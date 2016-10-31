@@ -26,13 +26,14 @@ import static org.jumpmind.metl.core.runtime.resource.HttpDirectory.HTTP_METHOD_
 import static org.jumpmind.metl.core.runtime.resource.HttpDirectory.SECURITY_BASIC;
 import static org.jumpmind.metl.core.runtime.resource.HttpDirectory.SECURITY_NONE;
 import static org.jumpmind.metl.core.runtime.resource.HttpDirectory.SECURITY_TOKEN;
+import static org.jumpmind.metl.core.runtime.resource.HttpDirectory.SECURITY_OAUTH_10;
 
 import org.jumpmind.metl.core.model.SettingDefinition;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.ResourceCategory;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.properties.TypedProperties;
 
-@ResourceDefinition(typeName = Http.TYPE, resourceCategory = ResourceCategory.STREAMABLE)
+@ResourceDefinition(typeName = Http.TYPE, resourceCategory = ResourceCategory.HTTP)
 public class Http extends AbstractResourceRuntime {
 
     public static final String TYPE = "Http";
@@ -69,7 +70,7 @@ public class Http extends AbstractResourceRuntime {
     @SettingDefinition(
             type = Type.CHOICE,
             order = 30,
-            choices = { SECURITY_NONE, SECURITY_BASIC, SECURITY_TOKEN },
+            choices = { SECURITY_NONE, SECURITY_BASIC, SECURITY_TOKEN, SECURITY_OAUTH_10 },
             defaultValue = SECURITY_NONE,
             label = "Security")
     public static final String SECURITY = "security.type";
@@ -83,6 +84,27 @@ public class Http extends AbstractResourceRuntime {
     @SettingDefinition(type = Type.PASSWORD, order = 60, required = false, label = "Token")
     public static final String SECURITY_TOKEN_VALUE = "security.usertoken.token";    
     
+    @SettingDefinition(type = Type.TEXT, order = 70, required = false, label = "OAuth 1.0 Consumer Key")
+    public static final String SECURITY_OAUTH10_CONSUMER_KEY = "security.oauth10.consumer.key";
+    
+    @SettingDefinition(type = Type.PASSWORD, order = 80, required = false, label = "OAuth 1.0 Consumer Secret")
+    public static final String SECURITY_OAUTH10_CONSUMER_SECRET = "security.oauth10.consumer.secret";
+    
+    @SettingDefinition(type = Type.TEXT, order = 90, required = false, label = "OAuth 1.0 Token")
+    public static final String SECURITY_OAUTH10_TOKEN = "security.oauth10.token";
+    
+    @SettingDefinition(type = Type.TEXT, order = 100, required = false, label = "OAuth 1.0 Token Secret")
+    public static final String SECURITY_OAUTH10_TOKEN_SECRET = "security.oauth10.token.secret";
+    
+    @SettingDefinition(type = Type.TEXT, order = 110, required = false, label = "OAuth 1.0 Version")
+    public static final String SECURITY_OAUTH10_VERSION = "security.oauth10.version";
+    
+    @SettingDefinition(type = Type.TEXT, order = 120, required = false, label = "OAuth 1.0 Signature Method")
+    public static final String SECURITY_OAUTH10_SIGNATURE_METHOD = "security.oauth10.signature.method";
+    
+    @SettingDefinition(type = Type.TEXT, order = 130, required = false, label = "OAuth 1.0 Realm")
+    public static final String SECURITY_OAUTH10_REALM = "security.oauth10.realm";
+    
     HttpDirectory streamable;
 
     @Override
@@ -92,7 +114,11 @@ public class Http extends AbstractResourceRuntime {
                 properties.get(CONTENT_TYPE),
                 properties.getInt(HTTP_TIMEOUT), properties.get(SECURITY),
                 properties.get(SECURITY_USERNAME), properties.get(SECURITY_PASSWORD),
-                properties.get(SECURITY_TOKEN_VALUE));
+                properties.get(SECURITY_TOKEN_VALUE), 
+                properties.get(SECURITY_OAUTH10_CONSUMER_KEY), properties.get(SECURITY_OAUTH10_CONSUMER_SECRET),
+                properties.get(SECURITY_OAUTH10_TOKEN), properties.get(SECURITY_OAUTH10_TOKEN_SECRET),
+                properties.get(SECURITY_OAUTH10_VERSION), properties.get(SECURITY_OAUTH10_SIGNATURE_METHOD),
+                properties.get(SECURITY_OAUTH10_REALM));
     }
 
     @Override

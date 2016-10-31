@@ -92,8 +92,8 @@ public class StartWebServer {
     private final static String SSL_IGNORE_CIPHERS = "metl.ssl.ignore.ciphers";
     private final static String SSL_KEYSTORE_CERT_ALIAS = "metl.keystore.ssl.cert.alias";
     private final static String SSL_DEFAULT_ALIAS_PRIVATE_KEY = "metl";
-    private final static String SSL_KEYSTORE_TYPE = "metl.ssl.keystore.type";
-    private final static String SSL_DEFAULT_KEYSTORE_TYPE = "JKS";
+    private final static String SSL_KEYSTORE_TYPE = "metl.keystore.type";
+    private final static String SSL_DEFAULT_KEYSTORE_TYPE = "JCEKS";
 
     public static void main(String[] args) throws Exception {
         runWebServer();
@@ -116,7 +116,6 @@ public class StartWebServer {
 
         ProtectionDomain protectionDomain = StartWebServer.class.getProtectionDomain();
         URL location = protectionDomain.getCodeSource().getLocation();
-        File locationDir = new File(location.getFile()).getParentFile();
 
         String allowDirListing = System.getProperty(SERVER_ALLOW_DIR_LISTING, "false");
         String allowedMethods = System.getProperty(SERVER_ALLOW_HTTP_METHODS, "");
@@ -133,7 +132,7 @@ public class StartWebServer {
         filterHolder.setInitParameter("server.disallow.http.methods", disallowedMethods);
         webapp.addFilter(filterHolder, "/*", EnumSet.of(DispatcherType.REQUEST));
 
-        String extraClasspath = getPluginClasspath(locationDir);
+        String extraClasspath = getPluginClasspath(new File(Wrapper.getConfigDir(null, false)));
         webapp.setExtraClasspath(extraClasspath);
         if (extraClasspath.length() > 0) {
             getLogger().info("Adding extra classpath of: " + extraClasspath.toString());
@@ -155,11 +154,11 @@ public class StartWebServer {
         boolean httpEnabled = System.getProperty(HTTP_ENABLE, "true").equals("true");
 
         int httpPort = Integer.parseInt(System.getProperty(HTTP_PORT, DEFAULT_HTTP_PORT));
-        String httpHostBindName = System.getProperty(HTTP_HOST_BIND_NAME);
+        String httpHostBindName = System.getProperty(HTTP_HOST_BIND_NAME,"0.0.0.0");
         int httpsPort = Integer.parseInt(System.getProperty(HTTPS_PORT, DEFAULT_HTTPS_PORT));
 
         boolean httpsEnabled = System.getProperty(HTTPS_ENABLE, "true").equals("true");
-        String httpsHostBindName = System.getProperty(HTTPS_HOST_BIND_NAME);
+        String httpsHostBindName = System.getProperty(HTTPS_HOST_BIND_NAME,"0.0.0.0");
 
         HttpConfiguration httpConfig = new HttpConfiguration();
         httpConfig.setOutputBufferSize(32768);

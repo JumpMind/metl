@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.core.model;
 
-public class AgentDeploymentParameter extends AbstractObject {
+public class AgentDeploymentParameter extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
 

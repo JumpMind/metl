@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.core.model;
 
-public class ModelAttribute extends AbstractObject {
+public class ModelAttribute extends AbstractNamedObject implements IAuditable, Comparable<ModelAttribute> {
 
     private static final long serialVersionUID = 1L;
     
@@ -34,6 +34,8 @@ public class ModelAttribute extends AbstractObject {
 
     String typeEntityId;
     
+    int attributeOrder;
+    
     boolean pk;
 
     public ModelAttribute() {    	
@@ -43,6 +45,14 @@ public class ModelAttribute extends AbstractObject {
         setId(id);
         setEntityId(entityId);
         this.name = name;
+    }
+    
+    public void setAttributeOrder(int attributeOrder) {
+        this.attributeOrder = attributeOrder;
+    }
+    
+    public int getAttributeOrder() {
+        return attributeOrder;
     }
     	
 	public void setEntityId(String entityId) {
@@ -99,6 +109,11 @@ public class ModelAttribute extends AbstractObject {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+    
+    @Override
+    public int compareTo(ModelAttribute o) {
+        return new Integer(attributeOrder).compareTo(o.attributeOrder);
     }
 
 }

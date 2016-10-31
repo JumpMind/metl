@@ -87,6 +87,8 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
     
     protected TypedProperties properties;
     
+    private EntityNameLookup entityNameLookup;
+    
     @Override
     public void create(XMLComponent definition, ComponentContext context, int threadNumber) {
         this.componentDefinition = definition;
@@ -245,9 +247,10 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
             bindings.put(key, flowParameters.get(key));            
         }
         
+        bindings.put("inputMessage", inputMessage);
         bindings.put("text", null);
         bindings.put("CHANGE_TYPE", null);
-        bindings.put("ENTITY_NAMES", new ArrayList<>());  
+        bindings.put("ENTITY_NAMES", Collections.emptyList());  
     }
     
     protected void bindModelEntities(Bindings bindings) {
@@ -267,11 +270,14 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
     }
     
     protected Bindings bindEntityData(ScriptEngine scriptEngine, Message inputMessage, EntityData entityData) {
+        if (entityNameLookup == null) {
+            entityNameLookup = new EntityNameLookup(context.getFlowStep().getComponent().getInputModel());
+        }
         Bindings bindings = scriptEngine.createBindings();       
         bindHeadersAndFlowParameters(bindings, inputMessage);
         Model model = getInputModel();
         bindings.put("CHANGE_TYPE", entityData.getChangeType().name());
-        bindings.put("ENTITY_NAMES", context.getFlowStep().getComponent().getEntityNames(entityData, true));                
+        bindings.put("ENTITY_NAMES", entityNameLookup.getEntityNames(entityData));                
         Set<String> attributeIds = entityData.keySet();
         for (String attributeId : attributeIds) {
             ModelAttribute attribute = model.getAttributeById(attributeId);

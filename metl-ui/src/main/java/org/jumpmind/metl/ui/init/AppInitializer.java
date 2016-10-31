@@ -21,13 +21,20 @@
 package org.jumpmind.metl.ui.init;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.jumpmind.metl.core.model.GlobalSetting.CONFIG_BACKUP_CRON;
+import static org.jumpmind.metl.core.model.GlobalSetting.CONFIG_BACKUP_ENABLED;
+import static org.jumpmind.metl.core.model.GlobalSetting.DEFAULT_CONFIG_BACKUP_CRON;
+import static org.jumpmind.metl.core.model.GlobalSetting.DEFAULT_CONFIG_BACKUP_ENABLED;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -45,6 +52,9 @@ import org.eclipse.jetty.servlet.DefaultServlet;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
 import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.core.job.BackupJob;
+import org.jumpmind.metl.core.model.AuditEvent;
+import org.jumpmind.metl.core.model.AuditEvent.EventType;
 import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.model.Version;
 import org.jumpmind.metl.core.persist.IConfigurationService;
@@ -52,16 +62,18 @@ import org.jumpmind.metl.core.persist.IImportExportService;
 import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
+import org.jumpmind.metl.core.util.AppConstants;
 import org.jumpmind.metl.core.util.DatabaseScriptContainer;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.VersionUtils;
-import org.jumpmind.metl.ui.common.AppConstants;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
@@ -72,9 +84,11 @@ import org.springframework.web.servlet.DispatcherServlet;
 
 public class AppInitializer implements WebApplicationInitializer, ServletContextListener {
 
-    protected static final String SYS_CONFIG_DIR = AppInitializer.class.getPackage().getName() + ".config.dir";
+    protected static final String SYS_CONFIG_DIR = "org.jumpmind.metl.ui.init.config.dir";
 
     public static ThreadLocal<AnnotationConfigWebApplicationContext> applicationContextRef = new ThreadLocal<>();
+    
+    ThreadPoolTaskScheduler jobScheduler;
 
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
@@ -154,28 +168,85 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
     public void contextInitialized(ServletContextEvent sce) {
         WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(sce.getServletContext());
         LogUtils.initLogging(getConfigDir(false), ctx);
+        cleanTempJettyDirectories();
         initDatabase(ctx);
         initPlugins(ctx);        
+        auditStartup(ctx);
         initAgentRuntime(ctx);
+        initBackgroundJobs(ctx);
+    }
+    
+    @Override
+    public void contextDestroyed(ServletContextEvent sce) {
+        if (jobScheduler != null) {
+            jobScheduler.destroy();
+        }
+    }
+    
+    protected void initBackgroundJobs(WebApplicationContext ctx) {
+        try {
+            IConfigurationService configurationService = ctx.getBean(IConfigurationService.class);
+            IImportExportService importExportService = ctx.getBean(IImportExportService.class);
+            
+            jobScheduler = new ThreadPoolTaskScheduler();
+            jobScheduler.setDaemon(true);
+            jobScheduler.setThreadNamePrefix("background-job-");
+            jobScheduler.setPoolSize(2);
+            jobScheduler.initialize();
+
+            TypedProperties properties = configurationService.findGlobalSetttingsAsProperties();
+            if (properties.is(CONFIG_BACKUP_ENABLED, DEFAULT_CONFIG_BACKUP_ENABLED)) {
+                jobScheduler.schedule(new BackupJob(importExportService, configurationService, getConfigDir(false)),
+                        new CronTrigger(
+                                properties.get(CONFIG_BACKUP_CRON, DEFAULT_CONFIG_BACKUP_CRON)));
+            }
+            jobScheduler.scheduleAtFixedRate(() -> configurationService.doInBackground(), 600000);
+        } catch (Exception e) {
+            LoggerFactory.getLogger(getClass()).info("Failed to schedule  the backup job", e);
+        }
+    }
+    
+    protected void auditStartup(WebApplicationContext ctx) {
+        IConfigurationService service = ctx.getBean(IConfigurationService.class);
+        service.save(new AuditEvent(EventType.RESTART, "Server starting...", AppConstants.SYSTEM_USER));
+    }
+    
+    protected void cleanTempJettyDirectories() {
+        File tempDir = new File(System.getProperty("java.io.tmpdir"));
+        if (tempDir.exists() && tempDir.isDirectory()) {
+            File[] files = tempDir.listFiles();
+            for (File file : files) {
+                if (file.isDirectory() && file.getName().startsWith("jetty") && file.getName().contains("metl") && file.lastModified() < (System.currentTimeMillis()-24*60*60*1000)) {
+                    try {
+                        LoggerFactory.getLogger(getClass()).info("Purging " + file.getAbsolutePath());
+                        FileUtils.deleteDirectory(file);
+                    } catch (IOException e) {
+                    }                    
+                }
+            }
+        }
     }
 
     protected void initAgentRuntime(WebApplicationContext ctx) {
         IAgentManager agentManger = ctx.getBean(IAgentManager.class);
-        agentManger.start();
+        Thread startupThread = new Thread(()->agentManger.start());
+        startupThread.setName("agent-manager-startup");
+        startupThread.start();
     }
 
     protected void initDatabase(WebApplicationContext ctx) {
-        IDatabasePlatform platform = ctx.getBean(IDatabasePlatform.class);
+        IDatabasePlatform platform = ctx.getBean("configDatabasePlatform", IDatabasePlatform.class);
         IConfigurationService configurationService = ctx.getBean(IConfigurationService.class);
         boolean isInstalled = configurationService.isInstalled();
-        DatabaseScriptContainer dbUpgradeScripts = new DatabaseScriptContainer("/org/jumpmind/metl/core/upgrade", platform);
-        ConfigDatabaseUpgrader dbUpgrader = ctx.getBean(ConfigDatabaseUpgrader.class);
+        DatabaseScriptContainer dbUpgradeScripts = new DatabaseScriptContainer("/org/jumpmind/metl/core/upgrade", platform);        
         String fromVersion = configurationService.getLastKnownVersion();
         String toVersion = VersionUtils.getCurrentVersion();
         if (fromVersion != null && !fromVersion.equals(toVersion)) {
             dbUpgradeScripts.executePreInstallScripts(fromVersion, toVersion);
         }
-        dbUpgrader.upgrade();
+        ctx.getBean("configDatabaseUpgrader", ConfigDatabaseUpgrader.class).upgrade();        
+        ctx.getBean("executionDatabaseUpgrader", ConfigDatabaseUpgrader.class).upgrade();
+        
         if (fromVersion != null && !fromVersion.equals(toVersion)) {
             dbUpgradeScripts.executePostInstallScripts(fromVersion, toVersion);
         }
@@ -187,7 +258,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
             try {
                 IImportExportService importExportService = ctx.getBean(IImportExportService.class);
                 LoggerFactory.getLogger(getClass()).info("Installing Metl samples");
-                importExportService.importConfiguration(IOUtils.toString(getClass().getResourceAsStream("/metl-samples.json")));
+                importExportService.importConfiguration(IOUtils.toString(getClass().getResourceAsStream("/metl-samples.json")), AppConstants.SYSTEM_USER);
             } catch (Exception e) {
                 getLogger().error("Failed to install Metl samples", e);
             }
@@ -196,10 +267,6 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
             
         }
         getLogger().info("The configuration database has been initialized");
-    }
-
-    @Override
-    public void contextDestroyed(ServletContextEvent sce) {
     }
 
     protected String getConfigDir(boolean printInstructions) {
@@ -238,8 +305,11 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
                         "Could not find the " + configFile.getAbsolutePath() + " configuration file.  A default version will be written.");
                 String propContent = IOUtils.toString(getClass().getResourceAsStream("/" + configFile.getName()));
                 propContent = FormatUtils.replaceToken(propContent, "configDir", configDir, true);
-                FileUtils.write(configFile, propContent);
-                properties = new TypedProperties(configFile);
+                properties = new TypedProperties(new ByteArrayInputStream(propContent.getBytes()));
+                properties.put("log.to.console.enabled", System.getProperty("log.to.console.enabled", "false"));
+                FileWriter writer = new FileWriter(configFile);
+                properties.store(writer , "Generated on " + new Date());
+                IOUtils.closeQuietly(writer);                
             } catch (IOException e) {
                 throw new IoException(e);
             }

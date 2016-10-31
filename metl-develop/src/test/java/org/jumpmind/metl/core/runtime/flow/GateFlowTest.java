@@ -47,7 +47,7 @@ public class GateFlowTest {
 
     @Parameters(name = "{0}")
     public static Collection<Object[]> getFlows() throws Exception {
-        standaloneFlowRunner = new StandaloneTestFlowRunner("/gate-flow-test-config.sql");
+        standaloneFlowRunner = new StandaloneTestFlowRunner("/gate-flow-test-config.json");
         return standaloneFlowRunner.getFlowAsTestParams();
     }
 

@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.codec.digest.DigestUtils;
+import org.jumpmind.metl.core.security.SecurityConstants;
 
 public class User extends AbstractObjectWithSettings {
 
@@ -36,19 +36,18 @@ public class User extends AbstractObjectWithSettings {
 
     String password;
     
+    String authMethod = SecurityConstants.PASSWORD_AUTH_METHOD_SHASH;
+    
+    String salt;
+    
+    Date lastPasswordTime;
+    
     Date lastLoginTime;    
     
     List<Group> groups;
     
     public User() {
         groups = new ArrayList<Group>();
-    }
-
-    public static String hashValue(String password) {
-        if (password != null) {
-            return DigestUtils.sha256Hex(password.getBytes());
-        }
-        return "";
     }
 
     @Override
@@ -89,6 +88,30 @@ public class User extends AbstractObjectWithSettings {
     public void setLastLoginTime(Date lastLoginTime) {
         this.lastLoginTime = lastLoginTime;
     }
+    
+    public void setAuthMethod(String authMethod) {
+        this.authMethod = authMethod;
+    }
+    
+    public String getAuthMethod() {
+        return authMethod;
+    }
+    
+    public void setLastPasswordTime(Date lastPasswordTime) {
+        this.lastPasswordTime = lastPasswordTime;
+    }
+    
+    public Date getLastPasswordTime() {
+        return lastPasswordTime;
+    }
+    
+   public void setSalt(String salt) {
+    this.salt = salt;
+   }
+   
+   public String getSalt() {
+    return salt;
+   }
 
     public List<Group> getGroups() {
         return groups;

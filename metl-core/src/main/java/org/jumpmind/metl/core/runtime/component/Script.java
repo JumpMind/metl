@@ -26,11 +26,12 @@ import java.io.File;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.jumpmind.metl.core.runtime.BinaryMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -64,6 +65,7 @@ public class Script extends AbstractComponentRuntime {
 
     @Override
     public void start() {
+        
         String importStatements = getComponent().get(IMPORTS);
         String initScript = getComponent().get(INIT_SCRIPT);
         String handleMessageScript = getComponent().get(HANDLE_SCRIPT);
@@ -71,9 +73,7 @@ public class Script extends AbstractComponentRuntime {
         String onSuccess = getComponent().get(ON_FLOW_SUCCESS);
         String onError = getComponent().get(ON_FLOW_ERROR);
 
-        ScriptEngineManager factory = new ScriptEngineManager();
-        ScriptEngine engine = factory.getEngineByName("groovy");
-
+        engine = new GroovyScriptEngineImpl();
         engine.put("component", this);        
         StringBuilder script = new StringBuilder();
         try {
@@ -81,6 +81,7 @@ public class Script extends AbstractComponentRuntime {
             script.append(String.format("import %s;\n", File.class.getName()));
             script.append(String.format("import %s;\n", FileUtils.class.getName()));
             script.append(String.format("import static %s.*;\n", FileUtils.class.getName()));
+            script.append(String.format("import static %s.*;\n", StringUtils.class.getName()));
             script.append(String.format("import %s.*;\n", Message.class.getPackage().getName()));
             script.append(String.format("import %s;\n", ScriptHelper.class.getName()));
             script.append(String.format("import %s;\n", EntityDataMessage.class.getName()));
@@ -129,7 +130,6 @@ public class Script extends AbstractComponentRuntime {
             log(LogLevel.DEBUG, script.toString());
             script.append("helper.onInit();");
             engine.eval(script.toString());
-            this.engine = engine;
         } catch (ScriptException e) {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
             if (rootCause != null) {

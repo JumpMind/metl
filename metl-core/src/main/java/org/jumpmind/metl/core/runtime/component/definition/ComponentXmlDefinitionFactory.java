@@ -63,6 +63,8 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
     Map<String, Map<String, XMLComponent>> componentsByProjectVersionIdById;
 
     Map<String, List<XMLComponent>> componentsByPluginId;
+    
+    Map<String, List<String>> componentIdsByCategory;
 
     protected IConfigurationService configurationService;
 
@@ -77,7 +79,7 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
         this();
         this.configurationService = configurationService;
         this.pluginManager = pluginManager;
-    }
+    }   
 
     @Override
     synchronized public void refresh() {

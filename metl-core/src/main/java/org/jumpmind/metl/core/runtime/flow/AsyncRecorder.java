@@ -23,12 +23,14 @@ package org.jumpmind.metl.core.runtime.flow;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.AbstractObject;
@@ -62,30 +64,51 @@ public class AsyncRecorder implements Runnable {
 
     public void record(AbstractObject object) {
         try {
-            inQueue.put(object);
+            synchronized (inQueue) {
+                inQueue.put(object);
+                inQueue.notify();
+            }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @Override
-    public void run() {
-        running = true;
+    protected void logAll() {
+        try {
+            HashSet<String> processed = new HashSet<>();
+            List<AbstractObject> toProcess = new ArrayList<>();
+            synchronized (inQueue) {
+                inQueue.drainTo(toProcess);
+                if (toProcess.isEmpty()) {
+                    inQueue.wait();
+                }
+            }
+            
+            for (int i = toProcess.size() - 1; i >= 0; i--) {
+                AbstractObject object = toProcess.get(i);
+                if (object != null && !(object instanceof ExecutionStepLog)) {
+                    if (!processed.contains(object.getId())) {
+                        executionService.save(object);
+                        processed.add(object.getId());
+                    }
+                }
+            }
 
-        while (!stopping || inQueue.size() > 0) {
-            try {
-                AbstractObject object = inQueue.poll(100, TimeUnit.MILLISECONDS);
+            for (int i = 0; i < toProcess.size(); i++) {
+                AbstractObject object = toProcess.get(i);
                 if (object instanceof ExecutionStepLog) {
                     ExecutionStepLog stepLog = (ExecutionStepLog) object;
                     String executionStepId = stepLog.getExecutionStepId();
                     CsvWriter writer = logWriters.get(executionStepId);
                     if (writer == null) {
                         File logFile = new File(LogUtils.getLogDir(), executionStepId + ".log");
-                        writer = new CsvWriter(logFile.getAbsolutePath(),'"',Charset.forName("UTF-8"));
-                        logWriters.put(executionStepId, writer);                        
+                        writer = new CsvWriter(logFile.getAbsolutePath(), '"',
+                                Charset.forName("UTF-8"));
+                        logWriters.put(executionStepId, writer);
                     }
                     try {
-                        writer.writeRecord(new String[] { stepLog.getLevel(), FormatUtils.TIMESTAMP_FORMATTER.format(stepLog.getCreateTime()), 
+                        writer.writeRecord(new String[] { stepLog.getLevel(),
+                                FormatUtils.TIMESTAMP_FORMATTER.format(stepLog.getCreateTime()),
                                 StringUtils.abbreviate(stepLog.getLogText(), 100000) });
                         writer.flush();
                     } catch (IOException e) {
@@ -93,16 +116,34 @@ public class AsyncRecorder implements Runnable {
                         logWriters.remove(executionStepId);
                         log.error("", e);
                     }
-
-                    // TODO log to file
-                } else if (object != null) {
-                    executionService.save(object);
                 }
-            } catch (InterruptedException e) {
             }
-        }
 
-        running = false;
+            if (toProcess.size() == 0) {
+                AppUtils.sleep(5);
+            }
+
+        } catch (Throwable e) {
+            log.error("Failed to persist log message", e);
+        }
+    }
+
+    @Override
+    public void run() {
+        running = true;
+
+        try {
+            while (!stopping || inQueue.size() > 0) {
+                try {
+                    logAll();
+                } catch (Throwable e) {
+                    log.error("Failed to persist log message", e);
+                }
+            }
+
+        } finally {
+            running = false;
+        }
     }
 
     public void shutdown() {

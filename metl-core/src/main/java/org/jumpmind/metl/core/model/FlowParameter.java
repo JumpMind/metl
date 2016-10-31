@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.core.model;
 
-public class FlowParameter extends AbstractObject {
+public class FlowParameter extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
 

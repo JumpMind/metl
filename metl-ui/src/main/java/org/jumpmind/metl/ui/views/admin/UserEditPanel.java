@@ -118,7 +118,7 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
     }
 
     protected void save(User user) {
-        if (isNotBlank(user.getName())) {
+        if (isNotBlank(user.getLoginId())) {
             context.getConfigurationService().save(user);
         }
     }
@@ -139,8 +139,9 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
 
     class PasswordChangeListener implements ValueChangeListener {
         public void valueChange(ValueChangeEvent event) {
-            user.setPassword(User.hashValue((String) event.getProperty().getValue()));
-            save(user);
+            if (isNotBlank(user.getLoginId())) {                
+                context.getConfigurationService().savePassword(user, (String) event.getProperty().getValue());
+            }
         }
     }
 

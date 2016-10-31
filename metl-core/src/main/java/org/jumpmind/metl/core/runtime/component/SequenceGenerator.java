@@ -44,7 +44,13 @@ public class SequenceGenerator extends AbstractRdbmsComponentRuntime {
     public final static String SHARED = "shared";
     
     public final static String SHARED_NAME = "shared.name";
+    
+    public final static String RESET_ON_ATTRIBUTE_CHANGE = "reset.on.attribute.change";
+    
+    public final static String RESET_ATTRIBUTE = "reset.attribute";
 
+    public final static String SEQUENCE_START_VALUE = "sequence.start.value";
+    
     String sequenceAttributeId;
 
     String sql;
@@ -54,6 +60,14 @@ public class SequenceGenerator extends AbstractRdbmsComponentRuntime {
     boolean shared = false;
     
     String sharedName;
+    
+    boolean resetOnAttributeChange = false;
+    
+    String resetAttribute;
+    
+    Long sequenceStartValue;
+    
+    Object fieldChangeValue = null;
     
     static final Map<String, Long> sharedSequence = new HashMap<String, Long>();
 
@@ -72,9 +86,21 @@ public class SequenceGenerator extends AbstractRdbmsComponentRuntime {
             }
         }
         
-        sql = getComponent().get(SQL);
-        if (sql == null) {
-            throw new IllegalStateException("An sql statement is required by the " + TYPE);
+        sql = getComponent().get(SQL);   
+        String seqStartString = getComponent().get(SEQUENCE_START_VALUE);
+        if (seqStartString != null) {
+            sequenceStartValue = new Long(seqStartString);
+        }
+        if (sql == null && sequenceStartValue == null) {
+            throw new IllegalStateException("Either a sequence start value or sql statement to get the start value is required");
+        }
+        
+        resetOnAttributeChange = getComponent().getBoolean(RESET_ON_ATTRIBUTE_CHANGE, resetOnAttributeChange);
+        if (resetOnAttributeChange) {
+            resetAttribute = getComponent().get(RESET_ATTRIBUTE);
+            if (resetAttribute == null) {
+                throw new IllegalStateException("The 'Reset Attribute' must be set when the sequence is set to reset on attribute change");
+            }
         }
 
         Model inputModel = component.getInputModel();
@@ -94,11 +120,17 @@ public class SequenceGenerator extends AbstractRdbmsComponentRuntime {
         }
 
         synchronized (SequenceGenerator.class) {
-            final String sqlToExecute = FormatUtils.replaceTokens(this.sql, context.getFlowParameters(), true);
-            log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
-            nonSharedSequenceNumber = getJdbcTemplate().queryForObject(sqlToExecute, context.getFlowParameters(), Long.class);
-            if (nonSharedSequenceNumber == null) {
-                nonSharedSequenceNumber = 1l;
+            
+            if (sql != null) {            
+                final String sqlToExecute = FormatUtils.replaceTokens(this.sql, context.getFlowParameters(), true);
+                log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
+                nonSharedSequenceNumber = getJdbcTemplate().queryForObject(sqlToExecute, context.getFlowParameters(), Long.class);
+                if (nonSharedSequenceNumber == null) {
+                    nonSharedSequenceNumber = 1l;
+                }
+                sequenceStartValue = nonSharedSequenceNumber;
+            } else {
+                nonSharedSequenceNumber = sequenceStartValue;                
             }
 
             if (shared) {
@@ -127,10 +159,16 @@ public class SequenceGenerator extends AbstractRdbmsComponentRuntime {
                 if (shared) {
                     synchronized (SequenceGenerator.class) {
                         Long sequenceNumber = sharedSequence.get(sharedName);
+                        if (resetNeeded(entityData)) {
+                            sequenceNumber = sequenceStartValue;
+                        }
                         sequence = ++sequenceNumber;
                         sharedSequence.put(sharedName, sequenceNumber);                        
                     }
                 } else {
+                    if (resetNeeded(entityData)) {
+                        nonSharedSequenceNumber = sequenceStartValue;
+                    }
                     sequence = ++nonSharedSequenceNumber;
                 }
                 entityData.put(sequenceAttributeId, sequence);
@@ -140,5 +178,15 @@ public class SequenceGenerator extends AbstractRdbmsComponentRuntime {
             callback.sendEntityDataMessage(null, outgoingPayload);
         }
     }
-
+    
+    protected boolean resetNeeded(EntityData entityData) {
+        boolean resetNeeded = false;
+        if (resetOnAttributeChange && getComponentStatistics().getNumberEntitiesProcessed(getThreadNumber()) != 0) {
+            if (!entityData.get(resetAttribute).equals(fieldChangeValue)) {
+                resetNeeded = true;
+            }
+        }
+        fieldChangeValue = entityData.get(resetAttribute);
+        return resetNeeded;
+    }
 }

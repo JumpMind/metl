@@ -22,12 +22,11 @@ package org.jumpmind.metl.ui.views.admin;
 
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
-import javax.mail.Transport;
 
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentStatus;
 import org.jumpmind.metl.core.model.GlobalSetting;
-import org.jumpmind.metl.core.util.MailSession;
+import org.jumpmind.metl.core.runtime.resource.MailSession;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
@@ -87,6 +86,7 @@ public class MailServerPanel extends VerticalLayout implements IUiPanel {
         NativeSelect transportField = new NativeSelect("Transport");
         transportField.addItem("smtp");
         transportField.addItem("smtps");
+        transportField.addItem("mock_smtp");
         transportField.select(transportSetting.getValue() == null ? "smtp" : transportSetting.getValue());
         transportField.setNullSelectionAllowed(false);
         transportField.setImmediate(true);
@@ -204,10 +204,9 @@ public class MailServerPanel extends VerticalLayout implements IUiPanel {
 
     class TestClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            try {
-                MailSession mailSession = new MailSession(context.getConfigurationService().findGlobalSettingsAsMap());
-                Transport transport = mailSession.getTransport();
-                mailSession.closeTransport(transport);
+            MailSession mailSession = new MailSession(context.getConfigurationService().findGlobalSettingsAsMap());
+            try {                
+                mailSession.getTransport();                
                 CommonUiUtils.notify("SMTP Test", "Success!");
             } catch (AuthenticationFailedException e) {
                 CommonUiUtils.notify("SMTP Test", "Failed with authentication exception: " + e.getMessage());
@@ -215,6 +214,8 @@ public class MailServerPanel extends VerticalLayout implements IUiPanel {
             } catch (MessagingException e) {
                 CommonUiUtils.notify("SMTP Test", "Failed with message exception: " + e.getMessage());
                 log.warn("SMTP test failed", e);
+            } finally {
+                mailSession.closeTransport();
             }
         }        
     }

@@ -39,9 +39,11 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelName;
+import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.SettingDefinition;
+import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.MessageType;
@@ -73,7 +75,9 @@ import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;
@@ -82,6 +86,8 @@ import com.vaadin.ui.themes.ValoTheme;
 public class PropertySheet extends AbsoluteLayout {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
+    
+    protected static final String DUMMY_PASSWORD = "*****";
 
     ApplicationContext context;
 
@@ -201,7 +207,6 @@ public class PropertySheet extends AbsoluteLayout {
                 XMLComponent componentDefintion = context.getComponentDefinitionFactory().getDefinition(component.getProjectVersionId(),
                         component.getType());
                 addThreadCount(componentDefintion, formLayout, component);
-                addComponentShared(formLayout, component);
             }
 
             if (obj instanceof List<?>) {
@@ -216,53 +221,39 @@ public class PropertySheet extends AbsoluteLayout {
     protected void addCommonComponentSettings(FormLayout formLayout, Object obj) {
         List<Object> list = (List<Object>) obj;
         List<Component> components = new ArrayList<Component>(list.size());
-
-        // Check if all selected components support the enabled property
-        // TODO: Support more than the enable component.
-        // Look for all common parameters.
-        boolean supportEnable = true;
-        boolean enabled = true;
-        for (Object o : list) {
-            if (o instanceof FlowStep) {
-                Component component = ((FlowStep) o).getComponent();
-                if (!hasSetting(component, AbstractComponentRuntime.ENABLED)) {
-                    supportEnable = false;
-                    break;
-                }
-                if (enabled && !component.getBoolean(AbstractComponentRuntime.ENABLED, true)) {
-                    enabled = false;
-                }
-                components.add(component);
-            } else {
-                supportEnable = false;
-                break;
+        for (Object object : list) {
+            if (object instanceof FlowStep) {
+                components.add(((FlowStep) object).getComponent());
+            } else if (object instanceof Component) {
+                components.add((Component) object);
             }
         }
-
-        // Create the enabled field if all selected components support the
-        // enabled setting.
-        if (components.size() != 0 && supportEnable) {
-            final CheckBox checkBox = new CheckBox("Enabled");
-            checkBox.setImmediate(true);
-            checkBox.setRequired(true);
-            checkBox.setValue(enabled);
-            checkBox.addValueChangeListener((event) -> {
-                for (final Component component : components) {
-                    saveSetting(AbstractComponentRuntime.ENABLED, checkBox.getValue().toString(), component);
-                }
-                if (listener != null) {
-                    listener.componentChanged(components);
-                }
-            });
-            checkBox.setReadOnly(readOnly);
-            formLayout.addComponent(checkBox);
+        if (components.size() != 0 && !readOnly) {
+            formLayout.addComponent(buildOptionGroup("Enabled", AbstractComponentRuntime.ENABLED, components));
+            formLayout.addComponent(buildOptionGroup("Log Input", AbstractComponentRuntime.LOG_INPUT, components));
+            formLayout.addComponent(buildOptionGroup("Log Output", AbstractComponentRuntime.LOG_OUTPUT, components));
         }
     }
-
-    private boolean hasSetting(Component component, String setting) {
-        XMLComponent componentDefinition = context.getComponentDefinitionFactory().getDefinition(component.getProjectVersionId(),
-                component.getType());
-        return (componentDefinition.findXMLSetting(setting) != null);
+    
+    protected OptionGroup buildOptionGroup(String caption, String name, List<Component> components) {
+        OptionGroup optionGroup = new OptionGroup(caption);
+        optionGroup.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
+        optionGroup.setImmediate(true);
+        optionGroup.addItem("ON");
+        optionGroup.addItem("OFF");
+        optionGroup
+                .addValueChangeListener((event) -> saveSetting(name,
+                        optionGroup, components));
+        return optionGroup;
+    }
+    
+    protected void saveSetting(String name,  Field<?> field, List<Component> components) {
+        for (final Component component : components) {
+            saveSetting(name, field.getValue() != null ? Boolean.valueOf(field.getValue().toString().equals("ON")).toString() : null, component);
+        }
+        if (listener != null) {
+            listener.componentChanged(components);
+        }
     }
 
     protected void addResourceProperties(FormLayout formLayout, Resource resource) {
@@ -295,13 +286,19 @@ public class PropertySheet extends AbsoluteLayout {
     protected void addOutputModelCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
         FlowStep step = getSingleFlowStep();
         if (step != null) {
+            IConfigurationService configurationService = context.getConfigurationService();
             String projectVersionId = step.getComponent().getProjectVersionId();
             if ((componentDefintion.getOutputMessageType() == MessageType.ENTITY
                     || componentDefintion.getOutputMessageType() == MessageType.ANY) && !componentDefintion.isInputOutputModelsMatch()) {
                 final AbstractSelect combo = new ComboBox("Output Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
-                List<ModelName> models = context.getConfigurationService().findModelsInProject(projectVersionId);
+                List<ModelName> models = new ArrayList<>(configurationService.findModelsInProject(projectVersionId));
+                List<ProjectVersionDependency> dependencies = configurationService.findProjectDependencies(projectVersionId);
+                for (ProjectVersionDependency projectVersionDependency : dependencies) {
+                    models.addAll(configurationService.findModelsInProject(projectVersionDependency.getTargetProjectVersionId()));
+                }
+
                 if (models != null) {
                     for (ModelName model : models) {
                         combo.addItem(model);
@@ -317,11 +314,11 @@ public class PropertySheet extends AbsoluteLayout {
                     public void valueChange(ValueChangeEvent event) {
                         ModelName model = (ModelName) combo.getValue();
                         if (model != null) {
-                            component.setOutputModel(context.getConfigurationService().findModel(model.getId()));
+                            component.setOutputModel(configurationService.findModel(model.getId()));
                         } else {
                             component.setOutputModel(null);
                         }
-                        context.getConfigurationService().save((AbstractObject) component);
+                        configurationService.save((AbstractObject) component);
                         setSource(value);
                     }
                 });
@@ -352,47 +349,22 @@ public class PropertySheet extends AbsoluteLayout {
         formLayout.addComponent(textField);
     }
 
-    protected void addComponentShared(FormLayout formLayout, final Component component) {
-
-        final CheckBox checkBox = new CheckBox("Shared");
-        checkBox.setImmediate(true);
-
-        if (component.isShared()) {
-            checkBox.setValue(true);
-        } else {
-            checkBox.setValue(false);
-        }
-        checkBox.setRequired(true);
-        checkBox.setDescription("Whether this component can be reused");
-        checkBox.addValueChangeListener(new ValueChangeListener() {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void valueChange(ValueChangeEvent event) {
-                // TODO: Don't allow unshare if component is already on more
-                // than 1 flow?
-                // TODO: Refresh palette for the existing flow to have this item
-                // display in shared definitions
-                component.setShared((boolean) event.getProperty().getValue());
-                context.getConfigurationService().save(component);
-            }
-        });
-        checkBox.setReadOnly(readOnly);
-        formLayout.addComponent(checkBox);
-
-    }
-
     protected void addInputModelCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
         FlowStep step = getSingleFlowStep();
         if (step != null) {
+            IConfigurationService configurationService = context.getConfigurationService();
             String projectVersionId = step.getComponent().getProjectVersionId();
             if (componentDefintion.getInputMessageType() == MessageType.ENTITY
                     || componentDefintion.getInputMessageType() == MessageType.ANY) {
                 final AbstractSelect combo = new ComboBox("Input Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
-                List<ModelName> models = context.getConfigurationService().findModelsInProject(projectVersionId);
+                List<ModelName> models = new ArrayList<>(configurationService.findModelsInProject(projectVersionId));
+                List<ProjectVersionDependency> dependencies = configurationService.findProjectDependencies(projectVersionId);
+                for (ProjectVersionDependency projectVersionDependency : dependencies) {
+                    models.addAll(configurationService.findModelsInProject(projectVersionDependency.getTargetProjectVersionId()));
+                }
+                
                 if (models != null) {
                     for (ModelName model : models) {
                         combo.addItem(model);
@@ -408,14 +380,14 @@ public class PropertySheet extends AbsoluteLayout {
                     public void valueChange(ValueChangeEvent event) {
                         ModelName model = (ModelName) combo.getValue();
                         if (model != null) {
-                            component.setInputModel(context.getConfigurationService().findModel(model.getId()));
+                            component.setInputModel(configurationService.findModel(model.getId()));
                         } else {
                             component.setInputModel(null);
                         }
                         if (componentDefintion.isInputOutputModelsMatch()) {
                             component.setOutputModel(component.getInputModel());
                         }
-                        context.getConfigurationService().save((AbstractObject) component);
+                        configurationService.save((AbstractObject) component);
                         setSource(value);
                     }
                 });
@@ -425,39 +397,50 @@ public class PropertySheet extends AbsoluteLayout {
         }
     }
 
-    protected void addResourceCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
+    protected void addResourceCombo(XMLComponent componentDefintion, FormLayout formLayout,
+            final Component component) {
         if (componentDefintion == null) {
-            log.info("null kaboom " + component.getName() + " " + component.getType());
-        }
-        FlowStep step = getSingleFlowStep();
-        if (componentDefintion.getResourceCategory() != null && componentDefintion.getResourceCategory() != ResourceCategory.NONE
-                && step != null) {
-            final AbstractSelect resourcesCombo = new ComboBox("Resource");
-            resourcesCombo.setImmediate(true);
-            List<String> types = context.getResourceFactory().getResourceTypes(componentDefintion.getResourceCategory());
-            String projectVersionId = step.getComponent().getProjectVersionId();
-            if (types != null) {
-                List<Resource> resources = context.getConfigurationService().findResourcesByTypes(projectVersionId,
-                        types.toArray(new String[types.size()]));
-                if (resources != null) {
-                    for (Resource resource : resources) {
-                        resourcesCombo.addItem(resource);
+            log.error("Could not find a component defintion for: " + component.getName() + " "
+                    + component.getType());
+        } else {
+            IConfigurationService configurationService = context.getConfigurationService();
+            FlowStep step = getSingleFlowStep();
+            if (componentDefintion.getResourceCategory() != null
+                    && componentDefintion.getResourceCategory() != ResourceCategory.NONE
+                    && step != null) {
+                final AbstractSelect resourcesCombo = new ComboBox("Resource");
+                resourcesCombo.setImmediate(true);
+                List<String> types = context.getResourceFactory()
+                        .getResourceTypes(componentDefintion.getResourceCategory());
+                String projectVersionId = step.getComponent().getProjectVersionId();
+                if (types != null) {
+                    String[] typeStrings = types.toArray(new String[types.size()]);
+                    List<Resource> resources = new ArrayList<>(configurationService
+                            .findResourcesByTypes(projectVersionId, typeStrings));
+                    List<ProjectVersionDependency> dependencies = configurationService.findProjectDependencies(projectVersionId);
+                    for (ProjectVersionDependency projectVersionDependency : dependencies) {
+                        resources.addAll(configurationService.findResourcesByTypes(projectVersionDependency.getTargetProjectVersionId(), typeStrings));
                     }
+                    if (resources != null) {
+                        for (Resource resource : resources) {
+                            resourcesCombo.addItem(resource);
+                        }
 
-                    resourcesCombo.setValue(component.getResource());
+                        resourcesCombo.setValue(component.getResource());
+                    }
                 }
+                resourcesCombo.addValueChangeListener(new ValueChangeListener() {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public void valueChange(ValueChangeEvent event) {
+                        component.setResource((Resource) resourcesCombo.getValue());
+                        context.getConfigurationService().save(component);
+                    }
+                });
+
+                formLayout.addComponent(resourcesCombo);
             }
-            resourcesCombo.addValueChangeListener(new ValueChangeListener() {
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public void valueChange(ValueChangeEvent event) {
-                    component.setResource((Resource) resourcesCombo.getValue());
-                    context.getConfigurationService().save(component);
-                }
-            });
-
-            formLayout.addComponent(resourcesCombo);
         }
     }
 
@@ -563,10 +546,15 @@ public class PropertySheet extends AbsoluteLayout {
                         private static final long serialVersionUID = 1L;
 
                         protected void save(String text) {
-                            saveSetting(definition.getId(), text, obj);
+                            if (!DUMMY_PASSWORD.equals(text)) {
+                                saveSetting(definition.getId(), text, obj);
+                            }
                         };
                     };
-                    passwordField.setValue(obj.get(definition.getId(), definition.getDefaultValue()));
+                    boolean isPasswordSet = isNotBlank(obj.get(definition.getId()));
+                    if (isPasswordSet) {
+                        passwordField.setValue(DUMMY_PASSWORD);
+                    }
                     passwordField.setRequired(required);
                     passwordField.setDescription(description);
                     passwordField.setReadOnly(readOnly);
@@ -617,6 +605,7 @@ public class PropertySheet extends AbsoluteLayout {
                         sourceStepsCombo.setValue(obj.get(definition.getId()));
                         sourceStepsCombo.setDescription(description);
                         sourceStepsCombo.setNullSelectionAllowed(false);
+                        sourceStepsCombo.setRequired(definition.isRequired());
                         sourceStepsCombo.addValueChangeListener(new ValueChangeListener() {
 
                             private static final long serialVersionUID = 1L;
@@ -646,6 +635,7 @@ public class PropertySheet extends AbsoluteLayout {
                         combo.setValue(obj.get(definition.getId()));
                         combo.setDescription(description);
                         combo.setNullSelectionAllowed(false);
+                        combo.setRequired(definition.isRequired());
                         combo.addValueChangeListener(new ValueChangeListener() {
 
                             private static final long serialVersionUID = 1L;
@@ -695,6 +685,7 @@ public class PropertySheet extends AbsoluteLayout {
                         }
                         entityColumnCombo.setDescription(description);
                         entityColumnCombo.setNullSelectionAllowed(definition.isRequired());
+                        entityColumnCombo.setRequired(definition.isRequired());
                         entityColumnCombo.addValueChangeListener(new ValueChangeListener() {
 
                             private static final long serialVersionUID = 1L;
@@ -759,6 +750,7 @@ public class PropertySheet extends AbsoluteLayout {
         combo.setImmediate(true);
         combo.setDescription(definition.getDescription());
         combo.setNullSelectionAllowed(false);
+        combo.setRequired(definition.isRequired());
         List<String> types = context.getResourceFactory().getResourceTypes(category);
         if (types != null) {
             List<Resource> resources = context.getConfigurationService().findResourcesByTypes(projectVersionId,

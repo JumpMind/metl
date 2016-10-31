@@ -23,12 +23,11 @@ package org.jumpmind.metl.ui.views.design;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
+import java.util.Collection;
 
-import org.jumpmind.metl.core.model.ProjectVersionComponentPlugin;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,23 +61,27 @@ public class EditFlowPalette extends VerticalLayout {
 
     String projectVersionId;
     
-    List<ProjectVersionComponentPlugin> projectVersionComponentPlugins;
-
     public EditFlowPalette(EditFlowPanel designFlowLayout, ApplicationContext context, String projectVersionId) {
         this.context = context;
         this.designFlowLayout = designFlowLayout;
         this.projectVersionId = projectVersionId;
-        this.projectVersionComponentPlugins = context.getConfigurationService().findProjectVersionComponentPlugins(projectVersionId);
 
+        final int WIDTH = 150;
+        
         setHeight(100, Unit.PERCENTAGE);
-        setWidth(150, Unit.PIXELS);
+        setWidth(WIDTH, Unit.PIXELS);
 
+        HorizontalLayout topWrapper = new HorizontalLayout();
+        topWrapper.setMargin(new MarginInfo(true, false, false, false));
         HorizontalLayout top = new HorizontalLayout();
-        top.setMargin(new MarginInfo(false, true, false, false));
-        addComponent(top);
+        top.addStyleName(ButtonBar.STYLE);
+        top.setMargin(true);
+        topWrapper.addComponent(top);
+        
+        addComponent(topWrapper);
         
         TextField filterField = new TextField();
-        filterField.setWidth(100, Unit.PERCENTAGE);
+        filterField.setWidth(WIDTH-30, Unit.PIXELS);
         filterField.setInputPrompt("Filter");
         filterField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
         filterField.setIcon(FontAwesome.SEARCH);
@@ -106,7 +109,7 @@ public class EditFlowPalette extends VerticalLayout {
 
         populateComponentPalette();
 
-    }
+    }  
 
     protected StreamResource getImageResourceForComponentType(String projectVersionId, XMLComponent componentDefinition) {
         StreamResource.StreamSource source = new StreamResource.StreamSource() {
@@ -119,25 +122,12 @@ public class EditFlowPalette extends VerticalLayout {
         };
         return new StreamResource(source, componentDefinition.getId());
     }
-    
-    protected boolean enabled(String type) {
-        boolean enabled = true;
-        for (ProjectVersionComponentPlugin projectVersionComponentPlugin : projectVersionComponentPlugins) {
-            if (projectVersionComponentPlugin.getComponentTypeId().equals(type)) {
-                enabled = projectVersionComponentPlugin.isEnabled();
-                break;
-            }
-        }
-        return enabled;
-    }
-
     protected void populateComponentPalette() {
         componentLayout.removeAllComponents();
-        List<XMLComponent> componentDefinitions = context.getComponentDefinitionFactory().getDefinitions(projectVersionId);
-        Collections.sort(componentDefinitions);
+        Collection<XMLComponent> componentDefinitions = context.getComponentDefinitionFactory().getDefinitions(projectVersionId);
         for (XMLComponent definition : componentDefinitions) {
-            if (enabled(definition.getId()) && (isBlank(filterText) || definition.getName().toLowerCase().contains(filterText)
-                    || definition.getCategory().toLowerCase().contains(filterText))) {
+            if ((isBlank(filterText) || definition.getName().toLowerCase().contains(filterText)
+                    || definition.getCategory().toLowerCase().contains(filterText) || definition.getKeywords().toLowerCase().contains(filterText))) {
                 StreamResource icon = getImageResourceForComponentType(projectVersionId, definition);
                 addItemToFlowPanelSection(definition.getName(), definition.getId(), componentLayout, icon, null);
             }

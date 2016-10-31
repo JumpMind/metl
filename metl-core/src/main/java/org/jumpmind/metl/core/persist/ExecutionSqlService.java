@@ -90,7 +90,7 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
         }
         return template.query(String.format(
                 "select id, agent_id, flow_id, deployment_id, deployment_name, agent_name, "
-                + "host_name, flow_name, status, start_time, end_time "
+                + "host_name, flow_name, status, start_time, end_time, create_by, last_update_by, parameters "
                         + "from %1$s_execution " + "where " + whereClause
                         + "order by create_time desc limit " + limit, tablePrefix),
                 new ISqlRowMapper<Execution>() {
@@ -107,6 +107,9 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
                         e.setStatus(row.getString("status"));
                         e.setStartTime(row.getDateTime("start_time"));
                         e.setEndTime(row.getDateTime("end_time"));
+                        e.setCreateBy(row.getString("create_by"));
+                        e.setLastUpdateBy(row.getString("last_update_by"));
+                        e.setParameters(row.getString("parameters"));
                         return e;
                     }
                 }, params.values().toArray());
@@ -160,7 +163,7 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
                 log.info("Purged {} execution records", new Object[] { count });                
             }
         } else {
-            log.info("Could not run execution purge because table had not been created yet");
+            log.info("Could not run execution purge for status '{}' because table had not been created yet", status);
         }
     }
 

@@ -30,26 +30,33 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.ComboBox;
 
 public class EditScriptPanel extends AbstractComponentEditPanel {
 
-    private static final String SCRIPT_ON_ERROR = "onError(myError, allStepErrors)";
-    private static final String SCRIPT_ON_SUCCESS = "onSuccess()";
-    private static final String SCRIPT_ON_INIT = "onInit()";
-    private static final String SCRIPT_ON_HANDLE = "onHandleMessage(inputMessage, messageTarget)";
-    private static final String SCRIPT_IMPORTS = "<Imports>";
-    private static final String SCRIPT_METHODS = "<Methods>";
+    protected static final String SCRIPT_ON_ERROR = "onError(myError, allStepErrors)";
+    protected static final String SCRIPT_ON_SUCCESS = "onSuccess()";
+    protected static final String SCRIPT_ON_INIT = "onInit()";
+    protected static final String SCRIPT_ON_HANDLE = "onHandleMessage(inputMessage, messageTarget)";
+    protected static final String SCRIPT_IMPORTS = "<Imports>";
+    protected static final String SCRIPT_METHODS = "<Methods>";
 
     private static final long serialVersionUID = 1L;
 
     AceEditor editor;
 
+    ComboBox select;
+
     @SuppressWarnings("serial")
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
+
+        buttonBar.addButtonRight("Templates", FontAwesome.QUESTION_CIRCLE,
+                (e) -> new ScriptTemplatesDialog(this, context, component, readOnly)
+                        .showAtSize(.75));
 
         editor = CommonUiUtils.createAceEditor();
         editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
@@ -57,7 +64,7 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
 
         editor.setMode(AceMode.java);
 
-        final ComboBox select = new ComboBox();
+        select = new ComboBox();
         select.setWidth(40, Unit.EM);
         select.setTextInputAllowed(false);
 
@@ -80,10 +87,7 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
         select.addValueChangeListener(new ValueChangeListener() {
             @Override
             public void valueChange(ValueChangeEvent event) {
-                String key = (String) select.getValue();
-                editor.setReadOnly(false);
-                editor.setValue(EditScriptPanel.this.component.get(key, componentDefinition.findXMLSetting(key).getDefaultValue()));
-                editor.setReadOnly(readOnly);
+                refresh();
             }
         });
         select.setValue(Script.HANDLE_SCRIPT);
@@ -96,7 +100,8 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
                 public void textChange(TextChangeEvent event) {
                     String key = (String) select.getValue();
                     EditScriptPanel.this.component.put(key, event.getText());
-                    EditScriptPanel.this.context.getConfigurationService().save(EditScriptPanel.this.component.findSetting(key));
+                    EditScriptPanel.this.context.getConfigurationService()
+                            .save(EditScriptPanel.this.component.findSetting(key));
                 }
             });
         }
@@ -105,4 +110,13 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
         setExpandRatio(editor, 1);
 
     }
+
+    protected void refresh() {
+        String key = (String) select.getValue();
+        editor.setReadOnly(false);
+        editor.setValue(
+                component.get(key, componentDefinition.findXMLSetting(key).getDefaultValue()));
+        editor.setReadOnly(readOnly);
+    }
+
 }

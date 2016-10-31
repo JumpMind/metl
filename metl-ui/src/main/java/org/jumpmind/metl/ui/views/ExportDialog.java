@@ -233,9 +233,9 @@ public class ExportDialog extends ResizableWindow {
             Set<String> modelIds = (Set<String>) exportModelGroup.getValue();
             Set<String> resourceIds = (Set<String>) exportResourceGroup.getValue();
             String export = context.getImportExportService().export(projectVersionId, new ArrayList<String>(flowIds),
-                    new ArrayList<String>(modelIds), new ArrayList<String>(resourceIds));
-            ProjectVersion project = context.getConfigurationService().findProjectVersion(projectVersionId);
-            downloadExport(export, project.getName().toLowerCase().replaceAll(" - ", " ").replaceAll(" ", "-"));
+                    new ArrayList<String>(modelIds), new ArrayList<String>(resourceIds), context.getUser().getLoginId());
+            ProjectVersion projectVersion = context.getConfigurationService().findProjectVersion(projectVersionId);
+            downloadExport(export, String.format("%s-%s", projectVersion.getProject().getName(), projectVersion.getName()).toLowerCase().replaceAll(" - ", " ").replaceAll(" ", "-"));
 
         }
     }

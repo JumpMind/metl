@@ -35,8 +35,6 @@ public interface IAgentManager {
     
     public void remove(Agent agent);
     
-    public AgentRuntime getAgentRuntime(Agent agent);
-    
     public AgentRuntime getAgentRuntime(String agentId);
     
     public boolean isAgentLocal(Agent agent);

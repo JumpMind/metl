@@ -30,9 +30,10 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
@@ -48,6 +49,8 @@ public class Transformer extends AbstractComponentRuntime {
     public static final String TYPE = "Transformer";
     
     public static String TRANSFORM_EXPRESSION = "transform.expression";
+    
+    public static String PASS_ALONG_CONTROL_MESSAGES = "pass.along.control.messages";
 
     Map<String, String> transformsByAttributeId = new HashMap<String, String>();
     
@@ -76,12 +79,27 @@ public class Transformer extends AbstractComponentRuntime {
     public boolean supportsStartupMessages() {
         return false;
     }   
+    
+    protected Set<String> getAllAttributesForIncludedEntities(EntityData data) {
+        Set<String> allAttributesForIncludedEntities = new HashSet<>();
+        Model inputModel = getComponent().getInputModel();
+        Set<String> attributeIds = data.keySet();
+        for (String attributeId : attributeIds) {
+            ModelAttribute attribute = inputModel.getAttributeById(attributeId);
+            ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
+            List<ModelAttribute> attributes = entity.getModelAttributes();
+            for (ModelAttribute modelAttribute : attributes) {
+                allAttributesForIncludedEntities.add(modelAttribute.getId());
+            }
+        }
+        return allAttributesForIncludedEntities;
+    }
 
+    @SuppressWarnings("unchecked")
     @Override
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (scriptEngine == null) {
-            ScriptEngineManager factory = new ScriptEngineManager();
-            scriptEngine = factory.getEngineByName("groovy");
+            scriptEngine = new GroovyScriptEngineImpl();
         }
         totalTime = 0;
 		if (inputMessage instanceof EntityDataMessage) {
@@ -96,21 +114,9 @@ public class Transformer extends AbstractComponentRuntime {
 					outDatas.add(outData);
 
 					Set<String> attributeIds = new HashSet<String>();
-					Set<ModelEntity> processedEntities = new HashSet<ModelEntity>();
-					for (String attributeId : inData.keySet()) {
-						ModelAttribute attribute = inputModel.getAttributeById(attributeId);
-						if (attribute != null) {
-							ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
-							if (entity != null && !processedEntities.contains(entity)) {
-								List<ModelAttribute> attributes = entity.getModelAttributes();
-								for (ModelAttribute modelAttribute : attributes) {
-									attributeIds.add(modelAttribute.getId());
-								}
-								processedEntities.add(entity);
-							}
-						}
-					}
-
+					attributeIds.addAll(inData.keySet());					
+					attributeIds.addAll(CollectionUtils.intersection(getAllAttributesForIncludedEntities(inData), transformsByAttributeId.keySet()));
+					
 					for (String attributeId : attributeIds) {
 						String transform = transformsByAttributeId.get(attributeId);
 						Object value = inData.get(attributeId);
@@ -161,7 +167,7 @@ public class Transformer extends AbstractComponentRuntime {
 			   log.debug("It took " + (totalTime/totalCalls) + "ms on average to call eval");
 			}
 						
-		} else if (inputMessage instanceof ControlMessage) {
+		} else if (inputMessage instanceof ControlMessage && properties.is(PASS_ALONG_CONTROL_MESSAGES, false)) {
 		        callback.sendControlMessage();
 		}
 	}

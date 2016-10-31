@@ -45,6 +45,10 @@ final public class Icons {
     
     public static final FontAwesome PROJECT = FontAwesome.CUBES;
     
+    public static final FontAwesome PROJECT_VERSION = FontAwesome.CUBE;
+    
+    public static final FontAwesome DEPENDENCY = FontAwesome.HAND_O_RIGHT;
+    
     public static final FontAwesome AGENT = FontAwesome.CLOUD;
     
     public static final FontAwesome DEPLOYMENT = FontAwesome.SUITCASE;

@@ -22,11 +22,9 @@ package org.jumpmind.metl.ui.views.design;
 
 import java.io.Serializable;
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -50,42 +48,35 @@ import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.FieldEvents.FocusEvent;
-import com.vaadin.event.FieldEvents.FocusListener;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
+import com.vaadin.data.util.filter.And;
+import com.vaadin.data.util.filter.Compare;
+import com.vaadin.data.util.filter.IsNull;
+import com.vaadin.data.util.filter.Not;
+import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.TableFieldFactory;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.HeaderCell;
+import com.vaadin.ui.Grid.HeaderRow;
+import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.themes.ValoTheme;
 
-public class EditXmlFormatPanel extends AbstractComponentEditPanel implements TextChangeListener {
+public class EditXmlFormatPanel extends AbstractComponentEditPanel {
 
     private static final long serialVersionUID = 1L;
 
-    Table table = new Table();
-
-    BeanItemContainer<Record> container = new BeanItemContainer<Record>(Record.class);
-
-    TextField filterTextField;
-
-    AbstractSelect filterPopField;
+    Grid grid;
 
     Set<String> xpathChoices;
 
-    static final String SHOW_ALL = "Show All Entities";
-    static final String SHOW_POPULATED_ENTITIES = "Filter Populated Entites";
+    BeanItemContainer<Record> container;
 
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
@@ -97,63 +88,55 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
         Button importButton = buttonBar.addButton("Import Template", FontAwesome.DOWNLOAD);
         importButton.addClickListener(new ImportTemplateClickListener());
 
-        buttonBar.addButtonRight("Export", FontAwesome.DOWNLOAD, (e)->export());
-        
-        filterPopField = new ComboBox();
-        filterPopField.addItem(SHOW_ALL);
-        filterPopField.addItem(SHOW_POPULATED_ENTITIES);
-        filterPopField.setNullSelectionAllowed(false);
-        filterPopField.setImmediate(true);
-        filterPopField.setValue(SHOW_ALL);
-        filterPopField.addValueChangeListener(new ValueChangeListener() {
-			private static final long serialVersionUID = 1L;
+        buttonBar.addButtonRight("Export", FontAwesome.DOWNLOAD, (e) -> export());
 
-			public void valueChange(ValueChangeEvent event) {
-                updateTable(filterTextField.getValue(),
-                        filterPopField.getValue().equals(SHOW_POPULATED_ENTITIES));
-            }
-        });
-        buttonBar.addRight(filterPopField);
-
-        filterTextField = buttonBar.addFilter();
-        filterTextField.addTextChangeListener(this);
-
-        table.setContainerDataSource(container);
-        table.setSelectable(true);
-        table.setSortEnabled(false);
-        table.setImmediate(true);
-        table.setSizeFull();
-        table.setVisibleColumns(new Object[] { "entityName", "attributeName", "xpath" });
-        table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "XPath" });
-        table.setTableFieldFactory(new EditFieldFactory());
-        table.setEditable(true);
-        addComponent(table);
-        setExpandRatio(table, 1.0f);
-
-        updateTable(null,false);
+        buildGrid();
+        refresh();
         saveXPathSettings();
         buildXpathChoices();
+
     }
 
     protected void export() {
         String fileNamePrefix = component.getName().toLowerCase().replace(' ', '-');
-        ExportDialog dialog = new ExportDialog(table, fileNamePrefix, component.getName());
+        ExportDialog dialog = new ExportDialog(grid, fileNamePrefix, component.getName());
         UI.getCurrent().addWindow(dialog);
     }
 
-    @Override
-    public void textChange(TextChangeEvent event) {
-        filterTextField.setValue(event.getText());
-        updateTable(event.getText(),
-        		filterPopField.getValue().equals(SHOW_POPULATED_ENTITIES));
+    protected void buildGrid() {
+        grid = new Grid();
+        grid.setSelectionMode(SelectionMode.NONE);
+        grid.setSizeFull();
+        grid.setEditorEnabled(!readOnly);
+        container = new BeanItemContainer<Record>(Record.class);
+        grid.setContainerDataSource(container);
+        grid.setColumnOrder("entityName", "attributeName", "xpath");
+        HeaderRow filterRow = grid.appendHeaderRow();
+
+        addColumn("entityName", filterRow);
+
+        addColumn("attributeName", filterRow);
+
+        ComboBox combo = new ComboBox();
+        combo.addBlurListener(e->saveXPathSettings());
+        combo.setWidth(100, Unit.PERCENTAGE);
+        combo.setPageLength(20);
+        combo.setImmediate(true);
+        combo.setNewItemsAllowed(true);
+        combo.setInvalidAllowed(true);
+        combo.setTextInputAllowed(true);
+        combo.setScrollToSelectedItem(true);
+        grid.getColumn("xpath").setEditorField(combo).setExpandRatio(1);
+        addShowPopulatedFilter("xpath", filterRow);
+        grid.setEditorBuffered(false);
+        addComponent(grid);
+        setExpandRatio(grid, 1);
     }
 
-    protected void updateTable(String filterText, boolean filterPopulated) {
+    protected void refresh() {
         Model model = component.getType().equals(XmlParser.TYPE) ? component.getOutputModel()
                 : component.getInputModel();
         if (model != null) {
-            table.removeAllItems();
-            String upperFilterText = StringUtils.trimToEmpty(filterText).toUpperCase();
             Collections.sort(model.getModelEntities(), new Comparator<ModelEntity>() {
                 public int compare(ModelEntity entity1, ModelEntity entity2) {
                     return entity1.getName().toLowerCase()
@@ -163,40 +146,64 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
 
             for (ModelEntity entity : model.getModelEntities()) {
                 boolean firstAttribute = true;
-                boolean entityMatches = upperFilterText.equals("")
-                        || entity.getName().toUpperCase().indexOf(upperFilterText) >= 0;
                 Record entityRecord = new Record(entity, null);
-                boolean populated = !filterPopulated
-                        || StringUtils.isNotBlank(entityRecord.getXpath());
-                List<Record> entityAttrGroup = new ArrayList<Record>();
                 for (ModelAttribute attr : entity.getModelAttributes()) {
-                    if (entityMatches
-                            || attr.getName().toUpperCase().indexOf(upperFilterText) >= 0) {
-                        if (firstAttribute) {
-                            firstAttribute = false;
-                            entityAttrGroup.add(entityRecord);
-                        }
-                        Record attrRecord = new Record(entity, attr);
-                        populated = populated || StringUtils.isNotBlank(attrRecord.getXpath());
-                        entityAttrGroup.add(attrRecord);
+                    if (firstAttribute) {
+                        firstAttribute = false;
+                        container.addItem(entityRecord);
                     }
+                    container.addItem(new Record(entity, attr));
                 }
-                if (entityMatches && firstAttribute) {
-                    entityAttrGroup.add(entityRecord);
-                }
-                if (populated) {
-                    table.addItems(entityAttrGroup);
+                if (firstAttribute) {
+                    container.addItem(entityRecord);
                 }
             }
         }
     }
+    
+    protected void addShowPopulatedFilter(String propertyId, HeaderRow filterRow) {
+        HeaderCell cell = filterRow.getCell(propertyId);
+        CheckBox group = new CheckBox("Show Set Only");
+        group.setImmediate(true);
+        group.addValueChangeListener(l->{
+            container.removeContainerFilters(propertyId);
+            if (group.getValue()) {
+                container.addContainerFilter(new And(new Not(new Compare.Equal(propertyId,"")), new Not(new IsNull(propertyId))));
+            }
+        });
+        group.addStyleName(ValoTheme.CHECKBOX_SMALL);
+        cell.setComponent(group);
+        
+    }
+
+    protected void addColumn(String propertyId, HeaderRow filterRow) {
+        grid.getColumn(propertyId).setEditable(false);
+        HeaderCell cell = filterRow.getCell(propertyId);
+        TextField filterField = new TextField();
+        filterField.setInputPrompt("Filter");
+        filterField.setImmediate(true);
+        filterField.addStyleName(ValoTheme.TEXTFIELD_TINY);
+        filterField.setWidth(100, Unit.PERCENTAGE);
+        filterField.addTextChangeListener(change -> {
+            container.removeContainerFilters(propertyId);
+            if (!change.getText().isEmpty()) {
+                container.addContainerFilter(
+                        new SimpleStringFilter(propertyId, change.getText(), true, false));
+            }
+        });
+        cell.setComponent(filterField);
+    }
 
     protected void saveXPathSettings() {
-        for (Record record : container.getItemIds()) {
-            if (record.getAttributeId() != null) {
-                saveAttributeSetting(record.getAttributeId(), XmlFormatter.XML_FORMATTER_XPATH, StringUtils.trimToNull(record.getXpath()));
+        for (Object obj : container.getItemIds()) {
+            Record record = (Record) obj;
+            if (record.modelAttribute != null) {
+                saveAttributeSetting(record.modelAttribute.getId(),
+                        XmlFormatter.XML_FORMATTER_XPATH,
+                        StringUtils.trimToNull(record.getXpath()));
             } else {
-                saveEntitySetting(record.getEntityId(), XmlFormatter.XML_FORMATTER_XPATH, StringUtils.trimToNull(record.getXpath()));
+                saveEntitySetting(record.modelEntity.getId(), XmlFormatter.XML_FORMATTER_XPATH,
+                        StringUtils.trimToNull(record.getXpath()));
             }
         }
     }
@@ -246,10 +253,17 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
             try {
                 Document document = builder.build(new StringReader(setting.getValue()));
                 xpathChoices = new HashSet<String>();
-                buildXpathChoicesFromElement("/" + document.getRootElement().getName(), document.getRootElement());
+                buildXpathChoicesFromElement("/" + document.getRootElement().getName(),
+                        document.getRootElement());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        if (xpathChoices != null) {
+            ComboBox combo = (ComboBox) grid.getColumn("xpath").getEditorField();
+            combo.removeAllItems();
+            combo.addItems(xpathChoices);
         }
     }
 
@@ -267,7 +281,7 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
 
     class EditTemplateClickListener implements ClickListener {
         private static final long serialVersionUID = 1L;
-        
+
         public void buttonClick(ClickEvent event) {
             EditTemplateWindow window = new EditTemplateWindow();
             window.show();
@@ -276,7 +290,7 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
 
     class EditTemplateWindow extends ResizableWindow {
         private static final long serialVersionUID = 1L;
-        
+
         AceEditor editor;
 
         public EditTemplateWindow() {
@@ -296,24 +310,26 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
 
             Setting templateSetting = component.findSetting(XmlFormatter.XML_FORMATTER_TEMPLATE);
             editor.setValue(templateSetting.getValue());
+            editor.setReadOnly(readOnly);
 
             addComponent(buildButtonFooter(buildCloseButton()));
         }
 
-        protected boolean onClose() {
+        @Override
+        public void close() {
+            super.close();
             Setting templateSetting = component.findSetting(XmlFormatter.XML_FORMATTER_TEMPLATE);
             templateSetting.setValue(editor.getValue());
             context.getConfigurationService().save(templateSetting);
             buildXpathChoices();
-            updateTable(filterTextField.getValue(),
-            		filterPopField.getValue().equals(SHOW_POPULATED_ENTITIES));
-            return true;
+            refresh();
         }
+
     }
 
     class ImportTemplateClickListener implements ClickListener, ImportXmlListener {
         private static final long serialVersionUID = 1L;
-        
+
         ImportXmlTemplateWindow importWindow;
 
         public void buttonClick(ClickEvent event) {
@@ -331,51 +347,10 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
         }
     }
 
-    class EditFieldFactory implements TableFieldFactory {
-        private static final long serialVersionUID = 1L;
-        
-        public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId,
-                com.vaadin.ui.Component uiContext) {
-            Field<?> field = null;
-            Record record = (Record) itemId;
-            if (propertyId.equals("xpath")) {
-                final ComboBox combo = new ComboBox();
-                combo.setWidth(100, Unit.PERCENTAGE);
-                if (xpathChoices != null) {
-                    combo.addItems(xpathChoices);
-                }
-                if (!StringUtils.trimToEmpty(record.getXpath()).equals("") && !combo.getItemIds().contains(record.getXpath())) {
-                    combo.addItem(record.getXpath());
-                }
-                combo.setPageLength(20);
-                combo.setImmediate(true);
-                combo.setNewItemsAllowed(true);
-                combo.setInvalidAllowed(true);
-                combo.setTextInputAllowed(true);
-                combo.setScrollToSelectedItem(true);
-                combo.setValue(record.getXpath());
-                combo.addValueChangeListener(new ValueChangeListener() {
-                    private static final long serialVersionUID = 1L;
-                    public void valueChange(ValueChangeEvent event) {
-                        saveXPathSettings();
-                    }
-                });
-                combo.addFocusListener(new FocusListener() {
-                    private static final long serialVersionUID = 1L;
-                    public void focus(FocusEvent event) {
-                        table.select(itemId);
-                    }
-                });
-                field = combo;
-            }
-            return field;
-        }
-    }
-
     public class Record implements Serializable {
-        
+
         private static final long serialVersionUID = 1L;
-        
+
         ModelEntity modelEntity;
 
         ModelAttribute modelAttribute;
@@ -386,13 +361,14 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
             this.modelEntity = modelEntity;
             this.modelAttribute = modelAttribute;
             if (modelAttribute != null) {
-                ComponentAttributeSetting setting = component.getSingleAttributeSetting(modelAttribute.getId(),
-                        XmlFormatter.XML_FORMATTER_XPATH);
+                ComponentAttributeSetting setting = component.getSingleAttributeSetting(
+                        modelAttribute.getId(), XmlFormatter.XML_FORMATTER_XPATH);
                 if (setting != null) {
                     xpath = setting.getValue();
                 }
             } else {
-                ComponentEntitySetting setting = component.getSingleEntitySetting(modelEntity.getId(), XmlFormatter.XML_FORMATTER_XPATH);
+                ComponentEntitySetting setting = component.getSingleEntitySetting(
+                        modelEntity.getId(), XmlFormatter.XML_FORMATTER_XPATH);
                 if (setting != null) {
                     xpath = setting.getValue();
                 }
@@ -400,7 +376,8 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
         }
 
         public int hashCode() {
-            return modelEntity.hashCode() + (modelAttribute == null ? 0 : modelAttribute.hashCode());
+            return modelEntity.hashCode()
+                    + (modelAttribute == null ? 0 : modelAttribute.hashCode());
         }
 
         public boolean equals(Object obj) {
@@ -414,20 +391,9 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
             return modelEntity.getName();
         }
 
-        public String getEntityId() {
-            return modelEntity.getId();
-        }
-
         public String getAttributeName() {
             if (modelAttribute != null) {
                 return modelAttribute.getName();
-            }
-            return null;
-        }
-
-        public String getAttributeId() {
-            if (modelAttribute != null) {
-                return modelAttribute.getId();
             }
             return null;
         }

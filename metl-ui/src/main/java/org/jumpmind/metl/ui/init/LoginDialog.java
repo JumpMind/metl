@@ -20,98 +20,323 @@
  */
 package org.jumpmind.metl.ui.init;
 
-import java.util.Date;
+import static org.jumpmind.metl.core.model.GlobalSetting.PASSWORD_MIN_LENGTH;
+import static org.jumpmind.metl.core.model.GlobalSetting.PASSWORD_PROHIBIT_COMMON_WORDS;
+import static org.jumpmind.metl.core.model.GlobalSetting.PASSWORD_PROHIBIT_PREVIOUS;
+import static org.jumpmind.metl.core.model.GlobalSetting.PASSWORD_REQUIRE_ALPHANUMERIC;
+import static org.jumpmind.metl.core.model.GlobalSetting.PASSWORD_REQUIRE_MIXED_CASE;
+import static org.jumpmind.metl.core.model.GlobalSetting.PASSWORD_REQUIRE_SYMBOL;
 
+import java.io.ByteArrayOutputStream;
+import java.util.Date;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.time.DateUtils;
+import org.jumpmind.metl.core.model.GlobalSetting;
 import org.jumpmind.metl.core.model.User;
+import org.jumpmind.metl.core.model.UserHist;
+import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.properties.TypedProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.Page;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.LoginForm;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 public class LoginDialog extends Window {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
+    private final String PASSWORD_EXPIRED = "Password Expired";
+
     private ApplicationContext context;
-    
-    private TextField userField;
+
+    private TextField userNameField;
 
     private PasswordField passwordField;
 
+    private PasswordField validatePasswordField;
+
     private LoginListener loginListener;
+
+    private int passwordExpiresInDays;
+
+    private TypedProperties settings;
 
     public LoginDialog(ApplicationContext context, LoginListener loginListener) {
         super("Login to Metl");
+
         this.context = context;
         this.loginListener = loginListener;
+
+        settings = new TypedProperties();
+        settings.putAll(context.getConfigurationService().findGlobalSettingsAsMap());
+        passwordExpiresInDays = settings.getInt(GlobalSetting.PASSWORD_EXPIRE_DAYS, 60);
+
         setWidth(300, Unit.PIXELS);
         setResizable(false);
-        setReadOnly(true);
         setModal(true);
         setClosable(false);
 
-        VerticalLayout layout = new VerticalLayout();
-        layout.setMargin(true);
-        layout.setSpacing(true);
-        
-        userField = new TextField("User Id");
-        userField.setWidth(100, Unit.PERCENTAGE);
-        layout.addComponent(userField);
+        LoginForm loginForm = new LoginForm() {
 
-        passwordField = new PasswordField("Password");
-        passwordField.setImmediate(true);
-        passwordField.setWidth(100, Unit.PERCENTAGE);
-        layout.addComponent(passwordField);
+            @Override
+            protected Component createContent(TextField userNameField, PasswordField passwordField,
+                    Button loginButton) {
+                VerticalLayout layout = new VerticalLayout();
+                layout.setMargin(true);
+                layout.setSpacing(true);
 
-        HorizontalLayout buttonLayout = new HorizontalLayout();
-        Button loginButton = new Button("Login");
-        loginButton.addClickListener(new LoginClickListener());
-        loginButton.setStyleName("primary");
-        loginButton.setClickShortcut(KeyCode.ENTER);
-        buttonLayout.addComponent(loginButton);
-        buttonLayout.setWidth(100, Unit.PERCENTAGE);
-        layout.addComponent(buttonLayout);
-        buttonLayout.addComponent(loginButton);
-        buttonLayout.setComponentAlignment(loginButton, Alignment.BOTTOM_RIGHT);
+                LoginDialog.this.userNameField = userNameField;
+                userNameField.setWidth(100, Unit.PERCENTAGE);
+                LoginDialog.this.passwordField = passwordField;
+                passwordField.setWidth(100, Unit.PERCENTAGE);
+                passwordField.setNullRepresentation("");
 
-        setContent(layout);
-        userField.focus();
+                layout.addComponent(userNameField);
+                layout.addComponent(passwordField);
+
+                validatePasswordField = new PasswordField("Verify Password");
+                validatePasswordField.setWidth(100, Unit.PERCENTAGE);
+                validatePasswordField.setNullRepresentation("");
+                validatePasswordField.setVisible(false);
+                layout.addComponent(validatePasswordField);
+
+                HorizontalLayout buttonLayout = new HorizontalLayout();
+                loginButton.setStyleName(ValoTheme.BUTTON_PRIMARY);
+                buttonLayout.addComponent(loginButton);
+                buttonLayout.setWidth(100, Unit.PERCENTAGE);
+                layout.addComponent(buttonLayout);
+                buttonLayout.addComponent(loginButton);
+                buttonLayout.setComponentAlignment(loginButton, Alignment.BOTTOM_RIGHT);
+
+                userNameField.focus();
+                return layout;
+            }
+
+        };
+        loginForm.addLoginListener((e) -> login());
+        loginForm.setWidth(300, Unit.PIXELS);
+
+        setContent(loginForm);
     }
 
-    class LoginClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
-            User user = context.getConfigurationService().findUserByLoginId(userField.getValue());            
-            String password = User.hashValue(passwordField.getValue());
-            
-            if (user != null && user.getPassword() != null && user.getPassword().equals(password)) {
-                UI.getCurrent().removeWindow(LoginDialog.this);
-                user.setLastLoginTime(new Date());
-                context.getConfigurationService().save(user);
-                loginListener.login(user);
-            } else {
-                String address = Page.getCurrent().getWebBrowser().getAddress();
-                log.warn("Invalid login attempt for user " + userField.getValue() + " from address " + address);
-                Notification note = new Notification("Invalid Login", "You specified an invalid login or password");
-                note.show(Page.getCurrent());
-                userField.selectAll();
+    protected boolean isNewPasswordMode() {
+        return PASSWORD_EXPIRED.equals(getCaption());
+    }
+
+    protected static boolean testPassword(PasswordField passwordField,
+            PasswordField validatePasswordField, ApplicationContext context) {
+        boolean passedTest = true;
+        if (validatePasswordField.getValue() == null || passwordField.getValue() == null
+                || !validatePasswordField.getValue().equals(passwordField.getValue())) {
+            notify("Invalid Password", "The passwords did not match");
+            passedTest = false;
+        } else {
+            TypedProperties settings = new TypedProperties();
+            settings.putAll(context.getConfigurationService().findGlobalSettingsAsMap());
+            IConfigurationService configurationService = context.getConfigurationService();
+            ISecurityService securityService = context.getSecurityService();
+
+            int minPasswordLength = settings.getInt(PASSWORD_MIN_LENGTH, 6);
+            if (passwordField.getValue().length() < minPasswordLength) {
+                passedTest = false;
+                notify("Password too short",
+                        "The password is required to be at least " + minPasswordLength
+                                + " characters long.  Please choose a different password.");
             }
+
+            int prohibitNPreviousPasswords = settings.getInt(PASSWORD_PROHIBIT_PREVIOUS, 5);
+            if (passedTest && prohibitNPreviousPasswords != 0) {
+                List<UserHist> histories = configurationService
+                        .findUserHist(context.getUser().getId());
+                if (prohibitNPreviousPasswords < 0) {
+                    prohibitNPreviousPasswords = histories.size();
+                }
+                for (int i = 0; i < histories.size() && i < prohibitNPreviousPasswords; i++) {
+                    UserHist hist = histories.get(i);
+                    String toCompare = securityService.hash(hist.getSalt(),
+                            passwordField.getValue());
+                    if (toCompare.equals(hist.getPassword())) {
+                        passedTest = false;
+                        notify("Password Repeated",
+                                "You have used this password in the past.  Please choose a different password.");
+                        break;
+                    }
+                }
+            }
+
+            if (passedTest) {
+                boolean requiresAlphaNumberic = settings.is(PASSWORD_REQUIRE_ALPHANUMERIC, true);
+                if (requiresAlphaNumberic && !containsAlphanumeric(passwordField.getValue())) {
+                    passedTest = false;
+                    notify("At least one letter and one number is required",
+                            "At least one letter and one number is required.  Please choose a different password.");
+                }
+            }
+
+            if (passedTest) {
+                boolean requiresSymbol = settings.is(PASSWORD_REQUIRE_SYMBOL, true);
+                if (requiresSymbol && !containsSymbol(passwordField.getValue())) {
+                    passedTest = false;
+                    notify("Password requires a symbol",
+                            "At least one symbol character is required.  Please choose a different password.");
+                }
+            }
+
+            if (passedTest) {
+                boolean requiresMixedCase = settings.is(PASSWORD_REQUIRE_MIXED_CASE, true);
+                if (requiresMixedCase && !containsMixedCase(passwordField.getValue())) {
+                    passedTest = false;
+                    notify("Password requires mixed case",
+                            "At least one upper case and one lower case character is required.  Please choose a different password.");
+                }
+            }
+
+            if (passedTest) {
+                boolean prohibitCommonWords = settings.is(PASSWORD_PROHIBIT_COMMON_WORDS, true);
+                if (prohibitCommonWords && containsCommonWords(passwordField.getValue())) {
+                    passedTest = false;
+                    notify("Common word detected",
+                            "You used a common word in your password.  Please choose a different password.");
+
+                }
+            }
+
+        }
+
+        return passedTest;
+    }
+
+    protected static boolean containsCommonWords(String password) {
+        ZipInputStream zip = null;
+        try {
+            zip = new ZipInputStream(
+                    LoginDialog.class.getResourceAsStream("/common-passwords.zip"));
+            ZipEntry entry = null;
+            for (entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
+                ByteArrayOutputStream os = new ByteArrayOutputStream();
+                try {
+                    final byte buffer[] = new byte[4096];
+                    int readCount;
+                    while ((readCount = zip.read(buffer)) > 0) {
+                        os.write(buffer, 0, readCount);
+                    }
+                } finally {
+                    os.close();
+                }
+
+                String text = new String(os.toByteArray());
+                String[] wordsArray = text.split("\\r?\\n");
+                for (String word : wordsArray) {
+                    if (password.contains(word)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            IOUtils.closeQuietly(zip);
         }
     }
-    
+
+    protected static boolean containsAlphanumeric(String password) {
+        boolean containsAlpha = false;
+        boolean containsNumeric = false;
+        char[] chars = password.toCharArray();
+        for (char c : chars) {
+            containsAlpha |= Character.isLetter(c);
+            containsNumeric |= Character.isDigit(c);
+        }
+        return containsAlpha & containsNumeric;
+    }
+
+    protected static boolean containsMixedCase(String password) {
+        boolean containsLower = false;
+        boolean containsUpper = false;
+        char[] chars = password.toCharArray();
+        for (char c : chars) {
+            containsLower |= Character.isLowerCase(c);
+            containsUpper |= Character.isUpperCase(c);
+        }
+        return containsLower & containsUpper;
+    }
+
+    protected static boolean containsSymbol(String password) {
+        Pattern p = Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(password);
+        return m.find();
+    }
+
+    protected void login() {
+        boolean login = false;
+        ISecurityService securityService = context.getSecurityService();
+        IConfigurationService configurationService = context.getConfigurationService();
+        User user = configurationService.findUserByLoginId(userNameField.getValue());
+        if (user != null) {
+            String password = securityService.hash(user.getSalt(), passwordField.getValue());            
+            if (isNewPasswordMode()) {
+                if (testPassword(passwordField, validatePasswordField, context)) {
+                    configurationService.savePassword(user, passwordField.getValue());
+                    login = true;
+                }
+            } else if (user.getPassword() != null
+                    && user.getPassword().equals(password)) {
+                Date expireTime = DateUtils.addDays(new Date(), -passwordExpiresInDays);
+                if (user.getLastPasswordTime() == null
+                        || user.getLastPasswordTime().before(expireTime)) {
+                    userNameField.setVisible(false);
+                    passwordField.setValue(null);
+                    setCaption(PASSWORD_EXPIRED);
+                    passwordField.setCaption("New Password");
+                    validatePasswordField.setVisible(true);
+                } else {
+                    login = true;
+                }
+            } 
+        }
+
+        if (login) {
+            UI.getCurrent().removeWindow(LoginDialog.this);
+            user.setLastLoginTime(new Date());
+            context.getConfigurationService().save(user);
+            loginListener.login(user);
+        } else {
+            String address = Page.getCurrent().getWebBrowser().getAddress();
+            log.warn("Invalid login attempt for user " + userNameField.getValue() + " from address "
+                    + address);
+            notify("Invalid Login", "You specified an invalid login or password");
+            userNameField.selectAll();
+        }
+    }
+
+    protected static void notify(String caption, String message) {
+        new Notification(caption, message).show(Page.getCurrent());
+    }
+
     static public interface LoginListener {
         public void login(User user);
     }

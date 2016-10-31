@@ -20,8 +20,9 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.Flow;
@@ -48,7 +49,11 @@ public class ComponentContext {
 
     ComponentStatistics componentStatistics = new ComponentStatistics();
 
-    LinkedCaseInsensitiveMap<Object> context;    
+    LinkedCaseInsensitiveMap<Object> context;  
+    
+    Map<Integer, IComponentRuntime> componentRuntimeByThread = new HashMap<>();
+    
+    boolean startStep = false;
 
     public ComponentContext(AgentDeployment deployment, FlowStep flowStep, Flow manipulatedFlow, IExecutionTracker executionTracker,
             Map<String, IResourceRuntime> deployedResources, Map<String, String> flowParameters, Map<String, String> globalSettings) {
@@ -57,7 +62,7 @@ public class ComponentContext {
         this.manipulatedFlow = manipulatedFlow;
         this.executionTracker = executionTracker;
         this.deployedResources = deployedResources;
-        this.flowParameters = flowParameters == null ? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(flowParameters);
+        this.flowParameters = flowParameters == null ? Collections.synchronizedMap(new HashMap<>()) : Collections.synchronizedMap(new HashMap<>(flowParameters));
         this.globalSettings = globalSettings;
         this.context = new LinkedCaseInsensitiveMap<Object>();
     }
@@ -108,6 +113,18 @@ public class ComponentContext {
 
     public Map<String, String> getGlobalSettings() {
         return globalSettings;
+    }
+    
+    public void setStartStep(boolean startStep) {
+        this.startStep = startStep;
+    }
+    
+    public boolean isStartStep() {
+        return startStep;
+    }
+    
+    public Map<Integer, IComponentRuntime> getComponentRuntimeByThread() {
+        return componentRuntimeByThread;
     }
 
 }

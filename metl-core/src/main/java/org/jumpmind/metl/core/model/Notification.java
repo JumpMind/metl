@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.core.model;
 
-public class Notification extends AbstractObject {
+public class Notification extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
 

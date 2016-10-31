@@ -29,13 +29,14 @@
              resourceCategory='datasource'>
     <name>RDBMS Reader</name>
     <className>org.jumpmind.metl.core.runtime.component.RdbmsReader</className>
+    <keywords>database,db,sql</keywords>
     <description></description>
     <settings>
       <setting id='sql'
                required='true'
                type='multiline_text'>
         <name>Sql</name>
-      </setting> 
+      </setting>
       <setting id='run.when'
                required='false'
                type='choice'>
@@ -57,7 +58,7 @@
           <choice>SQL SCRIPT</choice>
           <choice>SQL STATEMENT</choice>
         </choices>
-      </setting>                 
+      </setting>
       <setting id='rows.per.message'
                required='true'
                type='integer'>

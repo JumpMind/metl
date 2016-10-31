@@ -47,6 +47,10 @@ import java.util.Date
         excludes(["**/AppWidgetSet.gwt.xml"])
     }     
     
+    ext {
+        majorMinorVersion = version.substring(0, version.indexOf(".", version.indexOf(".")+ 1))
+    }    
+    
     repositories {
         // uncomment this if you want to use your local maven repository to test undelivered
         /// changes (like symmetricds changes)
@@ -150,7 +154,7 @@ import java.util.Date
       ignoreDerivedResources(provider.asNode())
     }
  
-    def ignoreDerivedResources(projectDescription, directories = ["build", "target", "test-output"]) {
+    def ignoreDerivedResources(projectDescription, directories = ["target", "test-output"]) {
       def count = directories.count { file(it).exists() }
       if (count > 0) {
         def filter = projectDescription

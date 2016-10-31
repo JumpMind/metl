@@ -56,6 +56,8 @@ public class ExecutionStep extends AbstractObject {
     private Date endTime;
 
     private long handleDuration = 0;
+    
+    private long queueDuration = 0;
 
     public long getHandleDuration() {
         return handleDuration;
@@ -73,6 +75,11 @@ public class ExecutionStep extends AbstractObject {
         LocalTime t = LocalTime.MIDNIGHT.plus(Duration.ofMillis(handleDuration));
         return DateTimeFormatter.ofPattern("HH:mm:ss.SSS").format(t);
     }
+    
+    public String getQueueDurationString() {
+        LocalTime t = LocalTime.MIDNIGHT.plus(Duration.ofMillis(queueDuration));
+        return DateTimeFormatter.ofPattern("HH:mm:ss.SSS").format(t);
+    }
 
     public void setThreadNumber(int threadNumber) {
         this.threadNumber = threadNumber;
@@ -80,15 +87,6 @@ public class ExecutionStep extends AbstractObject {
 
     public int getThreadNumber() {
         return threadNumber;
-    }
-
-    @Override
-    public void setName(String name) {
-    }
-
-    @Override
-    public String getName() {
-        return getId();
     }
 
     public String getExecutionId() {
@@ -189,6 +187,14 @@ public class ExecutionStep extends AbstractObject {
 
     public long getPayloadReceived() {
         return payloadReceived;
+    }
+    
+    public void setQueueDuration(long queueDuration) {
+        this.queueDuration = queueDuration;
+    }
+    
+    public long getQueueDuration() {
+        return queueDuration;
     }
 
 }

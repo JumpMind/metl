@@ -22,12 +22,17 @@ package org.jumpmind.metl.core.runtime.flow;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import javax.mail.Message.RecipientType;
@@ -52,7 +57,6 @@ import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerLogger;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerRecorder;
 import org.jumpmind.metl.core.runtime.IExecutionTracker;
-import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
@@ -65,7 +69,7 @@ import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionF
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.metl.core.util.MailSession;
+import org.jumpmind.metl.core.runtime.resource.MailSession;
 import org.jumpmind.util.AppUtils;
 import org.jumpmind.util.FormatUtils;
 import org.slf4j.Logger;
@@ -117,19 +121,19 @@ public class FlowRuntime {
     
     Flow manipulatedFlow;
 
-    public FlowRuntime(String executionId, AgentDeployment deployment, Agent agent,
+    public FlowRuntime(String executionId, String userId, AgentDeployment deployment, Agent agent,
             IComponentRuntimeFactory componentRuntimeFactory,
             IComponentDefinitionFactory componentDefinitionFactory,
             IResourceFactory resourceFactory, ExecutorService threadService,
             IConfigurationService configurationService, IExecutionService executionService,
             Map<String, IResourceRuntime> deployedResources, List<Notification> notifications,
             Map<String, String> globalSettings) {
-        this(executionId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
+        this(executionId, userId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
                 resourceFactory, threadService, configurationService, executionService,
                 deployedResources, notifications, globalSettings, null);
     }
 
-    public FlowRuntime(String executionId, AgentDeployment deployment, Agent agent,
+    public FlowRuntime(String executionId, String userId, AgentDeployment deployment, Agent agent,
             IComponentRuntimeFactory componentRuntimeFactory,
             IComponentDefinitionFactory componentDefinitionFactory,
             IResourceFactory resourceFactory, ExecutorService threadService,
@@ -153,14 +157,16 @@ public class FlowRuntime {
         this.mailSession = new MailSession(globalSettings);
         this.deployedResources = deployedResources;
         this.globalSettings = globalSettings;
-        this.flowParameters = getFlowParameters(agent, deployment);
+        
+        this.flowParameters = new LinkedHashMap<String, String>();         
         if (runtimeParameters != null) {
             this.flowParameters.putAll(runtimeParameters);
         }
+        getFlowParameters(this.flowParameters, agent, deployment);
         
         if (threadService != null && executionService != null) {
             this.executionTracker = new ExecutionTrackerRecorder(agent, deployment, threadService,
-                    executionService);
+                    executionService, userId, flowParameters.toString());
         } else {
             this.executionTracker = new ExecutionTrackerLogger(deployment);
         }
@@ -314,15 +320,23 @@ public class FlowRuntime {
         }
     }
 
-    protected Flow manipulateFlow(Flow flow) {
-        for (FlowStep flowStep : new ArrayList<>(flow.getFlowSteps())) {
+    protected Flow manipulateFlow(Flow flow) {        
+        Flow clone = (Flow)flow.clone();
+        clone.setFlowParameters(new ArrayList<>());
+        clone.getFlowParameters().addAll(flow.getFlowParameters());
+        clone.setFlowSteps(new ArrayList<>());
+        clone.getFlowSteps().addAll(flow.getFlowSteps());
+        clone.setFlowStepLinks(new ArrayList<>());
+        clone.getFlowStepLinks().addAll(flow.getFlowStepLinks());
+
+        for (FlowStep flowStep : new ArrayList<>(clone.getFlowSteps())) {
             XMLComponent componentDefintion = componentDefinitionFactory.getDefinition(flow.getProjectVersionId(), flowStep.getComponent().getType());
             if (isNotBlank(componentDefintion.getFlowManipulatorClassName())) {
                 try {
                     IFlowManipulator flowManipulator = (IFlowManipulator) Class
                             .forName(componentDefintion.getFlowManipulatorClassName())
                             .newInstance();
-                    flow = flowManipulator.manipulate(flow, flowStep, configurationService);
+                    clone = flowManipulator.manipulate(clone, flowStep, configurationService);
                 } catch (RuntimeException e) {
                     throw e;
                 } catch (Exception e) {
@@ -330,7 +344,7 @@ public class FlowRuntime {
                 }
             }
         }
-        return flow;
+        return clone;
     }
 
     public static Map<String, String> getFlowParameters(Flow flow, Agent agent,
@@ -343,30 +357,37 @@ public class FlowRuntime {
         return getFlowParameters(params, agent, agentDeployment);
     }
 
-    public static Map<String, String> getFlowParameters(Agent agent,
-            AgentDeployment agentDeployment) {
-        Map<String, String> params = new HashMap<String, String>();
-        return getFlowParameters(params, agent, agentDeployment);
-    }
-
     public static Map<String, String> getFlowParameters(Map<String, String> params, Agent agent,
             AgentDeployment agentDeployment) {
         List<AgentDeploymentParameter> deployParameters = agentDeployment
                 .getAgentDeploymentParameters();
         List<AgentParameter> agentParameters = agent.getAgentParameters();
+        Set<String> overridable = new HashSet<>();
         if (agentParameters != null) {
             for (AgentParameter agentParameter : agentParameters) {
-                params.put(agentParameter.getName(), agentParameter.getValue());
+                String name = agentParameter.getName();
+                if (!params.containsKey(name)) {
+                    params.put(name, agentParameter.getValue());
+                    overridable.add(name);
+                }
             }
         }
         if (deployParameters != null) {
             for (AgentDeploymentParameter deployParameter : deployParameters) {
-                params.put(deployParameter.getName(), deployParameter.getValue());
+                String name = deployParameter.getName();
+                if (!params.containsKey(name) || overridable.contains(name)) {
+                    params.put(deployParameter.getName(), deployParameter.getValue());
+                }
             }
         }
         Date date = new Date();
         params.put("_agentName", agent.getName());
-        params.put("_deploymentName", agentDeployment.getName());
+        params.put("_deploymentName", agentDeployment.getName());        
+        try {
+            params.put("_agentNameUrlEncoded", URLEncoder.encode(agent.getName(), "utf-8"));
+            params.put("_deploymentNameUrlEncoded", URLEncoder.encode(agentDeployment.getName(), "utf-8"));
+        } catch (UnsupportedEncodingException e) {
+        }
         params.put("_versionName", agentDeployment.getProjectVersion().getVersionLabel());
         params.put("_flowName", agentDeployment.getFlow().getName());
         params.put("_host", agent.getHost());
@@ -387,7 +408,7 @@ public class FlowRuntime {
     }
 
     public void notifyStepsTheFlowIsComplete() {
-        List<Throwable> allErrors = getAllErrors();
+        List<Throwable> allErrors = getAllErrors(); 
 
         Collection<StepRuntime> allSteps = stepRuntimes.values();
         for (StepRuntime stepRuntime : allSteps) {
@@ -400,9 +421,10 @@ public class FlowRuntime {
 
         executionTracker.afterFlow();
 
+        allErrors = getAllErrors();
         // Check getAllErrors here to make sure any new errors are trapped from
         // the flowCompleted methods
-        if (getAllErrors().size() > 0) {
+        if (allErrors.size() > 0) {
             flowParameters.put("_errorText", getErrorText(allErrors));
             sendNotifications(Notification.EventType.FLOW_ERROR);
         }
@@ -460,6 +482,7 @@ public class FlowRuntime {
             }
 
             if (!isTargetStep) {
+                stepRuntimes.get(stepId).getComponentContext().setStartStep(true);
                 starterSteps.add(stepRuntimes.get(stepId));
             }
         }
@@ -469,16 +492,7 @@ public class FlowRuntime {
     public void cancel() {
         if (stepRuntimes != null) {
             for (StepRuntime stepRuntime : stepRuntimes.values()) {
-                if (stepRuntime.isRunning()) {
-                    try {
-                        stepRuntime.inQueue.clear();
-                        stepRuntime.queue(new ShutdownMessage(
-                                stepRuntime.getComponentContext().getFlowStep().getId(), true));
-                    } catch (InterruptedException e) {
-                    }
-                } else {
-                    stepRuntime.cancel();
-                }
+                stepRuntime.cancel();
             }
         }
     }
@@ -514,7 +528,7 @@ public class FlowRuntime {
             } catch (MessagingException e) {
                 log.error("Failure while preparing notification", e);
             } finally {
-                mailSession.closeTransport(transport);
+                mailSession.closeTransport();
             }
         }
     }

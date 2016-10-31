@@ -37,7 +37,7 @@ import org.jumpmind.metl.core.model.Execution;
 import org.jumpmind.metl.core.model.ExecutionStatus;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FolderType;
-import org.jumpmind.metl.ui.common.AppConstants;
+import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
@@ -94,7 +94,8 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
     TabbedPanel tabs;
 
-    BeanItemContainer<Execution> executionContainer = new BeanItemContainer<Execution>(Execution.class);
+    BeanItemContainer<Execution> executionContainer = new BeanItemContainer<Execution>(
+            Execution.class);
 
     Table table;
 
@@ -175,8 +176,9 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
             public void textChange(TextChangeEvent event) {
                 executionContainer.removeAllContainerFilters();
                 if (!StringUtils.isBlank(event.getText())) {
-                    executionContainer.addContainerFilter(new MultiPropertyFilter(event.getText(),
-                            new String[] { "agentName", "hostName", "flowName", "status", "startTime", "endTime" }));
+                    executionContainer.addContainerFilter(
+                            new MultiPropertyFilter(event.getText(), new String[] { "agentName",
+                                    "hostName", "flowName", "status", "startTime", "endTime" }));
                 }
             }
         });
@@ -193,6 +195,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         table.setSelectable(true);
         table.setMultiSelect(false);
         table.setSizeFull();
+        table.setColumnCollapsingAllowed(true);
         table.addItemClickListener(new ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent event) {
@@ -201,15 +204,22 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
                 }
             }
         });
-        table.setVisibleColumns(new Object[] { "agentName", "deploymentName", "hostName", "status", "startTime", "endTime" });
-        table.setColumnHeaders(new String[] { "Agent", "Deployment", "Host", "Status", "Start", "End" });
+        table.setVisibleColumns(new Object[] { "agentName", "deploymentName", "hostName", "status",
+                "startTime", "endTime", "createBy", "parameters" });
+        table.setColumnHeaders(new String[] { "Agent", "Deployment", "Host", "Status", "Start",
+                "End", "Caller", "Parameters" });
+        table.setColumnWidth("agentName", 250);
+        table.setColumnWidth("deploymentName", 250);
+        table.setColumnWidth("hostName", 145);
+        table.setColumnWidth("status", 90);
+        table.setColumnWidth("startTime", 170);
+        table.setColumnWidth("endTime", 170);
+        table.setColumnWidth("createBy", 100);
+        table.setColumnWidth("parameters", 5000);
+        table.setColumnCollapsed("hostName", true);
         table.setSortContainerPropertyId("startTime");
         table.setSortAscending(false);
-        table.addValueChangeListener(new ValueChangeListener() {
-            public void valueChange(ValueChangeEvent event) {
-                viewButton.setEnabled(table.getValue() != null);
-            }
-        });
+        table.addValueChangeListener((event) -> viewButton.setEnabled(table.getValue() != null));
         mainTab.addComponent(table);
         mainTab.setExpandRatio(table, 1.0f);
 
@@ -218,14 +228,10 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
         HorizontalSplitPanel split = new HorizontalSplitPanel();
         split.setSizeFull();
-        split.setSplitPosition(AppConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS, false);
+        split.setSplitPosition(UIConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS, false);
 
         manageNavigator = new ManageNavigator(FolderType.AGENT, context);
-        manageNavigator.addValueChangeListener(new ValueChangeListener() {
-            public void valueChange(ValueChangeEvent event) {
-                refreshUI(getBackgroundData());
-            }
-        });
+        manageNavigator.addValueChangeListener((event) -> refreshUI(getBackgroundData()));
         split.setFirstComponent(manageNavigator);
 
         VerticalLayout container = new VerticalLayout();
@@ -269,11 +275,21 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     }
 
     public Object getBackgroundData() {
+        if (statusSelect.isReadOnly()) {
+            statusSelect.setReadOnly(false);
+            statusSelect.setValue(ANY);
+        }
         Object currentSelection = manageNavigator.getCurrentSelection();
         Object currentSelectionParent = manageNavigator.getCurrentSelectionParent();
         if (currentSelection != null) {
             Map<String, Object> params = new HashMap<String, Object>();
-            if (currentSelection instanceof Agent) {
+            if (currentSelection.equals(ManageNavigator.CURRENTLY_RUNNING)) {
+                statusSelect.setValue(ExecutionStatus.RUNNING.name());
+                statusSelect.setReadOnly(true);
+            } else if (currentSelection.equals(ManageNavigator.IN_ERROR)) {
+                statusSelect.setValue(ExecutionStatus.ERROR.name());
+                statusSelect.setReadOnly(true);
+            } else if (currentSelection instanceof Agent) {
                 params.put("agentId", ((Agent) currentSelection).getId());
             } else if (currentSelection instanceof AgentName) {
                 params.put("agentId", ((AgentName) currentSelection).getId());
@@ -291,7 +307,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
                 params.put("agentId", ((AgentName) currentSelectionParent).getId());
             }
 
-            if (!statusSelect.getValue().equals("<Any>")) {
+            if (!statusSelect.getValue().equals(ANY)) {
                 params.put("status", statusSelect.getValue());
             }
 
@@ -315,30 +331,40 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
                 table.setValue(currentSelection);
             }
             viewButton.setEnabled(table.getValue() != null);
+            tabs.mainTabToTop();
         }
     }
 
     protected boolean needsUpdated(List<Execution> data) {
         boolean needsUpdated = false;
-        List<Execution> all = data != null ? new ArrayList<Execution>(data) : new ArrayList<Execution>(0);
+        List<Execution> all = data != null ? new ArrayList<Execution>(data)
+                : new ArrayList<Execution>(0);
         @SuppressWarnings("unchecked")
         Collection<Execution> tableValues = (Collection<Execution>) table.getItemIds();
-        for (Execution execution : tableValues) {
-            if (!all.remove(execution)) {
-                needsUpdated = true;
-                break;
-            }
-        }
-        if (all.size() > 0) {
+
+        if (all.size() != tableValues.size()) {
             needsUpdated = true;
         }
+
+        if (!needsUpdated) {
+            int index = 0;
+            for (Execution execution : tableValues) {
+                if (all.size() <= index || !all.get(index).equals(execution)) {
+                    needsUpdated = true;
+                    break;
+                }
+                index++;
+            }
+        }
+
         return needsUpdated;
     }
 
     protected void viewLog(Object item) {
         Execution execution = (Execution) item;
         ExecutionRunPanel logPanel = new ExecutionRunPanel(execution.getId(), context, tabs, null);
-        tabs.addCloseableTab(execution.getId(), "Log " + execution.getFlowName(), Icons.LOG, logPanel);
+        tabs.addCloseableTab(execution.getId(), "Log " + execution.getFlowName(), Icons.LOG,
+                logPanel);
         logPanel.onBackgroundUIRefresh(logPanel.onBackgroundDataRefresh());
     }
 

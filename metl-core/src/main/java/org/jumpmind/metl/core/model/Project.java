@@ -23,7 +23,7 @@ package org.jumpmind.metl.core.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Project extends AbstractObject {
+public class Project extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
 
@@ -81,5 +81,10 @@ public class Project extends AbstractObject {
             }
         }
         return version;
+    }
+    
+    @Override
+    public boolean isSettingNameAllowed() {
+        return true;
     }
 }

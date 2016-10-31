@@ -77,12 +77,12 @@ public class TabbedPanel extends TabSheet {
         setCloseHandler((tabsheet, tabContent) -> close(tabContent));
 
         ContextMenu menu = new ContextMenu(this, true);
-        menu.addItem("Close", (selectedItem) -> close());
-        menu.addItem("Close Others", (selectedItem) -> closeOthers());
-        menu.addItem("Close To the Left", (selectedItem) -> closeToTheLeft());
-        menu.addItem("Close To the Right", (selectedItem) -> closeToTheRight());
+        menu.addItem("Close", selectedItem -> close());
+        menu.addItem("Close Others", selectedItem -> closeOthers());
+        menu.addItem("Close To the Left", selectedItem -> closeToTheLeft());
+        menu.addItem("Close To the Right", selectedItem -> closeToTheRight());
         menu.addSeparator();
-        menu.addItem("Close All", (selectedItem) -> closeAll());
+        menu.addItem("Close All", selectedItem -> closeAll());
     }
 
     protected void close(Component tabContent) {
@@ -117,17 +117,17 @@ public class TabbedPanel extends TabSheet {
         }
     }
 
-    protected void close() {
+    public void close() {
         close(getSelectedTab());
     }
 
-    protected void closeAll() {
+    public void closeAll() {
         for(Component next : getChildren()) {
             close(next);
         }
     }
 
-    protected void closeToTheLeft() {
+    public void closeToTheLeft() {
         Component selected = getSelectedTab();
         for(Component next : getChildren()) {
             if (!next.equals(selected)) {
@@ -138,7 +138,7 @@ public class TabbedPanel extends TabSheet {
         }
     }
 
-    protected void closeToTheRight() {
+    public void closeToTheRight() {
         Component selected = getSelectedTab();
         boolean closing = false;
         for(Component next : getChildren()) {
@@ -150,7 +150,7 @@ public class TabbedPanel extends TabSheet {
         }
     }
 
-    protected void closeOthers() {
+    public void closeOthers() {
         Component selected = getSelectedTab();
         for(Component next : getChildren()) {
             if (!next.equals(selected)) {
@@ -175,6 +175,10 @@ public class TabbedPanel extends TabSheet {
     public void setMainTab(String caption, Resource icon, Component component) {
         component.setSizeFull();
         this.mainTab = addTab(component, caption, icon, 0);
+    }
+    
+    public void mainTabToTop() {
+        this.setSelectedTab(mainTab);
     }
 
     public boolean closeTab(String id) {

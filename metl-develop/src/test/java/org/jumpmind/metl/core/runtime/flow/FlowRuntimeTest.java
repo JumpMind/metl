@@ -76,7 +76,7 @@ public class FlowRuntimeTest {
     	
     	Flow flow = createSimpleTwoStepNoOpFlow(folder);
     	AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);	
-    	FlowRuntime flowRuntime = new FlowRuntime("", deployment, agent, componentRuntimeFactory, componentDefinitionFactory, resourceFactory, 
+    	FlowRuntime flowRuntime = new FlowRuntime("test", "", deployment, agent, componentRuntimeFactory, componentDefinitionFactory, resourceFactory, 
     			 threadService, null, null, new HashMap<String, IResourceRuntime>(), new ArrayList<Notification>(), new HashMap<String, String>());
     	flowRuntime.start();
     	flowRuntime.waitForFlowCompletion();
@@ -88,7 +88,7 @@ public class FlowRuntimeTest {
     public void singleSrcToTwoTarget() throws Exception {
     	Flow flow = createSrcToTwoTargetFlow(folder);
     	AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);
-        FlowRuntime flowRuntime = new FlowRuntime("", deployment, agent, componentRuntimeFactory, componentDefinitionFactory, resourceFactory, 
+        FlowRuntime flowRuntime = new FlowRuntime("test","", deployment, agent, componentRuntimeFactory, componentDefinitionFactory, resourceFactory, 
                 threadService, null, null, new HashMap<String, IResourceRuntime>(), new ArrayList<Notification>(), new HashMap<String, String>());
     	flowRuntime.start();
     	flowRuntime.waitForFlowCompletion();
@@ -101,7 +101,7 @@ public class FlowRuntimeTest {
     public void twoSrcOneTarget() throws Exception {
         Flow flow = createTwoSrcToOneTargetFlow(folder);
         AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);
-        FlowRuntime flowRuntime = new FlowRuntime("", deployment, agent, componentRuntimeFactory, componentDefinitionFactory, resourceFactory, 
+        FlowRuntime flowRuntime = new FlowRuntime("test","", deployment, agent, componentRuntimeFactory, componentDefinitionFactory, resourceFactory, 
                 threadService, null, null, new HashMap<String, IResourceRuntime>(), new ArrayList<Notification>(), new HashMap<String, String>());
         flowRuntime.start();
         flowRuntime.waitForFlowCompletion();

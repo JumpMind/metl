@@ -22,8 +22,8 @@ public class HttpRequest extends AbstractHttpRequestResponse implements IHasSecu
     }
 
     @Override
-    public SecurityType getSecurityType() {
-        return SecurityType.valueOf(properties.get(SECURITY_SCHEME, SecurityType.NONE.name()));
+    public SecurityScheme getSecurityType() {
+        return SecurityScheme.valueOf(properties.get(SECURITY_SCHEME, SecurityScheme.NONE.name()));
     }
 
     @Override

@@ -35,15 +35,6 @@ public class ExecutionStepLog extends AbstractObject implements Comparable<Execu
     private String logText;
     
     private Date createTime = new Date();
-	
-    @Override
-    public void setName(String name) {
-    }
-
-    @Override
-    public String getName() {
-        return getId();
-    }
 
 	public String getExecutionStepId() {
 		return executionStepId;

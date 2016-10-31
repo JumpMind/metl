@@ -126,6 +126,8 @@ public class ScriptHelper {
     protected boolean unitOfWorkBoundaryReached;
 
     protected IComponentRuntime componentRuntime;
+    
+    private EntityNameLookup entityNameLookup;
 
     public ScriptHelper(IComponentRuntime componentRuntime) {
         this.componentRuntime = componentRuntime;
@@ -135,6 +137,18 @@ public class ScriptHelper {
         this.flow = context.getManipulatedFlow();
         this.flowStep = context.getFlowStep();
         this.scriptContext = new HashMap<String, Object>();
+    }
+    
+    /** 
+     * @return the name of flow step from which the input message came from
+     * 
+     */
+    protected String getInputMessageSourceName() {
+        if (inputMessage != null) {
+            return context.getManipulatedFlow().findFlowStepWithId(inputMessage.getHeader().getOriginatingStepId()).getName();
+        } else {
+            return null;
+        }
     }
     
     /**
@@ -351,7 +365,10 @@ public class ScriptHelper {
      *         {@link ModelEntity} with a specific name
      */
     protected boolean containsEntity(String entityName, EntityData data) {
-        return flowStep.getComponent().getEntityNames(data, true).contains(entityName);
+        if (entityNameLookup == null) {
+            entityNameLookup = new EntityNameLookup(context.getFlowStep().getComponent().getInputModel());
+        }
+        return entityNameLookup.getEntityNames(data).contains(entityName);
     }
 
     /**
@@ -490,6 +507,7 @@ public class ScriptHelper {
     }
 
     protected void onHandle() {
+        
     }
 
     protected void onError(Throwable myError) {

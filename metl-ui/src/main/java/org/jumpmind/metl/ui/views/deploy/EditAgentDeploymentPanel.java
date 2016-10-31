@@ -66,11 +66,11 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
     
     TextField startExpressionTextField;
     
-    AgentDeploymentChangeListener listener;
+    IAgentDeploymentChangeListener listener;
     
     TabbedPanel tabbedPanel;
         
-    public EditAgentDeploymentPanel(ApplicationContext context, AgentDeployment agentDeployment, AgentDeploymentChangeListener listener, 
+    public EditAgentDeploymentPanel(ApplicationContext context, AgentDeployment agentDeployment, IAgentDeploymentChangeListener listener, 
             TabbedPanel tabbedPanel) {
         this.context = context;
         this.agentDeployment = agentDeployment;

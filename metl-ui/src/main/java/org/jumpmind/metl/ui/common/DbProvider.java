@@ -71,7 +71,7 @@ public class DbProvider implements IDbProvider, Serializable {
         IAgentManager agentManager = context.getAgentManager();
         Collection<Agent> agents = agentManager.getAvailableAgents();
         for (Agent agent : agents) {
-            AgentRuntime runtime = agentManager.getAgentRuntime(agent);
+            AgentRuntime runtime = agentManager.getAgentRuntime(agent.getId());
             Collection<IResourceRuntime> resources = runtime.getDeployedResources();
             for (IResourceRuntime iResource : resources) {
                 if (iResource.getResource().getType().equals(Datasource.TYPE)) {
@@ -90,12 +90,28 @@ public class DbProvider implements IDbProvider, Serializable {
         });
 
         dbs.add(0, new MetlDb());
+        dbs.add(1, new ExecutionMetlDb());
 
     }
 
     @Override
     public List<IDb> getDatabases() {
         return dbs;
+    }
+    
+    class ExecutionMetlDb implements IDb, Serializable {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public IDatabasePlatform getPlatform() {
+            return context.getExecutionDatabasePlatform();
+        }
+
+        @Override
+        public String getName() {
+            return "Metl DB - Exec";
+        }
+
     }
     
     class MetlDb implements IDb, Serializable {
@@ -108,7 +124,7 @@ public class DbProvider implements IDbProvider, Serializable {
 
         @Override
         public String getName() {
-            return "Metl DB";
+            return "Metl DB - Config";
         }
 
     }

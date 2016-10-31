@@ -192,16 +192,11 @@ public class SftpDirectory implements IDirectory {
         }
     }    
 
-    private boolean fileExists(ChannelSftp sftp, String filePath) {
-        try {
-                SftpATTRS attributes = sftp.stat(filePath);
-                if (attributes != null) {
-                    return true;
-                } else {
-                    return false;
-                }
-        } catch (SftpException e) {
-            log.error(String.format("Error determing whether the remote file '%s' exsits. Error %s", filePath, e.getMessage()));
+    private boolean fileExists(ChannelSftp sftp, String filePath) throws SftpException {
+        SftpATTRS attributes = sftp.stat(filePath);
+        if (attributes != null) {
+            return true;
+        } else {
             return false;
         }
     }
@@ -587,9 +582,15 @@ public class SftpDirectory implements IDirectory {
 
         @Override
         public void close() throws IOException {
-            super.close();
             if (closeSession) {
-                SftpDirectory.this.close();
+                try {
+                    super.close();
+                } catch (Exception ex) {
+                    log.debug("", ex);
+                } finally {
+                    SftpDirectory.this.close();
+                }
+                super.close();
             }
         }
     }

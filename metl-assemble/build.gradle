@@ -10,7 +10,7 @@ buildscript {
     dependencies {
     	classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.3'
         classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.6'
-        classpath 'fi.jasoft.plugin:gradle-vaadin-plugin:0.10.7'
+        classpath 'fi.jasoft.plugin:gradle-vaadin-plugin:0.11.1'
         classpath 'com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2'
         classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'      
         classpath 'co.riiid:gradle-github-plugin:0.3.1'
@@ -20,12 +20,19 @@ buildscript {
 buildNumber = 'dev'.equals(buildNumber) ?  ('dev' + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())) : buildNumber
 version = version + "." + buildNumber
 
+ext {
+    majorMinorVersion = version.substring(0, version.indexOf(".", version.indexOf(".")+ 1))
+}    
+
 apply plugin: 'co.riiid.gradle'
 
 repositories {
     mavenCentral()
 }
 
+subprojects {
+    task allDeps(type: DependencyReportTask) {}
+}
 
 configurations {
     sshAntTask
@@ -67,5 +74,14 @@ task publishMetl {
             verbose: 'true',
             localFile: '../metl-ui/build/libs/metl.war',
             remoteTofile: "${targetScpSite}/metl-${version}.war")
+            
+        println "Publishing metl doc documentation to jumpmind.com"
+        ant.scp(
+            trust: 'true',
+            verbose: 'true',
+            localFile: '../metl-ui/src/main/webapp/doc/html/user-guide.html',
+            remoteTofile: "$jumpmindUser:$jumpmindPassword@jumpmind.com:~/www/downloads/met/doc/user-guide-${majorMinorVersion}.html")      
     }
+    
+   
 }

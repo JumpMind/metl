@@ -23,7 +23,7 @@ package org.jumpmind.metl.core.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ModelEntity extends AbstractObject {
+public class ModelEntity extends AbstractNamedObject implements IAuditable {
 
     private static final long serialVersionUID = 1L;
 
@@ -54,6 +54,7 @@ public class ModelEntity extends AbstractObject {
     }
 
     public void addModelAttribute(ModelAttribute modelAttribute) {
+        modelAttribute.setAttributeOrder(modelAttributes.size());
         this.modelAttributes.add(modelAttribute);
     }
 

@@ -21,10 +21,10 @@
 package org.jumpmind.metl.ui.common;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.jumpmind.db.platform.IDatabasePlatform;
+import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.Group;
 import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.model.ProjectVersion;
@@ -37,6 +37,8 @@ import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
+import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
+import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.ui.init.BackgroundRefresherService;
 import org.jumpmind.metl.ui.views.IComponentDefinitionPlusUIFactory;
 import org.jumpmind.vaadin.ui.common.UiComponent;
@@ -83,14 +85,23 @@ public class ApplicationContext implements Serializable {
     IDatabasePlatform configDatabasePlatform;
     
     @Autowired
+    IDatabasePlatform executionDatabasePlatform;
+    
+    @Autowired
+    IHttpRequestMappingRegistry httpRequestMappingRegistry;
+    
+    @Autowired
+    ISecurityService securityService;
+    
+    @Autowired
     String configDir;
 
     User user = new User();
     
     boolean showRunDiagram = true;
     
-    List<ProjectVersion> openProjects = new ArrayList<ProjectVersion>();
-
+    FlowName currentFlow;
+    
     public IConfigurationService getConfigurationService() {
         return configurationService;
     }
@@ -134,13 +145,13 @@ public class ApplicationContext implements Serializable {
     public User getUser() {
         return user;
     }
-    
-    public List<ProjectVersion> getOpenProjects() {
-        return openProjects;
-    }
 
     public IDatabasePlatform getConfigDatabasePlatform() {
         return configDatabasePlatform;
+    }
+    
+    public IDatabasePlatform getExecutionDatabasePlatform() {
+        return executionDatabasePlatform;
     }
         
     public IComponentDefinitionPlusUIFactory getUiFactory() {
@@ -151,9 +162,25 @@ public class ApplicationContext implements Serializable {
         return pluginManager;
     }
     
+    public IHttpRequestMappingRegistry getHttpRequestMappingRegistry() {
+        return httpRequestMappingRegistry;
+    }
+    
+    public ISecurityService getSecurityService() {
+        return securityService;
+    }
+    
     public void setShowRunDiagram(boolean showRunDiagram) {
         this.showRunDiagram = showRunDiagram;
     }
+    
+    public void setCurrentFlow(FlowName currentFlow) {
+        this.currentFlow = currentFlow;
+    }
+    
+    public FlowName getCurrentFlow() {
+        return currentFlow;
+    }    
     
     public boolean isReadOnly(ProjectVersion projectVersion, Privilege privilege) {
         boolean readOnly = projectVersion.isReadOnly();

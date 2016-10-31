@@ -49,7 +49,6 @@ import org.jumpmind.db.sql.SqlPersistenceManager;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
-import org.jumpmind.metl.core.persist.ConfigurationSqlService;
 import org.jumpmind.metl.core.persist.ExecutionSqlService;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
@@ -61,13 +60,18 @@ import org.jumpmind.metl.core.runtime.AgentManager;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.component.ComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
+import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMappingRegistry;
 import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
+import org.jumpmind.metl.core.security.ISecurityService;
+import org.jumpmind.metl.core.security.SecurityConstants;
+import org.jumpmind.metl.core.security.SecurityService;
+import org.jumpmind.metl.core.util.AppConstants;
 import org.jumpmind.metl.core.util.EnvConstants;
 import org.jumpmind.metl.core.util.LogUtils;
-import org.jumpmind.metl.ui.common.AppConstants;
+import org.jumpmind.metl.ui.persist.AuditableConfigurationService;
 import org.jumpmind.metl.ui.views.ComponentXmlDefinitionPlusUIFactory;
 import org.jumpmind.metl.ui.views.IComponentDefinitionPlusUIFactory;
 import org.jumpmind.persist.IPersistenceManager;
@@ -106,7 +110,9 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Autowired
     Environment env;
 
-    IDatabasePlatform databasePlatform;
+    IDatabasePlatform configDatabasePlatform;
+    
+    IDatabasePlatform executionDatabasePlatform;
 
     IConfigurationService configurationService;
 
@@ -114,34 +120,48 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 
     IComponentRuntimeFactory componentRuntimeFactory;
 
+    IComponentDefinitionFactory componentDefinitionFactory;
+
     IResourceFactory resourceFactory;
 
     IPersistenceManager persistenceManager;
+    
+    IPersistenceManager executionPersistenceManager;
 
     IExecutionService executionService;
 
-    IHttpRequestMappingRegistry httpRequestMappingRegistry;
+    ISecurityService securityService;
 
+    IHttpRequestMappingRegistry httpRequestMappingRegistry;
+    
     IPluginManager pluginManager;
 
     IComponentDefinitionPlusUIFactory componentDefinitionPlusUIFactory;
 
+    DataSource configDataSource;
+    
+    DataSource executionDataSource;
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
+        registry.addResourceHandler("swagger-ui.html")
+                .addResourceLocations("classpath:/META-INF/resources/");
 
-        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
+        registry.addResourceHandler("/webjars/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
 
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
-        configurer.defaultContentType(MediaType.APPLICATION_JSON).favorParameter(true).mediaType("xml", MediaType.APPLICATION_XML);
+        configurer.defaultContentType(MediaType.APPLICATION_JSON).favorParameter(true)
+                .mediaType("xml", MediaType.APPLICATION_XML);
     }
 
     @Bean
     public Docket swaggerSpringMvcPlugin() {
-        return new Docket(DocumentationType.SWAGGER_2).pathMapping("/api").produces(contentTypes()).consumes(contentTypes())
-                .apiInfo(new ApiInfo("Metl API", "This is the REST API for Metl", null, null, null, null, null));
+        return new Docket(DocumentationType.SWAGGER_2).pathMapping("/api").produces(contentTypes())
+                .consumes(contentTypes()).apiInfo(new ApiInfo("Metl API",
+                        "This is the REST API for Metl", null, null, null, null, null));
     }
 
     protected Set<String> contentTypes() {
@@ -154,40 +174,96 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Bean
     @Scope(value = "singleton")
     DataSource configDataSource() {
+        if (configDataSource == null) {
         TypedProperties properties = new TypedProperties();
         properties.put(DB_POOL_DRIVER, env.getProperty(DB_POOL_DRIVER, Driver.class.getName()));
         properties.put(DB_POOL_URL, env.getProperty(DB_POOL_URL, "jdbc:h2:mem:config"));
         properties.put(DB_POOL_USER, env.getProperty(DB_POOL_USER));
         properties.put(DB_POOL_PASSWORD, env.getProperty(DB_POOL_PASSWORD));
-        properties.put(DB_POOL_INITIAL_SIZE, env.getProperty(DB_POOL_INITIAL_SIZE, "20"));
-        properties.put(DB_POOL_MAX_ACTIVE, env.getProperty(DB_POOL_MAX_ACTIVE, "20"));
-        properties.put(DB_POOL_MAX_IDLE, env.getProperty(DB_POOL_MAX_IDLE, "20"));
-        properties.put(DB_POOL_MIN_IDLE, env.getProperty(DB_POOL_MIN_IDLE, "20"));
+        properties.put(DB_POOL_INITIAL_SIZE, env.getProperty(DB_POOL_INITIAL_SIZE, "100"));
+        properties.put(DB_POOL_MAX_ACTIVE, env.getProperty(DB_POOL_MAX_ACTIVE, "100"));
+        properties.put(DB_POOL_MAX_IDLE, env.getProperty(DB_POOL_MAX_IDLE, "100"));
+        properties.put(DB_POOL_MIN_IDLE, env.getProperty(DB_POOL_MIN_IDLE, "100"));
         properties.put(DB_POOL_MAX_WAIT, env.getProperty(DB_POOL_MAX_WAIT, "30000"));
-        properties.put(DB_POOL_MIN_EVICTABLE_IDLE_TIME_MILLIS, env.getProperty(DB_POOL_MIN_EVICTABLE_IDLE_TIME_MILLIS, "120000"));
+        properties.put(DB_POOL_MIN_EVICTABLE_IDLE_TIME_MILLIS,
+                env.getProperty(DB_POOL_MIN_EVICTABLE_IDLE_TIME_MILLIS, "120000"));
         properties.put(DB_POOL_VALIDATION_QUERY, env.getProperty(DB_POOL_VALIDATION_QUERY));
         properties.put(DB_POOL_TEST_ON_BORROW, env.getProperty(DB_POOL_TEST_ON_BORROW, "false"));
         properties.put(DB_POOL_TEST_ON_RETURN, env.getProperty(DB_POOL_TEST_ON_RETURN, "false"));
         properties.put(DB_POOL_TEST_WHILE_IDLE, env.getProperty(DB_POOL_TEST_WHILE_IDLE, "true"));
         properties.put(DB_POOL_INIT_SQL, env.getProperty(DB_POOL_INIT_SQL));
-        properties.put(DB_POOL_CONNECTION_PROPERTIES, env.getProperty(DB_POOL_CONNECTION_PROPERTIES));
+        properties.put(DB_POOL_CONNECTION_PROPERTIES,
+                env.getProperty(DB_POOL_CONNECTION_PROPERTIES));
         log.info(
                 "About to initialize the configuration datasource using the following driver:"
                         + " '{}' and the following url: '{}' and the following user: '{}'",
-                new Object[] { properties.get(DB_POOL_DRIVER), properties.get(DB_POOL_URL), properties.get(DB_POOL_USER) });
+                new Object[] { properties.get(DB_POOL_DRIVER), properties.get(DB_POOL_URL),
+                        properties.get(DB_POOL_USER) });
 
-        DataSource configDataSource = BasicDataSourceFactory.create(properties, SecurityServiceFactory.create());
+        configDataSource = BasicDataSourceFactory.create(properties,
+                SecurityServiceFactory.create());
+        }
         return configDataSource;
+    }
+    
+    @Bean
+    @Scope(value = "singleton")
+    DataSource executionDataSource() {
+        if (executionDataSource == null) {
+            TypedProperties properties = new TypedProperties();
+            final String EXECUTION = "execution.";
+            properties.put(DB_POOL_DRIVER, env.getProperty(EXECUTION + DB_POOL_DRIVER, env.getProperty(DB_POOL_DRIVER, Driver.class.getName())));
+            properties.put(DB_POOL_URL, env.getProperty(EXECUTION + DB_POOL_URL, env.getProperty(DB_POOL_URL,"jdbc:h2:mem:exec")));
+            properties.put(DB_POOL_USER, env.getProperty(EXECUTION + DB_POOL_USER, env.getProperty(DB_POOL_USER)));
+            properties.put(DB_POOL_PASSWORD, env.getProperty(EXECUTION + DB_POOL_PASSWORD, env.getProperty(DB_POOL_PASSWORD)));
+            properties.put(DB_POOL_INITIAL_SIZE, env.getProperty(DB_POOL_INITIAL_SIZE, "100"));
+            properties.put(DB_POOL_MAX_ACTIVE, env.getProperty(DB_POOL_MAX_ACTIVE, "100"));
+            properties.put(DB_POOL_MAX_IDLE, env.getProperty(DB_POOL_MAX_IDLE, "100"));
+            properties.put(DB_POOL_MIN_IDLE, env.getProperty(DB_POOL_MIN_IDLE, "100"));
+            properties.put(DB_POOL_MAX_WAIT, env.getProperty(DB_POOL_MAX_WAIT, "30000"));
+            properties.put(DB_POOL_MIN_EVICTABLE_IDLE_TIME_MILLIS,
+                    env.getProperty(DB_POOL_MIN_EVICTABLE_IDLE_TIME_MILLIS, "120000"));
+            properties.put(DB_POOL_VALIDATION_QUERY, env.getProperty(DB_POOL_VALIDATION_QUERY));
+            properties.put(DB_POOL_TEST_ON_BORROW,
+                    env.getProperty(DB_POOL_TEST_ON_BORROW, "false"));
+            properties.put(DB_POOL_TEST_ON_RETURN,
+                    env.getProperty(DB_POOL_TEST_ON_RETURN, "false"));
+            properties.put(DB_POOL_TEST_WHILE_IDLE,
+                    env.getProperty(DB_POOL_TEST_WHILE_IDLE, "true"));
+            properties.put(EXECUTION + DB_POOL_INIT_SQL, env.getProperty(DB_POOL_INIT_SQL));
+            properties.put(DB_POOL_CONNECTION_PROPERTIES,
+                    env.getProperty(DB_POOL_CONNECTION_PROPERTIES));
+            log.info(
+                    "About to initialize the configuration datasource using the following driver:"
+                            + " '{}' and the following url: '{}' and the following user: '{}'",
+                    new Object[] { properties.get(DB_POOL_DRIVER), properties.get(DB_POOL_URL),
+                            properties.get(DB_POOL_USER) });
+
+            executionDataSource = BasicDataSourceFactory.create(properties,
+                    SecurityServiceFactory.create());
+
+        }
+        return executionDataSource;
     }
 
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IDatabasePlatform configDatabasePlatform() {
-        if (databasePlatform == null) {
-            databasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(configDataSource(), new SqlTemplateSettings(), true,
-                    false);
+        if (configDatabasePlatform == null) {
+            configDatabasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(
+                    configDataSource(), new SqlTemplateSettings(), true, false);
         }
-        return databasePlatform;
+        return configDatabasePlatform;
+    }
+    
+    @Bean
+    @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
+    public IDatabasePlatform executionDatabasePlatform() {
+        if (executionDatabasePlatform == null) {
+            executionDatabasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(
+                    executionDataSource(), new SqlTemplateSettings(), true, false);
+        }
+        return executionDatabasePlatform;
     }
 
     @Bean
@@ -218,7 +294,15 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Bean
     @Scope(value = "singleton")
     public ConfigDatabaseUpgrader configDatabaseUpgrader() {
-        return new ConfigDatabaseUpgrader("/schema.xml", configDatabasePlatform(), true, tablePrefix());
+        return new ConfigDatabaseUpgrader("/schema.xml", configDatabasePlatform(), true,
+                tablePrefix());
+    }
+    
+    @Bean
+    @Scope(value = "singleton")
+    public ConfigDatabaseUpgrader executionDatabaseUpgrader() {
+        return new ConfigDatabaseUpgrader("/schema-exec.xml", executionDatabasePlatform(), true,
+                tablePrefix());
     }
 
     @Bean
@@ -229,12 +313,23 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         }
         return persistenceManager;
     }
+    
+    @Bean
+    @Scope(value = "singleton")
+    public IPersistenceManager executionPersistenceManager() {
+        if (executionPersistenceManager == null) {
+            executionPersistenceManager = new SqlPersistenceManager(executionDatabasePlatform());
+        }
+        return executionPersistenceManager;
+    }
+    
 
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IConfigurationService configurationService() {
         if (configurationService == null) {
-            configurationService = new ConfigurationSqlService(configDatabasePlatform(), persistenceManager(), tablePrefix());
+            configurationService = new AuditableConfigurationService(securityService(), componentDefinitionPlusUIFactory(),
+                    configDatabasePlatform(), persistenceManager(), tablePrefix());
         }
         return configurationService;
     }
@@ -243,8 +338,8 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IImportExportService importExportService() {
         if (importExportService == null) {
-            importExportService = new ImportExportService(configDatabasePlatform(), persistenceManager(), tablePrefix(),
-                    configurationService);
+            importExportService = new ImportExportService(configDatabasePlatform(),
+                    persistenceManager(), tablePrefix(), configurationService(), securityService());
         }
         return importExportService;
     }
@@ -253,7 +348,8 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IExecutionService executionService() {
         if (executionService == null) {
-            executionService = new ExecutionSqlService(configDatabasePlatform(), persistenceManager(), tablePrefix(), env);
+            executionService = new ExecutionSqlService(executionDatabasePlatform(),
+                    executionPersistenceManager(), tablePrefix(), env);
         }
         return executionService;
     }
@@ -295,11 +391,13 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         return resourceFactory;
     }
 
+
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IAgentManager agentManager() {
-        IAgentManager agentManager = new AgentManager(configurationService(), executionService(), componentRuntimeFactory(),
-                componentDefinitionPlusUIFactory(), resourceFactory(), httpRequestMappingRegistry());
+        IAgentManager agentManager = new AgentManager(configurationService(), executionService(),
+                componentRuntimeFactory(), componentDefinitionPlusUIFactory(), resourceFactory(),
+                httpRequestMappingRegistry());
         return agentManager;
     }
 
@@ -310,6 +408,25 @@ public class AppConfig extends WebMvcConfigurerAdapter {
             httpRequestMappingRegistry = new HttpRequestMappingRegistry();
         }
         return httpRequestMappingRegistry;
+    }
+
+    @Bean
+    @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
+    public ISecurityService securityService() {
+        if (securityService == null) {
+            try {
+                securityService = (ISecurityService) Class
+                        .forName(System.getProperty(SecurityConstants.CLASS_NAME_SECURITY_SERVICE,
+                                SecurityService.class.getName()))
+                        .newInstance();
+                securityService.setConfigDir(configDir());
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return securityService;
     }
 
     @Bean

@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -121,7 +122,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         if (PER_ENTITY.equals(runWhen) && inputMessage instanceof ContentMessage<?>) {
             inboundPayload = ((Collection<?>) ((ContentMessage<?>) inputMessage).getPayload()).iterator();
             inboundRecordCount = ((Collection<?>) ((ContentMessage<?>) inputMessage).getPayload()).size();
-        } else if (PER_MESSAGE.equals(runWhen) && !(inputMessage instanceof ControlMessage)) {
+        } else if (PER_MESSAGE.equals(runWhen) && (!(inputMessage instanceof ControlMessage) || context.isStartStep())) {
             inboundPayload = null;
             inboundRecordCount = 1;
         } else if (PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage) {
@@ -162,6 +163,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             }
         }
         sendLeftOverRows(callback, outboundPayload);
+        
     }
 
     private void sendLeftOverRows(final ISendMessageCallback callback, ArrayList<EntityData> outboundPayload) {
@@ -295,20 +297,26 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         }
     }
 
-    public Map<Integer, String> getSqlColumnEntityHints(String sql) {
+    public static Map<Integer, String> getSqlColumnEntityHints(String sql) {
         Map<Integer, String> columnEntityHints = new HashMap<Integer, String>();
         String columns = sql.substring(sql.toLowerCase().indexOf("select") + 6, getFromIndex(sql));
         int commentIdx = 0;
+        Set<String> used = new HashSet<>();
         while (columns.indexOf("/*", commentIdx) != -1) {
             commentIdx = columns.indexOf("/*", commentIdx) + 2;
             int columnIdx = countColumnSeparatingCommas(columns.substring(0, commentIdx)) + 1;
             String entity = StringUtils.trimWhitespace(columns.substring(commentIdx, columns.indexOf("*/", commentIdx)));
-            columnEntityHints.put(columnIdx, entity);
+            if (!used.contains(entity)) {
+                columnEntityHints.put(columnIdx, entity);
+                used.add(entity);
+            } else {
+                throw new MisconfiguredException("The same hint was used twice.  Only one column can map to an entity attribute.  The hint that was repeated was for " + entity);
+            }
         }
         return columnEntityHints;
     }
 
-    protected int countColumnSeparatingCommas(String value) {
+    protected static int countColumnSeparatingCommas(String value) {
         int count = 0;
 
         int p = 0;
@@ -324,7 +332,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         return count;
     }
 
-    protected int getFromIndex(String sql) {
+    protected static int getFromIndex(String sql) {
         sql = sql.toLowerCase();
         int idx = -1;
 

@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentName;
@@ -58,7 +59,6 @@ import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DefaultFieldFactory;
 import com.vaadin.ui.Field;
@@ -70,7 +70,6 @@ import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.CellStyleGenerator;
 import com.vaadin.ui.Table.ColumnHeaderMode;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.Tree.CollapseEvent;
 import com.vaadin.ui.Tree.CollapseListener;
 import com.vaadin.ui.Tree.ExpandEvent;
@@ -87,6 +86,10 @@ public class DeployNavigator extends VerticalLayout {
     MenuItem newFolder;
 
     MenuItem delete;
+    
+    MenuItem rename;
+    
+    MenuItem open;
 
     MenuItem newAgent;
 
@@ -100,12 +103,7 @@ public class DeployNavigator extends VerticalLayout {
 
     TabbedPanel tabbedPanel;
 
-    MenuItem search;
-
-    HorizontalLayout searchBarLayout;
-
     public DeployNavigator(ApplicationContext context, TabbedPanel tabbedPanel) {
-
         this.context = context;
         this.tabbedPanel = tabbedPanel;
         setCaption("Navigator");
@@ -115,13 +113,11 @@ public class DeployNavigator extends VerticalLayout {
 
         addComponent(buildMenuBar());
 
-        searchBarLayout = buildSearchBar();
-        addComponent(searchBarLayout);
-
         treeTable = buildTreeTable();
         treeTable.addStyleName("noselect");
         addComponent(treeTable);
         setExpandRatio(treeTable, 1);
+        selectionChanged(null);
 
     }
 
@@ -175,19 +171,6 @@ public class DeployNavigator extends VerticalLayout {
         treeTable.focus();
     }
 
-    protected HorizontalLayout buildSearchBar() {
-        HorizontalLayout layout = new HorizontalLayout();
-        layout.setMargin(new MarginInfo(false, true, true, true));
-        layout.setWidth(100, Unit.PERCENTAGE);
-        layout.setVisible(false);
-        TextField search = new TextField();
-        search.setIcon(Icons.SEARCH);
-        search.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
-        search.setWidth(100, Unit.PERCENTAGE);
-        layout.addComponent(search);
-        return layout;
-    }
-
     protected HorizontalLayout buildMenuBar() {
         HorizontalLayout layout = new HorizontalLayout();
         layout.setWidth(100, Unit.PERCENTAGE);
@@ -216,7 +199,7 @@ public class DeployNavigator extends VerticalLayout {
 
         MenuItem editMenu = leftMenuBar.addItem("Edit", null);
 
-        editMenu.addItem("Open", new Command() {
+        open = editMenu.addItem("Open", new Command() {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
@@ -224,7 +207,7 @@ public class DeployNavigator extends VerticalLayout {
             }
         });
 
-        editMenu.addItem("Rename", new Command() {
+        rename = editMenu.addItem("Rename", new Command() {
             @Override
             public void menuSelected(MenuItem selectedItem) {
                 startEditingItem((AbstractObject) treeTable.getValue());
@@ -241,16 +224,6 @@ public class DeployNavigator extends VerticalLayout {
 
         MenuBar rightMenuBar = new MenuBar();
         rightMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
-
-        search = rightMenuBar.addItem("", Icons.SEARCH, new Command() {
-
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                search.setChecked(!search.isChecked());
-                searchBarLayout.setVisible(search.isChecked());
-            }
-        });
-        search.setVisible(false);
 
         layout.addComponent(leftMenuBar);
         layout.addComponent(rightMenuBar);
@@ -272,7 +245,7 @@ public class DeployNavigator extends VerticalLayout {
         table.setImmediate(true);
         table.setSelectable(true);
         table.setEditable(true);
-        table.setContainerDataSource(new BeanItemContainer<AbstractObject>(AbstractObject.class));
+        table.setContainerDataSource(new BeanItemContainer<AbstractNamedObject>(AbstractNamedObject.class));
         table.setTableFieldFactory(new DefaultFieldFactory() {
             @Override
             public Field<?> createField(Container container, Object itemId, Object propertyId,
@@ -442,7 +415,7 @@ public class DeployNavigator extends VerticalLayout {
     protected void openItem(Object item) {
         if (item instanceof AgentName) {
             AgentName agentName = (AgentName) item;
-            Agent agent = context.getConfigurationService().findAgent(agentName.getId());
+            Agent agent = context.getConfigurationService().findAgent(agentName.getId(), false);
             tabbedPanel.addCloseableTab(agent.getId(), agent.getName(), Icons.AGENT,
                     new EditAgentPanel(context, tabbedPanel, agent));
         }
@@ -474,6 +447,8 @@ public class DeployNavigator extends VerticalLayout {
         newAgent.setEnabled(selectedFolder == null || !selectedFolder.getName().startsWith("<"));
 
         delete.setEnabled(isDeleteButtonEnabled(selected));
+        rename.setEnabled(isDeleteButtonEnabled(selected));
+        open.setEnabled(selected != null && selectedFolder == null);
     }
 
     protected boolean isDeleteButtonEnabled(Object selected) {
@@ -582,10 +557,16 @@ public class DeployNavigator extends VerticalLayout {
     protected void deleteTreeItems(AbstractObject obj) {
         if (obj instanceof AgentName) {
             AgentName agentName = (AgentName) obj;
-            Agent agent = context.getConfigurationService().findAgent(agentName.getId());
-            context.getConfigurationService().delete(agent);
-            context.getAgentManager().refresh(agent);
-            refresh();
+            ConfirmDialog.show("Delete Agent?",
+                    "Are you sure you want to delete the '" + agentName.getName() + "' agent?",
+                    () -> {
+                        Agent agent = context.getConfigurationService().findAgent(agentName.getId(),
+                                false);
+                        context.getConfigurationService().delete(agent);
+                        context.getAgentManager().refresh(agent);
+                        refresh();
+                        return true;
+                    });
         }
     }
 

@@ -39,17 +39,24 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
+import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
+import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.symmetric.io.data.DbExport;
 import org.jumpmind.symmetric.io.data.DbExport.Format;
 
 public class ConfigurationSqlService extends AbstractConfigurationService {
 
-    IDatabasePlatform databasePlatform;
+    protected IDatabasePlatform databasePlatform;
 
-    public ConfigurationSqlService(IDatabasePlatform databasePlatform, IPersistenceManager persistenceManager, String tablePrefix) {
-        super(persistenceManager, tablePrefix);
+    public ConfigurationSqlService(ISecurityService securityService, IComponentDefinitionFactory componentDefinitionFactory, IDatabasePlatform databasePlatform,
+            IPersistenceManager persistenceManager, String tablePrefix) {
+        super(securityService, componentDefinitionFactory, persistenceManager, tablePrefix);
         this.databasePlatform = databasePlatform;
+    }
+    
+    @Override
+    public void doInBackground() {
     }
 
     @Override
@@ -99,17 +106,34 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
 
     public List<AgentDeploymentSummary> findAgentDeploymentSummary(String agentId) {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
-        return template.query(
-                String.format("select p.name as project_name, v.version_label, '%2$s' as type, "
-                        + "d.id, d.name, d.start_type, d.log_level, d.start_expression, d.status " + "from %1$s_agent_deployment d "
-                        + "inner join %1$s_flow f on f.id = d.flow_id " + "inner join %1$s_project_version v on v.id = f.project_version_id "
-                        + "inner join %1$s_project p on p.id = v.project_id " + "where d.agent_id = ? " + "union "
-                        + "select distinct p.name, v.version_label, '%3$s', " + "r.id, r.name, null, null, null, null "
-                        + "from %1$s_agent_deployment d " + "inner join %1$s_flow f on f.id = d.flow_id "
-                        + "inner join %1$s_project_version v on v.id = f.project_version_id "
-                        + "inner join %1$s_project p on p.id = v.project_id " + "inner join %1$s_resource r on r.project_version_id = v.id "
-                        + "where d.agent_id = ? order by 5 ", tablePrefix, AgentDeploymentSummary.TYPE_FLOW,
-                        AgentDeploymentSummary.TYPE_RESOURCE),
+        return template.query(String.format(
+                "select p.name as project_name, v.version_label, '%2$s' as type, " +
+                "d.id, d.name, d.start_type, d.log_level, d.start_expression, d.status " +
+                "from %1$s_agent_deployment d " +
+                "inner join %1$s_flow f on f.id = d.flow_id " +
+                "inner join %1$s_project_version v on v.id = f.project_version_id " +
+                "inner join %1$s_project p on p.id = v.project_id " +
+                "where d.agent_id = ? " +
+                "union " +
+                "select distinct p.name, v.version_label, '%3$s', " +
+                "r.id, r.name, null, null, null, null " +
+                "from %1$s_agent_deployment d " +
+                "inner join %1$s_flow f on f.id = d.flow_id " +
+                "inner join %1$s_project_version v on v.id = f.project_version_id " +
+                "inner join %1$s_project p on p.id = v.project_id " +
+                "inner join %1$s_resource r on r.project_version_id = v.id " +
+                "where d.agent_id = ? and r.deleted=0 " +
+                "union " +
+                "select distinct p.name, v.version_label, '%3$s', " +
+                "r.id, r.name, null, null, null, null " +
+                "from %1$s_agent_deployment d " +
+                "inner join %1$s_flow f on f.id = d.flow_id " +
+                "inner join %1$s_project_version_dependency d on d.project_version_id = f.project_version_id " +
+                "inner join %1$s_project_version v on v.id = d.target_project_version_id " +
+                "inner join %1$s_project p on p.id = v.project_id " +
+                "inner join %1$s_resource r on r.project_version_id = v.id " +
+                "where d.agent_id = ? and r.deleted=0 order by 5 "    ,
+                tablePrefix, AgentDeploymentSummary.TYPE_FLOW, AgentDeploymentSummary.TYPE_RESOURCE), 
                 new ISqlRowMapper<AgentDeploymentSummary>() {
                     public AgentDeploymentSummary mapRow(Row row) {
                         AgentDeploymentSummary summary = new AgentDeploymentSummary();
@@ -123,7 +147,7 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
                         summary.setStartExpression(row.getString("start_expression"));
                         return summary;
                     }
-                }, agentId, agentId);
+                }, agentId, agentId, agentId);
     }
 
     @Override

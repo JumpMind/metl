@@ -47,6 +47,8 @@ public class Gate extends AbstractComponentRuntime {
 
     List<Message> queuedWhileWaitingForGateController = new ArrayList<Message>();
     
+    ControlMessage lastControlMessageReceived;
+    
     @Override
     public void start() {
     	gateOpened = false;
@@ -63,9 +65,10 @@ public class Gate extends AbstractComponentRuntime {
     public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (gateControlSourceStepId.equals(inputMessage.getHeader().getOriginatingStepId())) {
 
-            gateOpened = inputMessage instanceof ControlMessage;
+            gateOpened = !gateOpened && inputMessage instanceof ControlMessage;
 
             if (gateOpened) {
+                info("The gate was just opened.  Releasing %d queue'd messages and every message from sources after this", queuedWhileWaitingForGateController.size());
                 Iterator<Message> messages = queuedWhileWaitingForGateController.iterator();
                 while (messages.hasNext()) {
                     Message message = messages.next();
@@ -77,7 +80,7 @@ public class Gate extends AbstractComponentRuntime {
         	queuedWhileWaitingForGateController.add(inputMessage);
         } else if (gateOpened && !(inputMessage instanceof ControlMessage)) {
         	getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-        	callback.forward(inputMessage);
+        	callback.forward(inputMessage);        	
         } else if (unitOfWorkBoundaryReached && !gateOpened && forceGateOpen) {
             Iterator<Message> messages = queuedWhileWaitingForGateController.iterator();
             while (messages.hasNext()) {
@@ -85,6 +88,8 @@ public class Gate extends AbstractComponentRuntime {
                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                 callback.forward(message);
             }
+        } else if (unitOfWorkBoundaryReached && (inputMessage instanceof ControlMessage)) {
+            callback.forward(inputMessage);
         }
     }
     

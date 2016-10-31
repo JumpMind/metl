@@ -49,7 +49,7 @@ public class FixedLengthFormatterTest {
         assertEquals(1, msgTarget.getPayloadList().size());
         ArrayList<EntityData> payload = msgTarget.getPayloadList().get(0);
         assertEquals(1,payload.size());
-        assertEquals("tt1c2     tt1c1     tt2c2     tt2c3     tt1c3     tt2c1     ", payload.get(0));
+        assertEquals("tt1c2     tt1c1      tt2c2      tt2c3     tt1c3    tt2c1    ", payload.get(0));
     }
 
     private static Message createInboundMessage() {

@@ -20,8 +20,8 @@
  */
 package org.jumpmind.metl.core.runtime;
 
-import java.time.Duration;
-import java.time.Instant;
+import static org.apache.commons.lang.StringUtils.abbreviate;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +41,7 @@ import org.jumpmind.util.AppUtils;
 
 public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
 
-    final long TIME_BETWEEN_MESSAGE_UPDATES_IN_MS = 500;
+    final long TIME_BETWEEN_MESSAGE_UPDATES_IN_MS = 2500;
 
     AsyncRecorder recorder;
 
@@ -51,15 +51,19 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     
     Map<ExecutionStep, Date> lastStatUpdate = new HashMap<ExecutionStep, Date>();
     
-    Map<ExecutionStep, Instant> startHandle = new HashMap<ExecutionStep, Instant>();
-
     Date startTime;
+    
+    String userId;
+    
+    String parameters;
 
-    public ExecutionTrackerRecorder(Agent agent, AgentDeployment agentDeployment,  ExecutorService threadService, IExecutionService executionService) {
+    public ExecutionTrackerRecorder(Agent agent, AgentDeployment agentDeployment,  ExecutorService threadService, IExecutionService executionService, String userId, String parameters) {
         super(agentDeployment);
         this.agent = agent;
+        this.userId = userId;
+        this.parameters = parameters;
         this.recorder = new AsyncRecorder(executionService);
-        threadService.execute(this.recorder);
+        threadService.execute(this.recorder);        
     }
 
     @Override
@@ -83,6 +87,9 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         execution.setDeploymentName(deployment.getName());
         execution.setDeploymentId(deployment.getId());
         execution.setLastUpdateTime(new Date());
+        execution.setCreateBy(userId);
+        execution.setLastUpdateBy(userId);
+        execution.setParameters(abbreviate(parameters, 4000));
         return execution;
     }
 
@@ -113,7 +120,6 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     public void flowStepStarted(int threadNumber, ComponentContext context) {
         super.flowStepStarted(threadNumber, context);
         ExecutionStep step = getExecutionStep(threadNumber, context);
-        step.setStatus(ExecutionStatus.READY.name());
         this.recorder.record(step);
     }
 
@@ -122,6 +128,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         ExecutionStep step = steps.get(id);
         if (step == null) {
             step = new ExecutionStep();
+            step.setStatus(ExecutionStatus.READY.name());
             step.setExecutionId(executionId);
             step.setThreadNumber(threadNumber);
             step.setApproximateOrder(context.getFlowStep().getApproximateOrder());
@@ -138,7 +145,6 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
 
         ExecutionStep step = getExecutionStep(threadNumber, context);
         Date lastUpdateTime = step.getLastUpdateTime();
-        startHandle.put(step, Instant.now());
         if (step.getStatus().equals(ExecutionStatus.READY.name()) || lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
             if (step.getStartTime() == null) {
                 step.setStartTime(new Date());
@@ -164,6 +170,8 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
                 step.setMessagesProduced(stats.getNumberOutboundMessages(threadNumber));
                 step.setPayloadProduced(stats.getNumberOutboundPayload(threadNumber));
                 step.setPayloadReceived(stats.getNumberInboundPayload(threadNumber));
+                step.setHandleDuration(stats.getTimeSpentInHandle(threadNumber));
+                step.setQueueDuration(stats.getTimeSpentWaiting(threadNumber));                
                 lastStatUpdate.put(step, new Date());
             }
             step.setLastUpdateTime(new Date());
@@ -176,10 +184,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         super.afterHandle(threadNumber, context, error);
         ExecutionStep step = getExecutionStep(threadNumber, context);
         Date lastUpdateTime = lastStatUpdate.get(step);
-        Instant startInstant = startHandle.get(step);
-        if (startInstant != null) {
-            step.incrementHandleDuration(Duration.between(startInstant,Instant.now()).toMillis());
-        }
+          
         if (lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
             step.setStatus(error != null ? ExecutionStatus.ERROR.name() : ExecutionStatus.READY.name());
             ComponentStatistics stats = context.getComponentStatistics();
@@ -189,6 +194,8 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
                 step.setMessagesProduced(stats.getNumberOutboundMessages(threadNumber));
                 step.setPayloadProduced(stats.getNumberOutboundPayload(threadNumber));
                 step.setPayloadReceived(stats.getNumberInboundPayload(threadNumber));
+                step.setHandleDuration(stats.getTimeSpentInHandle(threadNumber));
+                step.setQueueDuration(stats.getTimeSpentWaiting(threadNumber));
                 lastStatUpdate.put(step, new Date());
             }
             step.setLastUpdateTime(new Date());
@@ -220,6 +227,8 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
             step.setMessagesProduced(stats.getNumberOutboundMessages(threadNumber));
             step.setPayloadProduced(stats.getNumberOutboundPayload(threadNumber));
             step.setPayloadReceived(stats.getNumberInboundPayload(threadNumber));
+            step.setHandleDuration(stats.getTimeSpentInHandle(threadNumber));
+            step.setQueueDuration(stats.getTimeSpentWaiting(threadNumber));            
             lastStatUpdate.put(step, new Date());
         }
         step.setLastUpdateTime(new Date());

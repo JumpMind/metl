@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.core.model;
 
-public class GroupPrivilege extends AbstractObject {
+public class GroupPrivilege extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
 

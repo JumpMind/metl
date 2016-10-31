@@ -22,6 +22,7 @@ package org.jumpmind.metl.core.runtime.component;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -68,6 +69,8 @@ public class FilePoller extends AbstractComponentRuntime {
     public final static String SETTING_MAX_FILES_TO_POLL = "max.files.to.poll";
     
     public final static String SETTING_MIN_FILES_TO_POLL = "min.files.to.poll";
+    
+    public final static String SETTING_ONLY_FILES_OLDER_THAN_MIN = "only.files.older.than.minutes";
 
     public final static String SORT_NAME = "Name";
     
@@ -95,6 +98,8 @@ public class FilePoller extends AbstractComponentRuntime {
     int maxFilesToPoll;
     
     int minFilesToPoll = 1;
+    
+    int onlyFilesOlderThan = 0;
 
     String actionOnSuccess = ACTION_NONE;
 
@@ -137,6 +142,7 @@ public class FilePoller extends AbstractComponentRuntime {
                 context.getFlowParameters(), true);
         maxFilesToPoll = properties.getInt(SETTING_MAX_FILES_TO_POLL);
         minFilesToPoll = properties.getInt(SETTING_MIN_FILES_TO_POLL);
+        onlyFilesOlderThan = properties.getInt(SETTING_ONLY_FILES_OLDER_THAN_MIN);
         fileSortOption = properties.get(SETTING_FILE_SORT_ORDER, fileSortOption);
         fileSortDescending = properties.is(SETTING_FILE_SORT_DESCENDING, fileSortDescending);
         runWhen = properties.get(RUN_WHEN, PER_UNIT_OF_WORK);        
@@ -154,8 +160,7 @@ public class FilePoller extends AbstractComponentRuntime {
     }
 
 	@Override
-	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-	    
+	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {	    
         List<String> filePatternsToPoll = getFilePatternsToPoll(inputMessage);
 		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
 				|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
@@ -258,8 +263,6 @@ public class FilePoller extends AbstractComponentRuntime {
         
         ArrayList<FileInfo> filesToSend = new ArrayList<FileInfo>();
         
-        ArrayList<FileInfo> filesToSort = new ArrayList<FileInfo>();
-
         for (String patternToPoll : filePatternsToPoll) {
 
             String[] includes = StringUtils.isNotBlank(patternToPoll) ? patternToPoll.split(",")
@@ -268,13 +271,20 @@ public class FilePoller extends AbstractComponentRuntime {
             for (String pattern : includes) {
                 matches.addAll(matchFiles(pattern, directory, pathMatcher));
             }
+            
+            if (onlyFilesOlderThan > 0) {
+                long ts = System.currentTimeMillis()-onlyFilesOlderThan*60*1000;
+                Iterator<FileInfo> i = matches.iterator();
+                while (i.hasNext()) {
+                    FileInfo fileInfo = i.next();
+                    if (fileInfo.getLastUpdated() > ts) {
+                        i.remove();
+                    }
+                }
+            }
 
             if (matches.size() >= minFilesToPoll) {
-                for (int i = 0; i < matches.size(); i++) {
-                    filesToSort.add(matches.get(i));
-                }
-
-                Collections.sort(filesToSort, (o1, o2) -> {
+                Collections.sort(matches, (o1, o2) -> {
                     int cmpr = 0;
                     if (SORT_NAME.equals(fileSortOption)) {
                         cmpr = new String(o1.getRelativePath())
@@ -286,12 +296,13 @@ public class FilePoller extends AbstractComponentRuntime {
                     return cmpr;
                 });
                 if (fileSortDescending) {
-                    Collections.reverse(filesToSort);
+                    Collections.reverse(matches);
                 }
                 
-                for (int i=0;i<filesToSort.size() && i<maxFilesToPoll;i++) {
-                    filesSent.add(filesToSort.get(i));
-                    filesToSend.add(filesToSort.get(i));
+                for (int i=0;i<matches.size() && i<maxFilesToPoll;i++) {
+                    FileInfo file = matches.get(i);
+                    filesSent.add(file);
+                    filesToSend.add(file);
                 }                
                 
                 ArrayList<String> filePaths = new ArrayList<>();
@@ -311,9 +322,6 @@ public class FilePoller extends AbstractComponentRuntime {
             } else if (cancelOnNoFiles) {
                 callback.sendShutdownMessage(true);
             }
-            matches.clear();
-            filesToSort.clear();
-            filesToSend.clear();
         }
     }
     

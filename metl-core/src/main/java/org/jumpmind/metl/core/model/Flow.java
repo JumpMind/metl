@@ -32,7 +32,7 @@ import java.util.Set;
 import java.util.UUID;
 import static org.jumpmind.metl.core.runtime.component.ComponentTypeIdConstants.*;
 
-public class Flow extends AbstractObject {
+public class Flow extends AbstractNamedObject implements IAuditable {
 
     private static final long serialVersionUID = 1L;
 
@@ -54,8 +54,6 @@ public class Flow extends AbstractObject {
     
     boolean test = false;
     
-    boolean webService = false;
-
     public Flow() {
         this.flowSteps = new ArrayList<FlowStep>();
         this.flowStepLinks = new ArrayList<FlowStepLink>();
@@ -73,17 +71,15 @@ public class Flow extends AbstractObject {
     }
     
     public void setWebService(boolean webService) {
-        this.webService = webService;
     }
     
     public boolean isWebService() {
         for (FlowStep flowStep : flowSteps) {
             if (HTTP_REQUEST.equals(flowStep.getComponent().getType())) {
-                webService = true;
-                break;
+                return true;
             }
         }
-        return webService;
+        return false;
     }
 
     public void setFolder(Folder folder) {
@@ -94,10 +90,12 @@ public class Flow extends AbstractObject {
         return folder;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -265,6 +263,11 @@ public class Flow extends AbstractObject {
 
     public void setProjectVersionId(String projectVersionId) {
         this.projectVersionId = projectVersionId;
+        if (this.flowSteps != null) {
+            for (FlowStep flowStep : flowSteps) {
+                flowStep.getComponent().setProjectVersionId(projectVersionId);
+            }
+        }
     }
 
     public String getProjectVersionId() {
@@ -377,7 +380,7 @@ public class Flow extends AbstractObject {
             }
         }
         return finalSteps;
-    }
+    }    
 
     static public class XSorter implements Comparator<FlowStep> {
         @Override

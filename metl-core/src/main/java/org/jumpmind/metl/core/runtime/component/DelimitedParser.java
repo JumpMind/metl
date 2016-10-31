@@ -103,20 +103,20 @@ public class DelimitedParser extends AbstractComponentRuntime {
             try {
                 int rowCount = 0;
                 if (inputRows != null) {
+                    StringBuilder combined = new StringBuilder();
                     for (String inputRow : inputRows) {
-                        if (headerRowsToSkip == 0) {
+                        if (headerRowsToSkip == 0) {                            
                             if (rowCount + numberOfFooterLinesToSkip < inputRows.size()) {
-                                EntityData data = processInputRow(inputMessage, inputRow);
-                                if (data != null) {
-                                    getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                                    outputPayload.add(data);
-                                }
+                                combined.append(inputRow).append("\n");
                             }
                         } else {
                             headerRowsToSkip--;
                         }
                         rowCount++;
                     }
+                    
+                    processInputRows(inputMessage, combined, outputPayload);
+
                 }
             } catch (IOException e) {
                 throw new IoException(e);
@@ -126,9 +126,9 @@ public class DelimitedParser extends AbstractComponentRuntime {
         }
     }
 
-    private EntityData processInputRow(Message inputMessage, String inputRow) throws IOException {
+    private void processInputRows(Message inputMessage, StringBuilder inputRow, List<EntityData> payload) throws IOException {
 
-        CsvReader csvReader = new CsvReader(new ByteArrayInputStream(inputRow.getBytes(Charset.forName(encoding))), Charset.forName(encoding));
+        CsvReader csvReader = new CsvReader(new ByteArrayInputStream(inputRow.toString().getBytes(Charset.forName(encoding))), Charset.forName(encoding));
         csvReader.setDelimiter(delimiter.charAt(0));
         if (isNotBlank(quoteCharacter)) {
             csvReader.setTextQualifier(quoteCharacter.charAt(0));
@@ -136,7 +136,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
         } else {
             csvReader.setUseTextQualifier(false);
         }
-        if (csvReader.readRecord()) {
+        while (csvReader.readRecord()) {
             EntityData data = new EntityData();
             if (attributes.size() > 0) {
                 for (AttributeFormat attribute : attributes) {
@@ -161,9 +161,9 @@ public class DelimitedParser extends AbstractComponentRuntime {
                 }
             }
 
-            return data;
+            context.getComponentStatistics().incrementNumberEntitiesProcessed(getThreadNumber());
+            payload.add(data);
         }
-        return null;
 
     }
 

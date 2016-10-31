@@ -29,6 +29,7 @@
              resourceCategory='none'>
     <name>Model Data Diff</name>
     <className>org.jumpmind.metl.core.runtime.component.DataDiff</className>
+    <keywords>change</keywords>
     <settings>
       <setting id='source.1'
                required='true'
@@ -53,5 +54,5 @@
         <defaultValue>true</defaultValue>
       </setting>
     </settings>
-  </component>  
+  </component> 
 </components>

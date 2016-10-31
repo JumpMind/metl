@@ -23,6 +23,7 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,6 +44,7 @@ import org.jumpmind.db.sql.SqlException;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.sql.UniqueKeyException;
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
@@ -73,13 +75,17 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     public final static String CONTINUE_ON_ERROR = "continue.on.error";
     public final static String TABLE_SUFFIX = "table.suffix";
     public final static String TABLE_PREFIX = "table.prefix";
+    public final static String AUTO_CREATE_TABLE = "table.auto.create";
+    public final static String USE_CACHED_METADATA = "use.cached.table.metadata";
 
+    boolean useCachedMetadata = false;
     boolean continueOnError = false;
     boolean replaceRows = false;
     boolean updateFirst = false;
     boolean insertFallback = false;
     boolean quoteIdentifiers = false;
     boolean fitToColumn = false;
+    boolean autoCreateTable = false;
     String catalogName;
     String schemaName;
     String tableSuffix = "";
@@ -91,6 +97,9 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     List<TargetTableDefintion> targetTables;
     Throwable error;
     String lastPreparedDml;
+    Map<TargetTableDefintion, WriteStats> statsMap = new HashMap<>();
+    long lastStatsLogTime = System.currentTimeMillis();
+    long sqlDuration = 0;
 
     @Override
     public void start() {
@@ -107,6 +116,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 
         TypedProperties properties = getTypedProperties();
         batchMode = properties.is(BATCH_MODE, batchMode);
+        useCachedMetadata = properties.is(USE_CACHED_METADATA, useCachedMetadata);
         replaceRows = properties.is(REPLACE);
         continueOnError = properties.is(CONTINUE_ON_ERROR, continueOnError);
         updateFirst = properties.is(UPDATE_FIRST);
@@ -114,6 +124,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         quoteIdentifiers = properties.is(QUOTE_IDENTIFIERS);
         fitToColumn = properties.is(FIT_TO_COLUMN);
         tableSuffix = properties.get(TABLE_SUFFIX, "");
+        autoCreateTable = properties.is(AUTO_CREATE_TABLE, false);
 
         if (tableSuffix == null) {
             tableSuffix = "";
@@ -130,6 +141,9 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         if (isBlank(schemaName)) {
             schemaName = null;
         }
+        
+        statsMap = new HashMap<TargetTableDefintion, WriteStats>();
+        lastStatsLogTime = System.currentTimeMillis();
     }
 
     @Override
@@ -157,7 +171,12 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                     targetTables = new ArrayList<TargetTableDefintion>();
                     for (ModelEntity entity : model.getModelEntities()) {
                         String tableName = tablePrefix + entity.getName() + tableSuffix;
-                        Table table = databasePlatform.getTableFromCache(catalogName, schemaName, tableName, true);
+                        Table table = databasePlatform.getTableFromCache(catalogName, schemaName, tableName, !useCachedMetadata);
+                        if (table == null && autoCreateTable) {
+                            table = createTableFromEntity(entity, tableName);
+                            log(LogLevel.INFO, "Creating table: " + table.getName() + "  on db: " + databasePlatform.getDataSource().toString());
+                            databasePlatform.createTables(false, false, table);
+                        }
                         if (table != null) {
                             targetTables.add(new TargetTableDefintion(entity, new TargetTable(DmlType.UPDATE, entity, table.copy()),
                                     new TargetTable(DmlType.INSERT, entity, table.copy()),
@@ -197,7 +216,47 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                     targetTable.getUpdateTable().getRowValues().clear();
                 }
             }
+        } else {
+            Map<Integer, IComponentRuntime> all = context.getComponentRuntimeByThread();
+            boolean called = false;
+            if (all != null && all.size() > 0) {
+                for (IComponentRuntime runtime : all.values()) {
+                    if (runtime instanceof RdbmsWriter) {
+                        ((RdbmsWriter) runtime).writeStats(true);
+                        called = true;
+                    }
+                }
+            } 
+            
+            if (!called) {
+                writeStats(true);
+            }
         }
+    }
+    
+    protected Table createTableFromEntity(ModelEntity entity, String tableName) {
+        Table table = new Table();
+        table.setName(tableName);
+        List<ModelAttribute> attributes = entity.getModelAttributes();
+        for (ModelAttribute attribute : attributes) {
+            DataType dataType = attribute.getDataType();
+            Column column = new Column(attribute.getName());
+            if (dataType.isNumeric()) {
+                column.setTypeCode(Types.DECIMAL);
+            } else if (dataType.isBoolean()) {
+                column.setTypeCode(Types.BOOLEAN);
+            } else if (dataType.isTimestamp()) {
+                column.setTypeCode(Types.TIMESTAMP);
+            } else if (dataType.isBinary()) {
+                column.setTypeCode(Types.BLOB);
+            } else {
+                column.setTypeCode(Types.LONGVARCHAR);
+            }
+
+            column.setPrimaryKey(attribute.isPk());
+            table.addColumn(column);
+        }
+        return table;
     }
 
     private Object[] getValues(boolean isUpdate, TargetTable modelTable, EntityData inputRow) {
@@ -264,17 +323,16 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         Collections.sort(targetTables);
     }
 
-    private void executeSqlByTableAndOperation(ISqlTransaction transaction, Map<TargetTableDefintion, WriteStats> statsMap) {
+    private void executeSqlByTableAndOperation(ISqlTransaction transaction) {
         for (TargetTableDefintion targetTableDefinition : targetTables) {
-            WriteStats stats = getStats(targetTableDefinition, statsMap);
+            WriteStats stats = getStats(targetTableDefinition);
             executeSqlDeletes(targetTableDefinition.getDeleteTable(), transaction, stats);
             executeSqlChanges(targetTableDefinition, transaction, stats);
             executeSqlInserts(targetTableDefinition, transaction, stats);
         }
     }
 
-    private WriteStats getStats(TargetTableDefintion targetTableDefinition, Map<TargetTableDefintion, WriteStats> statsMap) {
-
+    private WriteStats getStats(TargetTableDefintion targetTableDefinition) {
         WriteStats stats = statsMap.get(targetTableDefinition);
         if (stats == null) {
             stats = new WriteStats();
@@ -316,7 +374,6 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     }
 
     private void executeSqlInserts(TargetTableDefintion targetTableDefinition, ISqlTransaction transaction, WriteStats stats) {
-
         TargetTable targetUpdateTable = targetTableDefinition.getUpdateTable();
         TargetTable targetInsertTable = targetTableDefinition.getInsertTable();
 
@@ -352,72 +409,76 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     }
 
     private void write(ISqlTransaction transaction, EntityDataMessage inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-
-        long ts = System.currentTimeMillis();
-        Map<TargetTableDefintion, WriteStats> statsMap = new HashMap<TargetTableDefintion, WriteStats>();
         sortAndStoreRowsByTableAndOperation(inputMessage.getPayload());
-        executeSqlByTableAndOperation(transaction, statsMap);
-        int totalStatementCount = writeStats(statsMap);       
-        info("Ran a total of %d statements in %s", totalStatementCount, LogUtils.formatDuration(System.currentTimeMillis() - ts));
+        executeSqlByTableAndOperation(transaction);
+        writeStats(false);       
     }
 
-    private int writeStats(Map<TargetTableDefintion, WriteStats> statsMap) {
-        int rowCount = 0;
-        for (TargetTableDefintion table : targetTables) {
-            WriteStats stats = statsMap.get(table);
-            if (stats != null) {
-                StringBuilder msg = new StringBuilder();
-                if (stats.insertCount > 0) {
-                    msg.append("Inserted: ");
-                    msg.append(stats.insertCount);
-                    rowCount += stats.insertCount;
-                }
-                if (stats.fallbackUpdateCount > 0) {
-                    if (msg.length() > 0) {
-                        msg.append(", ");
+    private void writeStats(boolean force) {
+        if (targetTables != null && (force || System.currentTimeMillis() - lastStatsLogTime > 5 * 60 * 1000)) {
+            int rowCount = 0;
+            for (TargetTableDefintion table : targetTables) {
+                WriteStats stats = statsMap.get(table);
+                if (stats != null) {
+                    StringBuilder msg = new StringBuilder();
+                    if (stats.insertCount > 0) {
+                        msg.append("Inserted: ");
+                        msg.append(stats.insertCount);
+                        rowCount += stats.insertCount;
                     }
-                    msg.append("Fallback Updates: ");
-                    msg.append(stats.fallbackUpdateCount);
-                    rowCount += stats.fallbackUpdateCount * 2;
-                }
-                if (stats.updateCount > 0) {
-                    if (msg.length() > 0) {
-                        msg.append(", ");
+                    if (stats.fallbackUpdateCount > 0) {
+                        if (msg.length() > 0) {
+                            msg.append(", ");
+                        }
+                        msg.append("Fallback Updates: ");
+                        msg.append(stats.fallbackUpdateCount);
+                        rowCount += stats.fallbackUpdateCount * 2;
                     }
-                    msg.append("Updated: ");
-                    msg.append(stats.updateCount);
-                    rowCount += stats.updateCount;
-                }
-                if (stats.deleteCount > 0) {
-                    if (msg.length() > 0) {
-                        msg.append(", ");
+                    if (stats.updateCount > 0) {
+                        if (msg.length() > 0) {
+                            msg.append(", ");
+                        }
+                        msg.append("Updated: ");
+                        msg.append(stats.updateCount);
+                        rowCount += stats.updateCount;
                     }
-                    msg.append("Deleted: ");
-                    msg.append(stats.deleteCount);
-                    rowCount += stats.deleteCount;
-                }
-                if (stats.fallbackInsertCount > 0) {
-                    if (msg.length() > 0) {
-                        msg.append(", ");
+                    if (stats.deleteCount > 0) {
+                        if (msg.length() > 0) {
+                            msg.append(", ");
+                        }
+                        msg.append("Deleted: ");
+                        msg.append(stats.deleteCount);
+                        rowCount += stats.deleteCount;
                     }
-                    msg.append("Fallback Inserts: ");
-                    msg.append(stats.fallbackInsertCount);
-                    rowCount += stats.fallbackInsertCount * 2;
-                }
-                if (stats.ignoredCount > 0) {
-                    if (msg.length() > 0) {
-                        msg.append(", ");
+                    if (stats.fallbackInsertCount > 0) {
+                        if (msg.length() > 0) {
+                            msg.append(", ");
+                        }
+                        msg.append("Fallback Inserts: ");
+                        msg.append(stats.fallbackInsertCount);
+                        rowCount += stats.fallbackInsertCount * 2;
                     }
-                    msg.append("Ignored Count: ");
-                    msg.append(stats.ignoredCount);
-                    rowCount += stats.ignoredCount;
-                }
-                if (msg.length() > 0) {
-                    log(LogLevel.INFO, "%s: %s", table.getInsertTable().getTable().getFullyQualifiedTableName(), msg.toString());
+                    if (stats.ignoredCount > 0) {
+                        if (msg.length() > 0) {
+                            msg.append(", ");
+                        }
+                        msg.append("Ignored Count: ");
+                        msg.append(stats.ignoredCount);
+                        rowCount += stats.ignoredCount;
+                    }
+                    if (msg.length() > 0) {
+                        log(LogLevel.INFO, "%s: %s",
+                                table.getInsertTable().getTable().getFullyQualifiedTableName(),
+                                msg.toString());
+                    }
                 }
             }
+            info("Ran a total of %d statements in %s", rowCount,
+                    LogUtils.formatDuration(sqlDuration));
+            sqlDuration = 0;
+            statsMap.clear();
+            lastStatsLogTime = System.currentTimeMillis();
         }
-        return rowCount;
     }
 
     private int execute(ISqlTransaction transaction, DmlStatement dmlStatement, Object marker, Object[] data) {
@@ -434,6 +495,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         if (log.isDebugEnabled()) {
             log.debug("Submitting data {} with types {}", Arrays.toString(data), Arrays.toString(dmlStatement.getTypes()));
         }
+        long ts = System.currentTimeMillis();
         try {
             return transaction.addRow(marker, data, dmlStatement.getTypes());
         } catch (SqlException ex) {
@@ -451,6 +513,8 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
             } else {
                 throw ex;
             }
+        } finally {
+            sqlDuration += System.currentTimeMillis()-ts;
         }
     }
 
@@ -505,6 +569,14 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 
     public void setUpdateFirst(boolean updateFirst) {
         this.updateFirst = updateFirst;
+    }
+
+    public boolean isContinueOnError() {
+        return continueOnError;
+    }
+
+    public void setContinueOnError(boolean continueOnError) {
+        this.continueOnError = continueOnError;
     }
     
     public Throwable getError() {

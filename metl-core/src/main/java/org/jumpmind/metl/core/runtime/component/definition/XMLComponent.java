@@ -63,9 +63,16 @@ public class XMLComponent implements Serializable, Comparable<XMLComponent> {
     @XmlEnum
     public enum ResourceCategory {
         @XmlEnumValue("datasource")
-        DATASOURCE, @XmlEnumValue("streamable")
-        STREAMABLE, @XmlEnumValue("none")
-        NONE, @XmlEnumValue("any")
+        DATASOURCE, 
+        @XmlEnumValue("streamable")
+        STREAMABLE,
+        @XmlEnumValue("mailsession")
+        MAIL_SESSION,
+        @XmlEnumValue("http")
+        HTTP,        
+        @XmlEnumValue("none")
+        NONE, 
+        @XmlEnumValue("any")
         ANY
     }
 
@@ -77,6 +84,9 @@ public class XMLComponent implements Serializable, Comparable<XMLComponent> {
 
     @XmlElement(required = true)
     protected String className;
+    
+    @XmlElement(required = true)
+    protected String keywords = "";
     
     @XmlElement(required = false)
     protected String deploymentListenerClassName;
@@ -261,4 +271,12 @@ public class XMLComponent implements Serializable, Comparable<XMLComponent> {
         return deploymentListenerClassName;
     }
     
+    public void setKeywords(String keywords) {
+        this.keywords = keywords;
+    }
+    
+    public String getKeywords() {
+        return keywords;
+    }
+
 }

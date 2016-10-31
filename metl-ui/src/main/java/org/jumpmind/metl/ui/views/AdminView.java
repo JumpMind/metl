@@ -22,14 +22,16 @@ package org.jumpmind.metl.ui.views;
 
 import javax.annotation.PostConstruct;
 
-import org.jumpmind.metl.ui.common.AppConstants;
+import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.metl.ui.views.admin.AboutPanel;
+import org.jumpmind.metl.ui.views.admin.ActiveUsersPanel;
 import org.jumpmind.metl.ui.views.admin.ApiPanel;
+import org.jumpmind.metl.ui.views.admin.AuditEventPanel;
 import org.jumpmind.metl.ui.views.admin.GeneralSettingsPanel;
 import org.jumpmind.metl.ui.views.admin.GroupPanel;
 import org.jumpmind.metl.ui.views.admin.LoggingPanel;
@@ -82,7 +84,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
 
         HorizontalSplitPanel leftSplit = new HorizontalSplitPanel();
         leftSplit.setSizeFull();
-        leftSplit.setSplitPosition(AppConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS);
+        leftSplit.setSplitPosition(UIConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS);
 
         VerticalLayout container = new VerticalLayout();
         container.setSizeFull();
@@ -113,7 +115,9 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         addItem("Plugins", Icons.COMPONENT);
         addItem("Mail Server", Icons.EMAIL);
         addItem("Notifications", Icons.NOTIFICATION);
-        addItem("Logging", Icons.LOGGING);
+        addItem("Active Users", FontAwesome.USERS);
+        addItem("Audit Events", FontAwesome.BARS);
+        addItem("Logging", Icons.LOGGING);        
         addItem("About", FontAwesome.QUESTION);
         
         VerticalLayout navigator = new VerticalLayout();
@@ -168,6 +172,10 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
                     panel = new AboutPanel(context, tabbedPanel);
                 } else if (id.equals("Plugins")) {
                     panel = new PluginsPanel(context, tabbedPanel);
+                } else if (id.equals("Active Users")) {
+                    panel = new ActiveUsersPanel(context, tabbedPanel);
+                } else if (id.equals("Audit Events")) {
+                    panel = new AuditEventPanel(context, tabbedPanel);
                 }
                 tabbedPanel.addCloseableTab(id, id, table.getItemIcon(id), panel);
             }

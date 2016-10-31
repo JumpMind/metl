@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<!--
+
+    Licensed to JumpMind Inc under one or more contributor
+    license agreements.  See the NOTICE file distributed
+    with this work for additional information regarding
+    copyright ownership.  JumpMind Inc licenses this file
+    to you under the GNU General Public License, version 3.0 (GPLv3)
+    (the "License"); you may not use this file except in compliance
+    with the License.
+
+    You should have received a copy of the GNU General Public License,
+    version 3.0 (GPLv3) along with this library; if not, see
+    <http://www.gnu.org/licenses/>.
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<!DOCTYPE database SYSTEM "database.dtd">
+
+<database name="metl-exec">
+       
+    <table name="execution" description="">
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="agent_id" type="CHAR" size="36" required="true" description="A unique identifier" />
+        <column name="flow_id" type="CHAR" size="36" required="true" description="A unique identifier" />
+        <column name="deployment_id" type="CHAR" size="36" required="true" description="A unique identifier" />
+		<column name="agent_name" type="VARCHAR" size="255" description="" />
+		<column name="host_name" type="VARCHAR" size="255" description="" />
+		<column name="flow_name" type="VARCHAR" size="255" description="" />        
+        <column name="deployment_name" type="VARCHAR" size="255" description="" />
+        <column name="parameters" type="VARCHAR" size="4000" description="" />
+        <column name="status" type="VARCHAR" required="true" default="REQUESTED" size="255" description="" />
+        <column name="start_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="end_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
+        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />    
+        <index name="idx_ex_sts_time">
+            <index-column name="status"/>
+            <index-column name="last_update_time"/>
+        </index>           
+    </table>    
+
+     <table name="execution_step" description="">
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="execution_id" type="CHAR" size="36" required="true" description="A unique identifier" />
+        <column name="thread_number" type="INTEGER" required="true" default="0" description="The thread number" />
+        <column name="flow_step_id" type="CHAR" size="36" required="true" description="A unique identifier" />
+        <column name="component_name" type="VARCHAR" required="true" size="255" description="" />
+        <column name="approximate_order" type="INTEGER" default="0" required="true" />
+        <column name="status" type="VARCHAR" size="255" description="" />
+        <column name="messages_received" type="INTEGER" default="0" required="true" />
+        <column name="messages_produced" type="INTEGER" default="0" required="true" />
+        <column name="payload_received" type="INTEGER" default="0" required="true" />
+        <column name="payload_produced" type="INTEGER" default="0" required="true" />        
+        <column name="entities_processed" type="INTEGER" default="0" required="true" />
+        <column name="start_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="end_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="handle_duration" type="BIGINT" default="0" required="true" />
+        <column name="queue_duration" type="BIGINT" default="0" required="true" />
+    </table>   
+
+</database>

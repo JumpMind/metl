@@ -27,8 +27,8 @@
 
     <table name="project" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
-        <column name="name" type="VARCHAR" size="255" description="Name of the folder" />
-        <column name="description" type="VARCHAR" size="255" description="Name of the folder" />
+        <column name="name" type="VARCHAR" size="255" description="Name of the project" />
+        <column name="description" type="VARCHAR" size="255" description="Description of the project" />
         <column name="deleted" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this row has been deleted."/>
         <column name="working_version" type="CHAR" size="36" description="Pointer to the current working version."/>                
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
@@ -53,10 +53,24 @@
         <foreign-key foreignTable="project" name="fk_v_2_prj">
             <reference local="project_id" foreign="id" />
         </foreign-key>
-        <foreign-key foreignTable="project_version" name="fk_v_2_v">
-            <reference local="orig_version_id" foreign="id" />
-        </foreign-key>
     </table>
+    
+    <table name="project_version_dependency" description="">
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="row_id" type="CHAR" size="36" required="true" description="A unique identifier for this row across different versions" />
+        <column name="project_version_id" type="CHAR" size="36" description="A unique identifier for the version this row belongs to" />
+        <column name="target_project_version_id" type="CHAR" size="36" description="A unique identifier for the version this row belongs to" />        
+        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
+        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />    
+        <foreign-key foreignTable="project_version" name="fk_dep_src_2_v">
+            <reference local="project_version_id" foreign="id" />
+        </foreign-key>
+        <foreign-key foreignTable="project_version" name="fk_dep_tgt_2_v">
+            <reference local="target_project_version_id" foreign="id" />
+        </foreign-key>                
+    </table>       
     
     <table name="project_version_component_plugin" description="">
         <column name="project_version_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier for the version this row belongs to" />        
@@ -130,6 +144,7 @@
     <table name="model_attribute" description="">
         <column name="id" primaryKey="true" required="true" type="CHAR" size="36" />
         <column name="entity_id" type="CHAR" size="36" required="true"  />
+        <column name="attribute_order" type="INTEGER" default="0" required="true" />        
         <column name="name" type="VARCHAR" size="255" required="true"  />
         <column name="description" type="CLOB" DESCRIPTION=""  />        
         <column name="type" type="VARCHAR" size="50" required="true" description="INTEGER, STRING, LONG, BOOLEAN, DECIMAL, ENUM, COMPLEX, SEQUENCE" />
@@ -344,6 +359,7 @@
         <column name="status" type="VARCHAR" size="255" description="" />
         <column name="last_start_time" type="TIMESTAMP" description="" />
         <column name="heartbeat_time" type="TIMESTAMP" description="" />
+        <column name="exec_thread_count" type="INTEGER" default="10" required="true" />
         <column name="auto_refresh" type="BOOLEANINT" size="1" required="true" default="1" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
@@ -411,54 +427,29 @@
         <foreign-key foreignTable="agent_deployment" name="fk_adp_2_ad">
             <reference local="agent_deployment_id" foreign="id" />
         </foreign-key>
-    </table>     
+    </table>    
     
-    <table name="execution" description="">
+    <table name="user_hist" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
-        <column name="agent_id" type="CHAR" size="36" required="true" description="A unique identifier" />
-        <column name="flow_id" type="CHAR" size="36" required="true" description="A unique identifier" />
-        <column name="deployment_id" type="CHAR" size="36" required="true" description="A unique identifier" />
-		<column name="agent_name" type="VARCHAR" size="255" description="" />
-		<column name="host_name" type="VARCHAR" size="255" description="" />
-		<column name="flow_name" type="VARCHAR" size="255" description="" />
-        <column name="deployment_name" type="VARCHAR" size="255" description="" />
-        <column name="status" type="VARCHAR" required="true" default="REQUESTED" size="255" description="" />
-        <column name="start_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
-        <column name="end_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="user_id" type="CHAR" size="36" required="true" description="" />
+        <column name="password" type="VARCHAR" size="255" required="false" description="" />
+        <column name="salt" type="VARCHAR" size="255" required="false" description="" />
+        <column name="auth_method" type="VARCHAR" size="255" default="HASH" required="true" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
-        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />    
-        <index name="idx_ex_sts_time">
-            <index-column name="status"/>
-            <index-column name="last_update_time"/>
-        </index>           
-    </table>    
-
-     <table name="execution_step" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
-        <column name="execution_id" type="CHAR" size="36" required="true" description="A unique identifier" />
-        <column name="thread_number" type="INTEGER" required="true" default="0" description="The thread number" />
-        <column name="flow_step_id" type="CHAR" size="36" required="true" description="A unique identifier" />
-        <column name="component_name" type="VARCHAR" required="true" size="255" description="" />
-        <column name="approximate_order" type="INTEGER" default="0" required="true" />
-        <column name="status" type="VARCHAR" size="255" description="" />
-        <column name="messages_received" type="INTEGER" default="0" required="true" />
-        <column name="messages_produced" type="INTEGER" default="0" required="true" />
-        <column name="payload_received" type="INTEGER" default="0" required="true" />
-        <column name="payload_produced" type="INTEGER" default="0" required="true" />        
-        <column name="entities_processed" type="INTEGER" default="0" required="true" />
-        <column name="start_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
-        <column name="end_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
-        <column name="handle_duration" type="INTEGER" default="0" required="true" />
-    </table>   
-
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />               
+    </table>     
+    
     <table name="user" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="login_id" type="VARCHAR" size="50" required="true" description="" />
         <column name="name" type="VARCHAR" size="255" required="false" description="" />
 		<column name="password" type="VARCHAR" size="255" required="false" description="" />
-		<column name="last_login_time" type="TIMESTAMP" description="" />
+        <column name="salt" type="VARCHAR" size="255" required="false" description="" />
+        <column name="auth_method" type="VARCHAR" size="255" default="HASH" required="true" description="" />        
+        <column name="last_login_time" type="TIMESTAMP" description="" />
+        <column name="last_password_time" type="TIMESTAMP" default="CURRENT_TIMESTAMP" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -545,12 +536,25 @@
     
     <table name="version" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
-        <column name="name" type="VARCHAR" size="255" description="Name of the folder" />
+        <column name="name" type="VARCHAR" size="255" description="Name of the version" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />        
     </table>
+    
+    <table name="audit_event" description="">
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="name" type="VARCHAR" size="255" description="The audit event name" />
+        <column name="event_text" type="VARCHAR" size="4000" description="The audit event text" />
+        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
+        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
+        <index name="idx_audit_event_1">
+            <index-column name="create_time" />
+        </index>        
+    </table>    
     
     <table name="plugin_repository" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
@@ -575,3 +579,4 @@
                         
 
 </database>
+    

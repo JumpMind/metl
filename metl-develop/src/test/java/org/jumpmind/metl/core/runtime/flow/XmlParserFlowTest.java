@@ -47,7 +47,7 @@ public class XmlParserFlowTest {
 
     @Parameters(name = "{0}")
     public static Collection<Object[]> getFlows() throws Exception {
-        standaloneFlowRunner = new StandaloneTestFlowRunner("/xmlparser-flow-test-config.sql");
+        standaloneFlowRunner = new StandaloneTestFlowRunner("/xmlparser-flow-test-config.json");
         return standaloneFlowRunner.getFlowAsTestParams();
     }
 

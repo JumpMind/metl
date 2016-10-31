@@ -51,8 +51,7 @@ public abstract class AbstractResourceRuntime extends AbstractRuntimeObject impl
         if (overrides != null) {
             combined.putAll(overrides);
         }
-        
-        
+
         resourceRuntimeSettings = combined;
         
         start(combined);

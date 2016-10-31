@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -81,6 +82,8 @@ public class StepRuntime implements Runnable {
     protected Executor componentRuntimeExecutor;
 
     boolean running = false;
+    
+    boolean cancelling = false;
 
     boolean cancelled = false;
 
@@ -105,8 +108,6 @@ public class StepRuntime implements Runnable {
     XMLComponent componentDefintion;
 
     FlowRuntime flowRuntime;
-
-    Map<Integer, IComponentRuntime> componentRuntimeByThread = new HashMap<>();
 
     boolean startStep;
 
@@ -183,7 +184,13 @@ public class StepRuntime implements Runnable {
             throw new RuntimeException("Inbound queue capacity on " + componentContext.getFlowStep().getName()
                     + " not sufficient to handle inbound messages from other components in addition to inbound messages from itself.");
         }
-        inQueue.put(message);
+        if (running) {
+            while (!inQueue.offer(message, 500, TimeUnit.MILLISECONDS)) {
+                if (cancelling) {
+                    throw new CancellationException();
+                }
+            }
+        }
     }
 
     public void start(IResourceFactory resourceFactory) {
@@ -194,7 +201,7 @@ public class StepRuntime implements Runnable {
                         LogUtils.normalizeName(componentContext.getFlowStep().getName()));
                 this.componentRuntimeExecutor = ThreadUtils.createFixedThreadPool(prefix, queueCapacity, threadCount);
             }
-            for(IComponentRuntime componentRuntime:componentRuntimeByThread.values()) {
+            for(IComponentRuntime componentRuntime:componentContext.getComponentRuntimeByThread().values()) {
                 if (sourceStepRuntimes.size() == 0 && !componentRuntime.supportsStartupMessages()) {
                     throw new MisconfiguredException("%s must have an inbound connection from another component",
                             componentRuntime.getComponentDefintion().getName());
@@ -211,7 +218,7 @@ public class StepRuntime implements Runnable {
     protected void createComponentRuntime(int threadNumber) {
         String type = getComponentType();
         IComponentRuntime componentRuntime = componentRuntimeFactory.create(componentContext.getFlowStep().getComponent().getProjectVersionId(), type, componentContext, threadNumber);
-        componentRuntimeByThread.put(threadNumber, componentRuntime);
+        componentContext.getComponentRuntimeByThread().put(threadNumber, componentRuntime);
     }
 
     protected void recordError(int threadNumber, Throwable ex) {
@@ -267,7 +274,7 @@ public class StepRuntime implements Runnable {
                         } else {
                             process(inputMessage, target);
                         }
-                    } else {
+                    } else if (running && !cancelled) {
                         AppUtils.sleep(50);
                     }
                 }
@@ -293,50 +300,58 @@ public class StepRuntime implements Runnable {
          * race conditions.
          */
         if (threadCount > 1) {
-            this.componentRuntimeExecutor.execute(() -> processOnAnotherThread(inputMessage, unitOfWorkBoundaryReached, target));
+            while (unitOfWorkBoundaryReached && activeCount > 1) {
+                AppUtils.sleep(5);
+            }
+            this.componentRuntimeExecutor.execute(() -> processOnAnotherThread(inputMessage, unitOfWorkBoundaryReached, target));    
         } else {
             processOnAnotherThread(inputMessage, unitOfWorkBoundaryReached, target);
         }
     }
 
-    protected void processOnAnotherThread(Message inputMessage, boolean unitOfWorkBoundaryReached, SendMessageCallback target) {
+    protected void processOnAnotherThread(Message inputMessage, boolean unitOfWorkBoundaryReached, SendMessageCallback callback) {
         int threadNumber = ThreadUtils.getThreadNumber(threadCount);
         try {
-            componentContext.getComponentStatistics().incrementInboundMessages(threadNumber);
+            ComponentStatistics statistics = componentContext.getComponentStatistics();
+            statistics.incrementInboundMessages(threadNumber);
             if (inputMessage instanceof ContentMessage<?>) {
                 Object payload = ((ContentMessage<?>)inputMessage).getPayload();
                 if (payload instanceof Collection<?>) {
-                    componentContext.getComponentStatistics().incrementNumberInboundPayload(threadNumber, ((Collection<?>)payload).size());
+                    statistics.incrementNumberInboundPayload(threadNumber, ((Collection<?>)payload).size());
                 } else if (payload != null) {
-                    componentContext.getComponentStatistics().incrementNumberInboundPayload(threadNumber);
+                    statistics.incrementNumberInboundPayload(threadNumber);
                 }
             }
             
             componentContext.getExecutionTracker().beforeHandle(threadNumber, componentContext);            
 
-            IComponentRuntime componentRuntime = componentRuntimeByThread.get(threadNumber);
+            IComponentRuntime componentRuntime = componentContext.getComponentRuntimeByThread().get(threadNumber);
 
             Component component = componentContext.getFlowStep().getComponent();
             boolean logInput = component.getBoolean(AbstractComponentRuntime.LOG_INPUT, false);
 
             if (logInput) {
-                logInput(inputMessage, target, unitOfWorkBoundaryReached);
+                logInput(inputMessage, callback, unitOfWorkBoundaryReached);
             }
-            target.setCurrentInputMessage(threadNumber, inputMessage);
-            componentRuntime.handle(inputMessage, target, unitOfWorkBoundaryReached);
+            callback.setCurrentInputMessage(threadNumber, inputMessage);
+            long ts = System.currentTimeMillis();
+            componentRuntime.handle(inputMessage, callback, unitOfWorkBoundaryReached);
+            statistics.incrementTimeSpentInHandle(threadNumber, System.currentTimeMillis()-ts-callback.useQueueTime(threadNumber));
 
             boolean recursionDone = liveSourceStepIds.size() == 1 && liveSourceStepIds.contains(componentContext.getFlowStep().getId())
                     && getActiveCountPlusQueueSize() == 1;
             
+            /* When multi-threaded, if a unit of work is received we will have waited for all threads to finish before processing the
+               this messsage */
             if ((unitOfWorkBoundaryReached || recursionDone) && componentRuntime.getComponentDefintion().isAutoSendControlMessages()) {
-                verifyAndSendControlMessageToTargets(target, inputMessage);
+                verifyAndSendControlMessageToTargets(callback, inputMessage);
             }
 
             /*
              * Detect shutdown condition
              */
             if (startStep || recursionDone) {
-                shutdown(threadNumber, target, false);
+                shutdown(callback, false);
             }
         } catch (Exception ex) {
             recordError(ThreadUtils.getThreadNumber(threadCount), ex);
@@ -367,7 +382,7 @@ public class StepRuntime implements Runnable {
          */
         if (cancelled || fromStepId == null || liveSourceStepIds == null || liveSourceStepIds.size() == 0
                 || fromStepId.equals(componentContext.getFlowStep().getId())) {
-            shutdown(1, target, true);
+            shutdown(target, true);
         }
     }
 
@@ -435,11 +450,11 @@ public class StepRuntime implements Runnable {
         return true;
     }
 
-    private void stop(int threadNumber, IComponentRuntime componentRuntime) {
+    private void stop(IComponentRuntime componentRuntime) {
         try {
             componentRuntime.stop();
         } catch (Exception e) {
-            recordError(threadNumber, e);
+            recordError(componentRuntime.getThreadNumber(), e);
         }
     }
 
@@ -451,7 +466,7 @@ public class StepRuntime implements Runnable {
         }
     }
 
-    private void shutdown(int threadNumber, ISendMessageCallback target, boolean waitForShutdown) {
+    private void shutdown(ISendMessageCallback target, boolean waitForShutdown) {
         shutdownThreads(waitForShutdown);
 
         if (log.isDebugEnabled()) {
@@ -459,7 +474,7 @@ public class StepRuntime implements Runnable {
         }
 
         targetStepRuntimes.forEach(t -> shutdownTargets(t));
-        componentRuntimeByThread.values().forEach(c -> stop(threadNumber, c));
+        componentContext.getComponentRuntimeByThread().values().forEach(c -> stop(c));
 
         finished = true;
         running = false;
@@ -480,17 +495,30 @@ public class StepRuntime implements Runnable {
             }
         }
     }
-
+    
     private final void recordFlowStepFinished() {
-        componentRuntimeByThread.keySet()
-                .forEach(e -> componentContext.getExecutionTracker().flowStepFinished(e, componentContext, error, cancelled));
+        componentContext.getComponentRuntimeByThread().keySet()
+                .forEach(threadNumber -> recordFlowStepFinished(threadNumber));
+    }
+
+    private final void recordFlowStepFinished(int threadNumber) {
+        componentContext.getExecutionTracker().flowStepFinished(threadNumber, componentContext, error, cancelled);
     }
 
     public void cancel() {
-        shutdownThreads(true);
-        if (!finished) {
-            this.cancelled = true;
-            recordFlowStepFinished();
+        cancelling = true;
+        if (isRunning()) {
+            try {
+                inQueue.clear();
+                queue(new ShutdownMessage(componentContext.getFlowStep().getId(), true));
+            } catch (InterruptedException e) {
+            }
+        } else {
+            shutdownThreads(true);
+            if (!finished) {
+                this.cancelled = true;
+                recordFlowStepFinished();
+            }
         }
     }
 
@@ -503,11 +531,11 @@ public class StepRuntime implements Runnable {
     }
     
     public List<IComponentRuntime> getComponentRuntimes() {
-        return new ArrayList<>(componentRuntimeByThread.values());
+        return new ArrayList<>(componentContext.getComponentRuntimeByThread().values());
     }
 
     public void flowCompletedWithoutError() {
-        componentRuntimeByThread.values().forEach(c -> flowCompletedWithoutError(c));
+        componentContext.getComponentRuntimeByThread().values().forEach(c -> flowCompletedWithoutError(c));
     }
 
     private void flowCompletedWithoutError(IComponentRuntime componentRuntime) {
@@ -522,7 +550,7 @@ public class StepRuntime implements Runnable {
     }
 
     public void flowCompletedWithErrors(Throwable myError, List<Throwable> allErrors) {
-        componentRuntimeByThread.values().forEach(c -> flowCompletedWithErrors(c, myError, allErrors));
+        componentContext.getComponentRuntimeByThread().values().forEach(c -> flowCompletedWithErrors(c, myError, allErrors));
     }
 
     private void flowCompletedWithErrors(IComponentRuntime componentRuntime, Throwable myError, List<Throwable> allErrors) {
@@ -610,6 +638,7 @@ public class StepRuntime implements Runnable {
     class SendMessageCallback implements ISendMessageCallback {
 
         Map<Integer, Message> currentInputMessages = new HashMap<>();
+        Map<Integer, Long> queueTime = new HashMap<>();
 
         private void setCurrentInputMessage(int threadNumber, Message currentInputMessage) {
             currentInputMessages.put(threadNumber, currentInputMessage);
@@ -672,6 +701,8 @@ public class StepRuntime implements Runnable {
             if (logOutput) {
                 logOutput(message, targetFlowStepIds);
             }
+            
+            long ts = System.currentTimeMillis();
 
             Collection<String> targetStepIds = targetFlowStepIds != null ? Arrays.asList(targetFlowStepIds) : Collections.emptyList();
 
@@ -697,6 +728,23 @@ public class StepRuntime implements Runnable {
                     }
                 }
             }
+            
+            long queueTime = System.currentTimeMillis()-ts;
+            Long totalQueueTime = this.queueTime.get(threadNumber);
+            if (totalQueueTime == null) {
+                totalQueueTime = 0l;
+            }
+            totalQueueTime += queueTime;
+            this.queueTime.put(threadNumber, totalQueueTime);
+            statistics.incrementTimeSpentWaiting(threadNumber, queueTime);
+        }
+        
+        protected long useQueueTime(int threadNumber) {
+            Long time = this.queueTime.remove(threadNumber);
+            if (time == null) {
+                time = 0l;
+            }             
+            return time;
         }
         
         private void validateEntityData(ArrayList<EntityData> payload) {

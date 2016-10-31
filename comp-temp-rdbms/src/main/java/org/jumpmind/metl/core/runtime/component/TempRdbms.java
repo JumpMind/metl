@@ -33,6 +33,10 @@ import org.jumpmind.properties.TypedProperties;
 public class TempRdbms extends AbstractRdbmsComponentRuntime  {
 
     public static String IN_MEMORY_DB = "in.memory.db";
+    
+    public static String CONTINUE_ON_ERROR = "continue.on.error";
+    
+    public static String BATCH_MODE = "batch.mode";
 
     int rowsPerMessage = 1000;
 
@@ -49,6 +53,10 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
     List<String> sqls;
     
     int rowReadDuringHandle;
+    
+    boolean continueOnError = false;
+    
+    boolean batchMode = false;
 
     @Override
     public void start() {
@@ -57,6 +65,8 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
 
         this.inMemoryDb = properties.is(IN_MEMORY_DB);
         this.rowsPerMessage = properties.getInt(ROWS_PER_MESSAGE);
+        this.continueOnError = properties.is(CONTINUE_ON_ERROR);
+        this.batchMode = properties.is(BATCH_MODE);
         Component comp = context.getFlowStep().getComponent();
         Model inputModel = context.getFlowStep().getComponent().getInputModel();
         Model outputModel = context.getFlowStep().getComponent().getOutputModel();
@@ -122,6 +132,8 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
             databaseWriter.setReplaceRows(true);
             databaseWriter.setContext(context);
             databaseWriter.setThreadNumber(threadNumber);
+            databaseWriter.setContinueOnError(continueOnError);
+            databaseWriter.setBatchMode(batchMode);
         }
         databaseWriter.handle(message, null, false);
     }

@@ -3,6 +3,7 @@ package org.jumpmind.metl.core.runtime.web;
 import java.io.Serializable;
 
 import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.runtime.component.SecurityScheme;
 
 public class HttpRequestMapping implements Serializable, Comparable<HttpRequestMapping> {
 
@@ -15,6 +16,12 @@ public class HttpRequestMapping implements Serializable, Comparable<HttpRequestM
     AgentDeployment deployment;
 
     int priority;
+    
+    SecurityScheme securityScheme;
+    
+    String securityUsername;
+    
+    String securityPassword;
     
     public HttpMethod getMethod() {
         return method;
@@ -46,6 +53,30 @@ public class HttpRequestMapping implements Serializable, Comparable<HttpRequestM
 
     public void setPriority(int priority) {
         this.priority = priority;
+    }
+    
+    public void setSecurityScheme(SecurityScheme securityScheme) {
+        this.securityScheme = securityScheme;
+    }
+    
+    public SecurityScheme getSecurityScheme() {
+        return securityScheme;
+    }
+    
+    public void setSecurityUsername(String securityUsername) {
+        this.securityUsername = securityUsername;
+    }
+    
+    public String getSecurityUsername() {
+        return securityUsername;
+    }
+    
+    public void setSecurityPassword(String securityPassword) {
+        this.securityPassword = securityPassword;
+    }
+    
+    public String getSecurityPassword() {
+        return securityPassword;
     }
 
     @Override

@@ -24,9 +24,12 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.File;
+import java.util.Iterator;
+import java.util.Map.Entry;
 
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.RollingFileAppender;
+import org.jumpmind.db.sql.Row;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.context.ApplicationContext;
 
@@ -61,6 +64,33 @@ public final class LogUtils {
     
     public static File getLogDir() {
         return logDir;
+    }
+    
+    public static String toJson(String changeType, Row row) {
+        Iterator<Entry<String, Object>> i = row.entrySet().iterator();
+        if (!i.hasNext()) {
+            return "{}";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append('{');
+        sb.append("\"ChangeType\" : \"").append(changeType).append('"').append('\n');
+        for (;;) {
+            Entry<String, Object> e = i.next();
+            String key = e.getKey();
+            Object value = e.getValue();
+            sb.append('"').append(key).append('"');
+            sb.append(" : ");
+            if (value instanceof String) {
+                sb.append('"').append(value).append('"');
+            } else {
+                sb.append(value);
+            }
+            if (!i.hasNext()) {
+                return sb.append('}').toString();
+            }
+            sb.append(',').append(' ').append('\n');
+        }
     }
     
     public static String formatDuration(long timeInMs) {

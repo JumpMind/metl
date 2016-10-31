@@ -21,7 +21,7 @@
    .v-filterselect-suggestpopup div[class*="page"]:hover {
        background: rgba(0, 114, 198, 1.0);
    }  
-    
+  
   .highlight {
     background-color: #FCEE89;
    } 
@@ -54,10 +54,6 @@
      text-shadow: 1px 1px 1px #bb9d7f;
   }
   
-  .warn {
-     color: orange;  
-  }
-  
   .done .v-icon {
      color: green;
   }
@@ -70,11 +66,19 @@
      color: $v-focus-color;
   }
   
-  .v-table-cell-content-project .v-icon {
-     color: #0072C6;     
+  .v-table-cell-content-project .v-icon {               
+     color: $v-focus-color;    
   }
   
+  .v-table-cell-content-project-version .v-icon {
+     color: $v-focus-color;    
+  }  
+  
   .v-selected .v-table-cell-content-project .v-icon {
+     color: white;
+  }
+  
+  .v-selected .v-table-cell-content-project-version .v-icon {
      color: white;
   }
   
@@ -82,16 +86,21 @@
      font-weight: bold;
   }
   
-  .v-table-cell-content-project-read-only .v-table-cell-wrapper {
+  .v-table-cell-content-project-version-read-only .v-table-cell-wrapper {
      font-weight: bold;
      color: gray;
   }  
   
   .v-selected .v-table-cell-content-project .v-table-cell-wrapper {
      font-weight: bold;
-  }  
+  }
   
   .v-selected .v-table-cell-content-project-read-only .v-table-cell-wrapper {
+     font-weight: bold;
+     color: white;
+  }   
+      
+  .v-selected .v-table-cell-content-project-version-read-only .v-table-cell-wrapper {
      font-weight: bold;
      color: white;
   }   
@@ -129,8 +138,6 @@
   }
 
     .v-table-column-selector {
-        top: -4px;
-        right: -4px;
         color: $v-focus-color;
     }
 
@@ -141,15 +148,6 @@
         -moz-transition-delay: 100ms;
         transition-delay: 100ms;
     }
-  
-    .v-table-body, .v-grid {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-     user-select: none;
-   }
   
      .v-panel-noborder, .v-panel-noborder > .v-panel-captionwrap, .v-panel-caption-noborder {
         border-radius: 0px;

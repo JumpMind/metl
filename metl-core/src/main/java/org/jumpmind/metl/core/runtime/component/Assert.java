@@ -23,9 +23,14 @@ package org.jumpmind.metl.core.runtime.component;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
+import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.runtime.BinaryMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -44,18 +49,28 @@ public class Assert extends AbstractComponentRuntime {
     public static final String EXPECTED_TEXT_MESSAGE_COUNT = "expected.text.messages.count";
     public static final String EXPECTED_BINARY_MESSAGE_COUNT = "expected.binary.messages.count";
     public static final String EXPECTED_CONTROL_MESSAGE_COUNT = "expected.control.messages.count";
+    public static final String EXPECTED_DISTINCT_ENTITY_TYPE_COUNT = "expected.distinct.entities.count";
+    public static final String EXPECTED_DISTINCT_ATTRIBUTE_TYPE_COUNT = "expected.distinct.attributes.count";
     public static final String EXPECTED_EMPTY_PAYLOAD_MESSAGE_COUNT = "expected.empty.payload.messages.count";
+    public static final String EXPECTED_CUSTOM_HEADER_PAIRS = "expected.custom.header.pairs";
+    public static final String EXPECTED_CUSTOM_CONTROL_HEADER_PAIRS = "expected.custom.control.header.pairs";
+    public static final String EXPECTED_TEXT_PAYLOAD = "expected.text.payload";
     public static final String EXPECTED_SQL_COUNT = "expected.sql.count";
     public static final String ASSERT_SQL = "sql";
     public static final String ASSERT_SQL_DATASOURCE = "sql.datasource";
 
     int expectedEntityMessageCount = 0;
+    int expectedDistinctEntityTypeCount = 0;
+    int expectedDistinctAttributeTypeCount = 0;
     int expectedTextMessageCount = 0;
     int expectedBinaryMessageCount = 0;
     int expectedControlMessageCount = 0;
     int expectedEmptyPayloadMessageCount = 0;
     int expectedSqlCount = 0;
+    String expectedCustomHeaderPairs;
+    String expectedCustomControlMsgHeaderPairs;
     Long expectedEntityCountPerMessage;
+    String expectedTextPayload;
 
     String sql;
     String dataSourceId;
@@ -66,10 +81,20 @@ public class Assert extends AbstractComponentRuntime {
     int controlMessageCount = 0;
     int emptyPayloadMessageCount = 0;
     int entityCountPerMessage = 0;
+    StringBuilder textPayload = new StringBuilder();
+    StringBuilder messageHeaders = new StringBuilder();
+    StringBuilder controlMessageHeaders = new StringBuilder();
+    
+    Set<String> distinctEntityIds = new HashSet<>();
+    Set<String> distinctAttributeIds = new HashSet<>();
 
     @Override
     public void start() {
         TypedProperties properties = getTypedProperties();
+        expectedCustomControlMsgHeaderPairs = properties.get(EXPECTED_CUSTOM_CONTROL_HEADER_PAIRS, null);
+        expectedCustomHeaderPairs = properties.get(EXPECTED_CUSTOM_HEADER_PAIRS, null);
+        expectedDistinctAttributeTypeCount = properties.getInt(EXPECTED_DISTINCT_ATTRIBUTE_TYPE_COUNT, -1);
+        expectedDistinctEntityTypeCount = properties.getInt(EXPECTED_DISTINCT_ENTITY_TYPE_COUNT, -1);
         expectedControlMessageCount = properties.getInt(EXPECTED_CONTROL_MESSAGE_COUNT,
                 expectedEntityMessageCount);
         expectedTextMessageCount = properties.getInt(EXPECTED_TEXT_MESSAGE_COUNT,
@@ -82,6 +107,7 @@ public class Assert extends AbstractComponentRuntime {
                 expectedBinaryMessageCount);
         expectedSqlCount = properties.getInt(EXPECTED_SQL_COUNT, expectedSqlCount);
         expectedEntityCountPerMessage = properties.getLong(EXPECTED_ENTITY_COUNT_PER_MESSAGE);
+        expectedTextPayload = properties.get(EXPECTED_TEXT_PAYLOAD, null);
         sql = properties.get(ASSERT_SQL);
         dataSourceId = properties.get(ASSERT_SQL_DATASOURCE);
     }
@@ -95,12 +121,59 @@ public class Assert extends AbstractComponentRuntime {
             ArrayList<EntityData> payload = ((EntityDataMessage) inputMessage).getPayload();
             entityCountPerMessage = payload.size();
             entityMessageCount++;
+            Model inputModel = getInputModel();
+            if (inputModel != null) {
+                for (EntityData entityData : payload) {
+                    Set<String> attributeIds = entityData.keySet();
+                    for (String attributeId : attributeIds) {
+                        distinctEntityIds.add(inputModel.getAttributeById(attributeId).getEntityId());                        
+                    }
+                    distinctAttributeIds.addAll(attributeIds);
+                }
+            }
         } else if (inputMessage instanceof TextMessage) {
-            textMessageCount++;
+            TextMessage textMessage = (TextMessage)inputMessage;
+            List<String> payload = textMessage.getPayload();
+            for (String string : payload) {
+                textPayload.append(string).append("\n");
+            }
+            textMessageCount++;            
         } else if (inputMessage instanceof BinaryMessage) {
             binaryMessageCount++;
         } else {
             emptyPayloadMessageCount++;
+        }
+        
+        if (!(inputMessage instanceof ControlMessage)) {
+            Map<String,String> headerValues = inputMessage.getHeader().getAsStrings();
+            boolean first = true;
+            for (String key : headerValues.keySet()) {
+                if (!key.startsWith("_")) {
+                    if (!first) {
+                        messageHeaders.append(",");
+                    }
+                    messageHeaders.append(key).append("=").append(headerValues.get(key));
+                    first = false;
+                }
+            }
+            if (!first) {
+                messageHeaders.append("\n");
+            }
+        } else {
+            Map<String,String> headerValues = inputMessage.getHeader().getAsStrings();
+            boolean first = true;
+            for (String key : headerValues.keySet()) {
+                if (!key.startsWith("_")) {
+                    if (!first) {
+                        controlMessageHeaders.append(",");
+                    }
+                    controlMessageHeaders.append(key).append("=").append(headerValues.get(key));
+                    first = false;
+                }
+            }
+            if (!first) {
+                controlMessageHeaders.append("\n");
+            }
         }
 
         callback.forward(inputMessage);
@@ -138,11 +211,36 @@ public class Assert extends AbstractComponentRuntime {
             assertFailed.append(String.format("\nExpected %d binary messages but received %s.",
                     expectedBinaryMessageCount, binaryMessageCount));
         }
+        
+        if (expectedDistinctAttributeTypeCount != -1 && expectedDistinctAttributeTypeCount != distinctAttributeIds.size()) {
+            assertFailed.append(String.format("\nExpected %d distinct attribute types but received %s.",
+                   expectedDistinctAttributeTypeCount, distinctAttributeIds.size()));
+        }
+        
+        if (expectedDistinctEntityTypeCount != -1 && expectedDistinctEntityTypeCount != distinctEntityIds.size()) {
+            assertFailed.append(String.format("\nExpected %d distinct entity types but received %s.",
+                    expectedDistinctEntityTypeCount, distinctEntityIds.size()));
+        }
 
         if (expectedEntityCountPerMessage.intValue() != -1
                 && expectedEntityCountPerMessage.intValue() != entityCountPerMessage) {
             assertFailed.append(String.format("\nExpected %d entities per message but received %s.",
                     expectedEntityCountPerMessage.intValue(), entityCountPerMessage));
+        }
+        
+        if (isNotBlank(expectedTextPayload) && !expectedTextPayload.trim().equals(textPayload.toString().trim())) {
+            assertFailed.append(String.format("\nExpected text payload of:\n%s \nReceived:\n%s",
+                    expectedTextPayload, textPayload.toString().trim()));       
+        }
+        
+        if (isNotBlank(expectedCustomHeaderPairs) && !expectedCustomHeaderPairs.trim().equals(messageHeaders.toString().trim())) {
+            assertFailed.append(String.format("\nExpected the following headers of:\n%s \nReceived:\n%s",
+                    expectedCustomHeaderPairs.trim(), messageHeaders.toString().trim()));                   
+        }
+        
+        if (isNotBlank(expectedCustomControlMsgHeaderPairs) && !expectedCustomControlMsgHeaderPairs.trim().equals(controlMessageHeaders.toString().trim())) {
+            assertFailed.append(String.format("\nExpected the following control headers of:\n%s \nReceived:\n%s",
+                    expectedCustomControlMsgHeaderPairs.trim(), controlMessageHeaders.toString().trim()));                   
         }
 
         if (isNotBlank(sql)) {
@@ -157,7 +255,7 @@ public class Assert extends AbstractComponentRuntime {
         }
 
         if (assertFailed.length() > 0) {
-            throw new AssertException(assertFailed.toString());
+            throw new AssertException("\nFlow Step: " + this.context.flowStep.getName() + assertFailed.toString());
         }
     }
 }

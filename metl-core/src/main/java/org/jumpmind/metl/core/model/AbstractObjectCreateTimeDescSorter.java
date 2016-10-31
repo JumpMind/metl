@@ -35,12 +35,14 @@ public class AbstractObjectCreateTimeDescSorter implements Comparator<AbstractOb
         }
     }
 
-    public static void sort(List<? extends AbstractObject> list) {
+    public static List<? extends AbstractObject> sort(List<? extends AbstractObject> list) {
         Collections.sort(list, new AbstractObjectCreateTimeDescSorter());
+        return list;
     }
     
-    public static void reverse(List<? extends AbstractObject> list) {
+    public static List<? extends AbstractObject> reverse(List<? extends AbstractObject> list) {
         Collections.sort(list, Collections.reverseOrder(new AbstractObjectCreateTimeDescSorter()));
+        return list;
     }
 
 }

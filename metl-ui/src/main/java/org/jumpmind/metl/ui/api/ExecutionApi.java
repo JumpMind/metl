@@ -20,15 +20,19 @@
  */
 package org.jumpmind.metl.ui.api;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang.StringUtils.left;
 import static org.jumpmind.metl.core.runtime.FlowConstants.REQUEST_VALUE_PARAMETER;
+import static org.jumpmind.metl.ui.api.ApiConstants.HEADER_EXECUTION_ID;
+import static org.jumpmind.metl.ui.common.UiUtils.whereAreYou;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.net.URLDecoder;
 import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -156,17 +160,21 @@ public class ExecutionApi {
             }
             AgentDeployment deployment = mapping.getDeployment();
             AgentRuntime agentRuntime = agentManager.getAgentRuntime(deployment.getAgentId());
-            FlowRuntime flowRuntime = agentRuntime.createFlowRuntime(deployment, params);
+            FlowRuntime flowRuntime = agentRuntime.createFlowRuntime(whoAreYou(request), deployment, params);
             IHasSecurity security = flowRuntime.getHasSecurity();
             if (enforceSecurity(security, request, response)) {
+                String executionId = flowRuntime.getExecutionId();
+                response.setHeader(HEADER_EXECUTION_ID, executionId);
                 Results results = flowRuntime.execute();
                 if (results != null) {
                     String contentType = results.getContentType();
                     if (isNotBlank(contentType)) {
                         response.setContentType(contentType);
+                    } else if (isBlank(response.getContentType())) {
+                        response.setContentType("application/octet-stream;charset=utf-8");
                     }
                     resultPayload = results.getValue();
-                }
+                }                
             }
             return resultPayload;
 
@@ -241,6 +249,16 @@ public class ExecutionApi {
     private void unauthorized(HttpServletResponse response) throws IOException {
         unauthorized(response, "Unauthorized");
     }
+    
+
+    
+    private String whoAreYou(HttpServletRequest req) {
+        String userId = left(req.getRemoteUser(), 50);
+        if (isBlank(userId)) {
+            userId =  left(whereAreYou(req), 50);
+        }
+        return userId;
+    }
 
     @ApiOperation(value = "Invoke a flow that is deployed to an agent by name")
     @RequestMapping(value = "/agents/{agentName}/deployments/{deploymentName}/invoke", method = RequestMethod.GET)
@@ -264,8 +282,8 @@ public class ExecutionApi {
                     if (agentDeployment.getName().equals(deploymentName)) {
                         foundDeployment = true;
                         if (agentDeployment.getDeploymentStatus() == DeploymentStatus.ENABLED) {
-                            AgentRuntime agentRuntime = agentManager.getAgentRuntime(agent);
-                            String executionId = agentRuntime.scheduleNow(agentDeployment,
+                            AgentRuntime agentRuntime = agentManager.getAgentRuntime(agent.getId());
+                            String executionId = agentRuntime.scheduleNow(whoAreYou(req), agentDeployment,
                                     toMap(req));
                             boolean done = false;
                             do {
@@ -273,7 +291,7 @@ public class ExecutionApi {
                                 done = execution != null
                                         && ExecutionStatus.isDone(execution.getExecutionStatus());
                                 if (!done) {
-                                    AppUtils.sleep(5000);
+                                    AppUtils.sleep(500);
                                 }
                             } while (!done);
                             break;
@@ -300,6 +318,8 @@ public class ExecutionApi {
                         }
                     }
                 }
+                
+                throw new FailureException(result);
             }
             return result;
         } else {
@@ -325,7 +345,7 @@ public class ExecutionApi {
     }
 
     protected Map<String, String> toMap(HttpServletRequest req) {
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> params = new LinkedHashMap<String, String>();
         Enumeration<String> names = req.getParameterNames();
         while (names.hasMoreElements()) {
             String name = names.nextElement();

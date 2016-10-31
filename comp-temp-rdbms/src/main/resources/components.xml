@@ -28,6 +28,7 @@
              resourceCategory='none'>
     <name>Temp RDBMS</name>
     <className>org.jumpmind.metl.core.runtime.component.TempRdbms</className>
+    <keywords>database,db,sql</keywords>
     <settings>
       <setting id='run.when'
                required='false'
@@ -55,6 +56,18 @@
                type='boolean'>
         <name>In Memory Db</name>
         <defaultValue>true</defaultValue>
+      </setting>
+      <setting id='continue.on.error'
+               required='true'
+               type='boolean'>
+        <name>Continue On Error</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='batch.mode'
+               required='true'
+               type='boolean'>
+        <name>Batch Mode</name>
+        <defaultValue>false</defaultValue>
       </setting>
     </settings>
   </component>

@@ -32,17 +32,17 @@ import java.util.Date;
 import java.util.List;
 
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang.time.FastDateFormat;
+import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
-import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.EntityData.ChangeType;
+import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.util.FormatUtils;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 
@@ -192,8 +192,11 @@ public class ModelAttributeScriptHelper {
     }
 
     public String replace(String searchString, String replacement) {
-        String text = value != null ? value.toString() : "";
-        return StringUtils.replace(text, searchString, replacement);
+        if (value != null) {
+            return StringUtils.replace(value.toString(), searchString, replacement);
+        } else {
+            return null;
+        }
     }
 
     public Date daysFromNow(int days) {
@@ -250,7 +253,7 @@ public class ModelAttributeScriptHelper {
         if (value != null) {
             return formatter.format(value);
         } else {
-            return "";
+            return null;
         }
     }
 
@@ -340,8 +343,7 @@ public class ModelAttributeScriptHelper {
             EntityData data, String expression) {
         ScriptEngine engine = scriptEngine.get();
         if (engine == null) {
-            ScriptEngineManager factory = new ScriptEngineManager();
-            engine = factory.getEngineByName("groovy");
+            engine = new GroovyScriptEngineImpl();
             scriptEngine.set(engine);
         }
         engine.put("value", value);

@@ -24,10 +24,12 @@
   <component category='PROCESSOR'
              id='Assert'
              inputMessageType='any'
+             showInputModel='true'
              outputMessageType='any'
              resourceCategory='none'>
     <name>Assert</name>
     <className>org.jumpmind.metl.core.runtime.component.Assert</className>
+    <keywords>test</keywords>
     <settings>
       <setting id='expected.entity.messages.count'
                required='false'
@@ -40,6 +42,18 @@
                type='integer'>
         <name>Expected Number of Entities Per Entity Message</name>
       </setting>
+      <setting id='expected.distinct.entities.count'
+               required='false'
+               type='integer'>
+        <name>Expected Distinct Types of Entities</name>
+        <defaultValue></defaultValue>
+      </setting>
+      <setting id='expected.distinct.attributes.count'
+               required='false'
+               type='integer'>
+        <name>Expected Distinct Types of Attributes</name>
+        <defaultValue></defaultValue>
+      </setting>            
       <setting id='expected.text.messages.count'
                required='false'
                type='integer'>
@@ -64,6 +78,22 @@
         <name>Expected Number of Empty Payload Messages</name>
         <defaultValue>0</defaultValue>
       </setting>
+      <setting id='expected.custom.header.pairs'
+               required='false'
+               type='multiline_text'>
+        <name>Expected Custom Content Message Header Pairs</name>
+      </setting>
+      <setting id='expected.custom.control.header.pairs'
+               required='false'
+               type='multiline_text'>
+        <name>Expected Custom Control Message Header Pairs</name>
+      </setting>      
+            
+      <setting id='expected.text.payload'
+               required='false'
+               type='multiline_text'>
+        <name>Expected Text Payload</name>
+      </setting>      
       <setting id='sql.datasource'
                required='false'
                type='datasource_resource'>
@@ -88,9 +118,10 @@
              inputMessageType='any'
              outputMessageType='any'
              resourceCategory='none'>
-    <name>Call Flow</name>
-    <className>org.jumpmind.metl.core.runtime.component.CallFlow</className>
-    <flowManipulatorClassName>org.jumpmind.metl.core.runtime.component.CallFlowFlowManipulator</flowManipulatorClassName>
+    <name>Embed Flow</name>
+    <className>org.jumpmind.metl.core.runtime.component.EmbedFlow</className>
+    <keywords>subflow,execute,embed</keywords>
+    <flowManipulatorClassName>org.jumpmind.metl.core.runtime.component.EmbedFlowFlowManipulator</flowManipulatorClassName>
     <settings>
       <setting id='flow.id'
                required='true'
@@ -107,6 +138,7 @@
              resourceCategory='none'>
     <name>Deduper</name>
     <className>org.jumpmind.metl.core.runtime.component.Deduper</className>
+    <keywords>unique</keywords>
     <description></description>
     <settings>
       <setting id='dedupe.type'
@@ -142,8 +174,10 @@
              inputMessageType='any'
              inputOutputModelsMatch='false'
              outputMessageType='any'
-             resourceCategory='none'>
+             resourceCategory='none'
+             supportsMultipleThreads='true'>
     <name>Delay</name>
+    <keywords>sleep,wait</keywords>
     <className>org.jumpmind.metl.core.runtime.component.Delay</className>
     <description></description>
     <settings>
@@ -165,16 +199,95 @@
       </setting>
     </settings>
   </component>
+  <component category='Writer'
+             id='35c4c0ae-b040-4f93-b212-5b92619c4064'
+             inputMessageType='any'
+             showInputModel='true'
+             inputOutputModelsMatch='false'
+             outputMessageType='any'
+             resourceCategory='mailsession'>
+    <name>Email Writer</name>
+    <keywords>send,email,smtp,write</keywords>
+    <className>org.jumpmind.metl.core.runtime.component.EmailWriter</className>
+    <description></description>
+    <settings>    
+      <setting id='subject'
+               required='true'
+               type='text'>
+        <name>Subject</name>
+      </setting>
+      <setting id='body'
+               required='true'
+               type='multiline_text'>
+        <name>Body</name>
+      </setting>
+      <setting id='from.line'
+               required='true'
+               type='text'>
+        <name>From:</name>
+      </setting>      
+      <setting id='to.line'
+               required='false'
+               type='text'>
+        <name>To:</name>
+      </setting>
+      <setting id='cc.line'
+               required='false'
+               type='text'>
+        <name>CC:</name>
+      </setting>
+      <setting id='bcc.line'
+               required='false'
+               type='text'>
+        <name>BCC:</name>
+      </setting>
+      <setting id='source.step.email.addresses'
+               required='false'
+               type='source_step'>
+        <name>Source Step For Email Addresses</name>
+      </setting>
+      <setting id='source.step.email.addresses.type'
+               required='false'
+               type='choice'>
+        <name>Source Step Email Addresses Type</name>
+        <defaultValue>TO</defaultValue>
+        <choices>
+          <choice>TO</choice>
+          <choice>CC</choice>
+          <choice>BCC</choice>
+        </choices>
+      </setting>       
+      <setting id='one.email.per.recipient'
+               required='false'
+               type='boolean'>
+        <name>One Email per Recipient</name>
+        <defaultValue>false</defaultValue>
+      </setting>          
+      <setting id='run.when'
+               required='false'
+               type='choice'>
+        <name>Run When</name>
+        <defaultValue>PER UNIT OF WORK</defaultValue>
+        <choices>
+          <choice>PER UNIT OF WORK</choice>
+          <choice>PER MESSAGE</choice>
+          <choice>PER ENTITY</choice>
+        </choices>
+      </setting>
+    </settings>
+  </component>
   <component autoSendControlMessages='false'
              category='PROCESSOR'
              id='Content Router'
              inputMessageType='any'
+             showInputModel='true'             
              inputOutputModelsMatch='true'
              outputMessageType='any'
              resourceCategory='none'
              shareable='false'>
     <name>Content Router</name>
     <className>org.jumpmind.metl.core.runtime.component.ContentRouter</className>
+    <keywords>target</keywords>
     <description></description>
     <settings>
       <setting id='rows.per.message'
@@ -199,6 +312,7 @@
              resourceCategory='none'>
     <name>Execute</name>
     <className>org.jumpmind.metl.core.runtime.component.Execute</className>
+    <keywords>launch,process</keywords>
     <description></description>
     <settings>
       <setting id='run.when'
@@ -238,12 +352,13 @@
              resourceCategory='streamable'>
     <name>File Poller</name>
     <className>org.jumpmind.metl.core.runtime.component.FilePoller</className>
+    <keywords>files</keywords>
     <description></description>
     <settings>
       <setting id='run.when'
                required='false'
                type='choice'>
-        <name>Run Whennn</name>
+        <name>Run When</name>
         <defaultValue>PER UNIT OF WORK</defaultValue>
         <choices>
           <choice>PER UNIT OF WORK</choice>
@@ -301,6 +416,12 @@
         <name>Max Files To Poll</name>
         <defaultValue>1000</defaultValue>
       </setting>
+      <setting id='only.files.older.than.minutes'
+               required='true'
+               type='integer'>
+        <name>Include Only Files Older Than (minutes)</name>
+        <defaultValue>0</defaultValue>
+      </setting>
       <setting id='action.on.success'
                required='false'
                type='choice'>
@@ -354,6 +475,7 @@
              resourceCategory='streamable'>
     <name>File Util</name>
     <className>org.jumpmind.metl.core.runtime.component.FileUtil</className>
+    <keywords>files,copy,move</keywords>
     <description></description>
     <settings>
       <setting id='run.when'
@@ -374,6 +496,7 @@
         <choices>
           <choice>Copy</choice>
           <choice>Move</choice>
+          <choice>Delete</choice>
         </choices>
       </setting>
       <setting id='relative.path'
@@ -419,6 +542,7 @@
              resourceCategory='none'>
     <name>Format Delimited</name>
     <className>org.jumpmind.metl.core.runtime.component.DelimitedFormatter</className>
+    <keywords>csv,generate,file,files,text</keywords>
     <description></description>
     <settings>
       <setting id='delimited.formatter.delimiter'
@@ -449,6 +573,7 @@
              resourceCategory='none'>
     <name>Format Fixed</name>
     <className>org.jumpmind.metl.core.runtime.component.FixedLengthFormatter</className>
+    <keywords>file,files,text,generate</keywords>
     <description></description>
     <settings>
       <setting id='fixed.length.formatter.header'
@@ -467,6 +592,7 @@
              resourceCategory='none'>
     <name>Format XML</name>
     <className>org.jumpmind.metl.core.runtime.component.XmlFormatter</className>
+    <keywords>files</keywords>
     <description></description>
     <settings>
       <setting id='run.when'
@@ -517,6 +643,7 @@
              resourceCategory='none'>
     <name>Merger</name>
     <className>org.jumpmind.metl.core.runtime.component.Merger</className>
+    <keywords>merge,join</keywords>
     <description></description>
     <settings>
       <setting id='rows.per.message'
@@ -531,11 +658,13 @@
              id='Lookup'
              inputMessageType='any'
              inputOutputModelsMatch='true'
+             showInputModel='true'
              outputMessageType='entity'
              resourceCategory='none'
              shareable='false'>
     <name>Lookup</name>
     <className>org.jumpmind.metl.core.runtime.component.Lookup</className>
+    <keywords>find,enhance</keywords>
     <description></description>
     <settings>
       <setting id='lookup.data.source.step'
@@ -573,6 +702,7 @@
              resourceCategory='none'>
     <name>Mapping</name>
     <className>org.jumpmind.metl.core.runtime.component.Mapping</className>
+    <keywords>map</keywords>
     <description></description>
     <settings>
       <setting id='set.unmapped.attributes.to.null'
@@ -592,11 +722,13 @@
   <component category='PROCESSOR'
              id='Message Logger'
              inputMessageType='any'
+             showInputModel='true'             
              inputOutputModelsMatch='true'
              outputMessageType='any'
              resourceCategory='none'>
     <name>Message Logger</name>
     <className>org.jumpmind.metl.core.runtime.component.MessageLogger</className>
+    <keywords>log</keywords>
     <description></description>
     <settings>
       <setting id='qualify.with.entity.name'
@@ -616,6 +748,7 @@
              shareable='false'>
     <name>Multiplier</name>
     <className>org.jumpmind.metl.core.runtime.component.Multiplier</className>
+    <keywords>generate,multiply</keywords>
     <description></description>
     <settings>
       <setting id='multiplier.source.step'
@@ -636,9 +769,11 @@
              inputMessageType='any'
              inputOutputModelsMatch='false'
              outputMessageType='any'
-             resourceCategory='none'>
+             resourceCategory='none'
+             supportsMultipleThreads='true'>
     <name>No Op</name>
     <className>org.jumpmind.metl.core.runtime.component.NoOp</className>
+    <keywords>nothing,noop</keywords>
     <description></description>
     <settings></settings>
   </component>
@@ -647,9 +782,11 @@
              inputMessageType='text'
              inputOutputModelsMatch='false'
              outputMessageType='entity'
-             resourceCategory='none'>
+             resourceCategory='none'
+             supportsMultipleThreads='true'>
     <name>Parse Delimited</name>
     <className>org.jumpmind.metl.core.runtime.component.DelimitedParser</className>
+    <keywords>parse,files,file,csv</keywords>
     <description></description>
     <settings>
       <setting id='delimiter'
@@ -690,6 +827,7 @@
              outputMessageType='entity'>
     <name>Parse Fixed Length</name>
     <className>org.jumpmind.metl.core.runtime.component.FixedLengthParser</className>
+    <keywords>parse,file,files</keywords>
     <description></description>
     <settings>
       <setting id='header.lines.to.skip'
@@ -715,6 +853,7 @@
              supportsMultipleThreads='true'>
     <name>Parse XML</name>
     <className>org.jumpmind.metl.core.runtime.component.XmlParser</className>
+    <keywords>parse,file,files,xml</keywords>
     <description></description>
     <settings>
       <setting id='rows.per.message'
@@ -722,19 +861,19 @@
                type='integer'>
         <name>Rows/Msg</name>
         <defaultValue>1000</defaultValue>
-      </setting>    
+      </setting>
       <setting id='optimize.for.speed'
                required='false'
                type='boolean'>
-        <name>Optimize for speed.  Supports only basic XPath</name>
+        <name>Optimize for speed. Supports only basic XPath</name>
         <defaultValue>false</defaultValue>
-      </setting>    
+      </setting>
       <setting id='xml.formatter.ignore.namespace'
                required='false'
                type='boolean'>
         <name>Ignore namespaces for XPath matching</name>
         <defaultValue>true</defaultValue>
-      </setting>        
+      </setting>
     </settings>
   </component>
   <component category='WRITER'
@@ -746,6 +885,7 @@
              supportsMultipleThreads='true'>
     <name>RDBMS Writer</name>
     <className>org.jumpmind.metl.core.runtime.component.RdbmsWriter</className>
+    <keywords>database,db,dml,insert,update,delete,crud</keywords>
     <description></description>
     <settings>
       <setting id='catalog'
@@ -800,6 +940,18 @@
         <name>Batch Mode</name>
         <defaultValue>false</defaultValue>
       </setting>
+      <setting id='table.auto.create'
+               required='false'
+               type='boolean'>
+        <name>Create table if missing</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='use.cached.table.metadata'
+               required='false'
+               type='boolean'>
+        <name>Use Previously Cached Table Metadata</name>
+        <defaultValue>false</defaultValue>
+      </setting>      
       <setting id='table.prefix'
                required='false'
                type='text'>
@@ -815,11 +967,14 @@
   <component category='PROCESSOR'
              id='Script'
              inputMessageType='any'
+             showInputModel='true'
              inputOutputModelsMatch='false'
              outputMessageType='any'
-             resourceCategory='any'>
-    <name>Script</name>
+             resourceCategory='any'
+             supportsMultipleThreads='true'>
+    <name>Groovy Script</name>
     <className>org.jumpmind.metl.core.runtime.component.Script</className>
+    <keywords>groovy,logic,java</keywords>
     <description></description>
     <settings>
       <setting id='imports'
@@ -833,7 +988,7 @@
                type='script'
                visible='false'>
         <name>Additional Methods</name>
-      </setting>      
+      </setting>
       <setting id='init.script'
                required='true'
                type='script'
@@ -845,7 +1000,9 @@
                type='script'
                visible='false'>
         <name>Handle Msg Script</name>
-        <defaultValue>forwardMessage()</defaultValue>
+        <defaultValue>
+forwardMessage()        
+        </defaultValue>
       </setting>
       <setting id='on.flow.success.script'
                required='true'
@@ -877,10 +1034,15 @@
         <name>Sequence Attribute Name</name>
       </setting>
       <setting id='sequence.sql'
-               required='true'
+               required='false'
                type='multiline_text'>
         <name>Select Starting Sequence Sql</name>
       </setting>
+      <setting id='sequence.start.value'
+               required='false'
+               type='integer'>            
+        <name>Starting Sequence Value</name>
+      </setting>      
       <setting id='shared'
                required='true'
                type='boolean'>
@@ -892,16 +1054,29 @@
                type='text'>
         <name>Shared Name</name>
       </setting>
+      <setting id='reset.on.attribute.change'
+               required='true'
+               type='boolean'>
+        <defaultValue>false</defaultValue>
+        <name>Reset on Attribute Change?</name>
+      </setting>
+      <setting id='reset.attribute'
+               required='false'
+               type='entity_column'>
+        <name>Reset Attribute Name</name>
+      </setting>      
     </settings>
   </component>
   <component category='WRITER'
              id='Sql Executor'
+             showInputModel='true'             
              inputMessageType='any'
              inputOutputModelsMatch='true'
              outputMessageType='text'
              resourceCategory='datasource'>
     <name>Sql Executor</name>
     <className>org.jumpmind.metl.core.runtime.component.SqlExecutor</className>
+    <keywords>database,db,sql</keywords>
     <description></description>
     <extraUnitOfWorkOptions>
       <extraUnitOfWorkOption>SQL Statement</extraUnitOfWorkOption>
@@ -935,6 +1110,7 @@
              outputMessageType='text'>
     <name>Text Constant</name>
     <className>org.jumpmind.metl.core.runtime.component.TextConstant</className>
+    <keywords>hardcode</keywords>
     <description></description>
     <settings>
       <setting id='run.when'
@@ -956,7 +1132,7 @@
                required='false'
                type='boolean'>
         <name>Split On Line Feed</name>
-        <defaultValue>false</defaultValue>
+        <defaultValue>true</defaultValue>
       </setting>
       <setting id='rows.per.message'
                required='false'
@@ -969,7 +1145,7 @@
                type='boolean'>
         <name>Send Control Message on Text Send</name>
         <defaultValue>false</defaultValue>
-      </setting>      
+      </setting>
     </settings>
   </component>
   <component category='READER'
@@ -980,6 +1156,7 @@
              resourceCategory='streamable'>
     <name>Text File Reader</name>
     <className>org.jumpmind.metl.core.runtime.component.TextFileReader</className>
+    <keywords>file,files</keywords>
     <description></description>
     <settings>
       <setting id='run.when'
@@ -1073,6 +1250,7 @@
              resourceCategory='streamable'>
     <name>Binary File Reader</name>
     <className>org.jumpmind.metl.core.runtime.component.BinaryFileReader</className>
+    <keywords>files</keywords>
     <description></description>
     <settings>
       <setting id='run.when'
@@ -1154,6 +1332,7 @@
              resourceCategory='streamable'>
     <name>Text File Writer</name>
     <className>org.jumpmind.metl.core.runtime.component.TextFileWriter</className>
+    <keywords>files</keywords>
     <description></description>
     <settings>
       <setting id='relative.path'
@@ -1211,6 +1390,7 @@
              resourceCategory='streamable'>
     <name>Binary File Writer</name>
     <className>org.jumpmind.metl.core.runtime.component.BinaryFileWriter</className>
+    <keywords>files</keywords>
     <description></description>
     <settings>
       <setting id='relative.path'
@@ -1274,16 +1454,25 @@
     <name>Transformer</name>
     <className>org.jumpmind.metl.core.runtime.component.Transformer</className>
     <description></description>
-    <settings></settings>
+    <settings>
+      <setting id='pass.along.control.messages'
+               required='false'
+               type='boolean'>
+        <name>Pass Along Control Messages</name>
+        <defaultValue>false</defaultValue>
+      </setting>    
+    </settings>
   </component>
   <component category='PROCESSOR'
              id='Web'
              inputMessageType='text'
              inputOutputModelsMatch='false'
              outputMessageType='text'
-             resourceCategory='streamable'>
-    <name>Web</name>
+             resourceCategory='http'
+             supportsMultipleThreads='true'>
+    <name>Web Request</name>
     <className>org.jumpmind.metl.core.runtime.component.Web</className>
+    <keywords>invoke,rest,http</keywords>
     <description></description>
     <settings>
       <setting id='run.when'
@@ -1310,12 +1499,23 @@
           <choice>Message</choice>
           <choice>Provided</choice>
         </choices>
-      </setting>
+      </setting>      
       <setting id='body.text'
                required='false'
                type='multiline_text'>
         <name>Body Text</name>
       </setting>
+      <setting id='http.headers'
+               required='false'
+               type='multiline_text'>
+        <name>Http Headers</name>
+        <defaultValue>User-Agent:Metl</defaultValue>
+      </setting>
+      <setting id='http.parameters'
+         required='false'
+         type='multiline_text'>
+         <name>Http Parameters</name>
+      </setting>                  
       <setting id='parameter.replacement'
                required='false'
                type='boolean'>
@@ -1332,6 +1532,7 @@
              resourceCategory='none'>
     <name>XSLT Processor</name>
     <className>org.jumpmind.metl.core.runtime.component.XsltProcessor</className>
+    <keywords>xml</keywords>
     <description></description>
     <settings>
       <setting id='xslt.processor.output.all.attributes'
@@ -1373,6 +1574,7 @@
              resourceCategory='none'>
     <name>Zip</name>
     <className>org.jumpmind.metl.core.runtime.component.Zip</className>
+    <keywords>compress</keywords>
     <description></description>
     <settings>
       <setting id='source.resource'
@@ -1418,6 +1620,7 @@
              resourceCategory='none'>
     <name>UnZip</name>
     <className>org.jumpmind.metl.core.runtime.component.UnZip</className>
+    <keywords>compress</keywords>
     <description></description>
     <settings>
       <setting id='source.resource'
@@ -1474,6 +1677,7 @@
              resourceCategory='streamable'>
     <name>XML Reader</name>
     <className>org.jumpmind.metl.core.runtime.component.XmlReader</className>
+    <keywords>files,file</keywords>
     <description></description>
     <settings>
       <setting id='run.when'
@@ -1551,110 +1755,147 @@
     <className>org.jumpmind.metl.core.runtime.component.Union</className>
     <description></description>
   </component>
-    <component category='SERVICE' id='HttpRequest' inputMessageType='none' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='none'>
-        <name>Http Request</name>
-        <className>org.jumpmind.metl.core.runtime.component.HttpRequest</className>
-        <deploymentListenerClassName>org.jumpmind.metl.core.runtime.component.HttpRequestDeploymentListener</deploymentListenerClassName>
+  <component category='SERVICE'
+             id='HttpRequest'
+             inputMessageType='any'
+             inputOutputModelsMatch='false'
+             outputMessageType='text'
+             resourceCategory='none'>
+    <name>Http Request</name>
+    <className>org.jumpmind.metl.core.runtime.component.HttpRequest</className>
+    <deploymentListenerClassName>org.jumpmind.metl.core.runtime.component.HttpRequestDeploymentListener</deploymentListenerClassName>
+    <keywords>REST,ws,webservice,web</keywords>
+    <description></description>
+    <settings>
+      <setting id='http.method'
+               required='true'
+               type='choice'>
+        <name>HTTP Method</name>
+        <defaultValue>GET</defaultValue>
+        <choices>
+          <choice>GET</choice>
+          <choice>POST</choice>
+          <choice>PUT</choice>
+          <choice>DELETE</choice>
+        </choices>
+      </setting>
+      <setting id='path'
+               required='true'
+               type='text'>
+        <name>Path</name>
+        <defaultValue>/$(_agentName)/$(_deploymentName)/$(_versionName)</defaultValue>
         <description></description>
-        <settings>
-            <setting id='http.method' required='true' type='choice'>
-                <name>HTTP Method</name>
-                <defaultValue>GET</defaultValue>
-                <choices>
-                    <choice>GET</choice>
-                    <choice>POST</choice>
-                    <choice>PUT</choice>
-                    <choice>DELETE</choice>
-                </choices>
-            </setting>
-            <setting id='path' required='true' type='text'>
-                <name>Path</name>
-                <defaultValue>/$(_agentName)/$(_deploymentName)/$(_versionName)</defaultValue>
-                <description></description>
-            </setting>
-            <setting id='security.scheme' required='false' type='choice'>
-                <name>Security Scheme</name>
-                <defaultValue>NONE</defaultValue>
-                <choices>
-                    <choice>NONE</choice>
-                    <choice>BASIC</choice>
-                </choices>
-            </setting>  
-            <setting id='secure.username'
+      </setting>
+      <setting id='security.scheme'
+               required='false'
+               type='choice'>
+        <name>Security Scheme</name>
+        <defaultValue>NONE</defaultValue>
+        <choices>
+          <choice>NONE</choice>
+          <choice>BASIC</choice>
+        </choices>
+      </setting>
+      <setting id='secure.username'
                required='false'
                type='text'>
-               <name>Secure Username</name>
-            </setting>
-            <setting id='secure.password'
+        <name>Secure Username</name>
+      </setting>
+      <setting id='secure.password'
                required='false'
                type='password'>
-               <name>Secure Password</name>
-            </setting>         
-        </settings>
-    </component>
-    <component category='SERVICE' id='16170152-eee5-11e5-9ce9-5e5517507c66'
-        inputMessageType='any' inputOutputModelsMatch='true'
-        outputMessageType='none' resourceCategory='none'>
-        <name>Http Response</name>
-        <className>org.jumpmind.metl.core.runtime.component.HttpResponse</className>
-        <description></description>
-        <settings>
-            <setting id='returns.data'
+        <name>Secure Password</name>
+      </setting>
+    </settings>
+  </component>
+  <component category='SERVICE'
+             id='16170152-eee5-11e5-9ce9-5e5517507c66'
+             inputMessageType='text'
+             inputOutputModelsMatch='true'
+             outputMessageType='none'
+             resourceCategory='none'>
+    <name>Http Response</name>
+    <className>org.jumpmind.metl.core.runtime.component.HttpResponse</className>
+    <keywords>REST,ws,webservice,web</keywords>
+    <description></description>
+    <settings>
+      <setting id='returns.data'
                required='true'
                type='boolean'>
-                <name>Returns Data</name>
-                <defaultValue>true</defaultValue>
-            </setting>
-        </settings>
-    </component>  
-    <component category='SERVICE' id='10887396-9d14-4a42-8212-66b4ce53cef2'
-        inputMessageType='text' inputOutputModelsMatch='false'
-        outputMessageType='entity' resourceCategory='none'>
-        <name>Deserializer</name>
-        <className>org.jumpmind.metl.core.runtime.component.Deserializer</className>
-        <settings>
-            <setting id='format' required='false' type='choice'>
-                <name>Format</name>
-                <defaultValue>AUTOMATIC</defaultValue>
-                <choices>
-                    <choice>AUTOMATIC</choice>
-                    <choice>JSON</choice>
-                    <choice>XML</choice>
-                </choices>
-            </setting>
-            <setting id='structure' required='false' type='choice'>
-                <name>Structure</name>
-                <defaultValue>BY_INBOUND_ROW</defaultValue>
-                <choices>
-                    <choice>BY_INBOUND_ROW</choice>
-                    <choice>BY_TABLE</choice>
-                </choices>
-            </setting>            
-        </settings>
-    </component>      
-    <component category='SERVICE' id='4e810250-d937-4223-9d50-6322b35c0527'
-        inputMessageType='entity' inputOutputModelsMatch='false'
-        outputMessageType='text' resourceCategory='none'>
-        <name>Serializer</name>
-        <className>org.jumpmind.metl.core.runtime.component.Serializer</className>
-        <settings>
-            <setting id='format' required='false' type='choice'>
-                <name>Format</name>
-                <defaultValue>AUTOMATIC</defaultValue>
-                <choices>
-                    <choice>AUTOMATIC</choice>
-                    <choice>JSON</choice>
-                    <choice>XML</choice>
-                </choices>
-            </setting>
-            <setting id='structure' required='false' type='choice'>
-                <name>Structure</name>
-                <defaultValue>BY_INBOUND_ROW</defaultValue>
-                <choices>
-                    <choice>BY_INBOUND_ROW</choice>
-                    <choice>BY_TABLE</choice>
-                </choices>
-            </setting>            
-        </settings>
-    </component>            
+        <name>Returns Data</name>
+        <defaultValue>true</defaultValue>
+      </setting>
+      <setting id='content.type'
+               required='false'
+               type='text'>
+        <name>Content Type</name>
+      </setting>      
+    </settings>
+  </component>
+  <component category='SERVICE'
+             id='10887396-9d14-4a42-8212-66b4ce53cef2'
+             inputMessageType='text'
+             inputOutputModelsMatch='false'
+             outputMessageType='entity'
+             resourceCategory='none'>
+    <name>Deserializer</name>
+    <className>org.jumpmind.metl.core.runtime.component.Deserializer</className>
+    <keywords>REST,ws,webservice,web</keywords>
+    <settings>
+      <setting id='format'
+               required='false'
+               type='choice'>
+        <name>Format</name>
+        <defaultValue>AUTOMATIC</defaultValue>
+        <choices>
+          <choice>AUTOMATIC</choice>
+          <choice>JSON</choice>
+          <choice>XML</choice>
+        </choices>
+      </setting>
+      <setting id='structure'
+               required='false'
+               type='choice'>
+        <name>Structure</name>
+        <defaultValue>BY_INBOUND_ROW</defaultValue>
+        <choices>
+          <choice>BY_INBOUND_ROW</choice>
+          <choice>BY_TABLE</choice>
+        </choices>
+      </setting>
+    </settings>
+  </component>
+  <component category='SERVICE'
+             id='4e810250-d937-4223-9d50-6322b35c0527'
+             inputMessageType='entity'
+             inputOutputModelsMatch='false'
+             outputMessageType='text'
+             resourceCategory='none'>
+    <name>Serializer</name>
+    <className>org.jumpmind.metl.core.runtime.component.Serializer</className>
+    <keywords>REST,ws,webservice,web</keywords>
+    <settings>
+      <setting id='format'
+               required='false'
+               type='choice'>
+        <name>Format</name>
+        <defaultValue>AUTOMATIC</defaultValue>
+        <choices>
+          <choice>AUTOMATIC</choice>
+          <choice>JSON</choice>
+          <choice>XML</choice>
+        </choices>
+      </setting>
+      <setting id='structure'
+               required='false'
+               type='choice'>
+        <name>Structure</name>
+        <defaultValue>BY_INBOUND_ROW</defaultValue>
+        <choices>
+          <choice>BY_INBOUND_ROW</choice>
+          <choice>BY_TABLE</choice>
+        </choices>
+      </setting>
+    </settings>
+  </component>
 </components>

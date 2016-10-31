@@ -42,6 +42,7 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.AgentDeploymentParameter;
+import org.jumpmind.metl.core.model.AgentResourceSetting;
 import org.jumpmind.metl.core.model.AgentStatus;
 import org.jumpmind.metl.core.model.DeploymentStatus;
 import org.jumpmind.metl.core.model.Flow;
@@ -49,6 +50,7 @@ import org.jumpmind.metl.core.model.FlowParameter;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Notification;
 import org.jumpmind.metl.core.model.ProjectVersion;
+import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.SettingDefinition;
@@ -176,7 +178,7 @@ public class AgentRuntime {
              * the entire pool is used.
              * A common Linux thread limit is 1024 per user.
              */
-            this.flowExecutionScheduler.setPoolSize(20);
+            this.flowExecutionScheduler.setPoolSize(agent.getExecThreadCount());
             this.flowExecutionScheduler.initialize();
 
             this.globalSettings = configurationService.findGlobalSettingsAsMap();
@@ -280,60 +282,88 @@ public class AgentRuntime {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void deployResources(Flow flow) {
-        List<ResourceName> flowResourceNames = 
-        configurationService.findResourcesInProject(flow.getProjectVersionId());
+        List<ResourceName> flowResourceNames = new ArrayList<>(configurationService
+                .findResourcesInProject(flow.getProjectVersionId()));
+        List<ProjectVersionDependency> dependencies = configurationService.findProjectDependencies(flow.getProjectVersionId());
+        for (ProjectVersionDependency projectVersionDependency : dependencies) {
+            flowResourceNames.addAll(configurationService.findResourcesInProject(projectVersionDependency.getTargetProjectVersionId()));
+        }
+        
         for (ResourceName flowResourceName : flowResourceNames) {
-            
-        	Resource flowResource = configurationService.findResource(flowResourceName.getId());
-            IResourceRuntime alreadyDeployed = deployedResources.get(flowResource.getId());
-    
-            Map<String, SettingDefinition> settings = resourceFactory
-                    .getSettingDefinitionsForResourceType(flowResource.getType());
-            TypedProperties defaultSettings = flowResource.toTypedProperties(settings);
-            TypedProperties overrideSettings = agent.toTypedProperties(flowResource);
-            TypedProperties combined = new TypedProperties(defaultSettings);
-            combined.putAll(overrideSettings);
-            Set<Entry<Object, Object>> entries = combined.entrySet();
-            for (Entry<Object, Object> entry : entries) {
-                String value = (String)entry.getValue();
-                if (value != null) {
-                    value = FormatUtils.replaceTokens(value, (Map)System.getProperties(), true);
-                    entry.setValue(value);
-                }
-            }
-    
-            boolean deploy = true;
-            if (alreadyDeployed != null) {
-                deploy = false;
-                Resource deployedResource = alreadyDeployed.getResource();
-                TypedProperties alreadyDeployedOverrides = alreadyDeployed.getResourceRuntimeSettings();
+            try {
+                Resource flowResource = configurationService.findResource(flowResourceName.getId());
+                IResourceRuntime alreadyDeployed = deployedResources.get(flowResource.getId());
                 
-                // TODO the runtime is already combined.  change this
-                TypedProperties alreadyDeployedDefaultSettings = deployedResource
-                        .toTypedProperties(settings);
-                TypedProperties alreadyDeployedCombined = new TypedProperties(
-                        alreadyDeployedDefaultSettings);
-                alreadyDeployedCombined.putAll(alreadyDeployedOverrides);
-    
-                for (Object key : combined.keySet()) {
-                    Object newObj = combined.get(key);
-                    Object oldObj = alreadyDeployedCombined.get(key);
-                    if (!ObjectUtils.equals(newObj, oldObj)) {
-                        deploy = true;
-                        break;
+                if (alreadyDeployed == null) {
+                    Resource previousResource = configurationService.findPreviousVersionResource(flowResource);
+                    if (previousResource != null) {
+                        log.info("Found a previous version of the '{}' resource.  Using it's agent settings during deployment", flowResource.getName());
+                        TypedProperties previouslyOverriddenSettings = agent.toTypedProperties(previousResource);
+                        for (Object key : previouslyOverriddenSettings.keySet()) {
+                            AgentResourceSetting setting = new AgentResourceSetting(flowResource.getId(), agent.getId());
+                            setting.setName((String)key);
+                            setting.setValue((String)previouslyOverriddenSettings.get(key));
+                            configurationService.save(setting);
+                            agent.getAgentResourceSettings().add(setting);
+                        }                        
                     }
                 }
-    
-                if (deploy) {
-                    log.info("Undeploying the {} resource to the {} agent", flowResource.getName(), agent.getName());
-                    alreadyDeployed.stop();
+
+                Map<String, SettingDefinition> settings = resourceFactory
+                        .getSettingDefinitionsForResourceType(flowResource.getType());
+                TypedProperties defaultSettings = flowResource.toTypedProperties(settings);
+                TypedProperties overrideSettings = agent.toTypedProperties(flowResource);
+                TypedProperties combined = new TypedProperties(defaultSettings);
+                combined.putAll(overrideSettings);
+                Set<Entry<Object, Object>> entries = combined.entrySet();
+                for (Entry<Object, Object> entry : entries) {
+                    String value = (String) entry.getValue();
+                    if (value != null) {
+                        value = FormatUtils.replaceTokens(value, (Map) System.getProperties(),
+                                true);
+                        entry.setValue(value);
+                    }
                 }
-            }
-    
-            if (deploy) {
-                log.info("Deploying the {} resource to the {} agent", flowResource.getName(), agent.getName());
-                IResourceRuntime resource = resourceFactory.create(flowResource, combined);
-                deployedResources.put(flowResource.getId(), resource);
+
+                boolean deploy = true;
+                if (alreadyDeployed != null) {
+                    deploy = false;
+                    Resource deployedResource = alreadyDeployed.getResource();
+                    TypedProperties alreadyDeployedOverrides = alreadyDeployed
+                            .getResourceRuntimeSettings();
+
+                    // TODO the runtime is already combined. change this
+                    TypedProperties alreadyDeployedDefaultSettings = deployedResource
+                            .toTypedProperties(settings);
+                    TypedProperties alreadyDeployedCombined = new TypedProperties(
+                            alreadyDeployedDefaultSettings);
+                    alreadyDeployedCombined.putAll(alreadyDeployedOverrides);
+
+                    for (Object key : combined.keySet()) {
+                        Object newObj = combined.get(key);
+                        Object oldObj = alreadyDeployedCombined.get(key);
+                        if (!ObjectUtils.equals(newObj, oldObj)) {
+                            deploy = true;
+                            break;
+                        }
+                    }
+
+                    if (deploy) {
+                        log.info("Undeploying the {} resource to the {} agent",
+                                flowResource.getName(), agent.getName());
+                        alreadyDeployed.stop();
+                    }
+                } 
+
+                if (deploy) {
+                    log.info("Deploying the {} resource to the {} agent", flowResource.getName(),
+                            agent.getName());
+                    IResourceRuntime resource = resourceFactory.create(flowResource, combined);
+                    deployedResources.put(flowResource.getId(), resource);
+                }
+            } catch (Exception e) {
+                log.error("Failed to deploy resource '" + flowResourceName.getName()
+                        + "' with an id of " + flowResourceName.getId() + " to the '" + agent.getName() + "' agent", e);
             }
         }
     }
@@ -349,9 +379,7 @@ public class AgentRuntime {
 
                 doComponentDeploymentEvent(deployment, (l, f, s, c) -> l.onDeploy(agent, deployment, f, s, c));
 
-                if (deployment.asStartType() == StartType.ON_DEPLOY) {
-                    scheduleNow(deployment);
-                } else if (deployment.asStartType() == StartType.SCHEDULED_CRON) {
+                if (deployment.asStartType() == StartType.SCHEDULED_CRON) {
                     String cron = deployment.getStartExpression();
                     log.info(
                             "Scheduling '{}' on '{}' with a cron expression of '{}'  The next run time should be at: {}",
@@ -359,7 +387,7 @@ public class AgentRuntime {
                                     new CronSequenceGenerator(cron).next(new Date()) });
     
                     ScheduledFuture<?> future = this.flowExecutionScheduler.schedule(
-                            new FlowRunner(deployment), new CronTrigger(cron));
+                            new FlowRunner("metl cron", deployment), new CronTrigger(cron));
                     scheduledDeployments.put(deployment, future);
                 }
     
@@ -394,29 +422,29 @@ public class AgentRuntime {
         }
     }
 
-    public String scheduleNow(AgentDeployment deployment) {
-    	return scheduleNow(deployment, null);
+    public String scheduleNow(String userId, AgentDeployment deployment) {
+    	return scheduleNow(userId, deployment, null);
     }
     
-    public FlowRuntime createFlowRuntime(AgentDeployment deployment, Map<String, String> runtimeParameters) throws Exception {
+    public FlowRuntime createFlowRuntime(String userId, AgentDeployment deployment, Map<String, String> runtimeParameters) throws Exception {
         String executionId = createExecutionId();
-        return new FlowRuntime(executionId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
+        return new FlowRuntime(executionId, userId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
                 resourceFactory,
                 flowStepsExecutionThreads, configurationService, executionService, deployedResources, null, globalSettings, runtimeParameters);
         
     }
     
-    public Results execute(AgentDeployment deployment, Map<String, String> runtimeParameters) throws Exception {
+    public Results execute(String userId, AgentDeployment deployment, Map<String, String> runtimeParameters) throws Exception {
         log.info("Executing '{}' on '{}' for now", new Object[] {
                 deployment.getName(), agent.getName() });
-        return createFlowRuntime(deployment, runtimeParameters).execute();
+        return createFlowRuntime(userId, deployment, runtimeParameters).execute();
     }
 
-    public String scheduleNow(AgentDeployment deployment, Map<String, String> runtimeParameters) {
+    public String scheduleNow(String userId, AgentDeployment deployment, Map<String, String> runtimeParameters) {
             log.info("Scheduling '{}' on '{}' for now", new Object[] {
                     deployment.getName(), agent.getName() });
             String executionId = createExecutionId();
-            this.flowExecutionScheduler.schedule(new FlowRunner(deployment, runtimeParameters, executionId),
+            this.flowExecutionScheduler.schedule(new FlowRunner(userId, deployment, runtimeParameters, executionId),
                     new Date());
             return executionId;
     }
@@ -490,16 +518,19 @@ public class AgentRuntime {
         Map<String, String> runtimeParameters;
         
         AgentDeployment deployment;
+        
+        String userId;
 
-        public FlowRunner(AgentDeployment deployment) {
-        	this(deployment, null, null);
+        public FlowRunner(String userId, AgentDeployment deployment) {
+        	this(userId, deployment, null, null);
         }
         
-        public FlowRunner(AgentDeployment deployment, Map<String, String> runtimeParameters) {
-            this(deployment, runtimeParameters, null);            
+        public FlowRunner(String userId, AgentDeployment deployment, Map<String, String> runtimeParameters) {
+            this(userId, deployment, runtimeParameters, null);            
         }
 
-        public FlowRunner(AgentDeployment deployment, Map<String, String> runtimeParameters, String executionId) {
+        public FlowRunner(String userId, AgentDeployment deployment, Map<String, String> runtimeParameters, String executionId) {
+            this.userId = userId;
             this.executionId = executionId;
             this.runtimeParameters = runtimeParameters;
             this.deployment = deployment;
@@ -515,7 +546,7 @@ public class AgentRuntime {
                 log.info("Deployment '{}' is running on the '{}' agent", deployment.getName(),
                         agent.getName());
                 List<Notification> notifications = configurationService.findNotificationsForDeployment(deployment);
-                flowRuntime = new FlowRuntime(executionId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
+                flowRuntime = new FlowRuntime(executionId, userId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
                         resourceFactory,
                         flowStepsExecutionThreads, configurationService, executionService, deployedResources, notifications, globalSettings, runtimeParameters);
                 addToRunning(deployment, flowRuntime);                
@@ -535,7 +566,7 @@ public class AgentRuntime {
         @Override
         public void run() {
             synchronized (AgentRuntime.this) {
-                configurationService.refresh(agent);
+                agent = configurationService.findAgent(agent.getId(), true);
                 for (AgentDeployment deployment : new HashSet<AgentDeployment>(agent.getAgentDeployments())) {
                     DeploymentStatus status = deployment.getDeploymentStatus();
                     if (status.equals(DeploymentStatus.REQUEST_ENABLE)) {

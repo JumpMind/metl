@@ -20,7 +20,11 @@
  */
 package org.jumpmind.metl.ui.init;
 
+import java.io.IOException;
+
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +43,12 @@ public class AppServlet extends VaadinServlet {
     protected void servletInitialized() throws ServletException {
         super.servletInitialized();
         getService().addSessionInitListener(new AppSessionInitListener());
+    }
+    
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        super.service(request, response);
     }
 
 

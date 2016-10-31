@@ -78,6 +78,15 @@ public abstract class AbstractService {
             return null;
         }
     }
+    
+    protected <T> T findOne(Class<T> clazzToMap, Map<String, Object> params, Class<?> tableNameClazz) {
+        List<T> all = persistenceManager.find(clazzToMap, params, null, null, tableName(tableNameClazz));
+        if (all.size() > 0) {
+            return all.get(0);
+        } else {
+            return null;
+        }
+    }    
 
     public void delete(AbstractObject data) {
         persistenceManager.delete(data, null, null, tableName(data.getClass()));
@@ -91,6 +100,16 @@ public abstract class AbstractService {
     public void save(AbstractObject data) {
         data.setLastUpdateTime(new Date());
         persistenceManager.save(data, null, null, tableName(data.getClass()));
+    }
+    
+    protected void rethrow(Throwable error) {
+        if (error instanceof RuntimeException) {
+            throw (RuntimeException)error;
+        } else if (error instanceof Error) {
+            throw (Error)error;
+        } else {
+            throw new RuntimeException(error);
+        }
     }
 
     

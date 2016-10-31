@@ -41,10 +41,6 @@ abstract public class AbstractObject implements Serializable, Cloneable {
     public AbstractObject() {
     }
     
-    abstract public void setName(String name);
-    
-    abstract public String getName();
-    
     public boolean isSettingNameAllowed() {
         return false;
     }
@@ -104,11 +100,6 @@ abstract public class AbstractObject implements Serializable, Cloneable {
         } else {
             return super.equals(obj);
         }            
-    }
-    
-    @Override
-    public String toString() {
-        return getName();
     }
     
     public AbstractObject clone() {

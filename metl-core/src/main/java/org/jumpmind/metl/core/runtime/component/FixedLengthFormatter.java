@@ -88,6 +88,9 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
                     if (attr.getAttribute() != null) {
                         String name = attr.getAttribute().getName();
                         if (name != null) {
+                            if (name.toString().length() > attr.getLength()) {
+                                name = name.toString().substring(0, attr.getLength());
+                            }                            
                             name = StringUtils.trim(name, true, true, PAD_CHAR);
                         } else {
                             name = "";
@@ -97,6 +100,8 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
                     }
                 }
                 outputPayload.add(stringBuilder.toString());
+                
+                useHeader = false;
             }
 
             String outputRec;
@@ -119,7 +124,9 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
                         inputRow, attribute.getFormatFunction());
             }
             if (value != null) {
-                value = StringUtils.trim(value.toString(), true, true, PAD_CHAR);
+                if (value.toString().length() > attribute.getLength()) {
+                    value = value.toString().substring(0, attribute.getLength());
+                }
             } else {
                 value = "";
             }

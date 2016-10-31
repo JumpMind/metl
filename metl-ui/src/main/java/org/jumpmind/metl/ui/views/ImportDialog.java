@@ -6,6 +6,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 
+import org.jumpmind.metl.core.util.MessageException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -26,6 +30,8 @@ public class ImportDialog extends Window {
 
     private static final long serialVersionUID = 1L;
     
+    final protected Logger log = LoggerFactory.getLogger(getClass()); 
+    
     HorizontalLayout importLayout;
 
     public ImportDialog(String caption, String text, final IImportListener importListener) {
@@ -33,13 +39,12 @@ public class ImportDialog extends Window {
         setModal(true);
         setResizable(true);
         setWidth(300, Unit.PIXELS);
-        setHeight(200, Unit.PIXELS);
         setClosable(false);
 
         VerticalLayout layout = new VerticalLayout();
-        layout.setSizeFull();
-        layout.setSpacing(true);
+        layout.setWidth(100, Unit.PERCENTAGE);
         layout.setMargin(true);
+        layout.setSpacing(true);
         setContent(layout);
 
         if (isNotBlank(text)) {
@@ -59,18 +64,32 @@ public class ImportDialog extends Window {
             private static final long serialVersionUID = 1L;
 
             public void uploadFinished(FinishedEvent event) {
-                String content = handler.getContent();   
-                importListener.onFinished(content);
-                importLayout.removeAllComponents();
-                Label label = new Label("Import Succeeded!");
-                label.setStyleName(ValoTheme.LABEL_SUCCESS);
-                importLayout.addComponent(label);
-                importLayout.setComponentAlignment(label, Alignment.MIDDLE_CENTER);                
+                try {
+                    String content = handler.getContent();   
+                    importListener.onFinished(content);
+                    importLayout.removeAllComponents();
+                    Label label = new Label("Import Succeeded!");
+                    label.setStyleName(ValoTheme.LABEL_SUCCESS);
+                    importLayout.addComponent(label);
+                    importLayout.setComponentAlignment(label, Alignment.MIDDLE_CENTER);
+                } catch (Exception e) {
+                    log.error("Import failed", e);
+                    importLayout.removeAllComponents();
+                    String message = "Import Failed! Please check log file for details.";
+                    if (e instanceof MessageException) {
+                        message = e.getMessage();
+                    }
+                    Label label = new Label(message);
+                    label.setStyleName(ValoTheme.LABEL_FAILURE);
+                    importLayout.addComponent(label);
+                    importLayout.setComponentAlignment(label, Alignment.MIDDLE_CENTER);
+                }                
             }
         });
         importLayout.addComponent(upload);
         importLayout.setComponentAlignment(upload, Alignment.MIDDLE_CENTER);
         layout.addComponent(importLayout);
+        layout.setExpandRatio(importLayout, 1);
 
         HorizontalLayout buttonLayout = new HorizontalLayout();
         buttonLayout.setStyleName(ValoTheme.WINDOW_BOTTOM_TOOLBAR);

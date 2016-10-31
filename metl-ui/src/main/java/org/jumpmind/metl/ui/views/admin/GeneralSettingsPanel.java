@@ -28,42 +28,130 @@ import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.ui.AbstractField;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 public class GeneralSettingsPanel extends VerticalLayout implements IUiPanel {
 
+    private static final String THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART = "This will take effect on the next server restart";
+
     final Logger log = LoggerFactory.getLogger(getClass());
-    
+
     ApplicationContext context;
 
     TabbedPanel tabbedPanel;
-    
+
     boolean isChanged;
+
+    FormLayout form;
 
     public GeneralSettingsPanel(final ApplicationContext context, TabbedPanel tabbedPanel) {
         this.context = context;
         this.tabbedPanel = tabbedPanel;
 
-        final GlobalSetting systemTextSetting = getGlobalSetting(GlobalSetting.SYSTEM_TEXT, "");
+        form = new FormLayout();
+        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
 
-        FormLayout form = new FormLayout();
-        form.setSpacing(true);
+        Label section = new Label("Display Settings");
+        section.addStyleName(ValoTheme.LABEL_H3);
+        section.addStyleName(ValoTheme.LABEL_COLORED);
+        form.addComponent(section);
 
-        ImmediateUpdateTextField systemTextField = new ImmediateUpdateTextField("System Text") {
-            protected void save(String value) {
-                saveSetting(systemTextSetting, value);
-            }
-        };
-        systemTextField.setDescription("Set HTML content to be displayed in the top bar that can identify a particular environment");
-        systemTextField.setValue(systemTextSetting.getValue());
-        systemTextField.setWidth(25f, Unit.EM);
-        form.addComponent(systemTextField);
-        systemTextField.focus();
+        addSetting("System Text", GlobalSetting.SYSTEM_TEXT, "",
+                "Set HTML content to be displayed in the top bar that can identify a particular environment")
+                        .focus();
+
+        section = new Label("Purge Settings");
+        section.addStyleName(ValoTheme.LABEL_H3);
+        section.addStyleName(ValoTheme.LABEL_COLORED);
+        form.addComponent(section);
+
+        addSetting("Audit Event Retention in Days", GlobalSetting.AUDIT_EVENT_RETENTION_IN_DAYS,
+                Integer.toString(GlobalSetting.DEFAULT_AUDIT_EVENT_RETENTION_IN_DAYS), "",
+                Integer.class);
+        
+        section = new Label("Auto Backup");
+        section.addStyleName(ValoTheme.LABEL_H3);
+        section.addStyleName(ValoTheme.LABEL_COLORED);
+        form.addComponent(section); 
+        
+        addSetting("Enable Backup", GlobalSetting.CONFIG_BACKUP_ENABLED,
+                Boolean.toString(GlobalSetting.DEFAULT_CONFIG_BACKUP_ENABLED),
+                THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART, Boolean.class);
+
+        addSetting("Backup Cron Expression", GlobalSetting.CONFIG_BACKUP_CRON,
+                GlobalSetting.DEFAULT_CONFIG_BACKUP_CRON,
+                THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART, String.class);
+
+        addSetting("Retention in Days", GlobalSetting.CONFIG_BACKUP_RETENTION_IN_DAYS,
+                Integer.toString(GlobalSetting.DEFAULT_CONFIG_BACKUP_RETENTION_IN_DAYS),
+                THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART, Integer.class);       
+
+        section = new Label("User Password Settings");
+        section.addStyleName(ValoTheme.LABEL_H3);
+        section.addStyleName(ValoTheme.LABEL_COLORED);
+        form.addComponent(section);
+
+        addSetting("Minimum Length", GlobalSetting.PASSWORD_MIN_LENGTH, "6", "", Integer.class);
+
+        addSetting("Prohibit Reuse", GlobalSetting.PASSWORD_PROHIBIT_PREVIOUS, "5", "",
+                Integer.class);
+
+        addSetting("Expiration in Days", GlobalSetting.PASSWORD_EXPIRE_DAYS, "60", "",
+                Integer.class);
+
+        addSetting("Prohibit Common Words", GlobalSetting.PASSWORD_PROHIBIT_COMMON_WORDS, "true",
+                "", Boolean.class);
+
+        addSetting("Require Alphanumeric", GlobalSetting.PASSWORD_REQUIRE_ALPHANUMERIC, "true", "",
+                Boolean.class);
+
+        addSetting("Require Symbol", GlobalSetting.PASSWORD_REQUIRE_SYMBOL, "true", "",
+                Boolean.class);
+
+        addSetting("Require Mixed Case", GlobalSetting.PASSWORD_REQUIRE_MIXED_CASE, "true", "",
+                Boolean.class);
 
         addComponent(form);
         setMargin(true);
+    }
+
+    protected AbstractField<?> addSetting(String text, String globalSetting, String defaultValue,
+            String description) {
+        return addSetting(text, globalSetting, defaultValue, description, String.class);
+    }
+
+    protected AbstractField<?> addSetting(String text, String globalSetting, String defaultValue,
+            String description, Class<?> converter) {
+        final GlobalSetting setting = getGlobalSetting(globalSetting, defaultValue);
+        AbstractField<?> field = null;
+        if (Boolean.class.equals(converter)) {
+            final CheckBox checkbox = new CheckBox(text);
+            checkbox.setImmediate(true);
+            checkbox.setValue(Boolean.parseBoolean(setting.getValue()));
+            checkbox.addValueChangeListener(
+                    (e) -> saveSetting(setting, checkbox.getValue().toString()));
+            field = checkbox;
+        } else {
+            field = new ImmediateUpdateTextField(text) {
+                protected void save(String value) {
+                    saveSetting(setting, value);
+                }
+            };
+            field.setDescription(description);
+            ((ImmediateUpdateTextField) field).setValue(setting.getValue());
+
+            if (converter != null) {
+                field.setConverter(converter);
+            }
+        }
+        form.addComponent(field);
+        return field;
     }
 
     private void saveSetting(GlobalSetting setting, String value) {

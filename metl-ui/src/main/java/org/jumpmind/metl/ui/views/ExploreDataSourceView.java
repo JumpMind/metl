@@ -22,8 +22,7 @@ package org.jumpmind.metl.ui.views;
 
 import javax.annotation.PostConstruct;
 
-import org.jumpmind.db.platform.IDatabasePlatform;
-import org.jumpmind.metl.ui.common.AppConstants;
+import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.DbProvider;
@@ -46,9 +45,6 @@ public class ExploreDataSourceView extends VerticalLayout implements View {
     private static final long serialVersionUID = 1L;
 
     @Autowired
-    IDatabasePlatform platform;
-
-    @Autowired
     ApplicationContext context;
     
     DbProvider dbProvider;
@@ -63,7 +59,7 @@ public class ExploreDataSourceView extends VerticalLayout implements View {
     protected void init () {
         dbProvider = new DbProvider(context);
         explorer = new SqlExplorer(context.getConfigDir(),
-                dbProvider, "admin", AppConstants.DEFAULT_LEFT_SPLIT);
+                dbProvider, context.getUser().getLoginId(), UIConstants.DEFAULT_LEFT_SPLIT);
         addComponent(explorer);
     }
 

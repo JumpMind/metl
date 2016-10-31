@@ -4,10 +4,13 @@ dependencies {
     compile project(":metl-core")
     compile (group:"org.jumpmind.vaadin", name:"sqlexplorer-vaadin", version:"$sqlExplorerVersion", changing:true) {
        exclude group:'org.jumpmind.symmetric'
+       exclude group:'com.vaadin'
     }
     compile "com.cybercom:spring-ui-scope:0.0.2"
     compile "org.springframework:spring-webmvc:$springVersion"
-    compile "org.peimari:maddon:1.20"
+    compile (group:"org.peimari", name:"maddon", version:"1.20") {
+       exclude group:'com.vaadin'
+    }    
     compile "org.apache.poi:poi:3.11"
     compile "io.springfox:springfox-swagger2:$springfoxSwaggerVersion"
     compile "io.springfox:springfox-swagger-ui:$springfoxSwaggerVersion"
