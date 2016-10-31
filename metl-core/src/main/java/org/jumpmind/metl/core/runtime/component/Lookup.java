@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -67,11 +69,20 @@ public class Lookup extends AbstractComponentRuntime {
         valueAttributeId = properties.get(LOOKUP_VALUE);
         replacementKeyAttributeId = properties.get(REPLACEMENT_KEY_ATTRIBUTE);
         replacementValueAttributeId = properties.get(REPLACEMENT_VALUE_ATTRIBUTE);
+        
+        if (getInputModel() == null) {
+            throw new MisconfiguredException("The input model must be specified");
+        }
+        
+        if (isBlank(replacementKeyAttributeId) || 
+                isBlank(replacementValueAttributeId) || isBlank(keyAttributeId) || isBlank(valueAttributeId)) {
+            throw new MisconfiguredException("The lookup and replacement keys and values need to be configured");
+        }
 
         FlowStepLink link = getFlow()
                 .findLinkBetweenSourceAndTarget(sourceStepId, this.getFlowStepId());
         if (link == null) {
-            throw new MisconfiguredException("The lookup data source is missing."); 
+            throw new MisconfiguredException("The lookup data source is missing"); 
         }
     }
 

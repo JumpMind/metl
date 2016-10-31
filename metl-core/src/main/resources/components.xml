@@ -24,6 +24,7 @@
   <component category='PROCESSOR'
              id='Assert'
              inputMessageType='any'
+             showInputModel='true'
              outputMessageType='any'
              resourceCategory='none'>
     <name>Assert</name>
@@ -235,6 +236,7 @@
   <component category='Writer'
              id='35c4c0ae-b040-4f93-b212-5b92619c4064'
              inputMessageType='any'
+             showInputModel='true'
              inputOutputModelsMatch='false'
              outputMessageType='any'
              resourceCategory='mailsession'>
@@ -312,6 +314,7 @@
              category='PROCESSOR'
              id='Content Router'
              inputMessageType='any'
+             showInputModel='true'             
              inputOutputModelsMatch='true'
              outputMessageType='any'
              resourceCategory='none'
@@ -689,6 +692,7 @@
              id='Lookup'
              inputMessageType='any'
              inputOutputModelsMatch='true'
+             showInputModel='true'
              outputMessageType='entity'
              resourceCategory='none'
              shareable='false'>
@@ -752,6 +756,7 @@
   <component category='PROCESSOR'
              id='Message Logger'
              inputMessageType='any'
+             showInputModel='true'             
              inputOutputModelsMatch='true'
              outputMessageType='any'
              resourceCategory='none'>
@@ -1060,11 +1065,12 @@
   <component category='PROCESSOR'
              id='Script'
              inputMessageType='any'
+             showInputModel='true'
              inputOutputModelsMatch='false'
              outputMessageType='any'
              resourceCategory='any'
              supportsMultipleThreads='true'>
-    <name>Script</name>
+    <name>Groovy Script</name>
     <className>org.jumpmind.metl.core.runtime.component.Script</className>
     <keywords>groovy,logic,java</keywords>
     <description></description>
@@ -1184,6 +1190,7 @@ forwardMessage()
   </component>
   <component category='WRITER'
              id='Sql Executor'
+             showInputModel='true'             
              inputMessageType='any'
              inputOutputModelsMatch='true'
              outputMessageType='text'
