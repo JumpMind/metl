@@ -289,7 +289,8 @@ public class PropertySheet extends AbsoluteLayout {
             IConfigurationService configurationService = context.getConfigurationService();
             String projectVersionId = step.getComponent().getProjectVersionId();
             if ((componentDefintion.getOutputMessageType() == MessageType.ENTITY
-                    || componentDefintion.getOutputMessageType() == MessageType.ANY) && !componentDefintion.isInputOutputModelsMatch()) {
+                    || (componentDefintion.getOutputMessageType() == MessageType.ANY && componentDefintion.isShowOutputModel())) && 
+                    !componentDefintion.isInputOutputModelsMatch()) {
                 final AbstractSelect combo = new ComboBox("Output Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
@@ -355,7 +356,8 @@ public class PropertySheet extends AbsoluteLayout {
             IConfigurationService configurationService = context.getConfigurationService();
             String projectVersionId = step.getComponent().getProjectVersionId();
             if (componentDefintion.getInputMessageType() == MessageType.ENTITY
-                    || componentDefintion.getInputMessageType() == MessageType.ANY) {
+                    || (componentDefintion.getInputMessageType() == MessageType.ANY 
+                    && componentDefintion.isShowInputModel())) {
                 final AbstractSelect combo = new ComboBox("Input Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);

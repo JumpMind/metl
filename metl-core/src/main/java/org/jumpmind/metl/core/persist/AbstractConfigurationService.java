@@ -376,7 +376,7 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         AbstractObjectCreateTimeDescSorter.sort(list);
         return list;
     }
-
+    
     @Override
     public Agent findAgent(String agentId, boolean includeDeployments) {
         Agent agent = findOne(Agent.class, new NameValue("id", agentId));

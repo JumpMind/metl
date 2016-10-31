@@ -60,6 +60,7 @@ import org.jumpmind.metl.ui.views.CallWebServicePanel;
 import org.jumpmind.metl.ui.views.manage.ExecutionRunPanel;
 import org.jumpmind.util.AppUtils;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
+import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.vaadin.ui.common.NotifyDialog;
@@ -382,8 +383,8 @@ public class EditAgentPanel extends VerticalLayout
     }
 
     protected void updateItems(List<AgentDeploymentSummary> summaries) {
-        boolean isChanged = false;
         Set<AgentDeploymentSummary> selectedItems = getSelectedItems();
+        boolean isChanged = container.size() != summaries.size();
         for (AgentDeploymentSummary summary : summaries) {
             BeanItem<AgentDeploymentSummary> beanItem = container.getItem(summary);
             if (beanItem == null || beanItem.getBean().isChanged(summary)) {
@@ -475,6 +476,34 @@ public class EditAgentPanel extends VerticalLayout
         }
 
         public void selected(Collection<FlowName> flowCollection) {
+            StringBuilder alreadyDeployedFlows = new StringBuilder();
+            List<AgentDeploymentSummary> summaries = container.getItemIds();
+            for (FlowName flowName : flowCollection) {
+                for (AgentDeploymentSummary agentDeploymentSummary : summaries) {
+                    if (flowName.getId().equals(agentDeploymentSummary.getArtifactId())) {
+                        if (alreadyDeployedFlows.length() > 0) {
+                            alreadyDeployedFlows.append(", ");
+                        }
+                        alreadyDeployedFlows.append("'").append(flowName.getName()).append("'");
+                    }
+                }
+            }
+
+            if (alreadyDeployedFlows.length() > 0) {
+                ConfirmDialog.show("Flows already deployed",
+                        String.format(
+                                "There are flows that have already been deployed.  Press OK to deploy another version. The following flows are already deployed: %s",
+                                alreadyDeployedFlows),
+                        () -> {
+                            deployFlows(flowCollection);
+                            return true;
+                        });
+            } else {
+                deployFlows(flowCollection);
+            }
+        }
+
+        protected void deployFlows(Collection<FlowName> flowCollection) {
             for (FlowName flowName : flowCollection) {
                 IConfigurationService configurationService = context.getConfigurationService();
                 Flow flow = configurationService.findFlow(flowName.getId());
@@ -498,6 +527,7 @@ public class EditAgentPanel extends VerticalLayout
                 context.getConfigurationService().save(deployment);
             }
             refresh();
+
         }
 
         protected String getName(String name) {
