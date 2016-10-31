@@ -2062,4 +2062,92 @@ forwardMessage()
       </setting>
     </settings>
   </component>
+  <component category='READER'
+             id='2b1aa706-9ec7-11e6-80f5-76304dec7eb7'
+             inputMessageType='text'
+             inputOutputModelsMatch='false'
+             outputMessageType='entity'
+             resourceCategory='streamable'>
+    <name>Excel File Reader</name>
+    <className>org.jumpmind.metl.core.runtime.component.ExcelFileReader</className>
+    <keywords>excel,file,files</keywords>
+    <description></description>
+    <settings>
+      <setting id='run.when'
+               required='false'
+               type='choice'>
+        <name>Run When</name>
+        <defaultValue>PER UNIT OF WORK</defaultValue>
+        <choices>
+          <choice>PER UNIT OF WORK</choice>
+          <choice>PER MESSAGE</choice>
+        </choices>
+      </setting>
+      <setting id='get.file.name.from.message'
+               required='false'
+               type='boolean'>
+        <name>Get File Name From Message</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='must.exist'
+               required='false'
+               type='boolean'>
+        <name>Must Exist</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='relative.path'
+               required='false'
+               type='text'>
+        <name>File Path</name>
+      </setting>
+      <setting id='rows.per.message'
+               required='false'
+               type='integer'>
+        <name>Rows/Msg</name>
+        <defaultValue>1000</defaultValue>
+      </setting>
+      <setting id='action.on.success'
+               required='false'
+               type='choice'>
+        <name>Action on Success</name>
+        <defaultValue>NONE</defaultValue>
+        <choices>
+          <choice>None</choice>
+          <choice>Archive</choice>
+          <choice>Delete</choice>
+        </choices>
+      </setting>
+      <setting id='archive.on.success.path'
+               required='false'
+               type='text'>
+        <name>Archive On Success Path</name>
+      </setting>
+      <setting id='action.on.error'
+               required='false'
+               type='choice'>
+        <name>Action on Error</name>
+        <defaultValue>NONE</defaultValue>
+        <choices>
+          <choice>None</choice>
+          <choice>Archive</choice>
+          <choice>Delete</choice>
+        </choices>
+      </setting>
+      <setting id='archive.on.error.path'
+               required='false'
+               type='text'>
+        <name>Archive On Error Path</name>
+      </setting>
+      <setting id='header.lines.to.skip'
+               required='false'
+               type='integer'>
+        <name>Header Lines to Skip</name>
+      </setting>
+      <setting id='control.message.on.eof'
+               required='false'
+               type='boolean'>
+        <name>Send Control Message on EOF</name>
+      </setting>
+    </settings>
+  </component>  
 </components>
