@@ -23,11 +23,11 @@ include::design/components/readers/unzip.asciidoc[]
 include::design/components/readers/xml-reader.asciidoc[]
 
 ==== Processors
-include::design/components/processors/call-flow.asciidoc[]
 include::design/components/processors/content-router.asciidoc[]
 include::design/components/processors/data-diff.asciidoc[]
 include::design/components/processors/deduper.asciidoc[]
 include::design/components/processors/delay.asciidoc[]
+include::design/components/processors/embed-flow.asciidoc[]
 include::design/components/processors/execute.asciidoc[]
 include::design/components/processors/file-util.asciidoc[]
 include::design/components/processors/format-delimited.asciidoc[]
