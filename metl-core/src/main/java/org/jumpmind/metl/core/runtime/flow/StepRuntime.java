@@ -355,7 +355,7 @@ public class StepRuntime implements Runnable {
             if (startStep || recursionDone) {
                 shutdown(callback, false);
             }
-        } catch (Exception ex) {
+        } catch (Error ex) {
             recordError(ThreadUtils.getThreadNumber(threadCount), ex);
         } finally {
             componentContext.getExecutionTracker().afterHandle(threadNumber, componentContext, error);
