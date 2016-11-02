@@ -31,25 +31,25 @@ import org.jumpmind.properties.TypedProperties;
 public class ExcelFileReader extends AbstractFileReader {
 
     public static final int MAX_COLUMNS_PER_WORKSHEET = 1000;
-    
+
     public static final String TYPE = "Excel File Reader";
-    
+
     public static final String SETTING_ROWS_PER_MESSAGE = "rows.per.message";
-    
+
     public static final String SETTING_HEADER_LINES_TO_SKIP = "header.lines.to.skip";
-    
+
     public static final String SETTING_EXCEL_MAPPING = "excel.mapping";
-    
+
     int rowsPerMessage = 1000;
-    
+
     int headerLinesToSkip = 0;
-    
+
     Model outputModel;
-    
+
     Set<String> worsheetsToRead;
-    
+
     Map<String, String[]> worksheetColumnListMap;
-    
+
     @Override
     public void start() {
         init();
@@ -69,7 +69,7 @@ public class ExcelFileReader extends AbstractFileReader {
             processFiles(files, inputMessage, callback, unitOfWorkBoundaryReached);
         }
     }
-    
+
     private void convertAttributeSettingsToMaps() {
         worksheetColumnListMap = new HashMap<String, String[]>();
         worsheetsToRead = new HashSet<String>();
@@ -77,7 +77,8 @@ public class ExcelFileReader extends AbstractFileReader {
         for (ComponentAttributeSetting attributeSetting : attributeSettings) {
             String[] attributeValues = attributeSetting.getValue().split(":");
             if (attributeValues.length != 2) {
-                throw new MisconfiguredException("Each attribute setting in the Excel Reader must be in the form <worksheet>:<column>");
+                throw new MisconfiguredException(
+                        "Each attribute setting in the Excel Reader must be in the form <worksheet>:<column>");
             } else {
                 String worksheetName = attributeValues[0];
                 String columnReference = attributeValues[1].toUpperCase();
@@ -86,30 +87,31 @@ public class ExcelFileReader extends AbstractFileReader {
                     worksheetColumnArray = new String[MAX_COLUMNS_PER_WORKSHEET];
                     worksheetColumnListMap.put(worksheetName, worksheetColumnArray);
                 }
-                worksheetColumnArray[calculateColumnIndex(columnReference)] = attributeSetting.getAttributeId();
+                worksheetColumnArray[calculateColumnIndex(columnReference)] = attributeSetting
+                        .getAttributeId();
                 worsheetsToRead.add(attributeValues[0]);
             }
         }
     }
-    
+
     private int calculateColumnIndex(String columnReference) {
         int columnIdx = 0;
-        for (int i = 0;i < columnReference.length();i++) {
+        for (int i = 0; i < columnReference.length(); i++) {
             int decimalValue = (int) columnReference.charAt(i);
-            columnIdx = columnIdx + (decimalValue - 64) + i*26 - 1;
+            columnIdx = columnIdx + (decimalValue - 64) + i * 26 - 1;
         }
         return columnIdx;
     }
-    
-    private void processFiles(List<String> files, Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
 
+    private void processFiles(List<String> files, Message inputMessage,
+            ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
 
         filesRead.addAll(files);
 
         for (String file : files) {
             Map<String, Serializable> headers = new HashMap<>(1);
             headers.put("source.file.path", file);
-            
+
             InputStream inStream = null;
             try {
                 info("Reading file: %s", file);
@@ -129,42 +131,50 @@ public class ExcelFileReader extends AbstractFileReader {
             }
         }
     }
-    
-    private void readWorkbook(Map<String, Serializable> headers, InputStream inStream, ISendMessageCallback callback) throws IOException {
-        
+
+    private void readWorkbook(Map<String, Serializable> headers, InputStream inStream,
+            ISendMessageCallback callback) throws IOException {
+
         int linesInMessage = 0;
         ArrayList<EntityData> outboundPayload = new ArrayList<EntityData>();
         int currentFileLinesRead = 1;
 
         Workbook wb = new XSSFWorkbook(inStream);
-        for (int i=0;i<wb.getNumberOfSheets();i++) {
+        for (int i = 0; i < wb.getNumberOfSheets(); i++) {
             Sheet sheet = wb.getSheetAt(i);
             if (worsheetsToRead.contains(sheet.getSheetName())) {
                 String[] worksheetColumnArray = worksheetColumnListMap.get(sheet.getSheetName());
-                for (Row row : sheet) {       
+                for (Row row : sheet) {
                     if (currentFileLinesRead > headerLinesToSkip) {
                         EntityData data = new EntityData();
-                        Object cellValue=null;
+                        Object cellValue = null;
                         for (Cell cell : row) {
-                            switch (cell.getCellType()) {
-                                case Cell.CELL_TYPE_STRING:
-                                    cellValue = cell.getStringCellValue();
-                                    break;
-                                case Cell.CELL_TYPE_BOOLEAN:
-                                    cellValue = cell.getBooleanCellValue();
-                                    break;                                            
-                                case Cell.CELL_TYPE_NUMERIC:
-                                    if (DateUtil.isCellDateFormatted(cell)) {
-                                        cellValue = cell.getDateCellValue();
-                                    } else {
-                                        cellValue = cell.getNumericCellValue();
-                                    }
-                                    break;
-                                default:
-                                    throw new UnsupportedOperationException("Invalid cell type value");
-                            }                                    
-                           data.put(worksheetColumnArray[cell.getColumnIndex()], cellValue);
-                        } //end for cells
+                            if (worksheetColumnArray[cell.getColumnIndex()] != null) {
+                                switch (cell.getCellType()) {
+                                    case Cell.CELL_TYPE_STRING:
+                                        cellValue = cell.getStringCellValue();
+                                        break;
+                                    case Cell.CELL_TYPE_BOOLEAN:
+                                        cellValue = cell.getBooleanCellValue();
+                                        break;
+                                    case Cell.CELL_TYPE_NUMERIC:
+                                        if (DateUtil.isCellDateFormatted(cell)) {
+                                            cellValue = cell.getDateCellValue();
+                                        } else {
+                                            cellValue = cell.getNumericCellValue();
+                                        }
+                                        break;
+                                    case Cell.CELL_TYPE_BLANK:
+                                        cellValue = null;
+                                        break;
+                                    default:
+                                        throw new UnsupportedOperationException(
+                                                "Invalid cell type value.  Cell Type ==>"
+                                                        + cell.getCellType());
+                                }
+                                data.put(worksheetColumnArray[cell.getColumnIndex()], cellValue);
+                            } //end if worksheetColumnArray != null i.e. this cell is mapped
+                        } // end for cells
                         getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                         outboundPayload.add(data);
                         linesInMessage++;
@@ -173,14 +183,14 @@ public class ExcelFileReader extends AbstractFileReader {
                             linesInMessage = 0;
                             outboundPayload = new ArrayList<EntityData>();
                         }
-                    } //if we are done skipping lines
+                    } // if we are done skipping lines
                     currentFileLinesRead++;
-                } //end for rows                            
-            } //if we should read this worksheet
-        }// for each worksheet
-        //send leftovers
+                } // end for rows
+            } // if we should read this worksheet
+        } // for each worksheet
+          // send leftovers
         if (outboundPayload.size() > 0) {
             callback.sendEntityDataMessage(headers, outboundPayload);
         }
-    }  
+    }
 }
