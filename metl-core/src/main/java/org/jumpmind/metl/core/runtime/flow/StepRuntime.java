@@ -281,7 +281,7 @@ public class StepRuntime implements Runnable {
                     }
                 }
             }
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             recordError(1, ex);
         }
     }
