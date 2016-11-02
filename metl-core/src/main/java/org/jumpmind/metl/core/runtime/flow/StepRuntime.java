@@ -344,7 +344,7 @@ public class StepRuntime implements Runnable {
                     && getActiveCountPlusQueueSize() == 1;
             
             /* When multi-threaded, if a unit of work is received we will have waited for all threads to finish before processing the
-               this messsage */
+               this message */
             if ((unitOfWorkBoundaryReached || recursionDone) && componentRuntime.getComponentDefintion().isAutoSendControlMessages()) {
                 verifyAndSendControlMessageToTargets(callback, inputMessage);
             }
@@ -355,7 +355,8 @@ public class StepRuntime implements Runnable {
             if (startStep || recursionDone) {
                 shutdown(callback, false);
             }
-        } catch (Error ex) {
+            
+        } catch (Throwable ex) {
             recordError(ThreadUtils.getThreadNumber(threadCount), ex);
         } finally {
             componentContext.getExecutionTracker().afterHandle(threadNumber, componentContext, error);
