@@ -29,6 +29,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
+import org.apache.commons.net.ProtocolCommandEvent;
+import org.apache.commons.net.ProtocolCommandListener;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPClientConfig;
@@ -157,6 +159,19 @@ public class FtpDirectory implements IDirectory {
 
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
             ftpClient.enterLocalPassiveMode();
+            ftpClient.addProtocolCommandListener(new ProtocolCommandListener() {
+                
+                @Override
+                public void protocolReplyReceived(ProtocolCommandEvent event) {
+                    log.debug("received message: " + event.getMessage().trim() + " reply code:" + event.getReplyCode());
+                }
+                
+                @Override
+                public void protocolCommandSent(ProtocolCommandEvent event) {
+                    log.debug("sent command: " + event.getCommand() + " message: " + event.getMessage().trim() + " reply code:" + event.getReplyCode());
+
+                }
+            });
 
             if (isNotBlank(basePath)) {
                 ftpClient.changeWorkingDirectory(basePath);
@@ -208,7 +223,7 @@ public class FtpDirectory implements IDirectory {
             ftpClient = createClient();
             InputStream is = ftpClient.retrieveFileStream(relativePath);
             if (is != null) {
-                return new CloseableInputStreamStream(is, ftpClient);
+                return new CloseableInputStream(is, ftpClient);
             } else {
                 if (!mustExist) {
                     String msg = String.format("Failed to open %s.  The ftp return code was %s", relativePath, ftpClient.getReplyCode());
@@ -294,14 +309,21 @@ public class FtpDirectory implements IDirectory {
         @Override
         public void close() throws IOException {
             super.close();
-            FtpDirectory.this.close(ftpClient);
+            try {
+                int reply = ftpClient.getReply();
+                if (!FTPReply.isPositiveCompletion(reply)) {
+                    throw new IoException("File transfered failed with a code of " + reply);
+                }
+            } finally {
+                FtpDirectory.this.close(ftpClient);
+            }
         }
     }
 
-    class CloseableInputStreamStream extends BufferedInputStream {
+    class CloseableInputStream extends BufferedInputStream {
         FTPClient ftpClient;
 
-        public CloseableInputStreamStream(InputStream is, FTPClient ftpClient) {
+        public CloseableInputStream(InputStream is, FTPClient ftpClient) {
             super(is);
             this.ftpClient = ftpClient;
         }
@@ -310,6 +332,10 @@ public class FtpDirectory implements IDirectory {
         public void close() throws IOException {
             try {
                 super.close();
+                int reply = ftpClient.getReply();
+                if (!FTPReply.isPositiveCompletion(reply)) {
+                    throw new IoException("File transfered failed with a code of " + reply);
+                }
             } catch (Exception ex) {
                 log.debug("", ex);
             } finally {
@@ -317,7 +343,7 @@ public class FtpDirectory implements IDirectory {
             }
         }
     }
-
+    
     @Override
     public void connect() {
     }
