@@ -146,7 +146,7 @@ public class FtpDirectory implements IDirectory {
 
             int reply = ftpClient.getReplyCode();
             if (!FTPReply.isPositiveCompletion(reply)) {
-                throw new RuntimeException(String.format("Failed to connect to %s.  Recevied a reply code of %d", hostname, reply));
+                throw new RuntimeException(String.format("Failed to connect to %s.  Received a reply code of %d", hostname, reply));
             }
 
             if (isNotBlank(username)) {
