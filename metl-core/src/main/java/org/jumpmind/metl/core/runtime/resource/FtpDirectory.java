@@ -294,7 +294,14 @@ public class FtpDirectory implements IDirectory {
         @Override
         public void close() throws IOException {
             super.close();
-            FtpDirectory.this.close(ftpClient);
+            try {
+                int reply = ftpClient.getReply();
+                if (!FTPReply.isPositiveCompletion(reply)) {
+                    throw new IoException("File transfered failed with a code of " + reply);
+                }
+            } finally {
+                FtpDirectory.this.close(ftpClient);
+            }
         }
     }
 
