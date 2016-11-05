@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This is moving to comp-abstract.  There are two versions right now.
  */
-@Deprecated
+//@Deprecated
 abstract public class AbstractComponentRuntime implements IComponentRuntime {
     
     protected final Logger log = LoggerFactory.getLogger(getClass());

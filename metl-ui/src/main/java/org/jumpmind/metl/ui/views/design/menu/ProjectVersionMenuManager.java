@@ -11,7 +11,7 @@ public class ProjectVersionMenuManager extends AbstractDesignSelectedValueMenuMa
     
     @Override
     public boolean handle(String menuSelected, Object selected) {
-        if (!super.handle(menuSelected, selected)) {            
+        if (!super.handle(menuSelected, selected)) {
             return true;
         } else {
             return false;
@@ -33,9 +33,9 @@ public class ProjectVersionMenuManager extends AbstractDesignSelectedValueMenuMa
                 "File|New|Resource|Directory|SMB",
                 "File|New|Resource|HTTP Resource",
                 "File|New|Resource|Mail Session",
-                "File|Hide",
+                "File|Open",
                 "File|Import...",        
-                "File|Export...",                
+                "File|Export...",
                 "Edit|Rename",
                 "Edit|Copy",
                 "Edit|Remove",
