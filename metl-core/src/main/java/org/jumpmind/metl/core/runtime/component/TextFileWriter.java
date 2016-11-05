@@ -127,6 +127,12 @@ public class TextFileWriter extends AbstractFileWriter {
             callback.sendTextMessage(null, results);
         }
     }
+    
+    @Override
+    public void flowCompletedWithErrors(Throwable myError) {
+        close();
+        super.flowCompletedWithErrors(myError);
+    }
 
     private void initStreamAndWriter(Message inputMessage) {
     	if (bufferedWriter == null) {
