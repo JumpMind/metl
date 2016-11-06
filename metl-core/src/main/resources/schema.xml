@@ -43,7 +43,7 @@
         <column name="project_id" type="CHAR" size="36" description="A unique identifier" />        
         <column name="orig_version_id" type="CHAR" size="36" description="A unique identifier" />
         <column name="description" type="VARCHAR" size="255" description="" />
-        <column name="read_only" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this version is editable."/>
+        <column name="released" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this version is released."/>
         <column name="archived" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this version is archived."/>
         <column name="deleted" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this row has been deleted."/>                
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />

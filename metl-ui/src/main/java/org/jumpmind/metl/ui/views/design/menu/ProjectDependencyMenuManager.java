@@ -19,8 +19,16 @@ public class ProjectDependencyMenuManager extends AbstractDesignSelectedValueMen
     }
     
     @Override
-    protected String[] getEnabledPaths() {
-        return (String[])ArrayUtils.addAll(super.getEnabledPaths(), new String[] {
+    protected String[] getDisabledPaths(Object selected) {
+        return (String[])ArrayUtils.addAll(super.getDisabledPaths(selected), new String[] {
+                "Edit|Copy",
+                "Edit|Remove"
+        });
+    }
+    
+    @Override
+    protected String[] getEnabledPaths(Object selected) {
+        return (String[])ArrayUtils.addAll(super.getEnabledPaths(selected), new String[] {
                 "File|New|Project Dependency",
                 "File|New|Flow|Design",
                 "File|New|Flow|Test",

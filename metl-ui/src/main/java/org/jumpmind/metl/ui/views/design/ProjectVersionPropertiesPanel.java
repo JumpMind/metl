@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.data.Item;
+import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
@@ -41,6 +42,8 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.HorizontalLayout;
@@ -58,7 +61,7 @@ public class ProjectVersionPropertiesPanel extends Panel implements IUiPanel {
 
     ApplicationContext context;
 
-    DesignNavigator projectNavigator;
+    DesignNavigator designNavigator;
 
     ProjectVersion projectVersion;
 
@@ -77,15 +80,36 @@ public class ProjectVersionPropertiesPanel extends Panel implements IUiPanel {
     public ProjectVersionPropertiesPanel(ProjectVersion projectVersion, ApplicationContext context, DesignNavigator projectNavigator) {
         this.setSizeFull();
         this.context = context;
-        this.projectNavigator = projectNavigator;
+        this.designNavigator = projectNavigator;
         this.projectVersion = projectVersion;
         
         VerticalLayout content = new VerticalLayout();
         setContent(content);
+        
+        HorizontalLayout versionPropertiesHeaderWrapper = new HorizontalLayout();
+        versionPropertiesHeaderWrapper.setMargin(new MarginInfo(false, false, false, true));
+        Label versionPropertiesHeader = new Label("Project Version Properties");
+        versionPropertiesHeader.addStyleName(ValoTheme.LABEL_H3);
+        versionPropertiesHeaderWrapper.addComponent(versionPropertiesHeader);
+        content.addComponent(versionPropertiesHeaderWrapper);
+        
+        FormLayout formLayout = new FormLayout();
+        CheckBox releasedCheckBox = new CheckBox("Released");
+        releasedCheckBox.setImmediate(true);
+        releasedCheckBox.setValue(projectVersion.isReleased());
+        releasedCheckBox.addValueChangeListener(e->toggleReleased(e));
+        formLayout.addComponent(releasedCheckBox);
+        
+        CheckBox archiveCheckBox = new CheckBox("Archived");
+        archiveCheckBox.setImmediate(true);
+        archiveCheckBox.setValue(projectVersion.isArchived());
+        archiveCheckBox.addValueChangeListener(e->toggleArchived(e));
+        formLayout.addComponent(archiveCheckBox);
+        content.addComponent(formLayout);
 
         HorizontalLayout componentHeaderWrapper = new HorizontalLayout();
         componentHeaderWrapper.setMargin(new MarginInfo(false, false, false, true));
-        Label componentHeader = new Label("Component Plugin Settings");
+        Label componentHeader = new Label("Component Plugin Properties");
         componentHeader.addStyleName(ValoTheme.LABEL_H3);
         componentHeaderWrapper.addComponent(componentHeader);
         content.addComponent(componentHeaderWrapper);
@@ -168,6 +192,20 @@ public class ProjectVersionPropertiesPanel extends Panel implements IUiPanel {
         
         setButtonsEnabled();        
 
+    }
+    
+    protected void toggleReleased(ValueChangeEvent event) {
+        Boolean value = (Boolean)event.getProperty().getValue();
+        projectVersion.setReleased(value);
+        context.getConfigurationService().save(projectVersion);
+        designNavigator.refresh();
+    }
+    
+    protected void toggleArchived(ValueChangeEvent event) {
+        Boolean value = (Boolean)event.getProperty().getValue();
+        projectVersion.setReleased(value);
+        context.getConfigurationService().save(projectVersion);
+        designNavigator.refresh();
     }
     
     protected void setButtonsEnabled() {

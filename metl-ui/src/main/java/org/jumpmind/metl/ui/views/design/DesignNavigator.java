@@ -218,7 +218,7 @@ public class DesignNavigator extends VerticalLayout {
                     return "project";
                 } else if (itemId instanceof ProjectVersion) {
                     ProjectVersion version = (ProjectVersion) itemId;
-                    return version.isReadOnly() ? "project-version-read-only" : "project-version";
+                    return version.isReleased() ? "project-version-read-only" : "project-version";
                 }
             }
             return null;
@@ -339,7 +339,11 @@ public class DesignNavigator extends VerticalLayout {
 
             for (ProjectVersion projectVersion : versions) {
                 treeTable.addItem(projectVersion);
-                treeTable.setItemIcon(projectVersion, Icons.PROJECT_VERSION);
+                if (projectVersion.isReleased()) {
+                    treeTable.setItemIcon(projectVersion, FontAwesome.LOCK);
+                } else { 
+                    treeTable.setItemIcon(projectVersion, Icons.PROJECT_VERSION);
+                }
                 treeTable.setChildrenAllowed(projectVersion, true);
                 treeTable.setParent(projectVersion, project);
                 addFlowsToFolder(addVirtualFolder("Flows", projectVersion), projectVersion, false);
@@ -482,7 +486,7 @@ public class DesignNavigator extends VerticalLayout {
         open(treeTable.getValue());
     }
 
-    public void open(Object item) {
+    protected void open(Object item) {
         if (item instanceof FlowName) {
             FlowName flow = (FlowName) item;
             EditFlowPanel flowLayout = new EditFlowPanel(context, flow.getId(), this, tabs);
@@ -647,12 +651,12 @@ public class DesignNavigator extends VerticalLayout {
         return null;
     }
 
-    protected ProjectVersion findProjectVersion() {
+    public ProjectVersion findProjectVersion() {
         Object value = treeTable.getValue();
         return findProjectVersion(value);
     }
 
-    protected ProjectVersion findProjectVersion(Object value) {
+    public ProjectVersion findProjectVersion(Object value) {
         while (!(value instanceof ProjectVersion) && value != null) {
             value = treeTable.getParent(value);
         }

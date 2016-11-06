@@ -142,27 +142,27 @@ abstract public class AbstractMenuBar extends MenuBar {
         }
 
         if (action != null) {
-            setMenuBarEnabled(action, getItems());
-            setContextMenuEnabled(action, contextMenu.getItems());
+            setMenuBarEnabled(action, getItems(), selected);
+            setContextMenuEnabled(action, contextMenu.getItems(), selected);
         }
     }
 
-    private void setMenuBarEnabled(ISelectedValueMenuManager action, List<MenuItem> items) {
+    private void setMenuBarEnabled(ISelectedValueMenuManager action, List<MenuItem> items, Object selected) {
         if (items != null) {
             for (MenuItem menuItem : items) {
-                menuItem.setEnabled(action.isEnabled(buildMenuString(menuItem)));
+                menuItem.setEnabled(action.isEnabled(buildMenuString(menuItem), selected));
                 List<MenuItem> children = menuItem.getChildren();
-                setMenuBarEnabled(action, children);
+                setMenuBarEnabled(action, children, selected);
             }
         }
     }
     
-    private void setContextMenuEnabled(ISelectedValueMenuManager action, List<com.vaadin.addon.contextmenu.MenuItem> items) {
+    private void setContextMenuEnabled(ISelectedValueMenuManager action, List<com.vaadin.addon.contextmenu.MenuItem> items, Object selected) {
         if (items != null) {
             for (com.vaadin.addon.contextmenu.MenuItem menuItem : items) {
-                menuItem.setEnabled(action.isEnabled(buildMenuString(menuItem)));
+                menuItem.setEnabled(action.isEnabled(buildMenuString(menuItem), selected));
                 List<com.vaadin.addon.contextmenu.MenuItem> children = menuItem.getChildren();
-                setContextMenuEnabled(action, children);
+                setContextMenuEnabled(action, children, selected);
             }
         }
     }    

@@ -1,17 +1,18 @@
 package org.jumpmind.metl.ui.views.design.menu;
 
 import org.jumpmind.metl.core.model.AbstractNamedObject;
+import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.ui.common.AbstractSelectedValueMenuManager;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
 
-public class AbstractDesignSelectedValueMenuManager extends AbstractSelectedValueMenuManager {
+abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSelectedValueMenuManager {
 
     protected DesignNavigator navigator;
 
     public AbstractDesignSelectedValueMenuManager(DesignNavigator navigator) {
         this.navigator = navigator;
     }
-
+    
     @Override
     public boolean handle(String menuSelected, Object valueSelected) {
         boolean handled = false;
@@ -77,9 +78,29 @@ public class AbstractDesignSelectedValueMenuManager extends AbstractSelectedValu
         }
         return handled;
     }
+    
+    protected boolean isReadOnly(Object selected) {
+        ProjectVersion projectVersion = navigator.findProjectVersion(selected);
+        if (projectVersion != null) {
+            return projectVersion.isReleased() || projectVersion.isArchived() || projectVersion.isDeleted();
+        } else {
+            return false;
+        }
+    }
+    
+    protected String[] getDisabledPaths(Object selected) {
+        if (isReadOnly(selected)) {
+            return new String[] { "File|New|Project Dependency", "File|New|Flow|Design", "File|New|Flow|Test", "File|New|Model",
+                    "File|New|Resource|Database", "File|New|Resource|Directory|FTP", "File|New|Resource|Directory|File System",
+                    "File|New|Resource|Directory|JMS Topic", "File|New|Resource|Directory|SFTP", "File|New|Resource|Directory|SMB",
+                    "File|New|Resource|HTTP Resource", "File|New|Resource|Mail Session", "Edit|Rename" };
+        } else {
+            return null;
+        }
+    }    
 
     @Override
-    protected String[] getEnabledPaths() {
+    protected String[] getEnabledPaths(Object selected) {        
         return new String[] { "File|New|Project", "View|Hidden", "File|Import..." };
     }
 

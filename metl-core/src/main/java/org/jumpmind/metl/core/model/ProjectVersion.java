@@ -35,7 +35,7 @@ public class ProjectVersion extends AbstractNamedObject {
 
     String versionLabel;
 
-    boolean readOnly;
+    boolean released;
 
     boolean archived;
 
@@ -103,12 +103,12 @@ public class ProjectVersion extends AbstractNamedObject {
         return archived;
     }
 
-    public void setReadOnly(boolean locked) {
-        this.readOnly = locked;
+    public void setReleased(boolean released) {
+        this.released = released;
     }
 
-    public boolean isReadOnly() {
-        return readOnly;
+    public boolean isReleased() {
+        return released;
     }
 
     public void setDeleted(boolean deleted) {

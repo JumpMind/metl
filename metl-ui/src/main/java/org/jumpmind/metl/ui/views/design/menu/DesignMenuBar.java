@@ -60,6 +60,11 @@ public class DesignMenuBar extends AbstractMenuBar {
             super(navigator);
         }
         
+        @Override
+        protected boolean isReadOnly(Object selected) {
+            return false;
+        }
+        
     }
 
 }

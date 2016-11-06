@@ -10,8 +10,8 @@ public class ProjectMenuManager extends AbstractDesignSelectedValueMenuManager {
     }
     
     @Override
-    protected String[] getEnabledPaths() {
-        return (String[])ArrayUtils.addAll(super.getEnabledPaths(), new String[] {
+    protected String[] getEnabledPaths(Object selected) {
+        return (String[])ArrayUtils.addAll(super.getEnabledPaths(selected), new String[] {
                 "File|Hide",
                 "Edit|Rename",
                 "Edit|Remove",
