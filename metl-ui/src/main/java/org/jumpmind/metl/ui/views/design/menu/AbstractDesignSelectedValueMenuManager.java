@@ -82,7 +82,7 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
     protected boolean isReadOnly(Object selected) {
         ProjectVersion projectVersion = navigator.findProjectVersion(selected);
         if (projectVersion != null) {
-            return projectVersion.isReleased() || projectVersion.isArchived() || projectVersion.isDeleted();
+            return projectVersion.locked();
         } else {
             return false;
         }

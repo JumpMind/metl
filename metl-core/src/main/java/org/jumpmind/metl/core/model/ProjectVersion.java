@@ -110,6 +110,10 @@ public class ProjectVersion extends AbstractNamedObject {
     public boolean isReleased() {
         return released;
     }
+    
+    public boolean locked() {
+        return released || archived || deleted;
+    }
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;

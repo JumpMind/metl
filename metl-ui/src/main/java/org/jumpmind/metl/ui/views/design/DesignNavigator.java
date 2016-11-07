@@ -218,7 +218,7 @@ public class DesignNavigator extends VerticalLayout {
                     return "project";
                 } else if (itemId instanceof ProjectVersion) {
                     ProjectVersion version = (ProjectVersion) itemId;
-                    return version.isReleased() ? "project-version-read-only" : "project-version";
+                    return version.locked() ? "project-version-read-only" : "project-version";
                 }
             }
             return null;
@@ -339,7 +339,7 @@ public class DesignNavigator extends VerticalLayout {
 
             for (ProjectVersion projectVersion : versions) {
                 treeTable.addItem(projectVersion);
-                if (projectVersion.isReleased()) {
+                if (projectVersion.locked()) {
                     treeTable.setItemIcon(projectVersion, FontAwesome.LOCK);
                 } else { 
                     treeTable.setItemIcon(projectVersion, Icons.PROJECT_VERSION);

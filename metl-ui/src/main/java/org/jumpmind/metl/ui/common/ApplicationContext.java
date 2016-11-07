@@ -183,7 +183,7 @@ public class ApplicationContext implements Serializable {
     }    
     
     public boolean isReadOnly(ProjectVersion projectVersion, Privilege privilege) {
-        boolean readOnly = projectVersion.isReleased();
+        boolean readOnly = projectVersion.locked();
         if (!readOnly) {
             List<Group> groups = user.getGroups();
             for (Group group : groups) {
