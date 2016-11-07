@@ -75,6 +75,8 @@ public class LoginDialog extends Window {
     private PasswordField passwordField;
 
     private PasswordField validatePasswordField;
+    
+    private Button loginButton;
 
     private LoginListener loginListener;
 
@@ -123,6 +125,7 @@ public class LoginDialog extends Window {
 
                 HorizontalLayout buttonLayout = new HorizontalLayout();
                 loginButton.setStyleName(ValoTheme.BUTTON_PRIMARY);
+                LoginDialog.this.loginButton = loginButton;
                 buttonLayout.addComponent(loginButton);
                 buttonLayout.setWidth(100, Unit.PERCENTAGE);
                 layout.addComponent(buttonLayout);
@@ -312,6 +315,7 @@ public class LoginDialog extends Window {
                     passwordField.setValue(null);
                     setCaption(PASSWORD_EXPIRED);
                     passwordField.setCaption("New Password");
+                    loginButton.setCaption("Change Password");
                     validatePasswordField.setVisible(true);
                 } else {
                     login = true;
@@ -324,7 +328,7 @@ public class LoginDialog extends Window {
             user.setLastLoginTime(new Date());
             context.getConfigurationService().save(user);
             loginListener.login(user);
-        } else {
+        } else if (!isNewPasswordMode()) {
             String address = Page.getCurrent().getWebBrowser().getAddress();
             log.warn("Invalid login attempt for user " + userNameField.getValue() + " from address "
                     + address);
