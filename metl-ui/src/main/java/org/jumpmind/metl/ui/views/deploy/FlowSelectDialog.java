@@ -21,10 +21,11 @@
 package org.jumpmind.metl.ui.views.deploy;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.metl.core.model.FlowName;
@@ -109,7 +110,7 @@ public class FlowSelectDialog extends ResizableWindow {
 
     @SuppressWarnings("unchecked")
     protected Collection<FlowName> getFlowCollection(boolean includeTestFlows) {
-        Collection<FlowName> flowCollection = new HashSet<FlowName>();
+        Collection<FlowName> flowCollection = new TreeSet<FlowName>();
         addFlowsToCollection(flowCollection, (Collection<Object>) tree.getValue(), includeTestFlows);
         return flowCollection;
     }
@@ -146,8 +147,9 @@ public class FlowSelectDialog extends ResizableWindow {
         if (includeTestFlows) {
         	flows.addAll(context.getConfigurationService().findFlowsInProject(version.getId(), true));
         }
+        Collections.sort(flows);
         for (FlowName flow : flows) {
-            addItem(flow, flow.getName(), Icons.FLOW, version, false);
+            addItem(flow, flow.getName(), flow.isWebService() ? Icons.WEB : Icons.FLOW, version, false);
         }
     }
 

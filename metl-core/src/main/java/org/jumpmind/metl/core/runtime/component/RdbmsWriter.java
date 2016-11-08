@@ -216,22 +216,17 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                     targetTable.getUpdateTable().getRowValues().clear();
                 }
             }
-        } else {
-            Map<Integer, IComponentRuntime> all = context.getComponentRuntimeByThread();
-            boolean called = false;
-            if (all != null && all.size() > 0) {
-                for (IComponentRuntime runtime : all.values()) {
-                    if (runtime instanceof RdbmsWriter) {
-                        ((RdbmsWriter) runtime).writeStats(true);
-                        called = true;
-                    }
-                }
-            } 
-            
-            if (!called) {
-                writeStats(true);
-            }
-        }
+        } 
+    }
+    
+    @Override
+    public void flowCompleted(boolean cancelled) {
+        writeStats(true);
+    }
+    
+    @Override
+    public void flowCompletedWithErrors(Throwable myError) {
+        writeStats(true);
     }
     
     protected Table createTableFromEntity(ModelEntity entity, String tableName) {
