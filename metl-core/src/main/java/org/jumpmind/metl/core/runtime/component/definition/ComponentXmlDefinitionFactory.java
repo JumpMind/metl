@@ -151,6 +151,7 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                         ProjectVersionComponentPlugin plugin = new ProjectVersionComponentPlugin();
                         plugin.setProjectVersionId(projectVersionId);
                         plugin.setComponentTypeId(xmlComponent.getId());
+                        plugin.setComponentName(xmlComponent.getName());
                         plugin.setArtifactGroup(configuredPlugin.getArtifactGroup());
                         plugin.setArtifactName(configuredPlugin.getArtifactName());
                         plugin.setArtifactVersion(latestVersion);

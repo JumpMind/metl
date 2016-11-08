@@ -20,6 +20,8 @@ import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
 import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.graph.DependencyFilter;
 import org.eclipse.aether.impl.DefaultServiceLocator;
+import org.eclipse.aether.installation.InstallRequest;
+import org.eclipse.aether.installation.InstallationException;
 import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactResult;
@@ -260,21 +262,17 @@ public class PluginManager implements IPluginManager {
         }
     }
 
-    public void deploy(String artifactGroup, String artifactName, String artifactVersion, String filePath) {
-        // Artifact jarArtifact = new DefaultArtifact(artifactGroup,
-        // artifactName, "jar", artifactVersion);
-        // jarArtifact = jarArtifact.setFile(new File( filePath ));
-        //
-        // RemoteRepository distRepo =
-        // new RemoteRepository.Builder( "org.eclipse.aether.examples",
-        // "default",
-        // new File( "target/dist-repo" ).toURI().toString() ).build();
-        //
-        // DeployRequest deployRequest = new DeployRequest();
-        // deployRequest.addArtifact( jarArtifact );
-        // deployRequest.setRepository( distRepo );
-        //
-        // repositorySystem.deploy( repositorySystemSession, deployRequest );
+    public void install(String artifactGroup, String artifactName, String artifactVersion, File file) {
+        try {
+            Artifact jarArtifact = new DefaultArtifact(artifactGroup, artifactName, "", "jar", artifactVersion).setFile(file);
+            InstallRequest request = new InstallRequest();
+            request.addArtifact(jarArtifact);
+            repositorySystem.install(repositorySystemSession, request);
+            Plugin newVersion = new Plugin(artifactGroup, artifactName, artifactVersion, 0);
+            configurationService.save(newVersion);
+        } catch (InstallationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

@@ -1,14 +1,20 @@
 package org.jumpmind.metl.ui.views.admin;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.slf4j.Logger;
@@ -52,11 +58,21 @@ public class PluginsPanelAddDialog extends ResizableWindow {
 
     private ListSelect versionSelect;
 
-    private ComboBox groupField;
+    private ComboBox groupCombo;
 
-    private ComboBox nameField;
-    
+    private ComboBox nameCombo;
+
+    private TextField groupField;
+
+    private TextField nameField;
+
+    private TextField versionField;
+
     private List<PluginRepository> pluginRepositories;
+
+    private UploadHandler uploadHandler;
+
+    private byte[] jarContents;
 
     public PluginsPanelAddDialog(ApplicationContext context, PluginsPanel pluginsPanel) {
         super("Add Plugins");
@@ -72,13 +88,15 @@ public class PluginsPanelAddDialog extends ResizableWindow {
         AbstractLayout uploadLayout = buildUploadLayout();
         tabSheet.addTab(uploadLayout, "Upload");
 
-        searchButton = new Button("Search", (event)->search());
+        searchButton = new Button("Search", (event) -> search());
         searchButton.setEnabled(false);
 
-        uploadButton = new Upload(null, new UploadHandler());
+        uploadHandler = new UploadHandler();
+        uploadButton = new Upload(null, uploadHandler);
         uploadButton.setImmediate(true);
         uploadButton.setVisible(false);
         uploadButton.setButtonCaption("Upload");
+        uploadButton.addFinishedListener((e) -> finishedUpload());
 
         tabSheet.addSelectedTabChangeListener((event) -> {
             boolean searchSelected = tabSheet.getSelectedTab().equals(searchLayout);
@@ -95,6 +113,7 @@ public class PluginsPanelAddDialog extends ResizableWindow {
         addButton = new Button("Add");
         addButton.setEnabled(false);
         addButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        addButton.addClickListener(e -> addPlugin());
 
         addComponent(buildButtonFooter(uploadButton, searchButton, cancelButton, addButton));
 
@@ -102,6 +121,27 @@ public class PluginsPanelAddDialog extends ResizableWindow {
 
         setWidth(550, Unit.PIXELS);
         setHeight(300, Unit.PIXELS);
+    }
+
+    protected void addPlugin() {
+        try {
+            IPluginManager pluginManager = context.getPluginManager();
+            File tempFile = File.createTempFile("install", ".jar");
+            FileUtils.writeByteArrayToFile(tempFile, jarContents);
+            pluginManager.install(groupField.getValue(), nameField.getValue(), versionField.getValue(), tempFile);
+            tempFile.delete();
+            close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected void finishedUpload() {
+        jarContents = uploadHandler.os.toByteArray();
+        uploadHandler.reset();
+        if (isNotBlank(groupField.getValue()) && isNotBlank(nameField.getValue()) && isNotBlank(versionField.getValue())) {
+            addButton.setEnabled(true);
+        }
     }
 
     protected AbstractLayout buildSearchLayout() {
@@ -118,67 +158,68 @@ public class PluginsPanelAddDialog extends ResizableWindow {
         }
 
         versionSelect = new ListSelect("Versions");
-        groupField = new ComboBox("Group");
-        nameField = new ComboBox("Name");
+        groupCombo = new ComboBox("Group");
+        nameCombo = new ComboBox("Name");
 
         versionSelect.setRows(4);
         versionSelect.setNullSelectionAllowed(false);
         versionSelect.setWidth(100, Unit.PERCENTAGE);
-        versionSelect.addValueChangeListener((e)-> versionSelected());
+        versionSelect.addValueChangeListener((e) -> versionSelected());
 
-        groupField.setWidth(100, Unit.PERCENTAGE);
-        groupField.setNewItemsAllowed(true);
-        groupField.addItems(groups);
-        groupField.addValueChangeListener((event) -> {
-            populateNameField(nameField);
+        groupCombo.setWidth(100, Unit.PERCENTAGE);
+        groupCombo.setNewItemsAllowed(true);
+        groupCombo.addItems(groups);
+        groupCombo.addValueChangeListener((event) -> {
+            populateNameField(nameCombo);
             setSearchButtonEnabled();
         });
-        groupField.setNewItemHandler((newItemCaption) -> {
-            groupField.removeItem(handEnteredGroup);
+        groupCombo.setNewItemHandler((newItemCaption) -> {
+            groupCombo.removeItem(handEnteredGroup);
             handEnteredGroup = newItemCaption;
-            groupField.addItem(handEnteredGroup);
-            groupField.setValue(handEnteredGroup);
+            groupCombo.addItem(handEnteredGroup);
+            groupCombo.setValue(handEnteredGroup);
             setSearchButtonEnabled();
         });
-        layout.addComponent(groupField);
+        layout.addComponent(groupCombo);
 
-        nameField.setWidth(100, Unit.PERCENTAGE);
-        nameField.setNewItemsAllowed(true);
-        nameField.addItems(names);
-        nameField.addValueChangeListener((event) -> {
-            populateGroupField(groupField);
+        nameCombo.setWidth(100, Unit.PERCENTAGE);
+        nameCombo.setNewItemsAllowed(true);
+        nameCombo.addItems(names);
+        nameCombo.addValueChangeListener((event) -> {
+            populateGroupField(groupCombo);
             setSearchButtonEnabled();
         });
-        nameField.setNewItemHandler((newItemCaption) -> {
-            nameField.removeItem(handEnteredName);
+        nameCombo.setNewItemHandler((newItemCaption) -> {
+            nameCombo.removeItem(handEnteredName);
             handEnteredName = newItemCaption;
-            nameField.addItem(handEnteredName);
-            nameField.setValue(handEnteredName);
+            nameCombo.addItem(handEnteredName);
+            nameCombo.setValue(handEnteredName);
             setSearchButtonEnabled();
         });
-        layout.addComponent(nameField);
+        layout.addComponent(nameCombo);
 
         layout.addComponent(versionSelect);
 
         return layout;
     }
-    
+
     protected void versionSelected() {
-        
+
     }
-    
+
     protected void search() {
-        List<String> versions = context.getPluginManager().getAvailableVersions((String)groupField.getValue(), (String)nameField.getValue(), pluginRepositories);
+        List<String> versions = context.getPluginManager().getAvailableVersions((String) groupCombo.getValue(), (String) nameCombo.getValue(),
+                pluginRepositories);
         List<Plugin> plugins = context.getConfigurationService().findPlugins();
         for (Plugin plugin : plugins) {
-            if (plugin.matches((String)groupField.getValue(), (String)nameField.getValue())) {
+            if (plugin.matches((String) groupCombo.getValue(), (String) nameCombo.getValue())) {
                 versions.remove(plugin.getArtifactVersion());
             }
         }
     }
-    
+
     protected void setSearchButtonEnabled() {
-        searchButton.setEnabled(nameField.getValue() != null && groupField.getValue() != null);    
+        searchButton.setEnabled(nameCombo.getValue() != null && groupCombo.getValue() != null);
         versionSelect.removeAllItems();
     }
 
@@ -194,17 +235,17 @@ public class PluginsPanelAddDialog extends ResizableWindow {
         FormLayout layout = new FormLayout();
         layout.setMargin(true);
 
-        TextField groupField = new TextField("Group");
+        groupField = new TextField("Group");
         groupField.setWidth(100, Unit.PERCENTAGE);
         groupField.setRequired(true);
         layout.addComponent(groupField);
 
-        TextField nameField = new TextField("Name");
+        nameField = new TextField("Name");
         nameField.setWidth(100, Unit.PERCENTAGE);
         nameField.setRequired(true);
         layout.addComponent(nameField);
 
-        TextField versionField = new TextField("Version");
+        versionField = new TextField("Version");
         versionField.setWidth(100, Unit.PERCENTAGE);
         versionField.setRequired(true);
         layout.addComponent(versionField);
@@ -249,10 +290,6 @@ public class PluginsPanelAddDialog extends ResizableWindow {
 
         public void reset() {
             os = new ByteArrayOutputStream();
-        }
-
-        public String getContent() {
-            return os.toString();
         }
 
     }

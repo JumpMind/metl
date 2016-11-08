@@ -14,11 +14,20 @@ public class ProjectVersionComponentPlugin extends Plugin implements Serializabl
 
     String projectVersionId;
     String componentTypeId;
+    String componentName;
     String latestArtifactVersion;
     boolean enabled = true;
     boolean pinVersion = false;
 
     public ProjectVersionComponentPlugin() {
+    }
+    
+    public String getComponentName() {
+        return componentName;
+    }
+    
+    public void setComponentName(String componentName) {
+        this.componentName = componentName;
     }
 
     public String getProjectVersionId() {

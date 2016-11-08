@@ -15,10 +15,6 @@ apply plugin: 'eclipse'
 sourceCompatibility=1.8
 targetCompatibility=1.8   
 
-jar {
-  baseName='1-' + baseName
-}
-
 dependencies {
-    compile "org.jumpmind.metl:metl-ui:1.2.0.dev201606091252"
+    compile "org.jumpmind.metl:metl-ui:1.6.0.dev201611081523"
 }    

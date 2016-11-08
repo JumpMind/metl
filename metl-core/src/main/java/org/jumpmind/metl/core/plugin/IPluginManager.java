@@ -1,5 +1,6 @@
 package org.jumpmind.metl.core.plugin;
 
+import java.io.File;
 import java.util.List;
 
 import org.jumpmind.metl.core.model.Plugin;
@@ -24,5 +25,7 @@ public interface IPluginManager {
     boolean isNewer(Plugin first, Plugin second);
 
     void delete(String artifactGroup, String artifactName, String artifactVersion);
+    
+    public void install(String artifactGroup, String artifactName, String artifactVersion, File file);
 
 }

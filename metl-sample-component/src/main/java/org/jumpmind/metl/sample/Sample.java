@@ -18,8 +18,4 @@ public class Sample extends AbstractComponentRuntime {
         return false;
     }
 
-    @Override
-    protected void start() {
-    }
-
 }

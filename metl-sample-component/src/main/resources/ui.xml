@@ -1,0 +1,28 @@
+<!--
+
+    Licensed to JumpMind Inc under one or more contributor
+    license agreements.  See the NOTICE file distributed
+    with this work for additional information regarding
+    copyright ownership.  JumpMind Inc licenses this file
+    to you under the GNU General Public License, version 3.0 (GPLv3)
+    (the "License"); you may not use this file except in compliance
+    with the License.
+
+    You should have received a copy of the GNU General Public License,
+    version 3.0 (GPLv3) along with this library; if not, see
+    <http://www.gnu.org/licenses/>.
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<ui>
+    <component-ui id="687e5b9f-b1a6-4ac1-a43b-7c9f56519349" componentId="52ae735e-f393-49d9-8464-caeee9560258">
+        <iconImage>/minion.png</iconImage>
+        <className>org.jumpmind.metl.sample.SampleUIPanel</className>        
+    </component-ui> 
+</ui>

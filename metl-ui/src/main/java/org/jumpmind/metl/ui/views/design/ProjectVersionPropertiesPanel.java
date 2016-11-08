@@ -22,6 +22,7 @@ package org.jumpmind.metl.ui.views.design;
 
 import java.util.Collection;
 
+import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionComponentPlugin;
 import org.jumpmind.metl.core.persist.IConfigurationService;
@@ -71,8 +72,6 @@ public class ProjectVersionPropertiesPanel extends Panel implements IUiPanel {
     
     Button updateButton;
     
-    Button addButton;
-    
     Button pinButton;
     
     Button unpinButton;
@@ -116,7 +115,6 @@ public class ProjectVersionPropertiesPanel extends Panel implements IUiPanel {
 
         ButtonBar buttonBar = new ButtonBar();
         content.addComponent(buttonBar);
-        addButton = buttonBar.addButton("Add", FontAwesome.PLUS, (event)->add());
         updateButton = buttonBar.addButton("Update", Icons.UPDATE, (event)->update());        
         pinButton =  buttonBar.addButton("Pin", FontAwesome.CHECK_CIRCLE_O, (event)->pin(true));
         unpinButton = buttonBar.addButton("Unpin", FontAwesome.CIRCLE_O, (event)->pin(false));
@@ -124,8 +122,8 @@ public class ProjectVersionPropertiesPanel extends Panel implements IUiPanel {
         componentPluginsGrid = new Grid();
         componentPluginsGrid.setSelectionMode(SelectionMode.MULTI);
         componentPluginsGrid.setHeightMode(HeightMode.ROW);
-        componentPluginsGrid.setEditorEnabled(true);
         componentPluginsGrid.setWidth(100, Unit.PERCENTAGE);
+        componentPluginsGrid.addColumn("componentName", String.class).setHeaderCaption("Name").setEditable(false);
         componentPluginsGrid.addColumn("componentTypeId", String.class).setHeaderCaption("Type").setEditable(false);
         componentPluginsGrid.addColumn("pluginId", String.class).setHeaderCaption("Plugin").setEditable(false);
         componentPluginsGrid.addColumn("enabled", Boolean.class).setHeaderCaption("Enabled").setWidth(75);
@@ -209,14 +207,15 @@ public class ProjectVersionPropertiesPanel extends Panel implements IUiPanel {
     }
     
     protected void setButtonsEnabled() {
+        boolean readOnly = context.isReadOnly(projectVersion, Privilege.DESIGN);
         Collection<Object> selectedRows = componentPluginsGrid.getSelectedRows();
         boolean updatesAvailable = false;
         for (Object object : selectedRows) {
             ProjectVersionComponentPlugin plugin = (ProjectVersionComponentPlugin)object;
             updatesAvailable |= plugin.isUpdateAvailable();
         }
-        boolean selected = selectedRows.size() > 0;
-        updateButton.setEnabled(updatesAvailable);        
+        boolean selected = selectedRows.size() > 0 && !readOnly;
+        updateButton.setEnabled(updatesAvailable && !readOnly);        
         pinButton.setEnabled(selected);
         unpinButton.setEnabled(selected);
     }
@@ -241,7 +240,7 @@ public class ProjectVersionPropertiesPanel extends Panel implements IUiPanel {
         }    
         refresh();
         populateContainer();
-        
+        setButtonsEnabled();        
     }
     
     protected void pin(boolean value) {
