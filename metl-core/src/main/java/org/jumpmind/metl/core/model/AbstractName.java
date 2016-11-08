@@ -23,7 +23,7 @@ package org.jumpmind.metl.core.model;
 import java.util.UUID;
 
 
-abstract public class AbstractName extends AbstractNamedObject {
+abstract public class AbstractName extends AbstractNamedObject implements Comparable<AbstractName> {
 
     private static final long serialVersionUID = 1L;
     
@@ -72,6 +72,15 @@ abstract public class AbstractName extends AbstractNamedObject {
     
     public String getRowId() {
         return rowId;
+    }
+    
+    @Override
+    public int compareTo(AbstractName o) {
+        if (name != null) {
+            return name.compareTo(o.name);
+        } else {
+            return 0;
+        }
     }
 
 }
