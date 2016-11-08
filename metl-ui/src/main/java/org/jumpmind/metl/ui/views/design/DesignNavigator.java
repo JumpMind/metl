@@ -219,6 +219,11 @@ public class DesignNavigator extends VerticalLayout {
                 } else if (itemId instanceof ProjectVersion) {
                     ProjectVersion version = (ProjectVersion) itemId;
                     return version.locked() ? "project-version-read-only" : "project-version";
+                } else {
+                    ProjectVersion version = findProjectVersion(itemId);
+                    if (version != null) {
+                        return version.locked() ? "project-version-read-only" : null;
+                    }
                 }
             }
             return null;
