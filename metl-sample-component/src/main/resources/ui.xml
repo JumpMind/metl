@@ -22,7 +22,7 @@
 -->
 <ui>
     <component-ui id="687e5b9f-b1a6-4ac1-a43b-7c9f56519349" componentId="52ae735e-f393-49d9-8464-caeee9560258">
-        <iconImage>/minion.png</iconImage>
+        <iconImage>minion.png</iconImage>
         <className>org.jumpmind.metl.sample.SampleUIPanel</className>        
     </component-ui> 
 </ui>

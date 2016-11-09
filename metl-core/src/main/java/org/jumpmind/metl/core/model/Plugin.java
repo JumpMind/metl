@@ -16,7 +16,6 @@ public class Plugin implements Serializable, Comparable<Plugin> {
     Date lastUpdateTime = new Date();
     String lastUpdateBy;
     
-
     public Plugin() {
     }
         

@@ -1,6 +1,7 @@
 package org.jumpmind.metl.core.plugin;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.DefaultModelWriter;
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
@@ -39,6 +42,7 @@ import org.eclipse.aether.util.filter.DependencyFilterUtils;
 import org.eclipse.aether.util.version.GenericVersionScheme;
 import org.eclipse.aether.version.Version;
 import org.h2.store.fs.FileUtils;
+import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.persist.IConfigurationService;
@@ -150,20 +154,23 @@ public class PluginManager implements IPluginManager {
             if (!checked.contains(id)) {
                 List<Plugin> existing = configurationService.findPlugins();
                 String latestVersion = getLatestLocalVersion(plugin.getArtifactGroup(), plugin.getArtifactName());
-                Plugin potentialNewVersion = new Plugin(plugin.getArtifactGroup(), plugin.getArtifactName(), latestVersion,
-                        plugin.getLoadOrder());
-                boolean matched = false;
-                for (Plugin existingPlugin : existing) {
-                    if (existingPlugin.equals(potentialNewVersion)) {
-                        matched = true;
-                        break;
+                if (latestVersion != null) { 
+                    Plugin potentialNewVersion = new Plugin(plugin.getArtifactGroup(), plugin.getArtifactName(), latestVersion,
+                            plugin.getLoadOrder());
+                    
+                    boolean matched = false;
+                    for (Plugin existingPlugin : existing) {
+                        if (existingPlugin.equals(potentialNewVersion)) {
+                            matched = true;
+                            break;
+                        }
                     }
+                    if (!matched) {
+                        logger.info("Found a new version of {}.  Recording it", potentialNewVersion);
+                        configurationService.save(potentialNewVersion);
+                    }
+                    checked.add(id);
                 }
-                if (!matched) {
-                    logger.info("Found a new version of {}.  Recording it", potentialNewVersion);
-                    configurationService.save(potentialNewVersion);
-                }
-                checked.add(id);
             }
         }
     }
@@ -265,11 +272,21 @@ public class PluginManager implements IPluginManager {
     public void install(String artifactGroup, String artifactName, String artifactVersion, File file) {
         try {
             Artifact jarArtifact = new DefaultArtifact(artifactGroup, artifactName, "", "jar", artifactVersion).setFile(file);
+            Model model = new Model();
+            model.setArtifactId(artifactName);
+            model.setGroupId(artifactGroup);
+            model.setVersion(artifactVersion);
+            File pomFile = File.createTempFile("pom", ".xml");
+            new DefaultModelWriter().write(pomFile, null, model);
             InstallRequest request = new InstallRequest();
+            request.addArtifact(new DefaultArtifact(artifactGroup, artifactName, null, "pom", artifactVersion, null, pomFile));
             request.addArtifact(jarArtifact);
             repositorySystem.install(repositorySystemSession, request);
+            pomFile.delete();
             Plugin newVersion = new Plugin(artifactGroup, artifactName, artifactVersion, 0);
             configurationService.save(newVersion);
+        } catch (IOException e) {
+            throw new IoException(e);
         } catch (InstallationException e) {
             throw new RuntimeException(e);
         }
