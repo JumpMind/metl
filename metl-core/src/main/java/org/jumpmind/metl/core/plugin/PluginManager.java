@@ -269,21 +269,22 @@ public class PluginManager implements IPluginManager {
         }
     }
 
-    public void install(String artifactGroup, String artifactName, String artifactVersion, File file) {
+    public void install(String groupId, String artifactId, String version, File file) {
         try {
-            Artifact jarArtifact = new DefaultArtifact(artifactGroup, artifactName, "", "jar", artifactVersion).setFile(file);
+            Artifact jarArtifact = new DefaultArtifact(groupId, artifactId, "", "jar", version).setFile(file);
             Model model = new Model();
-            model.setArtifactId(artifactName);
-            model.setGroupId(artifactGroup);
-            model.setVersion(artifactVersion);
+            model.setArtifactId(artifactId);
+            model.setGroupId(groupId);
+            model.setVersion(version);
+            model.setModelVersion("4.0.0");
             File pomFile = File.createTempFile("pom", ".xml");
             new DefaultModelWriter().write(pomFile, null, model);
             InstallRequest request = new InstallRequest();
-            request.addArtifact(new DefaultArtifact(artifactGroup, artifactName, null, "pom", artifactVersion, null, pomFile));
+            request.addArtifact(new DefaultArtifact(groupId, artifactId, null, "pom", version, null, pomFile));
             request.addArtifact(jarArtifact);
             repositorySystem.install(repositorySystemSession, request);
             pomFile.delete();
-            Plugin newVersion = new Plugin(artifactGroup, artifactName, artifactVersion, 0);
+            Plugin newVersion = new Plugin(groupId, artifactId, version, 0);
             configurationService.save(newVersion);
         } catch (IOException e) {
             throw new IoException(e);
