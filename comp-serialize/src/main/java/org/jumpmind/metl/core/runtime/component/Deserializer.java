@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import static org.jumpmind.metl.core.runtime.component.CommonSettingsConstants.STRUCTURE_BY_TABLE;
+
 import java.util.ArrayList;
 import java.util.List;
 

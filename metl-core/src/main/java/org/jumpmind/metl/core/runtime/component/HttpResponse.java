@@ -2,6 +2,9 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.jumpmind.metl.core.runtime.component.CommonSettingsConstants.FORMAT;
+import static org.jumpmind.metl.core.runtime.component.CommonSettingsConstants.FORMAT_JSON;
+import static org.jumpmind.metl.core.runtime.component.CommonSettingsConstants.FORMAT_XML;
 
 import org.jumpmind.metl.core.runtime.ContentMessage;
 import org.jumpmind.metl.core.runtime.Message;
@@ -28,7 +31,7 @@ public class HttpResponse extends AbstractHttpRequestResponse implements IHasRes
             if (inputMessage instanceof ContentMessage) {
                 ContentMessage<?> textMessage = (ContentMessage<?>) inputMessage;
                 response.append(textMessage.getTextFromPayload());
-                detectedFormat = (String)textMessage.getHeader().get(AbstractSerializer.FORMAT);
+                detectedFormat = (String)textMessage.getHeader().get(FORMAT);
             }
         }
     }
@@ -42,9 +45,9 @@ public class HttpResponse extends AbstractHttpRequestResponse implements IHasRes
         String contentType = properties.get("content.type");
         if (isBlank(contentType)) {
             if (isNotBlank(detectedFormat)) {
-                if (AbstractSerializer.FORMAT_JSON.equals(detectedFormat)) {
+                if (FORMAT_JSON.equals(detectedFormat)) {
                     contentType = "application/json;charset=utf-8";
-                } else if (AbstractSerializer.FORMAT_XML.equals(detectedFormat)) {
+                } else if (FORMAT_XML.equals(detectedFormat)) {
                     contentType = "application/xml;charset=utf-8";
                 }
             }

@@ -132,6 +132,7 @@ public class ExcelFileReader extends AbstractFileReader {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void readWorkbook(Map<String, Serializable> headers, InputStream inStream,
             ISendMessageCallback callback) throws IOException {
 
@@ -140,6 +141,7 @@ public class ExcelFileReader extends AbstractFileReader {
         int currentFileLinesRead = 1;
 
         Workbook wb = new XSSFWorkbook(inStream);
+        try {
         for (int i = 0; i < wb.getNumberOfSheets(); i++) {
             Sheet sheet = wb.getSheetAt(i);
             if (worsheetsToRead.contains(sheet.getSheetName())) {
@@ -191,6 +193,9 @@ public class ExcelFileReader extends AbstractFileReader {
           // send leftovers
         if (outboundPayload.size() > 0) {
             callback.sendEntityDataMessage(headers, outboundPayload);
+        }
+        } finally {
+            IOUtils.closeQuietly(wb);
         }
     }
 }

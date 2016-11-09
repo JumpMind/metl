@@ -20,22 +20,21 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import static org.jumpmind.metl.core.runtime.component.CommonSettingsConstants.FORMAT;
+import static org.jumpmind.metl.core.runtime.component.CommonSettingsConstants.FORMAT_AUTOMATIC;
+import static org.jumpmind.metl.core.runtime.component.CommonSettingsConstants.FORMAT_JSON;
+import static org.jumpmind.metl.core.runtime.component.CommonSettingsConstants.FORMAT_XML;
+import static org.jumpmind.metl.core.runtime.component.CommonSettingsConstants.STRUCTURE;
+import static org.jumpmind.metl.core.runtime.component.CommonSettingsConstants.STRUCTURE_BY_INBOUND_ROW;
+
 import org.apache.http.HttpHeaders;
 import org.springframework.util.MimeTypeUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-
 public abstract class AbstractSerializer extends AbstractComponentRuntime {
 
-    public static final String STRUCTURE = "structure";
-    public static final String FORMAT = "format";
-    public static final String STRUCTURE_BY_INBOUND_ROW = "BY_INBOUND_ROW";
-    public static final String STRUCTURE_BY_TABLE = "BY_TABLE";
 
-    public static final String FORMAT_AUTOMATIC = "AUTOMATIC";
-    public static final String FORMAT_JSON = "JSON";
-    public static final String FORMAT_XML = "XML";
 
     protected String format;
     protected String structure;

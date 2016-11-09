@@ -63,7 +63,7 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
     Map<String, Map<String, XMLComponent>> componentsByProjectVersionIdById;
 
     Map<String, List<XMLComponent>> componentsByPluginId;
-    
+
     Map<String, List<String>> componentIdsByCategory;
 
     protected IConfigurationService configurationService;
@@ -79,7 +79,7 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
         this();
         this.configurationService = configurationService;
         this.pluginManager = pluginManager;
-    }   
+    }
 
     @Override
     synchronized public void refresh() {
@@ -141,26 +141,32 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
             }
 
             if (!matched) {
-                String latestVersion = pluginManager.getLatestLocalVersion(configuredPlugin.getArtifactGroup(), configuredPlugin.getArtifactName());
+                String latestVersion = pluginManager.getLatestLocalVersion(configuredPlugin.getArtifactGroup(),
+                        configuredPlugin.getArtifactName());
                 if (latestVersion != null) {
-                    String pluginId = load(projectVersionId, configuredPlugin.getArtifactGroup(), configuredPlugin.getArtifactName(), latestVersion,
-                            remoteRepostiories);
+                    String pluginId = load(projectVersionId, configuredPlugin.getArtifactGroup(), configuredPlugin.getArtifactName(),
+                            latestVersion, remoteRepostiories);
 
                     List<XMLComponent> components = componentsByPluginId.get(pluginId);
-                    for (XMLComponent xmlComponent : components) {
-                        ProjectVersionComponentPlugin plugin = new ProjectVersionComponentPlugin();
-                        plugin.setProjectVersionId(projectVersionId);
-                        plugin.setComponentTypeId(xmlComponent.getId());
-                        plugin.setComponentName(xmlComponent.getName());
-                        plugin.setArtifactGroup(configuredPlugin.getArtifactGroup());
-                        plugin.setArtifactName(configuredPlugin.getArtifactName());
-                        plugin.setArtifactVersion(latestVersion);
-                        plugin.setLatestArtifactVersion(latestVersion);
-                        configurationService.save(plugin);
+                    if (components != null) {
+                        for (XMLComponent xmlComponent : components) {
+                            ProjectVersionComponentPlugin plugin = new ProjectVersionComponentPlugin();
+                            plugin.setProjectVersionId(projectVersionId);
+                            plugin.setComponentTypeId(xmlComponent.getId());
+                            plugin.setComponentName(xmlComponent.getName());
+                            plugin.setArtifactGroup(configuredPlugin.getArtifactGroup());
+                            plugin.setArtifactName(configuredPlugin.getArtifactName());
+                            plugin.setArtifactVersion(latestVersion);
+                            plugin.setLatestArtifactVersion(latestVersion);
+                            configurationService.save(plugin);
+                        }
+                    } else {
+                        logger.warn("Could not find a component in the {} plugin", pluginId);
                     }
 
                 } else {
-                    logger.warn("Could not find a registered plugin for {}:{}", configuredPlugin.getArtifactGroup(), configuredPlugin.getArtifactName());
+                    logger.warn("Could not find a registered plugin for {}:{}", configuredPlugin.getArtifactGroup(),
+                            configuredPlugin.getArtifactName());
                 }
             }
         }
