@@ -23,7 +23,8 @@ package org.jumpmind.metl.ui.views.design;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.io.InputStream;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.ui.common.ApplicationContext;
@@ -124,7 +125,8 @@ public class EditFlowPalette extends VerticalLayout {
     }
     protected void populateComponentPalette() {
         componentLayout.removeAllComponents();
-        Collection<XMLComponent> componentDefinitions = context.getComponentDefinitionFactory().getDefinitions(projectVersionId);
+        List<XMLComponent> componentDefinitions = context.getComponentDefinitionFactory().getDefinitions(projectVersionId);
+        Collections.sort(componentDefinitions);
         for (XMLComponent definition : componentDefinitions) {
             if ((isBlank(filterText) || definition.getName().toLowerCase().contains(filterText)
                     || definition.getCategory().toLowerCase().contains(filterText) || definition.getKeywords().toLowerCase().contains(filterText))) {
