@@ -88,7 +88,7 @@ public class PluginsPanelAddDialog extends ResizableWindow {
         AbstractLayout uploadLayout = buildUploadLayout();
         tabSheet.addTab(uploadLayout, "Upload");
 
-        searchButton = new Button("Search", (event) -> search());
+        searchButton = new Button("Search", e -> search());
         searchButton.setEnabled(false);
 
         uploadHandler = new UploadHandler();
@@ -96,9 +96,9 @@ public class PluginsPanelAddDialog extends ResizableWindow {
         uploadButton.setImmediate(true);
         uploadButton.setVisible(false);
         uploadButton.setButtonCaption("Upload");
-        uploadButton.addFinishedListener((e) -> finishedUpload());
+        uploadButton.addFinishedListener(e -> finishedUpload());
 
-        tabSheet.addSelectedTabChangeListener((event) -> {
+        tabSheet.addSelectedTabChangeListener(e -> {
             boolean searchSelected = tabSheet.getSelectedTab().equals(searchLayout);
             searchButton.setVisible(searchSelected);
             uploadButton.setVisible(!searchSelected);
@@ -124,16 +124,23 @@ public class PluginsPanelAddDialog extends ResizableWindow {
     }
 
     protected void addPlugin() {
-        try {
-            IPluginManager pluginManager = context.getPluginManager();
-            File tempFile = File.createTempFile("install", ".jar");
-            FileUtils.writeByteArrayToFile(tempFile, jarContents);
-            pluginManager.install(groupField.getValue(), nameField.getValue(), versionField.getValue(), tempFile);
-            tempFile.delete();
+        IPluginManager pluginManager = context.getPluginManager();
+        if (searchButton.isVisible()) {
+            Plugin newVersion = new Plugin((String)groupCombo.getValue(), (String)nameCombo.getValue(), (String)versionSelect.getValue(), 0);
+            context.getConfigurationService().save(newVersion);
+            pluginManager.refresh();
             close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        } else if (uploadButton.isVisible() && jarContents != null) {
+            try {
+                File tempFile = File.createTempFile("install", ".jar");
+                FileUtils.writeByteArrayToFile(tempFile, jarContents);
+                pluginManager.install(groupField.getValue(), nameField.getValue(), versionField.getValue(), tempFile);
+                tempFile.delete();
+                close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }        
     }
 
     protected void finishedUpload() {
@@ -162,14 +169,15 @@ public class PluginsPanelAddDialog extends ResizableWindow {
         nameCombo = new ComboBox("Name");
 
         versionSelect.setRows(4);
+        versionSelect.setMultiSelect(false);
         versionSelect.setNullSelectionAllowed(false);
         versionSelect.setWidth(100, Unit.PERCENTAGE);
-        versionSelect.addValueChangeListener((e) -> versionSelected());
+        versionSelect.addValueChangeListener(e -> versionSelected());
 
         groupCombo.setWidth(100, Unit.PERCENTAGE);
         groupCombo.setNewItemsAllowed(true);
         groupCombo.addItems(groups);
-        groupCombo.addValueChangeListener((event) -> {
+        groupCombo.addValueChangeListener(e -> {
             populateNameField(nameCombo);
             setSearchButtonEnabled();
         });
@@ -185,8 +193,7 @@ public class PluginsPanelAddDialog extends ResizableWindow {
         nameCombo.setWidth(100, Unit.PERCENTAGE);
         nameCombo.setNewItemsAllowed(true);
         nameCombo.addItems(names);
-        nameCombo.addValueChangeListener((event) -> {
-            populateGroupField(groupCombo);
+        nameCombo.addValueChangeListener(e -> {
             setSearchButtonEnabled();
         });
         nameCombo.setNewItemHandler((newItemCaption) -> {
@@ -204,7 +211,7 @@ public class PluginsPanelAddDialog extends ResizableWindow {
     }
 
     protected void versionSelected() {
-
+        addButton.setEnabled(versionSelect.getValue() != null);
     }
 
     protected void search() {
@@ -216,6 +223,8 @@ public class PluginsPanelAddDialog extends ResizableWindow {
                 versions.remove(plugin.getArtifactVersion());
             }
         }
+        versionSelect.removeAllItems();
+        versionSelect.addItems(versions);
     }
 
     protected void setSearchButtonEnabled() {
@@ -224,10 +233,6 @@ public class PluginsPanelAddDialog extends ResizableWindow {
     }
 
     protected void populateNameField(ComboBox nameField) {
-
-    }
-
-    protected void populateGroupField(ComboBox groupField) {
 
     }
 

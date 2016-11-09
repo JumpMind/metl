@@ -42,6 +42,7 @@ public class Develop {
         
         System.out.println(IOUtils.toString(new FileInputStream("../metl-server/src/main/resources/Metl.asciiart")));
 
+        new File(System.getProperty("java.io.tmpdir")).mkdirs();
         new File("working").mkdirs();
         System.setProperty("org.jumpmind.metl.ui.init.config.dir","working");
         
@@ -66,7 +67,7 @@ public class Develop {
         
         ServerContainer webSocketServer = WebSocketServerContainerInitializer.configureContext(webapp);
         webSocketServer.setDefaultMaxSessionIdleTimeout(10000000);        
-
+        
         server.start();
         server.join();
 

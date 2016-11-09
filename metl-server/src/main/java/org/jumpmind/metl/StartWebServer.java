@@ -101,6 +101,8 @@ public class StartWebServer {
 
     public static void runWebServer() throws Exception {
         disableJettyLogging();
+        
+        new File(System.getProperty("java.io.tmpdir")).mkdirs();
 
         System.out.println(IOUtils.toString(StartWebServer.class.getResource("/Metl.asciiart")));
 

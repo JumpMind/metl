@@ -34,13 +34,9 @@ import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.views.UiConstants;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -74,13 +70,13 @@ public class PluginsPanel extends VerticalLayout implements IUiPanel {
         addComponent(buttonBar);
 
         addButton = buttonBar.addButton("Add", FontAwesome.PLUS);
-        addButton.addClickListener(new AddClickListener());
+        addButton.addClickListener(e -> addPlugin());
 
-        moveUpButton = buttonBar.addButton("Move Up", FontAwesome.ARROW_UP, new MoveUpListener());
+        moveUpButton = buttonBar.addButton("Move Up", FontAwesome.ARROW_UP, e -> moveUp());
 
-        moveDownButton = buttonBar.addButton("Move Down", FontAwesome.ARROW_DOWN, new MoveDownListener());
+        moveDownButton = buttonBar.addButton("Move Down", FontAwesome.ARROW_DOWN, e -> moveDown());
 
-        removeButton = buttonBar.addButton("Purge Unused", FontAwesome.TRASH_O, new PurgeUnusedClickListener());
+        removeButton = buttonBar.addButton("Purge Unused", FontAwesome.TRASH_O, e -> purgeUnused());
 
         container = new BeanItemContainer<Plugin>(Plugin.class);
 
@@ -96,7 +92,7 @@ public class PluginsPanel extends VerticalLayout implements IUiPanel {
         table.setVisibleColumns("artifactGroup", "artifactName", "artifactVersion", "lastUpdateTime");
         table.setColumnHeaders("Group", "Name", "Version", "Updated");
         table.setColumnWidth("lastUpdateTime", UiConstants.DATETIME_WIDTH_PIXELS);
-        table.addValueChangeListener(new TableValueChangeListener());
+        table.addValueChangeListener(e -> setButtonsEnabled());
 
         addComponent(table);
         setExpandRatio(table, 1.0f);
@@ -105,7 +101,7 @@ public class PluginsPanel extends VerticalLayout implements IUiPanel {
 
         refresh();
     }
-    
+
     public List<Plugin> getPlugins() {
         return plugins;
     }
@@ -182,63 +178,55 @@ public class PluginsPanel extends VerticalLayout implements IUiPanel {
 
     }
 
-    class MoveUpListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
-            Set<Plugin> itemIds = getSelectedItems();
-            if (itemIds.size() > 0 && itemIds != null) {
-                Plugin firstItem = itemIds.iterator().next();
-                int index = container.indexOfId(firstItem) - 1;
-                moveItemsTo(getSelectedItems(), index);
-            }
+    protected void moveUp() {
+        Set<Plugin> itemIds = getSelectedItems();
+        if (itemIds.size() > 0 && itemIds != null) {
+            Plugin firstItem = itemIds.iterator().next();
+            int index = container.indexOfId(firstItem) - 1;
+            moveItemsTo(getSelectedItems(), index);
         }
     }
 
-    class MoveDownListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
-            Set<Plugin> itemIds = getSelectedItems();
-            if (itemIds.size() > 0 && itemIds != null) {
-                Plugin lastItem = null;
-                Iterator<Plugin> iter = itemIds.iterator();
-                while (iter.hasNext()) {
-                    lastItem = iter.next();
-                }
-                int index = container.indexOfId(lastItem) + 1;
-                moveItemsTo(getSelectedItems(), index);
+    protected void moveDown() {
+        Set<Plugin> itemIds = getSelectedItems();
+        if (itemIds.size() > 0 && itemIds != null) {
+            Plugin lastItem = null;
+            Iterator<Plugin> iter = itemIds.iterator();
+            while (iter.hasNext()) {
+                lastItem = iter.next();
             }
+            int index = container.indexOfId(lastItem) + 1;
+            moveItemsTo(getSelectedItems(), index);
         }
     }
 
-    class AddClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
-            PluginsPanelAddDialog dialog = new PluginsPanelAddDialog(context, PluginsPanel.this);
-            UI.getCurrent().addWindow(dialog);
-        }
+    protected void addPlugin() {
+        PluginsPanelAddDialog dialog = new PluginsPanelAddDialog(context, PluginsPanel.this) {
+            @Override
+            public void close() {
+                super.close();
+                PluginsPanel.this.refresh();
+            }
+        };
+        UI.getCurrent().addWindow(dialog);
     }
 
-    class PurgeUnusedClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
-            IConfigurationService configurationService = context.getConfigurationService();
-            List<Plugin> plugins = configurationService.findUnusedPlugins();
-            for (Plugin plugin : plugins) {
-                configurationService.delete(plugin);
-                /*
-                 * Before enabling this need to figure out logic to calculate if
-                 * the plug-in is required by other plug-ins that ARE currently
-                 * referenced
-                 */
-                // context.getPluginManager().delete(plugin.getArtifactGroup(),
-                // plugin.getArtifactName(), plugin.getArtifactVersion());
-            }
-
-            if (plugins.size() > 0) {
-                refresh();
-            }
+    protected void purgeUnused() {
+        IConfigurationService configurationService = context.getConfigurationService();
+        List<Plugin> plugins = configurationService.findUnusedPlugins();
+        for (Plugin plugin : plugins) {
+            configurationService.delete(plugin);
+            /*
+             * TODO: Before enabling this need to figure out logic to calculate if the
+             * plug-in is required by other plug-ins that ARE currently
+             * referenced
+             */
+            // context.getPluginManager().delete(plugin.getArtifactGroup(),
+            // plugin.getArtifactName(), plugin.getArtifactVersion());
         }
-    }
 
-    class TableValueChangeListener implements ValueChangeListener {
-        public void valueChange(ValueChangeEvent event) {
-            setButtonsEnabled();
+        if (plugins.size() > 0) {
+            refresh();
         }
     }
 
