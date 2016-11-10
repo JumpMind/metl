@@ -11,7 +11,10 @@ dependencies {
     testCompile project(":comp-data-diff")  
     testCompile project(":comp-sorter")  
     testCompile project(":comp-temp-rdbms")
-    testCompile project(":comp-serialize")       
+    testCompile project(":comp-serialize")
+    testCompile project(":comp-sql-execute")
+    testCompile project(":comp-rdbms-writer")
+    testCompile project(":comp-sequence")           
     testCompile project(path: ':metl-core', configuration: 'testArtifacts')    
     testCompile "javax.servlet:javax.servlet-api:$servletVersion"
     testCompile "org.eclipse.jetty:jetty-servlet:$jettyVersion"

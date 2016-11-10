@@ -1,0 +1,112 @@
+<!--
+
+    Licensed to JumpMind Inc under one or more contributor
+    license agreements.  See the NOTICE file distributed
+    with this work for additional information regarding
+    copyright ownership.  JumpMind Inc licenses this file
+    to you under the GNU General Public License, version 3.0 (GPLv3)
+    (the "License"); you may not use this file except in compliance
+    with the License.
+
+    You should have received a copy of the GNU General Public License,
+    version 3.0 (GPLv3) along with this library; if not, see
+    <http://www.gnu.org/licenses/>.
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<components>
+  <component category='WRITER'
+             id='RDBMS Writer'
+             inputMessageType='entity'
+             inputOutputModelsMatch='false'
+             outputMessageType='text'
+             resourceCategory='datasource'
+             supportsMultipleThreads='true'>
+    <name>RDBMS Writer</name>
+    <className>org.jumpmind.metl.core.runtime.component.RdbmsWriter</className>
+    <keywords>database,db,dml,insert,update,delete,crud</keywords>
+    <description></description>
+    <settings>
+      <setting id='catalog'
+               required='false'
+               type='text'>
+        <name>Catalog</name>
+      </setting>
+      <setting id='schema'
+               required='false'
+               type='text'>
+        <name>Schema</name>
+      </setting>
+      <setting id='replace'
+               required='false'
+               type='boolean'>
+        <name>Replace rows if they exist</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='update.first'
+               required='false'
+               type='boolean'>
+        <name>Update rows first instead of insert</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='insert.fallback'
+               required='false'
+               type='boolean'>
+        <name>Fallback to insert if no rows updated</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='quote.identifiers'
+               required='false'
+               type='boolean'>
+        <name>Quote table and column names</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='fit.to.column'
+               required='false'
+               type='boolean'>
+        <name>Trim character data to fit within column</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='continue.on.error'
+               required='false'
+               type='boolean'>
+        <name>Continue on Error</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='batch.mode'
+               required='false'
+               type='boolean'>
+        <name>Batch Mode</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='table.auto.create'
+               required='false'
+               type='boolean'>
+        <name>Create table if missing</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='use.cached.table.metadata'
+               required='false'
+               type='boolean'>
+        <name>Use Previously Cached Table Metadata</name>
+        <defaultValue>false</defaultValue>
+      </setting>      
+      <setting id='table.prefix'
+               required='false'
+               type='text'>
+        <name>Table Prefix</name>
+      </setting>
+      <setting id='table.suffix'
+               required='false'
+               type='text'>
+        <name>Table Suffix</name>
+      </setting>
+    </settings>
+  </component>
+</components>
