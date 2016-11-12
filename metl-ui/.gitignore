@@ -5,8 +5,7 @@
 /build
 .DS_Store
 
-/src/main/webapp/VAADIN/themes/apptheme/addons.scss
-/src/main/webapp/VAADIN/themes/images/addons.scss
+/src/main/webapp/
 /test_codb.h2.db
 /test_codb.lock.db
 /test_codb.trace.db
