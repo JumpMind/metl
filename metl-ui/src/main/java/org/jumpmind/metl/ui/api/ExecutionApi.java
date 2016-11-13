@@ -177,6 +177,8 @@ public class ExecutionApi {
             Tag tag = new Tag().name(GeneralUtils.replaceSpecialCharacters(agent.getName()));
             if (agent.getName().startsWith("<")) {
                 tag.setDescription("This is a development agent");
+            } else {
+                tag.setDescription("This is an agent");
             }
             swagger.addTag(tag);
 
@@ -186,7 +188,8 @@ public class ExecutionApi {
                 if (flow.isWebService()) {
                     List<HttpRequestMapping> mappings = requestRegistry.getHttpRequestMappingsFor(agentDeployment);
                     for (HttpRequestMapping httpRequestMapping : mappings) {
-                        Operation operation = new Operation().summary(flow.getName()).operationId(flow.getName()).tag(tag.getName());
+                        Operation operation = new Operation().summary(flow.getName()).operationId(flow.getName()).tag(tag.getName())
+                                .description(httpRequestMapping.getDescription());
                         String path = addParameters(operation, httpRequestMapping.getPath());
                         // Response response = new
                         // Response().description("description of
@@ -205,7 +208,7 @@ public class ExecutionApi {
                                 operation.addParameter(new FormParameter().name("payload").required(false).property(new StringProperty()));
                                 swagger.path(path, new Path().post(operation));
                                 break;
-                            case DELETE:                                
+                            case DELETE:
                                 swagger.path(path, new Path().delete(operation));
                                 break;
                             case HEAD:
@@ -245,35 +248,35 @@ public class ExecutionApi {
             boolean tracking = false;
             for (int i = 0; i < path.length(); i++) {
                 char c = path.charAt(i);
-                 if (c == '{') {
-                     tracking = true;
-                     paramName.setLength(0);
-                     finalPath.append(c);
-                 } else if (tracking && c == '}') {
-                     tracking = false;
-                     addParameter(paramName.toString(), operation, type);                     
-                     finalPath.append(c);
-                 } else if (c == '$' && path.charAt(i+1) == '(') {
-                     tracking = true;
-                     paramName.setLength(0);
-                     i++;
-                     finalPath.append('{');
-                 } else if (tracking && c == ')') {
-                     tracking = false;
-                     addParameter(paramName.toString(), operation, type);
-                     finalPath.append('}');
-                 } else if (tracking) {
-                     paramName.append(c);
-                     finalPath.append(c);
-                 } else {
-                     finalPath.append(c);
-                 }
+                if (c == '{') {
+                    tracking = true;
+                    paramName.setLength(0);
+                    finalPath.append(c);
+                } else if (tracking && c == '}') {
+                    tracking = false;
+                    addParameter(paramName.toString(), operation, type);
+                    finalPath.append(c);
+                } else if (c == '$' && path.charAt(i + 1) == '(') {
+                    tracking = true;
+                    paramName.setLength(0);
+                    i++;
+                    finalPath.append('{');
+                } else if (tracking && c == ')') {
+                    tracking = false;
+                    addParameter(paramName.toString(), operation, type);
+                    finalPath.append('}');
+                } else if (tracking) {
+                    paramName.append(c);
+                    finalPath.append(c);
+                } else {
+                    finalPath.append(c);
+                }
             }
             path = finalPath.toString();
         }
         return path;
     }
-    
+
     private void addParameter(String name, Operation operation, Class<? extends AbstractSerializableParameter<?>> type) {
         try {
             AbstractSerializableParameter<?> param = type.newInstance();

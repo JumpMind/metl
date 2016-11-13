@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.core.runtime.component.definition;
 
-import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.ENABLED;
+import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.*;
 import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.INBOUND_QUEUE_CAPACITY;
 import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.LOG_INPUT;
 import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.LOG_OUTPUT;
@@ -274,6 +274,7 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                                     .add(new XMLSetting(LOG_OUTPUT, "Log Output", "false", Type.BOOLEAN, false));
                             xmlComponent.getSettings().getSetting()
                                     .add(new XMLSetting(INBOUND_QUEUE_CAPACITY, "Inbound Queue Capacity", "100", Type.INTEGER, true));
+                            xmlComponent.getSettings().getSetting().add(new XMLSetting(DESCRIPTION, "Description", null, Type.MULTILINE_TEXT, false));
                         } else {
                             if (!getClass().getClassLoader().equals(componentsById.get(id).getClassLoader())) {
                                 logger.info(

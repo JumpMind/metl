@@ -21,6 +21,9 @@
 package org.jumpmind.metl.ui.views.design;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.ENABLED;
+import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.LOG_INPUT;
+import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.LOG_OUTPUT;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,7 +47,6 @@ import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.SettingDefinition;
 import org.jumpmind.metl.core.persist.IConfigurationService;
-import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.MessageType;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.ResourceCategory;
@@ -229,9 +231,9 @@ public class PropertySheet extends AbsoluteLayout {
             }
         }
         if (components.size() != 0 && !readOnly) {
-            formLayout.addComponent(buildOptionGroup("Enabled", AbstractComponentRuntime.ENABLED, components));
-            formLayout.addComponent(buildOptionGroup("Log Input", AbstractComponentRuntime.LOG_INPUT, components));
-            formLayout.addComponent(buildOptionGroup("Log Output", AbstractComponentRuntime.LOG_OUTPUT, components));
+            formLayout.addComponent(buildOptionGroup("Enabled", ENABLED, components));
+            formLayout.addComponent(buildOptionGroup("Log Input", LOG_INPUT, components));
+            formLayout.addComponent(buildOptionGroup("Log Output", LOG_OUTPUT, components));
         }
     }
     

@@ -23,6 +23,8 @@ public class HttpRequestMapping implements Serializable, Comparable<HttpRequestM
     
     String securityPassword;
     
+    String description;
+    
     public HttpMethod getMethod() {
         return method;
     }
@@ -77,6 +79,14 @@ public class HttpRequestMapping implements Serializable, Comparable<HttpRequestM
     
     public String getSecurityPassword() {
         return securityPassword;
+    }
+    
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
+    public String getDescription() {
+        return description;
     }
 
     @Override

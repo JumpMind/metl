@@ -3,7 +3,7 @@ package org.jumpmind.metl.core.runtime.component;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
+import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.DESCRIPTION;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.Flow;
@@ -65,6 +65,7 @@ public class HttpRequestDeploymentListener implements IComponentDeploymentListen
         mapping.setSecurityScheme(SecurityScheme.valueOf(properties.get(HttpRequest.SECURITY_SCHEME, SecurityScheme.NONE.name())));
         mapping.setSecurityUsername(properties.get(HttpRequest.SECURE_USERNAME));
         mapping.setSecurityPassword(properties.get(HttpRequest.SECURE_PASSWORD));
+        mapping.setDescription(properties.get(DESCRIPTION));
         mapping.setDeployment(deployment);
         return mapping;
     }
