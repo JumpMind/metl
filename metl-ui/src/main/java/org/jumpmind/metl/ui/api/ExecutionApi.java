@@ -96,6 +96,7 @@ import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.QueryParameter;
 import io.swagger.models.properties.StringProperty;
 import io.swagger.util.Json;
+import io.swagger.util.Yaml;
 import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "Execution API", description = "This is the API for Metl")
@@ -103,6 +104,8 @@ import springfox.documentation.annotations.ApiIgnore;
 public class ExecutionApi {
 
     private static final String SWAGGER_JSON = "/swagger.json";
+    
+    private static final String SWAGGER_YAML = "/swagger.yaml";
 
     static final String WS = "/ws";
 
@@ -164,13 +167,28 @@ public class ExecutionApi {
         return executeFlow(req, res, payload);
     }
 
-    @ApiOperation(value = "This is the Swagger API definition for Metl Hosted Services")
-    @RequestMapping(value = WS + SWAGGER_JSON, method = RequestMethod.GET)
-    public final void api(HttpServletRequest req, HttpServletResponse res) throws Exception {
-        Info info = new Info().version(VersionUtils.getCurrentVersion()).title("Metl Services")
+    @ApiOperation(value = "This is the Json Swagger API definition for Metl Hosted Services. Visit http://swagger.io for more details about the specification")
+    @RequestMapping(value = SWAGGER_JSON, method = RequestMethod.GET)
+    public final void swaggerJson(HttpServletRequest req, HttpServletResponse res) throws Exception {
+        Swagger swagger = buildSwagger(SWAGGER_JSON, req, res);
+        res.getWriter().write(Json.pretty().writeValueAsString(swagger));
+        res.getWriter().flush();
+    }
+        
+
+    @ApiOperation(value = "This is the Yaml Swagger API definition for Metl Hosted Services.  Visit http://swagger.io for more details about the specification")
+    @RequestMapping(value = SWAGGER_YAML, method = RequestMethod.GET)
+    public final void swaggerYaml(HttpServletRequest req, HttpServletResponse res) throws Exception {
+        Swagger swagger = buildSwagger(SWAGGER_YAML, req, res);
+        res.getWriter().write(Yaml.pretty().writeValueAsString(swagger));
+        res.getWriter().flush();
+    }
+
+    protected final Swagger buildSwagger(String type, HttpServletRequest req, HttpServletResponse res) throws Exception {
+    Info info = new Info().version(VersionUtils.getCurrentVersion()).title("Metl Services")
                 .description("Following is a list of deployed web services.   The listing is by agent.");
-        String basePath = req.getContextPath() + req.getServletPath() + req.getPathInfo();
-        int index = basePath.indexOf(SWAGGER_JSON);
+        String basePath = req.getContextPath() + req.getServletPath() + WS + req.getPathInfo();
+        int index = basePath.indexOf(type);
         basePath = basePath.substring(0, index);
         
         List<String> mimeTypes = new ArrayList<>();
@@ -226,8 +244,7 @@ public class ExecutionApi {
 
         }
 
-        res.getWriter().write(Json.pretty().writeValueAsString(swagger));
-        res.getWriter().flush();
+        return swagger;
     }
 
     protected String addParameters(Operation operation, String path) {
