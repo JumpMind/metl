@@ -7,6 +7,7 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
     var selectedColor = "orange";
     var diagramStart = {};
     var nodeStart = {};
+    var nodeClickStart = {};
     var ctrlPress = false;
     
     /**
@@ -123,11 +124,13 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
             nodeDiv.innerHTML = node.text;
             nodeDiv.className = "diagram-node";
             if (!node.enabled) {
-            	$(nodeDiv).addClass("disabled");
+                $(nodeDiv).addClass("disabled");
             }
             
             $(nodeDiv).click(node_Click);
             $(nodeDiv).mousedown(node_MouseDown);
+            $(nodeDiv).mouseup(node_MouseUp);
+            
             
             nodeDiv.addEventListener("dblclick", function(event) {
                     self.onNodeDoubleClick({
@@ -140,7 +143,7 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
             labelDiv.innerHTML = node.name;
             draggableDiv.appendChild(labelDiv);
 
-            parentDiv.appendChild(draggableDiv);            
+            parentDiv.appendChild(draggableDiv);
 
             if (!state.readOnly) {
                 instance.draggable(draggableDiv, {
@@ -245,10 +248,10 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
 
         $(document).keydown(function(event){
             if(event.which=="17")
-            	ctrlPress = true;
+                ctrlPress = true;
         });
         $(document).keyup(function(){
-        	ctrlPress = false;
+            ctrlPress = false;
         });
 
         $(parentDiv).click(diagramContainer_Click);
@@ -267,16 +270,17 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
         instance.batch(function() {
             var selected = state.selectedNodeIds;
             for (var i = 0; i < selected.length; i++) {
-            	var node = document.getElementById(selected[i]);
-            	var serverNode = findNode(selected[i]);
-            	node.parentNode.childNodes[1].innerHTML = serverNode.name;
-            	if (serverNode.enabled) {
-                	$(node).removeClass("disabled");
+                var node = document.getElementById(selected[i]);
+                var serverNode = findNode(selected[i]);
+                node.parentNode.childNodes[1].innerHTML = serverNode.name;
+                if (serverNode.enabled) {
+                    $(node).removeClass("disabled");
                 } else {
-                	$(node).addClass("disabled");
+                    $(node).addClass("disabled");
                 }
             }
         });
+        selectAssociatedNodeLinks();
     };
     
     var findNode = function(id) {
@@ -307,58 +311,78 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
     }
     
     function node_Click(event) {
-    	// Node click event logic is handled in node_mouseDown()
-    	// Prevent diagram click event from running
-    	event.stopPropagation();
+        // Node click event logic is handled in node_mouseDown()
+        // Prevent diagram click event from running
+        event.stopPropagation();
     }
     
     function sendSelected() {
-    	var selected = {nodes: []};
-    	$( ".diagram-node.selected" ).each(function() {
-    	    selected.nodes.push({
-    	    	"id" : this.id
-    	    });
-    	});
-    	self.onNodeSelected(selected);
+        var selected = {nodes: []};
+        $( ".diagram-node.selected" ).each(function() {
+            selected.nodes.push({
+                "id" : this.id
+            });
+        });
+        self.onNodeSelected(selected);
     }
     
     function node_MouseDown(event) {
-    	if(!$(this).hasClass("selected")) {
-    		if (!ctrlPress) {
-	    		instance.clearDragSelection();
-	    		$(".diagram-node").removeClass("selected");
-	    		unselectAllLinks();
-    		}
-    		instance.addToDragSelection(this.parentNode);
-    		$(this).addClass("selected");
-    		sendSelected();
-    		selectAssociatedNodeLinks();
-    	}
-    	diagramStart.x = event.pageX;
-    	diagramStart.y = event.pageY;
+        // Immediately unselect other nodes if new node is not selected.
+        if(!$(this).hasClass("selected")) {
+            if (!ctrlPress) {
+                instance.clearDragSelection();
+                $(".diagram-node").removeClass("selected");
+                unselectAllLinks();
+            }
+        }
+
+        // Unselect node if selected while and pressing control
+        if($(this).hasClass("selected")) {
+            if (ctrlPress) {
+                instance.removeFromDragSelection(this.parentNode);
+                $(this).removeClass("selected");
+                unselectAllLinks();
+            }
+        } else {
+            instance.addToDragSelection(this.parentNode);
+            $(this).addClass("selected");
+        }
+        selectAssociatedNodeLinks();
+        
+        // If mouse down and mouse up at same location, 
+        // un-select other selected nodes.
+        nodeClickStart.x = event.pageX;
+        nodeClickStart.y = event.pageY;
     }
     
-    function selectAssociatedNodeLinks() {
-    	$( ".diagram-node.selected" ).each(function() {
-    		for (i = 0; i < state.nodes.length; i++) {
-				for (j = 0; j < state.nodes[i].targetNodeIds.length; j++) {
-					if (state.nodes[i].id == this.id
-							|| state.nodes[i].targetNodeIds[j] == this.id) {
-						connection = instance.connect({
-		                    uuids : [ "source-" + state.nodes[i].id, "target-" + state.nodes[i].targetNodeIds[j] ],
-		                    editable : true,
-		                    fireEvent : false
-		                });
-		                connection.toggleType("selected");
-	    			}
-				}
-    		}
-    	});
+    function node_MouseUp(event) {
+        var node = this;
+        // Unselect other nodes when we aren't dragging. 
+        if(nodeClickStart.x === event.pageX && nodeClickStart.y === event.pageY)
+        {
+            if (!ctrlPress) {
+                instance.clearDragSelection();
+                // Unselect all but this node.
+                $(".diagram-node").each(function() {
+                    if(this!==node)  {
+                        $(this).removeClass("selected");
+                    }
+                });
+                unselectAllLinks();
+            }
+        }
+
+        selectAssociatedNodeLinks();
+        sendSelected();
+        
+        diagramStart.x = event.pageX;
+        diagramStart.y = event.pageY;
     }
 
+
     function diagramContainer_MouseDown(event) {
-    	diagramStart.x = event.pageX;
-    	diagramStart.y = event.pageY;
+        diagramStart.x = event.pageX;
+        diagramStart.y = event.pageY;
         
         var offset = $("#diagram").offset();
         var l=diagramStart.x - offset.left;
@@ -386,13 +410,6 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
         $("#rubberband").css({top:t, left:l, height:h, width:w, position:'absolute'});
     }
     
-    function diagramContainer_MouseUp(event) {
-        if(diagramStart.x !== event.pageX && diagramStart.y !== event.pageY) {
-        	diagramContainer_FindSelectedItem();
-        }
-        $("#rubberband").hide();
-    }
-    
     function diagramContainer_FindSelectedItem() {
         if($("#rubberband").is(":visible") !== true) { return; }
 
@@ -409,11 +426,11 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
                 itemOffset.bottom < rubberbandOffset.bottom) 
             {
                 $(this).addClass("selected");
-                selectAssociatedNodeLinks();
                 instance.addToDragSelection(this.parentNode);
             }
         });
         sendSelected();
+        selectAssociatedNodeLinks();
     }
     
     function getTopLeftOffset(element) {
@@ -423,6 +440,13 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
         elementDimension.right = elementDimension.left + element.outerWidth();
         elementDimension.bottom = elementDimension.top + element.outerHeight();
         return elementDimension;
+    }
+    
+    function diagramContainer_MouseUp(event) {
+        if(diagramStart.x !== event.pageX && diagramStart.y !== event.pageY) {
+            diagramContainer_FindSelectedItem();
+        }
+        $("#rubberband").hide();
     }
     
     function diagramContainer_Click(event) {
@@ -435,55 +459,73 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
         }
     }
     
+    function selectAssociatedNodeLinks() {
+        $( ".diagram-node.selected" ).each(function() {
+            for (i = 0; i < state.nodes.length; i++) {
+                for (j = 0; j < state.nodes[i].targetNodeIds.length; j++) {
+                    if (state.nodes[i].id == this.id
+                            || state.nodes[i].targetNodeIds[j] == this.id) {
+                        connection = instance.connect({
+                            uuids : [ "source-" + state.nodes[i].id, "target-" + state.nodes[i].targetNodeIds[j] ],
+                            editable : true,
+                            fireEvent : false
+                        });
+                        connection.toggleType("selected");
+                    }
+                }
+            }
+        });
+    }
+    
 }
 
 // Client side conversion from design view to image.
 function exportDiagram(width, height) {
     html2canvas($('#diagram'),
-	    {
-	    	onrendered: function(canvas) {
-	    		var svgList = $('#diagram').find( 'svg' );
-	    		svgList.each(function(index, value) {
-			        try {
-			        	var svgExample = this;
-			            var serializer = new XMLSerializer();
-			            var svgMarkup = serializer.serializeToString(svgExample);
-			
-			            if(svgMarkup.indexOf('_jsPlumb_connector') > -1) {
-			            	var left = parseInt($(svgExample).css('left'),10);
-			            	var top = parseInt($(svgExample).css('top'),10);
-			            
-			            	svgMarkup = svgMarkup.replace('xmlns=\"http://www.w3.org/2000/svg\"','');
-			            
-			            	var connectorCanvas = document.createElement('canvas');
-			            	canvg(connectorCanvas, svgMarkup);
-			            
-			            	var context = canvas.getContext('2d');
-			            	context.drawImage(connectorCanvas, left, top);
-			            }
-			        } catch(err) {
-			            log.error('Error converting SVG link to the canvas: ' + err);
-			        }
-				});
-	        
-			    var tempCanvas = document.createElement('canvas');
-			    tempCanvas.width = canvas.width;
-			    tempCanvas.height = canvas.height;
-			
-			    tempCanvas.getContext('2d').drawImage(canvas, 0, 0);
-			    canvas.width = width;
-			    canvas.height = height;
-			    
-			    canvas.getContext('2d').drawImage(tempCanvas, 0, 0);
-			    
-			    // Keep the download link if it doesn't work on IE?
+        {
+            onrendered: function(canvas) {
+                var svgList = $('#diagram').find( 'svg' );
+                svgList.each(function(index, value) {
+                    try {
+                        var svgExample = this;
+                        var serializer = new XMLSerializer();
+                        var svgMarkup = serializer.serializeToString(svgExample);
+            
+                        if(svgMarkup.indexOf('_jsPlumb_connector') > -1) {
+                            var left = parseInt($(svgExample).css('left'),10);
+                            var top = parseInt($(svgExample).css('top'),10);
+                        
+                            svgMarkup = svgMarkup.replace('xmlns=\"http://www.w3.org/2000/svg\"','');
+                        
+                            var connectorCanvas = document.createElement('canvas');
+                            canvg(connectorCanvas, svgMarkup);
+                        
+                            var context = canvas.getContext('2d');
+                            context.drawImage(connectorCanvas, left, top);
+                        }
+                    } catch(err) {
+                        log.error('Error converting SVG link to the canvas: ' + err);
+                    }
+                });
+            
+                var tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+            
+                tempCanvas.getContext('2d').drawImage(canvas, 0, 0);
+                canvas.width = width;
+                canvas.height = height;
+                
+                canvas.getContext('2d').drawImage(tempCanvas, 0, 0);
+                
+                // Keep the download link if it doesn't work on IE?
 //			    $('#downloadLink a').attr('href', canvas.toDataURL().replace('image/png', 'image/octet-stream'));
 //			    $('#downloadLink a').attr('download', 'design.png');
-			    $('#canvasContainer .v-panel-content').append('<img src='+canvas.toDataURL()+' />');
-			},
-		    logging: false,
-		    // View port used by html2canvas. Use the full canvas.
-		    width: 10000,
-		    height: 10000
-	    });
+                $('#canvasContainer .v-panel-content').append('<img src='+canvas.toDataURL()+' />');
+            },
+            logging: false,
+            // View port used by html2canvas. Use the full canvas.
+            width: 10000,
+            height: 10000
+        });
 }
