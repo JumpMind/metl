@@ -23,8 +23,10 @@ package org.jumpmind.metl.ui.views.deploy;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.jumpmind.db.platform.IDatabasePlatform;
@@ -35,6 +37,7 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Button;
@@ -55,6 +58,8 @@ public class FlowSelectDialog extends ResizableWindow {
     Map<Object, IDatabasePlatform> platformByItemId = new HashMap<Object, IDatabasePlatform>();
     
     IFlowSelectListener listener;
+    
+    Project firstProject;
     
     public FlowSelectDialog(ApplicationContext context, String caption, String introText,
     		boolean includeTestFlows) {
@@ -93,6 +98,8 @@ public class FlowSelectDialog extends ResizableWindow {
         
         Button cancelButton = new Button("Cancel");
         Button selectButton = new Button("Select");
+        selectButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        selectButton.setClickShortcut(KeyCode.ENTER);
         addComponent(buildButtonFooter(cancelButton, selectButton));
         
         cancelButton.addClickListener(event -> {
@@ -106,6 +113,13 @@ public class FlowSelectDialog extends ResizableWindow {
                 close();
             }
         });
+        
+        Set<Object> selected = new HashSet<>();
+        if (firstProject != null) {
+            selected.add(firstProject);
+        }
+        tree.setValue(selected);
+        tree.focus();
     }
 
     @SuppressWarnings("unchecked")
@@ -135,6 +149,9 @@ public class FlowSelectDialog extends ResizableWindow {
     protected void addProjects() {
         List<Project> projects = context.getConfigurationService().findProjects();
         for (Project project : projects) {
+            if (firstProject == null) {
+                firstProject = project;
+            }
             addItem(project, project.getName(), Icons.PROJECT, null, true);
             for (ProjectVersion version : project.getProjectVersions()) {
                 addItem(version, version.getVersionLabel(), Icons.VERSION, project, true);
@@ -151,6 +168,10 @@ public class FlowSelectDialog extends ResizableWindow {
         for (FlowName flow : flows) {
             addItem(flow, flow.getName(), flow.isWebService() ? Icons.WEB : Icons.FLOW, version, false);
         }
+        Set<Object> selected = new HashSet<>();
+        selected.add(version);
+        tree.setValue(selected);
+        tree.focus();
     }
 
     @SuppressWarnings("unchecked")
