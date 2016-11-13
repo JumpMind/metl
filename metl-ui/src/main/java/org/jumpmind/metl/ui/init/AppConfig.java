@@ -94,6 +94,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 
 import com.cybercom.vaadin.spring.UIScope;
 
+import springfox.documentation.service.Contact;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
@@ -161,7 +162,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     public Docket swaggerSpringMvcPlugin() {
         return new Docket(DocumentationType.SWAGGER_2).pathMapping("/api").produces(contentTypes())
                 .consumes(contentTypes()).apiInfo(new ApiInfo("Metl API",
-                        "This is the REST API for Metl", null, null, null, null, null));
+                        "This is the REST API for Metl", null, null, (Contact)null, null, null));
     }
 
     protected Set<String> contentTypes() {

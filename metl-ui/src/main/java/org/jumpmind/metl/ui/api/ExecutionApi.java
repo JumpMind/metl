@@ -49,6 +49,7 @@ import org.jumpmind.metl.core.model.Execution;
 import org.jumpmind.metl.core.model.ExecutionStatus;
 import org.jumpmind.metl.core.model.ExecutionStep;
 import org.jumpmind.metl.core.model.ExecutionStepLog;
+import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.IAgentManager;
@@ -59,6 +60,8 @@ import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
 import org.jumpmind.metl.core.runtime.web.HttpMethod;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMapping;
 import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
+import org.jumpmind.metl.core.util.GeneralUtils;
+import org.jumpmind.metl.core.util.VersionUtils;
 import org.jumpmind.util.AppUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,15 +78,28 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.HandlerMapping;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.models.Info;
+import io.swagger.models.Operation;
+import io.swagger.models.Path;
+import io.swagger.models.Scheme;
+import io.swagger.models.Swagger;
+import io.swagger.models.Tag;
+import io.swagger.models.parameters.AbstractSerializableParameter;
+import io.swagger.models.parameters.FormParameter;
+import io.swagger.models.parameters.PathParameter;
+import io.swagger.models.parameters.QueryParameter;
+import io.swagger.models.properties.StringProperty;
+import io.swagger.util.Json;
 import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "Execution API", description = "This is the API for Metl")
 @Controller
 public class ExecutionApi {
+
+    private static final String SWAGGER_JSON = "/swagger.json";
 
     static final String WS = "/ws";
 
@@ -100,6 +116,17 @@ public class ExecutionApi {
 
     AntPathMatcher patternMatcher = new AntPathMatcher();
 
+    @ApiOperation(
+            value = "Invoke a flow that is deployed to an agent by name.  This is the way a non-webservice enabled flow is typically called by an external tool")
+    @RequestMapping(value = "/agents/{agentName}/deployments/{deploymentName}/invoke", method = RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public final ExecutionResults invoke(@ApiParam(value = "The name of the agent to use") @PathVariable("agentName") String agentName,
+            @ApiParam(value = "The name of the flow deployment to invoke") @PathVariable("deploymentName") String deploymentName,
+            HttpServletRequest req) {
+        return callFlow(agentName, deploymentName, req);
+    }
+
     @ApiIgnore
     @RequestMapping(value = WS + "/**", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
@@ -112,8 +139,7 @@ public class ExecutionApi {
     @RequestMapping(value = WS + "/**", method = RequestMethod.PUT)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public final Object put(HttpServletRequest req, HttpServletResponse res,
-            @RequestBody(required = false) String payload) throws Exception {
+    public final Object put(HttpServletRequest req, HttpServletResponse res, @RequestBody(required = false) String payload) throws Exception {
         return executeFlow(req, res, payload);
     }
 
@@ -121,8 +147,8 @@ public class ExecutionApi {
     @RequestMapping(value = WS + "/**", method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public final Object delete(HttpServletRequest req, HttpServletResponse res,
-            @RequestBody(required = false) String payload) throws Exception {
+    public final Object delete(HttpServletRequest req, HttpServletResponse res, @RequestBody(required = false) String payload)
+            throws Exception {
         return executeFlow(req, res, payload);
     }
 
@@ -130,26 +156,142 @@ public class ExecutionApi {
     @RequestMapping(value = WS + "/**", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public final Object post(HttpServletRequest req, HttpServletResponse res,
-            @RequestBody(required = false) String payload) throws Exception {
+    public final Object post(HttpServletRequest req, HttpServletResponse res, @RequestBody(required = false) String payload)
+            throws Exception {
         return executeFlow(req, res, payload);
     }
 
-    private Object executeFlow(HttpServletRequest request, HttpServletResponse response,
-            String payload) throws Exception {
+    @ApiOperation(value = "This is the Swagger API definition for Metl Hosted Services")
+    @RequestMapping(value = WS + SWAGGER_JSON, method = RequestMethod.GET)
+    public final void api(HttpServletRequest req, HttpServletResponse res) throws Exception {
+        Info info = new Info().version(VersionUtils.getCurrentVersion()).title("Metl Services")
+                .description("Following is a list of deployed web services.   The listing is by agent.");
+        String basePath = req.getContextPath() + req.getServletPath() + req.getPathInfo();
+        int index = basePath.indexOf(SWAGGER_JSON);
+        basePath = basePath.substring(0, index);
+        Swagger swagger = new Swagger().info(info).host(req.getServerName() + ":" + req.getServerPort()).scheme(Scheme.HTTP)
+                .basePath(basePath);
+
+        Set<Agent> agents = agentManager.getAvailableAgents();
+        for (Agent agent : agents) {
+            Tag tag = new Tag().name(GeneralUtils.replaceSpecialCharacters(agent.getName()));
+            if (agent.getName().startsWith("<")) {
+                tag.setDescription("This is a development agent");
+            }
+            swagger.addTag(tag);
+
+            List<AgentDeployment> deployments = agent.getAgentDeployments();
+            for (AgentDeployment agentDeployment : deployments) {
+                Flow flow = agentDeployment.getFlow();
+                if (flow.isWebService()) {
+                    List<HttpRequestMapping> mappings = requestRegistry.getHttpRequestMappingsFor(agentDeployment);
+                    for (HttpRequestMapping httpRequestMapping : mappings) {
+                        Operation operation = new Operation().summary(flow.getName()).operationId(flow.getName()).tag(tag.getName());
+                        String path = addParameters(operation, httpRequestMapping.getPath());
+                        // Response response = new
+                        // Response().description("description of
+                        // response").example("application/json",
+                        // "{\"yo\":\"dog\"}");
+                        // operation.response(200, response);
+                        switch (httpRequestMapping.getMethod()) {
+                            case GET:
+                                swagger.path(path, new Path().get(operation));
+                                break;
+                            case PUT:
+                                operation.addParameter(new FormParameter().name("payload").required(false).property(new StringProperty()));
+                                swagger.path(path, new Path().put(operation));
+                                break;
+                            case POST:
+                                operation.addParameter(new FormParameter().name("payload").required(false).property(new StringProperty()));
+                                swagger.path(path, new Path().post(operation));
+                                break;
+                            case DELETE:                                
+                                swagger.path(path, new Path().delete(operation));
+                                break;
+                            case HEAD:
+                                swagger.path(path, new Path().head(operation));
+                                break;
+                        }
+                    }
+                }
+            }
+
+        }
+
+        res.getWriter().write(Json.pretty().writeValueAsString(swagger));
+        res.getWriter().flush();
+    }
+
+    protected String addParameters(Operation operation, String path) {
+        String queryString = null;
+        if (path.contains("?")) {
+            String[] parts = path.split("?");
+            path = parts[0];
+            queryString = parts[1];
+
+        }
+
+        path = addParameters(operation, path, PathParameter.class);
+        addParameters(operation, queryString, QueryParameter.class);
+
+        return path;
+    }
+
+    protected String addParameters(Operation operation, String path, Class<? extends AbstractSerializableParameter<?>> type) {
+
+        if (path != null) {
+            StringBuilder finalPath = new StringBuilder();
+            StringBuilder paramName = new StringBuilder();
+            boolean tracking = false;
+            for (int i = 0; i < path.length(); i++) {
+                char c = path.charAt(i);
+                 if (c == '{') {
+                     tracking = true;
+                     paramName.setLength(0);
+                     finalPath.append(c);
+                 } else if (tracking && c == '}') {
+                     tracking = false;
+                     addParameter(paramName.toString(), operation, type);                     
+                     finalPath.append(c);
+                 } else if (c == '$' && path.charAt(i+1) == '(') {
+                     tracking = true;
+                     paramName.setLength(0);
+                     i++;
+                     finalPath.append('{');
+                 } else if (tracking && c == ')') {
+                     tracking = false;
+                     addParameter(paramName.toString(), operation, type);
+                     finalPath.append('}');
+                 } else if (tracking) {
+                     paramName.append(c);
+                     finalPath.append(c);
+                 } else {
+                     finalPath.append(c);
+                 }
+            }
+            path = finalPath.toString();
+        }
+        return path;
+    }
+    
+    private void addParameter(String name, Operation operation, Class<? extends AbstractSerializableParameter<?>> type) {
+        try {
+            AbstractSerializableParameter<?> param = type.newInstance();
+            operation.addParameter(param.name(name).property(new StringProperty()));
+        } catch (Exception e) {
+            log.info("Failed to create parameter: " + name, e);
+        }
+    }
+
+    private Object executeFlow(HttpServletRequest request, HttpServletResponse response, String payload) throws Exception {
         Object resultPayload = null;
         String requestType = request.getMethod();
-        String restOfTheUrl = ((String) request
-                .getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE))
-                        .substring(WS.length());
-        log.info(String.format("Attempting to find a service uri match for %s with request type %s",
-                restOfTheUrl, requestType));
-        HttpRequestMapping mapping = requestRegistry.findBestMatch(HttpMethod.valueOf(requestType),
-                restOfTheUrl);
+        String restOfTheUrl = ((String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)).substring(WS.length());
+        log.info(String.format("Attempting to find a service uri match for %s with request type %s", restOfTheUrl, requestType));
+        HttpRequestMapping mapping = requestRegistry.findBestMatch(HttpMethod.valueOf(requestType), restOfTheUrl);
         if (mapping != null) {
             Map<String, String> params = toMap(request);
-            params.putAll(
-                    patternMatcher.extractUriTemplateVariables(mapping.getPath(), restOfTheUrl));
+            params.putAll(patternMatcher.extractUriTemplateVariables(mapping.getPath(), restOfTheUrl));
             if (isNotBlank(payload)) {
                 params.put(REQUEST_VALUE_PARAMETER, payload.toString());
             }
@@ -174,19 +316,17 @@ public class ExecutionApi {
                         response.setContentType("application/octet-stream;charset=utf-8");
                     }
                     resultPayload = results.getValue();
-                }                
+                }
             }
             return resultPayload;
 
         } else {
             throw new CouldNotFindDeploymentException(
-                    "Could not find a deployed web request that matches " + restOfTheUrl
-                            + " for an HTTP " + requestType);
+                    "Could not find a deployed web request that matches " + restOfTheUrl + " for an HTTP " + requestType);
         }
     }
 
-    protected boolean enforceSecurity(IHasSecurity security, HttpServletRequest request,
-            HttpServletResponse response) throws IOException {
+    protected boolean enforceSecurity(IHasSecurity security, HttpServletRequest request, HttpServletResponse response) throws IOException {
         boolean secured = true;
         if (security != null) {
             switch (security.getSecurityType()) {
@@ -201,8 +341,7 @@ public class ExecutionApi {
         return secured;
     }
 
-    protected boolean enforceBasicAuth(IHasSecurity security, HttpServletRequest request,
-            HttpServletResponse response) throws IOException {
+    protected boolean enforceBasicAuth(IHasSecurity security, HttpServletRequest request, HttpServletResponse response) throws IOException {
         boolean secured = true;
 
         String authHeader = request.getHeader("Authorization");
@@ -213,14 +352,12 @@ public class ExecutionApi {
 
                 if (basic.equalsIgnoreCase("Basic")) {
                     try {
-                        String credentials = new String(Base64.decodeBase64(st.nextToken()),
-                                "UTF-8");
+                        String credentials = new String(Base64.decodeBase64(st.nextToken()), "UTF-8");
                         int p = credentials.indexOf(":");
                         if (p != -1) {
                             String _username = credentials.substring(0, p).trim();
                             String _password = credentials.substring(p + 1).trim();
-                            if (!security.getUsername().equals(_username)
-                                    || !security.getPassword().equals(_password)) {
+                            if (!security.getUsername().equals(_username) || !security.getPassword().equals(_password)) {
                                 unauthorized(response, "Bad credentials");
                                 secured = false;
                             }
@@ -249,25 +386,16 @@ public class ExecutionApi {
     private void unauthorized(HttpServletResponse response) throws IOException {
         unauthorized(response, "Unauthorized");
     }
-    
 
-    
     private String whoAreYou(HttpServletRequest req) {
         String userId = left(req.getRemoteUser(), 50);
         if (isBlank(userId)) {
-            userId =  left(whereAreYou(req), 50);
+            userId = left(whereAreYou(req), 50);
         }
         return userId;
     }
 
-    @ApiOperation(value = "Invoke a flow that is deployed to an agent by name")
-    @RequestMapping(value = "/agents/{agentName}/deployments/{deploymentName}/invoke", method = RequestMethod.GET)
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public final ExecutionResults invoke(
-            @ApiParam(value = "The name of the agent to use") @PathVariable("agentName") String agentName,
-            @ApiParam(value = "The name of the flow deployment to invoke") @PathVariable("deploymentName") String deploymentName,
-            HttpServletRequest req) {
+    protected final ExecutionResults callFlow(String agentName, String deploymentName, HttpServletRequest req) {
         agentName = decode(agentName);
         deploymentName = decode(deploymentName);
         Set<Agent> agents = agentManager.getAvailableAgents();
@@ -283,13 +411,11 @@ public class ExecutionApi {
                         foundDeployment = true;
                         if (agentDeployment.getDeploymentStatus() == DeploymentStatus.ENABLED) {
                             AgentRuntime agentRuntime = agentManager.getAgentRuntime(agent.getId());
-                            String executionId = agentRuntime.scheduleNow(whoAreYou(req), agentDeployment,
-                                    toMap(req));
+                            String executionId = agentRuntime.scheduleNow(whoAreYou(req), agentDeployment, toMap(req));
                             boolean done = false;
                             do {
                                 execution = executionService.findExecution(executionId);
-                                done = execution != null
-                                        && ExecutionStatus.isDone(execution.getExecutionStatus());
+                                done = execution != null && ExecutionStatus.isDone(execution.getExecutionStatus());
                                 if (!done) {
                                     AppUtils.sleep(500);
                                 }
@@ -302,14 +428,13 @@ public class ExecutionApi {
         }
 
         if (execution != null) {
-            ExecutionResults result = new ExecutionResults(execution.getId(), execution.getStatus(),
-                    execution.getStartTime(), execution.getEndTime());
+            ExecutionResults result = new ExecutionResults(execution.getId(), execution.getStatus(), execution.getStartTime(),
+                    execution.getEndTime());
             if (execution.getExecutionStatus() == ExecutionStatus.ERROR) {
                 List<ExecutionStep> steps = executionService.findExecutionSteps(execution.getId());
                 for (ExecutionStep executionStep : steps) {
                     if (executionStep.getExecutionStatus() == ExecutionStatus.ERROR) {
-                        List<ExecutionStepLog> logs = executionService
-                                .findExecutionStepLogsInError(executionStep.getId());
+                        List<ExecutionStepLog> logs = executionService.findExecutionStepLogsInError(executionStep.getId());
                         for (ExecutionStepLog executionStepLog : logs) {
                             if (executionStepLog.getLogLevel() == LogLevel.ERROR) {
                                 result.setMessage(executionStepLog.getLogText());
@@ -318,7 +443,7 @@ public class ExecutionApi {
                         }
                     }
                 }
-                
+
                 throw new FailureException(result);
             }
             return result;
@@ -329,8 +454,7 @@ public class ExecutionApi {
             } else if (!foundDeployment) {
                 msg = String.format("Could not find a deployment name '%s'", deploymentName);
             } else {
-                msg = String.format("Found deployment '%s', but it was not enabled",
-                        deploymentName);
+                msg = String.format("Found deployment '%s', but it was not enabled", deploymentName);
             }
             throw new CouldNotFindDeploymentException(msg);
         }

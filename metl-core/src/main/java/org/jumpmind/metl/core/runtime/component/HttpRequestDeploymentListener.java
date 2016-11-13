@@ -15,6 +15,7 @@ import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
 import org.jumpmind.metl.core.runtime.web.HttpMethod;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMapping;
 import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
+import org.jumpmind.metl.core.util.GeneralUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 import org.slf4j.Logger;
@@ -52,9 +53,7 @@ public class HttpRequestDeploymentListener implements IComponentDeploymentListen
         Map<String, String> replacements = FlowRuntime.getFlowParameters(flow, agent, deployment);
         for(String key: replacements.keySet()) {
             String value = replacements.get(key);
-            value = value.replaceAll("[\\s]", "_");
-            value = value.replaceAll("[^a-zA-Z0-9_\\.]", "");
-            replacements.put(key, value);
+            replacements.put(key, GeneralUtils.replaceSpecialCharacters(value));
         }
         path = FormatUtils.replaceTokens(path, replacements, true);
         
