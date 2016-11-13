@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -69,6 +70,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -84,6 +86,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.models.Info;
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
+import io.swagger.models.Response;
 import io.swagger.models.Scheme;
 import io.swagger.models.Swagger;
 import io.swagger.models.Tag;
@@ -169,8 +172,13 @@ public class ExecutionApi {
         String basePath = req.getContextPath() + req.getServletPath() + req.getPathInfo();
         int index = basePath.indexOf(SWAGGER_JSON);
         basePath = basePath.substring(0, index);
+        
+        List<String> mimeTypes = new ArrayList<>();
+        mimeTypes.add(MimeTypeUtils.APPLICATION_XML_VALUE);
+        mimeTypes.add(MimeTypeUtils.APPLICATION_JSON_VALUE);
+        
         Swagger swagger = new Swagger().info(info).host(req.getServerName() + ":" + req.getServerPort()).scheme(Scheme.HTTP)
-                .basePath(basePath);
+                .basePath(basePath).produces(mimeTypes);
 
         Set<Agent> agents = agentManager.getAvailableAgents();
         for (Agent agent : agents) {
@@ -180,7 +188,7 @@ public class ExecutionApi {
             } else {
                 tag.setDescription("This is an agent");
             }
-            swagger.addTag(tag);
+            swagger.addTag(tag);            
 
             List<AgentDeployment> deployments = agent.getAgentDeployments();
             for (AgentDeployment agentDeployment : deployments) {
@@ -189,13 +197,10 @@ public class ExecutionApi {
                     List<HttpRequestMapping> mappings = requestRegistry.getHttpRequestMappingsFor(agentDeployment);
                     for (HttpRequestMapping httpRequestMapping : mappings) {
                         Operation operation = new Operation().summary(flow.getName()).operationId(flow.getName()).tag(tag.getName())
-                                .description(httpRequestMapping.getDescription());
+                                .description(httpRequestMapping.getDescription()).produces(mimeTypes);
                         String path = addParameters(operation, httpRequestMapping.getPath());
-                        // Response response = new
-                        // Response().description("description of
-                        // response").example("application/json",
-                        // "{\"yo\":\"dog\"}");
-                        // operation.response(200, response);
+                         Response response = new Response().description("A successful response").schema(new StringProperty());
+                         operation.response(200, response);
                         switch (httpRequestMapping.getMethod()) {
                             case GET:
                                 swagger.path(path, new Path().get(operation));
