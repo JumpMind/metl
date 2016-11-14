@@ -133,9 +133,6 @@
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-web-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditWebPanel</className>
     </component-ui>
-    <component-ui id="HttpRequest UI" componentId="HttpRequest">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-web-48x48-color.png</iconImage>
-    </component-ui>                                                    
     <component-ui id="Zip UI" componentId="Zip">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-zip-48x48-color.png</iconImage>
     </component-ui>   
@@ -158,9 +155,6 @@
     <component-ui id="Union UI" componentId="Union">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-union-48x48-color.png</iconImage>
     </component-ui>
-    <component-ui id="Http Response UI" componentId="16170152-eee5-11e5-9ce9-5e5517507c66">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-web-48x48-color.png</iconImage>
-    </component-ui> 
     <component-ui id="Excel File Reader UI" componentId="2b1aa706-9ec7-11e6-80f5-76304dec7eb7">
         <iconImage>/org/jumpmind/metl/core/runtime/component/excel-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditExcelReaderPanel</className>        

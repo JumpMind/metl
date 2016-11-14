@@ -69,11 +69,15 @@ public class PluginManager implements IPluginManager {
     public PluginManager(String localRepositoryPath, IConfigurationService configurationService) {
         this.localRepositoryPath = localRepositoryPath;
         this.configurationService = configurationService;
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-rdbms-reader", 1));
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-data-diff", 2));
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-sorter", 3));
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-temp-rdbms", 4));
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-serialize", 5));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-rdbms-reader", 10));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-rdbms-writer", 20));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-data-diff", 30));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-sorter", 40));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-temp-rdbms", 50));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-serialize", 60));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-service", 70));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-sequence", 80));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-sql-execute", 90));
     }
 
     @Override

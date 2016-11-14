@@ -189,29 +189,6 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
         return pluginId;
     }
 
-    // @Override
-    // synchronized public Map<String, List<XMLComponent>>
-    // getDefinitionsByCategory(String projectVersionId) {
-    // Map<String, List<XMLComponent>> componentDefinitionsByCategory = new
-    // HashMap<>();
-    // Map<String, XMLComponent> componentsById =
-    // componentsByProjectVersionIdById.get(projectVersionId);
-    // Set<String> categories = componentIdsByCategory.keySet();
-    // for (String category : categories) {
-    // List<XMLComponent> list = new ArrayList<>();
-    // componentDefinitionsByCategory.put(category, list);
-    // List<String> types = componentIdsByCategory.get(category);
-    // for (String type : types) {
-    // list.add(componentsById.get(type));
-    // }
-    // }
-    // return componentDefinitionsByCategory;
-    // }
-
-    // synchronized public Map<String, List<String>> getTypesByCategory() {
-    // return componentIdsByCategory;
-    // }
-
     @Override
     synchronized public XMLComponent getDefinition(String projectVersionId, String id) {
         Map<String, XMLComponent> componentsById = componentsByProjectVersionIdById.get(projectVersionId);
@@ -257,7 +234,7 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                         if (!componentsById.containsKey(id)) {
                             xmlComponent.setClassLoader(classLoader);
                             componentsById.put(id, xmlComponent);
-                            logger.info("Registering '{}' with an id of '{}' for plugin '{}' for project '{}'", xmlComponent.getName(), id,
+                            logger.debug("Registering '{}' with an id of '{}' for plugin '{}' for project '{}'", xmlComponent.getName(), id,
                                     pluginId, projectVersionId);
 
                             if (xmlComponent.getSettings() == null) {
@@ -276,8 +253,8 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                                     .add(new XMLSetting(INBOUND_QUEUE_CAPACITY, "Inbound Queue Capacity", "100", Type.INTEGER, true));
                             xmlComponent.getSettings().getSetting().add(new XMLSetting(DESCRIPTION, "Description", null, Type.MULTILINE_TEXT, false));
                         } else {
-                            if (!getClass().getClassLoader().equals(componentsById.get(id).getClassLoader())) {
-                                logger.info(
+                            if (!classLoader.equals(componentsById.get(id).getClassLoader())) {
+                                logger.debug(
                                         "There was already a component registered under the id of '{}' with the name '{}' from another plugin.  Not loading it for the plugin '{}'",
                                         new Object[] { id, xmlComponent.getName(), pluginId });
                             }

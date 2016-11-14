@@ -21,6 +21,7 @@
 package org.jumpmind.metl.ui.views.design;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.model.ProjectVersion;
@@ -128,7 +129,9 @@ public class ProjectVersionPropertiesPanel extends Panel implements IUiPanel {
         componentPluginsGrid.addColumn("pluginId", String.class).setHeaderCaption("Plugin").setEditable(false);
         componentPluginsGrid.addColumn("enabled", Boolean.class).setHeaderCaption("Enabled").setWidth(75);
         componentPluginsGrid.addColumn("pinVersion", Boolean.class).setHeaderCaption("Pin Version").setWidth(95);
+        
         final double VERSION_WIDTH = 190;
+        
         componentPluginsGrid.addColumn("artifactVersion", String.class).setHeaderCaption("Version").setWidth(VERSION_WIDTH)
                 .setEditable(false);
         componentPluginsGrid.addColumn("updatesAvailable", String.class).setHeaderCaption("").setWidth(55)
@@ -184,10 +187,7 @@ public class ProjectVersionPropertiesPanel extends Panel implements IUiPanel {
         content.addComponent(spacer);
         content.setExpandRatio(spacer, 1);
 
-        refresh();
-        
-        populateContainer();
-        
+        refresh();        
         setButtonsEnabled();        
 
     }
@@ -225,10 +225,6 @@ public class ProjectVersionPropertiesPanel extends Panel implements IUiPanel {
         populateContainer();
     }
     
-    protected void add() {
-        
-    }
-    
     protected void update() {
         Collection<Object> selectedRows = componentPluginsGrid.getSelectedRows();
         for (Object object : selectedRows) {
@@ -254,8 +250,10 @@ public class ProjectVersionPropertiesPanel extends Panel implements IUiPanel {
     }
     
     protected void populateContainer() {
+        IConfigurationService configurationService = context.getConfigurationService();
+        List<ProjectVersionComponentPlugin> plugins = configurationService.findProjectVersionComponentPlugins(projectVersion.getId());
         componentPluginsGridContainer.removeAllItems();
-        componentPluginsGridContainer.addAll(context.getConfigurationService().findProjectVersionComponentPlugins(projectVersion.getId()));
+        componentPluginsGridContainer.addAll(plugins);
         componentPluginsGrid.setHeightByRows(componentPluginsGridContainer.size() > 0 ? componentPluginsGridContainer.size() : 1);
     }
 

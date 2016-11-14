@@ -108,4 +108,55 @@ public class ProjectVersionComponentPlugin extends Plugin implements Serializabl
         return pinVersion;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((componentName == null) ? 0 : componentName.hashCode());
+        result = prime * result + ((componentTypeId == null) ? 0 : componentTypeId.hashCode());
+        result = prime * result + (enabled ? 1231 : 1237);
+        result = prime * result + ((latestArtifactVersion == null) ? 0 : latestArtifactVersion.hashCode());
+        result = prime * result + (pinVersion ? 1231 : 1237);
+        result = prime * result + ((projectVersionId == null) ? 0 : projectVersionId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ProjectVersionComponentPlugin other = (ProjectVersionComponentPlugin) obj;
+        if (componentName == null) {
+            if (other.componentName != null)
+                return false;
+        } else if (!componentName.equals(other.componentName))
+            return false;
+        if (componentTypeId == null) {
+            if (other.componentTypeId != null)
+                return false;
+        } else if (!componentTypeId.equals(other.componentTypeId))
+            return false;
+        if (enabled != other.enabled)
+            return false;
+        if (latestArtifactVersion == null) {
+            if (other.latestArtifactVersion != null)
+                return false;
+        } else if (!latestArtifactVersion.equals(other.latestArtifactVersion))
+            return false;
+        if (pinVersion != other.pinVersion)
+            return false;
+        if (projectVersionId == null) {
+            if (other.projectVersionId != null)
+                return false;
+        } else if (!projectVersionId.equals(other.projectVersionId))
+            return false;
+        return true;
+    }
+    
+    
+
 }
