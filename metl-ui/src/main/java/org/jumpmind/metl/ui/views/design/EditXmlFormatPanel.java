@@ -249,10 +249,11 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
         builder.setXMLReaderFactory(XMLReaders.NONVALIDATING);
         builder.setFeature("http://xml.org/sax/features/validation", false);
         Setting setting = component.findSetting(XmlFormatter.XML_FORMATTER_TEMPLATE);
+        xpathChoices = new HashSet<String>();
         if (StringUtils.isNotBlank(setting.getValue())) {
             try {
                 Document document = builder.build(new StringReader(setting.getValue()));
-                xpathChoices = new HashSet<String>();
+                
                 buildXpathChoicesFromElement("/" + document.getRootElement().getName(),
                         document.getRootElement());
             } catch (Exception e) {
@@ -260,11 +261,9 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
             }
         }
 
-        if (xpathChoices != null) {
-            ComboBox combo = (ComboBox) grid.getColumn("xpath").getEditorField();
-            combo.removeAllItems();
-            combo.addItems(xpathChoices);
-        }
+        ComboBox combo = (ComboBox) grid.getColumn("xpath").getEditorField();
+        combo.removeAllItems();
+        combo.addItems(xpathChoices);
     }
 
     protected void buildXpathChoicesFromElement(String prefix, Element parentElement) {
