@@ -43,8 +43,6 @@ import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.ResourceName;
-import org.jumpmind.metl.core.model.Setting;
-import org.jumpmind.metl.core.model.UserSetting;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.resource.Datasource;
 import org.jumpmind.metl.core.runtime.resource.Ftp;
@@ -137,6 +135,7 @@ public class DesignNavigator extends VerticalLayout {
         IConfigurationService configurationService = context.getConfigurationService();
         configurationService.save(project);
         configurationService.save(version);
+        context.getComponentDefinitionFactory().refresh(version.getId());
         refreshProjects();
         startEditingItem(project);
     }
@@ -152,13 +151,6 @@ public class DesignNavigator extends VerticalLayout {
         search.setWidth(100, Unit.PERCENTAGE);
         layout.addComponent(search);
         return layout;
-    }
-
-    public void addProjectVersion(ProjectVersion projectVersion) {
-        Setting setting = context.getUser().findSetting(UserSetting.SETTING_CURRENT_PROJECT_ID_LIST,
-                projectVersion.getId());
-        context.getConfigurationService().save(setting);
-        refresh();
     }
 
     protected TreeTable buildTreeTable() {
@@ -584,6 +576,7 @@ public class DesignNavigator extends VerticalLayout {
             }
             ProjectVersion newVersion = configurationService.saveNewVersion(nextVersionLabel,
                     original);
+            context.getComponentDefinitionFactory().refresh(newVersion.getId());
 
             treeTable.addItem(newVersion);
             treeTable.setItemIcon(newVersion, Icons.PROJECT_VERSION);
