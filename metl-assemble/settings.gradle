@@ -2,5 +2,5 @@ includeFlat 'metl-server', 'metl-core',  'metl-ui',
 'comp-abstract', 'comp-rdbms-reader', 'comp-sorter', 
 'comp-data-diff', 'comp-temp-rdbms', 'comp-serialize',
 'comp-sql-execute', 'comp-rdbms-writer', 'comp-sequence',
-'comp-service',
+'comp-service', 'comp-zip',
 'metl-war', 'metl-develop'

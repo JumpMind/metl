@@ -1,0 +1,127 @@
+<!--
+
+    Licensed to JumpMind Inc under one or more contributor
+    license agreements.  See the NOTICE file distributed
+    with this work for additional information regarding
+    copyright ownership.  JumpMind Inc licenses this file
+    to you under the GNU General Public License, version 3.0 (GPLv3)
+    (the "License"); you may not use this file except in compliance
+    with the License.
+
+    You should have received a copy of the GNU General Public License,
+    version 3.0 (GPLv3) along with this library; if not, see
+    <http://www.gnu.org/licenses/>.
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<components>
+  <component category='WRITER'
+             id='Zip'
+             inputMessageType='text'
+             inputOutputModelsMatch='false'
+             outputMessageType='none'
+             resourceCategory='none'>
+    <name>Zip</name>
+    <className>org.jumpmind.metl.core.runtime.component.Zip</className>
+    <keywords>compress</keywords>
+    <description></description>
+    <settings>
+      <setting id='source.resource'
+               required='true'
+               type='streamable_resource'>
+        <name>Source Directory Resource</name>
+      </setting>
+      <setting id='target.resource'
+               required='true'
+               type='streamable_resource'>
+        <name>Zip Target Directory Resource</name>
+      </setting>
+      <setting id='target.relative.path'
+               required='false'
+               type='text'>
+        <name>Target Path</name>
+      </setting>
+      <setting id='must.exist'
+               required='false'
+               type='boolean'>
+        <name>Must Exist</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='delete.on.complete'
+               required='false'
+               type='boolean'>
+        <name>Delete Source Files</name>
+        <defaultValue>true</defaultValue>
+      </setting>
+      <setting id='encoding'
+               required='false'
+               type='text'>
+        <name>Encoding</name>
+        <defaultValue>UTF-8</defaultValue>
+      </setting>
+    </settings>
+  </component>
+  <component category='READER'
+             id='UnZip'
+             inputMessageType='text'
+             inputOutputModelsMatch='false'
+             outputMessageType='text'
+             resourceCategory='none'>
+    <name>UnZip</name>
+    <className>org.jumpmind.metl.core.runtime.component.UnZip</className>
+    <keywords>compress</keywords>
+    <description></description>
+    <settings>
+      <setting id='source.resource'
+               required='true'
+               type='streamable_resource'>
+        <name>Zip Source Directory Resource</name>
+      </setting>
+      <setting id='target.resource'
+               required='true'
+               type='streamable_resource'>
+        <name>Unzip Target Directory Resource</name>
+      </setting>
+      <setting id='target.relative.path'
+               required='false'
+               type='text'>
+        <name>Target Path</name>
+      </setting>
+      <setting id='target.sub.dir'
+               required='false'
+               type='boolean'>
+        <name>Create Sub Dir From File Name</name>
+      </setting>
+      <setting id='extract.empty.files'
+               required='false'
+               type='boolean'>
+        <name>Extract Empty Files</name>
+        <defaultValue>true</defaultValue>
+      </setting>
+      <setting id='overwrite'
+               required='false'
+               type='boolean'>
+        <name>Overwrite</name>
+        <defaultValue>true</defaultValue>
+      </setting>
+      <setting id='encoding'
+               required='false'
+               type='text'>
+        <name>Encoding</name>
+        <defaultValue>UTF-8</defaultValue>
+      </setting>
+      <setting id='delete.on.complete'
+               required='false'
+               type='boolean'>
+        <name>Delete Source File</name>
+        <defaultValue>true</defaultValue>
+      </setting>
+    </settings>
+  </component>
+</components>
