@@ -1,0 +1,101 @@
+<!--
+
+    Licensed to JumpMind Inc under one or more contributor
+    license agreements.  See the NOTICE file distributed
+    with this work for additional information regarding
+    copyright ownership.  JumpMind Inc licenses this file
+    to you under the GNU General Public License, version 3.0 (GPLv3)
+    (the "License"); you may not use this file except in compliance
+    with the License.
+
+    You should have received a copy of the GNU General Public License,
+    version 3.0 (GPLv3) along with this library; if not, see
+    <http://www.gnu.org/licenses/>.
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<components>
+  <component category='SERVICE'
+             id='HttpRequest'
+             inputMessageType='any'
+             inputOutputModelsMatch='false'
+             outputMessageType='text'
+             resourceCategory='none'>
+    <name>Http Request</name>
+    <className>org.jumpmind.metl.core.runtime.component.HttpRequest</className>
+    <deploymentListenerClassName>org.jumpmind.metl.core.runtime.component.HttpRequestDeploymentListener</deploymentListenerClassName>
+    <keywords>REST,ws,webservice,web</keywords>
+    <description></description>
+    <settings>
+      <setting id='http.method'
+               required='true'
+               type='choice'>
+        <name>HTTP Method</name>
+        <defaultValue>GET</defaultValue>
+        <choices>
+          <choice>GET</choice>
+          <choice>POST</choice>
+          <choice>PUT</choice>
+          <choice>DELETE</choice>
+        </choices>
+      </setting>
+      <setting id='path'
+               required='true'
+               type='text'>
+        <name>Path</name>
+        <defaultValue>/$(_agentName)/$(_deploymentName)/$(_versionName)</defaultValue>
+        <description></description>
+      </setting>
+      <setting id='security.scheme'
+               required='false'
+               type='choice'>
+        <name>Security Scheme</name>
+        <defaultValue>NONE</defaultValue>
+        <choices>
+          <choice>NONE</choice>
+          <choice>BASIC</choice>
+        </choices>
+      </setting>
+      <setting id='secure.username'
+               required='false'
+               type='text'>
+        <name>Secure Username</name>
+      </setting>
+      <setting id='secure.password'
+               required='false'
+               type='password'>
+        <name>Secure Password</name>
+      </setting>
+    </settings>
+  </component>
+  <component category='SERVICE'
+             id='16170152-eee5-11e5-9ce9-5e5517507c66'
+             inputMessageType='text'
+             inputOutputModelsMatch='true'
+             outputMessageType='none'
+             resourceCategory='none'>
+    <name>Http Response</name>
+    <className>org.jumpmind.metl.core.runtime.component.HttpResponse</className>
+    <keywords>REST,ws,webservice,web</keywords>
+    <description></description>
+    <settings>
+      <setting id='returns.data'
+               required='true'
+               type='boolean'>
+        <name>Returns Data</name>
+        <defaultValue>true</defaultValue>
+      </setting>
+      <setting id='content.type'
+               required='false'
+               type='text'>
+        <name>Content Type</name>
+      </setting>      
+    </settings>
+  </component>
+</components>
