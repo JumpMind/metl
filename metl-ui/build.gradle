@@ -15,7 +15,7 @@ dependencies {
     compile "org.apache.poi:poi:3.11"
     compile "io.springfox:springfox-swagger2:$springfoxSwaggerVersion"
     compile "io.springfox:springfox-swagger-ui:$springfoxSwaggerVersion"
-    compile "io.swagger:swagger-core:1.5.10"
+    compile "io.swagger:swagger-core:$swaggerVersion"
     compile ("org.reficio:soap-builder:$reficioSoapVersion") {
        exclude group:'com.googlecode.guava-osgi'
     }    
