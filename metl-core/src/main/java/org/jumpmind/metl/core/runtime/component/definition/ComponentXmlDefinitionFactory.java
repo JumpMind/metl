@@ -96,6 +96,7 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
 
     @Override
     public void refresh(String projectVersionId) {
+        long ts = System.currentTimeMillis();
         loadComponentsForClassloader(projectVersionId, "org.jumpmind.metl:metl-core:" + VersionUtils.getCurrentVersion(),
                 getClass().getClassLoader());
         List<PluginRepository> remoteRepostiories = configurationService.findPluginRepositories();
@@ -170,6 +171,7 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                 }
             }
         }
+        logger.info("It took {}ms to refresh plugins for project version: {}", (System.currentTimeMillis()-ts), projectVersionId);
     }
 
     @Override

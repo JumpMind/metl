@@ -287,6 +287,7 @@
         <column name="test" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates that this flow is a test."/>            
         <column name="web_service" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates that this flow is a web service."/>                    
         <column name="name" type="VARCHAR" size="255" description="" />
+        <column name="description" type="CLOB" description="" />
         <column name="folder_id" type="CHAR" size="36" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />

@@ -43,6 +43,8 @@ public class Flow extends AbstractNamedObject implements IAuditable {
     String projectVersionId;
 
     String name;
+    
+    String description;
 
     List<FlowStep> flowSteps;
 
@@ -126,6 +128,16 @@ public class Flow extends AbstractNamedObject implements IAuditable {
             }
         }
         return resources;
+    }
+    
+    public List<Component> findComponentsOfType(String typeId) {
+        List<Component> components  = new ArrayList<>();
+        for (FlowStep flowStep : flowSteps) {
+            if (flowStep.getComponent().getType().equals(typeId)) {
+                components.add(flowStep.getComponent());
+            }
+        }
+        return components;
     }
 
     public FlowStepLink findFlowStepLink(String sourceNodeId, String targetNodeId) {
@@ -380,7 +392,15 @@ public class Flow extends AbstractNamedObject implements IAuditable {
             }
         }
         return finalSteps;
-    }    
+    }
+    
+    public String getDescription() {
+        return description;
+    }
+    
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     static public class XSorter implements Comparator<FlowStep> {
         @Override

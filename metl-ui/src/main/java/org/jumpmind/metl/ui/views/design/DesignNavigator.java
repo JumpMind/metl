@@ -504,7 +504,7 @@ public class DesignNavigator extends VerticalLayout {
                     sheet);
         } else if (item instanceof ProjectVersion) {
             ProjectVersion projectVersion = (ProjectVersion)item;
-            ProjectVersionPropertiesPanel panel = new ProjectVersionPropertiesPanel(projectVersion, context, this);
+            ProjectVersionSettingsPanel panel = new ProjectVersionSettingsPanel(projectVersion, context, this);
             tabs.addCloseableTab(projectVersion.getId(), String.format("%s (%s)", projectVersion.getProject().getName(), 
                     projectVersion.getName()), Icons.PROJECT_VERSION, panel);
         }

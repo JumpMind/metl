@@ -30,6 +30,7 @@ import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowParameter;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
+import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextArea;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 
@@ -45,11 +46,15 @@ import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptAll;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.AbstractSelect.AbstractSelectTargetDetails;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Field;
+import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.TableDragMode;
 import com.vaadin.ui.TableFieldFactory;
@@ -57,7 +62,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-class EditParametersDialog extends ResizableWindow implements ValueChangeListener {
+class EditFlowSettingsDialog extends ResizableWindow implements ValueChangeListener {
 
     ApplicationContext context;
 
@@ -70,16 +75,35 @@ class EditParametersDialog extends ResizableWindow implements ValueChangeListene
     Button insertButton;
 
     Button removeButton;
-
-    public EditParametersDialog(ApplicationContext context, Flow flow, boolean readOnly) {
-        super("Flow Parameters");
+    
+    public EditFlowSettingsDialog(ApplicationContext context, Flow flow, boolean readOnly) {
+        super("Flow Settings");
         this.context = context;
         this.flow = flow;
 
         Button closeButton = new Button("Close");
         closeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
         closeButton.addClickListener(new CloseClickListener());
+        
+        addHeader("General Settings");
+        
+        FormLayout formLayout = new FormLayout();
+        formLayout.setMargin(true);
+        formLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
+        formLayout.setWidth(100, Unit.PERCENTAGE);
+        addComponent(formLayout);
+        
+        ImmediateUpdateTextArea description = new ImmediateUpdateTextArea("Description") {
+            protected void save(String text) {
+                flow.setDescription(text);
+                context.getConfigurationService().save(flow);
+            };
+        };
+        description.setValue(flow.getDescription());
+        formLayout.addComponent(description);
 
+        addHeader("Parameters");
+        
         if (!readOnly) {
             ButtonBar buttonBar = new ButtonBar();
             buttonBar.addButton("Add", FontAwesome.PLUS, new AddClickListener());
@@ -89,7 +113,7 @@ class EditParametersDialog extends ResizableWindow implements ValueChangeListene
             removeButton.setEnabled(false);
             addComponent(buttonBar);
         }
-
+        
         table = new Table();
         table.setSizeFull();
         container = new BeanItemContainer<FlowParameter>(FlowParameter.class);
@@ -121,6 +145,16 @@ class EditParametersDialog extends ResizableWindow implements ValueChangeListene
         for (FlowParameter flowParameter : params) {
             table.addItem(flowParameter);
         }
+    }
+    
+    protected void addHeader(String caption) {
+        HorizontalLayout componentHeaderWrapper = new HorizontalLayout();
+        componentHeaderWrapper.setMargin(new MarginInfo(false, false, false, true));
+        Label componentHeader = new Label(caption);
+        componentHeader.addStyleName(ValoTheme.LABEL_H3);
+        componentHeader.addStyleName(ValoTheme.LABEL_COLORED);
+        componentHeaderWrapper.addComponent(componentHeader);
+        addComponent(componentHeaderWrapper);
     }
 
     public void valueChange(ValueChangeEvent event) {
@@ -181,7 +215,7 @@ class EditParametersDialog extends ResizableWindow implements ValueChangeListene
 
     class CloseClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            EditParametersDialog.this.close();
+            EditFlowSettingsDialog.this.close();
         }
     }
 

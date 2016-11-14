@@ -2,9 +2,9 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
-import static org.jumpmind.metl.core.runtime.component.CommonSettingsConstants.FORMAT;
-import static org.jumpmind.metl.core.runtime.component.CommonSettingsConstants.FORMAT_JSON;
-import static org.jumpmind.metl.core.runtime.component.CommonSettingsConstants.FORMAT_XML;
+import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.FORMAT;
+import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.FORMAT_JSON;
+import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.FORMAT_XML;
 
 import org.jumpmind.metl.core.runtime.ContentMessage;
 import org.jumpmind.metl.core.runtime.Message;
@@ -12,6 +12,8 @@ import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class HttpResponse extends AbstractHttpRequestResponse implements IHasResults {
 
+    public static final String TYPE = "16170152-eee5-11e5-9ce9-5e5517507c66";
+    
     StringBuilder response;
 
     String detectedFormat;

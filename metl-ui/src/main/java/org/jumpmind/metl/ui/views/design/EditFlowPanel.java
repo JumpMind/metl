@@ -124,7 +124,6 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     final static float MAX_PANEL_POSITION = 99;
 
     public EditFlowPanel(ApplicationContext context, String flowId, DesignNavigator designNavigator, TabbedPanel tabs) {
-
         this.configurationService = context.getConfigurationService();
         this.flow = configurationService.findFlow(flowId);
         this.readOnly = context.isReadOnly(configurationService.findProjectVersion(flow.getProjectVersionId()), Privilege.DESIGN);
@@ -201,8 +200,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         Button exportButton = buttonBar.addButtonRight("Capture", FontAwesome.CAMERA, (event)->export());
         exportButton.setId("exportButton");
 
-        parametersButton = buttonBar.addButton("Parameters", FontAwesome.LIST_OL);
-        parametersButton.addClickListener((event) -> new EditParametersDialog(context, flow, readOnly).showAtSize(.75));
+        parametersButton = buttonBar.addButton("Settings", FontAwesome.GEARS);
+        parametersButton.addClickListener((event) -> new EditFlowSettingsDialog(context, flow, readOnly).showAtSize(.75));
 
         return buttonBar;
     }

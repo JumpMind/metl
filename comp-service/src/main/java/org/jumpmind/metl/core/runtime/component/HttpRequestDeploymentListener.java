@@ -6,6 +6,7 @@ import java.util.Map;
 import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.DESCRIPTION;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.runtime.IHttpRequestMappingRegistryAware;
@@ -59,13 +60,26 @@ public class HttpRequestDeploymentListener implements IComponentDeploymentListen
         
         String method = properties.get(HttpRequest.HTTP_METHOD, HttpMethod.GET.name());
         
+        String responseDescription = null;
+        List<Component> components = flow.findComponentsOfType(HttpResponse.TYPE);
+        for (Component component : components) {
+            String desc = component.get(DESCRIPTION);
+            if (responseDescription == null) {
+                responseDescription = desc;
+            } else if (desc != null) {
+                responseDescription += "\n" + desc;
+            }
+        }
+        
         HttpRequestMapping mapping = new HttpRequestMapping();        
         mapping.setPath(path);
         mapping.setMethod(HttpMethod.valueOf(method));
         mapping.setSecurityScheme(SecurityScheme.valueOf(properties.get(HttpRequest.SECURITY_SCHEME, SecurityScheme.NONE.name())));
         mapping.setSecurityUsername(properties.get(HttpRequest.SECURE_USERNAME));
         mapping.setSecurityPassword(properties.get(HttpRequest.SECURE_PASSWORD));
-        mapping.setDescription(properties.get(DESCRIPTION));
+        mapping.setRequestDescription(properties.get(DESCRIPTION));
+        mapping.setFlowDescription(flow.getDescription());
+        mapping.setResponseDescription(responseDescription);
         mapping.setDeployment(deployment);
         return mapping;
     }

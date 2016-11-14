@@ -20,12 +20,12 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import static org.jumpmind.metl.core.runtime.component.CommonSettingsConstants.FORMAT;
-import static org.jumpmind.metl.core.runtime.component.CommonSettingsConstants.FORMAT_AUTOMATIC;
-import static org.jumpmind.metl.core.runtime.component.CommonSettingsConstants.FORMAT_JSON;
-import static org.jumpmind.metl.core.runtime.component.CommonSettingsConstants.FORMAT_XML;
-import static org.jumpmind.metl.core.runtime.component.CommonSettingsConstants.STRUCTURE;
-import static org.jumpmind.metl.core.runtime.component.CommonSettingsConstants.STRUCTURE_BY_INBOUND_ROW;
+import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.FORMAT;
+import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.FORMAT_AUTOMATIC;
+import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.FORMAT_JSON;
+import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.FORMAT_XML;
+import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.STRUCTURE;
+import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.STRUCTURE_BY_INBOUND_ROW;
 
 import org.apache.http.HttpHeaders;
 import org.springframework.util.MimeTypeUtils;

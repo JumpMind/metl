@@ -215,10 +215,10 @@ public class ExecutionApi {
                     List<HttpRequestMapping> mappings = requestRegistry.getHttpRequestMappingsFor(agentDeployment);
                     for (HttpRequestMapping httpRequestMapping : mappings) {
                         Operation operation = new Operation().summary(flow.getName()).operationId(flow.getName()).tag(tag.getName())
-                                .description(httpRequestMapping.getDescription()).produces(mimeTypes);
+                                .description(httpRequestMapping.getFlowDescription()).produces(mimeTypes);
                         String path = addParameters(operation, httpRequestMapping.getPath());
-                         Response response = new Response().description("A successful response").schema(new StringProperty());
-                         operation.response(200, response);
+                        Response response = new Response().schema(new StringProperty()).description(httpRequestMapping.getResponseDescription());
+                        operation.response(200, response);
                         switch (httpRequestMapping.getMethod()) {
                             case GET:
                                 swagger.path(path, new Path().get(operation));
