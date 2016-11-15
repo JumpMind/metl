@@ -13,7 +13,7 @@ final public class ComponentSettingsConstants {
 
     public final static String LOG_OUTPUT = "logOutput";
     
-    public final static String DESCRIPTION = "description";
+    public final static String NOTES = "notes";
     
     public final static String ROWS_PER_MESSAGE = "rows.per.message";
     

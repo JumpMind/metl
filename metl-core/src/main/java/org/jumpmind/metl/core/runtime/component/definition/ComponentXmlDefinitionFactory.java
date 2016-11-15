@@ -253,7 +253,7 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                                     .add(new XMLSetting(LOG_OUTPUT, "Log Output", "false", Type.BOOLEAN, false));
                             xmlComponent.getSettings().getSetting()
                                     .add(new XMLSetting(INBOUND_QUEUE_CAPACITY, "Inbound Queue Capacity", "100", Type.INTEGER, true));
-                            xmlComponent.getSettings().getSetting().add(new XMLSetting(DESCRIPTION, "Notes", null, Type.MULTILINE_TEXT, false));
+                            xmlComponent.getSettings().getSetting().add(new XMLSetting(NOTES, "Notes", null, Type.MULTILINE_TEXT, false));
                         } else {
                             if (!classLoader.equals(componentsById.get(id).getClassLoader())) {
                                 logger.debug(

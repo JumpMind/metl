@@ -44,7 +44,7 @@ public class Flow extends AbstractNamedObject implements IAuditable {
 
     String name;
     
-    String description;
+    String notes;
 
     List<FlowStep> flowSteps;
 
@@ -394,12 +394,12 @@ public class Flow extends AbstractNamedObject implements IAuditable {
         return finalSteps;
     }
     
-    public String getDescription() {
-        return description;
+    public String getNotes() {
+        return notes;
     }
     
-    public void setDescription(String description) {
-        this.description = description;
+    public void setNotes(String description) {
+        this.notes = description;
     }
 
     static public class XSorter implements Comparator<FlowStep> {

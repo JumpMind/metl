@@ -33,14 +33,6 @@
     <component-ui id="Last Unit of Work UI" componentId="Last Unit of Work">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delay-48x48-color.png</iconImage>
     </component-ui>    
-    <component-ui id="RDBMS Writer UI" componentId="RDBMS Writer">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-writer-48x48-color.png</iconImage>
-        <className>org.jumpmind.metl.ui.views.design.EditRdbmsWriterPanel</className>
-    </component-ui>
-    <component-ui id="Sql Executor UI" componentId="Sql Executor">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-sql-execute-48x48-color.png</iconImage>
-        <className>org.jumpmind.metl.ui.views.design.EditRdbmsReaderPanel</className>        
-    </component-ui>       
     <component-ui id="Content Router UI" componentId="Content Router">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-content-router-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditContentRouterPanel</className>
@@ -111,21 +103,6 @@
     <component-ui id="Multiplier UI" componentId="Multiplier">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-multiplier-48x48-color.png</iconImage>
     </component-ui>   
-    <component-ui id="Sequence UI" componentId="Sequence">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-sequencing-48x48-color.png</iconImage>
-    </component-ui>       
-    <component-ui id="Text File Reader UI" componentId="Text File Reader">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-text-file-48x48-color.png</iconImage>
-    </component-ui> 
-    <component-ui id="Binary File Reader UI" componentId="Binary File Reader">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-text-file-48x48-color.png</iconImage>
-    </component-ui> 
-    <component-ui id="Text File Writer UI" componentId="Text File Writer">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-text-writer-48x48-color.png</iconImage>
-    </component-ui>    
-    <component-ui id="Binary File Writer UI" componentId="Binary File Writer">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-text-writer-48x48-color.png</iconImage>
-    </component-ui>    
     <component-ui id="Text Replace UI" componentId="Text Replace">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-regex-replace-48x48-color.png</iconImage>
     </component-ui>    
@@ -133,9 +110,6 @@
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-web-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditWebPanel</className>
     </component-ui>
-    <component-ui id="File Poller UI" componentId="File Poller">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-file-poller-48x48-color.png</iconImage>
-    </component-ui>     
     <component-ui id="Text Constant UI" componentId="Text Constant">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-text-constant-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditTextConstant</className>
@@ -143,14 +117,7 @@
     <component-ui id="XML Reader UI" componentId="XmlReader">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xml-formatter-48x48-color.png</iconImage>
     </component-ui>
-    <component-ui id="File Util UI" componentId="File Util">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-file-util-48x48-color.png</iconImage>
-    </component-ui>
     <component-ui id="Union UI" componentId="Union">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-union-48x48-color.png</iconImage>
     </component-ui>
-    <component-ui id="Excel File Reader UI" componentId="2b1aa706-9ec7-11e6-80f5-76304dec7eb7">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/excel-48x48-color.png</iconImage>
-        <className>org.jumpmind.metl.ui.views.design.EditExcelReaderPanel</className>        
-    </component-ui>       
 </ui>
