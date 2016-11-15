@@ -169,36 +169,6 @@
       </setting>
     </settings>
   </component>
-  <component category='PROCESSOR'
-             id='Delay'
-             inputMessageType='any'
-             inputOutputModelsMatch='false'
-             outputMessageType='any'
-             resourceCategory='none'
-             supportsMultipleThreads='true'>
-    <name>Delay</name>
-    <keywords>sleep,wait</keywords>
-    <className>org.jumpmind.metl.core.runtime.component.Delay</className>
-    <description></description>
-    <settings>
-      <setting id='run.when'
-               required='false'
-               type='choice'>
-        <name>Run When</name>
-        <defaultValue>PER UNIT OF WORK</defaultValue>
-        <choices>
-          <choice>PER UNIT OF WORK</choice>
-          <choice>PER MESSAGE</choice>
-        </choices>
-      </setting>
-      <setting id='delay.in.ms'
-               required='true'
-               type='integer'>
-        <name>Delay (ms)</name>
-        <defaultValue>1000</defaultValue>
-      </setting>
-    </settings>
-  </component>
   <component category='Writer'
              id='35c4c0ae-b040-4f93-b212-5b92619c4064'
              inputMessageType='any'
@@ -969,38 +939,6 @@ forwardMessage()
                required='false'
                type='integer'>
         <name>Number of read tags to send together</name>
-      </setting>
-    </settings>
-  </component>
-  <component category='CONTROL'
-             id='Last Unit of Work'
-             inputMessageType='any'
-             inputOutputModelsMatch='false'
-             outputMessageType='any'
-             resourceCategory='none'>
-    <name>Last Unit of Work</name>
-    <className>org.jumpmind.metl.core.runtime.component.LastUnitOfWork</className>
-    <description></description>
-  </component>
-  <component category='CONTROL'
-             id='Gate'
-             inputMessageType='any'
-             inputOutputModelsMatch='false'
-             outputMessageType='any'
-             resourceCategory='none'>
-    <name>Gate</name>
-    <className>org.jumpmind.metl.core.runtime.component.Gate</className>
-    <description></description>
-    <settings>
-      <setting id='gate.control.source.step'
-               required='true'
-               type='source_step'>
-        <name>Gate Control Source</name>
-      </setting>
-      <setting id='force.gate.open'
-               required='false'
-               type='boolean'>
-        <name>Force Gate Open On No Source Message</name>
       </setting>
     </settings>
   </component>

@@ -1,0 +1,86 @@
+<!--
+
+    Licensed to JumpMind Inc under one or more contributor
+    license agreements.  See the NOTICE file distributed
+    with this work for additional information regarding
+    copyright ownership.  JumpMind Inc licenses this file
+    to you under the GNU General Public License, version 3.0 (GPLv3)
+    (the "License"); you may not use this file except in compliance
+    with the License.
+
+    You should have received a copy of the GNU General Public License,
+    version 3.0 (GPLv3) along with this library; if not, see
+    <http://www.gnu.org/licenses/>.
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<components>
+  <component category='PROCESSOR'
+             id='Delay'
+             inputMessageType='any'
+             inputOutputModelsMatch='false'
+             outputMessageType='any'
+             resourceCategory='none'
+             supportsMultipleThreads='true'>
+    <name>Delay</name>
+    <keywords>sleep,wait</keywords>
+    <className>org.jumpmind.metl.core.runtime.component.Delay</className>
+    <description></description>
+    <settings>
+      <setting id='run.when'
+               required='false'
+               type='choice'>
+        <name>Run When</name>
+        <defaultValue>PER UNIT OF WORK</defaultValue>
+        <choices>
+          <choice>PER UNIT OF WORK</choice>
+          <choice>PER MESSAGE</choice>
+        </choices>
+      </setting>
+      <setting id='delay.in.ms'
+               required='true'
+               type='integer'>
+        <name>Delay (ms)</name>
+        <defaultValue>1000</defaultValue>
+      </setting>
+    </settings>
+  </component>
+  <component category='CONTROL'
+             id='Last Unit of Work'
+             inputMessageType='any'
+             inputOutputModelsMatch='false'
+             outputMessageType='any'
+             resourceCategory='none'>
+    <name>Last Unit of Work</name>
+    <className>org.jumpmind.metl.core.runtime.component.LastUnitOfWork</className>
+    <description></description>
+  </component>
+  <component category='CONTROL'
+             id='Gate'
+             inputMessageType='any'
+             inputOutputModelsMatch='false'
+             outputMessageType='any'
+             resourceCategory='none'>
+    <name>Gate</name>
+    <className>org.jumpmind.metl.core.runtime.component.Gate</className>
+    <description></description>
+    <settings>
+      <setting id='gate.control.source.step'
+               required='true'
+               type='source_step'>
+        <name>Gate Control Source</name>
+      </setting>
+      <setting id='force.gate.open'
+               required='false'
+               type='boolean'>
+        <name>Force Gate Open On No Source Message</name>
+      </setting>
+    </settings>
+  </component>
+</components>

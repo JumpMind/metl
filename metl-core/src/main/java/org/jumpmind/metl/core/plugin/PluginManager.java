@@ -80,6 +80,8 @@ public class PluginManager implements IPluginManager {
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-sql-execute", 90));
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-zip", 100));
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-file", 110));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-excel", 120));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-control", 130));
     }
 
     @Override
