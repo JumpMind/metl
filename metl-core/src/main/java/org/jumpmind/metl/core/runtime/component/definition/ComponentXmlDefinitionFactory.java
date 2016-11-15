@@ -197,7 +197,7 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
         if (componentsById != null) {
             return componentsById.get(id);
         } else {
-            logger.warn("Could not find components for project version of {}", projectVersionId);
+            logger.warn("Could not find components for project version of {} with a type id of {}", projectVersionId, id);
             return null;
         }
     }

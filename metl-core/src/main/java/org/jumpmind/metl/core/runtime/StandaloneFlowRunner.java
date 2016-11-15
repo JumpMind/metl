@@ -54,8 +54,10 @@ import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.persist.IImportExportService;
 import org.jumpmind.metl.core.persist.ImportExportService;
+import org.jumpmind.metl.core.plugin.PluginManager;
 import org.jumpmind.metl.core.runtime.component.ComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.definition.ComponentXmlDefinitionFactory;
+import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMappingRegistry;
 import org.jumpmind.metl.core.security.SecurityService;
@@ -125,19 +127,11 @@ public class StandaloneFlowRunner {
         return executionService.findExecution(executionId);
     }
 
-    public String runFlow(FlowName flow, boolean waitFor) {
+    public String runFlow(FlowName flow, boolean waitFor) throws Exception {
         AgentDeployment deployment = agentRuntime.deploy(configurationService.findFlow(flow.getId()), new HashMap<>());
-        String executionId = agentRuntime.scheduleNow("standalone", deployment);
-        Execution execution = findExecution(executionId);
-        while (execution == null) {
-            AppUtils.sleep(50);
-            execution = findExecution(executionId);
-        }
-        while (waitFor && !execution.isDone()) {
-            AppUtils.sleep(50);
-            execution = findExecution(executionId);
-        }
-        return executionId;
+        FlowRuntime runtime = agentRuntime.createFlowRuntime("standalone", deployment, new HashMap<>());
+        runtime.execute();
+        return runtime.getExecutionId();
     }
 
     public String getFailureMessage(Execution execution) {
@@ -166,11 +160,17 @@ public class StandaloneFlowRunner {
                 new ConfigDatabaseUpgrader("/schema.xml", databasePlatform, true, "METL").upgrade();
                 new ConfigDatabaseUpgrader("/schema-exec.xml", databasePlatform, true, "METL").upgrade();
                 persistenceManager = new SqlPersistenceManager(databasePlatform);
-                ComponentXmlDefinitionFactory componentDefinitionFactory = new ComponentXmlDefinitionFactory();
-                configurationService = new ConfigurationSqlService(new SecurityService(), componentDefinitionFactory, databasePlatform,
+                configurationService = new ConfigurationSqlService(new SecurityService(), databasePlatform,
                         persistenceManager, "METL");
+                
+                PluginManager pluginManager = new PluginManager("working/plugins", configurationService);
+                pluginManager.init();
+                
+                ComponentXmlDefinitionFactory componentDefinitionFactory = new ComponentXmlDefinitionFactory(configurationService, pluginManager);
+                
                 IImportExportService importService = new ImportExportService(databasePlatform, persistenceManager, "METL",
                         configurationService, new SecurityService());
+                
                 executionService = new ExecutionSqlService(databasePlatform, persistenceManager, "METL", new StandardEnvironment());
                 agentRuntime = new AgentRuntime(new Agent("test", AppUtils.getHostName()), configurationService, executionService,
                         new ComponentRuntimeFactory(componentDefinitionFactory), componentDefinitionFactory, new ResourceFactory(),
@@ -191,6 +191,8 @@ public class StandaloneFlowRunner {
                 } else {
                     importService.importConfiguration(IOUtils.toString(configSqlScriptURL), "standalone");
                 }
+                
+                componentDefinitionFactory.refresh();
             } catch (IOException e) {
                 throw new IoException(e);
             }

@@ -79,7 +79,6 @@ import org.jumpmind.metl.core.model.UserGroup;
 import org.jumpmind.metl.core.model.UserHist;
 import org.jumpmind.metl.core.model.UserSetting;
 import org.jumpmind.metl.core.model.Version;
-import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.security.SecurityConstants;
 import org.jumpmind.metl.core.util.NameValue;
@@ -89,15 +88,12 @@ import org.jumpmind.util.FormatUtils;
 
 abstract class AbstractConfigurationService extends AbstractService implements IConfigurationService {
 
-    IComponentDefinitionFactory componentDefinitionFactory;
-    
     ISecurityService securityService;
 
-    AbstractConfigurationService(ISecurityService securityService, IComponentDefinitionFactory componentDefinitionFactory, IPersistenceManager persistenceManager,
+    AbstractConfigurationService(ISecurityService securityService, IPersistenceManager persistenceManager,
             String tablePrefix) {
         super(persistenceManager, tablePrefix);
         this.securityService = securityService;
-        this.componentDefinitionFactory = componentDefinitionFactory;
     }
     
     @Override

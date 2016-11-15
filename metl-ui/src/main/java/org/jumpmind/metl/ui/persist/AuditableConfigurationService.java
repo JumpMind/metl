@@ -25,7 +25,6 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.persist.ConfigurationSqlService;
-import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.init.AppUI;
@@ -43,10 +42,9 @@ public class AuditableConfigurationService extends ConfigurationSqlService {
     long lastAuditTimeInMs = System.currentTimeMillis();
 
     public AuditableConfigurationService(ISecurityService securityService,
-            IComponentDefinitionFactory componentDefinitionFactory,
             IDatabasePlatform databasePlatform, IPersistenceManager persistenceManager,
             String tablePrefix) {
-        super(securityService, componentDefinitionFactory, databasePlatform, persistenceManager,
+        super(securityService, databasePlatform, persistenceManager,
                 tablePrefix);
     }
 

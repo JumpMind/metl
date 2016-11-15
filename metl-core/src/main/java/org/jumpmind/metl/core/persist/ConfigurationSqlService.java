@@ -39,7 +39,6 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
-import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.symmetric.io.data.DbExport;
@@ -49,9 +48,9 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
 
     protected IDatabasePlatform databasePlatform;
 
-    public ConfigurationSqlService(ISecurityService securityService, IComponentDefinitionFactory componentDefinitionFactory, IDatabasePlatform databasePlatform,
+    public ConfigurationSqlService(ISecurityService securityService, IDatabasePlatform databasePlatform,
             IPersistenceManager persistenceManager, String tablePrefix) {
-        super(securityService, componentDefinitionFactory, persistenceManager, tablePrefix);
+        super(securityService, persistenceManager, tablePrefix);
         this.databasePlatform = databasePlatform;
     }
     

@@ -134,36 +134,35 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
 
     @Override
     protected void purgeExecutions(String status, int retentionTimeInMs) {
-        Table table = databasePlatform
-                .readTableFromDatabase(null, null, tableName(Execution.class));
-        if (table != null) {
-            Date purgeBefore = DateUtils.addMilliseconds(new Date(), -retentionTimeInMs);
-            log.debug("Purging executions with the status of {} before {}", status, purgeBefore);
-            ISqlTemplate template = databasePlatform.getSqlTemplate();
-            
-            List<String> executionStepIds = template.query(
-                    String.format("select id from %1$s_execution_step where execution_id in "
-                            + "(select id from %1$s_execution where status=? and last_update_time <= ?)", tablePrefix),
-                    new StringMapper(), new Object[] { status, purgeBefore });
-            for (String executionStepId : executionStepIds) {
-                File file = new File(LogUtils.getLogDir(), executionStepId + ".log");
-                FileUtils.deleteQuietly(file);
+        if (databasePlatform != null) {
+            Table table = databasePlatform.readTableFromDatabase(null, null, tableName(Execution.class));
+            if (table != null) {
+                Date purgeBefore = DateUtils.addMilliseconds(new Date(), -retentionTimeInMs);
+                log.debug("Purging executions with the status of {} before {}", status, purgeBefore);
+                ISqlTemplate template = databasePlatform.getSqlTemplate();
+
+                List<String> executionStepIds = template.query(
+                        String.format("select id from %1$s_execution_step where execution_id in "
+                                + "(select id from %1$s_execution where status=? and last_update_time <= ?)", tablePrefix),
+                        new StringMapper(), new Object[] { status, purgeBefore });
+                for (String executionStepId : executionStepIds) {
+                    File file = new File(LogUtils.getLogDir(), executionStepId + ".log");
+                    FileUtils.deleteQuietly(file);
+                }
+
+                int count = template.update(
+                        String.format("delete from %1$s_execution_step where execution_id in "
+                                + "(select id from %1$s_execution where status=? and last_update_time <= ?)", tablePrefix),
+                        status, purgeBefore);
+                count += template.update(String.format("delete from %1$s_execution where status=? and last_update_time <= ?", tablePrefix),
+                        status, purgeBefore);
+                log.debug("Purged {} execution records with the status of {}", new Object[] { count, status });
+                if (!log.isDebugEnabled() && count > 0) {
+                    log.info("Purged {} execution records", new Object[] { count });
+                }
+            } else {
+                log.info("Could not run execution purge for status '{}' because table had not been created yet", status);
             }
-            
-            int count = template
-                    .update(String
-                            .format("delete from %1$s_execution_step where execution_id in "
-                                    + "(select id from %1$s_execution where status=? and last_update_time <= ?)",
-                                    tablePrefix), status, purgeBefore);
-            count += template.update(String.format(
-                    "delete from %1$s_execution where status=? and last_update_time <= ?",
-                    tablePrefix), status, purgeBefore);
-            log.debug("Purged {} execution records with the status of {}", new Object[] { count, status });                
-            if (!log.isDebugEnabled() && count > 0) {
-                log.info("Purged {} execution records", new Object[] { count });                
-            }
-        } else {
-            log.info("Could not run execution purge for status '{}' because table had not been created yet", status);
         }
     }
 
