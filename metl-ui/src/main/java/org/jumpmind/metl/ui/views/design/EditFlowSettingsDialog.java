@@ -93,7 +93,7 @@ class EditFlowSettingsDialog extends ResizableWindow implements ValueChangeListe
         formLayout.setWidth(100, Unit.PERCENTAGE);
         addComponent(formLayout);
         
-        ImmediateUpdateTextArea description = new ImmediateUpdateTextArea("Description") {
+        ImmediateUpdateTextArea description = new ImmediateUpdateTextArea("Notes") {
             protected void save(String text) {
                 flow.setDescription(text);
                 context.getConfigurationService().save(flow);
