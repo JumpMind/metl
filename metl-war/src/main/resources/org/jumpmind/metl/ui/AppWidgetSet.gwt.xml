@@ -4,7 +4,6 @@
 <module>
         <inherits name="com.vaadin.DefaultWidgetSet" />
         <inherits name="org.jumpmind.vaadin.ui.sqlexplorer.AppWidgetSet" />
-        <inherits name="org.vaadin.teemusa.gridextensions.GridExtensionPackWidgetSet" />
         <inherits name="org.vaadin.aceeditor.AceEditorWidgetSet" />
         <inherits name="com.vaadin.addon.contextmenu.WidgetSet" />
         <set-configuration-property name="devModeRedirectEnabled" value="true" />
