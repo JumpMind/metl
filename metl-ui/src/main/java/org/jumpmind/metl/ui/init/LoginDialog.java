@@ -309,8 +309,9 @@ public class LoginDialog extends Window {
             } else if (user.getPassword() != null
                     && user.getPassword().equals(password)) {
                 Date expireTime = DateUtils.addDays(new Date(), -passwordExpiresInDays);
-                if (user.getLastPasswordTime() == null
-                        || user.getLastPasswordTime().before(expireTime)) {
+                if (passwordExpiresInDays > 0 
+                        && (user.getLastPasswordTime() == null
+                        || user.getLastPasswordTime().before(expireTime))) {
                     userNameField.setVisible(false);
                     passwordField.setValue(null);
                     setCaption(PASSWORD_EXPIRED);
