@@ -246,34 +246,6 @@
       </setting>
     </settings>
   </component>
-  <component autoSendControlMessages='false'
-             category='PROCESSOR'
-             id='Content Router'
-             inputMessageType='any'
-             showInputModel='true'             
-             inputOutputModelsMatch='true'
-             outputMessageType='any'
-             resourceCategory='none'
-             shareable='false'>
-    <name>Content Router</name>
-    <className>org.jumpmind.metl.core.runtime.component.ContentRouter</className>
-    <keywords>target</keywords>
-    <description></description>
-    <settings>
-      <setting id='rows.per.message'
-               required='true'
-               type='integer'>
-        <name>Rows/Msg</name>
-        <defaultValue>1000</defaultValue>
-      </setting>
-      <setting id='only.route.first.match'
-               required='false'
-               type='boolean'>
-        <name>Only Route First Match</name>
-        <defaultValue>false</defaultValue>
-      </setting>
-    </settings>
-  </component>
   <component category='PROCESSOR'
              id='Execute'
              inputMessageType='any'
@@ -475,31 +447,6 @@
     </settings>
   </component>
   <component category='PROCESSOR'
-             id='Mapping'
-             inputMessageType='entity'
-             inputOutputModelsMatch='false'
-             outputMessageType='entity'
-             resourceCategory='none'>
-    <name>Mapping</name>
-    <className>org.jumpmind.metl.core.runtime.component.Mapping</className>
-    <keywords>map</keywords>
-    <description></description>
-    <settings>
-      <setting id='set.unmapped.attributes.to.null'
-               required='false'
-               type='boolean'>
-        <name>Set Unmapped Attributes To Null</name>
-        <defaultValue>false</defaultValue>
-      </setting>
-      <setting id='entity.per.record'
-               required='false'
-               type='boolean'>
-        <name>Entity Per Record</name>
-        <defaultValue>false</defaultValue>
-      </setting>
-    </settings>
-  </component>
-  <component category='PROCESSOR'
              id='Message Logger'
              inputMessageType='any'
              showInputModel='true'             
@@ -653,60 +600,6 @@
                type='boolean'>
         <name>Ignore namespaces for XPath matching</name>
         <defaultValue>true</defaultValue>
-      </setting>
-    </settings>
-  </component>
-  <component category='PROCESSOR'
-             id='Script'
-             inputMessageType='any'
-             showInputModel='true'
-             inputOutputModelsMatch='false'
-             outputMessageType='any'
-             resourceCategory='any'
-             supportsMultipleThreads='true'>
-    <name>Groovy Script</name>
-    <className>org.jumpmind.metl.core.runtime.component.Script</className>
-    <keywords>groovy,logic,java</keywords>
-    <description></description>
-    <settings>
-      <setting id='imports'
-               required='true'
-               type='script'
-               visible='false'>
-        <name>Import Statements</name>
-      </setting>
-      <setting id='methods'
-               required='true'
-               type='script'
-               visible='false'>
-        <name>Additional Methods</name>
-      </setting>
-      <setting id='init.script'
-               required='true'
-               type='script'
-               visible='false'>
-        <name>Init Script</name>
-      </setting>
-      <setting id='handle.msg.script'
-               required='true'
-               type='script'
-               visible='false'>
-        <name>Handle Msg Script</name>
-        <defaultValue>
-forwardMessage()        
-        </defaultValue>
-      </setting>
-      <setting id='on.flow.success.script'
-               required='true'
-               type='script'
-               visible='false'>
-        <name>Ended with Success Script</name>
-      </setting>
-      <setting id='on.flow.error.script'
-               required='true'
-               type='script'
-               visible='false'>
-        <name>Ended with Error Script</name>
       </setting>
     </settings>
   </component>

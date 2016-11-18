@@ -21,7 +21,9 @@ dependencies {
     testCompile project(":comp-file")
     testCompile project(":comp-excel")
     testCompile project(":comp-control") 
-    testCompile project(":comp-groovy")           
+    testCompile project(":comp-groovy")  
+    testCompile project(":comp-route")  
+    testCompile project(":comp-map")           
     testCompile project(path: ':metl-core', configuration: 'testArtifacts')    
     testCompile "javax.servlet:javax.servlet-api:$servletVersion"
     testCompile "org.eclipse.jetty:jetty-servlet:$jettyVersion"
