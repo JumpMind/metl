@@ -180,18 +180,18 @@ public class LocalFileDirectory implements IDirectory {
     @Override
     public void moveToDir(String fromFilePath, String toDirPath, boolean closeSession) {
         moveToDir(fromFilePath, toDirPath);
-    }
+    }    
 
     protected List<FileInfo> listFiles(File dir) {
+        String fileSeparator = System.getProperty("file.separator");
         List<FileInfo> list = new ArrayList<>();
         File[] files = dir.listFiles();
         if (files != null) {
             for (File file : files) {
                 String path = file.getAbsolutePath();
-                path = path.replaceAll("\\\\", "/");
                 int index = path.indexOf(basePath);
                 if (index >= 0) {
-                    if (!basePath.endsWith("/")) {
+                    if (!basePath.endsWith(fileSeparator)) {
                         index++;
                     }
                     path = path.substring(index + basePath.length());

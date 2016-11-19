@@ -89,6 +89,7 @@ public class PluginManager implements IPluginManager {
 
     @Override
     public void init() {
+        logger.info("Initializing plugin manager.  The local repository is located at: " + localRepositoryPath);
         repositorySystem = newRepositorySystem();
         repositorySystemSession = newRepositorySystemSession(repositorySystem, localRepositoryPath);
     }
@@ -340,7 +341,6 @@ public class PluginManager implements IPluginManager {
 
     private static DefaultRepositorySystemSession newRepositorySystemSession(RepositorySystem repositorySystem, String localRepositoryPath) {
         DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
-
         LocalRepository localRepo = new LocalRepository(localRepositoryPath);
         session.setLocalRepositoryManager(repositorySystem.newLocalRepositoryManager(session, localRepo));
         session.setTransferListener(new ConsoleTransferListener());

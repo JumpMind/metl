@@ -41,8 +41,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.logging.Handler;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import javax.servlet.DispatcherType;
@@ -101,7 +101,7 @@ public class StartWebServer {
 
     public static void runWebServer() throws Exception {
         disableJettyLogging();
-        
+
         new File(System.getProperty("java.io.tmpdir")).mkdirs();
 
         System.out.println(IOUtils.toString(StartWebServer.class.getResource("/Metl.asciiart")));
@@ -110,8 +110,7 @@ public class StartWebServer {
         server.setConnectors(getConnectors(server));
 
         ClassList classlist = Configuration.ClassList.setServerDefault(server);
-        classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
-                "org.eclipse.jetty.annotations.AnnotationConfiguration");
+        classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration", "org.eclipse.jetty.annotations.AnnotationConfiguration");
 
         MBeanContainer mbContainer = new MBeanContainer(ManagementFactory.getPlatformMBeanServer());
         server.addBean(mbContainer);
@@ -142,8 +141,7 @@ public class StartWebServer {
 
         server.setHandler(webapp);
 
-        ServerContainer webSocketServer = WebSocketServerContainerInitializer
-                .configureContext(webapp);
+        ServerContainer webSocketServer = WebSocketServerContainerInitializer.configureContext(webapp);
 
         webSocketServer.setDefaultMaxSessionIdleTimeout(10000000);
 
@@ -156,11 +154,11 @@ public class StartWebServer {
         boolean httpEnabled = System.getProperty(HTTP_ENABLE, "true").equals("true");
 
         int httpPort = Integer.parseInt(System.getProperty(HTTP_PORT, DEFAULT_HTTP_PORT));
-        String httpHostBindName = System.getProperty(HTTP_HOST_BIND_NAME,"0.0.0.0");
+        String httpHostBindName = System.getProperty(HTTP_HOST_BIND_NAME, "0.0.0.0");
         int httpsPort = Integer.parseInt(System.getProperty(HTTPS_PORT, DEFAULT_HTTPS_PORT));
 
         boolean httpsEnabled = System.getProperty(HTTPS_ENABLE, "true").equals("true");
-        String httpsHostBindName = System.getProperty(HTTPS_HOST_BIND_NAME,"0.0.0.0");
+        String httpsHostBindName = System.getProperty(HTTPS_HOST_BIND_NAME, "0.0.0.0");
 
         HttpConfiguration httpConfig = new HttpConfiguration();
         httpConfig.setOutputBufferSize(32768);
@@ -168,14 +166,13 @@ public class StartWebServer {
         List<Connector> connectors = new ArrayList<>(2);
 
         if (httpEnabled) {
-            ServerConnector http = new ServerConnector(server,
-                    new HttpConnectionFactory(httpConfig));
+            ServerConnector http = new ServerConnector(server, new HttpConnectionFactory(httpConfig));
             http.setPort(httpPort);
             http.setHost(httpHostBindName);
             connectors.add(http);
-            
-            getLogger()
-            .info(String.format("Metl can be reached on http://%s:%d/metl", httpHostBindName != null ? httpHostBindName : "localhost", httpPort ));
+
+            getLogger().info(String.format("Metl can be reached on http://%s:%d/metl",
+                    httpHostBindName != null ? httpHostBindName : "localhost", httpPort));
         }
 
         if (httpsEnabled) {
@@ -201,8 +198,7 @@ public class StartWebServer {
                 sslConnectorFactory.addExcludeCipherSuites(ciphers);
             }
 
-            sslConnectorFactory.setCertAlias(
-                    System.getProperty(SSL_KEYSTORE_CERT_ALIAS, SSL_DEFAULT_ALIAS_PRIVATE_KEY));
+            sslConnectorFactory.setCertAlias(System.getProperty(SSL_KEYSTORE_CERT_ALIAS, SSL_DEFAULT_ALIAS_PRIVATE_KEY));
             sslConnectorFactory.setKeyStore(getKeyStore(keyStorePassword));
             sslConnectorFactory.setTrustStore(getTrustStore());
 
@@ -213,14 +209,13 @@ public class StartWebServer {
             httpsConfig.addCustomizer(new SecureRequestCustomizer());
 
             ServerConnector https = new ServerConnector(server,
-                    new SslConnectionFactory(sslConnectorFactory, HttpVersion.HTTP_1_1.asString()),
-                    new HttpConnectionFactory(httpsConfig));
+                    new SslConnectionFactory(sslConnectorFactory, HttpVersion.HTTP_1_1.asString()), new HttpConnectionFactory(httpsConfig));
             https.setPort(httpsPort);
             https.setHost(httpsHostBindName);
             connectors.add(https);
-            
-            getLogger()
-            .info(String.format("Metl can be reached on https://%s:%d/metl", httpsHostBindName != null ? httpsHostBindName : "localhost", httpsPort ));
+
+            getLogger().info(String.format("Metl can be reached on https://%s:%d/metl",
+                    httpsHostBindName != null ? httpsHostBindName : "localhost", httpsPort));
 
         }
 
@@ -235,14 +230,14 @@ public class StartWebServer {
         return new File(System.getProperty(SSL_KEYSTORE_FILE, "security/keystore"));
 
     }
-    
+
     private static String getHostName(String property) {
         final String UNKNOWN = "unknown";
         String hostName = System.getProperty(property, UNKNOWN);
         if (UNKNOWN.equals(hostName)) {
             try {
                 hostName = System.getenv("HOSTNAME");
-                
+
                 if (isBlank(hostName)) {
                     hostName = System.getenv("COMPUTERNAME");
                 }
@@ -250,14 +245,14 @@ public class StartWebServer {
                 if (isBlank(hostName)) {
                     try {
                         hostName = IOUtils.toString(Runtime.getRuntime().exec("hostname").getInputStream());
-                    } catch (Exception ex) {}
+                    } catch (Exception ex) {
+                    }
                 }
-                
+
                 if (isBlank(hostName)) {
-                    hostName = InetAddress.getByName(
-                            InetAddress.getLocalHost().getHostAddress()).getHostName();
+                    hostName = InetAddress.getByName(InetAddress.getLocalHost().getHostAddress()).getHostName();
                 }
-                
+
                 if (isNotBlank(hostName)) {
                     hostName = hostName.trim();
                 }
@@ -276,7 +271,8 @@ public class StartWebServer {
             String keyStoreType = System.getProperty(SSL_KEYSTORE_TYPE, SSL_DEFAULT_KEYSTORE_TYPE);
             KeyStore ks = KeyStore.getInstance(keyStoreType);
             File trustStoreFile = getTrustStoreFile();
-            char[] password = System.getProperty(SSL_TRUSTSTORE_PASSWORD) != null ? System.getProperty(SSL_TRUSTSTORE_PASSWORD).toCharArray() : null;
+            char[] password = System.getProperty(SSL_TRUSTSTORE_PASSWORD) != null ? System.getProperty(SSL_TRUSTSTORE_PASSWORD).toCharArray()
+                    : null;
             if (trustStoreFile.exists()) {
                 FileInputStream is = new FileInputStream(trustStoreFile);
                 ks.load(is, password);
@@ -316,34 +312,28 @@ public class StartWebServer {
         try {
             String hostName = getHostName(HTTPS_HOST_BIND_NAME);
             KeyStore keyStore = getKeyStore(keyPass);
-            String alias = System.getProperty(SSL_KEYSTORE_CERT_ALIAS,
-                    SSL_DEFAULT_ALIAS_PRIVATE_KEY);
-            KeyStore.ProtectionParameter param = new KeyStore.PasswordProtection(
-                    keyPass.toCharArray());
+            String alias = System.getProperty(SSL_KEYSTORE_CERT_ALIAS, SSL_DEFAULT_ALIAS_PRIVATE_KEY);
+            KeyStore.ProtectionParameter param = new KeyStore.PasswordProtection(keyPass.toCharArray());
             Entry entry = keyStore.getEntry(alias, param);
             if (entry == null) {
                 Class<?> keyPairClazz = Class.forName("sun.security.tools.keytool.CertAndKeyGen");
-                Constructor<?> constructor = keyPairClazz.getConstructor(String.class,
-                        String.class);
+                Constructor<?> constructor = keyPairClazz.getConstructor(String.class, String.class);
                 Object keypair = constructor.newInstance("RSA", "SHA1WithRSA");
 
                 Class<?> x500NameClazz = Class.forName("sun.security.x509.X500Name");
-                constructor = x500NameClazz.getConstructor(String.class, String.class, String.class,
-                        String.class, String.class, String.class);
-                Object x500Name = constructor.newInstance(hostName, "Metl", "JumpMind", "Unknown",
-                        "Unknown", "Unknown");
+                constructor = x500NameClazz.getConstructor(String.class, String.class, String.class, String.class, String.class,
+                        String.class);
+                Object x500Name = constructor.newInstance(hostName, "Metl", "JumpMind", "Unknown", "Unknown", "Unknown");
 
                 keyPairClazz.getMethod("generate", Integer.TYPE).invoke(keypair, 1024);
 
-                PrivateKey privKey = (PrivateKey) keyPairClazz.getMethod("getPrivateKey")
-                        .invoke(keypair);
+                PrivateKey privKey = (PrivateKey) keyPairClazz.getMethod("getPrivateKey").invoke(keypair);
 
                 X509Certificate[] chain = new X509Certificate[1];
 
                 Date startDate = new Date(System.currentTimeMillis() - (1000 * 60 * 60 * 24));
                 long validTimeInMs = 100 * 365 * 24 * 60 * 60;
-                chain[0] = (X509Certificate) keyPairClazz
-                        .getMethod("getSelfCertificate", x500NameClazz, Date.class, Long.TYPE)
+                chain[0] = (X509Certificate) keyPairClazz.getMethod("getSelfCertificate", x500NameClazz, Date.class, Long.TYPE)
                         .invoke(keypair, x500Name, startDate, validTimeInMs);
 
                 keyStore.setKeyEntry(alias, privKey, keyPass.toCharArray(), chain);
@@ -363,15 +353,12 @@ public class StartWebServer {
     }
 
     private static void disableJettyLogging() {
-        System.setProperty("org.eclipse.jetty.util.log.class", JavaUtilLog.class.getName());
-        Logger.getLogger(JavaUtilLog.class.getName()).setLevel(Level.SEVERE);
-        Logger rootLogger = Logger.getLogger("org.eclipse.jetty");
-        for (Handler handler : rootLogger.getHandlers()) {
-            handler.setLevel(Level.SEVERE);
+        if (System.getProperty("enable.jetty.logging") == null) {
+            LogManager.getLogManager().reset();
+            System.setProperty("org.eclipse.jetty.util.log.class", JavaUtilLog.class.getName());
+            Logger.getLogger(JavaUtilLog.class.getName()).setLevel(Level.SEVERE);
         }
-        rootLogger.setLevel(Level.SEVERE);
     }
-
 
     private static String getPluginClasspath(File locationDir) throws Exception {
         File pluginsDir = new File(locationDir, "plugins");

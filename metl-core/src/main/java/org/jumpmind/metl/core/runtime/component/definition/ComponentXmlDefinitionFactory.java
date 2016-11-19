@@ -171,7 +171,7 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                 }
             }
         }
-        logger.info("It took {}ms to refresh plugins for project version: {}", (System.currentTimeMillis()-ts), projectVersionId);
+        logger.info("It took {}ms to refresh plugins for project version: {}", (System.currentTimeMillis() - ts), projectVersionId);
     }
 
     @Override
@@ -209,7 +209,9 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
 
     protected void loadComponentsForClassloader(String projectVersionId, String pluginId, ClassLoader classLoader) {
         try {
-            JAXBContext jc = JAXBContext.newInstance(XMLComponents.class.getPackage().getName());
+
+            JAXBContext jc = JAXBContext.newInstance(XMLComponents.class, XMLComponent.class, XMLSetting.class, XMLSettings.class,
+                    XMLSettingChoices.class, ObjectFactory.class);           
             Unmarshaller unmarshaller = jc.createUnmarshaller();
             List<InputStream> componentXmls = loadResources("components.xml", classLoader);
             Map<String, XMLComponent> componentsById = componentsByProjectVersionIdById.get(projectVersionId);

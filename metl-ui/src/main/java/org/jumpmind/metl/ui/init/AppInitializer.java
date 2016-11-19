@@ -125,7 +125,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
             try {
                 zip = new ZipInputStream(is);
                 ZipEntry entry = null;
-                File dir = new File(getConfigDir(false), AppConstants.PLUGINS_DIR + "/extracted");
+                File dir = new File(getConfigDir(false), AppConstants.PLUGINS_DIR);
                 for (entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
                     File f = new File(dir, entry.getName());
                     if (!f.exists()) {
@@ -274,7 +274,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
     protected String getConfigDir(boolean printInstructions) {
         String configDir = System.getProperty(SYS_CONFIG_DIR);
         if (isBlank(configDir)) {
-            configDir = System.getProperty("user.home") + "/.metl";
+            configDir = System.getProperty("user.dir");
             if (printInstructions) {
                 System.out.println("You can configure the following system property to point to a working directory "
                         + "where configuration files can be found:\n  -D" + SYS_CONFIG_DIR + "=/some/config/dir");

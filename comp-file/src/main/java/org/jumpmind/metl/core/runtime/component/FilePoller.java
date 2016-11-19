@@ -239,8 +239,7 @@ public class FilePoller extends AbstractComponentRuntime {
     }
 
     protected List<FileInfo> listFilesAndDirsFromDirectory(String pattern, String fileSpecification,
-            IDirectory resourceDirectory, AntPathMatcher pathMatcher) {
-        
+            IDirectory resourceDirectory, AntPathMatcher pathMatcher) {        
         List<FileInfo> files = new ArrayList<FileInfo>();
         List<FileInfo> matchedFiles = new ArrayList<FileInfo>();
         files = resourceDirectory.listFiles(pattern);

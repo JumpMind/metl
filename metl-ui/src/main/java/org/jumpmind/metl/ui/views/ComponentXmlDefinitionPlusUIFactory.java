@@ -37,6 +37,7 @@ import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.core.runtime.component.definition.ComponentXmlDefinitionFactory;
+import org.jumpmind.metl.ui.definition.ObjectFactory;
 import org.jumpmind.metl.ui.definition.XMLComponentUI;
 import org.jumpmind.metl.ui.definition.XMLUI;
 import org.jumpmind.metl.ui.views.design.IComponentEditPanel;
@@ -65,7 +66,7 @@ public class ComponentXmlDefinitionPlusUIFactory extends ComponentXmlDefinitionF
             uisByProjectVersionIdByComponentId.put(projectVersionId, componentsById);
         }
         try {
-            JAXBContext jc = JAXBContext.newInstance(XMLUI.class.getPackage().getName());
+            JAXBContext jc = JAXBContext.newInstance(XMLUI.class, XMLComponentUI.class, ObjectFactory.class);
             Unmarshaller unmarshaller = jc.createUnmarshaller();
 
             List<InputStream> componentXmls = loadResources("ui.xml", classLoader);
