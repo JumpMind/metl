@@ -59,10 +59,6 @@
     <component-ui id="Lookup UI" componentId="Lookup">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-lookup-48x48-color.png</iconImage>
     </component-ui>    
-    <component-ui id="Transformer UI" componentId="Transformer">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-transform-48x48-color.png</iconImage>
-        <className>org.jumpmind.metl.ui.views.design.EditTransformerPanel</className>
-    </component-ui>
     <component-ui id="Format XML UI" componentId="Format XML">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xml-formatter-out-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditXmlFormatPanel</className>

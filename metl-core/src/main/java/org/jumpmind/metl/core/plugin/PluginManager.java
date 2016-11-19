@@ -85,6 +85,7 @@ public class PluginManager implements IPluginManager {
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-groovy", 140));
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-route", 150));
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-map", 160));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-transform", 170));
     }
 
     @Override

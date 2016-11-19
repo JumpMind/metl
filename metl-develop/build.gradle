@@ -23,7 +23,8 @@ dependencies {
     testCompile project(":comp-control") 
     testCompile project(":comp-groovy")  
     testCompile project(":comp-route")  
-    testCompile project(":comp-map")           
+    testCompile project(":comp-map")
+    testCompile project(":comp-transform")           
     testCompile project(path: ':metl-core', configuration: 'testArtifacts')    
     testCompile "javax.servlet:javax.servlet-api:$servletVersion"
     testCompile "org.eclipse.jetty:jetty-servlet:$jettyVersion"
