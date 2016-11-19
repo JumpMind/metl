@@ -100,7 +100,7 @@ public class Wrapper {
                     configDir = System.getenv("SYM_HOME");
                 }
                 if (isBlank(configDir)) {
-                    configDir = System.getProperty("user.home") + "/.metl";
+                    configDir = System.getProperty("user.dir");
                     if (printInstructions) {
                         System.out.println("You can configure the following system property to point to a working directory "
                                 + "where configuration files can be found: -D" + SYS_CONFIG_DIR + "=/some/config/dir");

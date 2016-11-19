@@ -26,12 +26,12 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import java.io.File;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.RollingFileAppender;
 import org.jumpmind.db.sql.Row;
 import org.slf4j.bridge.SLF4JBridgeHandler;
-import org.springframework.context.ApplicationContext;
 
 public final class LogUtils {
     
@@ -106,7 +106,7 @@ public final class LogUtils {
         }
     }
 
-    public static void initLogging(String configDir, ApplicationContext ctx) {
+    public static void initLogging(String configDir, Properties properties) {
                 
         /* Optionally remove existing handlers attached to j.u.l root logger */
         SLF4JBridgeHandler.removeHandlersForRootLogger();
@@ -116,17 +116,17 @@ public final class LogUtils {
          * during the initialization phase of your application
          */
         SLF4JBridgeHandler.install();
-
-        consoleEnabled = Boolean.parseBoolean(ctx.getEnvironment().getProperty(
+        
+        consoleEnabled = Boolean.parseBoolean(properties.getProperty(
                 EnvConstants.LOG_TO_CONSOLE_ENABLED, "true"));
         if (!consoleEnabled) {
             org.apache.log4j.Logger.getRootLogger().removeAppender("CONSOLE");
         }
 
-        fileEnabled = Boolean.parseBoolean(ctx.getEnvironment().getProperty(
+        fileEnabled = Boolean.parseBoolean(properties.getProperty(
                 EnvConstants.LOG_TO_FILE_ENABLED, "true"));
         if (fileEnabled) {
-            logFilePath = ctx.getEnvironment().getProperty(EnvConstants.LOG_FILE,(String)null);
+            logFilePath = properties.getProperty(EnvConstants.LOG_FILE,(String)null);
             if (isBlank(logFilePath)) {
                 logDir = new File(configDir, "logs");
                 logDir.mkdirs();

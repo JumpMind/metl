@@ -89,10 +89,13 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
     public static ThreadLocal<AnnotationConfigWebApplicationContext> applicationContextRef = new ThreadLocal<>();
     
     ThreadPoolTaskScheduler jobScheduler;
+    
+    Properties properties;
 
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
-        Properties properties = loadProperties();
+        properties = loadProperties();
+        LogUtils.initLogging(getConfigDir(false), properties);
         AnnotationConfigWebApplicationContext applicationContext = new AnnotationConfigWebApplicationContext();
         applicationContext.scan("org.jumpmind.metl");
         MutablePropertySources sources = applicationContext.getEnvironment().getPropertySources();
@@ -166,8 +169,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(sce.getServletContext());
-        LogUtils.initLogging(getConfigDir(false), ctx);
+        WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(sce.getServletContext());        
         cleanTempJettyDirectories();
         initDatabase(ctx);
         initPlugins(ctx);        
@@ -275,10 +277,6 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         String configDir = System.getProperty(SYS_CONFIG_DIR);
         if (isBlank(configDir)) {
             configDir = System.getProperty("user.dir");
-            if (printInstructions) {
-                System.out.println("You can configure the following system property to point to a working directory "
-                        + "where configuration files can be found:\n  -D" + SYS_CONFIG_DIR + "=/some/config/dir");
-            }
         }
 
         if (isBlank(System.getProperty("h2.baseDir"))) {
@@ -286,11 +284,8 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         }
 
         if (printInstructions) {
-            System.out.println("");
+            System.out.println();
             System.out.println("The current config directory is " + configDir);
-            System.out.println("");
-            System.out.println("The current working directory is " + System.getProperty("user.dir"));
-            System.out.println("");
         }
         return configDir;
     }

@@ -95,11 +95,7 @@ public class StartWebServer {
     private final static String SSL_KEYSTORE_TYPE = "metl.keystore.type";
     private final static String SSL_DEFAULT_KEYSTORE_TYPE = "JCEKS";
 
-    public static void main(String[] args) throws Exception {
-        runWebServer();
-    }
-
-    public static void runWebServer() throws Exception {
+    public static void runWebServer(String[] args) throws Exception {
         disableJettyLogging();
 
         new File(System.getProperty("java.io.tmpdir")).mkdirs();
@@ -107,7 +103,8 @@ public class StartWebServer {
         System.out.println(IOUtils.toString(StartWebServer.class.getResource("/Metl.asciiart")));
 
         Server server = new Server();
-        server.setConnectors(getConnectors(server));
+        Connector[] connectors = getConnectors(args, server); 
+        server.setConnectors(connectors);
 
         ClassList classlist = Configuration.ClassList.setServerDefault(server);
         classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration", "org.eclipse.jetty.annotations.AnnotationConfiguration");
@@ -146,11 +143,11 @@ public class StartWebServer {
         webSocketServer.setDefaultMaxSessionIdleTimeout(10000000);
 
         server.start();
-
+        
         server.join();
     }
 
-    private static Connector[] getConnectors(Server server) throws IOException {
+    private static Connector[] getConnectors(String[] args, Server server) throws IOException {
         boolean httpEnabled = System.getProperty(HTTP_ENABLE, "true").equals("true");
 
         int httpPort = Integer.parseInt(System.getProperty(HTTP_PORT, DEFAULT_HTTP_PORT));
@@ -171,14 +168,14 @@ public class StartWebServer {
             http.setHost(httpHostBindName);
             connectors.add(http);
 
-            getLogger().info(String.format("Metl can be reached on http://%s:%d/metl",
+            System.out.println(String.format("Metl can be reached on http://%s:%d/metl",
                     httpHostBindName != null ? httpHostBindName : "localhost", httpPort));
         }
 
         if (httpsEnabled) {
             String keyStorePassword = System.getProperty(SSL_KEYSTORE_PASSWORD, "changeit");
 
-            installSslCertIfNecessary(keyStorePassword);
+            installSslCertIfNecessary(args, keyStorePassword);
 
             SslContextFactory sslConnectorFactory = new SslContextFactory();
             sslConnectorFactory.setKeyManagerPassword(keyStorePassword);
@@ -199,8 +196,8 @@ public class StartWebServer {
             }
 
             sslConnectorFactory.setCertAlias(System.getProperty(SSL_KEYSTORE_CERT_ALIAS, SSL_DEFAULT_ALIAS_PRIVATE_KEY));
-            sslConnectorFactory.setKeyStore(getKeyStore(keyStorePassword));
-            sslConnectorFactory.setTrustStore(getTrustStore());
+            sslConnectorFactory.setKeyStore(getKeyStore(args, keyStorePassword));
+            sslConnectorFactory.setTrustStore(getTrustStore(args));
 
             httpConfig.setSecureScheme("https");
             httpConfig.setSecurePort(httpsPort);
@@ -214,20 +211,22 @@ public class StartWebServer {
             https.setHost(httpsHostBindName);
             connectors.add(https);
 
-            getLogger().info(String.format("Metl can be reached on https://%s:%d/metl",
+            System.out.println(String.format("Metl can be reached on https://%s:%d/metl",
                     httpsHostBindName != null ? httpsHostBindName : "localhost", httpsPort));
 
         }
+        
+        System.out.println();
 
         return connectors.toArray(new Connector[connectors.size()]);
     }
 
-    private static File getTrustStoreFile() {
-        return new File(System.getProperty(SSL_TRUSTSTORE_FILE, "security/cacerts"));
+    private static File getTrustStoreFile(String[] args) {
+        return new File(System.getProperty(SSL_TRUSTSTORE_FILE, Wrapper.getConfigDir(args, false) + "/security/cacerts"));
     }
 
-    private static File getKeyStoreFile() {
-        return new File(System.getProperty(SSL_KEYSTORE_FILE, "security/keystore"));
+    private static File getKeyStoreFile(String[] args) {
+        return new File(System.getProperty(SSL_KEYSTORE_FILE, Wrapper.getConfigDir(args, false) + "security/keystore"));
 
     }
 
@@ -266,11 +265,11 @@ public class StartWebServer {
         return hostName;
     }
 
-    private static KeyStore getTrustStore() {
+    private static KeyStore getTrustStore(String[] args) {
         try {
             String keyStoreType = System.getProperty(SSL_KEYSTORE_TYPE, SSL_DEFAULT_KEYSTORE_TYPE);
             KeyStore ks = KeyStore.getInstance(keyStoreType);
-            File trustStoreFile = getTrustStoreFile();
+            File trustStoreFile = getTrustStoreFile(args);
             char[] password = System.getProperty(SSL_TRUSTSTORE_PASSWORD) != null ? System.getProperty(SSL_TRUSTSTORE_PASSWORD).toCharArray()
                     : null;
             if (trustStoreFile.exists()) {
@@ -288,11 +287,11 @@ public class StartWebServer {
         }
     }
 
-    private static KeyStore getKeyStore(String keyPass) {
+    private static KeyStore getKeyStore(String[] args, String keyPass) {
         try {
             String keyStoreType = System.getProperty(SSL_KEYSTORE_TYPE, SSL_DEFAULT_KEYSTORE_TYPE);
             KeyStore ks = KeyStore.getInstance(keyStoreType);
-            File keyStoreFile = getKeyStoreFile();
+            File keyStoreFile = getKeyStoreFile(args);
             if (keyStoreFile.exists()) {
                 FileInputStream is = new FileInputStream(keyStoreFile);
                 ks.load(is, keyPass.toCharArray());
@@ -308,10 +307,10 @@ public class StartWebServer {
         }
     }
 
-    private static void installSslCertIfNecessary(String keyPass) {
+    private static void installSslCertIfNecessary(String[] args, String keyPass) {
         try {
             String hostName = getHostName(HTTPS_HOST_BIND_NAME);
-            KeyStore keyStore = getKeyStore(keyPass);
+            KeyStore keyStore = getKeyStore(args, keyPass);
             String alias = System.getProperty(SSL_KEYSTORE_CERT_ALIAS, SSL_DEFAULT_ALIAS_PRIVATE_KEY);
             KeyStore.ProtectionParameter param = new KeyStore.PasswordProtection(keyPass.toCharArray());
             Entry entry = keyStore.getEntry(alias, param);
@@ -338,7 +337,7 @@ public class StartWebServer {
 
                 keyStore.setKeyEntry(alias, privKey, keyPass.toCharArray(), chain);
 
-                File keyStoreFile = getKeyStoreFile();
+                File keyStoreFile = getKeyStoreFile(args);
                 keyStoreFile.getParentFile().mkdirs();
                 FileOutputStream fos = new FileOutputStream(keyStoreFile);
                 keyStore.store(fos, keyPass.toCharArray());

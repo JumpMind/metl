@@ -24,7 +24,7 @@ public class Metl {
 
     public static void main(String[] args) throws Exception {
         if (args.length == 0) {
-            StartWebServer.runWebServer();
+            StartWebServer.runWebServer(args);
         } else {
             Wrapper.runServiceWrapper(args);
         }
