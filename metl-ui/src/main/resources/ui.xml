@@ -29,17 +29,11 @@
     </component-ui>
     <component-ui id="Email UI" componentId="35c4c0ae-b040-4f93-b212-5b92619c4064">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-email-48x48-color.png</iconImage>
-    </component-ui>    
-    <component-ui id="Last Unit of Work UI" componentId="Last Unit of Work">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delay-48x48-color.png</iconImage>
-    </component-ui>    
+    </component-ui>   
     <component-ui id="Format Delimited UI" componentId="Format Delimited">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delimitedformatter-out-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditFormatPanel</className>
     </component-ui>
-    <component-ui id="Gate UI" componentId="Gate">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-gate-48x48-color.png</iconImage>
-    </component-ui>    
     <component-ui id="Parse Delimited UI" componentId="Parse Delimited">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delimitedformatter-in-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditFormatPanel</className>
@@ -59,18 +53,6 @@
     <component-ui id="Lookup UI" componentId="Lookup">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-lookup-48x48-color.png</iconImage>
     </component-ui>    
-    <component-ui id="Format XML UI" componentId="Format XML">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xml-formatter-out-48x48-color.png</iconImage>
-        <className>org.jumpmind.metl.ui.views.design.EditXmlFormatPanel</className>
-    </component-ui>
-    <component-ui id="Parse XML UI" componentId="Parse XML">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xml-formatter-in-48x48-color.png</iconImage>
-        <className>org.jumpmind.metl.ui.views.design.EditXmlFormatPanel</className>
-    </component-ui>
-    <component-ui id="XSLT Processor UI" componentId="XSLT Processor">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xslt-48x48-color.png</iconImage>
-        <className>org.jumpmind.metl.ui.views.design.EditXsltPanel</className>
-    </component-ui>
     <component-ui id="Deduper UI" componentId="Deduper">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-deduper-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditDeduperPanel</className>        
@@ -98,9 +80,6 @@
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-text-constant-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditTextConstant</className>
     </component-ui>    
-    <component-ui id="XML Reader UI" componentId="XmlReader">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xml-formatter-48x48-color.png</iconImage>
-    </component-ui>
     <component-ui id="Union UI" componentId="Union">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-union-48x48-color.png</iconImage>
     </component-ui>

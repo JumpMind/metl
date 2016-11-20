@@ -1,0 +1,193 @@
+<!--
+
+    Licensed to JumpMind Inc under one or more contributor
+    license agreements.  See the NOTICE file distributed
+    with this work for additional information regarding
+    copyright ownership.  JumpMind Inc licenses this file
+    to you under the GNU General Public License, version 3.0 (GPLv3)
+    (the "License"); you may not use this file except in compliance
+    with the License.
+
+    You should have received a copy of the GNU General Public License,
+    version 3.0 (GPLv3) along with this library; if not, see
+    <http://www.gnu.org/licenses/>.
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<components>
+  <component category='PROCESSOR'
+             id='Format XML'
+             inputMessageType='entity'
+             inputOutputModelsMatch='false'
+             outputMessageType='text'
+             resourceCategory='none'>
+    <name>Format XML</name>
+    <className>org.jumpmind.metl.core.runtime.component.XmlFormatter</className>
+    <keywords>files</keywords>
+    <description></description>
+    <settings>
+      <setting id='run.when'
+               required='false'
+               type='choice'>
+        <name>Run When</name>
+        <defaultValue>PER MESSAGE</defaultValue>
+        <choices>
+          <choice>PER UNIT OF WORK</choice>
+          <choice>PER MESSAGE</choice>
+        </choices>
+      </setting>
+      <setting id='xml.formatter.ignore.namespace'
+               required='false'
+               type='boolean'>
+        <name>Ignore namespaces for XPath matching</name>
+        <defaultValue>true</defaultValue>
+      </setting>
+      <setting id='xml.formatter.xml.format'
+               required='false'
+               type='choice'>
+        <name>XML Format</name>
+        <defaultValue>Pretty</defaultValue>
+        <choices>
+          <choice>Pretty</choice>
+          <choice>Compact</choice>
+          <choice>Raw</choice>
+        </choices>
+      </setting>
+      <setting id='xml.formatter.null.handling'
+               required='false'
+               type='choice'>
+        <name>XML Null Handling</name>
+        <defaultValue>Empty Element</defaultValue>
+        <choices>
+          <choice>Empty Element</choice>
+          <choice>Remove Element</choice>
+          <choice>XML nil</choice>
+        </choices>
+      </setting>
+    </settings>
+  </component>
+  <component category='PROCESSOR'
+             id='Parse XML'
+             inputMessageType='text'
+             inputOutputModelsMatch='false'
+             outputMessageType='entity'
+             resourceCategory='none'
+             supportsMultipleThreads='true'>
+    <name>Parse XML</name>
+    <className>org.jumpmind.metl.core.runtime.component.XmlParser</className>
+    <keywords>parse,file,files,xml</keywords>
+    <description></description>
+    <settings>
+      <setting id='rows.per.message'
+               required='true'
+               type='integer'>
+        <name>Rows/Msg</name>
+        <defaultValue>1000</defaultValue>
+      </setting>
+      <setting id='optimize.for.speed'
+               required='false'
+               type='boolean'>
+        <name>Optimize for speed. Supports only basic XPath</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='xml.formatter.ignore.namespace'
+               required='false'
+               type='boolean'>
+        <name>Ignore namespaces for XPath matching</name>
+        <defaultValue>true</defaultValue>
+      </setting>
+    </settings>
+  </component>
+  <component category='PROCESSOR'
+             id='XSLT Processor'
+             inputMessageType='entity'
+             inputOutputModelsMatch='false'
+             outputMessageType='text'
+             resourceCategory='none'>
+    <name>XSLT Processor</name>
+    <className>org.jumpmind.metl.core.runtime.component.XsltProcessor</className>
+    <keywords>xml</keywords>
+    <description></description>
+    <settings>
+      <setting id='xslt.processor.output.all.attributes'
+               required='false'
+               type='boolean'>
+        <name>Output all attributes</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='xslt.processor.parameter.replacement'
+               required='false'
+               type='boolean'>
+        <name>Parameter replacement</name>
+        <defaultValue>true</defaultValue>
+      </setting>
+      <setting id='xslt.processor.xml.omit.declaration'
+               required='false'
+               type='boolean'>
+        <name>Omit XML Declaration</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='xslt.processor.xml.format'
+               required='false'
+               type='choice'>
+        <name>XML Format</name>
+        <defaultValue>Pretty</defaultValue>
+        <choices>
+          <choice>Pretty</choice>
+          <choice>Compact</choice>
+          <choice>Raw</choice>
+        </choices>
+      </setting>
+    </settings>
+  </component>
+  <component category='READER'
+             id='XmlReader'
+             inputMessageType='text'
+             inputOutputModelsMatch='false'
+             outputMessageType='text'
+             resourceCategory='streamable'>
+    <name>XML Reader</name>
+    <className>org.jumpmind.metl.core.runtime.component.XmlReader</className>
+    <keywords>files,file</keywords>
+    <description></description>
+    <settings>
+      <setting id='run.when'
+               required='false'
+               type='choice'>
+        <name>Run When</name>
+        <defaultValue>PER UNIT OF WORK</defaultValue>
+        <choices>
+          <choice>PER UNIT OF WORK</choice>
+          <choice>PER MESSAGE</choice>
+        </choices>
+      </setting>
+      <setting id='get.file.name.from.message'
+               required='false'
+               type='boolean'>
+        <name>Get File Name From Message</name>
+      </setting>
+      <setting id='relative.path'
+               required='false'
+               type='text'>
+        <name>File Path</name>
+      </setting>
+      <setting id='read.tag'
+               required='false'
+               type='text'>
+        <name>Tag to find and send, defaults to root</name>
+        <description></description>
+      </setting>
+      <setting id='read.tags.per.message'
+               required='false'
+               type='integer'>
+        <name>Number of read tags to send together</name>
+      </setting>
+    </settings>
+  </component>
+</components>
