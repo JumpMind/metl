@@ -37,7 +37,6 @@ import org.jumpmind.metl.core.runtime.component.ModelAttributeScriptHelper;
 import org.jumpmind.metl.core.runtime.component.Transformer;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UiUtils;
-import org.jumpmind.metl.ui.views.design.EditFormatPanel.RecordFormat;
 import org.jumpmind.vaadin.ui.common.ExportDialog;
 
 import com.vaadin.data.Container;
@@ -359,13 +358,6 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
 
         public int hashCode() {
             return modelEntity.hashCode() + modelAttribute.hashCode();
-        }
-
-        public boolean equals(Object obj) {
-            if (obj instanceof RecordFormat) {
-                return hashCode() == ((RecordFormat) obj).hashCode();
-            }
-            return super.equals(obj);
         }
 
         public String getEntityName() {

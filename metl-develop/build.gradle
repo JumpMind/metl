@@ -26,6 +26,7 @@ dependencies {
     testCompile project(":comp-map")
     testCompile project(":comp-transform")
     testCompile project(":comp-xml") 
+    testCompile project(":comp-format") 
     testCompile project(path: ':metl-core', configuration: 'testArtifacts')    
     testCompile "javax.servlet:javax.servlet-api:$servletVersion"
     testCompile "org.eclipse.jetty:jetty-servlet:$jettyVersion"

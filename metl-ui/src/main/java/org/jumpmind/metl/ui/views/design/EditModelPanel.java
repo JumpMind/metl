@@ -39,7 +39,6 @@ import org.jumpmind.metl.core.model.ModelEntitySorter;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UiUtils;
-import org.jumpmind.metl.ui.views.design.EditFormatPanel.RecordFormat;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.ExportDialog;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
@@ -769,13 +768,6 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
         public int hashCode() {
             return modelEntity.hashCode() + modelAttribute.hashCode();
-        }
-
-        public boolean equals(Object obj) {
-            if (obj instanceof RecordFormat) {
-                return hashCode() == ((RecordFormat) obj).hashCode();
-            }
-            return super.equals(obj);
         }
 
         public String getEntityName() {
