@@ -27,9 +27,6 @@
     <component-ui id="Call Flow UI" componentId="Call Flow">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-flow-48x48-color.png</iconImage>
     </component-ui>
-    <component-ui id="Email UI" componentId="35c4c0ae-b040-4f93-b212-5b92619c4064">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-email-48x48-color.png</iconImage>
-    </component-ui>
     <component-ui id="Merger UI" componentId="Merger">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-merger-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditMergerPanel</className>
@@ -44,9 +41,6 @@
     <component-ui id="Delay UI" componentId="Delay">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delay-48x48-color.png</iconImage>
     </component-ui>   
-    <component-ui id="Execute UI" componentId="Execute">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-execute-48x48-color.png</iconImage>
-    </component-ui>  
     <component-ui id="Message Logger UI" componentId="Message Logger">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-message-logger-48x48-color.png</iconImage>
     </component-ui>
