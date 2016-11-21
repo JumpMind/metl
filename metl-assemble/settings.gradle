@@ -5,5 +5,5 @@ includeFlat 'metl-server', 'metl-core',  'metl-ui',
 'comp-service', 'comp-zip', 'comp-file', 'comp-excel',
 'comp-control', 'comp-groovy', 'comp-route', 'comp-map',
 'comp-transform', 'comp-xml', 'comp-format', 'comp-email',
-'comp-execute',
+'comp-execute', 'comp-test', 'comp-text', 'comp-webrequest',
 'metl-war', 'metl-develop'

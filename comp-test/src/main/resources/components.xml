@@ -1,0 +1,116 @@
+<!--
+
+    Licensed to JumpMind Inc under one or more contributor
+    license agreements.  See the NOTICE file distributed
+    with this work for additional information regarding
+    copyright ownership.  JumpMind Inc licenses this file
+    to you under the GNU General Public License, version 3.0 (GPLv3)
+    (the "License"); you may not use this file except in compliance
+    with the License.
+
+    You should have received a copy of the GNU General Public License,
+    version 3.0 (GPLv3) along with this library; if not, see
+    <http://www.gnu.org/licenses/>.
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<components>
+  <component category='PROCESSOR'
+             id='Assert'
+             inputMessageType='any'
+             showInputModel='true'
+             outputMessageType='any'
+             resourceCategory='none'>
+    <name>Assert</name>
+    <className>org.jumpmind.metl.core.runtime.component.Assert</className>
+    <keywords>test</keywords>
+    <settings>
+      <setting id='expected.entity.messages.count'
+               required='false'
+               type='integer'>
+        <name>Expected Number of Entity Messages</name>
+        <defaultValue>0</defaultValue>
+      </setting>
+      <setting id='expected.entity.couunt.per.message'
+               required='false'
+               type='integer'>
+        <name>Expected Number of Entities Per Entity Message</name>
+      </setting>
+      <setting id='expected.distinct.entities.count'
+               required='false'
+               type='integer'>
+        <name>Expected Distinct Types of Entities</name>
+        <defaultValue></defaultValue>
+      </setting>
+      <setting id='expected.distinct.attributes.count'
+               required='false'
+               type='integer'>
+        <name>Expected Distinct Types of Attributes</name>
+        <defaultValue></defaultValue>
+      </setting>            
+      <setting id='expected.text.messages.count'
+               required='false'
+               type='integer'>
+        <name>Expected Number of Text Messages</name>
+        <defaultValue>0</defaultValue>
+      </setting>
+      <setting id='expected.binary.messages.count'
+               required='false'
+               type='integer'>
+        <name>Expected Number of Binary Messages</name>
+        <defaultValue>0</defaultValue>
+      </setting>
+      <setting id='expected.control.messages.count'
+               required='false'
+               type='integer'>
+        <name>Expected Number of Control Messages</name>
+        <defaultValue>0</defaultValue>
+      </setting>
+      <setting id='expected.empty.payload.messages.count'
+               required='false'
+               type='integer'>
+        <name>Expected Number of Empty Payload Messages</name>
+        <defaultValue>0</defaultValue>
+      </setting>
+      <setting id='expected.custom.header.pairs'
+               required='false'
+               type='multiline_text'>
+        <name>Expected Custom Content Message Header Pairs</name>
+      </setting>
+      <setting id='expected.custom.control.header.pairs'
+               required='false'
+               type='multiline_text'>
+        <name>Expected Custom Control Message Header Pairs</name>
+      </setting>      
+            
+      <setting id='expected.text.payload'
+               required='false'
+               type='multiline_text'>
+        <name>Expected Text Payload</name>
+      </setting>      
+      <setting id='sql.datasource'
+               required='false'
+               type='datasource_resource'>
+        <name>Assert DataSource</name>
+        <defaultValue>0</defaultValue>
+      </setting>
+      <setting id='sql'
+               required='true'
+               type='multiline_text'>
+        <name>Assert Sql</name>
+      </setting>
+      <setting id='expected.sql.count'
+               required='false'
+               type='integer'>
+        <name>Expected Count from Assert Sql</name>
+        <defaultValue>0</defaultValue>
+      </setting>
+    </settings>
+  </component>
+</components>

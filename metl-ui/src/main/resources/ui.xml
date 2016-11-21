@@ -21,9 +21,6 @@
 
 -->
 <ui>
-    <component-ui id="Assert UI" componentId="Assert">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-assert-48x48-color.png</iconImage>
-    </component-ui>
     <component-ui id="Call Flow UI" componentId="Call Flow">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-flow-48x48-color.png</iconImage>
     </component-ui>
@@ -47,17 +44,6 @@
     <component-ui id="Multiplier UI" componentId="Multiplier">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-multiplier-48x48-color.png</iconImage>
     </component-ui>   
-    <component-ui id="Text Replace UI" componentId="Text Replace">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-regex-replace-48x48-color.png</iconImage>
-    </component-ui>    
-    <component-ui id="Web UI" componentId="Web">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-web-48x48-color.png</iconImage>
-        <className>org.jumpmind.metl.ui.views.design.EditWebPanel</className>
-    </component-ui>
-    <component-ui id="Text Constant UI" componentId="Text Constant">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-text-constant-48x48-color.png</iconImage>
-        <className>org.jumpmind.metl.ui.views.design.EditTextConstant</className>
-    </component-ui>    
     <component-ui id="Union UI" componentId="Union">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-union-48x48-color.png</iconImage>
     </component-ui>
