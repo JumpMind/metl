@@ -26,6 +26,7 @@ import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.Mapping;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.views.design.AbstractComponentEditPanel;
+import org.jumpmind.vaadin.ui.common.ExportDialog;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -43,7 +44,9 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -63,8 +66,8 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
     TextField dstTextFilter;
 
     protected void buildUI() {
+        ButtonBar buttonBar = new ButtonBar();
         if (!readOnly) {
-            ButtonBar buttonBar = new ButtonBar();
             addComponent(buttonBar);
             Button autoMapButton = buttonBar.addButton("Auto Map", FontAwesome.FLASH);
             removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
@@ -72,6 +75,7 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
             autoMapButton.addClickListener(new AutoMapListener());
             removeButton.addClickListener(new RemoveListener());
         }
+        buttonBar.addButtonRight("Export", FontAwesome.DOWNLOAD, (e)->export());
 
         HorizontalLayout titleHeader = new HorizontalLayout();
         titleHeader.setSpacing(true);
@@ -214,6 +218,30 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
 
     protected int minimum(int a, int b, int c) {
         return Math.min(Math.min(a, b), c);
+    }
+
+    protected void export() {
+        Table table = new Table();
+        table.addContainerProperty("Source Entity", String.class, null);
+        table.addContainerProperty("Source Attribute",  String.class, null);
+        table.addContainerProperty("Destination Entity", String.class, null);
+        table.addContainerProperty("Destination Attribute",  String.class, null);
+        
+        int itemId = 0;
+        for (ComponentAttributeSetting setting : component.getAttributeSettings()) {
+            if (Mapping.ATTRIBUTE_MAPS_TO.equals(setting.getName())) {
+                ModelAttribute srcAttribute = component.getInputModel().getAttributeById(setting.getAttributeId());
+                ModelEntity srcEntity = component.getInputModel().getEntityById(srcAttribute.getEntityId());
+                ModelAttribute dstAttribute = component.getOutputModel().getAttributeById(setting.getValue());
+                ModelEntity dstEntity = component.getOutputModel().getEntityById(dstAttribute.getEntityId());
+                
+                table.addItem(new Object[]{srcEntity.getName(), srcAttribute.getName(), dstEntity.getName(), dstAttribute.getName()}, itemId++);
+            }
+        }
+        
+        String fileNamePrefix = component.getName().toLowerCase().replace(' ', '-');
+        ExportDialog dialog = new ExportDialog(table, fileNamePrefix, component.getName());
+        UI.getCurrent().addWindow(dialog);
     }
 
     class EventListener implements Listener {
