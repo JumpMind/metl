@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A simplistic transfer listener that logs uploads/downloads to the console.
  */
-public class ConsoleTransferListener extends AbstractTransferListener {
+public class PluginTransferListener extends AbstractTransferListener {
 
     final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -24,7 +24,7 @@ public class ConsoleTransferListener extends AbstractTransferListener {
 
     private int lastLength;
 
-    public ConsoleTransferListener() {
+    public PluginTransferListener() {
     }
 
     @Override

@@ -21,8 +21,8 @@
 package org.jumpmind.metl.core.runtime.resource;
 
 import org.jumpmind.metl.core.model.SettingDefinition;
-import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.ResourceCategory;
-import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
+import org.jumpmind.metl.core.plugin.XMLComponent.ResourceCategory;
+import org.jumpmind.metl.core.plugin.XMLSetting.Type;
 import org.jumpmind.properties.TypedProperties;
 
 @ResourceDefinition(typeName=LocalFile.TYPE, resourceCategory=ResourceCategory.STREAMABLE)

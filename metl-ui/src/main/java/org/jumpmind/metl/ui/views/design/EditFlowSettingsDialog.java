@@ -59,6 +59,7 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.TableDragMode;
 import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
@@ -114,6 +115,10 @@ class EditFlowSettingsDialog extends ResizableWindow implements ValueChangeListe
             addComponent(buttonBar);
         }
         
+        VerticalLayout tableWrapperLayout = new VerticalLayout();
+        tableWrapperLayout.setMargin(true);
+        tableWrapperLayout.setSizeFull();
+        
         table = new Table();
         table.setSizeFull();
         container = new BeanItemContainer<FlowParameter>(FlowParameter.class);
@@ -131,7 +136,9 @@ class EditFlowSettingsDialog extends ResizableWindow implements ValueChangeListe
         table.setColumnHeaders("#", "Name", "Default Value");
         table.setColumnExpandRatio("name", .3f);
         table.setColumnExpandRatio("defaultValue", .6f);
-        addComponent(table, 1);
+        tableWrapperLayout.addComponent(table);
+        
+        addComponent(tableWrapperLayout, 1);
 
         addComponent(buildButtonFooter(closeButton));
 

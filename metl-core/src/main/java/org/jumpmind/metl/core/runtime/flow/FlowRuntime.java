@@ -53,6 +53,8 @@ import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Notification;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
+import org.jumpmind.metl.core.plugin.IDefinitionFactory;
+import org.jumpmind.metl.core.plugin.XMLComponent;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerLogger;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerRecorder;
@@ -65,8 +67,6 @@ import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.IHasResults;
 import org.jumpmind.metl.core.runtime.component.IHasSecurity;
 import org.jumpmind.metl.core.runtime.component.Results;
-import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
-import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.MailSession;
@@ -91,7 +91,7 @@ public class FlowRuntime {
 
     IComponentRuntimeFactory componentRuntimeFactory;
 
-    IComponentDefinitionFactory componentDefinitionFactory;
+    IDefinitionFactory componentDefinitionFactory;
 
     IResourceFactory resourceFactory;
 
@@ -123,7 +123,7 @@ public class FlowRuntime {
 
     public FlowRuntime(String executionId, String userId, AgentDeployment deployment, Agent agent,
             IComponentRuntimeFactory componentRuntimeFactory,
-            IComponentDefinitionFactory componentDefinitionFactory,
+            IDefinitionFactory componentDefinitionFactory,
             IResourceFactory resourceFactory, ExecutorService threadService,
             IConfigurationService configurationService, IExecutionService executionService,
             Map<String, IResourceRuntime> deployedResources, List<Notification> notifications,
@@ -135,7 +135,7 @@ public class FlowRuntime {
 
     public FlowRuntime(String executionId, String userId, AgentDeployment deployment, Agent agent,
             IComponentRuntimeFactory componentRuntimeFactory,
-            IComponentDefinitionFactory componentDefinitionFactory,
+            IDefinitionFactory componentDefinitionFactory,
             IResourceFactory resourceFactory, ExecutorService threadService,
             IConfigurationService configurationService, IExecutionService executionService,
             Map<String, IResourceRuntime> deployedResources, List<Notification> notifications,

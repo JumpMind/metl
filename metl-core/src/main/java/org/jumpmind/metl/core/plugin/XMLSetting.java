@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jumpmind.metl.core.runtime.component.definition;
+package org.jumpmind.metl.core.plugin;
 
 import java.io.Serializable;
 

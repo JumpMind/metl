@@ -20,14 +20,14 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
-import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
+import org.jumpmind.metl.core.plugin.IDefinitionFactory;
+import org.jumpmind.metl.core.plugin.XMLComponent;
 
 public class ComponentRuntimeFactory implements IComponentRuntimeFactory {
 
-    IComponentDefinitionFactory componentDefinitionFactory;
+    IDefinitionFactory componentDefinitionFactory;
 
-    public ComponentRuntimeFactory(IComponentDefinitionFactory componentDefinitionFactory) {
+    public ComponentRuntimeFactory(IDefinitionFactory componentDefinitionFactory) {
         this.componentDefinitionFactory = componentDefinitionFactory;
     }
 

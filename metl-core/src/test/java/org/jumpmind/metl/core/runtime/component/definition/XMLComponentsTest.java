@@ -29,6 +29,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 
+import org.jumpmind.metl.core.plugin.XMLDefinitions;
 import org.junit.Test;
 
 public class XMLComponentsTest {
@@ -36,11 +37,11 @@ public class XMLComponentsTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testReadXml() throws Exception {
-        JAXBContext jc = JAXBContext.newInstance(XMLComponents.class.getPackage().getName());
+        JAXBContext jc = JAXBContext.newInstance(XMLDefinitions.class.getPackage().getName());
         Unmarshaller unmarshaller = jc.createUnmarshaller();
         InputStreamReader reader = new InputStreamReader(getClass().getResourceAsStream("test-components.xml"));
-        JAXBElement<XMLComponents> root = (JAXBElement<XMLComponents>) unmarshaller.unmarshal(reader);
-        XMLComponents components = root.getValue();
+        JAXBElement<XMLDefinitions> root = (JAXBElement<XMLDefinitions>) unmarshaller.unmarshal(reader);
+        XMLDefinitions components = root.getValue();
         assertNotNull(components);
         assertEquals("test", components.getComponent().get(0).getName());
 

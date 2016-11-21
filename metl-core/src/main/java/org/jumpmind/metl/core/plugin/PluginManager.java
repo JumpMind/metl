@@ -351,8 +351,8 @@ public class PluginManager implements IPluginManager {
         DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
         LocalRepository localRepo = new LocalRepository(localRepositoryPath);
         session.setLocalRepositoryManager(repositorySystem.newLocalRepositoryManager(session, localRepo));
-        session.setTransferListener(new ConsoleTransferListener());
-        session.setRepositoryListener(new ConsoleRepositoryListener());
+        session.setTransferListener(new PluginTransferListener());
+        session.setRepositoryListener(new PluginRepositoryListener());
 
         // uncomment to generate dirty trees
         // session.setDependencyGraphTransformer( null );

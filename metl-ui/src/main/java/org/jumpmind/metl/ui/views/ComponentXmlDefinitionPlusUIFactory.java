@@ -35,14 +35,14 @@ import javax.xml.bind.Unmarshaller;
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.plugin.DefinitionFactory;
 import org.jumpmind.metl.core.plugin.IPluginManager;
-import org.jumpmind.metl.core.runtime.component.definition.ComponentXmlDefinitionFactory;
 import org.jumpmind.metl.ui.definition.ObjectFactory;
 import org.jumpmind.metl.ui.definition.XMLComponentUI;
 import org.jumpmind.metl.ui.definition.XMLUI;
 import org.jumpmind.metl.ui.views.design.IComponentEditPanel;
 
-public class ComponentXmlDefinitionPlusUIFactory extends ComponentXmlDefinitionFactory implements IComponentDefinitionPlusUIFactory {
+public class ComponentXmlDefinitionPlusUIFactory extends DefinitionFactory implements IComponentDefinitionPlusUIFactory {
 
     protected Map<String, Map<String, XMLComponentUI>> uisByProjectVersionIdByComponentId;
 

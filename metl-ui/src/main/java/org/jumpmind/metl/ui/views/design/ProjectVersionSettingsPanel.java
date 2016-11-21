@@ -90,6 +90,7 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
         addHeader("Project Version Settings");
         
         FormLayout formLayout = new FormLayout();
+        formLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         CheckBox releasedCheckBox = new CheckBox("Released");
         releasedCheckBox.setImmediate(true);
         releasedCheckBox.setValue(projectVersion.isReleased());

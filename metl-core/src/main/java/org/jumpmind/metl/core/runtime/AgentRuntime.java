@@ -57,11 +57,11 @@ import org.jumpmind.metl.core.model.SettingDefinition;
 import org.jumpmind.metl.core.model.StartType;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
+import org.jumpmind.metl.core.plugin.IDefinitionFactory;
+import org.jumpmind.metl.core.plugin.XMLComponent;
 import org.jumpmind.metl.core.runtime.component.IComponentDeploymentListener;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.Results;
-import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
-import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
@@ -98,7 +98,7 @@ public class AgentRuntime {
 
     IComponentRuntimeFactory componentRuntimeFactory;
 
-    IComponentDefinitionFactory componentDefinitionFactory;
+    IDefinitionFactory componentDefinitionFactory;
 
     IExecutionService executionService;
 
@@ -115,7 +115,7 @@ public class AgentRuntime {
     Map<AgentDeployment, List<FlowRuntime>> runningFlows = Collections.synchronizedMap(new HashMap<>());
 
     public AgentRuntime(Agent agent, IConfigurationService configurationService, IExecutionService executionService,
-            IComponentRuntimeFactory componentFactory, IComponentDefinitionFactory componentDefinitionFactory,
+            IComponentRuntimeFactory componentFactory, IDefinitionFactory componentDefinitionFactory,
             IResourceFactory resourceFactory, IHttpRequestMappingRegistry httpRequestMappingRegistry) {
         this.agent = agent;
         this.componentDefinitionFactory = componentDefinitionFactory;

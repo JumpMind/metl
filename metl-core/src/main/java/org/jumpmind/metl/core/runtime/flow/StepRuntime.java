@@ -41,6 +41,8 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.FlowStep;
+import org.jumpmind.metl.core.plugin.IDefinitionFactory;
+import org.jumpmind.metl.core.plugin.XMLComponent;
 import org.jumpmind.metl.core.runtime.BinaryMessage;
 import org.jumpmind.metl.core.runtime.ContentMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
@@ -58,8 +60,6 @@ import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
-import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
-import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.ThreadUtils;
@@ -103,7 +103,7 @@ public class StepRuntime implements Runnable {
 
     IComponentRuntimeFactory componentRuntimeFactory;
     
-    IComponentDefinitionFactory componentDefintionFactory;
+    IDefinitionFactory componentDefintionFactory;
 
     XMLComponent componentDefintion;
 
@@ -123,7 +123,7 @@ public class StepRuntime implements Runnable {
     
     int threadCount;
 
-    public StepRuntime(IComponentRuntimeFactory componentFactory, IComponentDefinitionFactory componentDefinitionFactory, ComponentContext componentContext, FlowRuntime flowRuntime) {
+    public StepRuntime(IComponentRuntimeFactory componentFactory, IDefinitionFactory componentDefinitionFactory, ComponentContext componentContext, FlowRuntime flowRuntime) {
         this.flowRuntime = flowRuntime;
         this.componentContext = componentContext;
         this.queueCapacity = componentContext.getFlowStep().getComponent().getInt(AbstractComponentRuntime.INBOUND_QUEUE_CAPACITY, 1000);

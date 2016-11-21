@@ -25,7 +25,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.ResourceCategory;
+import org.jumpmind.metl.core.plugin.XMLComponent.ResourceCategory;
 
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)

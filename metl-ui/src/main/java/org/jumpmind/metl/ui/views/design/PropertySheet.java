@@ -21,9 +21,9 @@
 package org.jumpmind.metl.ui.views.design;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
-import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.ENABLED;
-import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.LOG_INPUT;
-import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.LOG_OUTPUT;
+import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.ENABLED;
+import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.LOG_INPUT;
+import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.LOG_OUTPUT;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,12 +47,12 @@ import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.SettingDefinition;
 import org.jumpmind.metl.core.persist.IConfigurationService;
-import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
-import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.ResourceCategory;
-import org.jumpmind.metl.core.runtime.component.definition.XMLSetting;
-import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
-import org.jumpmind.metl.core.runtime.component.definition.XMLSettingChoices;
+import org.jumpmind.metl.core.plugin.XMLComponent;
+import org.jumpmind.metl.core.plugin.XMLSetting;
+import org.jumpmind.metl.core.plugin.XMLSettingChoices;
+import org.jumpmind.metl.core.plugin.XMLComponent.MessageType;
+import org.jumpmind.metl.core.plugin.XMLComponent.ResourceCategory;
+import org.jumpmind.metl.core.plugin.XMLSetting.Type;
 import org.jumpmind.metl.core.runtime.flow.StepRuntime;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Icons;

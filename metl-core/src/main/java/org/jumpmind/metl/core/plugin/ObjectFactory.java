@@ -18,33 +18,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jumpmind.metl.core.runtime.component.definition;
+package org.jumpmind.metl.core.plugin;
 
-import java.io.Serializable;
-import java.util.List;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.annotation.XmlElementDecl;
+import javax.xml.bind.annotation.XmlRegistry;
+import javax.xml.namespace.QName;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
 
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "components", propOrder = {
-    "component"
-})
-public class XMLComponents implements Serializable {
+@XmlRegistry
+public class ObjectFactory {
 
-    private static final long serialVersionUID = 1L;
+    private final static QName _Components_QNAME = new QName("", "components");
 
-    @XmlElement(required = true)
-    protected List<XMLComponent> component;
-    
-    public void setComponent(List<XMLComponent> components) {
-        this.component = components;
+    /**
+     * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.jumpmind.metl.core.model.xml
+     * 
+     */
+    public ObjectFactory() {
     }
-    
-    public List<XMLComponent> getComponent() {
-        return component;
+
+    public XMLComponent createXmlComponent() {
+        return new XMLComponent();
+    }
+
+    @XmlElementDecl(namespace="", name = "components")
+    public JAXBElement<XMLDefinitions> createConfig(XMLDefinitions value) {
+        return new JAXBElement<XMLDefinitions>(_Components_QNAME, XMLDefinitions.class, null, value);
     }
 
 }

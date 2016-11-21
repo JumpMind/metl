@@ -26,7 +26,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 
-import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
+import org.jumpmind.metl.core.plugin.XMLComponent;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UiUtils;

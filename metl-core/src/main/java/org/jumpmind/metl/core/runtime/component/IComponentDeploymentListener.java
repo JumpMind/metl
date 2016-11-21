@@ -4,7 +4,7 @@ import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
-import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
+import org.jumpmind.metl.core.plugin.XMLComponent;
 
 public interface IComponentDeploymentListener {
 

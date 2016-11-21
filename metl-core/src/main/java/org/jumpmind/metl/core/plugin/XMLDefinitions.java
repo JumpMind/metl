@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jumpmind.metl.core.runtime.component.definition;
+package org.jumpmind.metl.core.plugin;
 
 import java.io.Serializable;
 import java.util.List;
@@ -29,22 +29,22 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "settings", propOrder = {
-    "setting"
+@XmlType(name = "components", propOrder = {
+    "component"
 })
-public class XMLSettings implements Serializable {
+public class XMLDefinitions implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @XmlElement(required = true)
-    protected List<XMLSetting> setting;
+    protected List<XMLComponent> component;
     
-    public void setSetting(List<XMLSetting> setting) {
-        this.setting = setting;
+    public void setComponent(List<XMLComponent> components) {
+        this.component = components;
     }
     
-    public List<XMLSetting> getSetting() {
-        return setting;
+    public List<XMLComponent> getComponent() {
+        return component;
     }
-    
+
 }

@@ -2,9 +2,9 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
-import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.FORMAT;
-import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.FORMAT_JSON;
-import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.FORMAT_XML;
+import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.FORMAT;
+import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.FORMAT_JSON;
+import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.FORMAT_XML;
 
 import org.jumpmind.metl.core.runtime.ContentMessage;
 import org.jumpmind.metl.core.runtime.Message;

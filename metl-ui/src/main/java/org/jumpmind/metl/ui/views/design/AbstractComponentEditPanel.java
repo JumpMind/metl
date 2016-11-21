@@ -21,7 +21,7 @@
 package org.jumpmind.metl.ui.views.design;
 
 import org.jumpmind.metl.core.model.Component;
-import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
+import org.jumpmind.metl.core.plugin.XMLComponent;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 
 import com.vaadin.ui.VerticalLayout;

@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory;
 /**
  * A simplistic repository listener that logs events to the console.
  */
-public class ConsoleRepositoryListener extends AbstractRepositoryListener {
+public class PluginRepositoryListener extends AbstractRepositoryListener {
 
     final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public ConsoleRepositoryListener() {
+    public PluginRepositoryListener() {
     }
 
     public void artifactDeployed(RepositoryEvent event) {

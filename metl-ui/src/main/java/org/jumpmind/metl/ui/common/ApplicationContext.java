@@ -32,10 +32,10 @@ import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.persist.IImportExportService;
+import org.jumpmind.metl.core.plugin.IDefinitionFactory;
 import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
-import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
 import org.jumpmind.metl.core.security.ISecurityService;
@@ -67,7 +67,7 @@ public class ApplicationContext implements Serializable {
     IComponentRuntimeFactory componentRuntimeFactory;
     
     @Autowired
-    IComponentDefinitionFactory componentDefinitionFactory;
+    IDefinitionFactory componentDefinitionFactory;
     
     @Autowired
     IComponentDefinitionPlusUIFactory uiFactory;
@@ -122,7 +122,7 @@ public class ApplicationContext implements Serializable {
         return componentRuntimeFactory;
     }
     
-    public IComponentDefinitionFactory getComponentDefinitionFactory() {
+    public IDefinitionFactory getComponentDefinitionFactory() {
         return componentDefinitionFactory;
     }
 

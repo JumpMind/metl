@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.jumpmind.metl.core.runtime.component.definition.XMLSetting;
+import org.jumpmind.metl.core.plugin.XMLSetting;
 import org.jumpmind.properties.TypedProperties;
 
 abstract public class AbstractObjectWithSettings extends AbstractNamedObject {

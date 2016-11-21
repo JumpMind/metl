@@ -27,8 +27,8 @@ import java.util.Map;
 
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.SettingDefinition;
+import org.jumpmind.metl.core.plugin.XMLComponent.ResourceCategory;
 import org.jumpmind.metl.core.runtime.AbstractFactory;
-import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.ResourceCategory;
 import org.jumpmind.properties.TypedProperties;
 
 public class ResourceFactory extends AbstractFactory<IResourceRuntime> implements IResourceFactory {

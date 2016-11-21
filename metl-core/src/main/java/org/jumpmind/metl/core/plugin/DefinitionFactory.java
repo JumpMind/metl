@@ -18,12 +18,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jumpmind.metl.core.runtime.component.definition;
+package org.jumpmind.metl.core.plugin;
 
-import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.*;
-import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.INBOUND_QUEUE_CAPACITY;
-import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.LOG_INPUT;
-import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.LOG_OUTPUT;
+import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,13 +47,12 @@ import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.model.ProjectVersionComponentPlugin;
 import org.jumpmind.metl.core.persist.IConfigurationService;
-import org.jumpmind.metl.core.plugin.IPluginManager;
-import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
+import org.jumpmind.metl.core.plugin.XMLSetting.Type;
 import org.jumpmind.metl.core.util.VersionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactory {
+public class DefinitionFactory implements IDefinitionFactory {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -70,12 +66,12 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
 
     protected IPluginManager pluginManager;
 
-    public ComponentXmlDefinitionFactory() {
+    public DefinitionFactory() {
         componentsByProjectVersionIdById = new HashMap<>();
         componentsByPluginId = new HashMap<>();
     }
 
-    public ComponentXmlDefinitionFactory(IConfigurationService configurationService, IPluginManager pluginManager) {
+    public DefinitionFactory(IConfigurationService configurationService, IPluginManager pluginManager) {
         this();
         this.configurationService = configurationService;
         this.pluginManager = pluginManager;
@@ -210,7 +206,7 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
     protected void loadComponentsForClassloader(String projectVersionId, String pluginId, ClassLoader classLoader) {
         try {
 
-            JAXBContext jc = JAXBContext.newInstance(XMLComponents.class, XMLComponent.class, XMLSetting.class, XMLSettings.class,
+            JAXBContext jc = JAXBContext.newInstance(XMLDefinitions.class, XMLComponent.class, XMLSetting.class, XMLSettings.class,
                     XMLSettingChoices.class, ObjectFactory.class);           
             Unmarshaller unmarshaller = jc.createUnmarshaller();
             List<InputStream> componentXmls = loadResources("components.xml", classLoader);
@@ -223,8 +219,8 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                 for (InputStream inputStream : componentXmls) {
                     InputStreamReader reader = new InputStreamReader(inputStream);
                     @SuppressWarnings("unchecked")
-                    JAXBElement<XMLComponents> root = (JAXBElement<XMLComponents>) unmarshaller.unmarshal(reader);
-                    XMLComponents components = root.getValue();
+                    JAXBElement<XMLDefinitions> root = (JAXBElement<XMLDefinitions>) unmarshaller.unmarshal(reader);
+                    XMLDefinitions components = root.getValue();
                     List<XMLComponent> componentList = components.getComponent();
                     for (XMLComponent xmlComponent : componentList) {
                         String id = xmlComponent.getId();

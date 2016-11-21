@@ -20,8 +20,8 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import org.jumpmind.metl.core.plugin.XMLComponent;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public interface IComponentRuntime {

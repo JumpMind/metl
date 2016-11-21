@@ -1,17 +1,19 @@
 package org.jumpmind.metl.core.runtime.component;
 
+import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.NOTES;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.NOTES;
+
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
+import org.jumpmind.metl.core.plugin.XMLComponent;
+import org.jumpmind.metl.core.plugin.XMLSetting;
 import org.jumpmind.metl.core.runtime.IHttpRequestMappingRegistryAware;
-import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
-import org.jumpmind.metl.core.runtime.component.definition.XMLSetting;
 import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
 import org.jumpmind.metl.core.runtime.web.HttpMethod;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMapping;

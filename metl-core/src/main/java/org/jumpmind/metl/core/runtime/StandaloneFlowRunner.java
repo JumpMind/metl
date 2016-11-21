@@ -54,9 +54,9 @@ import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.persist.IImportExportService;
 import org.jumpmind.metl.core.persist.ImportExportService;
+import org.jumpmind.metl.core.plugin.DefinitionFactory;
 import org.jumpmind.metl.core.plugin.PluginManager;
 import org.jumpmind.metl.core.runtime.component.ComponentRuntimeFactory;
-import org.jumpmind.metl.core.runtime.component.definition.ComponentXmlDefinitionFactory;
 import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMappingRegistry;
@@ -166,7 +166,7 @@ public class StandaloneFlowRunner {
                 PluginManager pluginManager = new PluginManager("working/plugins", configurationService);
                 pluginManager.init();
                 
-                ComponentXmlDefinitionFactory componentDefinitionFactory = new ComponentXmlDefinitionFactory(configurationService, pluginManager);
+                DefinitionFactory componentDefinitionFactory = new DefinitionFactory(configurationService, pluginManager);
                 
                 IImportExportService importService = new ImportExportService(databasePlatform, persistenceManager, "METL",
                         configurationService, new SecurityService());

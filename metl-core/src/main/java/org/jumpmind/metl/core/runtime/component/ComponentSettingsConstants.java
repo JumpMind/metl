@@ -1,4 +1,4 @@
-package org.jumpmind.metl.core.runtime.component.definition;
+package org.jumpmind.metl.core.runtime.component;
 
 final public class ComponentSettingsConstants {
 

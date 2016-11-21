@@ -35,8 +35,8 @@ import org.jumpmind.metl.core.model.AgentStartMode;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
+import org.jumpmind.metl.core.plugin.IDefinitionFactory;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
-import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
 import org.jumpmind.util.AppUtils;
@@ -55,7 +55,7 @@ public class AgentManager implements IAgentManager {
 
     IComponentRuntimeFactory componentRuntimeFactory;
     
-    IComponentDefinitionFactory componentDefinitionFactory;
+    IDefinitionFactory componentDefinitionFactory;
 
     IResourceFactory resourceFactory;
     
@@ -64,7 +64,7 @@ public class AgentManager implements IAgentManager {
     Map<String, AgentRuntime> engines = new HashMap<String, AgentRuntime>();
 
     public AgentManager(IConfigurationService configurationService, IExecutionService executionService,
-            IComponentRuntimeFactory componentFactory, IComponentDefinitionFactory componentDefinitionFactory, IResourceFactory resourceFactory, IHttpRequestMappingRegistry httpRequestMappingRegistry) {
+            IComponentRuntimeFactory componentFactory, IDefinitionFactory componentDefinitionFactory, IResourceFactory resourceFactory, IHttpRequestMappingRegistry httpRequestMappingRegistry) {
         this.executionService = executionService;
         this.configurationService = configurationService;
         this.componentRuntimeFactory = componentFactory;
