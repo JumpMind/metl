@@ -26,7 +26,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 
-import org.jumpmind.metl.core.plugin.XMLComponent;
+import org.jumpmind.metl.core.plugin.XMLComponentDefinition;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UiUtils;
@@ -112,7 +112,7 @@ public class EditFlowPalette extends VerticalLayout {
 
     }  
 
-    protected StreamResource getImageResourceForComponentType(String projectVersionId, XMLComponent componentDefinition) {
+    protected StreamResource getImageResourceForComponentType(String projectVersionId, XMLComponentDefinition componentDefinition) {
         StreamResource.StreamSource source = new StreamResource.StreamSource() {
             private static final long serialVersionUID = 1L;
 
@@ -125,9 +125,9 @@ public class EditFlowPalette extends VerticalLayout {
     }
     protected void populateComponentPalette() {
         componentLayout.removeAllComponents();
-        List<XMLComponent> componentDefinitions = context.getComponentDefinitionFactory().getDefinitions(projectVersionId);
+        List<XMLComponentDefinition> componentDefinitions = context.getComponentDefinitionFactory().getComponentDefinitions(projectVersionId);
         Collections.sort(componentDefinitions);
-        for (XMLComponent definition : componentDefinitions) {
+        for (XMLComponentDefinition definition : componentDefinitions) {
             if ((isBlank(filterText) || definition.getName().toLowerCase().contains(filterText)
                     || definition.getCategory().toLowerCase().contains(filterText) || definition.getKeywords().toLowerCase().contains(filterText))) {
                 StreamResource icon = getImageResourceForComponentType(projectVersionId, definition);

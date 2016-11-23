@@ -54,7 +54,7 @@ import org.jumpmind.metl.core.model.Notification;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.plugin.IDefinitionFactory;
-import org.jumpmind.metl.core.plugin.XMLComponent;
+import org.jumpmind.metl.core.plugin.XMLComponentDefinition;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerLogger;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerRecorder;
@@ -330,7 +330,7 @@ public class FlowRuntime {
         clone.getFlowStepLinks().addAll(flow.getFlowStepLinks());
 
         for (FlowStep flowStep : new ArrayList<>(clone.getFlowSteps())) {
-            XMLComponent componentDefintion = componentDefinitionFactory.getDefinition(flow.getProjectVersionId(), flowStep.getComponent().getType());
+            XMLComponentDefinition componentDefintion = componentDefinitionFactory.getDefinition(flow.getProjectVersionId(), flowStep.getComponent().getType());
             if (isNotBlank(componentDefintion.getFlowManipulatorClassName())) {
                 try {
                     IFlowManipulator flowManipulator = (IFlowManipulator) Class

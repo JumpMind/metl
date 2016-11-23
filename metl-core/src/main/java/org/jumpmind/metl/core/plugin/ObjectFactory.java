@@ -38,8 +38,8 @@ public class ObjectFactory {
     public ObjectFactory() {
     }
 
-    public XMLComponent createXmlComponent() {
-        return new XMLComponent();
+    public XMLComponentDefinition createXmlComponent() {
+        return new XMLComponentDefinition();
     }
 
     @XmlElementDecl(namespace="", name = "components")

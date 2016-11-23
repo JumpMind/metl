@@ -47,11 +47,11 @@ import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.SettingDefinition;
 import org.jumpmind.metl.core.persist.IConfigurationService;
-import org.jumpmind.metl.core.plugin.XMLComponent;
+import org.jumpmind.metl.core.plugin.XMLComponentDefinition;
 import org.jumpmind.metl.core.plugin.XMLSetting;
 import org.jumpmind.metl.core.plugin.XMLSettingChoices;
-import org.jumpmind.metl.core.plugin.XMLComponent.MessageType;
-import org.jumpmind.metl.core.plugin.XMLComponent.ResourceCategory;
+import org.jumpmind.metl.core.plugin.XMLComponentDefinition.MessageType;
+import org.jumpmind.metl.core.plugin.XMLComponentDefinition.ResourceCategory;
 import org.jumpmind.metl.core.plugin.XMLSetting.Type;
 import org.jumpmind.metl.core.runtime.flow.StepRuntime;
 import org.jumpmind.metl.ui.common.ApplicationContext;
@@ -206,7 +206,7 @@ public class PropertySheet extends AbsoluteLayout {
 
             if (obj instanceof Component) {
                 Component component = (Component) obj;
-                XMLComponent componentDefintion = context.getComponentDefinitionFactory().getDefinition(component.getProjectVersionId(),
+                XMLComponentDefinition componentDefintion = context.getComponentDefinitionFactory().getDefinition(component.getProjectVersionId(),
                         component.getType());
                 addThreadCount(componentDefintion, formLayout, component);
             }
@@ -266,7 +266,7 @@ public class PropertySheet extends AbsoluteLayout {
     }
 
     protected void addComponentProperties(FormLayout formLayout, Component component) {
-        XMLComponent componentDefintion = context.getComponentDefinitionFactory().getDefinition(component.getProjectVersionId(),
+        XMLComponentDefinition componentDefintion = context.getComponentDefinitionFactory().getDefinition(component.getProjectVersionId(),
                 component.getType());
         addComponentName(formLayout, component);
         TextField textField = new TextField("Component Type");
@@ -278,14 +278,14 @@ public class PropertySheet extends AbsoluteLayout {
         addOutputModelCombo(componentDefintion, formLayout, component);
     }
 
-    protected void addThreadCount(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
+    protected void addThreadCount(XMLComponentDefinition componentDefintion, FormLayout formLayout, final Component component) {
         if (componentDefintion.isSupportsMultipleThreads()) {
             XMLSetting setting = new XMLSetting(StepRuntime.THREAD_COUNT, "Thread Count", "1", Type.INTEGER, true);
             addSettingField(setting, component, formLayout);
         }
     }
 
-    protected void addOutputModelCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
+    protected void addOutputModelCombo(XMLComponentDefinition componentDefintion, FormLayout formLayout, final Component component) {
         FlowStep step = getSingleFlowStep();
         if (step != null) {
             IConfigurationService configurationService = context.getConfigurationService();
@@ -352,7 +352,7 @@ public class PropertySheet extends AbsoluteLayout {
         formLayout.addComponent(textField);
     }
 
-    protected void addInputModelCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
+    protected void addInputModelCombo(XMLComponentDefinition componentDefintion, FormLayout formLayout, final Component component) {
         FlowStep step = getSingleFlowStep();
         if (step != null) {
             IConfigurationService configurationService = context.getConfigurationService();
@@ -401,7 +401,7 @@ public class PropertySheet extends AbsoluteLayout {
         }
     }
 
-    protected void addResourceCombo(XMLComponent componentDefintion, FormLayout formLayout,
+    protected void addResourceCombo(XMLComponentDefinition componentDefintion, FormLayout formLayout,
             final Component component) {
         if (componentDefintion == null) {
             log.error("Could not find a component defintion for: " + component.getName() + " "
@@ -451,7 +451,7 @@ public class PropertySheet extends AbsoluteLayout {
     protected List<XMLSetting> buildSettings(Object obj) {
         if (obj instanceof Component) {
             Component component = (Component) obj;
-            XMLComponent definition = context.getComponentDefinitionFactory().getDefinition(component.getProjectVersionId(),
+            XMLComponentDefinition definition = context.getComponentDefinitionFactory().getDefinition(component.getProjectVersionId(),
                     component.getType());
             return definition.getSettings().getSetting();
         } else if (obj instanceof Resource) {

@@ -11,7 +11,7 @@ import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
-import org.jumpmind.metl.core.plugin.XMLComponent;
+import org.jumpmind.metl.core.plugin.XMLComponentDefinition;
 import org.jumpmind.metl.core.plugin.XMLSetting;
 import org.jumpmind.metl.core.runtime.IHttpRequestMappingRegistryAware;
 import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
@@ -31,7 +31,7 @@ public class HttpRequestDeploymentListener implements IComponentDeploymentListen
     IHttpRequestMappingRegistry httpRequestMappingRegistry;
 
     @Override
-    public void onDeploy(Agent agent, AgentDeployment deployment, Flow flow, FlowStep flowStep, XMLComponent componentDefinition) {
+    public void onDeploy(Agent agent, AgentDeployment deployment, Flow flow, FlowStep flowStep, XMLComponentDefinition componentDefinition) {
         HttpRequestMapping requestMapping = buildMapping(agent, deployment, flow, flowStep, componentDefinition);
         if (!requestMapping.getPath().substring(0,1).equalsIgnoreCase("/")) {
             requestMapping.setPath("/" + requestMapping.getPath());
@@ -40,7 +40,7 @@ public class HttpRequestDeploymentListener implements IComponentDeploymentListen
     }
 
     @Override
-    public void onUndeploy(Agent agent, AgentDeployment deployment, Flow flow, FlowStep flowStep, XMLComponent componentDefinition) {
+    public void onUndeploy(Agent agent, AgentDeployment deployment, Flow flow, FlowStep flowStep, XMLComponentDefinition componentDefinition) {
         httpRequestMappingRegistry.unregister(buildMapping(agent, deployment, flow, flowStep, componentDefinition));
     }
 
@@ -49,7 +49,7 @@ public class HttpRequestDeploymentListener implements IComponentDeploymentListen
         this.httpRequestMappingRegistry = httpRequestMappingRegistry;
     }
 
-    protected HttpRequestMapping buildMapping(Agent agent, AgentDeployment deployment, Flow flow, FlowStep flowStep, XMLComponent componentDefinition) {
+    protected HttpRequestMapping buildMapping(Agent agent, AgentDeployment deployment, Flow flow, FlowStep flowStep, XMLComponentDefinition componentDefinition) {
         TypedProperties properties = getTypedProperties(flowStep, componentDefinition);
         
         String path = properties.get(HttpRequest.PATH);
@@ -86,7 +86,7 @@ public class HttpRequestDeploymentListener implements IComponentDeploymentListen
         return mapping;
     }
 
-    protected TypedProperties getTypedProperties(FlowStep flowStep, XMLComponent componentDefinition) {
+    protected TypedProperties getTypedProperties(FlowStep flowStep, XMLComponentDefinition componentDefinition) {
         List<XMLSetting> settings = componentDefinition != null ? componentDefinition.getSettings().getSetting() : null;
         if (settings == null) {
             settings = Collections.emptyList();

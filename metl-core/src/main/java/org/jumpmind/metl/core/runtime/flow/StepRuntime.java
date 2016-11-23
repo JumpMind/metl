@@ -42,7 +42,7 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.plugin.IDefinitionFactory;
-import org.jumpmind.metl.core.plugin.XMLComponent;
+import org.jumpmind.metl.core.plugin.XMLComponentDefinition;
 import org.jumpmind.metl.core.runtime.BinaryMessage;
 import org.jumpmind.metl.core.runtime.ContentMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
@@ -105,7 +105,7 @@ public class StepRuntime implements Runnable {
     
     IDefinitionFactory componentDefintionFactory;
 
-    XMLComponent componentDefintion;
+    XMLComponentDefinition componentDefintion;
 
     FlowRuntime flowRuntime;
 

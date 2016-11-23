@@ -33,7 +33,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.plugin.XMLComponent.ResourceCategory;
+import org.jumpmind.metl.core.plugin.XMLComponentDefinition.ResourceCategory;
 import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.resource.FileInfo;

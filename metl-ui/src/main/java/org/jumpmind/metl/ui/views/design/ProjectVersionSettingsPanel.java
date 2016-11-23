@@ -108,6 +108,7 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
 
         ButtonBar buttonBar = new ButtonBar();
         content.addComponent(buttonBar);
+        buttonBar.addButton("Refresh", Icons.REFRESH, (event)->refreshPlugins()); 
         updateButton = buttonBar.addButton("Update", Icons.UPDATE, (event)->update());        
         pinButton =  buttonBar.addButton("Pin", FontAwesome.CHECK_CIRCLE_O, (event)->pin(true));
         unpinButton = buttonBar.addButton("Unpin", FontAwesome.CIRCLE_O, (event)->pin(false));
@@ -184,6 +185,11 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
 
     }
     
+    protected void refreshPlugins() {
+        context.getComponentDefinitionFactory().refresh(projectVersion.getId());
+        populateContainer();
+    }
+    
     protected void addHeader(String caption) {
         HorizontalLayout componentHeaderWrapper = new HorizontalLayout();
         componentHeaderWrapper.setMargin(new MarginInfo(false, false, false, true));
@@ -223,7 +229,6 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
     }
     
     protected void refresh() {
-        context.getComponentDefinitionFactory().refresh(projectVersion.getId());
         populateContainer();
     }
     

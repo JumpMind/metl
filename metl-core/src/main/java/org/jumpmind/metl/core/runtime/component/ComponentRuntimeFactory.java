@@ -21,7 +21,7 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import org.jumpmind.metl.core.plugin.IDefinitionFactory;
-import org.jumpmind.metl.core.plugin.XMLComponent;
+import org.jumpmind.metl.core.plugin.XMLComponentDefinition;
 
 public class ComponentRuntimeFactory implements IComponentRuntimeFactory {
 
@@ -34,7 +34,7 @@ public class ComponentRuntimeFactory implements IComponentRuntimeFactory {
     @Override
     synchronized public IComponentRuntime create(String projectVersionId, String id, ComponentContext context, int threadNumber) {
         try {
-            XMLComponent definition = componentDefinitionFactory.getDefinition(projectVersionId, id);
+            XMLComponentDefinition definition = componentDefinitionFactory.getDefinition(projectVersionId, id);
             if (definition != null) {
                 IComponentRuntime component = (IComponentRuntime) Class.forName(definition.getClassName().trim(), true, definition.getClassLoader()).newInstance();
                 component.create(definition, context, threadNumber);

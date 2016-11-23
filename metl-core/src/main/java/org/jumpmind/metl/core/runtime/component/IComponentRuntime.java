@@ -20,13 +20,13 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import org.jumpmind.metl.core.plugin.XMLComponent;
+import org.jumpmind.metl.core.plugin.XMLComponentDefinition;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public interface IComponentRuntime {
 
-    public void create(XMLComponent definition, ComponentContext context, int threadNumber);
+    public void create(XMLComponentDefinition definition, ComponentContext context, int threadNumber);
     
     public void start();
 
@@ -40,7 +40,7 @@ public interface IComponentRuntime {
 
     public ComponentContext getComponentContext();
     
-    public XMLComponent getComponentDefintion();
+    public XMLComponentDefinition getComponentDefintion();
     
     public boolean supportsStartupMessages();   
     

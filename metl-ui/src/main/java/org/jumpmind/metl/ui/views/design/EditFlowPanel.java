@@ -39,7 +39,7 @@ import org.jumpmind.metl.core.model.FolderType;
 import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.plugin.IDefinitionFactory;
-import org.jumpmind.metl.core.plugin.XMLComponent;
+import org.jumpmind.metl.core.plugin.XMLComponentDefinition;
 import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
@@ -368,7 +368,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             node.setX(flowStep.getX());
             node.setY(flowStep.getY());
 
-            XMLComponent definition = context.getComponentDefinitionFactory().getDefinition(flow.getProjectVersionId(), type);
+            XMLComponentDefinition definition = context.getComponentDefinitionFactory().getDefinition(flow.getProjectVersionId(), type);
             if (definition == null) {
                 throw new MisconfiguredException("Could not find the component defintion for a component of type '%s'", type);
             }
@@ -521,7 +521,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                     Component sourceComp = flow.findFlowStepWithId(event.getSourceNodeId()).getComponent();
                     Component targetComp = flow.findFlowStepWithId(event.getTargetNodeId()).getComponent();
                     IDefinitionFactory factory = context.getComponentDefinitionFactory();
-                    XMLComponent sourceDefn = factory.getDefinition(flow.getProjectVersionId(), sourceComp.getType());
+                    XMLComponentDefinition sourceDefn = factory.getDefinition(flow.getProjectVersionId(), sourceComp.getType());
 
                     if (targetComp.getInputModel() == null) {
                         if (sourceComp.getOutputModel() != null) {

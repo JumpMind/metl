@@ -20,8 +20,6 @@
  */
 package org.jumpmind.metl.core.plugin;
 
-import java.io.Serializable;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -32,7 +30,7 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "component", propOrder = {})
-public class XMLComponent implements Serializable, Comparable<XMLComponent> {
+public class XMLComponentDefinition extends XMLAbstractDefinition {
 
     private static final long serialVersionUID = 1L;
     
@@ -76,15 +74,6 @@ public class XMLComponent implements Serializable, Comparable<XMLComponent> {
         ANY
     }
 
-    @XmlElement(required = false)
-    protected String description;
-
-    @XmlElement(required = true)
-    protected String name;
-
-    @XmlElement(required = true)
-    protected String className;
-    
     @XmlElement(required = true)
     protected String keywords = "";
     
@@ -93,9 +82,6 @@ public class XMLComponent implements Serializable, Comparable<XMLComponent> {
     
     @XmlElement(required = true)
     protected String flowManipulatorClassName;    
-
-    @XmlAttribute(required = true)
-    protected String id;
 
     @XmlAttribute(required = true)
     protected String category;
@@ -139,38 +125,6 @@ public class XMLComponent implements Serializable, Comparable<XMLComponent> {
             classLoader = getClass().getClassLoader();
         }
         return classLoader;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setClassName(String className) {
-        this.className = className;
-    }
-
-    public String getClassName() {
-        return className;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getCategory() {
@@ -264,11 +218,6 @@ public class XMLComponent implements Serializable, Comparable<XMLComponent> {
         return flowManipulatorClassName;
     }
     
-    @Override
-    public int compareTo(XMLComponent o) {
-        return name.compareTo(o.getName());
-    }
-
     public void getDeploymentListenerClassName(String deploymentListenerClassname) {
         this.deploymentListenerClassName = deploymentListenerClassname;
     }

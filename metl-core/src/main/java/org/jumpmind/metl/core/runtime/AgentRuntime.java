@@ -58,7 +58,7 @@ import org.jumpmind.metl.core.model.StartType;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.plugin.IDefinitionFactory;
-import org.jumpmind.metl.core.plugin.XMLComponent;
+import org.jumpmind.metl.core.plugin.XMLComponentDefinition;
 import org.jumpmind.metl.core.runtime.component.IComponentDeploymentListener;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.Results;
@@ -394,7 +394,7 @@ public class AgentRuntime {
         Flow flow = deployment.getFlow();
         List<FlowStep> steps = flow.getFlowSteps();
         for (FlowStep flowStep : steps) {
-            XMLComponent componentDefintion = componentDefinitionFactory.getDefinition(flow.getProjectVersionId(),
+            XMLComponentDefinition componentDefintion = componentDefinitionFactory.getDefinition(flow.getProjectVersionId(),
                     flowStep.getComponent().getType());
             if (componentDefintion != null && isNotBlank(componentDefintion.getDeploymentListenerClassName())) {
                 try {
@@ -577,7 +577,7 @@ public class AgentRuntime {
     }
 
     interface DeployListenerAction {
-        public void run(IComponentDeploymentListener listener, Flow flow, FlowStep step, XMLComponent componentDefintion) throws Exception;
+        public void run(IComponentDeploymentListener listener, Flow flow, FlowStep step, XMLComponentDefinition componentDefintion) throws Exception;
     }
 
 }

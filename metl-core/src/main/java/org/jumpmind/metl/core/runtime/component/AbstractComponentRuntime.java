@@ -38,7 +38,7 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Resource;
-import org.jumpmind.metl.core.plugin.XMLComponent;
+import org.jumpmind.metl.core.plugin.XMLComponentDefinition;
 import org.jumpmind.metl.core.plugin.XMLSetting;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
@@ -82,14 +82,14 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
     
     protected int threadNumber;
     
-    protected XMLComponent componentDefinition;   
+    protected XMLComponentDefinition componentDefinition;   
     
     protected TypedProperties properties;
     
     private EntityNameLookup entityNameLookup;
     
     @Override
-    public void create(XMLComponent definition, ComponentContext context, int threadNumber) {
+    public void create(XMLComponentDefinition definition, ComponentContext context, int threadNumber) {
         this.componentDefinition = definition;
         this.context = context;
         this.threadNumber = threadNumber;
@@ -97,7 +97,7 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
     }
     
     @Override
-    public XMLComponent getComponentDefintion() {
+    public XMLComponentDefinition getComponentDefintion() {
         return componentDefinition;
     }
     
@@ -317,7 +317,7 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
         return ComponentUtils.getAttributeValues(getInputModel(), rows, entityName, attributeName);
     }
     
-    public void setComponentDefinition(XMLComponent componentDefinition) {
+    public void setComponentDefinition(XMLComponentDefinition componentDefinition) {
         this.componentDefinition = componentDefinition;
     }
     

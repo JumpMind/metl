@@ -56,9 +56,9 @@ public class DefinitionFactory implements IDefinitionFactory {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    Map<String, Map<String, XMLComponent>> componentsByProjectVersionIdById;
+    Map<String, Map<String, XMLComponentDefinition>> componentsByProjectVersionIdById;
 
-    Map<String, List<XMLComponent>> componentsByPluginId;
+    Map<String, List<XMLComponentDefinition>> componentsByPluginId;
 
     Map<String, List<String>> componentIdsByCategory;
 
@@ -144,9 +144,9 @@ public class DefinitionFactory implements IDefinitionFactory {
                     String pluginId = load(projectVersionId, configuredPlugin.getArtifactGroup(), configuredPlugin.getArtifactName(),
                             latestVersion, remoteRepostiories);
 
-                    List<XMLComponent> components = componentsByPluginId.get(pluginId);
+                    List<XMLComponentDefinition> components = componentsByPluginId.get(pluginId);
                     if (components != null) {
-                        for (XMLComponent xmlComponent : components) {
+                        for (XMLComponentDefinition xmlComponent : components) {
                             ProjectVersionComponentPlugin plugin = new ProjectVersionComponentPlugin();
                             plugin.setProjectVersionId(projectVersionId);
                             plugin.setComponentTypeId(xmlComponent.getId());
@@ -171,7 +171,7 @@ public class DefinitionFactory implements IDefinitionFactory {
     }
 
     @Override
-    public List<XMLComponent> getDefinitions(String projectVersionId) {
+    public List<XMLComponentDefinition> getComponentDefinitions(String projectVersionId) {
         return new ArrayList<>(componentsByProjectVersionIdById.get(projectVersionId).values());
     }
 
@@ -188,8 +188,8 @@ public class DefinitionFactory implements IDefinitionFactory {
     }
 
     @Override
-    synchronized public XMLComponent getDefinition(String projectVersionId, String id) {
-        Map<String, XMLComponent> componentsById = componentsByProjectVersionIdById.get(projectVersionId);
+    synchronized public XMLComponentDefinition getDefinition(String projectVersionId, String id) {
+        Map<String, XMLComponentDefinition> componentsById = componentsByProjectVersionIdById.get(projectVersionId);
         if (componentsById != null) {
             return componentsById.get(id);
         } else {
@@ -206,11 +206,11 @@ public class DefinitionFactory implements IDefinitionFactory {
     protected void loadComponentsForClassloader(String projectVersionId, String pluginId, ClassLoader classLoader) {
         try {
 
-            JAXBContext jc = JAXBContext.newInstance(XMLDefinitions.class, XMLComponent.class, XMLSetting.class, XMLSettings.class,
+            JAXBContext jc = JAXBContext.newInstance(XMLDefinitions.class, XMLComponentDefinition.class, XMLSetting.class, XMLSettings.class,
                     XMLSettingChoices.class, ObjectFactory.class);           
             Unmarshaller unmarshaller = jc.createUnmarshaller();
             List<InputStream> componentXmls = loadResources("components.xml", classLoader);
-            Map<String, XMLComponent> componentsById = componentsByProjectVersionIdById.get(projectVersionId);
+            Map<String, XMLComponentDefinition> componentsById = componentsByProjectVersionIdById.get(projectVersionId);
             if (componentsById == null) {
                 componentsById = new HashMap<>();
                 componentsByProjectVersionIdById.put(projectVersionId, componentsById);
@@ -221,10 +221,10 @@ public class DefinitionFactory implements IDefinitionFactory {
                     @SuppressWarnings("unchecked")
                     JAXBElement<XMLDefinitions> root = (JAXBElement<XMLDefinitions>) unmarshaller.unmarshal(reader);
                     XMLDefinitions components = root.getValue();
-                    List<XMLComponent> componentList = components.getComponent();
-                    for (XMLComponent xmlComponent : componentList) {
+                    List<XMLComponentDefinition> componentList = components.getComponent();
+                    for (XMLComponentDefinition xmlComponent : componentList) {
                         String id = xmlComponent.getId();
-                        List<XMLComponent> componentsForPluginId = componentsByPluginId.get(pluginId);
+                        List<XMLComponentDefinition> componentsForPluginId = componentsByPluginId.get(pluginId);
                         if (componentsForPluginId == null) {
                             componentsForPluginId = new ArrayList<>();
                             componentsByPluginId.put(pluginId, componentsForPluginId);

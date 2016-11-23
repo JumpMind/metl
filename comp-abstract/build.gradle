@@ -4,5 +4,6 @@ version = '1.0.0.' + pluginBuildNumber
 
 dependencies {
     provided project(':metl-core')   
+    provided project(':metl-ui')
     testCompile project(path: ':metl-core', configuration: 'testArtifacts') 
 }

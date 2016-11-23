@@ -37,13 +37,13 @@ public class XMLDefinitions implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @XmlElement(required = true)
-    protected List<XMLComponent> component;
+    protected List<XMLComponentDefinition> component;
     
-    public void setComponent(List<XMLComponent> components) {
+    public void setComponent(List<XMLComponentDefinition> components) {
         this.component = components;
     }
     
-    public List<XMLComponent> getComponent() {
+    public List<XMLComponentDefinition> getComponent() {
         return component;
     }
 
