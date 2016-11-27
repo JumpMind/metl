@@ -23,6 +23,11 @@ abstract public class XMLAbstractDefinition implements Serializable, Comparable<
     
     @XmlAttribute(required = true)
     protected String id;
+        
+    protected ClassLoader classLoader;
+    
+    @XmlElement
+    protected XMLSettings settings;
     
     public XMLAbstractDefinition() {
     }
@@ -58,6 +63,36 @@ abstract public class XMLAbstractDefinition implements Serializable, Comparable<
     public void setId(String id) {
         this.id = id;
     }
+    
+    public void setClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
+    
+    public ClassLoader getClassLoader() {
+        if (classLoader == null) {
+            classLoader = getClass().getClassLoader();
+        }
+        return classLoader;
+    }    
+    
+    public void setSettings(XMLSettings settings) {
+        this.settings = settings;
+    }
+
+    public XMLSettings getSettings() {
+        return settings;
+    }
+    
+    public XMLSetting findXMLSetting(String type) {
+        if (settings != null) {
+            for (XMLSetting setting :settings.getSetting()) {
+                if (setting.getId().equals(type)) {
+                    return setting;
+                }
+            }
+        }
+        return null;
+    }       
     
     @Override
     public int compareTo(XMLAbstractDefinition o) {

@@ -20,7 +20,7 @@
     under the License.
 
 -->
-<components>
+<definitions>
   <component category='PROCESSOR'
              id='Format Delimited'
              inputMessageType='entity'
@@ -138,4 +138,4 @@
       </setting>
     </settings>
   </component>
-</components>
+</definitions>

@@ -29,7 +29,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _Components_QNAME = new QName("", "components");
+    private final static QName _Components_QNAME = new QName("", "definitions");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.jumpmind.metl.core.model.xml
@@ -42,7 +42,7 @@ public class ObjectFactory {
         return new XMLComponentDefinition();
     }
 
-    @XmlElementDecl(namespace="", name = "components")
+    @XmlElementDecl(namespace="", name = "definitions")
     public JAXBElement<XMLDefinitions> createConfig(XMLDefinitions value) {
         return new JAXBElement<XMLDefinitions>(_Components_QNAME, XMLDefinitions.class, null, value);
     }

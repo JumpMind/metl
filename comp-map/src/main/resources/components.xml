@@ -20,7 +20,7 @@
     under the License.
 
 -->
-<components>
+<definitions>
   <component category='PROCESSOR'
              id='Mapping'
              inputMessageType='entity'
@@ -46,4 +46,4 @@
       </setting>
     </settings>
   </component>
-</components>
+</definitions>

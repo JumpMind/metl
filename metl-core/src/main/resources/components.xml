@@ -20,7 +20,7 @@
     under the License.
 
 -->
-<components>
+<definitions>
   <component category='PROCESSOR'
              id='Call Flow'
              inputMessageType='any'
@@ -204,4 +204,4 @@
     <className>org.jumpmind.metl.core.runtime.component.Union</className>
     <description></description>
   </component>  
-</components>
+</definitions>

@@ -34,8 +34,6 @@ public class XMLComponentDefinition extends XMLAbstractDefinition {
 
     private static final long serialVersionUID = 1L;
     
-    protected ClassLoader classLoader;
-    
     @XmlType
     @XmlEnum(String.class)
     public enum MessageType {
@@ -112,21 +110,7 @@ public class XMLComponentDefinition extends XMLAbstractDefinition {
 
     @XmlAttribute(required = false)
     protected ResourceCategory resourceCategory;
-
-    @XmlElement
-    protected XMLSettings settings;
     
-    public void setClassLoader(ClassLoader classLoader) {
-        this.classLoader = classLoader;
-    }
-    
-    public ClassLoader getClassLoader() {
-        if (classLoader == null) {
-            classLoader = getClass().getClassLoader();
-        }
-        return classLoader;
-    }
-
     public String getCategory() {
         return category;
     }
@@ -183,25 +167,6 @@ public class XMLComponentDefinition extends XMLAbstractDefinition {
         this.resourceCategory = resourceCategory;
     }
 
-    public void setSettings(XMLSettings settings) {
-        this.settings = settings;
-    }
-
-    public XMLSettings getSettings() {
-        return settings;
-    }
-    
-    public XMLSetting findXMLSetting(String type) {
-        if (settings != null) {
-            for (XMLSetting setting :settings.getSetting()) {
-                if (setting.getId().equals(type)) {
-                    return setting;
-                }
-            }
-        }
-        return null;
-    }
-    
     public boolean isSupportsMultipleThreads() {
         return supportsMultipleThreads;
     }

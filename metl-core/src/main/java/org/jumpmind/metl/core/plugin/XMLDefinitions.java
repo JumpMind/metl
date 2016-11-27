@@ -29,8 +29,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "components", propOrder = {
-    "component"
+@XmlType(name = "definitions", propOrder = {
+    "component", "resource"
 })
 public class XMLDefinitions implements Serializable {
 
@@ -39,12 +39,23 @@ public class XMLDefinitions implements Serializable {
     @XmlElement(required = true)
     protected List<XMLComponentDefinition> component;
     
+    @XmlElement(required = true)
+    protected List<XMLResourceDefinition> resource;    
+    
     public void setComponent(List<XMLComponentDefinition> components) {
         this.component = components;
     }
     
     public List<XMLComponentDefinition> getComponent() {
         return component;
+    }
+    
+    public void setResource(List<XMLResourceDefinition> resource) {
+        this.resource = resource;
+    }
+    
+    public List<XMLResourceDefinition> getResource() {
+        return resource;
     }
 
 }

@@ -20,7 +20,7 @@
     under the License.
 
 -->
-<components>
+<definitions>
   <component category='READER'
              id='File Poller'
              inputMessageType='any'
@@ -487,4 +487,4 @@
       </setting>
     </settings>
   </component>
-</components>
+</definitions>

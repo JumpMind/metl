@@ -20,7 +20,7 @@
     under the License.
 
 -->
-<components>
+<definitions>
   <component category='WRITER'
              id='Sql Executor'
              showInputModel='true'             
@@ -57,4 +57,4 @@
       </setting>
     </settings>
   </component>
-</components>
+</definitions>

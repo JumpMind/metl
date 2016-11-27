@@ -20,7 +20,7 @@
     under the License.
 
 -->
-<components>
+<definitions>
   <component category='WRITER'
              id='Zip'
              inputMessageType='text'
@@ -124,4 +124,4 @@
       </setting>
     </settings>
   </component>
-</components>
+</definitions>

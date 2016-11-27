@@ -20,7 +20,7 @@
     under the License.
 
 -->
-<components>
+<definitions>
   <component category='READER'
              id='RDBMS Reader'
              inputMessageType='any'
@@ -85,4 +85,4 @@
       </setting>
     </settings>
   </component>
-</components>
+</definitions>

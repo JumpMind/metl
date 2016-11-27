@@ -20,7 +20,7 @@
     under the License.
 
 -->
-<components>
+<definitions>
   <component category='PROCESSOR'
              id='Assert'
              inputMessageType='any'
@@ -113,4 +113,4 @@
       </setting>
     </settings>
   </component>
-</components>
+</definitions>
