@@ -207,7 +207,7 @@ public class DefinitionFactory implements IDefinitionFactory {
             JAXBContext jc = JAXBContext.newInstance(XMLDefinitions.class, XMLComponentDefinition.class, XMLSetting.class, XMLSettings.class,
                     XMLSettingChoices.class, ObjectFactory.class);           
             Unmarshaller unmarshaller = jc.createUnmarshaller();
-            List<InputStream> componentXmls = loadResources("components.xml", classLoader);
+            List<InputStream> componentXmls = loadResources("plugin.xml", classLoader);
             Map<String, XMLComponentDefinition> componentsById = componentsByProjectVersionIdById.get(projectVersionId);
             if (componentsById == null) {
                 componentsById = new HashMap<>();
