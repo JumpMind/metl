@@ -206,7 +206,7 @@ public class PropertySheet extends AbsoluteLayout {
 
             if (obj instanceof Component) {
                 Component component = (Component) obj;
-                XMLComponentDefinition componentDefintion = context.getComponentDefinitionFactory().getDefinition(component.getProjectVersionId(),
+                XMLComponentDefinition componentDefintion = context.getComponentDefinitionFactory().getComponentDefinition(component.getProjectVersionId(),
                         component.getType());
                 addThreadCount(componentDefintion, formLayout, component);
             }
@@ -266,7 +266,7 @@ public class PropertySheet extends AbsoluteLayout {
     }
 
     protected void addComponentProperties(FormLayout formLayout, Component component) {
-        XMLComponentDefinition componentDefintion = context.getComponentDefinitionFactory().getDefinition(component.getProjectVersionId(),
+        XMLComponentDefinition componentDefintion = context.getComponentDefinitionFactory().getComponentDefinition(component.getProjectVersionId(),
                 component.getType());
         addComponentName(formLayout, component);
         TextField textField = new TextField("Component Type");
@@ -451,7 +451,7 @@ public class PropertySheet extends AbsoluteLayout {
     protected List<XMLSetting> buildSettings(Object obj) {
         if (obj instanceof Component) {
             Component component = (Component) obj;
-            XMLComponentDefinition definition = context.getComponentDefinitionFactory().getDefinition(component.getProjectVersionId(),
+            XMLComponentDefinition definition = context.getComponentDefinitionFactory().getComponentDefinition(component.getProjectVersionId(),
                     component.getType());
             return definition.getSettings().getSetting();
         } else if (obj instanceof Resource) {

@@ -8,7 +8,7 @@ public interface IDefinitionFactory {
     
     public void refresh(String projectVersionId);
     
-    XMLComponentDefinition getDefinition(String projectVersionId, String id);
+    XMLComponentDefinition getComponentDefinition(String projectVersionId, String id);
     
     List<XMLComponentDefinition> getComponentDefinitions(String projectVersionId);
     

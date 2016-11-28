@@ -6,30 +6,47 @@ import org.eclipse.aether.util.version.GenericVersionScheme;
 import org.eclipse.aether.version.InvalidVersionSpecificationException;
 import org.eclipse.aether.version.Version;
 
-public class ProjectVersionComponentPlugin extends Plugin implements Serializable {
+public class ProjectVersionDefinitionPlugin extends Plugin implements Serializable {
 
     private static final long serialVersionUID = 1L;
     
     static final GenericVersionScheme versionScheme = new GenericVersionScheme(); 
 
     String projectVersionId;
-    String componentTypeId;
-    String componentName;
+    String definitionType;
+    String definitionTypeId;
+    String definitionName;
     String latestArtifactVersion;
     boolean enabled = true;
     boolean pinVersion = false;
 
-    public ProjectVersionComponentPlugin() {
+    public ProjectVersionDefinitionPlugin() {
     }
     
-    public String getComponentName() {
-        return componentName;
+    public void setDefinitionName(String definitionName) {
+        this.definitionName = definitionName;
     }
     
-    public void setComponentName(String componentName) {
-        this.componentName = componentName;
+    public String getDefinitionName() {
+        return definitionName;
     }
-
+    
+    public void setDefinitionType(String definitionType) {
+        this.definitionType = definitionType;
+    }
+    
+    public String getDefinitionType() {
+        return definitionType;
+    }
+    
+    public void setDefinitionTypeId(String definitionTypeId) {
+        this.definitionTypeId = definitionTypeId;
+    }
+    
+    public String getDefinitionTypeId() {
+        return definitionTypeId;
+    }
+    
     public String getProjectVersionId() {
         return projectVersionId;
     }
@@ -38,13 +55,6 @@ public class ProjectVersionComponentPlugin extends Plugin implements Serializabl
         this.projectVersionId = projectVersionId;
     }
 
-    public String getComponentTypeId() {
-        return componentTypeId;
-    }
-
-    public void setComponentTypeId(String componentType) {
-        this.componentTypeId = componentType;
-    }
 
     public String getArtifactName() {
         return artifactName;
@@ -112,11 +122,8 @@ public class ProjectVersionComponentPlugin extends Plugin implements Serializabl
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((componentName == null) ? 0 : componentName.hashCode());
-        result = prime * result + ((componentTypeId == null) ? 0 : componentTypeId.hashCode());
-        result = prime * result + (enabled ? 1231 : 1237);
-        result = prime * result + ((latestArtifactVersion == null) ? 0 : latestArtifactVersion.hashCode());
-        result = prime * result + (pinVersion ? 1231 : 1237);
+        result = prime * result + ((definitionType == null) ? 0 : definitionType.hashCode());
+        result = prime * result + ((definitionTypeId == null) ? 0 : definitionTypeId.hashCode());
         result = prime * result + ((projectVersionId == null) ? 0 : projectVersionId.hashCode());
         return result;
     }
@@ -129,25 +136,16 @@ public class ProjectVersionComponentPlugin extends Plugin implements Serializabl
             return false;
         if (getClass() != obj.getClass())
             return false;
-        ProjectVersionComponentPlugin other = (ProjectVersionComponentPlugin) obj;
-        if (componentName == null) {
-            if (other.componentName != null)
+        ProjectVersionDefinitionPlugin other = (ProjectVersionDefinitionPlugin) obj;
+        if (definitionType == null) {
+            if (other.definitionType != null)
                 return false;
-        } else if (!componentName.equals(other.componentName))
+        } else if (!definitionType.equals(other.definitionType))
             return false;
-        if (componentTypeId == null) {
-            if (other.componentTypeId != null)
+        if (definitionTypeId == null) {
+            if (other.definitionTypeId != null)
                 return false;
-        } else if (!componentTypeId.equals(other.componentTypeId))
-            return false;
-        if (enabled != other.enabled)
-            return false;
-        if (latestArtifactVersion == null) {
-            if (other.latestArtifactVersion != null)
-                return false;
-        } else if (!latestArtifactVersion.equals(other.latestArtifactVersion))
-            return false;
-        if (pinVersion != other.pinVersion)
+        } else if (!definitionTypeId.equals(other.definitionTypeId))
             return false;
         if (projectVersionId == null) {
             if (other.projectVersionId != null)
@@ -156,6 +154,8 @@ public class ProjectVersionComponentPlugin extends Plugin implements Serializabl
             return false;
         return true;
     }
+
+
     
     
 

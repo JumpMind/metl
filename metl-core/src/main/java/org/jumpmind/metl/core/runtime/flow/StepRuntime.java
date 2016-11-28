@@ -132,7 +132,7 @@ public class StepRuntime implements Runnable {
         this.targetStepRuntimeUnitOfWorkSent = new HashSet<String>();
         this.componentRuntimeFactory = componentFactory;
         this.componentDefintionFactory = componentDefinitionFactory;
-        this.componentDefintion = componentDefintionFactory.getDefinition(componentContext.getFlowStep().getComponent().getProjectVersionId(), getComponentType());        
+        this.componentDefintion = componentDefintionFactory.getComponentDefinition(componentContext.getFlowStep().getComponent().getProjectVersionId(), getComponentType());        
         Component component = componentContext.getFlowStep().getComponent();
         this.threadCount = component.getInt(StepRuntime.THREAD_COUNT, 1);        
         for (int threadNumber = 1; threadNumber <= threadCount; threadNumber++) {

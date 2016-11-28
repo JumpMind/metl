@@ -32,7 +32,7 @@ import javax.xml.bind.Unmarshaller;
 import org.jumpmind.metl.core.plugin.XMLDefinitions;
 import org.junit.Test;
 
-public class XMLComponentsTest {
+public class XMLDefinitionsTest {
 
     @SuppressWarnings("unchecked")
     @Test

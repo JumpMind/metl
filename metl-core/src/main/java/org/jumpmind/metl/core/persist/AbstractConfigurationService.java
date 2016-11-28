@@ -68,7 +68,7 @@ import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
-import org.jumpmind.metl.core.model.ProjectVersionComponentPlugin;
+import org.jumpmind.metl.core.model.ProjectVersionDefinitionPlugin;
 import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
@@ -283,10 +283,10 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     }
 
     @Override
-    public List<ProjectVersionComponentPlugin> findProjectVersionComponentPlugins(String projectVersionId) {
+    public List<ProjectVersionDefinitionPlugin> findProjectVersionComponentPlugins(String projectVersionId) {
         Map<String, Object> params = new HashMap<>();
         params.put("projectVersionId", projectVersionId);
-        return find(ProjectVersionComponentPlugin.class, params);
+        return find(ProjectVersionDefinitionPlugin.class, params);
     }
     
     @Override
@@ -1072,7 +1072,7 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     }
 
     @Override
-    public void save(ProjectVersionComponentPlugin projectVersionComponentPlugin) {
+    public void save(ProjectVersionDefinitionPlugin projectVersionComponentPlugin) {
         projectVersionComponentPlugin.setLastUpdateTime(new Date());
         persistenceManager.save(projectVersionComponentPlugin, null, null, tableName(projectVersionComponentPlugin.getClass()));
     }
@@ -1269,8 +1269,8 @@ abstract class AbstractConfigurationService extends AbstractService implements I
             save(newFlow);
         }
         
-        List<ProjectVersionComponentPlugin> projectVersionComponentPlugins = findProjectVersionComponentPlugins(original.getId());
-        for (ProjectVersionComponentPlugin projectVersionComponentPlugin : projectVersionComponentPlugins) {
+        List<ProjectVersionDefinitionPlugin> projectVersionComponentPlugins = findProjectVersionComponentPlugins(original.getId());
+        for (ProjectVersionDefinitionPlugin projectVersionComponentPlugin : projectVersionComponentPlugins) {
             projectVersionComponentPlugin.setProjectVersionId(newVersion.getId());
             save(projectVersionComponentPlugin);
         }

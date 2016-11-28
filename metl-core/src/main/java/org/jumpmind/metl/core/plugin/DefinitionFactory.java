@@ -21,12 +21,13 @@
 package org.jumpmind.metl.core.plugin;
 
 import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.*;
-
+import static org.jumpmind.metl.core.plugin.PluginConstants.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,7 +46,7 @@ import org.eclipse.aether.version.Version;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
-import org.jumpmind.metl.core.model.ProjectVersionComponentPlugin;
+import org.jumpmind.metl.core.model.ProjectVersionDefinitionPlugin;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.plugin.XMLSetting.Type;
 import org.jumpmind.metl.core.util.VersionUtils;
@@ -56,17 +57,17 @@ public class DefinitionFactory implements IDefinitionFactory {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    Map<String, Map<String, XMLComponentDefinition>> componentsByProjectVersionIdById;
+    Map<String, Map<String, XMLAbstractDefinition>> definitionsByProjectVersionIdById;
 
-    Map<String, List<XMLComponentDefinition>> componentsByPluginId;
+    Map<String, List<XMLAbstractDefinition>> definitionsByPluginId;
 
     protected IConfigurationService configurationService;
 
     protected IPluginManager pluginManager;
 
     public DefinitionFactory() {
-        componentsByProjectVersionIdById = new HashMap<>();
-        componentsByPluginId = new HashMap<>();
+        definitionsByProjectVersionIdById = new HashMap<>();
+        definitionsByPluginId = new HashMap<>();
     }
 
     public DefinitionFactory(IConfigurationService configurationService, IPluginManager pluginManager) {
@@ -78,8 +79,8 @@ public class DefinitionFactory implements IDefinitionFactory {
     @Override
     synchronized public void refresh() {
         pluginManager.refresh();
-        componentsByProjectVersionIdById = new HashMap<>();
-        componentsByPluginId = new HashMap<>();
+        definitionsByProjectVersionIdById = new HashMap<>();
+        definitionsByPluginId = new HashMap<>();
         if (pluginManager != null && configurationService != null) {
             List<String> projectVersionIds = configurationService.findAllProjectVersionIds();
             for (String projectVersionId : projectVersionIds) {
@@ -94,11 +95,11 @@ public class DefinitionFactory implements IDefinitionFactory {
         loadComponentsForClassloader(projectVersionId, "org.jumpmind.metl:metl-core:" + VersionUtils.getCurrentVersion(),
                 getClass().getClassLoader());
         List<PluginRepository> remoteRepostiories = configurationService.findPluginRepositories();
-        List<ProjectVersionComponentPlugin> pvcps = configurationService.findProjectVersionComponentPlugins(projectVersionId);
+        List<ProjectVersionDefinitionPlugin> pvcps = configurationService.findProjectVersionComponentPlugins(projectVersionId);
         GenericVersionScheme versionScheme = new GenericVersionScheme();
         for (Plugin configuredPlugin : configurationService.findPlugins()) {
             boolean matched = false;
-            for (ProjectVersionComponentPlugin pvcp : pvcps) {
+            for (ProjectVersionDefinitionPlugin pvcp : pvcps) {
                 if (pvcp.matches(configuredPlugin)) {
                     try {
                         matched = true;
@@ -142,17 +143,24 @@ public class DefinitionFactory implements IDefinitionFactory {
                     String pluginId = load(projectVersionId, configuredPlugin.getArtifactGroup(), configuredPlugin.getArtifactName(),
                             latestVersion, remoteRepostiories);
 
-                    List<XMLComponentDefinition> components = componentsByPluginId.get(pluginId);
-                    if (components != null) {
-                        for (XMLComponentDefinition xmlComponent : components) {
-                            ProjectVersionComponentPlugin plugin = new ProjectVersionComponentPlugin();
+                    List<XMLAbstractDefinition> definitions = definitionsByPluginId.get(pluginId);
+                    if (definitions != null) {
+                        for (XMLAbstractDefinition definition : definitions) {
+                            ProjectVersionDefinitionPlugin plugin = new ProjectVersionDefinitionPlugin();
                             plugin.setProjectVersionId(projectVersionId);
-                            plugin.setComponentTypeId(xmlComponent.getId());
-                            plugin.setComponentName(xmlComponent.getName());
+                            plugin.setDefinitionTypeId(definition.getId());
+                            plugin.setDefinitionName(definition.getName());
                             plugin.setArtifactGroup(configuredPlugin.getArtifactGroup());
                             plugin.setArtifactName(configuredPlugin.getArtifactName());
                             plugin.setArtifactVersion(latestVersion);
                             plugin.setLatestArtifactVersion(latestVersion);
+                            if (definition instanceof XMLComponentDefinition) {
+                                plugin.setDefinitionType(DEFINTION_TYPE_COMPONENT);
+                            } else if (definition instanceof XMLResourceDefinition) {
+                                plugin.setDefinitionType(DEFINTION_TYPE_RESOURCE);
+                            } else {
+                                throw new IllegalStateException("Unknown definition type");
+                            }
                             configurationService.save(plugin);
                         }
                     } else {
@@ -170,7 +178,14 @@ public class DefinitionFactory implements IDefinitionFactory {
 
     @Override
     public List<XMLComponentDefinition> getComponentDefinitions(String projectVersionId) {
-        return new ArrayList<>(componentsByProjectVersionIdById.get(projectVersionId).values());
+        List<XMLComponentDefinition> components = new ArrayList<>();
+        Collection<XMLAbstractDefinition> definitions = definitionsByProjectVersionIdById.get(projectVersionId).values();
+        for (XMLAbstractDefinition xmlAbstractDefinition : definitions) {
+            if (xmlAbstractDefinition instanceof XMLComponentDefinition) {
+                components.add((XMLComponentDefinition)xmlAbstractDefinition);
+            }
+        }
+        return components;
     }
 
     protected String load(String projectVersionId, String artifactGroup, String artifactName, String artifactVersion,
@@ -186,19 +201,26 @@ public class DefinitionFactory implements IDefinitionFactory {
     }
 
     @Override
-    synchronized public XMLComponentDefinition getDefinition(String projectVersionId, String id) {
-        Map<String, XMLComponentDefinition> componentsById = componentsByProjectVersionIdById.get(projectVersionId);
+    synchronized public XMLComponentDefinition getComponentDefinition(String projectVersionId, String id) {
+        XMLComponentDefinition defintion = null;
+        Map<String, XMLAbstractDefinition> componentsById = definitionsByProjectVersionIdById.get(projectVersionId);
         if (componentsById != null) {
-            return componentsById.get(id);
-        } else {
+            XMLAbstractDefinition component = componentsById.get(id);
+            if (component instanceof XMLComponentDefinition) {
+                defintion = (XMLComponentDefinition)component;
+            }
+        } 
+        
+        if (defintion == null) {
             logger.warn("Could not find components for project version of {} with a type id of {}", projectVersionId, id);
-            return null;
         }
+        
+        return defintion;
     }
 
     protected void reset() {
-        componentsByPluginId = new HashMap<>();
-        componentsByProjectVersionIdById = new HashMap<>();
+        definitionsByPluginId = new HashMap<>();
+        definitionsByProjectVersionIdById = new HashMap<>();
     }
 
     protected void loadComponentsForClassloader(String projectVersionId, String pluginId, ClassLoader classLoader) {
@@ -208,10 +230,10 @@ public class DefinitionFactory implements IDefinitionFactory {
                     XMLSettingChoices.class, ObjectFactory.class);           
             Unmarshaller unmarshaller = jc.createUnmarshaller();
             List<InputStream> componentXmls = loadResources("plugin.xml", classLoader);
-            Map<String, XMLComponentDefinition> componentsById = componentsByProjectVersionIdById.get(projectVersionId);
+            Map<String, XMLAbstractDefinition> componentsById = definitionsByProjectVersionIdById.get(projectVersionId);
             if (componentsById == null) {
                 componentsById = new HashMap<>();
-                componentsByProjectVersionIdById.put(projectVersionId, componentsById);
+                definitionsByProjectVersionIdById.put(projectVersionId, componentsById);
             }
             try {
                 for (InputStream inputStream : componentXmls) {
@@ -222,17 +244,12 @@ public class DefinitionFactory implements IDefinitionFactory {
                     List<XMLComponentDefinition> componentList = components.getComponent();
                     for (XMLComponentDefinition xmlComponent : componentList) {
                         String id = xmlComponent.getId();
-                        List<XMLComponentDefinition> componentsForPluginId = componentsByPluginId.get(pluginId);
-                        if (componentsForPluginId == null) {
-                            componentsForPluginId = new ArrayList<>();
-                            componentsByPluginId.put(pluginId, componentsForPluginId);
-                        }
-                        componentsForPluginId.add(xmlComponent);
+                        addXMLAbstractDefition(pluginId, xmlComponent);
 
                         if (!componentsById.containsKey(id)) {
                             xmlComponent.setClassLoader(classLoader);
                             componentsById.put(id, xmlComponent);
-                            logger.debug("Registering '{}' with an id of '{}' for plugin '{}' for project '{}'", xmlComponent.getName(), id,
+                            logger.debug("Registering component '{}' with an id of '{}' for plugin '{}' for project '{}'", xmlComponent.getName(), id,
                                     pluginId, projectVersionId);
 
                             if (xmlComponent.getSettings() == null) {
@@ -258,6 +275,34 @@ public class DefinitionFactory implements IDefinitionFactory {
                             }
                         }
                     }
+                    
+                    List<XMLResourceDefinition> resourceList = components.getResource();
+                    for (XMLResourceDefinition xmlResource : resourceList) {
+                        String id = xmlResource.getId();
+                        addXMLAbstractDefition(pluginId, xmlResource);
+
+                        if (!componentsById.containsKey(id)) {
+                            xmlResource.setClassLoader(classLoader);
+                            componentsById.put(id, xmlResource);
+                            logger.debug("Registering resource '{}' with an id of '{}' for plugin '{}' for project '{}'", xmlResource.getName(), id,
+                                    pluginId, projectVersionId);
+
+                            if (xmlResource.getSettings() == null) {
+                                xmlResource.setSettings(new XMLSettings());
+                            }
+
+                            if (xmlResource.getSettings().getSetting() == null) {
+                                xmlResource.getSettings().setSetting(new ArrayList<XMLSetting>());
+                            }
+
+                        } else {
+                            if (!classLoader.equals(componentsById.get(id).getClassLoader())) {
+                                logger.debug(
+                                        "There was already a resource registered under the id of '{}' with the name '{}' from another plugin.  Not loading it for the plugin '{}'",
+                                        new Object[] { id, xmlResource.getName(), pluginId });
+                            }
+                        }
+                    }
                 }
             } finally {
                 for (InputStream inputStream : componentXmls) {
@@ -270,6 +315,15 @@ public class DefinitionFactory implements IDefinitionFactory {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    private final void addXMLAbstractDefition(String pluginId, XMLAbstractDefinition definition) {
+        List<XMLAbstractDefinition> componentsForPluginId = definitionsByPluginId.get(pluginId);
+        if (componentsForPluginId == null) {
+            componentsForPluginId = new ArrayList<>();
+            definitionsByPluginId.put(pluginId, componentsForPluginId);
+        }
+        componentsForPluginId.add(definition);
     }
 
     protected List<InputStream> loadResources(final String name, final ClassLoader classLoader) {

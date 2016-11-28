@@ -67,7 +67,7 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
     public List<Plugin> findActivePlugins() {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         return template.query(String.format("select distinct artifact_group, artifact_name, load_order from ("
-                + "select v.artifact_group, v.artifact_name, p.load_order from %1$s_project_version_component_plugin v left join "
+                + "select v.artifact_group, v.artifact_name, p.load_order from %1$s_project_version_definition_plugin v left join "
                 + " %1$s_plugin p on v.artifact_name=p.artifact_name and v.artifact_group=p.artifact_group where v.enabled=1) "
                 + " order by load_order, artifact_group, artifact_name", tablePrefix), new ISqlRowMapper<Plugin>() {
                     public Plugin mapRow(Row row) {
@@ -81,7 +81,7 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         return template.query(String.format(
                 "select artifact_group, artifact_name, artifact_version from %1$s_plugin p where not exists "
-                        + "(select 1 from %1$s_project_version_component_plugin v where "
+                        + "(select 1 from %1$s_project_version_definition_plugin v where "
                         + "v.artifact_name=p.artifact_name and v.artifact_group=p.artifact_group and v.artifact_version=p.artifact_version) ",
                 tablePrefix), new ISqlRowMapper<Plugin>() {
                     public Plugin mapRow(Row row) {

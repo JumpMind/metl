@@ -50,7 +50,7 @@ import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
-import org.jumpmind.metl.core.model.ProjectVersionComponentPlugin;
+import org.jumpmind.metl.core.model.ProjectVersionDefinitionPlugin;
 import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
@@ -61,7 +61,7 @@ import org.jumpmind.properties.TypedProperties;
 
 public interface IConfigurationService {
 
-    public List<ProjectVersionComponentPlugin> findProjectVersionComponentPlugins(String projectVersionId);
+    public List<ProjectVersionDefinitionPlugin> findProjectVersionComponentPlugins(String projectVersionId);
 
     public void doInBackground();
 
@@ -117,7 +117,7 @@ public interface IConfigurationService {
 
     public void save(Plugin plugin);
 
-    public void save(ProjectVersionComponentPlugin projectVersionComponentPlugin);
+    public void save(ProjectVersionDefinitionPlugin projectVersionComponentPlugin);
 
     public void delete(AbstractObject obj);
 
