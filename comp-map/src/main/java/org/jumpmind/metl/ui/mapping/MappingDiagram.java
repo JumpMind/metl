@@ -21,10 +21,12 @@
 package org.jumpmind.metl.ui.mapping;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntitySorter;
 import org.jumpmind.metl.core.runtime.component.Mapping;
 import org.jumpmind.metl.ui.common.ApplicationContext;
@@ -58,6 +60,8 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
 		this.readOnly = readOnly;
         setPrimaryStyleName("mapping-diagram");
         setId("mapping-diagram");
+        
+        cleanupAttributes(component);
 
         MappingDiagramState state = getState();
         state.component = component;
@@ -80,6 +84,27 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
         addFunction("onSelect", new OnSelectFunction());       
         addFunction("onConnection", new OnConnectionFunction());
     }
+	
+	protected void cleanupAttributes(Component c) {
+	    // Look for any broken links.
+	    Iterator<ComponentAttributeSetting> iter = c.getAttributeSettings().iterator();
+	    boolean dirty = false;
+	    while (iter.hasNext()) {
+	        ComponentAttributeSetting setting = iter.next();
+            if (Mapping.ATTRIBUTE_MAPS_TO.equals(setting.getName())) {
+                ModelAttribute srcAttribute = c.getInputModel().getAttributeById(setting.getAttributeId());
+                ModelAttribute dstAttribute = c.getOutputModel().getAttributeById(setting.getValue());
+                if (srcAttribute == null || dstAttribute == null) {
+                    // Remove link setting if source or target can't be found.
+                    iter.remove();
+                    dirty = true;
+                }
+            }
+        }
+	    if (dirty) {
+	        context.getConfigurationService().save(c);
+	    }
+	}
     
     @Override
     protected MappingDiagramState getState() {
