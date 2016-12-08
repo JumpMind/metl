@@ -94,6 +94,10 @@ public class StartWebServer {
     private final static String SSL_DEFAULT_ALIAS_PRIVATE_KEY = "metl";
     private final static String SSL_KEYSTORE_TYPE = "metl.keystore.type";
     private final static String SSL_DEFAULT_KEYSTORE_TYPE = "JCEKS";
+    
+    public static void main(String[] args) throws Exception {
+        runWebServer(args);
+    }
 
     public static void runWebServer(String[] args) throws Exception {
         disableJettyLogging();
