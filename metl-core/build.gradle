@@ -42,7 +42,7 @@ dependencies {
     compile "org.codehaus.groovy:groovy-all:$groovyVersion"
     compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
     compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion"  
-    compile "com.jcraft:jsch:0.1.52"
+    compile "com.jcraft:jsch:0.1.54"
     compile "oauth.signpost:oauth-signpost:1.2.1.2"    
     compile "org.apache.ant:ant:$antVersion"
     compile "sshtools:j2ssh-ant:0.2.9"    
