@@ -113,7 +113,7 @@ public class AppUI extends UI implements LoginListener {
         backgroundRefresherService = ctx.getBean(BackgroundRefresherService.class);
         backgroundRefresherService.init(this);
 
-        UI.getCurrent().setErrorHandler(new DefaultErrorHandler() {
+        setErrorHandler(new DefaultErrorHandler() {
             public void error(com.vaadin.server.ErrorEvent event) {
                 String intro = "Exception of type <b>";
                 String message = "";
