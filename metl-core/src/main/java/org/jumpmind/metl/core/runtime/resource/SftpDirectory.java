@@ -255,6 +255,7 @@ public class SftpDirectory implements IDirectory {
             }
             java.util.Properties config = new java.util.Properties();
             config.put("StrictHostKeyChecking", "no");
+            config.put("PreferredAuthentications", "publickey,keyboard-interactive,password");
             session.setConfig(config);
             session.connect(connectionTimeout);
             threadSession.set(session);
@@ -325,6 +326,7 @@ public class SftpDirectory implements IDirectory {
             }
             java.util.Properties config = new java.util.Properties();
             config.put("StrictHostKeyChecking", "no");
+            config.put("PreferredAuthentications", "publickey,keyboard-interactive,password");
             session.setConfig(config);
             session.connect(connectionTimeout);
             return session;
