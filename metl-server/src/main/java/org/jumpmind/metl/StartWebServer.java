@@ -230,7 +230,7 @@ public class StartWebServer {
     }
 
     private static File getKeyStoreFile(String[] args) {
-        return new File(System.getProperty(SSL_KEYSTORE_FILE, Wrapper.getConfigDir(args, false) + "security/keystore"));
+        return new File(System.getProperty(SSL_KEYSTORE_FILE, Wrapper.getConfigDir(args, false) + "/security/keystore"));
 
     }
 
