@@ -449,7 +449,7 @@ public class SftpDirectory implements IDirectory {
             if (mustExist && !fileExists(sftp, relativePath)) {
                 throw new IoException("Could not find endpoint %s that was configured as MUST EXIST",relativePath);
             }
-            return new CloseableInputStreamStream(sftp.get(relativePath), session, sftp, closeSession);
+            return new CloseableInputStream(sftp.get(relativePath), session, sftp, closeSession);
         } catch (Exception e) {
             if (e instanceof IOException || 
                     (e instanceof SftpException && ((SftpException) e).id != 2)) {
@@ -570,12 +570,12 @@ public class SftpDirectory implements IDirectory {
         }
     }
 
-    class CloseableInputStreamStream extends BufferedInputStream {
+    class CloseableInputStream extends BufferedInputStream {
         Session session;
         ChannelSftp sftp;
         boolean closeSession = true;
 
-        public CloseableInputStreamStream(InputStream is, Session session, ChannelSftp sftp, boolean closeSession) {
+        public CloseableInputStream(InputStream is, Session session, ChannelSftp sftp, boolean closeSession) {
             super(is);
             this.session = session;
             this.sftp = sftp;

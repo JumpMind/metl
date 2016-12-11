@@ -1,490 +1,338 @@
-<!--
-
-    Licensed to JumpMind Inc under one or more contributor
-    license agreements.  See the NOTICE file distributed
-    with this work for additional information regarding
-    copyright ownership.  JumpMind Inc licenses this file
-    to you under the GNU General Public License, version 3.0 (GPLv3)
-    (the "License"); you may not use this file except in compliance
-    with the License.
-
-    You should have received a copy of the GNU General Public License,
-    version 3.0 (GPLv3) along with this library; if not, see
-    <http://www.gnu.org/licenses/>.
-
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
-
--->
+<!-- Licensed to JumpMind Inc under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright ownership. 
+    JumpMind Inc licenses this file to you under the GNU General Public License, version 3.0 (GPLv3) (the "License"); you may not use this file except in compliance with the License. You 
+    should have received a copy of the GNU General Public License, version 3.0 (GPLv3) along with this library; if not, see <http://www.gnu.org/licenses/>. Unless required by applicable 
+    law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See 
+    the License for the specific language governing permissions and limitations under the License. -->
 <definitions>
-  <component category='READER'
-             id='File Poller'
-             inputMessageType='any'
-             inputOutputModelsMatch='false'
-             outputMessageType='text'
-             resourceCategory='streamable'>
-    <name>File Poller</name>
-    <className>org.jumpmind.metl.core.runtime.component.FilePoller</className>
-    <keywords>files</keywords>
-    <description></description>
-    <settings>
-      <setting id='run.when'
-               required='false'
-               type='choice'>
-        <name>Run When</name>
-        <defaultValue>PER UNIT OF WORK</defaultValue>
-        <choices>
-          <choice>PER UNIT OF WORK</choice>
-          <choice>PER MESSAGE</choice>
-        </choices>
-      </setting>
-      <setting id='get.file.pattern.from.message'
-               required='false'
-               type='boolean'>
-        <name>Get File Pattern From Message</name>
-        <defaultValue>false</defaultValue>
-      </setting>
-      <setting id='file.pattern'
-               required='false'
-               type='text'>
-        <name>File Pattern</name>
-      </setting>
-      <setting id='cancel.on.no.files'
-               required='false'
-               type='boolean'>
-        <name>Cancel On No Files</name>
-        <defaultValue>true</defaultValue>
-      </setting>
-      <setting id='file.sort.order'
-               required='false'
-               type='choice'>
-        <name>File Sort Order</name>
-        <defaultValue>Last Modified</defaultValue>
-        <choices>
-          <choice>Last Modified</choice>
-          <choice>Name</choice>
-        </choices>
-      </setting>
-      <setting id='file.sort.descending'
-               required='false'
-               type='boolean'>
-        <name>Sort Descending</name>
-        <defaultValue>false</defaultValue>
-      </setting>
-      <setting id='rows.per.message'
-               required='false'
-               type='integer'>
-        <name>Files/Msg</name>
-        <defaultValue>1</defaultValue>
-      </setting>
-      <setting id='min.files.to.poll'
-               required='true'
-               type='integer'>
-        <name>Min Files To Poll</name>
-        <defaultValue>1</defaultValue>
-      </setting>
-      <setting id='max.files.to.poll'
-               required='true'
-               type='integer'>
-        <name>Max Files To Poll</name>
-        <defaultValue>1000</defaultValue>
-      </setting>
-      <setting id='only.files.older.than.minutes'
-               required='true'
-               type='integer'>
-        <name>Include Only Files Older Than (minutes)</name>
-        <defaultValue>0</defaultValue>
-      </setting>
-      <setting id='action.on.success'
-               required='false'
-               type='choice'>
-        <name>Action on Success</name>
-        <defaultValue>None</defaultValue>
-        <choices>
-          <choice>None</choice>
-          <choice>Archive</choice>
-          <choice>Delete</choice>
-        </choices>
-      </setting>
-      <setting id='archive.on.success.path'
-               required='false'
-               type='text'>
-        <name>Archive On Success Path</name>
-      </setting>
-      <setting id='action.on.error'
-               required='false'
-               type='choice'>
-        <name>Action on Error</name>
-        <defaultValue>None</defaultValue>
-        <choices>
-          <choice>None</choice>
-          <choice>Archive</choice>
-          <choice>Delete</choice>
-        </choices>
-      </setting>
-      <setting id='archive.on.error.path'
-               required='false'
-               type='text'>
-        <name>Archive On Error Path</name>
-      </setting>
-      <setting id='use.trigger.file'
-               required='false'
-               type='boolean'>
-        <name>Use Trigger File</name>
-        <defaultValue>false</defaultValue>
-      </setting>
-      <setting id='trigger.file.path'
-               required='false'
-               type='text'>
-        <name>Relative Trigger File Path</name>
-      </setting>
-    </settings>
-  </component>
-  <component category='PROCESSOR'
-             id='File Util'
-             inputMessageType='any'
-             inputOutputModelsMatch='false'
-             outputMessageType='text'
-             resourceCategory='streamable'>
-    <name>File Util</name>
-    <className>org.jumpmind.metl.core.runtime.component.FileUtil</className>
-    <keywords>files,copy,move</keywords>
-    <description></description>
-    <settings>
-      <setting id='run.when'
-               required='false'
-               type='choice'>
-        <name>Run When</name>
-        <defaultValue>PER UNIT OF WORK</defaultValue>
-        <choices>
-          <choice>PER UNIT OF WORK</choice>
-          <choice>PER MESSAGE</choice>
-        </choices>
-      </setting>
-      <setting id='action'
-               required='false'
-               type='choice'>
-        <name>Action</name>
-        <defaultValue>Copy</defaultValue>
-        <choices>
-          <choice>Copy</choice>
-          <choice>Move</choice>
-          <choice>Delete</choice>
-        </choices>
-      </setting>
-      <setting id='relative.path'
-               required='false'
-               type='text'>
-        <name>Source Relative Path</name>
-      </setting>
-      <setting id='target.relative.path'
-               required='true'
-               type='text'>
-        <name>Target Relative Path</name>
-      </setting>
-      <setting id='new.name'
-               required='false'
-               type='text'>
-        <name>Target File Name</name>
+    <component category='READER' id='File Poller' inputMessageType='any' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='streamable'>
+        <name>File Poller</name>
+        <className>org.jumpmind.metl.core.runtime.component.FilePoller</className>
+        <keywords>files</keywords>
         <description></description>
-      </setting>
-      <setting id='get.file.name.from.message'
-               required='false'
-               type='boolean'>
-        <name>Get File Name From Message</name>
-        <defaultValue>false</defaultValue>
-      </setting>
-      <setting id='overwrite'
-               required='false'
-               type='boolean'>
-        <name>Overwrite</name>
-        <defaultValue>true</defaultValue>
-      </setting>
-      <setting id='append.to.name'
-               required='false'
-               type='text'>
-        <name>Append To Name</name>
-      </setting>
-    </settings>
-  </component>
+        <settings>
+            <setting id='run.when' required='false' type='choice'>
+                <name>Run When</name>
+                <defaultValue>PER UNIT OF WORK</defaultValue>
+                <choices>
+                    <choice>PER UNIT OF WORK</choice>
+                    <choice>PER MESSAGE</choice>
+                </choices>
+            </setting>
+            <setting id='get.file.pattern.from.message' required='false' type='boolean'>
+                <name>Get File Pattern From Message</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='file.pattern' required='false' type='text'>
+                <name>File Pattern</name>
+            </setting>
+            <setting id='cancel.on.no.files' required='false' type='boolean'>
+                <name>Cancel On No Files</name>
+                <defaultValue>true</defaultValue>
+            </setting>
+            <setting id='file.sort.order' required='false' type='choice'>
+                <name>File Sort Order</name>
+                <defaultValue>Last Modified</defaultValue>
+                <choices>
+                    <choice>Last Modified</choice>
+                    <choice>Name</choice>
+                </choices>
+            </setting>
+            <setting id='file.sort.descending' required='false' type='boolean'>
+                <name>Sort Descending</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='rows.per.message' required='false' type='integer'>
+                <name>Files/Msg</name>
+                <defaultValue>1</defaultValue>
+            </setting>
+            <setting id='min.files.to.poll' required='true' type='integer'>
+                <name>Min Files To Poll</name>
+                <defaultValue>1</defaultValue>
+            </setting>
+            <setting id='max.files.to.poll' required='true' type='integer'>
+                <name>Max Files To Poll</name>
+                <defaultValue>1000</defaultValue>
+            </setting>
+            <setting id='only.files.older.than.minutes' required='true' type='integer'>
+                <name>Include Only Files Older Than (minutes)</name>
+                <defaultValue>0</defaultValue>
+            </setting>
+            <setting id='action.on.success' required='false' type='choice'>
+                <name>Action on Success</name>
+                <defaultValue>None</defaultValue>
+                <choices>
+                    <choice>None</choice>
+                    <choice>Archive</choice>
+                    <choice>Delete</choice>
+                </choices>
+            </setting>
+            <setting id='archive.on.success.path' required='false' type='text'>
+                <name>Archive On Success Path</name>
+            </setting>
+            <setting id='action.on.error' required='false' type='choice'>
+                <name>Action on Error</name>
+                <defaultValue>None</defaultValue>
+                <choices>
+                    <choice>None</choice>
+                    <choice>Archive</choice>
+                    <choice>Delete</choice>
+                </choices>
+            </setting>
+            <setting id='archive.on.error.path' required='false' type='text'>
+                <name>Archive On Error Path</name>
+            </setting>
+            <setting id='use.trigger.file' required='false' type='boolean'>
+                <name>Use Trigger File</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='trigger.file.path' required='false' type='text'>
+                <name>Relative Trigger File Path</name>
+            </setting>
+        </settings>
+    </component>
+    <component category='PROCESSOR' id='File Util' inputMessageType='any' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='streamable'>
+        <name>File Util</name>
+        <className>org.jumpmind.metl.core.runtime.component.FileUtil</className>
+        <keywords>files,copy,move</keywords>
+        <description></description>
+        <settings>
+            <setting id='run.when' required='false' type='choice'>
+                <name>Run When</name>
+                <defaultValue>PER UNIT OF WORK</defaultValue>
+                <choices>
+                    <choice>PER UNIT OF WORK</choice>
+                    <choice>PER MESSAGE</choice>
+                </choices>
+            </setting>
+            <setting id='action' required='false' type='choice'>
+                <name>Action</name>
+                <defaultValue>Copy</defaultValue>
+                <choices>
+                    <choice>Copy</choice>
+                    <choice>Move</choice>
+                    <choice>Delete</choice>
+                </choices>
+            </setting>
+            <setting id='relative.path' required='false' type='text'>
+                <name>Source Relative Path</name>
+            </setting>
+            <setting id='target.relative.path' required='true' type='text'>
+                <name>Target Relative Path</name>
+            </setting>
+            <setting id='new.name' required='false' type='text'>
+                <name>Target File Name</name>
+                <description></description>
+            </setting>
+            <setting id='get.file.name.from.message' required='false' type='boolean'>
+                <name>Get File Name From Message</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='overwrite' required='false' type='boolean'>
+                <name>Overwrite</name>
+                <defaultValue>true</defaultValue>
+            </setting>
+            <setting id='append.to.name' required='false' type='text'>
+                <name>Append To Name</name>
+            </setting>
+        </settings>
+    </component>
 
-  <component category='READER'
-             id='Text File Reader'
-             inputMessageType='text'
-             inputOutputModelsMatch='false'
-             outputMessageType='text'
-             resourceCategory='streamable'>
-    <name>Text File Reader</name>
-    <className>org.jumpmind.metl.core.runtime.component.TextFileReader</className>
-    <keywords>file,files</keywords>
-    <description></description>
-    <settings>
-      <setting id='run.when'
-               required='false'
-               type='choice'>
-        <name>Run When</name>
-        <defaultValue>PER UNIT OF WORK</defaultValue>
-        <choices>
-          <choice>PER UNIT OF WORK</choice>
-          <choice>PER MESSAGE</choice>
-        </choices>
-      </setting>
-      <setting id='get.file.name.from.message'
-               required='false'
-               type='boolean'>
-        <name>Get File Name From Message</name>
-        <defaultValue>false</defaultValue>
-      </setting>
-      <setting id='must.exist'
-               required='false'
-               type='boolean'>
-        <name>Must Exist</name>
-        <defaultValue>false</defaultValue>
-      </setting>
-      <setting id='relative.path'
-               required='false'
-               type='text'>
-        <name>File Path</name>
-      </setting>
-      <setting id='text.rows.per.message'
-               required='false'
-               type='integer'>
-        <name>Rows/Msg</name>
-        <defaultValue>1000</defaultValue>
-      </setting>
-      <setting id='action.on.success'
-               required='false'
-               type='choice'>
-        <name>Action on Success</name>
-        <defaultValue>NONE</defaultValue>
-        <choices>
-          <choice>None</choice>
-          <choice>Archive</choice>
-          <choice>Delete</choice>
-        </choices>
-      </setting>
-      <setting id='archive.on.success.path'
-               required='false'
-               type='text'>
-        <name>Archive On Success Path</name>
-      </setting>
-      <setting id='action.on.error'
-               required='false'
-               type='choice'>
-        <name>Action on Error</name>
-        <defaultValue>NONE</defaultValue>
-        <choices>
-          <choice>None</choice>
-          <choice>Archive</choice>
-          <choice>Delete</choice>
-        </choices>
-      </setting>
-      <setting id='archive.on.error.path'
-               required='false'
-               type='text'>
-        <name>Archive On Error Path</name>
-      </setting>
-      <setting id='encoding'
-               required='false'
-               type='text'>
-        <name>Encoding</name>
-        <defaultValue>UTF-8</defaultValue>
-      </setting>
-      <setting id='text.header.lines.to.skip'
-               required='false'
-               type='integer'>
-        <name>Header Lines to Skip</name>
-      </setting>
-      <setting id='control.message.on.eof'
-               required='false'
-               type='boolean'>
-        <name>Send Control Message on EOF</name>
-      </setting>
-    </settings>
-  </component>
-  <component category='READER'
-             id='Binary File Reader'
-             inputMessageType='text'
-             inputOutputModelsMatch='false'
-             outputMessageType='binary'
-             resourceCategory='streamable'>
-    <name>Binary File Reader</name>
-    <className>org.jumpmind.metl.core.runtime.component.BinaryFileReader</className>
-    <keywords>files</keywords>
-    <description></description>
-    <settings>
-      <setting id='run.when'
-               required='false'
-               type='choice'>
-        <name>Run When</name>
-        <defaultValue>PER UNIT OF WORK</defaultValue>
-        <choices>
-          <choice>PER UNIT OF WORK</choice>
-          <choice>PER MESSAGE</choice>
-        </choices>
-      </setting>
-      <setting id='get.file.name.from.message'
-               required='false'
-               type='boolean'>
-        <name>Get File Name From Message</name>
-        <defaultValue>false</defaultValue>
-      </setting>
-      <setting id='must.exist'
-               required='false'
-               type='boolean'>
-        <name>Must Exist</name>
-        <defaultValue>false</defaultValue>
-      </setting>
-      <setting id='relative.path'
-               required='false'
-               type='text'>
-        <name>File Path</name>
-      </setting>
-      <setting id='action.on.success'
-               required='false'
-               type='choice'>
-        <name>Action on Success</name>
-        <defaultValue>NONE</defaultValue>
-        <choices>
-          <choice>None</choice>
-          <choice>Archive</choice>
-          <choice>Delete</choice>
-        </choices>
-      </setting>
-      <setting id='archive.on.success.path'
-               required='false'
-               type='text'>
-        <name>Archive On Success Path</name>
-      </setting>
-      <setting id='action.on.error'
-               required='false'
-               type='choice'>
-        <name>Action on Error</name>
-        <defaultValue>NONE</defaultValue>
-        <choices>
-          <choice>None</choice>
-          <choice>Archive</choice>
-          <choice>Delete</choice>
-        </choices>
-      </setting>
-      <setting id='archive.on.error.path'
-               required='false'
-               type='text'>
-        <name>Archive On Error Path</name>
-      </setting>
-      <setting id='size.per.message'
-               required='false'
-               type='integer'>
-        <name>Size / Message (MB)</name>
-      </setting>
-      <setting id='control.message.on.eof'
-               required='false'
-               type='boolean'>
-        <name>Send Control Message on EOF</name>
-      </setting>
-    </settings>
-  </component>
-  <component category='WRITER'
-             id='Text File Writer'
-             inputMessageType='text'
-             inputOutputModelsMatch='false'
-             outputMessageType='text'
-             resourceCategory='streamable'>
-    <name>Text File Writer</name>
-    <className>org.jumpmind.metl.core.runtime.component.TextFileWriter</className>
-    <keywords>files</keywords>
-    <description></description>
-    <settings>
-      <setting id='relative.path'
-               required='false'
-               type='text'>
-        <name>Path and File</name>
-      </setting>
-      <setting id='must.exist'
-               required='true'
-               type='boolean'>
-        <name>Must Exist</name>
-        <defaultValue>false</defaultValue>
-      </setting>
-      <setting id='append'
-               required='true'
-               type='boolean'>
-        <name>Append</name>
-        <defaultValue>false</defaultValue>
-      </setting>
-      <setting id='text.line.terminator'
-               required='false'
-               type='text'>
-        <name>Line Terminator</name>
-      </setting>
-      <setting id='encoding'
-               required='false'
-               type='text'>
-        <name>Encoding</name>
-        <defaultValue>UTF-8</defaultValue>
-      </setting>
-      <setting id='get.file.name.from.message'
-               required='false'
-               type='boolean'>
-        <name>Get File Name From Message</name>
-        <defaultValue>false</defaultValue>
-      </setting>
-      <setting id='filename.property'
-               required='false'
-               type='text'>
-        <name>Param Name For Msg Based File Name</name>
-      </setting>
-      <setting id='empty.file'
-               required='true'
-               type='boolean'>
-        <name>Empty File On No Input</name>
-        <defaultValue>true</defaultValue>
-      </setting>
-    </settings>
-  </component>
-  <component category='WRITER'
-             id='Binary File Writer'
-             inputMessageType='binary'
-             inputOutputModelsMatch='false'
-             outputMessageType='text'
-             resourceCategory='streamable'>
-    <name>Binary File Writer</name>
-    <className>org.jumpmind.metl.core.runtime.component.BinaryFileWriter</className>
-    <keywords>files</keywords>
-    <description></description>
-    <settings>
-      <setting id='relative.path'
-               required='false'
-               type='text'>
-        <name>Path and File</name>
-      </setting>
-      <setting id='must.exist'
-               required='true'
-               type='boolean'>
-        <name>Must Exist</name>
-        <defaultValue>false</defaultValue>
-      </setting>
-      <setting id='append'
-               required='true'
-               type='boolean'>
-        <name>Append</name>
-        <defaultValue>false</defaultValue>
-      </setting>
-      <setting id='get.file.name.from.message'
-               required='false'
-               type='boolean'>
-        <name>Get File Name From Message</name>
-        <defaultValue>false</defaultValue>
-      </setting>
-      <setting id='filename.property'
-               required='false'
-               type='text'>
-        <name>Param Name For Msg Based File Name</name>
-      </setting>
-    </settings>
-  </component>
+    <component category='READER' id='Text File Reader' inputMessageType='text' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='streamable'>
+        <name>Text File Reader</name>
+        <className>org.jumpmind.metl.core.runtime.component.TextFileReader</className>
+        <keywords>file,files</keywords>
+        <description></description>
+        <settings>
+            <setting id='run.when' required='false' type='choice'>
+                <name>Run When</name>
+                <defaultValue>PER UNIT OF WORK</defaultValue>
+                <choices>
+                    <choice>PER UNIT OF WORK</choice>
+                    <choice>PER MESSAGE</choice>
+                </choices>
+            </setting>
+            <setting id='get.file.name.from.message' required='false' type='boolean'>
+                <name>Get File Name From Message</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='must.exist' required='false' type='boolean'>
+                <name>Must Exist</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='relative.path' required='false' type='text'>
+                <name>File Path</name>
+            </setting>
+            <setting id='text.rows.per.message' required='false' type='integer'>
+                <name>Rows/Msg</name>
+                <defaultValue>1000</defaultValue>
+            </setting>
+            <setting id='action.on.success' required='false' type='choice'>
+                <name>Action on Success</name>
+                <defaultValue>NONE</defaultValue>
+                <choices>
+                    <choice>None</choice>
+                    <choice>Archive</choice>
+                    <choice>Delete</choice>
+                </choices>
+            </setting>
+            <setting id='archive.on.success.path' required='false' type='text'>
+                <name>Archive On Success Path</name>
+            </setting>
+            <setting id='action.on.error' required='false' type='choice'>
+                <name>Action on Error</name>
+                <defaultValue>NONE</defaultValue>
+                <choices>
+                    <choice>None</choice>
+                    <choice>Archive</choice>
+                    <choice>Delete</choice>
+                </choices>
+            </setting>
+            <setting id='archive.on.error.path' required='false' type='text'>
+                <name>Archive On Error Path</name>
+            </setting>
+            <setting id='encoding' required='false' type='text'>
+                <name>Encoding</name>
+                <defaultValue>UTF-8</defaultValue>
+            </setting>
+            <setting id='text.header.lines.to.skip' required='false' type='integer'>
+                <name>Header Lines to Skip</name>
+            </setting>
+            <setting id='control.message.on.eof' required='false' type='boolean'>
+                <name>Send Control Message on EOF</name>
+            </setting>
+            <setting id='number.of.times.to.read.file' required='false' type='integer'>
+                <name>Number of times to read file content</name>
+                <defaultValue>1</defaultValue>                
+            </setting>            
+        </settings>
+    </component>
+    <component category='READER' id='Binary File Reader' inputMessageType='text' inputOutputModelsMatch='false' outputMessageType='binary' resourceCategory='streamable'>
+        <name>Binary File Reader</name>
+        <className>org.jumpmind.metl.core.runtime.component.BinaryFileReader</className>
+        <keywords>files</keywords>
+        <description></description>
+        <settings>
+            <setting id='run.when' required='false' type='choice'>
+                <name>Run When</name>
+                <defaultValue>PER UNIT OF WORK</defaultValue>
+                <choices>
+                    <choice>PER UNIT OF WORK</choice>
+                    <choice>PER MESSAGE</choice>
+                </choices>
+            </setting>
+            <setting id='get.file.name.from.message' required='false' type='boolean'>
+                <name>Get File Name From Message</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='must.exist' required='false' type='boolean'>
+                <name>Must Exist</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='relative.path' required='false' type='text'>
+                <name>File Path</name>
+            </setting>
+            <setting id='action.on.success' required='false' type='choice'>
+                <name>Action on Success</name>
+                <defaultValue>NONE</defaultValue>
+                <choices>
+                    <choice>None</choice>
+                    <choice>Archive</choice>
+                    <choice>Delete</choice>
+                </choices>
+            </setting>
+            <setting id='archive.on.success.path' required='false' type='text'>
+                <name>Archive On Success Path</name>
+            </setting>
+            <setting id='action.on.error' required='false' type='choice'>
+                <name>Action on Error</name>
+                <defaultValue>NONE</defaultValue>
+                <choices>
+                    <choice>None</choice>
+                    <choice>Archive</choice>
+                    <choice>Delete</choice>
+                </choices>
+            </setting>
+            <setting id='archive.on.error.path' required='false' type='text'>
+                <name>Archive On Error Path</name>
+            </setting>
+            <setting id='size.per.message' required='false' type='integer'>
+                <name>Size / Message (MB)</name>
+            </setting>
+            <setting id='control.message.on.eof' required='false' type='boolean'>
+                <name>Send Control Message on EOF</name>
+            </setting>
+        </settings>
+    </component>
+    <component category='WRITER' id='Text File Writer' inputMessageType='text' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='streamable'>
+        <name>Text File Writer</name>
+        <className>org.jumpmind.metl.core.runtime.component.TextFileWriter</className>
+        <keywords>files</keywords>
+        <description></description>
+        <settings>
+            <setting id='relative.path' required='false' type='text'>
+                <name>Path and File</name>
+            </setting>
+            <setting id='must.exist' required='true' type='boolean'>
+                <name>Must Exist</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='append' required='true' type='boolean'>
+                <name>Append</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='text.line.terminator' required='false' type='text'>
+                <name>Line Terminator</name>
+            </setting>
+            <setting id='encoding' required='false' type='text'>
+                <name>Encoding</name>
+                <defaultValue>UTF-8</defaultValue>
+            </setting>
+            <setting id='get.file.name.from.message' required='false' type='boolean'>
+                <name>Get File Name From Message</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='filename.property' required='false' type='text'>
+                <name>Param Name For Msg Based File Name</name>
+            </setting>
+            <setting id='empty.file' required='true' type='boolean'>
+                <name>Empty File On No Input</name>
+                <defaultValue>true</defaultValue>
+            </setting>
+            <setting id='close.on' required='false' type='choice'>
+                <name>Close On</name>
+                <defaultValue>UNIT OF WORK</defaultValue>
+                <choices>
+                    <choice>UNIT OF WORK</choice>
+                    <choice>MESSAGE</choice>
+                    <choice>ROW</choice>
+                </choices>
+            </setting>
+        </settings>
+    </component>
+    <component category='WRITER' id='Binary File Writer' inputMessageType='binary' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='streamable'>
+        <name>Binary File Writer</name>
+        <className>org.jumpmind.metl.core.runtime.component.BinaryFileWriter</className>
+        <keywords>files</keywords>
+        <description></description>
+        <settings>
+            <setting id='relative.path' required='false' type='text'>
+                <name>Path and File</name>
+            </setting>
+            <setting id='must.exist' required='true' type='boolean'>
+                <name>Must Exist</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='append' required='true' type='boolean'>
+                <name>Append</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='get.file.name.from.message' required='false' type='boolean'>
+                <name>Get File Name From Message</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='filename.property' required='false' type='text'>
+                <name>Param Name For Msg Based File Name</name>
+            </setting>
+        </settings>
+    </component>
 </definitions>

@@ -48,6 +48,7 @@ dependencies {
     compile "sshtools:j2ssh-ant:0.2.9"    
     compile "javax.jms:javax.jms-api:2.0.1"    
     compile  "org.apache.activemq:activemq-client:$activeMqVersion"
+    compile  "org.apache.activemq:activemq-broker:$activeMqVersion"
     compile "com.googlecode.json-simple:json-simple:1.1.1"
     compile "kxml2:kxml2:$kxmlVersion"  
     compile group: 'org.apache.maven', name: 'maven-aether-provider', version: '3.3.9'

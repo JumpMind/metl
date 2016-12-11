@@ -28,7 +28,7 @@ public class FolderMenuManager extends AbstractDesignSelectedValueMenuManager {
                 "File|New|Resource|Database",
                 "File|New|Resource|Directory|FTP",
                 "File|New|Resource|Directory|File System",
-                "File|New|Resource|Directory|JMS Topic",
+                "File|New|Resource|Directory|JMS",
                 "File|New|Resource|Directory|SFTP",
                 "File|New|Resource|Directory|SMB",
                 "File|New|Resource|HTTP Resource",

@@ -1,0 +1,239 @@
+package org.jumpmind.metl.core.runtime.resource;
+
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Hashtable;
+
+import javax.jms.BytesMessage;
+import javax.jms.Connection;
+import javax.jms.JMSException;
+import javax.jms.MapMessage;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
+import javax.jms.ObjectMessage;
+import javax.jms.Session;
+import javax.jms.TextMessage;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
+import org.jumpmind.properties.TypedProperties;
+import org.jumpmind.util.FormatUtils;
+
+abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
+
+    protected TypedProperties properties;
+
+    protected Connection connection;
+
+    protected Session session;
+
+    protected Context context;
+
+    public AbstractJMSJndiDirectory(TypedProperties properties) throws JMSException, NamingException {
+        this.properties = properties;
+        initialize();
+    }
+
+    protected void close(AutoCloseable toClose) {
+        if (toClose != null) {
+            try {
+                toClose.close();
+            } catch (Exception ex) {
+            }
+        }
+    }
+
+    protected void initialize() throws JMSException, NamingException {
+        if (connection == null) {
+            try {
+                Hashtable<String, String> env = new Hashtable<String, String>();
+                {
+                    env.put(Context.INITIAL_CONTEXT_FACTORY, properties.get(JMS.SETTING_INITIAL_CONTEXT_FACTORY));
+                    env.put(Context.PROVIDER_URL, properties.get(JMS.SETTING_PROVIDER_URL));
+                    String principal = properties.get(JMS.SETTING_SECURITY_PRINCIPAL);
+                    if (isNotBlank(principal)) {
+                        env.put(Context.SECURITY_PRINCIPAL, principal);
+                    }
+                    String credentials = properties.get(JMS.SETTING_SECURITY_CREDENTIALS);
+                    if (isNotBlank(credentials)) {
+                        env.put(Context.SECURITY_CREDENTIALS, credentials);
+                    }
+                }
+
+                context = new InitialContext(env);
+                connection = createConnection(context);
+                session = createSession(connection);
+                connection.start();
+
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (JMSException e) {
+                throw e;
+            } catch (NamingException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    abstract protected MessageProducer createProducer();
+
+    abstract protected Connection createConnection(Context context) throws JMSException, NamingException;
+
+    abstract protected Session createSession(Connection connection) throws JMSException, NamingException;
+
+    abstract protected MessageConsumer createConsumer();
+
+    @Override
+    public boolean supportsInputStream() {
+        return true;
+    }
+
+    @Override
+    public InputStream getInputStream(String relativePath, boolean mustExist) {
+        return getInputStream(relativePath, mustExist, false);
+    }
+
+    @Override
+    public InputStream getInputStream(String relativePath, boolean mustExist, boolean closeSession) {
+        try {
+            MessageConsumer consumer = createConsumer();
+            StringBuilder builder = new StringBuilder();
+            try {
+                Message message = consumer.receive(500);
+                if (message != null) {
+                    if (message instanceof TextMessage) {
+                        TextMessage textMessage = (TextMessage) message;
+                        String text = textMessage.getText();
+                        if (isNotBlank(text)) {
+                            builder.append(text);
+                        }
+                    } else if (message instanceof MapMessage) {
+                        MapMessage mapMessage = (MapMessage) message;
+                        String keyName = properties.get(JMS.SETTING_MESSAGE_TYPE_MAP_VALUE, "Payload");
+                        String text = mapMessage.getString(keyName);
+                        if (isNotBlank(text)) {
+                            builder.append(text);
+                        }
+                    } else if (message instanceof ObjectMessage) {
+                        ObjectMessage objMessage = (ObjectMessage) message;
+                        Object obj = objMessage.getObject();
+                        if (obj != null) {
+                            builder.append(obj.toString());
+                        }
+                    } else if (message instanceof BytesMessage) {
+                        BytesMessage bytesMessage = (BytesMessage) message;
+                        long length = bytesMessage.getBodyLength();
+                        byte[] bytes = new byte[(int) length];
+                        bytesMessage.readBytes(bytes, (int) length);
+                    }
+                }
+
+            } finally {
+                AbstractJMSJndiDirectory.this.close(consumer);
+                if (closeSession) {
+                    AbstractJMSJndiDirectory.this.close();
+                }
+            }
+            return new ByteArrayInputStream(builder.toString().getBytes());
+        } catch (JMSException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public boolean supportsOutputStream() {
+        return true;
+    }
+
+    @Override
+    public OutputStream getOutputStream(String relativePath, boolean mustExist) {
+        return new CloseableOutputStream(relativePath, false);
+    }
+
+    @Override
+    public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession, boolean append) {
+        return new CloseableOutputStream(relativePath, closeSession);
+    }
+
+    @Override
+    public void close() {
+        close(session);
+        session = null;
+        close(connection);
+        connection = null;
+    }
+
+    @Override
+    public void connect() {
+    }
+
+    class CloseableOutputStream extends ByteArrayOutputStream {
+
+        String relativePath;
+
+        MessageProducer producer;
+
+        boolean closeSession;
+
+        public CloseableOutputStream(String relativePath, boolean closeSession) {
+            this.relativePath = relativePath;
+            this.producer = createProducer();
+        }
+
+        @Override
+        public void close() throws IOException {
+            super.close();
+            String text = new String(toByteArray());
+            try {
+                initialize();
+                String msgType = properties.get(JMS.SETTING_MESSAGE_TYPE, JMS.MSG_TYPE_TEXT);
+                Message jmsMsg = null;
+                if (JMS.MSG_TYPE_TEXT.equals(msgType)) {
+                    jmsMsg = session.createTextMessage(text);
+                } else if (JMS.MSG_TYPE_BYTES.equals(msgType)) {
+                    BytesMessage msg = session.createBytesMessage();
+                    msg.writeBytes(text.getBytes());
+                    jmsMsg = msg;
+                } else if (JMS.MSG_TYPE_OBJECT.equals(msgType)) {
+                    ObjectMessage msg = session.createObjectMessage();
+                    msg.setObject(text);
+                    jmsMsg = msg;
+                } else if (JMS.MSG_TYPE_MAP.equals(msgType)) {
+                    String keyName = properties.get(JMS.SETTING_MESSAGE_TYPE_MAP_VALUE, "Payload");
+                    MapMessage msg = session.createMapMessage();
+                    msg.setString(keyName, text);
+                    jmsMsg = msg;
+                }
+
+                if (jmsMsg != null) {
+                    String jmsType = properties.get(JMS.SETTING_MESSAGE_JMS_TYPE);
+                    if (isNotBlank(jmsType)) {
+                        if (isNotBlank(relativePath)) {
+                            jmsType = FormatUtils.replaceToken(jmsType, "relativePath", relativePath, true);
+                        }
+                        jmsMsg.setJMSType(jmsType);
+                    }
+                    producer.send(jmsMsg);
+                }
+            } catch (Exception e) {
+                AbstractJMSJndiDirectory.this.close();
+                throw new RuntimeException(e);
+            } finally {
+                AbstractJMSJndiDirectory.this.close(producer);
+                if (closeSession) {
+                    AbstractJMSJndiDirectory.this.close();
+                }
+            }
+        }
+    }
+
+}

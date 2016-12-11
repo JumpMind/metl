@@ -35,6 +35,8 @@ public class JMS extends AbstractResourceRuntime {
     public static final String CREATE_MODE_JNDI = "JNDI";
 
     public static final String TYPE_TOPIC = "Topic";
+    
+    public static final String TYPE_QUEUE = "Queue";
 
     public static final String MSG_TYPE_TEXT = "Text";
 
@@ -58,7 +60,7 @@ public class JMS extends AbstractResourceRuntime {
             required = true,
             type = Type.CHOICE,
             label = "JMS Type",
-            choices = { TYPE_TOPIC },
+            choices = { TYPE_TOPIC, TYPE_QUEUE },
             defaultValue = TYPE_TOPIC)
     public static final String SETTING_TYPE = "jms.type";
 
@@ -70,7 +72,7 @@ public class JMS extends AbstractResourceRuntime {
             defaultValue = "org.apache.activemq.jndi.ActiveMQInitialContextFactory")
     public static final String SETTING_INITIAL_CONTEXT_FACTORY = Context.INITIAL_CONTEXT_FACTORY;
 
-    @SettingDefinition(type = Type.TEXT, order = 60, required = false, label = Context.PROVIDER_URL, defaultValue = "tcp://localhost:61616")
+    @SettingDefinition(type = Type.TEXT, order = 60, required = false, label = Context.PROVIDER_URL, defaultValue = "vm://localhost?broker.persistent=false")
     public static final String SETTING_PROVIDER_URL = Context.PROVIDER_URL;
 
     @SettingDefinition(type = Type.TEXT, order = 70, required = false, label = Context.SECURITY_PRINCIPAL)
@@ -84,6 +86,10 @@ public class JMS extends AbstractResourceRuntime {
 
     @SettingDefinition(type = Type.TEXT, order = 110, required = false, label = "Topic Name", defaultValue = "dynamicTopics/foo.bar")
     public static final String SETTING_TOPIC_NAME = "topic.name";
+    
+    @SettingDefinition(type = Type.TEXT, order = 120, required = false, label = "Queue Name", defaultValue = "dynamicQueues/foo.bar")
+    public static final String SETTING_QUEUE_NAME = "queue.name";
+    
 
     @SettingDefinition(
             order = 150,
@@ -126,6 +132,8 @@ public class JMS extends AbstractResourceRuntime {
                     String type = properties.get(SETTING_TYPE);
                     if (TYPE_TOPIC.equals(type)) {
                         streamableResource = new JMSJndiTopicDirectory(properties);
+                    } else if (TYPE_QUEUE.equals(type)) {
+                        streamableResource = new JMSJndiQueueDirectory(properties);
                     }
                 }
             } catch (RuntimeException e) {

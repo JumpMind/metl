@@ -40,7 +40,7 @@ import org.jumpmind.properties.TypedProperties;
 
 public class TextFileWriter extends AbstractFileWriter {
 
-    public static final String TYPE = "Text File Writer";
+    public final static String TYPE = "Text File Writer";
 
     public final static String DEFAULT_ENCODING = "UTF-8";
 
@@ -49,8 +49,16 @@ public class TextFileWriter extends AbstractFileWriter {
     public final static String SETTING_APPEND = "append";
 
     public final static String SETTING_EMPTY_FILE = "empty.file";
+    
+    public final static String SETTING_CLOSE_ON = "close.on";
 
     public static final String SETTING_TEXT_LINE_TERMINATOR = "text.line.terminator";
+    
+    public static final String CLOSE_ON_UNIT_OF_WORK = "UNIT OF WORK";
+    
+    public static final String CLOSE_ON_MESSAGE = "MESSAGE";
+    
+    public static final String CLOSE_ON_ROW = "ROW";
 
     String encoding;
 
@@ -61,6 +69,8 @@ public class TextFileWriter extends AbstractFileWriter {
     boolean emptyFile;
     
     boolean inputDataReceived = false;
+    
+    String closeOn = CLOSE_ON_UNIT_OF_WORK;
 
     BufferedWriter bufferedWriter = null;
 
@@ -72,6 +82,7 @@ public class TextFileWriter extends AbstractFileWriter {
         encoding = properties.get(SETTING_ENCODING, DEFAULT_ENCODING); 
         append = properties.is(SETTING_APPEND, false);
         emptyFile = properties.is(SETTING_EMPTY_FILE, false);
+        closeOn = properties.get(SETTING_CLOSE_ON, closeOn);               
         if (lineTerminator != null) {
             lineTerminator = StringEscapeUtils.unescapeJava(properties.get(SETTING_TEXT_LINE_TERMINATOR));
         }
@@ -106,13 +117,18 @@ public class TextFileWriter extends AbstractFileWriter {
 		                        bufferedWriter.newLine();
 		                    }
 		                }
-		                bufferedWriter.flush();
 		
 		            } else if (payload instanceof String) {
 		                bufferedWriter.write((String) payload);
 		            } else {
 		                bufferedWriter.write("");
 		            }
+		            
+                    bufferedWriter.flush();
+                    if (CLOSE_ON_ROW.equals(closeOn)) {
+                        close();
+                        initStreamAndWriter(inputMessage);
+                    }
 		        } catch (IOException e) {
 		            throw new IoException(e);
 		        }
@@ -125,7 +141,11 @@ public class TextFileWriter extends AbstractFileWriter {
             ArrayList<String> results = new ArrayList<>(1);
             results.add("{\"status\":\"success\"}");
             callback.sendTextMessage(null, results);
-        }
+        } else if (CLOSE_ON_MESSAGE.equals(closeOn)) {
+            close();
+        } 
+        
+
     }
     
     @Override

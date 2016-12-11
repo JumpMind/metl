@@ -37,7 +37,7 @@ public class DesignMenuBar extends AbstractMenuBar {
         add("File|New|Resource|Database");
         add("File|New|Resource|Directory|FTP");
         add("File|New|Resource|Directory|File System");
-        add("File|New|Resource|Directory|JMS Topic");
+        add("File|New|Resource|Directory|JMS");
         add("File|New|Resource|Directory|SFTP");
         add("File|New|Resource|Directory|SMB");
         add("File|New|Resource|HTTP Resource");

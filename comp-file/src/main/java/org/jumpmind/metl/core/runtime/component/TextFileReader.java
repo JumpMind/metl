@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,11 +46,15 @@ public class TextFileReader extends AbstractFileReader {
 
     public static final String SETTING_ROWS_PER_MESSAGE = "text.rows.per.message";
 
-    public final static String SETTING_ENCODING = "encoding";
+    public static final String SETTING_ENCODING = "encoding";
 
     public static final String SETTING_HEADER_LINES_TO_SKIP = "text.header.lines.to.skip";
+    
+    public static final String SETTING_NUMBER_OF_TIMES_TO_READ_FILE = "number.of.times.to.read.file";
 
     int textRowsPerMessage = 1000;
+    
+    int numberOfTimesToReadFile = 1;
 
     int textHeaderLinesToSkip;
 
@@ -60,6 +66,7 @@ public class TextFileReader extends AbstractFileReader {
         TypedProperties properties = getTypedProperties();
         textHeaderLinesToSkip = properties.getInt(SETTING_HEADER_LINES_TO_SKIP, textHeaderLinesToSkip);
         textRowsPerMessage = properties.getInt(SETTING_ROWS_PER_MESSAGE, textRowsPerMessage);
+        numberOfTimesToReadFile = properties.getInt(SETTING_NUMBER_OF_TIMES_TO_READ_FILE, numberOfTimesToReadFile);
         encoding = properties.get(SETTING_ENCODING, encoding);
     }
 
@@ -85,33 +92,41 @@ public class TextFileReader extends AbstractFileReader {
             BufferedReader reader = null;
             int currentFileLinesRead = 0;
             String currentLine;
+            boolean readContent = true;
             try {
-                info("Reading file: %s", file);
-                IDirectory resource = (IDirectory) getResourceReference();
-                String filePath = resolveParamsAndHeaders(file, inputMessage);
-                inStream = resource.getInputStream(filePath, mustExist);
-                if (inStream != null) {
-                    reader = new BufferedReader(new InputStreamReader(inStream, encoding));
-    
-                    while ((currentLine = reader.readLine()) != null) {
-                        currentFileLinesRead++;
-                        if (linesInMessage == textRowsPerMessage) {
+                for (int i = 0; i < numberOfTimesToReadFile && readContent; i++) {
+                    if (isNotBlank(file)) {
+                        info("Reading file: %s", file);
+                    }
+                    IDirectory resource = (IDirectory) getResourceReference();
+                    String filePath = resolveParamsAndHeaders(file, inputMessage);
+                    inStream = resource.getInputStream(filePath, mustExist);
+                    if (inStream != null) {
+                        reader = new BufferedReader(new InputStreamReader(inStream, encoding));
+
+                        while ((currentLine = reader.readLine()) != null) {
+                            currentFileLinesRead++;
+                            if (linesInMessage == textRowsPerMessage) {
+                                callback.sendTextMessage(headers, payload);
+                                linesInMessage = 0;
+                                payload = new ArrayList<String>();
+                            }
+                            if (currentFileLinesRead > textHeaderLinesToSkip) {
+                                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+                                payload.add(currentLine);
+                                linesInMessage++;
+                            }
+                        }
+                        if (payload.size() > 0) {
                             callback.sendTextMessage(headers, payload);
-                            linesInMessage = 0;
-                            payload = new ArrayList<String>();
+                            payload = new ArrayList<>();
+                        } else {
+                            readContent = false;
                         }
-                        if (currentFileLinesRead > textHeaderLinesToSkip) {
-                            getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                            payload.add(currentLine);
-                            linesInMessage++;
-                        }
+                        linesInMessage = 0;
+                    } else {
+                        info("File %s didn't exist, but Must Exist setting was false.  Continuing", file);
                     }
-                    if (payload.size() > 0) {
-                        callback.sendTextMessage(headers, payload);
-                    }
-                    linesInMessage = 0;
-                } else {
-                    info("File %s didn't exist, but Must Exist setting was false.  Continuing",file);
                 }
             } catch (IOException e) {
                 throw new IoException("Error reading from file " + e.getMessage());
