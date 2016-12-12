@@ -38,7 +38,7 @@ public class ResourceMenuManager extends AbstractDesignSelectedValueMenuManager 
                 "File|New|Resource|Directory|JMS",
                 "File|New|Resource|Directory|SFTP",
                 "File|New|Resource|Directory|SMB",
-                "File|New|Resource|HTTP Resource",
+                "File|New|Resource|HTTP",
                 "File|New|Resource|Mail Session",
                 "File|Open",
                 "File|Import...",        

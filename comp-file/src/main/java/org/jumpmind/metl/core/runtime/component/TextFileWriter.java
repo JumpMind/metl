@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -158,7 +160,11 @@ public class TextFileWriter extends AbstractFileWriter {
     	if (bufferedWriter == null) {
 	    	String fileName = getFileName(inputMessage);
 	    	IDirectory streamable = initStream(fileName);
-	        log(LogLevel.INFO, String.format("Writing text file to resource: %s with name: %s", streamable.toString(), fileName));
+	    	if (isNotBlank(fileName)) {
+	            log(LogLevel.INFO, String.format("Writing text to resource: %s with name: %s", streamable.toString(), fileName));
+	    	} else {
+	    	    log(LogLevel.INFO, String.format("Writing text to resource: %s", streamable.toString()));
+	    	}
 	       	bufferedWriter = initializeWriter(streamable.getOutputStream(fileName, mustExist, false, append));
     	}
     }

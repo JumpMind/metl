@@ -53,5 +53,10 @@ public class JMSJndiQueueDirectory extends AbstractJMSJndiDirectory {
             throw new RuntimeException(e);
         }
     }
+    
+    @Override
+    public String toString() {
+        return String.format("JMS Queue: %s", properties.get(JMS.SETTING_QUEUE_NAME)); 
+    }
 
 }

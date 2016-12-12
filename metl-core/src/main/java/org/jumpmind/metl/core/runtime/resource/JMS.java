@@ -84,13 +84,18 @@ public class JMS extends AbstractResourceRuntime {
     @SettingDefinition(type = Type.TEXT, order = 100, required = false, label = "Connection Factory Name", defaultValue = "ConnectionFactory")
     public static final String SETTING_CONNECTION_FACTORY_NAME = "connection.factory.name";
 
-    @SettingDefinition(type = Type.TEXT, order = 110, required = false, label = "Topic Name", defaultValue = "dynamicTopics/foo.bar")
-    public static final String SETTING_TOPIC_NAME = "topic.name";
-    
-    @SettingDefinition(type = Type.TEXT, order = 120, required = false, label = "Queue Name", defaultValue = "dynamicQueues/foo.bar")
+    @SettingDefinition(type = Type.TEXT, order = 110, required = false, label = "Queue Name", defaultValue = "dynamicQueues/foo.bar")
     public static final String SETTING_QUEUE_NAME = "queue.name";
     
-
+    @SettingDefinition(type = Type.TEXT, order = 120, required = false, label = "Topic Name", defaultValue = "dynamicTopics/foo.bar")
+    public static final String SETTING_TOPIC_NAME = "topic.name";
+    
+    @SettingDefinition(type = Type.TEXT, order = 130, required = false, label = "Durable Subscription Name")
+    public static final String SETTING_DURABLE_SUBSCRIPTION_NAME = "durable.subscription.name";
+    
+    @SettingDefinition(type = Type.TEXT, order = 135, required = false, label = "Client ID")
+    public static final String SETTING_CLIENT_ID = "client.id";    
+    
     @SettingDefinition(
             order = 150,
             required = true,
@@ -113,6 +118,21 @@ public class JMS extends AbstractResourceRuntime {
     @Override
     protected void start(TypedProperties properties) {
         this.properties = properties;
+        try {
+            String createMode = properties.get(SETTING_CREATE_MODE);
+            if (CREATE_MODE_JNDI.equals(createMode)) {
+                String type = properties.get(SETTING_TYPE);
+                if (TYPE_TOPIC.equals(type)) {
+                    streamableResource = new JMSJndiTopicDirectory(properties);
+                } else if (TYPE_QUEUE.equals(type)) {
+                    streamableResource = new JMSJndiQueueDirectory(properties);
+                }
+            }
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -125,23 +145,6 @@ public class JMS extends AbstractResourceRuntime {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T reference() {
-        if (streamableResource == null) {
-            try {
-                String createMode = properties.get(SETTING_CREATE_MODE);
-                if (CREATE_MODE_JNDI.equals(createMode)) {
-                    String type = properties.get(SETTING_TYPE);
-                    if (TYPE_TOPIC.equals(type)) {
-                        streamableResource = new JMSJndiTopicDirectory(properties);
-                    } else if (TYPE_QUEUE.equals(type)) {
-                        streamableResource = new JMSJndiQueueDirectory(properties);
-                    }
-                }
-            } catch (RuntimeException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
         return (T) streamableResource;
     }
 }
