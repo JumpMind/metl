@@ -522,6 +522,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                     Component targetComp = flow.findFlowStepWithId(event.getTargetNodeId()).getComponent();
                     IDefinitionFactory factory = context.getComponentDefinitionFactory();
                     XMLComponentDefinition sourceDefn = factory.getComponentDefinition(flow.getProjectVersionId(), sourceComp.getType());
+                    XMLComponentDefinition targetDefn = factory.getComponentDefinition(flow.getProjectVersionId(), targetComp.getType());
 
                     if (targetComp.getInputModel() == null) {
                         if (sourceComp.getOutputModel() != null) {
@@ -529,17 +530,26 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                         } else if (sourceDefn.isInputOutputModelsMatch() && sourceComp.getInputModel() != null) {
                             targetComp.setInputModel(sourceComp.getInputModel());
                         }
+                        
+                        if (targetDefn.isInputOutputModelsMatch()) {
+                            targetComp.setOutputModel(targetComp.getInputModel());
+                        }
                     }
 
                     if (sourceComp.getOutputModel() == null) {
                         if (targetComp.getInputModel() != null) {
                             sourceComp.setOutputModel(targetComp.getInputModel());
                         }
+                        
+                        if (sourceDefn.isInputOutputModelsMatch()) {
+                            sourceComp.setInputModel(sourceComp.getOutputModel());
+                        }
                     }
 
                     if (sourceComp.getInputModel() == null && sourceDefn.isInputOutputModelsMatch()) {
                         if (targetComp.getInputModel() != null) {
                             sourceComp.setInputModel(targetComp.getInputModel());
+                            sourceComp.setOutputModel(targetComp.getInputModel());
                         }
                     }
 

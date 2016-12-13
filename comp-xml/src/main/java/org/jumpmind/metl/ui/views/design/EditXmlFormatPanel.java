@@ -24,8 +24,8 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
 import org.jdom2.Attribute;
@@ -55,6 +55,7 @@ import com.vaadin.data.util.filter.IsNull;
 import com.vaadin.data.util.filter.Not;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -124,7 +125,8 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
         combo.setNewItemsAllowed(true);
         combo.setInvalidAllowed(true);
         combo.setTextInputAllowed(true);
-        //combo.setScrollToSelectedItem(true);
+        combo.setScrollToSelectedItem(true);
+        combo.setFilteringMode(FilteringMode.CONTAINS);
         grid.getColumn("xpath").setEditorField(combo).setExpandRatio(1);
         addShowPopulatedFilter("xpath", filterRow);
         grid.setEditorBuffered(false);
@@ -248,7 +250,7 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
         builder.setXMLReaderFactory(XMLReaders.NONVALIDATING);
         builder.setFeature("http://xml.org/sax/features/validation", false);
         Setting setting = component.findSetting(XmlFormatter.XML_FORMATTER_TEMPLATE);
-        xpathChoices = new HashSet<String>();
+        xpathChoices = new TreeSet<String>();
         if (StringUtils.isNotBlank(setting.getValue())) {
             try {
                 Document document = builder.build(new StringReader(setting.getValue()));

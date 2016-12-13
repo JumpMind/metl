@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -44,6 +46,7 @@ import org.jdom2.Document;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaders;
 import org.jumpmind.metl.ui.views.design.ChooseWsdlServiceOperationWindow.ServiceChosenListener;
+import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.reficio.ws.builder.SoapBuilder;
 import org.reficio.ws.builder.SoapOperation;
 import org.reficio.ws.builder.core.Wsdl;
@@ -66,7 +69,6 @@ import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 import jlibs.xml.sax.XMLDocument;
@@ -74,43 +76,41 @@ import jlibs.xml.xsd.XSInstance;
 import jlibs.xml.xsd.XSParser;
 
 @SuppressWarnings("serial")
-public class ImportXmlTemplateWindow extends Window implements ValueChangeListener, ClickListener, Receiver, SucceededListener {
+public class ImportXmlTemplateWindow extends ResizableWindow implements ValueChangeListener, ClickListener, Receiver, SucceededListener {
 
     private static String OPTION_TEXT = "Text";
-    
+
     private static String OPTION_FILE = "File";
-    
+
     private static String OPTION_URL = "URL";
-    
+
     VerticalLayout optionLayout;
-    
+
     OptionGroup optionGroup;
-    
+
     AceEditor editor;
-    
+
     Upload upload;
-    
+
     TextField urlTextField;
-    
+
     ByteArrayOutputStream uploadedData;
-    
+
     ImportXmlListener listener;
 
     public ImportXmlTemplateWindow(ImportXmlListener listener) {
         this.listener = listener;
         setCaption("Import XML Template");
-        setModal(true);
         setWidth(600.0f, Unit.PIXELS);
         setHeight(500.0f, Unit.PIXELS);
 
         VerticalLayout layout = new VerticalLayout();
+        layout.setSizeFull();
         layout.setSpacing(true);
         layout.setMargin(true);
         layout.addStyleName(ValoTheme.WINDOW_BOTTOM_TOOLBAR);
-        setContent(layout);
-
         layout.addComponent(new Label("Import XML from either an XSD or WSDL source."));
-        
+
         optionGroup = new OptionGroup("Select the location of the XSD or WSDL.");
         optionGroup.addItem(OPTION_TEXT);
         optionGroup.addItem(OPTION_FILE);
@@ -120,14 +120,19 @@ public class ImportXmlTemplateWindow extends Window implements ValueChangeListen
         optionGroup.select(OPTION_TEXT);
         optionGroup.addValueChangeListener(this);
         layout.addComponent(optionGroup);
-        
+
         optionLayout = new VerticalLayout();
+        optionLayout.setSizeFull();
+
         editor = new AceEditor();
         editor.setCaption("Enter the XML text:");
         editor.setMode(AceMode.xml);
-        editor.setWidth(100f, Unit.PERCENTAGE);
+        editor.setSizeFull();
         editor.setHighlightActiveLine(true);
         editor.setShowPrintMargin(false);
+
+        Button importButton = new Button("Import");
+        importButton.addClickListener(this);
 
         upload = new Upload(null, this);
         upload.addSucceededListener(this);
@@ -137,10 +142,10 @@ public class ImportXmlTemplateWindow extends Window implements ValueChangeListen
         layout.addComponent(optionLayout);
         layout.setExpandRatio(optionLayout, 1.0f);
         rebuildOptionLayout();
-        
-        Button importButton = new Button("Import");
-        importButton.addClickListener(this);
-        layout.addComponent(importButton);
+
+        addComponent(layout, 1);
+        addComponent(buildButtonFooter(importButton, buildCloseButton()));
+
     }
 
     protected void rebuildOptionLayout() {
@@ -154,7 +159,7 @@ public class ImportXmlTemplateWindow extends Window implements ValueChangeListen
         } else if (optionGroup.getValue().equals(OPTION_URL)) {
             optionLayout.addComponent(urlTextField);
             urlTextField.focus();
-        }        
+        }
     }
 
     @Override
@@ -194,24 +199,25 @@ public class ImportXmlTemplateWindow extends Window implements ValueChangeListen
     }
 
     protected void importXml(String text) {
-        SAXBuilder builder = new SAXBuilder();
-        builder.setXMLReaderFactory(XMLReaders.NONVALIDATING);
-        builder.setFeature("http://xml.org/sax/features/validation", false);
-        try {
-            Document document = builder.build(new StringReader(text));
-            String rootName = document.getRootElement().getName();
-            if (rootName.equals("definitions")) {
-                importFromWsdl(text);
-            } else if (rootName.equals("schema")) {
-                importFromXsd(text);
-            } else {
-                Notification note = new Notification("Unrecognized Content", 
-                        "The XML file has a root element of " + rootName + 
-                        ", but expected \"definitions\" for WSDL or \"schema\" for XSD.");
-                note.show(Page.getCurrent());
+        if (isNotBlank(text)) {
+            SAXBuilder builder = new SAXBuilder();
+            builder.setXMLReaderFactory(XMLReaders.NONVALIDATING);
+            builder.setFeature("http://xml.org/sax/features/validation", false);
+            try {
+                Document document = builder.build(new StringReader(text));
+                String rootName = document.getRootElement().getName();
+                if (rootName.equals("definitions")) {
+                    importFromWsdl(text);
+                } else if (rootName.equals("schema")) {
+                    importFromXsd(text);
+                } else {
+                    Notification note = new Notification("Unrecognized Content", "The XML file has a root element of " + rootName
+                            + ", but expected \"definitions\" for WSDL or \"schema\" for XSD.");
+                    note.show(Page.getCurrent());
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -225,8 +231,7 @@ public class ImportXmlTemplateWindow extends Window implements ValueChangeListen
 
         XSNamedMap map = xsModel.getComponents(XSConstants.ELEMENT_DECLARATION);
 
-        QName rootElement = new QName(map.item(0).getNamespace(), map.item(0).getName(),
-                XMLConstants.DEFAULT_NS_PREFIX);
+        QName rootElement = new QName(map.item(0).getNamespace(), map.item(0).getName(), XMLConstants.DEFAULT_NS_PREFIX);
         StringWriter writer = new StringWriter();
         XMLDocument sampleXml = new XMLDocument(new StreamResult(writer), true, 4, null);
         xsInstance.generate(xsModel, rootElement, sampleXml);
@@ -253,8 +258,7 @@ public class ImportXmlTemplateWindow extends Window implements ValueChangeListen
         } else if (allOperations.size() == 1) {
             importFromWsdl(wsdl, allOperations.get(0));
         } else {
-            ChooseWsdlServiceOperationWindow dialog = new ChooseWsdlServiceOperationWindow(
-                    allOperations, new ServiceChosenListener() {
+            ChooseWsdlServiceOperationWindow dialog = new ChooseWsdlServiceOperationWindow(allOperations, new ServiceChosenListener() {
                 public boolean onOk(SoapOperation operation) {
                     importFromWsdl(wsdl, operation);
                     return true;
@@ -271,7 +275,7 @@ public class ImportXmlTemplateWindow extends Window implements ValueChangeListen
             listener.onImport(xml);
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }        
+        }
     }
 
     public static interface ImportXmlListener extends Serializable {
