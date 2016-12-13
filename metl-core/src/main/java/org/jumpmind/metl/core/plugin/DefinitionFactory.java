@@ -21,6 +21,7 @@
 package org.jumpmind.metl.core.plugin;
 
 import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.*;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.jumpmind.metl.core.plugin.PluginConstants.*;
 import java.io.IOException;
 import java.io.InputStream;
@@ -104,26 +105,28 @@ public class DefinitionFactory implements IDefinitionFactory {
                     try {
                         matched = true;
                         String latestVersion = pluginManager.getLatestLocalVersion(pvcp.getArtifactGroup(), pvcp.getArtifactName());
-                        Version version = versionScheme.parseVersion(latestVersion);
-                        if (!pvcp.getArtifactVersion().equals(latestVersion)) {
-                            Version previousVersion = versionScheme.parseVersion(pvcp.getArtifactVersion());
-                            if (previousVersion.compareTo(version) == -1) {
-                                if (!pvcp.isPinVersion()) {
-                                    logger.info("Upgrading {}:{} from {} to {}", pvcp.getArtifactGroup(), pvcp.getArtifactName(),
-                                            pvcp.getArtifactVersion(), latestVersion);
-                                    pvcp.setArtifactVersion(latestVersion);
-                                    pvcp.setLatestArtifactVersion(latestVersion);
+                        if (isNotBlank(latestVersion)) {
+                            Version version = versionScheme.parseVersion(latestVersion);
+                            if (!pvcp.getArtifactVersion().equals(latestVersion)) {
+                                Version previousVersion = versionScheme.parseVersion(pvcp.getArtifactVersion());
+                                if (previousVersion.compareTo(version) == -1) {
+                                    if (!pvcp.isPinVersion()) {
+                                        logger.info("Upgrading {}:{} from {} to {}", pvcp.getArtifactGroup(), pvcp.getArtifactName(),
+                                                pvcp.getArtifactVersion(), latestVersion);
+                                        pvcp.setArtifactVersion(latestVersion);
+                                        pvcp.setLatestArtifactVersion(latestVersion);
+                                    } else {
+                                        logger.info("Not upgrading {}:{} from {} to {} because the version is pinned",
+                                                pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion(), latestVersion);
+                                        pvcp.setLatestArtifactVersion(latestVersion);
+                                    }
+                                    configurationService.save(pvcp);
                                 } else {
-                                    logger.info("Not upgrading {}:{} from {} to {} because the version is pinned", pvcp.getArtifactGroup(),
-                                            pvcp.getArtifactName(), pvcp.getArtifactVersion(), latestVersion);
-                                    pvcp.setLatestArtifactVersion(latestVersion);
+                                    logger.info(
+                                            "The latest version in the local repository was older than the configured version.  The configured version was {}:{}:{}.  "
+                                                    + "The latest version is {}",
+                                            pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion(), latestVersion);
                                 }
-                                configurationService.save(pvcp);
-                            } else {
-                                logger.info(
-                                        "The latest version in the local repository was older than the configured version.  The configured version was {}:{}:{}.  "
-                                                + "The latest version is {}",
-                                        pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion(), latestVersion);
                             }
                         }
 
@@ -182,7 +185,7 @@ public class DefinitionFactory implements IDefinitionFactory {
         Collection<XMLAbstractDefinition> definitions = definitionsByProjectVersionIdById.get(projectVersionId).values();
         for (XMLAbstractDefinition xmlAbstractDefinition : definitions) {
             if (xmlAbstractDefinition instanceof XMLComponentDefinition) {
-                components.add((XMLComponentDefinition)xmlAbstractDefinition);
+                components.add((XMLComponentDefinition) xmlAbstractDefinition);
             }
         }
         return components;
@@ -207,14 +210,14 @@ public class DefinitionFactory implements IDefinitionFactory {
         if (componentsById != null) {
             XMLAbstractDefinition component = componentsById.get(id);
             if (component instanceof XMLComponentDefinition) {
-                defintion = (XMLComponentDefinition)component;
+                defintion = (XMLComponentDefinition) component;
             }
-        } 
-        
+        }
+
         if (defintion == null) {
             logger.warn("Could not find components for project version of {} with a type id of {}", projectVersionId, id);
         }
-        
+
         return defintion;
     }
 
@@ -227,7 +230,7 @@ public class DefinitionFactory implements IDefinitionFactory {
         try {
 
             JAXBContext jc = JAXBContext.newInstance(XMLDefinitions.class, XMLComponentDefinition.class, XMLSetting.class, XMLSettings.class,
-                    XMLSettingChoices.class, ObjectFactory.class);           
+                    XMLSettingChoices.class, ObjectFactory.class);
             Unmarshaller unmarshaller = jc.createUnmarshaller();
             List<InputStream> componentXmls = loadResources("plugin.xml", classLoader);
             Map<String, XMLAbstractDefinition> componentsById = definitionsByProjectVersionIdById.get(projectVersionId);
@@ -249,8 +252,8 @@ public class DefinitionFactory implements IDefinitionFactory {
                         if (!componentsById.containsKey(id)) {
                             xmlComponent.setClassLoader(classLoader);
                             componentsById.put(id, xmlComponent);
-                            logger.debug("Registering component '{}' with an id of '{}' for plugin '{}' for project '{}'", xmlComponent.getName(), id,
-                                    pluginId, projectVersionId);
+                            logger.debug("Registering component '{}' with an id of '{}' for plugin '{}' for project '{}'",
+                                    xmlComponent.getName(), id, pluginId, projectVersionId);
 
                             if (xmlComponent.getSettings() == null) {
                                 xmlComponent.setSettings(new XMLSettings());
@@ -275,7 +278,7 @@ public class DefinitionFactory implements IDefinitionFactory {
                             }
                         }
                     }
-                    
+
                     List<XMLResourceDefinition> resourceList = components.getResource();
                     for (XMLResourceDefinition xmlResource : resourceList) {
                         String id = xmlResource.getId();
@@ -284,8 +287,8 @@ public class DefinitionFactory implements IDefinitionFactory {
                         if (!componentsById.containsKey(id)) {
                             xmlResource.setClassLoader(classLoader);
                             componentsById.put(id, xmlResource);
-                            logger.debug("Registering resource '{}' with an id of '{}' for plugin '{}' for project '{}'", xmlResource.getName(), id,
-                                    pluginId, projectVersionId);
+                            logger.debug("Registering resource '{}' with an id of '{}' for plugin '{}' for project '{}'",
+                                    xmlResource.getName(), id, pluginId, projectVersionId);
 
                             if (xmlResource.getSettings() == null) {
                                 xmlResource.setSettings(new XMLSettings());
@@ -316,7 +319,7 @@ public class DefinitionFactory implements IDefinitionFactory {
             throw new RuntimeException(e);
         }
     }
-    
+
     private final void addXMLAbstractDefition(String pluginId, XMLAbstractDefinition definition) {
         List<XMLAbstractDefinition> componentsForPluginId = definitionsByPluginId.get(pluginId);
         if (componentsForPluginId == null) {

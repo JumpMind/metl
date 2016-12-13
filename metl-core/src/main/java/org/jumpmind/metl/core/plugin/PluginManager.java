@@ -131,7 +131,12 @@ public class PluginManager implements IPluginManager {
         List<Plugin> existing = configurationService.findPlugins();
         List<PluginRepository> repositories = configurationService.findPluginRepositories();
         for (Plugin plugin : existing) {
-            getClassLoader(plugin.getArtifactGroup(), plugin.getArtifactName(), plugin.getArtifactVersion(), repositories);
+            try {
+                getClassLoader(plugin.getArtifactGroup(), plugin.getArtifactName(), plugin.getArtifactVersion(), repositories);
+            } catch (Exception ex) {
+                logger.warn("Failed to load plugin: %s", plugin);
+                logger.debug("", ex);
+            }
         }
     }
 
@@ -175,10 +180,10 @@ public class PluginManager implements IPluginManager {
             if (!checked.contains(id)) {
                 List<Plugin> existing = configurationService.findPlugins();
                 String latestVersion = getLatestLocalVersion(plugin.getArtifactGroup(), plugin.getArtifactName());
-                if (latestVersion != null) { 
+                if (latestVersion != null) {
                     Plugin potentialNewVersion = new Plugin(plugin.getArtifactGroup(), plugin.getArtifactName(), latestVersion,
                             plugin.getLoadOrder());
-                    
+
                     boolean matched = false;
                     for (Plugin existingPlugin : existing) {
                         if (existingPlugin.equals(potentialNewVersion)) {
@@ -249,7 +254,7 @@ public class PluginManager implements IPluginManager {
                 plugins.put(pluginId, classLoader);
             } catch (Exception e) {
                 logger.warn("Failed to get class loader for {}:{}:{}", artifactGroup, artifactName, artifactVersion);
-                logger.error("", e);
+                logger.debug("", e);
             }
         }
         return classLoader;

@@ -44,7 +44,6 @@ public class PluginTransferListener extends AbstractTransferListener {
         for (Map.Entry<TransferResource, Long> entry : downloads.entrySet()) {
             long total = entry.getKey().getContentLength();
             long complete = entry.getValue().longValue();
-
             buffer.append(getStatus(complete, total)).append("  ");
         }
 
@@ -52,7 +51,9 @@ public class PluginTransferListener extends AbstractTransferListener {
         lastLength = buffer.length();
         pad(buffer, pad);
 
-        logger.info(buffer.toString());
+        if (buffer.length() > 0) {
+            logger.info(buffer.toString());
+        }
     }
 
     private String getStatus(long complete, long total) {
@@ -102,9 +103,8 @@ public class PluginTransferListener extends AbstractTransferListener {
     @Override
     public void transferFailed(TransferEvent event) {
         transferCompleted(event);
-
         if (!(event.getException() instanceof MetadataNotFoundException)) {
-            logger.error("", event.getException());
+            logger.debug("", event.getException());
         }
     }
 
@@ -112,7 +112,9 @@ public class PluginTransferListener extends AbstractTransferListener {
         downloads.remove(event.getResource());
         StringBuilder buffer = new StringBuilder(64);
         pad(buffer, lastLength);
-        logger.info(buffer.toString());
+        if (buffer.length() > 0) {
+            logger.info(buffer.toString());
+        }
     }
 
     public void transferCorrupted(TransferEvent event) {

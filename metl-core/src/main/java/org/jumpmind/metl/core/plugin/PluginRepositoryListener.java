@@ -44,11 +44,11 @@ public class PluginRepositoryListener extends AbstractRepositoryListener {
     }
 
     public void artifactDownloading(RepositoryEvent event) {
-        logger.info("Downloading artifact " + event.getArtifact() + " from " + event.getRepository());
+        logger.debug("Downloading artifact " + event.getArtifact() + " from " + event.getRepository());
     }
 
     public void artifactDownloaded(RepositoryEvent event) {
-        logger.info("Downloaded artifact " + event.getArtifact() + " from " + event.getRepository());
+        logger.debug("Downloaded artifact " + event.getArtifact() + " from " + event.getRepository());
     }
 
     public void artifactResolving(RepositoryEvent event) {
