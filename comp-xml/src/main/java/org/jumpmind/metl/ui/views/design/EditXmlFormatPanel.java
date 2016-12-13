@@ -118,14 +118,13 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
         addColumn("attributeName", filterRow);
 
         ComboBox combo = new ComboBox();
-        combo.addBlurListener(e->saveXPathSettings());
+        combo.addValueChangeListener(e->saveXPathSettings());
         combo.setWidth(100, Unit.PERCENTAGE);
-        combo.setPageLength(20);
         combo.setImmediate(true);
         combo.setNewItemsAllowed(true);
         combo.setInvalidAllowed(true);
         combo.setTextInputAllowed(true);
-        combo.setScrollToSelectedItem(true);
+        //combo.setScrollToSelectedItem(true);
         grid.getColumn("xpath").setEditorField(combo).setExpandRatio(1);
         addShowPopulatedFilter("xpath", filterRow);
         grid.setEditorBuffered(false);
