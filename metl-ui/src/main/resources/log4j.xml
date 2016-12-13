@@ -67,6 +67,7 @@
         <priority value="ERROR" />
     </category>
     
+    <!-- 
     <category name="org.jumpmind.metl.core.plugin.PluginManager">
         <priority value="DEBUG" />
     </category>        
@@ -74,7 +75,7 @@
     <category name="org.jumpmind.metl.core.runtime.component.definition">
         <priority value="DEBUG" />
     </category>        
-    
+     -->
     
     <root>
         <priority value="WARN" />
