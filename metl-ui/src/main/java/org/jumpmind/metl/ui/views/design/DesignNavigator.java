@@ -30,11 +30,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.jumpmind.metl.core.model.AbstractNamedObject;
+import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.ComponentName;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
-import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FolderName;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelName;
@@ -43,6 +43,8 @@ import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.ResourceName;
+import org.jumpmind.metl.core.model.Setting;
+import org.jumpmind.metl.core.model.UserSetting;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.resource.Datasource;
 import org.jumpmind.metl.core.runtime.resource.Ftp;
@@ -118,7 +120,7 @@ public class DesignNavigator extends VerticalLayout {
         setSizeFull();
         addStyleName(ValoTheme.MENU_ROOT);
 
-        treeTable = buildTreeTable();
+        buildTreeTable();
 
         menuBar = new DesignMenuBar(this, treeTable);
         addComponent(menuBar);
@@ -154,55 +156,53 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     protected TreeTable buildTreeTable() {
-        final TreeTable table = new TreeTable();
-        table.addStyleName(ValoTheme.TREETABLE_NO_HORIZONTAL_LINES);
-        table.addStyleName(ValoTheme.TREETABLE_NO_STRIPES);
-        table.addStyleName(ValoTheme.TREETABLE_NO_VERTICAL_LINES);
-        table.addStyleName(ValoTheme.TREETABLE_BORDERLESS);
-        table.addStyleName("noselect");
-        table.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
-        table.setItemCaptionMode(ItemCaptionMode.EXPLICIT);
-        table.setSizeFull();
-        table.setCacheRate(100);
-        table.setPageLength(100);
-        table.setImmediate(true);
-        table.setSelectable(true);
-        table.setEditable(true);
-        table.setContainerDataSource(
-                new BeanItemContainer<AbstractNamedObject>(AbstractNamedObject.class));
+        treeTable = new TreeTable();
+        treeTable.addStyleName(ValoTheme.TREETABLE_NO_HORIZONTAL_LINES);
+        treeTable.addStyleName(ValoTheme.TREETABLE_NO_STRIPES);
+        treeTable.addStyleName(ValoTheme.TREETABLE_NO_VERTICAL_LINES);
+        treeTable.addStyleName(ValoTheme.TREETABLE_BORDERLESS);
+        treeTable.addStyleName("noselect");
+        treeTable.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
+        treeTable.setItemCaptionMode(ItemCaptionMode.EXPLICIT);
+        treeTable.setSizeFull();
+        treeTable.setCacheRate(100);
+        treeTable.setPageLength(100);
+        treeTable.setImmediate(true);
+        treeTable.setSelectable(true);
+        treeTable.setEditable(true);
+        treeTable.setContainerDataSource(new BeanItemContainer<AbstractNamedObject>(AbstractNamedObject.class));
 
-        table.setTableFieldFactory(new DefaultFieldFactory() {
+        treeTable.setTableFieldFactory(new DefaultFieldFactory() {
             @Override
-            public Field<?> createField(Container container, Object itemId, Object propertyId,
-                    Component uiContext) {
+            public Field<?> createField(Container container, Object itemId, Object propertyId, Component uiContext) {
                 return buildEditableNavigatorField(itemId);
             }
         });
-        table.setVisibleColumns(new Object[] { "name" });
-        table.setColumnExpandRatio("name", 1);
-        table.addItemClickListener(event -> {
+        treeTable.setVisibleColumns(new Object[] { "name" });
+        treeTable.setColumnExpandRatio("name", 1);
+        treeTable.addItemClickListener(event -> {
             if (event.getButton() == MouseButton.LEFT) {
                 if (event.isDoubleClick()) {
                     abortEditingItem();
                     open(event.getItemId());
-                    if (table.areChildrenAllowed(event.getItemId())) {
+                    if (treeTable.areChildrenAllowed(event.getItemId())) {
                         Object item = event.getItemId();
-                        table.setCollapsed(item, !table.isCollapsed(item));
+                        treeTable.setCollapsed(item, !treeTable.isCollapsed(item));
                     }
                 }
             }
         });
-        table.addExpandListener(event -> {
+        treeTable.addExpandListener(event -> {
             if (event.getItemId() instanceof FolderName) {
-                table.setItemIcon(event.getItemId(), Icons.FOLDER_OPEN);
+                treeTable.setItemIcon(event.getItemId(), Icons.FOLDER_OPEN);
             }
         });
-        table.addCollapseListener(event -> {
+        treeTable.addCollapseListener(event -> {
             if (event.getItemId() instanceof FolderName) {
-                table.setItemIcon(event.getItemId(), Icons.FOLDER_CLOSED);
+                treeTable.setItemIcon(event.getItemId(), Icons.FOLDER_CLOSED);
             }
         });
-        table.setCellStyleGenerator((Table source, Object itemId, Object propertyId) -> {
+        treeTable.setCellStyleGenerator((Table source, Object itemId, Object propertyId) -> {
             if ("name".equals(propertyId)) {
                 if (itemId instanceof FolderName) {
                     return "folder";
@@ -221,8 +221,18 @@ public class DesignNavigator extends VerticalLayout {
             return null;
 
         });
+        treeTable.addValueChangeListener(e -> selectionChanged());
 
-        return table;
+        return treeTable;
+    }
+
+    protected void selectionChanged() {
+        AbstractObject object = (AbstractObject) treeTable.getValue();
+        if (object != null) {
+            Setting setting = context.getUser().findSetting(UserSetting.SETTING_DESIGN_NAVIGATOR_SELECTION_ID);
+            setting.setValue(object.getId());
+            context.getConfigurationService().save(setting);
+        }
     }
 
     protected Field<?> buildEditableNavigatorField(Object itemId) {
@@ -244,8 +254,7 @@ public class DesignNavigator extends VerticalLayout {
                     abortEditingItem();
                 }
             });
-            field.addValueChangeListener(
-                    event -> finishEditingItem((String) event.getProperty().getValue()));
+            field.addValueChangeListener(event -> finishEditingItem((String) event.getProperty().getValue()));
             field.addBlurListener(event -> abortEditingItem());
             return field;
         } else {
@@ -271,8 +280,7 @@ public class DesignNavigator extends VerticalLayout {
             Object selected = itemBeingEdited;
             Method method = null;
             try {
-                method = configurationService.getClass().getMethod("save",
-                        itemBeingEdited.getClass());
+                method = configurationService.getClass().getMethod("save", itemBeingEdited.getClass());
             } catch (NoSuchMethodException e) {
             } catch (SecurityException e) {
             }
@@ -338,7 +346,7 @@ public class DesignNavigator extends VerticalLayout {
                 treeTable.addItem(projectVersion);
                 if (projectVersion.locked()) {
                     treeTable.setItemIcon(projectVersion, FontAwesome.LOCK);
-                } else { 
+                } else {
                     treeTable.setItemIcon(projectVersion, Icons.PROJECT_VERSION);
                 }
                 treeTable.setChildrenAllowed(projectVersion, true);
@@ -346,14 +354,48 @@ public class DesignNavigator extends VerticalLayout {
                 addFlowsToFolder(addVirtualFolder("Flows", projectVersion), projectVersion, false);
                 addFlowsToFolder(addVirtualFolder("Tests", projectVersion), projectVersion, true);
                 addModelsToFolder(addVirtualFolder(LABEL_MODELS, projectVersion), projectVersion);
-                addResourcesToFolder(addVirtualFolder(LABEL_RESOURCES, projectVersion),
-                        projectVersion);
-                addDependenciesToFolder(addVirtualFolder(LABEL_DEPENDENCIES, projectVersion),
-                        projectVersion);
+                addResourcesToFolder(addVirtualFolder(LABEL_RESOURCES, projectVersion), projectVersion);
+                addDependenciesToFolder(addVirtualFolder(LABEL_DEPENDENCIES, projectVersion), projectVersion);
             }
         }
 
-        treeTable.select(selected);
+        if (selected == null) {
+            Setting setting = context.getUser().findSetting(UserSetting.SETTING_DESIGN_NAVIGATOR_SELECTION_ID);
+            if (isNotBlank(setting.getValue())) {
+                Collection<?> items = treeTable.getItemIds();
+                for (Object object : items) {
+                    if (setting.getValue().equals(((AbstractObject) object).getId())) {
+                        selected = object;
+                        break;
+                    } else {
+                        selected = findChild(setting.getValue(), object);
+                        if (selected != null) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        selectAndExpand(selected);
+    }
+
+    protected Object findChild(String id, Object parent) {
+        Collection<?> items = treeTable.getChildren(parent);
+        if (items != null) {
+            for (Object object : items) {
+                if (id.equals(((AbstractObject) object).getId())) {
+                    return object;
+                } else {
+                    Object obj = findChild(id, object);
+                    if (obj != null) {
+                        return obj;
+                    }
+                }
+            }
+        }
+        return null;
+
     }
 
     protected FolderName addVirtualFolder(String name, ProjectVersion projectVersion) {
@@ -372,8 +414,7 @@ public class DesignNavigator extends VerticalLayout {
 
     protected void addResourcesToFolder(FolderName folder, ProjectVersion projectVersion) {
         IConfigurationService configurationService = context.getConfigurationService();
-        List<ResourceName> resources = configurationService
-                .findResourcesInProject(projectVersion.getId());
+        List<ResourceName> resources = configurationService.findResourcesInProject(projectVersion.getId());
         AbstractObjectNameBasedSorter.sort(resources);
         for (ResourceName resource : resources) {
             this.treeTable.setChildrenAllowed(folder, true);
@@ -397,8 +438,7 @@ public class DesignNavigator extends VerticalLayout {
 
     protected void addSharedComponentsToFolder(FolderName folder, ProjectVersion projectVersion) {
         IConfigurationService configurationService = context.getConfigurationService();
-        List<ComponentName> components = configurationService
-                .findSharedComponentsInProject(projectVersion.getId());
+        List<ComponentName> components = configurationService.findSharedComponentsInProject(projectVersion.getId());
         AbstractObjectNameBasedSorter.sort(components);
         for (ComponentName component : components) {
             this.treeTable.setChildrenAllowed(folder, true);
@@ -415,8 +455,7 @@ public class DesignNavigator extends VerticalLayout {
 
     protected void addDependenciesToFolder(FolderName folder, ProjectVersion projectVersion) {
         IConfigurationService configurationService = context.getConfigurationService();
-        List<ProjectVersionDependency> dependencies = configurationService
-                .findProjectDependencies(projectVersion.getId());
+        List<ProjectVersionDependency> dependencies = configurationService.findProjectDependencies(projectVersion.getId());
         AbstractObjectNameBasedSorter.sort(dependencies);
         for (ProjectVersionDependency dependency : dependencies) {
             this.treeTable.setChildrenAllowed(folder, true);
@@ -432,11 +471,9 @@ public class DesignNavigator extends VerticalLayout {
 
     }
 
-    protected void addFlowsToFolder(FolderName folder, ProjectVersion projectVersion,
-            boolean test) {
+    protected void addFlowsToFolder(FolderName folder, ProjectVersion projectVersion, boolean test) {
         IConfigurationService configurationService = context.getConfigurationService();
-        List<FlowName> flows = configurationService.findFlowsInProject(projectVersion.getId(),
-                test);
+        List<FlowName> flows = configurationService.findFlowsInProject(projectVersion.getId(), test);
         AbstractObjectNameBasedSorter.sort(flows);
         for (FlowName flow : flows) {
             this.treeTable.setChildrenAllowed(folder, true);
@@ -470,13 +507,21 @@ public class DesignNavigator extends VerticalLayout {
 
     }
 
-    public void unselectAll() {
-        treeTable.setValue(null);
+    protected void selectAndExpand(Object value) {
+        treeTable.setValue(value);
+        if (value != null) {
+            treeTable.setCollapsed(value, false);
+            Object parent = treeTable.getParent(value);
+            while (parent != null) {
+                treeTable.setCollapsed(parent, false);
+                parent = treeTable.getParent(parent);
+            }
+        }
+        treeTable.focus();
     }
 
-    protected boolean isDeleteButtonEnabled(Object selected) {
-        return selected instanceof FlowName || selected instanceof FlowStep
-                || selected instanceof ModelName || selected instanceof ResourceName;
+    public void unselectAll() {
+        treeTable.setValue(null);
     }
 
     public void doOpen() {
@@ -491,22 +536,19 @@ public class DesignNavigator extends VerticalLayout {
         } else if (item instanceof ModelName) {
             ModelName model = (ModelName) item;
             ProjectVersion projectVersion = findProjectVersion(model);
-            EditModelPanel editModel = new EditModelPanel(context, model.getId(),
-                    context.isReadOnly(projectVersion, Privilege.DESIGN));
+            EditModelPanel editModel = new EditModelPanel(context, model.getId(), context.isReadOnly(projectVersion, Privilege.DESIGN));
             tabs.addCloseableTab(model.getId(), model.getName(), Icons.MODEL, editModel);
         } else if (item instanceof ResourceName) {
             ResourceName resource = (ResourceName) item;
             ProjectVersion projectVersion = findProjectVersion(resource);
-            PropertySheet sheet = new PropertySheet(context, tabs,
-                    context.isReadOnly(projectVersion, Privilege.DESIGN));
+            PropertySheet sheet = new PropertySheet(context, tabs, context.isReadOnly(projectVersion, Privilege.DESIGN));
             sheet.setSource(context.getConfigurationService().findResource(resource.getId()));
-            tabs.addCloseableTab(resource.getId(), resource.getName(), treeTable.getItemIcon(item),
-                    sheet);
+            tabs.addCloseableTab(resource.getId(), resource.getName(), treeTable.getItemIcon(item), sheet);
         } else if (item instanceof ProjectVersion) {
-            ProjectVersion projectVersion = (ProjectVersion)item;
+            ProjectVersion projectVersion = (ProjectVersion) item;
             ProjectVersionSettingsPanel panel = new ProjectVersionSettingsPanel(projectVersion, context, this);
-            tabs.addCloseableTab(projectVersion.getId(), String.format("%s (%s)", projectVersion.getProject().getName(), 
-                    projectVersion.getName()), Icons.PROJECT_VERSION, panel);
+            tabs.addCloseableTab(projectVersion.getId(),
+                    String.format("%s (%s)", projectVersion.getProject().getName(), projectVersion.getName()), Icons.PROJECT_VERSION, panel);
         }
     }
 
@@ -515,8 +557,7 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public void doImport() {
-        ImportDialog.show("Import Config", "Click the import button to import your config",
-                new ImportConfigurationListener());
+        ImportDialog.show("Import Config", "Click the import button to import your config", new ImportConfigurationListener());
     }
 
     public void doCopy() {
@@ -570,12 +611,10 @@ public class DesignNavigator extends VerticalLayout {
             }
 
             if (!unique) {
-                nextVersionLabel = original.getVersionLabel() + "."
-                        + new SimpleDateFormat("yyyyMMddmmhhss").format(new Date());
+                nextVersionLabel = original.getVersionLabel() + "." + new SimpleDateFormat("yyyyMMddmmhhss").format(new Date());
                 unique = true;
             }
-            ProjectVersion newVersion = configurationService.saveNewVersion(nextVersionLabel,
-                    original);
+            ProjectVersion newVersion = configurationService.saveNewVersion(nextVersionLabel, original);
             context.getComponentDefinitionFactory().refresh(newVersion.getId());
 
             treeTable.addItem(newVersion);
@@ -592,35 +631,29 @@ public class DesignNavigator extends VerticalLayout {
         Object object = treeTable.getValue();
         if (object instanceof FlowName) {
             FlowName flow = (FlowName) object;
-            ConfirmDialog.show("Delete Flow?",
-                    "Are you sure you want to delete the '" + flow.getName() + "' flow?",
+            ConfirmDialog.show("Delete Flow?", "Are you sure you want to delete the '" + flow.getName() + "' flow?",
                     new DeleteFlowConfirmationListener(flow));
         } else if (object instanceof ResourceName) {
             ResourceName resource = (ResourceName) object;
-            ConfirmDialog.show("Delete Resource?",
-                    "Are you sure you want to delete the '" + resource.getName() + "' resource?",
+            ConfirmDialog.show("Delete Resource?", "Are you sure you want to delete the '" + resource.getName() + "' resource?",
                     new DeleteResourceConfirmationListener(resource));
 
         } else if (object instanceof ModelName) {
             ModelName model = (ModelName) object;
             if (!context.getConfigurationService().isModelUsed(model.getId())) {
-                ConfirmDialog.show("Delete Model?",
-                        "Are you sure you want to delete the '" + model.getName() + "' model?",
+                ConfirmDialog.show("Delete Model?", "Are you sure you want to delete the '" + model.getName() + "' model?",
                         new DeleteModelConfirmationListener(model));
             } else {
-                CommonUiUtils.notify("The model is currently in use.  It cannot be deleted.",
-                        Type.WARNING_MESSAGE);
+                CommonUiUtils.notify("The model is currently in use.  It cannot be deleted.", Type.WARNING_MESSAGE);
             }
         } else if (object instanceof Project) {
             Project namedObject = (Project) object;
-            ConfirmDialog.show("Delete Project?",
-                    "Are you sure you want to delete the '" + namedObject.getName() + "' project?",
+            ConfirmDialog.show("Delete Project?", "Are you sure you want to delete the '" + namedObject.getName() + "' project?",
                     new DeleteProjectConfirmationListener(namedObject));
 
         } else if (object instanceof ProjectVersion) {
             ProjectVersion namedObject = (ProjectVersion) object;
-            ConfirmDialog.show("Delete Project Version?",
-                    "Are you sure you want to delete the '" + namedObject.getName() + "' version?",
+            ConfirmDialog.show("Delete Project Version?", "Are you sure you want to delete the '" + namedObject.getName() + "' version?",
                     new DeleteProjectVersionConfirmationListener(namedObject));
         } else if (object instanceof ProjectVersionDependency) {
             context.getConfigurationService().delete((ProjectVersionDependency) object);
@@ -667,20 +700,17 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public void promptForNewDependency() {
-        SelectProjectVersionDialog.show(context, findProjectVersion().getProject(),
-                v -> addNewDependency(v),
+        SelectProjectVersionDialog.show(context, findProjectVersion().getProject(), v -> addNewDependency(v),
                 "Please select a project version that this project depends upon.");
     }
 
     public void addNewDependency(ProjectVersion targetVersion) {
         ProjectVersion projectVersion = findProjectVersion();
         IConfigurationService configurationService = context.getConfigurationService();
-        List<ProjectVersionDependency> dependencies = configurationService
-                .findProjectDependencies(projectVersion.getId());
+        List<ProjectVersionDependency> dependencies = configurationService.findProjectDependencies(projectVersion.getId());
         boolean add = true;
         for (ProjectVersionDependency projectVersionDependency : dependencies) {
-            if (projectVersionDependency.getTargetProjectVersionId()
-                    .equals(targetVersion.getId())) {
+            if (projectVersionDependency.getTargetProjectVersionId().equals(targetVersion.getId())) {
                 add = false;
             }
         }
@@ -818,8 +848,7 @@ public class DesignNavigator extends VerticalLayout {
 
         @Override
         public void onFinished(String dataToImport) {
-            context.getImportExportService().importConfiguration(dataToImport,
-                    context.getUser().getLoginId());
+            context.getImportExportService().importConfiguration(dataToImport, context.getUser().getLoginId());
             refresh();
         }
 
@@ -837,8 +866,7 @@ public class DesignNavigator extends VerticalLayout {
 
         @Override
         public boolean onOk() {
-            context.getConfigurationService()
-                    .deleteFlow(context.getConfigurationService().findFlow(toDelete.getId()));
+            context.getConfigurationService().deleteFlow(context.getConfigurationService().findFlow(toDelete.getId()));
             tabs.closeTab(toDelete.getId());
             Object parent = treeTable.getParent(toDelete);
             refresh();
@@ -861,8 +889,7 @@ public class DesignNavigator extends VerticalLayout {
 
         @Override
         public boolean onOk() {
-            context.getConfigurationService()
-                    .delete(context.getConfigurationService().findResource(toDelete.getId()));
+            context.getConfigurationService().delete(context.getConfigurationService().findResource(toDelete.getId()));
             tabs.closeTab(toDelete.getId());
             Object parent = treeTable.getParent(toDelete);
             refresh();
@@ -885,8 +912,7 @@ public class DesignNavigator extends VerticalLayout {
 
         @Override
         public boolean onOk() {
-            context.getConfigurationService()
-                    .delete(context.getConfigurationService().findModel(toDelete.getId()));
+            context.getConfigurationService().delete(context.getConfigurationService().findModel(toDelete.getId()));
             tabs.closeTab(toDelete.getId());
             Object parent = treeTable.getParent(toDelete);
             refresh();
