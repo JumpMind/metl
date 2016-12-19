@@ -71,8 +71,8 @@ import org.jumpmind.metl.core.util.AppConstants;
 import org.jumpmind.metl.core.util.EnvConstants;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.ui.persist.AuditableConfigurationService;
-import org.jumpmind.metl.ui.views.ComponentXmlDefinitionPlusUIFactory;
-import org.jumpmind.metl.ui.views.IComponentDefinitionPlusUIFactory;
+import org.jumpmind.metl.ui.views.DefinitionPlusUIFactory;
+import org.jumpmind.metl.ui.views.IDefinitionPlusUIFactory;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.security.SecurityServiceFactory;
@@ -134,7 +134,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     
     IPluginManager pluginManager;
 
-    IComponentDefinitionPlusUIFactory componentDefinitionPlusUIFactory;
+    IDefinitionPlusUIFactory componentDefinitionPlusUIFactory;
 
     DataSource configDataSource;
     
@@ -373,9 +373,9 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
-    public IComponentDefinitionPlusUIFactory componentDefinitionPlusUIFactory() {
+    public IDefinitionPlusUIFactory componentDefinitionPlusUIFactory() {
         if (componentDefinitionPlusUIFactory == null) {
-            componentDefinitionPlusUIFactory = new ComponentXmlDefinitionPlusUIFactory(configurationService(), pluginManager());
+            componentDefinitionPlusUIFactory = new DefinitionPlusUIFactory(configurationService(), pluginManager());
         }
         return componentDefinitionPlusUIFactory;
     }

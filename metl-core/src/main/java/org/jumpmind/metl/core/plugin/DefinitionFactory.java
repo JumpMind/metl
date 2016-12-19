@@ -232,7 +232,9 @@ public class DefinitionFactory implements IDefinitionFactory {
             JAXBContext jc = JAXBContext.newInstance(XMLDefinitions.class, XMLComponentDefinition.class, XMLSetting.class, XMLSettings.class,
                     XMLSettingChoices.class, ObjectFactory.class);
             Unmarshaller unmarshaller = jc.createUnmarshaller();
-            List<InputStream> componentXmls = loadResources("plugin.xml", classLoader);
+            List<InputStream> componentXmls = new ArrayList<>();
+            componentXmls.addAll(loadResources("plugin.xml", classLoader));
+            componentXmls.addAll(loadResources("component.xml", classLoader));
             Map<String, XMLAbstractDefinition> componentsById = definitionsByProjectVersionIdById.get(projectVersionId);
             if (componentsById == null) {
                 componentsById = new HashMap<>();

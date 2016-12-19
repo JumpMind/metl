@@ -42,11 +42,11 @@ import org.jumpmind.metl.ui.definition.XMLComponentUI;
 import org.jumpmind.metl.ui.definition.XMLUI;
 import org.jumpmind.metl.ui.views.design.IComponentEditPanel;
 
-public class ComponentXmlDefinitionPlusUIFactory extends DefinitionFactory implements IComponentDefinitionPlusUIFactory {
+public class DefinitionPlusUIFactory extends DefinitionFactory implements IDefinitionPlusUIFactory {
 
     protected Map<String, Map<String, XMLComponentUI>> uisByProjectVersionIdByComponentId;
 
-    public ComponentXmlDefinitionPlusUIFactory(IConfigurationService configurationService, IPluginManager pluginManager) {
+    public DefinitionPlusUIFactory(IConfigurationService configurationService, IPluginManager pluginManager) {
         super(configurationService, pluginManager);
     }
 

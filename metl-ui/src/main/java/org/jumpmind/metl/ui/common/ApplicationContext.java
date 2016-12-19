@@ -40,7 +40,7 @@ import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.ui.init.BackgroundRefresherService;
-import org.jumpmind.metl.ui.views.IComponentDefinitionPlusUIFactory;
+import org.jumpmind.metl.ui.views.IDefinitionPlusUIFactory;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -70,7 +70,7 @@ public class ApplicationContext implements Serializable {
     IDefinitionFactory componentDefinitionFactory;
     
     @Autowired
-    IComponentDefinitionPlusUIFactory uiFactory;
+    IDefinitionPlusUIFactory uiFactory;
 
     @Autowired
     IResourceFactory resourceFactory;
@@ -154,7 +154,7 @@ public class ApplicationContext implements Serializable {
         return executionDatabasePlatform;
     }
         
-    public IComponentDefinitionPlusUIFactory getUiFactory() {
+    public IDefinitionPlusUIFactory getUiFactory() {
         return uiFactory;
     }
     

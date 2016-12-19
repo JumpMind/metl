@@ -24,7 +24,7 @@ import org.jumpmind.metl.core.plugin.IDefinitionFactory;
 import org.jumpmind.metl.ui.definition.XMLComponentUI;
 import org.jumpmind.metl.ui.views.design.IComponentEditPanel;
 
-public interface IComponentDefinitionPlusUIFactory extends IDefinitionFactory {
+public interface IDefinitionPlusUIFactory extends IDefinitionFactory {
     
     public XMLComponentUI getUiDefinition(String projectVersionId, String componentId);
 
