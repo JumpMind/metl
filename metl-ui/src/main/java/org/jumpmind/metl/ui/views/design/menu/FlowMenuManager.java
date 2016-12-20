@@ -21,7 +21,6 @@ public class FlowMenuManager extends AbstractDesignSelectedValueMenuManager {
     @Override
     protected String[] getDisabledPaths(Object selected) {
         return (String[])ArrayUtils.addAll(super.getDisabledPaths(selected), new String[] {
-                "Edit|Copy"
         });
     }
     
@@ -44,7 +43,9 @@ public class FlowMenuManager extends AbstractDesignSelectedValueMenuManager {
                 "File|Import...",        
                 "File|Export...",
                 "Edit|Rename",
+                "Edit|Cut",
                 "Edit|Copy",
+                "Edit|Paste",
                 "Edit|Remove"
         });
     }

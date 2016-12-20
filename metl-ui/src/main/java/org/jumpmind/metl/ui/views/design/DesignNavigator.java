@@ -581,6 +581,7 @@ public class DesignNavigator extends VerticalLayout {
             treeTable.setValue(model);
             startEditingItem((AbstractNamedObject) treeTable.getValue());
         } else if (object instanceof FlowName) {
+            //TODO change this.
             Flow oldFlow = configurationService.findFlow(((FlowName) object).getId());
             Flow newFlow = configurationService.copy((Flow) oldFlow);
             newFlow.setName(newFlow.getName() + " Copy");
@@ -627,6 +628,15 @@ public class DesignNavigator extends VerticalLayout {
         }
     }
 
+    public void doCut() {
+        //TODO: Implement   
+        
+    }
+    
+    public void doPaste() {
+        //TODO: Implement
+    }
+    
     public void doRemove() {
         Object object = treeTable.getValue();
         if (object instanceof FlowName) {
