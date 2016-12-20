@@ -1,0 +1,355 @@
+<!-- Licensed to JumpMind Inc under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright ownership. 
+    JumpMind Inc licenses this file to you under the GNU General Public License, version 3.0 (GPLv3) (the "License"); you may not use this file except in compliance with the License. You 
+    should have received a copy of the GNU General Public License, version 3.0 (GPLv3) along with this library; if not, see <http://www.gnu.org/licenses/>. Unless required by applicable 
+    law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See 
+    the License for the specific language governing permissions and limitations under the License. -->
+<definitions>
+
+    <resource id='Database' resourceCategory='datasource'>
+        <name>DataSource</name>
+        <className>org.jumpmind.metl.core.runtime.resource.Datasource</className>
+        <settings>
+            <setting id='db.driver' required='true' type='text'>
+                <name>Driver</name>
+                <defaultValue>org.h2.Driver</defaultValue>
+            </setting>
+            <setting id='db.url' required='true' type='text'>
+                <name>Url</name>
+                <defaultValue>jdbc:h2:mem:db</defaultValue>
+            </setting>
+            <setting id='db.user' required='false' type='text'>
+                <name>User</name>
+            </setting>
+            <setting id='db.password' required='false' type='password'>
+                <name>Password</name>
+            </setting>
+            <setting id='db.validation.query' required='false' type='text'>
+                <name>Validation Query</name>
+            </setting>
+            <setting id='db.pool.initial.size' required='true' type='integer'>
+                <name>Initial Size</name>
+                <defaultValue>5</defaultValue>
+            </setting>
+            <setting id='db.pool.max.active' required='true' type='integer'>
+                <name>Max Active</name>
+                <defaultValue>20</defaultValue>
+            </setting>
+            <setting id='db.pool.max.idle' required='true' type='integer'>
+                <name>Max Idle</name>
+                <defaultValue>10</defaultValue>
+            </setting>
+            <setting id='db.pool.min.idle' required='true' type='integer'>
+                <name>Min Idle</name>
+                <defaultValue>5</defaultValue>
+            </setting>
+            <setting id='db.pool.max.wait.millis' required='true' type='integer'>
+                <name>Wait Time (ms)</name>
+                <defaultValue>30000</defaultValue>
+            </setting>
+            <setting id='db.pool.min.evictable.idle.millis' required='true' type='integer'>
+                <name>Evict Time (ms)</name>
+                <defaultValue>120000</defaultValue>
+            </setting>
+            <setting id='db.test.on.borrow' required='true' type='boolean'>
+                <name>Test on Borrow</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='db.test.on.return' required='true' type='boolean'>
+                <name>Test on Return</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='db.test.while.idle' required='true' type='boolean'>
+                <name>Test while Idle</name>
+                <defaultValue>true</defaultValue>
+            </setting>
+            <setting id='db.init.sql' required='false' type='text'>
+                <name>Init Sql</name>
+            </setting>
+            <setting id='db.fetch.size' required='true' type='integer'>
+                <name>Fetch Size</name>
+                <defaultValue>1000</defaultValue>
+            </setting>
+            <setting id='db.query.timeout' required='true' type='integer'>
+                <name>Query Timeout (seconds)</name>
+                <defaultValue>300</defaultValue>
+            </setting>
+            <setting id='db.connection.properties' required='false' type='text'>
+                <name>Connection Properties</name>
+            </setting>
+
+        </settings>
+    </resource>
+
+    <resource id='Ftp' resourceCategory='streamable'>
+        <name>FTP</name>
+        <className>org.jumpmind.metl.core.runtime.resource.Ftp</className>
+        <settings>
+            <setting id='server' required='true' type='text'>
+                <name>Server</name>
+                <defaultValue>localhost</defaultValue>
+            </setting>
+            <setting id='port' required='false' type='integer'>
+                <name>Port</name>
+            </setting>
+            <setting id='user' required='false' type='text'>
+                <name>User</name>
+            </setting>
+            <setting id='password' required='false' type='password'>
+                <name>Password</name>
+            </setting>
+            <setting id='base.path' required='true' type='text'>
+                <name>Base Path</name>
+            </setting>
+            <setting id='connection.timeout' required='false' type='integer'>
+                <name>Connection Timeout (ms)</name>
+                <defaultValue>30000</defaultValue>
+            </setting>
+        </settings>
+    </resource>
+
+    <resource id='Http' resourceCategory='http'>
+        <name>HTTP</name>
+        <className>org.jumpmind.metl.core.runtime.resource.Http</className>
+        <settings>
+            <setting id='url' required='true' type='text'>
+                <name>URL</name>
+            </setting>
+            <setting id='http.method' required='true' type='choice'>
+                <name>HTTP Method</name>
+                <defaultValue>GET</defaultValue>
+                <choices>
+                    <choice>GET</choice>
+                    <choice>PUT</choice>
+                    <choice>POST</choice>
+                    <choice>DELETE</choice>
+                </choices>
+            </setting>
+            <setting id='content.type' required='true' type='text'>
+                <name>Content Type</name>
+                <defaultValue>text/xml; charset=utf-8</defaultValue>
+            </setting>
+            <setting id='http.timeout' required='false' type='integer'>
+                <name>Http Timeout (ms)</name>
+                <defaultValue>60000</defaultValue>
+            </setting>
+            <setting id='security.type' required='true' type='choice'>
+                <name>Security Type</name>
+                <defaultValue>None</defaultValue>
+                <choices>
+                    <choice>None</choice>
+                    <choice>Basic Auth</choice>
+                    <choice>Token Auth</choice>
+                    <choice>OAuth 1.0</choice>
+                </choices>
+            </setting>
+            <setting id='security.usertoken.username' required='false' type='text'>
+                <name>User</name>
+            </setting>
+            <setting id='security.usertoken.password' required='false' type='password'>
+                <name>Password</name>
+            </setting>
+            <setting id='security.usertoken.token' required='false' type='password'>
+                <name>Token</name>
+            </setting>
+            <setting id='security.oauth10.consumer.key' required='false' type='text'>
+                <name>OAuth 1.0 Consumer Key</name>
+            </setting>
+            <setting id='security.oauth10.consumer.secret' required='false' type='password'>
+                <name>OAuth 1.0 Consumer Secret</name>
+            </setting>
+            <setting id='security.oauth10.token' required='false' type='text'>
+                <name>OAuth 1.0 Token</name>
+            </setting>
+            <setting id='security.oauth10.token.secret' required='false' type='text'>
+                <name>OAuth 1.0 Token Secret</name>
+            </setting>
+            <setting id='security.oauth10.version' required='false' type='text'>
+                <name>OAuth 1.0 Version</name>
+            </setting>
+            <setting id='security.oauth10.signature.method' required='false' type='text'>
+                <name>OAuth 1.0 Signature Method</name>
+            </setting>
+            <setting id='security.oauth10.realm' required='false' type='text'>
+                <name>OAuth 1.0 Realm</name>
+            </setting>
+        </settings>
+    </resource>
+
+    <resource id='JMS' resourceCategory='streamable'>
+        <name>HTTP</name>
+        <className>org.jumpmind.metl.core.runtime.resource.JMS</className>
+        <settings>
+            <setting id='create.mode' required='true' type='choice'>
+                <name>Create Mode</name>
+                <defaultValue>JNDI</defaultValue>
+                <choices>
+                    <choice>JNDI</choice>
+                </choices>
+            </setting>
+            <setting id='jms.type' required='true' type='choice'>
+                <name>JMS Type</name>
+                <defaultValue>Topic</defaultValue>
+                <choices>
+                    <choice>Queue</choice>
+                    <choice>Topic</choice>
+                </choices>
+            </setting>
+            <setting id='java.naming.factory.initial' required='false' type='text'>
+                <name>java.naming.factory.initial</name>
+                <defaultValue>org.apache.activemq.jndi.ActiveMQInitialContextFactory</defaultValue>
+            </setting>
+            <setting id='java.naming.provider.url' required='false' type='text'>
+                <name>java.naming.provider.url</name>
+                <defaultValue>vm://localhost?broker.persistent=false</defaultValue>
+            </setting>
+            <setting id='java.naming.security.principal' required='false' type='text'>
+                <name>java.naming.security.principal</name>
+            </setting>
+            <setting id='java.naming.security.credentials' required='false' type='password'>
+                <name>java.naming.security.credentials</name>
+            </setting>
+            <setting id='connection.factory.name' required='false' type='text'>
+                <name>Connection Factory Name</name>
+                <defaultValue>ConnectionFactory</defaultValue>
+            </setting>
+            <setting id='queue.name' required='false' type='text'>
+                <name>Queue Name</name>
+                <defaultValue>dynamicQueues/foo.bar</defaultValue>
+            </setting>
+            <setting id='topic.name' required='false' type='text'>
+                <name>Topic Name</name>
+                <defaultValue>dynamicTopics/foo.bar</defaultValue>
+            </setting>
+            <setting id='durable.subscription.name' required='false' type='text'>
+                <name>Durable Subscription Name</name>
+            </setting>
+            <setting id='client.id' required='false' type='text'>
+                <name>Client ID</name>
+            </setting>
+            <setting id='msg.type' required='true' type='choice'>
+                <name>Message Type</name>
+                <defaultValue>Text</defaultValue>
+                <choices>
+                    <choice>Text</choice>
+                    <choice>Object</choice>
+                    <choice>Map</choice>
+                    <choice>Byte</choice>
+                </choices>
+            </setting>
+            <setting id='map.msg.key' required='false' type='text'>
+                <name>Map Message Key</name>
+            </setting>
+            <setting id='msg.jms.type' required='false' type='text'>
+                <name>Message JMS Type</name>
+            </setting>
+        </settings>
+    </resource>
+
+    <resource id='Local File System' resourceCategory='streamable'>
+        <name>HTTP</name>
+        <className>org.jumpmind.metl.core.runtime.resource.LocalFile</className>
+        <settings>
+            <setting id='localfile.path' required='true' type='text'>
+                <name>Path</name>
+            </setting>
+            <setting id='localfile.must.exist' required='true' type='boolean'>
+                <name>Must Exist</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+        </settings>
+    </resource>
+
+    <resource id='MailSession' resourceCategory='mailsession'>
+        <name>Mail Session</name>
+        <className>org.jumpmind.metl.core.runtime.resource.MailSessionResource</className>
+        <settings>
+            <setting id='mail.transport' required='true' type='choice'>
+                <name>Transport</name>
+                <defaultValue>smtp</defaultValue>
+                <choices>
+                    <choice>smtp</choice>
+                    <choice>smtps</choice>
+                    <choice>mock_smtp</choice>
+                </choices>
+            </setting>
+            <setting id='mail.host' required='true' type='text'>
+                <name>Hostname</name>
+            </setting>
+            <setting id='mail.port' required='faltruese' type='integer'>
+                <name>Port Number</name>
+                <defaultValue>25</defaultValue>
+            </setting>
+            <setting id='mail.smtp.starttls.enable' required='true' type='boolean'>
+                <name>Use TLS</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='mail.smtp.auth' required='true' type='boolean'>
+                <name>Use Auth</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='mail.user' required='false' type='text'>
+                <name>Username</name>
+            </setting>
+            <setting id='mail.password' required='false' type='password'>
+                <name>Password</name>
+            </setting>
+            <setting id='mail.from' required='false' type='text'>
+                <name>From Address</name>
+            </setting>
+        </settings>
+    </resource>
+
+    <resource id='Sftp' resourceCategory='streamable'>
+        <name>SFTP</name>
+        <className>org.jumpmind.metl.core.runtime.resource.Sftp</className>
+        <settings>
+            <setting id='sftp.server' required='true' type='text'>
+                <name>Server</name>
+                <defaultValue>localhost</defaultValue>
+            </setting>
+            <setting id='sftp.port' required='false' type='integer'>
+                <name>Port</name>
+            </setting>
+            <setting id='sftp.user' required='false' type='text'>
+                <name>User</name>
+            </setting>
+            <setting id='sftp.password' required='false' type='password'>
+                <name>Password</name>
+            </setting>
+            <setting id='sftp.base.path' required='true' type='text'>
+                <name>Base Path</name>
+            </setting>
+            <setting id='sftp.must.exist' required='true' type='boolean'>
+                <name>Must Exist</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='key.file.location' required='false' type='text'>
+                <name>Key File Location</name>
+            </setting>
+            <setting id='sftp.connection.timeout' required='false' type='integer'>
+                <name>Connection Timeout (ms)</name>
+                <defaultValue>30000</defaultValue>
+            </setting>
+        </settings>
+    </resource>
+    
+    <resource id='SMB' resourceCategory='streamable'>
+        <name>SFTP</name>
+        <className>org.jumpmind.metl.core.runtime.resource.SMB</className>
+        <settings>
+            <setting id='smb.base.url' required='true' type='text'>
+                <name>Base Url</name>
+            </setting>
+            <setting id='smb.user' required='false' type='text'>
+                <name>User</name>
+            </setting>
+            <setting id='smb.password' required='false' type='password'>
+                <name>Password</name>
+            </setting>
+            <setting id='smb.domain' required='false' type='text'>
+                <name>Domain</name>
+            </setting>
+        </settings>
+    </resource>    
+
+</definitions>

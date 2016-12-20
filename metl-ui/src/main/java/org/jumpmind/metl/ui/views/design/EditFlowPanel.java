@@ -368,7 +368,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             node.setX(flowStep.getX());
             node.setY(flowStep.getY());
 
-            XMLComponentDefinition definition = context.getComponentDefinitionFactory().getComponentDefinition(flow.getProjectVersionId(), type);
+            XMLComponentDefinition definition = context.getDefinitionFactory().getComponentDefinition(flow.getProjectVersionId(), type);
             if (definition == null) {
                 throw new MisconfiguredException("Could not find the component defintion for a component of type '%s'", type);
             }
@@ -520,7 +520,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                     flow.getFlowStepLinks().add(new FlowStepLink(event.getSourceNodeId(), event.getTargetNodeId()));
                     Component sourceComp = flow.findFlowStepWithId(event.getSourceNodeId()).getComponent();
                     Component targetComp = flow.findFlowStepWithId(event.getTargetNodeId()).getComponent();
-                    IDefinitionFactory factory = context.getComponentDefinitionFactory();
+                    IDefinitionFactory factory = context.getDefinitionFactory();
                     XMLComponentDefinition sourceDefn = factory.getComponentDefinition(flow.getProjectVersionId(), sourceComp.getType());
                     XMLComponentDefinition targetDefn = factory.getComponentDefinition(flow.getProjectVersionId(), targetComp.getType());
 

@@ -24,7 +24,7 @@ import java.util.Date
     sourceCompatibility=1.8
     targetCompatibility=1.8
     
-    if (project.name.startsWith('comp')) {
+    if (project.name.startsWith('comp') || project.name.startsWith('resource')) {
         apply plugin: 'maven-publish'
         publishing {
             publications {

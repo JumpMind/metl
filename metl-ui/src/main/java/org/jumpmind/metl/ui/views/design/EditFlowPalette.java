@@ -125,7 +125,7 @@ public class EditFlowPalette extends VerticalLayout {
     }
     protected void populateComponentPalette() {
         componentLayout.removeAllComponents();
-        List<XMLComponentDefinition> componentDefinitions = context.getComponentDefinitionFactory().getComponentDefinitions(projectVersionId);
+        List<XMLComponentDefinition> componentDefinitions = context.getDefinitionFactory().getComponentDefinitions(projectVersionId);
         Collections.sort(componentDefinitions);
         for (XMLComponentDefinition definition : componentDefinitions) {
             if ((isBlank(filterText) || definition.getName().toLowerCase().contains(filterText)

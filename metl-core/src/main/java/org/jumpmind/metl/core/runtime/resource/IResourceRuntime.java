@@ -25,7 +25,7 @@ import org.jumpmind.properties.TypedProperties;
 
 public interface IResourceRuntime {
 
-    public void start(IResourceFactory resourceFactory, Resource resource, TypedProperties agentOverrides);
+    public void start(Resource resource, TypedProperties agentOverrides);
     
     public void stop();
     

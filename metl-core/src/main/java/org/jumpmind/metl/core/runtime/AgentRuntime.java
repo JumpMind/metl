@@ -53,17 +53,16 @@ import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
-import org.jumpmind.metl.core.model.SettingDefinition;
 import org.jumpmind.metl.core.model.StartType;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.plugin.IDefinitionFactory;
 import org.jumpmind.metl.core.plugin.XMLComponentDefinition;
+import org.jumpmind.metl.core.plugin.XMLResourceDefinition;
 import org.jumpmind.metl.core.runtime.component.IComponentDeploymentListener;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.Results;
 import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
-import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
 import org.jumpmind.metl.core.util.LogUtils;
@@ -98,11 +97,9 @@ public class AgentRuntime {
 
     IComponentRuntimeFactory componentRuntimeFactory;
 
-    IDefinitionFactory componentDefinitionFactory;
+    IDefinitionFactory definitionFactory;
 
     IExecutionService executionService;
-
-    IResourceFactory resourceFactory;
 
     ExecutorService flowStepsExecutionThreads;
 
@@ -115,14 +112,13 @@ public class AgentRuntime {
     Map<AgentDeployment, List<FlowRuntime>> runningFlows = Collections.synchronizedMap(new HashMap<>());
 
     public AgentRuntime(Agent agent, IConfigurationService configurationService, IExecutionService executionService,
-            IComponentRuntimeFactory componentFactory, IDefinitionFactory componentDefinitionFactory,
-            IResourceFactory resourceFactory, IHttpRequestMappingRegistry httpRequestMappingRegistry) {
+            IComponentRuntimeFactory componentFactory, IDefinitionFactory definitionFactory,
+            IHttpRequestMappingRegistry httpRequestMappingRegistry) {
         this.agent = agent;
-        this.componentDefinitionFactory = componentDefinitionFactory;
+        this.definitionFactory = definitionFactory;
         this.executionService = executionService;
         this.configurationService = configurationService;
         this.componentRuntimeFactory = componentFactory;
-        this.resourceFactory = resourceFactory;
         this.httpRequestMappingRegistry = httpRequestMappingRegistry;
     }
 
@@ -287,73 +283,90 @@ public class AgentRuntime {
         for (ResourceName flowResourceName : flowResourceNames) {
             try {
                 Resource flowResource = configurationService.findResource(flowResourceName.getId());
-                IResourceRuntime alreadyDeployed = deployedResources.get(flowResource.getId());
+                XMLResourceDefinition definition = definitionFactory.getResourceDefintion(flowResource.getProjectVersionId(),
+                        flowResource.getType());
 
-                if (alreadyDeployed == null) {
-                    Resource previousResource = configurationService.findPreviousVersionResource(flowResource);
-                    if (previousResource != null) {
-                        log.info("Found a previous version of the '{}' resource.  Using it's agent settings during deployment",
-                                flowResource.getName());
-                        TypedProperties previouslyOverriddenSettings = agent.toTypedProperties(previousResource);
-                        for (Object key : previouslyOverriddenSettings.keySet()) {
-                            AgentResourceSetting setting = new AgentResourceSetting(flowResource.getId(), agent.getId());
-                            setting.setName((String) key);
-                            setting.setValue((String) previouslyOverriddenSettings.get(key));
-                            configurationService.save(setting);
-                            agent.getAgentResourceSettings().add(setting);
+                if (definition != null) {
+                    IResourceRuntime alreadyDeployed = deployedResources.get(flowResource.getId());
+
+                    if (alreadyDeployed == null) {
+                        Resource previousResource = configurationService.findPreviousVersionResource(flowResource);
+                        if (previousResource != null) {
+                            log.info("Found a previous version of the '{}' resource.  Using it's agent settings during deployment",
+                                    flowResource.getName());
+                            TypedProperties previouslyOverriddenSettings = agent.toTypedProperties(definition, previousResource);
+                            for (Object key : previouslyOverriddenSettings.keySet()) {
+                                AgentResourceSetting setting = new AgentResourceSetting(flowResource.getId(), agent.getId());
+                                setting.setName((String) key);
+                                setting.setValue((String) previouslyOverriddenSettings.get(key));
+                                configurationService.save(setting);
+                                agent.getAgentResourceSettings().add(setting);
+                            }
                         }
                     }
-                }
 
-                Map<String, SettingDefinition> settings = resourceFactory.getSettingDefinitionsForResourceType(flowResource.getType());
-                TypedProperties defaultSettings = flowResource.toTypedProperties(settings);
-                TypedProperties overrideSettings = agent.toTypedProperties(flowResource);
-                TypedProperties combined = new TypedProperties(defaultSettings);
-                combined.putAll(overrideSettings);
-                Set<Entry<Object, Object>> entries = combined.entrySet();
-                for (Entry<Object, Object> entry : entries) {
-                    String value = (String) entry.getValue();
-                    if (value != null) {
-                        value = FormatUtils.replaceTokens(value, (Map) System.getProperties(), true);
-                        entry.setValue(value);
+                    TypedProperties combined = agent.toTypedProperties(definition, flowResource);
+                    Set<Entry<Object, Object>> entries = combined.entrySet();
+                    for (Entry<Object, Object> entry : entries) {
+                        String value = (String) entry.getValue();
+                        if (value != null) {
+                            value = FormatUtils.replaceTokens(value, (Map) System.getProperties(), true);
+                            entry.setValue(value);
+                        }
                     }
-                }
 
-                boolean deploy = true;
-                if (alreadyDeployed != null) {
-                    deploy = false;
-                    Resource deployedResource = alreadyDeployed.getResource();
-                    TypedProperties alreadyDeployedOverrides = alreadyDeployed.getResourceRuntimeSettings();
+                    boolean deploy = true;
+                    if (alreadyDeployed != null) {
+                        deploy = false;
+                        TypedProperties alreadyDeployedOverrides = alreadyDeployed.getResourceRuntimeSettings();
+                        for (Object key : combined.keySet()) {
+                            Object newObj = combined.get(key);
+                            Object oldObj = alreadyDeployedOverrides.get(key);
+                            if (!ObjectUtils.equals(newObj, oldObj)) {
+                                deploy = true;
+                                break;
+                            }
+                        }
 
-                    // TODO the runtime is already combined. change this
-                    TypedProperties alreadyDeployedDefaultSettings = deployedResource.toTypedProperties(settings);
-                    TypedProperties alreadyDeployedCombined = new TypedProperties(alreadyDeployedDefaultSettings);
-                    alreadyDeployedCombined.putAll(alreadyDeployedOverrides);
-
-                    for (Object key : combined.keySet()) {
-                        Object newObj = combined.get(key);
-                        Object oldObj = alreadyDeployedCombined.get(key);
-                        if (!ObjectUtils.equals(newObj, oldObj)) {
-                            deploy = true;
-                            break;
+                        if (deploy) {
+                            log.info("Undeploying the {} resource to the {} agent", flowResource.getName(), agent.getName());
+                            alreadyDeployed.stop();
                         }
                     }
 
                     if (deploy) {
-                        log.info("Undeploying the {} resource to the {} agent", flowResource.getName(), agent.getName());
-                        alreadyDeployed.stop();
+                        log.info("Deploying the {} resource to the {} agent", flowResource.getName(), agent.getName());
+                        IResourceRuntime resource = create(definition, flowResource, combined);
+                        deployedResources.put(flowResource.getId(), resource);
                     }
-                }
-
-                if (deploy) {
-                    log.info("Deploying the {} resource to the {} agent", flowResource.getName(), agent.getName());
-                    IResourceRuntime resource = resourceFactory.create(flowResource, combined);
-                    deployedResources.put(flowResource.getId(), resource);
+                } else {
+                    log.error("Could not find a resource definition for deployment for '{}' of type '{}'", flowResourceName.getName(),
+                            flowResourceName.getType());
                 }
             } catch (Exception e) {
                 log.error("Failed to deploy resource '" + flowResourceName.getName() + "' with an id of " + flowResourceName.getId()
                         + " to the '" + agent.getName() + "' agent", e);
             }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private IResourceRuntime create(XMLResourceDefinition definition, Resource resource, TypedProperties agentOverrides) {
+        try {
+            String resourceType = resource.getType();
+            Class<? extends IResourceRuntime> clazz = (Class<? extends IResourceRuntime>) definition.getClassLoader()
+                    .loadClass(definition.getClassName());
+            if (clazz != null) {
+                IResourceRuntime runtime = clazz.newInstance();
+                runtime.start(resource, agentOverrides);
+                return runtime;
+            } else {
+                throw new IllegalStateException("Could not find a class associated with the resource type of " + resourceType);
+            }
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -394,7 +407,7 @@ public class AgentRuntime {
         Flow flow = deployment.getFlow();
         List<FlowStep> steps = flow.getFlowSteps();
         for (FlowStep flowStep : steps) {
-            XMLComponentDefinition componentDefintion = componentDefinitionFactory.getComponentDefinition(flow.getProjectVersionId(),
+            XMLComponentDefinition componentDefintion = definitionFactory.getComponentDefinition(flow.getProjectVersionId(),
                     flowStep.getComponent().getType());
             if (componentDefintion != null && isNotBlank(componentDefintion.getDeploymentListenerClassName())) {
                 try {
@@ -418,9 +431,8 @@ public class AgentRuntime {
 
     public FlowRuntime createFlowRuntime(String userId, AgentDeployment deployment, Map<String, String> runtimeParameters) throws Exception {
         String executionId = createExecutionId();
-        return new FlowRuntime(executionId, userId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory, resourceFactory,
-                flowStepsExecutionThreads, configurationService, executionService, deployedResources, null, globalSettings,
-                runtimeParameters);
+        return new FlowRuntime(executionId, userId, deployment, agent, componentRuntimeFactory, definitionFactory, flowStepsExecutionThreads,
+                configurationService, executionService, deployedResources, null, globalSettings, runtimeParameters);
 
     }
 
@@ -531,9 +543,9 @@ public class AgentRuntime {
             try {
                 log.info("Deployment '{}' is running on the '{}' agent", deployment.getName(), agent.getName());
                 List<Notification> notifications = configurationService.findNotificationsForDeployment(deployment);
-                flowRuntime = new FlowRuntime(executionId, userId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
-                        resourceFactory, flowStepsExecutionThreads, configurationService, executionService, deployedResources, notifications,
-                        globalSettings, runtimeParameters);
+                flowRuntime = new FlowRuntime(executionId, userId, deployment, agent, componentRuntimeFactory, definitionFactory,
+                        flowStepsExecutionThreads, configurationService, executionService, deployedResources, notifications, globalSettings,
+                        runtimeParameters);
                 addToRunning(deployment, flowRuntime);
                 flowRuntime.execute();
             } catch (Exception e) {
@@ -577,7 +589,8 @@ public class AgentRuntime {
     }
 
     interface DeployListenerAction {
-        public void run(IComponentDeploymentListener listener, Flow flow, FlowStep step, XMLComponentDefinition componentDefintion) throws Exception;
+        public void run(IComponentDeploymentListener listener, Flow flow, FlowStep step, XMLComponentDefinition componentDefintion)
+                throws Exception;
     }
 
 }

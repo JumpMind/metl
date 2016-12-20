@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.jumpmind.metl.core.plugin.XMLResourceDefinition;
 import org.jumpmind.properties.TypedProperties;
 
 public class Agent extends AbstractNamedObject {
@@ -206,8 +207,8 @@ public class Agent extends AbstractNamedObject {
         return null;
     }
 
-    public TypedProperties toTypedProperties(Resource resource) {
-        TypedProperties properties = new TypedProperties();
+    public TypedProperties toTypedProperties(XMLResourceDefinition defintion, Resource resource) {
+        TypedProperties properties = resource.toTypedProperties(defintion.getSettings().getSetting());
         if (agentResourceSettings != null) {
             for (AgentResourceSetting setting : agentResourceSettings) {
                 if (setting.getResourceId().equals(resource.getId())) {

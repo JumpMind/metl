@@ -54,7 +54,7 @@ task copyJavaDocsToWebapp(type: Copy) {
 }
 
 task copyPluginsForDevelopment (type:Copy) {
-   rootProject.allprojects.findAll { it.name.startsWith('comp') }.each {
+   rootProject.allprojects.findAll { it.name.startsWith('comp') || it.name.startsWith('resource') }.each {
        dependsOn ":$it.name:publishMavenJavaPublicationToMavenRepository"
    }
     

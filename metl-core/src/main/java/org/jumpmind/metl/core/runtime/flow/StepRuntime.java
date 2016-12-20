@@ -60,7 +60,6 @@ import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
-import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.ThreadUtils;
 import org.jumpmind.util.AppUtils;
@@ -193,7 +192,7 @@ public class StepRuntime implements Runnable {
         }
     }
 
-    public void start(IResourceFactory resourceFactory) {
+    public void start() {
         try {
             componentContext.setComponentStatistics(new ComponentStatistics());    
             if (threadCount > 1) {

@@ -36,7 +36,6 @@ import org.jumpmind.metl.core.plugin.IDefinitionFactory;
 import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
-import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.ui.init.BackgroundRefresherService;
@@ -67,13 +66,10 @@ public class ApplicationContext implements Serializable {
     IComponentRuntimeFactory componentRuntimeFactory;
     
     @Autowired
-    IDefinitionFactory componentDefinitionFactory;
+    IDefinitionFactory definitionFactory;
     
     @Autowired
     IDefinitionPlusUIFactory uiFactory;
-
-    @Autowired
-    IResourceFactory resourceFactory;
 
     @Autowired
     BackgroundRefresherService backgroundRefresherService;
@@ -122,12 +118,8 @@ public class ApplicationContext implements Serializable {
         return componentRuntimeFactory;
     }
     
-    public IDefinitionFactory getComponentDefinitionFactory() {
-        return componentDefinitionFactory;
-    }
-
-    public IResourceFactory getResourceFactory() {
-        return resourceFactory;
+    public IDefinitionFactory getDefinitionFactory() {
+        return definitionFactory;
     }
 
     public BackgroundRefresherService getBackgroundRefresherService() {

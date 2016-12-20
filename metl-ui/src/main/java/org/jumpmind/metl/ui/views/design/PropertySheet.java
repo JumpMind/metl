@@ -28,7 +28,7 @@ import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstant
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
@@ -45,13 +45,12 @@ import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
-import org.jumpmind.metl.core.model.SettingDefinition;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.plugin.XMLComponentDefinition;
-import org.jumpmind.metl.core.plugin.XMLSetting;
-import org.jumpmind.metl.core.plugin.XMLSettingChoices;
 import org.jumpmind.metl.core.plugin.XMLComponentDefinition.MessageType;
 import org.jumpmind.metl.core.plugin.XMLComponentDefinition.ResourceCategory;
+import org.jumpmind.metl.core.plugin.XMLResourceDefinition;
+import org.jumpmind.metl.core.plugin.XMLSetting;
 import org.jumpmind.metl.core.plugin.XMLSetting.Type;
 import org.jumpmind.metl.core.runtime.flow.StepRuntime;
 import org.jumpmind.metl.ui.common.ApplicationContext;
@@ -88,7 +87,7 @@ import com.vaadin.ui.themes.ValoTheme;
 public class PropertySheet extends AbsoluteLayout {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
-    
+
     protected static final String DUMMY_PASSWORD = "*****";
 
     ApplicationContext context;
@@ -206,8 +205,8 @@ public class PropertySheet extends AbsoluteLayout {
 
             if (obj instanceof Component) {
                 Component component = (Component) obj;
-                XMLComponentDefinition componentDefintion = context.getComponentDefinitionFactory().getComponentDefinition(component.getProjectVersionId(),
-                        component.getType());
+                XMLComponentDefinition componentDefintion = context.getDefinitionFactory()
+                        .getComponentDefinition(component.getProjectVersionId(), component.getType());
                 addThreadCount(componentDefintion, formLayout, component);
             }
 
@@ -236,22 +235,21 @@ public class PropertySheet extends AbsoluteLayout {
             formLayout.addComponent(buildOptionGroup("Log Output", LOG_OUTPUT, components));
         }
     }
-    
+
     protected OptionGroup buildOptionGroup(String caption, String name, List<Component> components) {
         OptionGroup optionGroup = new OptionGroup(caption);
         optionGroup.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
         optionGroup.setImmediate(true);
         optionGroup.addItem("ON");
         optionGroup.addItem("OFF");
-        optionGroup
-                .addValueChangeListener((event) -> saveSetting(name,
-                        optionGroup, components));
+        optionGroup.addValueChangeListener((event) -> saveSetting(name, optionGroup, components));
         return optionGroup;
     }
-    
-    protected void saveSetting(String name,  Field<?> field, List<Component> components) {
+
+    protected void saveSetting(String name, Field<?> field, List<Component> components) {
         for (final Component component : components) {
-            saveSetting(name, field.getValue() != null ? Boolean.valueOf(field.getValue().toString().equals("ON")).toString() : null, component);
+            saveSetting(name, field.getValue() != null ? Boolean.valueOf(field.getValue().toString().equals("ON")).toString() : null,
+                    component);
         }
         if (listener != null) {
             listener.componentChanged(components);
@@ -266,7 +264,7 @@ public class PropertySheet extends AbsoluteLayout {
     }
 
     protected void addComponentProperties(FormLayout formLayout, Component component) {
-        XMLComponentDefinition componentDefintion = context.getComponentDefinitionFactory().getComponentDefinition(component.getProjectVersionId(),
+        XMLComponentDefinition componentDefintion = context.getDefinitionFactory().getComponentDefinition(component.getProjectVersionId(),
                 component.getType());
         addComponentName(formLayout, component);
         TextField textField = new TextField("Component Type");
@@ -291,8 +289,8 @@ public class PropertySheet extends AbsoluteLayout {
             IConfigurationService configurationService = context.getConfigurationService();
             String projectVersionId = step.getComponent().getProjectVersionId();
             if ((componentDefintion.getOutputMessageType() == MessageType.ENTITY
-                    || (componentDefintion.getOutputMessageType() == MessageType.ANY && componentDefintion.isShowOutputModel())) && 
-                    !componentDefintion.isInputOutputModelsMatch()) {
+                    || (componentDefintion.getOutputMessageType() == MessageType.ANY && componentDefintion.isShowOutputModel()))
+                    && !componentDefintion.isInputOutputModelsMatch()) {
                 final AbstractSelect combo = new ComboBox("Output Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
@@ -358,8 +356,7 @@ public class PropertySheet extends AbsoluteLayout {
             IConfigurationService configurationService = context.getConfigurationService();
             String projectVersionId = step.getComponent().getProjectVersionId();
             if (componentDefintion.getInputMessageType() == MessageType.ENTITY
-                    || (componentDefintion.getInputMessageType() == MessageType.ANY 
-                    && componentDefintion.isShowInputModel())) {
+                    || (componentDefintion.getInputMessageType() == MessageType.ANY && componentDefintion.isShowInputModel())) {
                 final AbstractSelect combo = new ComboBox("Input Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
@@ -368,7 +365,7 @@ public class PropertySheet extends AbsoluteLayout {
                 for (ProjectVersionDependency projectVersionDependency : dependencies) {
                     models.addAll(configurationService.findModelsInProject(projectVersionDependency.getTargetProjectVersionId()));
                 }
-                
+
                 if (models != null) {
                     for (ModelName model : models) {
                         combo.addItem(model);
@@ -401,29 +398,30 @@ public class PropertySheet extends AbsoluteLayout {
         }
     }
 
-    protected void addResourceCombo(XMLComponentDefinition componentDefintion, FormLayout formLayout,
-            final Component component) {
+    protected void addResourceCombo(XMLComponentDefinition componentDefintion, FormLayout formLayout, final Component component) {
         if (componentDefintion == null) {
-            log.error("Could not find a component defintion for: " + component.getName() + " "
-                    + component.getType());
+            log.error("Could not find a component defintion for: " + component.getName() + " " + component.getType());
         } else {
             IConfigurationService configurationService = context.getConfigurationService();
             FlowStep step = getSingleFlowStep();
-            if (componentDefintion.getResourceCategory() != null
-                    && componentDefintion.getResourceCategory() != ResourceCategory.NONE
+            if (componentDefintion.getResourceCategory() != null && componentDefintion.getResourceCategory() != ResourceCategory.NONE
                     && step != null) {
                 final AbstractSelect resourcesCombo = new ComboBox("Resource");
                 resourcesCombo.setImmediate(true);
-                List<String> types = context.getResourceFactory()
-                        .getResourceTypes(componentDefintion.getResourceCategory());
                 String projectVersionId = step.getComponent().getProjectVersionId();
+                Set<XMLResourceDefinition> types = context.getDefinitionFactory().getResourceDefinitions(projectVersionId,
+                        componentDefintion.getResourceCategory());
                 if (types != null) {
-                    String[] typeStrings = types.toArray(new String[types.size()]);
-                    List<Resource> resources = new ArrayList<>(configurationService
-                            .findResourcesByTypes(projectVersionId, typeStrings));
+                    String[] typeStrings = new String[types.size()];
+                    int i = 0;
+                    for (XMLResourceDefinition type : types) {
+                        typeStrings[i++] = type.getId();
+                    }
+                    List<Resource> resources = new ArrayList<>(configurationService.findResourcesByTypes(projectVersionId, typeStrings));
                     List<ProjectVersionDependency> dependencies = configurationService.findProjectDependencies(projectVersionId);
                     for (ProjectVersionDependency projectVersionDependency : dependencies) {
-                        resources.addAll(configurationService.findResourcesByTypes(projectVersionDependency.getTargetProjectVersionId(), typeStrings));
+                        resources.addAll(
+                                configurationService.findResourcesByTypes(projectVersionDependency.getTargetProjectVersionId(), typeStrings));
                     }
                     if (resources != null) {
                         for (Resource resource : resources) {
@@ -451,34 +449,14 @@ public class PropertySheet extends AbsoluteLayout {
     protected List<XMLSetting> buildSettings(Object obj) {
         if (obj instanceof Component) {
             Component component = (Component) obj;
-            XMLComponentDefinition definition = context.getComponentDefinitionFactory().getComponentDefinition(component.getProjectVersionId(),
+            XMLComponentDefinition definition = context.getDefinitionFactory().getComponentDefinition(component.getProjectVersionId(),
                     component.getType());
             return definition.getSettings().getSetting();
         } else if (obj instanceof Resource) {
             Resource resource = (Resource) obj;
-            List<XMLSetting> xmlSettings = new ArrayList<XMLSetting>();
-            Map<String, SettingDefinition> resourceSettings = context.getResourceFactory()
-                    .getSettingDefinitionsForResourceType(resource.getType());
-            for (String key : resourceSettings.keySet()) {
-                SettingDefinition def = resourceSettings.get(key);
-                XMLSetting setting = new XMLSetting();
-                setting.setId(key);
-                setting.setName(def.label());
-                setting.setDefaultValue(def.defaultValue());
-                setting.setRequired(def.required());
-                setting.setVisible(def.visible());
-                setting.setType(def.type());
-                if (def.type() == Type.CHOICE) {
-                    XMLSettingChoices choices = new XMLSettingChoices();
-                    choices.setChoice(new ArrayList<String>());
-                    for (String choice : def.choices()) {
-                        choices.getChoice().add(choice);
-                    }
-                    setting.setChoices(choices);
-                }
-                xmlSettings.add(setting);
-            }
-            return xmlSettings;
+            XMLResourceDefinition definition = context.getDefinitionFactory().getResourceDefintion(resource.getProjectVersionId(),
+                    resource.getType());
+            return definition.getSettings().getSetting();
         } else {
             return Collections.emptyList();
         }
@@ -755,7 +733,7 @@ public class PropertySheet extends AbsoluteLayout {
         combo.setDescription(definition.getDescription());
         combo.setNullSelectionAllowed(false);
         combo.setRequired(definition.isRequired());
-        List<String> types = context.getResourceFactory().getResourceTypes(category);
+        Set<String> types = context.getDefinitionFactory().getResourceCategories(projectVersionId);
         if (types != null) {
             List<Resource> resources = context.getConfigurationService().findResourcesByTypes(projectVersionId,
                     types.toArray(new String[types.size()]));

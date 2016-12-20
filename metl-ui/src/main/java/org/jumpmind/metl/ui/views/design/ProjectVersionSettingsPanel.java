@@ -187,7 +187,7 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
     }
     
     protected void refreshPlugins() {
-        context.getComponentDefinitionFactory().refresh(projectVersion.getId());
+        context.getDefinitionFactory().refresh(projectVersion.getId());
         populateContainer();
     }
     

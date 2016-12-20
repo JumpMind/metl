@@ -24,7 +24,6 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.plugin.XMLSetting;
@@ -144,18 +143,6 @@ abstract public class AbstractObjectWithSettings extends AbstractNamedObject {
         } else {
             return Boolean.parseBoolean(value);
         }
-    }
-
-    public TypedProperties toTypedProperties(Map<String, SettingDefinition> definitions) {
-        TypedProperties properties = new TypedProperties();
-        for (String name : definitions.keySet()) {
-            properties.put(name, definitions.get(name).defaultValue());
-        }
-
-        for (Setting settingObject : settings) {
-            properties.setProperty(settingObject.getName(), settingObject.getValue());
-        }
-        return properties;
     }
 
     public TypedProperties toTypedProperties(List<XMLSetting> definitions) {

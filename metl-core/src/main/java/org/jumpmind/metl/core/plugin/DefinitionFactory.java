@@ -20,9 +20,15 @@
  */
 package org.jumpmind.metl.core.plugin;
 
-import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.*;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
-import static org.jumpmind.metl.core.plugin.PluginConstants.*;
+import static org.jumpmind.metl.core.plugin.PluginConstants.DEFINTION_TYPE_COMPONENT;
+import static org.jumpmind.metl.core.plugin.PluginConstants.DEFINTION_TYPE_RESOURCE;
+import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.ENABLED;
+import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.INBOUND_QUEUE_CAPACITY;
+import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.LOG_INPUT;
+import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.LOG_OUTPUT;
+import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.NOTES;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -35,6 +41,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -49,6 +56,7 @@ import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.model.ProjectVersionDefinitionPlugin;
 import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.plugin.XMLComponentDefinition.ResourceCategory;
 import org.jumpmind.metl.core.plugin.XMLSetting.Type;
 import org.jumpmind.metl.core.util.VersionUtils;
 import org.slf4j.Logger;
@@ -206,9 +214,9 @@ public class DefinitionFactory implements IDefinitionFactory {
     @Override
     synchronized public XMLComponentDefinition getComponentDefinition(String projectVersionId, String id) {
         XMLComponentDefinition defintion = null;
-        Map<String, XMLAbstractDefinition> componentsById = definitionsByProjectVersionIdById.get(projectVersionId);
-        if (componentsById != null) {
-            XMLAbstractDefinition component = componentsById.get(id);
+        Map<String, XMLAbstractDefinition> definitionsById = definitionsByProjectVersionIdById.get(projectVersionId);
+        if (definitionsById != null) {
+            XMLAbstractDefinition component = definitionsById.get(id);
             if (component instanceof XMLComponentDefinition) {
                 defintion = (XMLComponentDefinition) component;
             }
@@ -219,6 +227,55 @@ public class DefinitionFactory implements IDefinitionFactory {
         }
 
         return defintion;
+    }
+
+    @Override
+    public XMLResourceDefinition getResourceDefintion(String projectVersionId, String id) {
+        XMLResourceDefinition defintion = null;
+        Map<String, XMLAbstractDefinition> definitionsById = definitionsByProjectVersionIdById.get(projectVersionId);
+        if (definitionsById != null) {
+            XMLAbstractDefinition component = definitionsById.get(id);
+            if (component instanceof XMLResourceDefinition) {
+                defintion = (XMLResourceDefinition) component;
+            }
+        }
+
+        if (defintion == null) {
+            logger.warn("Could not find resource for project version of {} with a type id of {}", projectVersionId, id);
+        }
+
+        return defintion;
+    }
+
+    @Override
+    public Set<XMLResourceDefinition> getResourceDefinitions(String projectVersionId, ResourceCategory resourceCategory) {
+        Set<XMLResourceDefinition> categories = new TreeSet<>();
+        Map<String, XMLAbstractDefinition> componentsById = definitionsByProjectVersionIdById.get(projectVersionId);
+        if (componentsById != null) {
+            for (XMLAbstractDefinition definition : componentsById.values()) {
+                if (definition instanceof XMLResourceDefinition) {
+                    XMLResourceDefinition resource = (XMLResourceDefinition) definition;
+                    if (resourceCategory == null || resourceCategory.equals(resource.getResourceCategory())) {
+                        categories.add(resource);
+                    }
+                }
+            }
+        }
+        return categories;
+    }
+
+    @Override
+    public Set<String> getResourceCategories(String projectVersionId) {
+        Set<String> categories = new TreeSet<>();
+        Map<String, XMLAbstractDefinition> componentsById = definitionsByProjectVersionIdById.get(projectVersionId);
+        if (componentsById != null) {
+            for (XMLAbstractDefinition definition : componentsById.values()) {
+                if (definition instanceof XMLResourceDefinition) {
+                    categories.add(((XMLResourceDefinition) definition).getResourceCategory().name());
+                }
+            }
+        }
+        return categories;
     }
 
     protected void reset() {

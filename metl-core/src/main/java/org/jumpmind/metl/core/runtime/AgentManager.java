@@ -37,7 +37,6 @@ import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.plugin.IDefinitionFactory;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
-import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
 import org.jumpmind.util.AppUtils;
 import org.slf4j.Logger;
@@ -46,33 +45,31 @@ import org.slf4j.LoggerFactory;
 public class AgentManager implements IAgentManager {
 
     final Logger log = LoggerFactory.getLogger(getClass());
-    
+
     public static final Date lastRestartTime = new Date();
 
     IConfigurationService configurationService;
-    
+
     IExecutionService executionService;
 
     IComponentRuntimeFactory componentRuntimeFactory;
-    
-    IDefinitionFactory componentDefinitionFactory;
 
-    IResourceFactory resourceFactory;
-    
+    IDefinitionFactory definitionFactory;
+
     IHttpRequestMappingRegistry httpRequestMappingRegistry;
 
     Map<String, AgentRuntime> engines = new HashMap<String, AgentRuntime>();
 
     public AgentManager(IConfigurationService configurationService, IExecutionService executionService,
-            IComponentRuntimeFactory componentFactory, IDefinitionFactory componentDefinitionFactory, IResourceFactory resourceFactory, IHttpRequestMappingRegistry httpRequestMappingRegistry) {
+            IComponentRuntimeFactory componentFactory, IDefinitionFactory componentDefinitionFactory,
+            IHttpRequestMappingRegistry httpRequestMappingRegistry) {
         this.executionService = executionService;
         this.configurationService = configurationService;
         this.componentRuntimeFactory = componentFactory;
-        this.resourceFactory = resourceFactory;
-        this.componentDefinitionFactory = componentDefinitionFactory;
+        this.definitionFactory = componentDefinitionFactory;
         this.httpRequestMappingRegistry = httpRequestMappingRegistry;
     }
-    
+
     @Override
     public Set<Agent> getAvailableAgents() {
         Set<Agent> agents = new HashSet<Agent>(engines.size());
@@ -88,7 +85,7 @@ public class AgentManager implements IAgentManager {
             createAndStartRuntime(agent);
         }
     }
-    
+
     public boolean cancel(String executionId) {
         boolean cancelled = false;
         for (AgentRuntime agentRuntime : engines.values()) {
@@ -96,7 +93,7 @@ public class AgentManager implements IAgentManager {
         }
         return cancelled;
     }
-    
+
     @Override
     public void undeploy(AgentDeployment agentDeployment) {
         AgentRuntime engine = getAgentRuntime(agentDeployment.getAgentId());
@@ -104,7 +101,7 @@ public class AgentManager implements IAgentManager {
             engine.undeploy(agentDeployment);
         }
     }
-    
+
     @Override
     public AgentDeployment deploy(String agentId, Flow flow, Map<String, String> parameters) {
         AgentDeployment deployment = null;
@@ -116,8 +113,7 @@ public class AgentManager implements IAgentManager {
     }
 
     protected Set<Agent> findLocalAgents() {
-        Set<Agent> agents = new HashSet<Agent>(configurationService.findAgentsForHost(AppUtils
-                .getHostName()));
+        Set<Agent> agents = new HashSet<Agent>(configurationService.findAgentsForHost(AppUtils.getHostName()));
         agents.addAll(configurationService.findAgentsForHost(AppUtils.getIpAddress()));
         agents.addAll(configurationService.findAgentsForHost("localhost"));
         return agents;
@@ -136,21 +132,18 @@ public class AgentManager implements IAgentManager {
     @Override
     public boolean isAgentLocal(Agent agent) {
         String hostName = agent.getHost();
-        return "localhost".equals(hostName) || "127.0.0.1".equals(hostName)
-                || "::1".equals(hostName) || AppUtils.getHostName().equals(hostName)
-                || AppUtils.getIpAddress().equals(hostName);
+        return "localhost".equals(hostName) || "127.0.0.1".equals(hostName) || "::1".equals(hostName)
+                || AppUtils.getHostName().equals(hostName) || AppUtils.getIpAddress().equals(hostName);
     }
 
     protected AgentRuntime createAndStartRuntime(Agent agent) {
-        AgentRuntime engine = new AgentRuntime(agent, configurationService, executionService, componentRuntimeFactory, componentDefinitionFactory,
-                resourceFactory, httpRequestMappingRegistry);
+        AgentRuntime engine = new AgentRuntime(agent, configurationService, executionService, componentRuntimeFactory, 
+                definitionFactory, httpRequestMappingRegistry);
         engines.put(agent.getId(), engine);
         if (agent.getAgentStartMode() == AgentStartMode.AUTO) {
             engine.start();
         } else {
-            log.info(
-                    "The '{}' agent is configured to be started manually. It will not be auto started.",
-                    agent.toString());
+            log.info("The '{}' agent is configured to be started manually. It will not be auto started.", agent.toString());
         }
         return engine;
     }

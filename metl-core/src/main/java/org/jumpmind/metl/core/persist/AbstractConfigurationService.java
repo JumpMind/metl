@@ -525,6 +525,7 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         }
 
         AgentResource agentResource = new AgentResource();
+        agentResource.setProjectVersionId(resource.getProjectVersionId());
         agentResource.setId(resource.getId());
         agentResource.setAgentId(agentId);
         agentResource.setType(resource.getType());

@@ -32,7 +32,6 @@ import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.IAgentManager;
-import org.jumpmind.metl.core.runtime.resource.Datasource;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.vaadin.ui.sqlexplorer.IDb;
 import org.jumpmind.vaadin.ui.sqlexplorer.IDbProvider;
@@ -74,7 +73,7 @@ public class DbProvider implements IDbProvider, Serializable {
             AgentRuntime runtime = agentManager.getAgentRuntime(agent.getId());
             Collection<IResourceRuntime> resources = runtime.getDeployedResources();
             for (IResourceRuntime iResource : resources) {
-                if (iResource.getResource().getType().equals(Datasource.TYPE)) {
+                if (iResource.getResource().getType().equals("Database")) {
                     DbResource db = new DbResource(agent, iResource);
                     dbs.add(db);
                 }

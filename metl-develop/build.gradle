@@ -8,6 +8,7 @@ dependencies {
        exclude group:'javax.servlet'
     }
     compile project(":metl-core")
+    testCompile project(":resource-core")
     testCompile project(":comp-rdbms-reader")  
     testCompile project(":comp-data-diff")  
     testCompile project(":comp-sorter")  
