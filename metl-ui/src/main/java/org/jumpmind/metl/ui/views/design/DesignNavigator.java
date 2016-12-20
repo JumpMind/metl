@@ -46,14 +46,6 @@ import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.UserSetting;
 import org.jumpmind.metl.core.persist.IConfigurationService;
-import org.jumpmind.metl.core.runtime.resource.Datasource;
-import org.jumpmind.metl.core.runtime.resource.Ftp;
-import org.jumpmind.metl.core.runtime.resource.Http;
-import org.jumpmind.metl.core.runtime.resource.JMS;
-import org.jumpmind.metl.core.runtime.resource.LocalFile;
-import org.jumpmind.metl.core.runtime.resource.MailSessionResource;
-import org.jumpmind.metl.core.runtime.resource.SMB;
-import org.jumpmind.metl.core.runtime.resource.Sftp;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.EnableFocusTextField;
 import org.jumpmind.metl.ui.common.Icons;
@@ -137,7 +129,7 @@ public class DesignNavigator extends VerticalLayout {
         IConfigurationService configurationService = context.getConfigurationService();
         configurationService.save(project);
         configurationService.save(version);
-        context.getComponentDefinitionFactory().refresh(version.getId());
+        context.getDefinitionFactory().refresh(version.getId());
         refreshProjects();
         startEditingItem(project);
     }
@@ -419,9 +411,9 @@ public class DesignNavigator extends VerticalLayout {
         for (ResourceName resource : resources) {
             this.treeTable.setChildrenAllowed(folder, true);
             this.treeTable.addItem(resource);
-            if (Datasource.TYPE.equals(resource.getType())) {
+            if ("Database".equals(resource.getType())) {
                 this.treeTable.setItemIcon(resource, Icons.DATABASE);
-            } else if (Http.TYPE.equals(resource.getType())) {
+            } else if ("Http".equals(resource.getType())) {
                 this.treeTable.setItemIcon(resource, Icons.WEB);
             } else {
                 this.treeTable.setItemIcon(resource, Icons.FILE_SYSTEM);
@@ -615,7 +607,7 @@ public class DesignNavigator extends VerticalLayout {
                 unique = true;
             }
             ProjectVersion newVersion = configurationService.saveNewVersion(nextVersionLabel, original);
-            context.getComponentDefinitionFactory().refresh(newVersion.getId());
+            context.getDefinitionFactory().refresh(newVersion.getId());
 
             treeTable.addItem(newVersion);
             treeTable.setItemIcon(newVersion, Icons.PROJECT_VERSION);
@@ -766,35 +758,35 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public void addNewDatabase() {
-        addNewResource(Datasource.TYPE, "Database", Icons.DATABASE);
+        addNewResource("Database", "Database", Icons.DATABASE);
     }
 
     public void addNewFtpFileSystem() {
-        addNewResource(Ftp.TYPE, "FTP Directory", Icons.FILE_SYSTEM);
+        addNewResource("Ftp", "FTP Directory", Icons.FILE_SYSTEM);
     }
 
     public void addNewLocalFileSystem() {
-        addNewResource(LocalFile.TYPE, "Directory", Icons.FILE_SYSTEM);
+        addNewResource("Local File System", "Directory", Icons.FILE_SYSTEM);
     }
 
     public void addNewSftpFileSystem() {
-        addNewResource(Sftp.TYPE, "SFTP Directory", Icons.FILE_SYSTEM);
+        addNewResource("Sftp", "SFTP Directory", Icons.FILE_SYSTEM);
     }
 
     public void addNewJMSFileSystem() {
-        addNewResource(JMS.TYPE, "JMS Directory", Icons.QUEUE);
+        addNewResource("JMS", "JMS Directory", Icons.QUEUE);
     }
 
     public void addNewSMBFileSystem() {
-        addNewResource(SMB.TYPE, "SMB Directory", Icons.FILE_SYSTEM);
+        addNewResource("SMB", "SMB Directory", Icons.FILE_SYSTEM);
     }
 
     public void addNewHttpResource() {
-        addNewResource(Http.TYPE, "Http", Icons.WEB);
+        addNewResource("Http", "Http", Icons.WEB);
     }
 
     public void addNewMailSession() {
-        addNewResource(MailSessionResource.TYPE, "Mail Session", Icons.EMAIL);
+        addNewResource("MailSession", "Mail Session", Icons.EMAIL);
     }
 
     protected void addNewResource(String type, String defaultName, FontAwesome icon) {

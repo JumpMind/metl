@@ -67,7 +67,6 @@ import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.IHasResults;
 import org.jumpmind.metl.core.runtime.component.IHasSecurity;
 import org.jumpmind.metl.core.runtime.component.Results;
-import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.MailSession;
 import org.jumpmind.util.AppUtils;
@@ -91,9 +90,7 @@ public class FlowRuntime {
 
     IComponentRuntimeFactory componentRuntimeFactory;
 
-    IDefinitionFactory componentDefinitionFactory;
-
-    IResourceFactory resourceFactory;
+    IDefinitionFactory definitionFactory;
 
     IExecutionTracker executionTracker;
 
@@ -124,19 +121,19 @@ public class FlowRuntime {
     public FlowRuntime(String executionId, String userId, AgentDeployment deployment, Agent agent,
             IComponentRuntimeFactory componentRuntimeFactory,
             IDefinitionFactory componentDefinitionFactory,
-            IResourceFactory resourceFactory, ExecutorService threadService,
+            ExecutorService threadService,
             IConfigurationService configurationService, IExecutionService executionService,
             Map<String, IResourceRuntime> deployedResources, List<Notification> notifications,
             Map<String, String> globalSettings) {
         this(executionId, userId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
-                resourceFactory, threadService, configurationService, executionService,
+                threadService, configurationService, executionService,
                 deployedResources, notifications, globalSettings, null);
     }
 
     public FlowRuntime(String executionId, String userId, AgentDeployment deployment, Agent agent,
             IComponentRuntimeFactory componentRuntimeFactory,
-            IDefinitionFactory componentDefinitionFactory,
-            IResourceFactory resourceFactory, ExecutorService threadService,
+            IDefinitionFactory definitionFactory,
+            ExecutorService threadService,
             IConfigurationService configurationService, IExecutionService executionService,
             Map<String, IResourceRuntime> deployedResources, List<Notification> notifications,
             Map<String, String> globalSettings, Map<String, String> runtimeParameters) {
@@ -149,8 +146,7 @@ public class FlowRuntime {
         this.agent = agent;
         this.notifications = notifications;
         this.componentRuntimeFactory = componentRuntimeFactory;
-        this.componentDefinitionFactory = componentDefinitionFactory;
-        this.resourceFactory = resourceFactory;
+        this.definitionFactory = definitionFactory;
         this.threadService = threadService;
         this.configurationService = configurationService;
         this.executionService = executionService;
@@ -183,7 +179,7 @@ public class FlowRuntime {
                         manipulatedFlow, executionTracker, deployedResources, flowParameters,
                         globalSettings);
                 StepRuntime stepRuntime = new StepRuntime(componentRuntimeFactory,
-                        componentDefinitionFactory, context, this);
+                        definitionFactory, context, this);
                 stepRuntimes.put(flowStep.getId(), stepRuntime);
             }
         }
@@ -296,7 +292,7 @@ public class FlowRuntime {
             StepRuntime stepRuntime = stepRuntimes.get(flowStep.getId());
             if (stepRuntime != null) {
                 try {
-                    stepRuntime.start(resourceFactory);
+                    stepRuntime.start();
                 } catch (RuntimeException ex) {
                     stepRuntime.error = ex;
                     throw ex;
@@ -330,7 +326,7 @@ public class FlowRuntime {
         clone.getFlowStepLinks().addAll(flow.getFlowStepLinks());
 
         for (FlowStep flowStep : new ArrayList<>(clone.getFlowSteps())) {
-            XMLComponentDefinition componentDefintion = componentDefinitionFactory.getComponentDefinition(flow.getProjectVersionId(), flowStep.getComponent().getType());
+            XMLComponentDefinition componentDefintion = definitionFactory.getComponentDefinition(flow.getProjectVersionId(), flowStep.getComponent().getType());
             if (isNotBlank(componentDefintion.getFlowManipulatorClassName())) {
                 try {
                     IFlowManipulator flowManipulator = (IFlowManipulator) Class

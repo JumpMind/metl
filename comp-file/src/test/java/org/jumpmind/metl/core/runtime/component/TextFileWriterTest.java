@@ -43,8 +43,8 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
-import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
 import org.jumpmind.metl.core.utils.TestUtils;
+import org.jumpmind.properties.TypedProperties;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -62,7 +62,10 @@ public class TextFileWriterTest {
         writerFlowStep = createWriterFlowStep();
         Resource resource = writerFlowStep.getComponent().getResource();
         deployedResources = new HashMap<>();
-        resourceRuntime = new ResourceFactory().create(resource, null);
+        resourceRuntime = new LocalFile();
+        TypedProperties properties = new TypedProperties();
+        properties.put(LocalFile.LOCALFILE_PATH, FILE_PATH);
+        resourceRuntime.start(resource, properties);
         deployedResources.put(resource.getId(), resourceRuntime);
     }
 

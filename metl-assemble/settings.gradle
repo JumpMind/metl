@@ -1,9 +1,9 @@
-includeFlat 'metl-server', 'metl-core',  'metl-ui', 
+includeFlat 'metl-server', 'metl-core',  'metl-ui', 'resource-core',
 'comp-abstract', 'comp-rdbms-reader', 'comp-sorter', 
 'comp-data-diff', 'comp-temp-rdbms', 'comp-serialize',
 'comp-sql-execute', 'comp-rdbms-writer', 'comp-sequence',
 'comp-service', 'comp-zip', 'comp-file', 'comp-excel',
 'comp-control', 'comp-groovy', 'comp-route', 'comp-map',
 'comp-transform', 'comp-xml', 'comp-format', 'comp-email',
-'comp-execute', 'comp-test', 'comp-text', 'comp-webrequest',
+'comp-execute', 'comp-test', 'comp-text', 'comp-webrequest', 
 'metl-war', 'metl-develop'

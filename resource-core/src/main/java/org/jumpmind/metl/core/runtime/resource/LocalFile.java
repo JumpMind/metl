@@ -20,20 +20,14 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
-import org.jumpmind.metl.core.model.SettingDefinition;
-import org.jumpmind.metl.core.plugin.XMLComponentDefinition.ResourceCategory;
-import org.jumpmind.metl.core.plugin.XMLSetting.Type;
 import org.jumpmind.properties.TypedProperties;
 
-@ResourceDefinition(typeName=LocalFile.TYPE, resourceCategory=ResourceCategory.STREAMABLE)
 public class LocalFile extends AbstractResourceRuntime {
 
 	public static final String TYPE = "Local File System";
 
-	@SettingDefinition(order = 0, required = false, type = Type.TEXT, label = "Path")
 	public final static String LOCALFILE_PATH = "localfile.path";
 
-	@SettingDefinition(type = Type.BOOLEAN, order = 20, required = true, provided = true, defaultValue = "false", label = "Must Exist")
 	public static final String LOCALFILE_MUST_EXIST = "localfile.must.exist";
 
 	IDirectory streamableResource;
@@ -53,7 +47,6 @@ public class LocalFile extends AbstractResourceRuntime {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T reference() {
-		// TODO think about renaming reference to resource or something more meaningful
 		return (T) streamableResource;
 	}
 	

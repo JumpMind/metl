@@ -44,7 +44,7 @@ public abstract class AbstractComponentEditPanel extends VerticalLayout implemen
     public void init(boolean readOnly, Component component, ApplicationContext context, PropertySheet propertySheet) {
         this.component = component;
         this.context  = context;
-        this.componentDefinition = context.getComponentDefinitionFactory().getComponentDefinition(component.getProjectVersionId(), component.getType());
+        this.componentDefinition = context.getDefinitionFactory().getComponentDefinition(component.getProjectVersionId(), component.getType());
         this.propertySheet = propertySheet;
         this.readOnly = readOnly;
         buildUI();

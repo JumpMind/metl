@@ -28,8 +28,6 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Resource;
-import org.jumpmind.metl.core.model.SettingDefinition;
-import org.jumpmind.metl.core.plugin.XMLSetting.Type;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
@@ -80,7 +78,6 @@ public class FilePoller extends AbstractComponentRuntime {
     
     public final static String SETTING_FILE_SORT_DESCENDING = "file.sort.descending";
 
-    @SettingDefinition(order = 70, type = Type.TEXT, label = "Relative Trigger File Path")
     public final static String SETTING_TRIGGER_FILE_PATH = "trigger.file.path";
     
     String runWhen = PER_UNIT_OF_WORK;

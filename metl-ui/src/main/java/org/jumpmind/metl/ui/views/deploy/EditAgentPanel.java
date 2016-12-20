@@ -48,8 +48,6 @@ import org.jumpmind.metl.core.model.FlowParameter;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.IAgentManager;
-import org.jumpmind.metl.core.runtime.resource.Datasource;
-import org.jumpmind.metl.core.runtime.resource.LocalFile;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
@@ -591,9 +589,9 @@ public class EditAgentPanel extends VerticalLayout
                     .findAgentResource(agent.getId(), summary.getId());
             EditAgentResourcePanel editPanel = new EditAgentResourcePanel(context, agentResource);
             FontAwesome icon = Icons.GENERAL_RESOURCE;
-            if (agentResource.getType().equals(Datasource.TYPE)) {
+            if (agentResource.getType().equals("Database")) {
                 icon = Icons.DATABASE;
-            } else if (agentResource.getType().equals(LocalFile.TYPE)) {
+            } else if (agentResource.getType().equals("Local File System")) {
                 icon = Icons.FILE_SYSTEM;
             }
             tabbedPanel.addCloseableTab(summary.getId(), summary.getName(), icon, editPanel);

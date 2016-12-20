@@ -34,12 +34,12 @@ import javax.annotation.PostConstruct;
 
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.plugin.XMLComponentDefinition.ResourceCategory;
+import org.jumpmind.metl.core.plugin.XMLResourceDefinition;
 import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.resource.FileInfo;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.metl.core.runtime.resource.ResourceDefinition;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.Category;
@@ -216,8 +216,8 @@ public class ExploreDirectoryView extends VerticalLayout implements View {
             AgentRuntime runtime = agentManager.getAgentRuntime(agent.getId());
             Collection<IResourceRuntime> resources = runtime.getDeployedResources();
             for (IResourceRuntime resource : resources) {
-                ResourceDefinition definition = resource.getClass().getAnnotation(ResourceDefinition.class);
-                if (definition != null && definition.resourceCategory() == ResourceCategory.STREAMABLE) {
+                XMLResourceDefinition definition = context.getDefinitionFactory().getResourceDefintion(resource.getResource().getProjectVersionId(), resource.getResource().getType());
+                if (definition != null && definition.getResourceCategory() == ResourceCategory.STREAMABLE) {
                     directoryRuntimes.add(new DirectoryResource(agent, resource));
                 }
             }

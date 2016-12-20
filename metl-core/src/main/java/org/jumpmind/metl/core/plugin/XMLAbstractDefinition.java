@@ -7,6 +7,8 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
+import org.jumpmind.properties.TypedProperties;
+
 @XmlAccessorType(XmlAccessType.FIELD)
 abstract public class XMLAbstractDefinition implements Serializable, Comparable<XMLAbstractDefinition> {
 
@@ -97,6 +99,16 @@ abstract public class XMLAbstractDefinition implements Serializable, Comparable<
     @Override
     public int compareTo(XMLAbstractDefinition o) {
         return name.compareTo(o.getName());
+    }
+    
+    public TypedProperties toDefaultSettings() {
+        TypedProperties properties = new TypedProperties();
+        if (settings != null) {
+            for (XMLSetting setting :settings.getSetting()) {
+                properties.put(setting.getName(), setting.getDefaultValue());
+            }
+        }
+        return properties;
     }
 
     

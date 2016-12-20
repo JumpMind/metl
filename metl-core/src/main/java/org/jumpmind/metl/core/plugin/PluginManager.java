@@ -93,6 +93,8 @@ public class PluginManager implements IPluginManager {
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-webrequest", 220));
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-test", 230));
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-text", 240));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "resource-core", 250));
+
     }
 
     @Override

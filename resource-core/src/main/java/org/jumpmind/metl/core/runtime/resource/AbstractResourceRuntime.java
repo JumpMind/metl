@@ -20,19 +20,33 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.jumpmind.metl.core.model.Resource;
+import org.jumpmind.metl.core.runtime.AbstractRuntimeObject;
+import org.jumpmind.properties.TypedProperties;
 
-import org.jumpmind.metl.core.plugin.XMLComponentDefinition.ResourceCategory;
+public abstract class AbstractResourceRuntime extends AbstractRuntimeObject implements IResourceRuntime {
 
-@Target({ ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
-public @interface ResourceDefinition {
+    protected Resource resource;
+    protected TypedProperties resourceRuntimeSettings;
 
-    String typeName();
-    
-    ResourceCategory resourceCategory();
-    
+    @Override
+    public void start(Resource resource,
+            TypedProperties resourceRuntimeSettings) {
+        this.resource = resource;
+        this.resourceRuntimeSettings = resourceRuntimeSettings;
+        start(resourceRuntimeSettings);
+    }
+
+    abstract protected void start(TypedProperties properties);
+
+    @Override
+    public Resource getResource() {
+        return resource;
+    }
+
+    @Override
+    public TypedProperties getResourceRuntimeSettings() {
+        return resourceRuntimeSettings;
+    }    
+
 }
