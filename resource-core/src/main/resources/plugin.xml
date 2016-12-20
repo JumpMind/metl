@@ -188,7 +188,7 @@
             </setting>
             <setting id='jms.type' required='true' type='choice'>
                 <name>JMS Type</name>
-                <defaultValue>Queue</defaultValue>
+                <defaultValue>Topic</defaultValue>
                 <choices>
                     <choice>Queue</choice>
                     <choice>Topic</choice>
@@ -208,15 +208,17 @@
             <setting id='java.naming.security.credentials' required='false' type='password'>
                 <name>java.naming.security.credentials</name>
             </setting>
-            <setting id='connection.factory.name' required='true' type='password'>
+            <setting id='connection.factory.name' required='false' type='text'>
                 <name>Connection Factory Name</name>
                 <defaultValue>ConnectionFactory</defaultValue>
             </setting>
             <setting id='queue.name' required='false' type='text'>
                 <name>Queue Name</name>
+                <defaultValue>dynamicQueues/foo.bar</defaultValue>
             </setting>
             <setting id='topic.name' required='false' type='text'>
                 <name>Topic Name</name>
+                <defaultValue>dynamicTopics/foo.bar</defaultValue>
             </setting>
             <setting id='durable.subscription.name' required='false' type='text'>
                 <name>Durable Subscription Name</name>

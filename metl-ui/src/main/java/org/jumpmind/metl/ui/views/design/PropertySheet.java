@@ -412,7 +412,7 @@ public class PropertySheet extends AbsoluteLayout {
                 Set<XMLResourceDefinition> types = context.getDefinitionFactory().getResourceDefinitions(projectVersionId,
                         componentDefintion.getResourceCategory());
                 if (types != null) {
-                    String[] typeStrings = types.toArray(new String[types.size()]);
+                    String[] typeStrings = new String[types.size()];
                     int i = 0;
                     for (XMLResourceDefinition type : types) {
                         typeStrings[i++] = type.getId();
