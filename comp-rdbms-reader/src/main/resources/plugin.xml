@@ -59,6 +59,12 @@
           <choice>SQL STATEMENT</choice>
         </choices>
       </setting>
+      <setting id='query.timeout.seconds'
+               required='true'
+               type='integer'>
+        <name>Query Timeout (seconds)</name>
+        <defaultValue>-1</defaultValue>
+      </setting>      
       <setting id='rows.per.message'
                required='true'
                type='integer'>
