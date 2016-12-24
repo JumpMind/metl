@@ -45,6 +45,7 @@ import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.properties.TypedProperties;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 /**
@@ -53,10 +54,14 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 abstract public class AbstractRdbmsComponentRuntime extends AbstractComponentRuntime {
 
     public final static String SQL = "sql";
+    
+    public final static String QUERY_TIMEOUT = "query.timeout.seconds";
 
     protected List<Result> results = new ArrayList<Result>();
 
     protected DataSource dataSource;
+    
+    protected int queryTimeout = -1;
 
     protected NamedParameterJdbcTemplate getJdbcTemplate() {
         if (dataSource == null && getResourceRuntime() == null) {
@@ -66,7 +71,9 @@ abstract public class AbstractRdbmsComponentRuntime extends AbstractComponentRun
         if (dataSource == null) {
             dataSource = (DataSource) getResourceRuntime().reference();
         }
-        return new NamedParameterJdbcTemplate(dataSource);
+        JdbcTemplate template = new JdbcTemplate(dataSource);
+        template.setQueryTimeout(queryTimeout);
+        return new NamedParameterJdbcTemplate(template);
     }
 
     protected List<String> getSqlStatements(boolean required) {
