@@ -87,10 +87,8 @@ public class JMS extends AbstractResourceRuntime {
                     streamableResource = new JMSJndiQueueDirectory(properties);
                 }
             }
-        } catch (RuntimeException e) {
-            throw e;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("Failed to start JMS resource", e);
         }
     }
 
