@@ -36,8 +36,12 @@ public abstract class AbstractResourceRuntime extends AbstractRuntimeObject impl
         this.resourceRuntimeSettings = resourceRuntimeSettings;
         start(resourceRuntimeSettings);
     }
-
-    abstract protected void start(TypedProperties properties);
+    
+    protected void start(TypedProperties properties) {}
+    
+    @Override
+    public void stop() {
+    }
 
     @Override
     public Resource getResource() {
