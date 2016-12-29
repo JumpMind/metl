@@ -33,6 +33,7 @@ dependencies {
     testCompile project(":comp-webrequest") 
     testCompile project(":comp-test") 
     testCompile project(":comp-text")      
+    testCompile project(":comp-stamp")      
     testCompile project(path: ':metl-core', configuration: 'testArtifacts')    
     testCompile "javax.servlet:javax.servlet-api:$servletVersion"
     testCompile "org.eclipse.jetty:jetty-servlet:$jettyVersion"
