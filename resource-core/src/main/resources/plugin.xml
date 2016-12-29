@@ -176,7 +176,7 @@
     </resource>
 
     <resource id='JMS' resourceCategory='streamable'>
-        <name>HTTP</name>
+        <name>JMS</name>
         <className>org.jumpmind.metl.core.runtime.resource.JMS</className>
         <settings>
             <setting id='create.mode' required='true' type='choice'>
