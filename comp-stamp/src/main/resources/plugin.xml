@@ -22,42 +22,38 @@
 -->
 <definitions>
   <component category='PROCESSOR'
-             id='Execute'
+             id='3b053254-c87c-4e59-b34b-0b2e2dc6deca'
              inputMessageType='any'
-             inputOutputModelsMatch='false'
-             outputMessageType='text'
+             inputOutputModelsMatch='true'
+             outputMessageType='any'
              resourceCategory='none'>
-    <name>Execute</name>
-    <className>org.jumpmind.metl.core.runtime.component.Execute</className>
-    <keywords>launch,process</keywords>
+    <name>Stamp</name>
+    <className>org.jumpmind.metl.core.runtime.component.Stamp</className>
+    <keywords>stamp,header,message</keywords>
     <description></description>
     <settings>
-      <setting id='run.when'
-               required='false'
-               type='choice'>
-        <name>Run When</name>
-        <defaultValue>PER UNIT OF WORK</defaultValue>
-        <choices>
-          <choice>PER UNIT OF WORK</choice>
-          <choice>PER MESSAGE</choice>
-        </choices>
-      </setting>
-      <setting id='command'
+      <setting id='header.name.to.use'
                required='true'
                type='text'>
-        <name>Command</name>
-      </setting>
-      <setting id='continue.on.error'
+        <name>Header Name to Use</name>
+      </setting>    
+      <setting id='stamp.type'
+               required='true'
+               type='choice'>
+        <name>Stamp Type</name>
+        <defaultValue>FIRST ENTITY ATTRIBUTE</defaultValue>
+        <choices>
+          <choice>FIRST ENTITY ATTRIBUTE</choice>
+          <choice>TIMESTAMP</choice>
+          <choice>yyyy-MM-dd hh:mm:ss.S</choice>
+          <choice>yyyyMMddhhmmssS</choice>                    
+        </choices>
+      </setting>      
+      <setting id='entity.column'
                required='false'
-               type='boolean'>
-        <name>Continue On Error</name>
+               type='entity_column'>
+        <name>Entity Attribute to Use</name>
         <defaultValue>false</defaultValue>
-      </setting>
-      <setting id='success.code'
-               required='false'
-               type='integer'>
-        <name>Success Code</name>
-        <defaultValue>0</defaultValue>
       </setting>
     </settings>
   </component>

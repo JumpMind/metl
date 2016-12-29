@@ -162,6 +162,10 @@
             <setting id='relative.path' required='false' type='text'>
                 <name>File Path</name>
             </setting>
+            <setting id='split.on.line.feed' required='false' type='boolean'>
+                <name>Split On Line Feed</name>
+                <defaultValue>true</defaultValue>
+            </setting>            
             <setting id='text.rows.per.message' required='false' type='integer'>
                 <name>Rows/Msg</name>
                 <defaultValue>1000</defaultValue>
