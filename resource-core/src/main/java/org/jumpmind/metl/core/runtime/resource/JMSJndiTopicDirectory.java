@@ -41,7 +41,11 @@ public class JMSJndiTopicDirectory extends AbstractJMSJndiDirectory {
 
     @Override
     protected Session createSession(Connection connection) throws JMSException, NamingException {
-        return connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        int ackSetting = Session.AUTO_ACKNOWLEDGE;
+        if (properties.get(JMS.SETTING_ACK_TYPE, JMS.ACK_TYPE_IMMEDIATE).equals(JMS.ACK_TYPE_ON_FLOW_COMPLETE)) {
+            ackSetting = Session.CLIENT_ACKNOWLEDGE;
+        }
+        return connection.createSession(false, ackSetting);
     }
 
     @Override

@@ -200,9 +200,13 @@ public class SftpDirectory implements IDirectory {
             return false;
         }
     }
-
+    
     @Override
     public void close() {
+    }
+    
+    @Override
+    public void close(boolean success) {
         Session session = threadSession.get();
         if (session != null) {
             session.disconnect();

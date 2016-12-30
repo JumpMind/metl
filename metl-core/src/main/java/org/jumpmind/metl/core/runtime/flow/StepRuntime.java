@@ -80,8 +80,6 @@ public class StepRuntime implements Runnable {
 
     protected Executor componentRuntimeExecutor;
     
-    protected Collection<Thread> threads = Collections.synchronizedCollection(new HashSet<>());
-
     boolean running = false;
     
     boolean cancelling = false;
@@ -313,7 +311,6 @@ public class StepRuntime implements Runnable {
     protected void processOnAnotherThread(Message inputMessage, boolean unitOfWorkBoundaryReached, SendMessageCallback callback) {
         int threadNumber = ThreadUtils.getThreadNumber(threadCount);
         try {
-            threads.add(Thread.currentThread());
             ComponentStatistics statistics = componentContext.getComponentStatistics();
             statistics.incrementInboundMessages(threadNumber);
             if (inputMessage instanceof ContentMessage<?>) {
@@ -523,11 +520,6 @@ public class StepRuntime implements Runnable {
             try {
                 inQueue.clear();
                 queue(new ShutdownMessage(componentContext.getFlowStep().getId(), true));
-                for (Thread thread : threads) {
-                    thread.interrupt();
-                    log.info("Interrupting thread {} for {} ", thread, componentContext.getFlowStep().getName());
-                }
-                
                 for (IComponentRuntime componentRuntime : getComponentRuntimes()) {
                     componentRuntime.interrupt();
                 }

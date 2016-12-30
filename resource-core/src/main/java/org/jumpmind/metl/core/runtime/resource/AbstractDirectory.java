@@ -47,9 +47,14 @@ abstract public class AbstractDirectory implements IDirectory {
     public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession, boolean append) {
         return null;
     }
+    
+    @Override
+    public void close(boolean success) {
+    }
 
     @Override
     public void close() {
+        close(true);
     }
 
     @Override

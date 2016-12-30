@@ -42,6 +42,7 @@ public interface IDirectory {
 
     public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession, boolean append);
     
+    @Deprecated
     public void close();
     
     public boolean delete(String relativePath);
@@ -79,4 +80,6 @@ public interface IDirectory {
     public boolean renameFile(String fromFilePath, String toFilePath, boolean closeSession);
     
     public void connect();
+    
+    public void close(boolean success);
 }

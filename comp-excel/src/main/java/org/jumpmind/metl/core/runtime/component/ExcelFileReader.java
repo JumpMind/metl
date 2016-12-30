@@ -25,7 +25,6 @@ import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
-import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.properties.TypedProperties;
 
 public class ExcelFileReader extends AbstractFileReader {
@@ -115,9 +114,8 @@ public class ExcelFileReader extends AbstractFileReader {
             InputStream inStream = null;
             try {
                 info("Reading file: %s", file);
-                IDirectory resource = (IDirectory) getResourceReference();
                 String filePath = resolveParamsAndHeaders(file, inputMessage);
-                inStream = resource.getInputStream(filePath, mustExist);
+                inStream = directory.getInputStream(filePath, mustExist);
                 if (inStream != null) {
                     readWorkbook(headers, inStream, callback);
                 }

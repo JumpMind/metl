@@ -266,7 +266,10 @@ public class FtpDirectory implements IDirectory {
 
     @Override
     public void close() {
-
+    }
+    
+    @Override
+    public void close(boolean success) {
     }
 
     @Override

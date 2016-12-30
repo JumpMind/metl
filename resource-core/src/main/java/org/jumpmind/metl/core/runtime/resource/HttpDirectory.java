@@ -285,6 +285,10 @@ public class HttpDirectory implements IDirectory {
     @Override
     public void close() {
     }
+    
+    @Override
+    public void close(boolean success) {
+    }
 
     @Override
     public boolean requiresContentLength() {

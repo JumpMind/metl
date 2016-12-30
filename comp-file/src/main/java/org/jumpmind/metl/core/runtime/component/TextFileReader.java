@@ -37,7 +37,6 @@ import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
-import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.properties.TypedProperties;
 
 public class TextFileReader extends AbstractFileReader {
@@ -93,7 +92,6 @@ public class TextFileReader extends AbstractFileReader {
             int currentFileLinesRead = 0;
             String currentLine;
             boolean readContent = true;
-            IDirectory directory = (IDirectory) getResourceReference();
             if (directory == null) {
                 throw new IllegalStateException("The resource was not created.  Please check to see that it is properly configured");
             }
@@ -135,6 +133,7 @@ public class TextFileReader extends AbstractFileReader {
                             linesInMessage = 0;
                         } else {
                             info("File %s didn't exist, but Must Exist setting was false.  Continuing", file);
+                            readContent = false;
                         }
                     } finally {
                         // Closes the reader and the inStream.
@@ -143,8 +142,6 @@ public class TextFileReader extends AbstractFileReader {
                 }
             } catch (IOException e) {
                 throw new IoException("Error reading from file " + e.getMessage());
-            } finally {
-                directory.close();
             }
 
             if (controlMessageOnEof) {

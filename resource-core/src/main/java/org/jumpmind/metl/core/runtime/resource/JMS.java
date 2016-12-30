@@ -39,6 +39,10 @@ public class JMS extends AbstractResourceRuntime {
     public static final String MSG_TYPE_OBJECT = "Object";
 
     public static final String MSG_TYPE_MAP = "Map";
+    
+    public static final String ACK_TYPE_ON_FLOW_COMPLETE = "On Flow Complete";
+    
+    public static final String ACK_TYPE_IMMEDIATE = "Immediate";
 
     public static final String SETTING_CREATE_MODE = "create.mode";
 
@@ -67,6 +71,8 @@ public class JMS extends AbstractResourceRuntime {
     public static final String SETTING_MESSAGE_TYPE_MAP_VALUE = "map.msg.key";
     
     public static final String SETTING_MESSAGE_JMS_TYPE = "msg.jms.type";
+    
+    public static final String SETTING_ACK_TYPE = "ack.type";
 
     @SuppressWarnings("unchecked")
     @Override

@@ -41,6 +41,7 @@ public abstract class AbstractFileReader extends AbstractComponentRuntime {
     String archiveOnErrorPath;
     String runWhen = PER_UNIT_OF_WORK;
     List<String> filesRead;
+    IDirectory directory;
 
 	protected void init() {
         filesRead = new ArrayList<String>();
@@ -61,6 +62,8 @@ public abstract class AbstractFileReader extends AbstractComponentRuntime {
             throw new MisconfiguredException(
                     "A resource has not been selected.  The resource is required if not configured to get the file name from the inbound message");
         }
+        
+        directory = getResourceReference();
 	}
 	
     @Override
@@ -75,6 +78,8 @@ public abstract class AbstractFileReader extends AbstractComponentRuntime {
         } else if (ACTION_DELETE.equals(actionOnError)) {
             deleteFiles();
         }
+        directory.close(false);
+        directory = null;
     }
 
     @Override
@@ -84,6 +89,8 @@ public abstract class AbstractFileReader extends AbstractComponentRuntime {
         } else if (ACTION_DELETE.equals(actionOnSuccess)) {
             deleteFiles();
         }
+        directory.close(true);
+        directory = null;
     }
 
     protected void deleteFiles() {

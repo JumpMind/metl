@@ -13,7 +13,6 @@ import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
-import org.jumpmind.metl.core.runtime.resource.IDirectory;
 
 public class BinaryFileReader extends AbstractFileReader {
 
@@ -48,9 +47,8 @@ public class BinaryFileReader extends AbstractFileReader {
             InputStream inStream = null;
             try {
                 info("Reading file: %s", file);
-                IDirectory resource = (IDirectory) getResourceReference();
                 String filePath = resolveParamsAndHeaders(file, inputMessage);
-                inStream = resource.getInputStream(filePath, mustExist);
+                inStream = directory.getInputStream(filePath, mustExist);
                 //TODO: if the file is bigger than the allowable message size, this doesn't work
                 if (inStream != null) {
                     byte[] payload = IOUtils.toByteArray(inStream);
