@@ -160,7 +160,6 @@ public class StandaloneFlowRunner {
     protected void init() {
         if (agentRuntime == null) {
             try {
-
                 logDir.delete();
                 logDir.mkdirs();
                 LogUtils.setLogDir(logDir);

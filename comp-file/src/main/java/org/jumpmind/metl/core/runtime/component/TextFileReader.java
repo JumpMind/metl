@@ -94,6 +94,9 @@ public class TextFileReader extends AbstractFileReader {
             String currentLine;
             boolean readContent = true;
             IDirectory directory = (IDirectory) getResourceReference();
+            if (directory == null) {
+                throw new IllegalStateException("The resource was not created.  Please check to see that it is properly configured");
+            }
             try {
                 for (int i = 0; i < numberOfTimesToReadFile && readContent; i++) {
                     if (isNotBlank(file)) {
