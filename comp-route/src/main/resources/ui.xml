@@ -26,6 +26,6 @@
         <className>org.jumpmind.metl.ui.views.design.EditContentRouterPanel</className>
     </component-ui>    
     <component-ui id="Message Filter UI" componentId="afe18f73-920e-47a8-bd0a-4f0bbd7824c">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-content-router-48x48-color.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-filter-48x48-color.png</iconImage>
     </component-ui>      
 </ui>
