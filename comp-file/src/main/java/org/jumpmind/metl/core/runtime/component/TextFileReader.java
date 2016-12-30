@@ -94,6 +94,9 @@ public class TextFileReader extends AbstractFileReader {
             String currentLine;
             boolean readContent = true;
             IDirectory directory = (IDirectory) getResourceReference();
+            if (directory == null) {
+                throw new IllegalStateException("The resource was not created.  Please check to see that it is properly configured");
+            }
             try {
                 for (int i = 0; i < numberOfTimesToReadFile && readContent; i++) {
                     if (isNotBlank(file)) {
@@ -105,7 +108,7 @@ public class TextFileReader extends AbstractFileReader {
                         InputStream inStream = directory.getInputStream(filePath, mustExist, false);
                         if (inStream != null) {
                             reader = new BufferedReader(new InputStreamReader(inStream, encoding));
-                            if (properties.is(SETTING_SPLIT_ON_LINE_FEED)) {
+                            if (properties.is(SETTING_SPLIT_ON_LINE_FEED, true)) {
                                 while ((currentLine = reader.readLine()) != null) {
                                     currentFileLinesRead++;
                                     if (linesInMessage == textRowsPerMessage) {

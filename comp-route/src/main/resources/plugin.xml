@@ -63,6 +63,16 @@
     <keywords>route,header</keywords>
     <description></description>
     <settings>
+      <setting id='message.type.to.filter'
+               required='false'
+               type='choice'>
+        <name>Message Type To Filter</name>
+        <defaultValue>CONTENT</defaultValue>
+        <choices>
+          <choice>CONTENT</choice>
+          <choice>CONTROL</choice>
+        </choices>
+      </setting>    
       <setting id='filter.expression'
                required='true'
                type='multiline_text'>

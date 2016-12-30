@@ -25,12 +25,20 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
 import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
+import org.jumpmind.metl.core.runtime.ContentMessage;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class MessageFilter extends AbstractComponentRuntime {
 
     public final static String SETTING_FILTER_EXPRESSION = "filter.expression";
+
+    public final static String SETTING_MESSAGE_TYPE_TO_FILTER = "message.type.to.filter";
+
+    public final static String MESSAGE_TYPE_TO_FILTER_CONTENT = "CONTENT";
+
+    public final static String MESSAGE_TYPE_TO_FILTER_CONTROL = "CONTROL";
 
     ScriptEngine scriptEngine;
 
@@ -45,11 +53,14 @@ public class MessageFilter extends AbstractComponentRuntime {
             scriptEngine = new GroovyScriptEngineImpl();
         }
 
+        String messageTypeToFilter = properties.get(SETTING_MESSAGE_TYPE_TO_FILTER);
         String expression = properties.get(SETTING_FILTER_EXPRESSION);
         Bindings bindings = scriptEngine.createBindings();
         bindHeadersAndFlowParameters(bindings, inputMessage);
         try {
-            if (Boolean.TRUE.equals(scriptEngine.eval(expression, bindings))) {
+            if (((MESSAGE_TYPE_TO_FILTER_CONTENT.equals(messageTypeToFilter) && inputMessage instanceof ContentMessage)
+                    || (MESSAGE_TYPE_TO_FILTER_CONTROL.equals(messageTypeToFilter) && inputMessage instanceof ControlMessage))
+                    && Boolean.TRUE.equals(scriptEngine.eval(expression, bindings))) {
                 callback.forward(inputMessage);
             }
         } catch (ScriptException e) {
