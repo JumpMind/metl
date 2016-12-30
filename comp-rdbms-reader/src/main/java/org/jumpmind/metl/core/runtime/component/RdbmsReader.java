@@ -147,6 +147,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                 outboundPayload.add((EntityData) entity);
             }
             for (String sql : getSqls()) {
+                checkForInterruption();
                 String sqlToExecute = prepareSql(sql, inputMessage, entity);
                 Map<String, Object> paramMap = prepareParams(sqlToExecute, inputMessage, entity, runWhen);
                 log(LogLevel.INFO, "About to run: %s", sqlToExecute);
@@ -464,6 +465,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
         @Override
         public ArrayList<EntityData> extractData(ResultSet rs) throws SQLException, DataAccessException {
+            checkForInterruption();
             ResultSetMetaData meta = rs.getMetaData();
             Map<Integer, String> columnHints = getSqlColumnEntityHints(sqlToExecute);
             ArrayList<String> attributeIds = getAttributeIds(sqlToExecute, meta, columnHints);

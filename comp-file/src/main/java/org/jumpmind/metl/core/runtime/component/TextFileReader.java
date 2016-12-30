@@ -99,6 +99,7 @@ public class TextFileReader extends AbstractFileReader {
             }
             try {
                 for (int i = 0; i < numberOfTimesToReadFile && readContent; i++) {
+                    checkForInterruption();
                     if (isNotBlank(file)) {
                         info("Reading file: %s", file);
                     }

@@ -36,6 +36,10 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
 
     protected Context context;
     
+    protected MessageConsumer consumer;
+    
+    protected MessageProducer producer;
+    
     public AbstractJMSJndiDirectory(TypedProperties properties) throws JMSException, NamingException {
         this.properties = properties;
         initialize();
@@ -47,6 +51,18 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
                 toClose.close();
             } catch (Exception ex) {
             }
+        }
+    }
+    
+    protected void initProducer() {
+        if (producer == null) {
+            producer = createProducer();
+        }        
+    }
+    
+    protected void initConsumer() {
+        if (consumer == null) {
+            consumer = createConsumer();
         }
     }
 
@@ -105,7 +121,7 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
     @Override
     public InputStream getInputStream(String relativePath, boolean mustExist, boolean closeSession) {
         try {
-            MessageConsumer consumer = createConsumer();
+            initConsumer();
             StringBuilder builder = new StringBuilder();
             try {
                 Message message = consumer.receive(500);
@@ -138,7 +154,6 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
                 }
 
             } finally {
-                AbstractJMSJndiDirectory.this.close(consumer);
                 if (closeSession) {
                     AbstractJMSJndiDirectory.this.close();
                 }
@@ -166,6 +181,10 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
 
     @Override
     public void close() {
+        close(producer);
+        producer = null;
+        close(consumer);
+        consumer = null;
         close(session);
         session = null;
         close(connection);
@@ -180,13 +199,11 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
 
         String relativePath;
 
-        MessageProducer producer;
-
         boolean closeSession;
 
         public CloseableOutputStream(String relativePath, boolean closeSession) {
             this.relativePath = relativePath;
-            this.producer = createProducer();
+            initProducer();
         }
 
         @Override
@@ -228,7 +245,6 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
                 AbstractJMSJndiDirectory.this.close();
                 throw new RuntimeException(e);
             } finally {
-                AbstractJMSJndiDirectory.this.close(producer);
                 if (closeSession) {
                     AbstractJMSJndiDirectory.this.close();
                 }
