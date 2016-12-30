@@ -29,6 +29,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.apache.activemq.broker.BrokerService;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.db.platform.IDatabasePlatform;
@@ -83,10 +84,19 @@ public class StandaloneFlowRunner {
     AgentRuntime agentRuntime;
 
     boolean includeTestFlows = true;
+    
+    BrokerService broker;
 
     boolean includeRegularFlows = true;
 
     public StandaloneFlowRunner() {
+        try {
+            broker = new BrokerService();
+            broker.setPersistent(false);
+            broker.start();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void setConfigSqlScript(String configSqlScript) {

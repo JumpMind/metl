@@ -36,8 +36,6 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
 
     protected Context context;
     
-    
-
     public AbstractJMSJndiDirectory(TypedProperties properties) throws JMSException, NamingException {
         this.properties = properties;
         initialize();

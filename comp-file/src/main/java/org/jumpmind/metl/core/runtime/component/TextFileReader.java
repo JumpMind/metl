@@ -105,7 +105,7 @@ public class TextFileReader extends AbstractFileReader {
                         InputStream inStream = directory.getInputStream(filePath, mustExist, false);
                         if (inStream != null) {
                             reader = new BufferedReader(new InputStreamReader(inStream, encoding));
-                            if (properties.is(SETTING_SPLIT_ON_LINE_FEED)) {
+                            if (properties.is(SETTING_SPLIT_ON_LINE_FEED, true)) {
                                 while ((currentLine = reader.readLine()) != null) {
                                     currentFileLinesRead++;
                                     if (linesInMessage == textRowsPerMessage) {

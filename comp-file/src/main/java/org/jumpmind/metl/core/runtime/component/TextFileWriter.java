@@ -47,44 +47,46 @@ public class TextFileWriter extends AbstractFileWriter {
     public final static String DEFAULT_ENCODING = "UTF-8";
 
     public final static String SETTING_ENCODING = "encoding";
-    
+
     public final static String SETTING_APPEND = "append";
 
     public final static String SETTING_EMPTY_FILE = "empty.file";
-    
+
     public final static String SETTING_CLOSE_ON = "close.on";
 
     public static final String SETTING_TEXT_LINE_TERMINATOR = "text.line.terminator";
-    
+
     public static final String CLOSE_ON_UNIT_OF_WORK = "UNIT OF WORK";
-    
+
     public static final String CLOSE_ON_MESSAGE = "MESSAGE";
-    
+
     public static final String CLOSE_ON_ROW = "ROW";
 
     String encoding;
 
     String lineTerminator;
-    
+
     boolean append;
-    
+
     boolean emptyFile;
-    
+
     boolean inputDataReceived = false;
-    
+
     String closeOn = CLOSE_ON_UNIT_OF_WORK;
 
     BufferedWriter bufferedWriter = null;
 
+    IDirectory directory = null;
+
     @Override
     public void start() {
-    	init();
+        init();
         TypedProperties properties = getTypedProperties();
         lineTerminator = properties.get(SETTING_TEXT_LINE_TERMINATOR);
-        encoding = properties.get(SETTING_ENCODING, DEFAULT_ENCODING); 
+        encoding = properties.get(SETTING_ENCODING, DEFAULT_ENCODING);
         append = properties.is(SETTING_APPEND, false);
         emptyFile = properties.is(SETTING_EMPTY_FILE, false);
-        closeOn = properties.get(SETTING_CLOSE_ON, closeOn);               
+        closeOn = properties.get(SETTING_CLOSE_ON, closeOn);
         if (lineTerminator != null) {
             lineTerminator = StringEscapeUtils.unescapeJava(properties.get(SETTING_TEXT_LINE_TERMINATOR));
         }
@@ -97,76 +99,92 @@ public class TextFileWriter extends AbstractFileWriter {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-    	
+
         if (getResourceRuntime() == null) {
-            throw new IllegalStateException("The msgTarget resource has not been configured.  Please choose a resource.");
+            throw new IllegalStateException("The resource has not been configured.  Please choose a resource.");
         }
-        if ((unitOfWorkBoundaryReached && inputDataReceived == false && emptyFile == true) ||
-        		(inputMessage instanceof ContentMessage<?>)) {
-        	inputDataReceived = true;
-	        initStreamAndWriter(inputMessage);
-	        
-	        if (inputMessage instanceof ContentMessage<?>) {
-		        try {
-		            Object payload = ((ContentMessage<?>)inputMessage).getPayload();
-		            if (payload instanceof ArrayList) {
-		                ArrayList<?> recs = (ArrayList<?>) payload;
-		                for (Object rec : recs) {
-		                    bufferedWriter.write(rec != null ? rec.toString() : "");
-		                    if (lineTerminator != null) {
-		                        bufferedWriter.write(lineTerminator);
-		                    } else {
-		                        bufferedWriter.newLine();
-		                    }
-		                }
-		
-		            } else if (payload instanceof String) {
-		                bufferedWriter.write((String) payload);
-		            } else {
-		                bufferedWriter.write("");
-		            }
-		            
+        if ((unitOfWorkBoundaryReached && inputDataReceived == false && emptyFile == true) || (inputMessage instanceof ContentMessage<?>)) {
+            inputDataReceived = true;
+            initStreamAndWriter(inputMessage);
+
+            if (inputMessage instanceof ContentMessage<?>) {
+                try {
+                    Object payload = ((ContentMessage<?>) inputMessage).getPayload();
+                    if (payload instanceof ArrayList) {
+                        ArrayList<?> recs = (ArrayList<?>) payload;
+                        for (Object rec : recs) {
+                            bufferedWriter.write(rec != null ? rec.toString() : "");
+                            if (lineTerminator != null) {
+                                bufferedWriter.write(lineTerminator);
+                            } else {
+                                bufferedWriter.newLine();
+                            }
+                        }
+
+                    } else if (payload instanceof String) {
+                        bufferedWriter.write((String) payload);
+                    } else {
+                        bufferedWriter.write("");
+                    }
+
                     bufferedWriter.flush();
                     if (CLOSE_ON_ROW.equals(closeOn)) {
-                        close();
+                        closeFile();
                         initStreamAndWriter(inputMessage);
                     }
-		        } catch (IOException e) {
-		            throw new IoException(e);
-		        }
-	        }
+                } catch (IOException e) {
+                    throw new IoException(e);
+                }
+            }
         }
-        
-        if ((inputMessage instanceof ControlMessage ||
-        		unitOfWorkBoundaryReached) && callback != null) {
-            close();
+
+        if ((inputMessage instanceof ControlMessage || unitOfWorkBoundaryReached) && callback != null) {
+            closeFile();
+            closeDirectory();
             ArrayList<String> results = new ArrayList<>(1);
             results.add("{\"status\":\"success\"}");
             callback.sendTextMessage(null, results);
         } else if (CLOSE_ON_MESSAGE.equals(closeOn)) {
-            close();
-        } 
-        
+            closeFile();
+        }
 
     }
     
+    private void closeDirectory() {
+        if (directory != null) {
+            directory.close();
+            directory = null;
+        }        
+    }
+    
+    @Override
+    public void stop() {
+        super.stop();
+        closeDirectory();
+    }
+
     @Override
     public void flowCompletedWithErrors(Throwable myError) {
-        close();
+        closeFile();
         super.flowCompletedWithErrors(myError);
     }
 
     private void initStreamAndWriter(Message inputMessage) {
-    	if (bufferedWriter == null) {
-	    	String fileName = getFileName(inputMessage);
-	    	IDirectory streamable = initStream(fileName);
-	    	if (isNotBlank(fileName)) {
-	            log(LogLevel.INFO, String.format("Writing text to resource: %s with name: %s", streamable.toString(), fileName));
-	    	} else {
-	    	    log(LogLevel.INFO, String.format("Writing text to resource: %s", streamable.toString()));
-	    	}
-	       	bufferedWriter = initializeWriter(streamable.getOutputStream(fileName, mustExist, false, append));
-    	}
+        if (bufferedWriter == null) {
+            String fileName = getFileName(inputMessage);
+            if (directory == null) {
+                directory = (IDirectory) getResourceReference();
+            }
+            if (!append) {
+                directory.delete(fileName);
+            }
+            if (isNotBlank(fileName)) {
+                log(LogLevel.INFO, String.format("Writing text to resource: %s with name: %s", directory.toString(), fileName));
+            } else {
+                log(LogLevel.INFO, String.format("Writing text to resource: %s", directory.toString()));
+            }
+            bufferedWriter = initializeWriter(directory.getOutputStream(fileName, mustExist, false, append));
+        }
     }
 
     private BufferedWriter initializeWriter(OutputStream stream) {
@@ -178,7 +196,7 @@ public class TextFileWriter extends AbstractFileWriter {
         return bufferedWriter;
     }
 
-    private void close() {
+    private void closeFile() {
         IOUtils.closeQuietly(bufferedWriter);
         bufferedWriter = null;
     }
