@@ -40,10 +40,8 @@ import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_VALI
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.jms.ConnectionFactory;
 import javax.sql.DataSource;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.Service;
 import org.apache.activemq.broker.BrokerService;
 import org.h2.Driver;

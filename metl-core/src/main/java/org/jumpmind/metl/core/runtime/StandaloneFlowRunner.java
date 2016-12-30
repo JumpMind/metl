@@ -84,19 +84,10 @@ public class StandaloneFlowRunner {
     AgentRuntime agentRuntime;
 
     boolean includeTestFlows = true;
-    
-    BrokerService broker;
 
     boolean includeRegularFlows = true;
 
     public StandaloneFlowRunner() {
-        try {
-            broker = new BrokerService();
-            broker.setPersistent(false);
-            broker.start();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public void setConfigSqlScript(String configSqlScript) {
@@ -137,10 +128,18 @@ public class StandaloneFlowRunner {
     }
 
     public String runFlow(FlowName flow, boolean waitFor) throws Exception {
-        AgentDeployment deployment = agentRuntime.deploy(configurationService.findFlow(flow.getId()), new HashMap<>());
-        FlowRuntime runtime = agentRuntime.createFlowRuntime("standalone", deployment, new HashMap<>());
-        runtime.execute();
-        return runtime.getExecutionId();
+        BrokerService broker = new BrokerService();
+        broker.setPersistent(false);
+        try {
+            broker.start();
+            AgentDeployment deployment = agentRuntime.deploy(configurationService.findFlow(flow.getId()), new HashMap<>());
+            FlowRuntime runtime = agentRuntime.createFlowRuntime("standalone", deployment, new HashMap<>());
+            runtime.execute();
+            return runtime.getExecutionId();
+        } finally {
+            broker.stop();
+        }
+
     }
 
     public String getFailureMessage(Execution execution) {
@@ -169,20 +168,19 @@ public class StandaloneFlowRunner {
                 new ConfigDatabaseUpgrader("/schema.xml", databasePlatform, true, "METL").upgrade();
                 new ConfigDatabaseUpgrader("/schema-exec.xml", databasePlatform, true, "METL").upgrade();
                 persistenceManager = new SqlPersistenceManager(databasePlatform);
-                configurationService = new ConfigurationSqlService(new SecurityService(), databasePlatform,
-                        persistenceManager, "METL");
-                
+                configurationService = new ConfigurationSqlService(new SecurityService(), databasePlatform, persistenceManager, "METL");
+
                 PluginManager pluginManager = new PluginManager("working/plugins", configurationService);
                 pluginManager.init();
-                
+
                 DefinitionFactory componentDefinitionFactory = new DefinitionFactory(configurationService, pluginManager);
-                
+
                 IImportExportService importService = new ImportExportService(databasePlatform, persistenceManager, "METL",
                         configurationService, new SecurityService());
-                
+
                 executionService = new ExecutionSqlService(databasePlatform, persistenceManager, "METL", new StandardEnvironment());
                 agentRuntime = new AgentRuntime(new Agent("test", AppUtils.getHostName()), configurationService, executionService,
-                        new ComponentRuntimeFactory(componentDefinitionFactory), componentDefinitionFactory, 
+                        new ComponentRuntimeFactory(componentDefinitionFactory), componentDefinitionFactory,
                         new HttpRequestMappingRegistry());
                 agentRuntime.start();
                 URL configSqlScriptURL = null;
@@ -200,7 +198,7 @@ public class StandaloneFlowRunner {
                 } else {
                     importService.importConfiguration(IOUtils.toString(configSqlScriptURL), "standalone");
                 }
-                
+
                 componentDefinitionFactory.refresh();
             } catch (IOException e) {
                 throw new IoException(e);
