@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
@@ -135,6 +136,13 @@ public class ModelAttributeScriptHelper {
         String text = value != null ? value.toString() : "0";
         text = isNotBlank(text) ? text : "0";
         return new BigDecimal(text);
+    }
+    
+    public Serializable map(Map<Object, Serializable> lookup, Serializable defaultValue) {
+        if (value != null) {
+            return lookup.get(value);
+        }
+        return (Serializable)value;
     }
 
     public Serializable flowParameter(String parameterName) {
