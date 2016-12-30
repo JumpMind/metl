@@ -32,7 +32,7 @@
              shareable='false'>
     <name>Content Router</name>
     <className>org.jumpmind.metl.core.runtime.component.ContentRouter</className>
-    <keywords>target</keywords>
+    <keywords>content,filter</keywords>
     <description></description>
     <settings>
       <setting id='rows.per.message'
@@ -48,4 +48,26 @@
         <defaultValue>false</defaultValue>
       </setting>
     </settings>
-  </component></definitions>
+  </component>
+  <component autoSendControlMessages='false'
+             category='PROCESSOR'
+             id='afe18f73-920e-47a8-bd0a-4f0bbd7824c'
+             inputMessageType='any'
+             showInputModel='true'             
+             inputOutputModelsMatch='true'
+             outputMessageType='any'
+             resourceCategory='none'
+             shareable='false'>
+    <name>Message Filter</name>
+    <className>org.jumpmind.metl.core.runtime.component.MessageFilter</className>
+    <keywords>route,header</keywords>
+    <description></description>
+    <settings>
+      <setting id='filter.expression'
+               required='true'
+               type='multiline_text'>
+        <name>Filter Expression</name>
+      </setting>    
+    </settings>    
+  </component>
+</definitions>
