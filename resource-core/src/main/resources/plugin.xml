@@ -236,6 +236,14 @@
                     <choice>Byte</choice>
                 </choices>
             </setting>
+            <setting id='ack.type' required='true' type='choice'>
+                <name>Acknowledge Type</name>
+                <defaultValue>Immediate</defaultValue>
+                <choices>
+                    <choice>Immediate</choice>
+                    <choice>On Flow Complete</choice>
+                </choices>
+            </setting>            
             <setting id='map.msg.key' required='false' type='text'>
                 <name>Map Message Key</name>
             </setting>

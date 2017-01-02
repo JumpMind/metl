@@ -265,6 +265,10 @@ public class LocalFileDirectory implements IDirectory {
     @Override
     public void close() {
     }
+    
+    @Override
+    public void close(boolean success) {
+    }
 
     @Override
     public boolean delete(String relativePath) {

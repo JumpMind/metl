@@ -46,4 +46,6 @@ public interface IComponentRuntime {
     
     public int getThreadNumber();
     
+    public void interrupt();
+    
 }

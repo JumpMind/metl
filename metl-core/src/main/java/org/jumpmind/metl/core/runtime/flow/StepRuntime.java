@@ -79,7 +79,7 @@ public class StepRuntime implements Runnable {
     protected BlockingQueue<Message> inQueue;
 
     protected Executor componentRuntimeExecutor;
-
+    
     boolean running = false;
     
     boolean cancelling = false;
@@ -334,7 +334,13 @@ public class StepRuntime implements Runnable {
             }
             callback.setCurrentInputMessage(threadNumber, inputMessage);
             long ts = System.currentTimeMillis();
-            componentRuntime.handle(inputMessage, callback, unitOfWorkBoundaryReached);
+            
+            try {
+                componentRuntime.handle(inputMessage, callback, unitOfWorkBoundaryReached);
+            } catch (CancellationException e) {
+                log.info("Handle was interrupted by cancellation for {}", componentContext.getFlowStep().getName());
+            }
+            
             statistics.incrementTimeSpentInHandle(threadNumber, System.currentTimeMillis()-ts-callback.useQueueTime(threadNumber));
 
             boolean recursionDone = liveSourceStepIds.size() == 1 && liveSourceStepIds.contains(componentContext.getFlowStep().getId())
@@ -478,6 +484,9 @@ public class StepRuntime implements Runnable {
 
         finished = true;
         running = false;
+        if (cancelling) {
+            cancelled = true;
+        }
 
         recordFlowStepFinished();
     }
@@ -511,6 +520,9 @@ public class StepRuntime implements Runnable {
             try {
                 inQueue.clear();
                 queue(new ShutdownMessage(componentContext.getFlowStep().getId(), true));
+                for (IComponentRuntime componentRuntime : getComponentRuntimes()) {
+                    componentRuntime.interrupt();
+                }
             } catch (InterruptedException e) {
             }
         } else {

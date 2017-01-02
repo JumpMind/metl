@@ -25,8 +25,12 @@ import javax.naming.NamingException;
 
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
+    
+    protected final Logger log = LoggerFactory.getLogger(getClass());
 
     protected TypedProperties properties;
 
@@ -35,6 +39,12 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
     protected Session session;
 
     protected Context context;
+    
+    protected MessageConsumer consumer;
+    
+    protected MessageProducer producer;
+    
+    protected Message lastMessage;
     
     public AbstractJMSJndiDirectory(TypedProperties properties) throws JMSException, NamingException {
         this.properties = properties;
@@ -47,6 +57,18 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
                 toClose.close();
             } catch (Exception ex) {
             }
+        }
+    }
+    
+    protected void initProducer() {
+        if (producer == null) {
+            producer = createProducer();
+        }        
+    }
+    
+    protected void initConsumer() {
+        if (consumer == null) {
+            consumer = createConsumer();
         }
     }
 
@@ -105,11 +127,12 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
     @Override
     public InputStream getInputStream(String relativePath, boolean mustExist, boolean closeSession) {
         try {
-            MessageConsumer consumer = createConsumer();
+            initConsumer();
             StringBuilder builder = new StringBuilder();
             try {
                 Message message = consumer.receive(500);
                 if (message != null) {
+                    lastMessage = message;
                     if (message instanceof TextMessage) {
                         TextMessage textMessage = (TextMessage) message;
                         String text = textMessage.getText();
@@ -138,12 +161,16 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
                 }
 
             } finally {
-                AbstractJMSJndiDirectory.this.close(consumer);
                 if (closeSession) {
                     AbstractJMSJndiDirectory.this.close();
                 }
             }
-            return new ByteArrayInputStream(builder.toString().getBytes());
+            
+            if (builder.length() > 0) {
+                return new ByteArrayInputStream(builder.toString().getBytes());
+            } else {
+                return null;
+            }
         } catch (JMSException e) {
             throw new RuntimeException(e);
         }
@@ -165,7 +192,19 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
     }
 
     @Override
-    public void close() {
+    public void close(boolean success) {
+        if (success && 
+                properties.get(JMS.SETTING_ACK_TYPE, JMS.ACK_TYPE_IMMEDIATE).equals(JMS.ACK_TYPE_ON_FLOW_COMPLETE) && lastMessage != null) {
+            try {
+                lastMessage.acknowledge();
+            } catch (JMSException e) {
+                log.error("The call to acknowledge failed", e);
+            }
+        }
+        close(producer);
+        producer = null;
+        close(consumer);
+        consumer = null;
         close(session);
         session = null;
         close(connection);
@@ -180,13 +219,11 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
 
         String relativePath;
 
-        MessageProducer producer;
-
         boolean closeSession;
 
         public CloseableOutputStream(String relativePath, boolean closeSession) {
             this.relativePath = relativePath;
-            this.producer = createProducer();
+            initProducer();
         }
 
         @Override
@@ -228,7 +265,6 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
                 AbstractJMSJndiDirectory.this.close();
                 throw new RuntimeException(e);
             } finally {
-                AbstractJMSJndiDirectory.this.close(producer);
                 if (closeSession) {
                     AbstractJMSJndiDirectory.this.close();
                 }

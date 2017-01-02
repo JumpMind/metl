@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
@@ -87,6 +88,13 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
     
     private EntityNameLookup entityNameLookup;
     
+    protected boolean interrupted = false;
+    
+    @Override
+    public void interrupt() {
+        interrupted = true;
+    }
+    
     @Override
     public void create(XMLComponentDefinition definition, ComponentContext context, int threadNumber) {
         this.componentDefinition = definition;
@@ -103,6 +111,14 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
     @Override
     public void start() {
     }
+    
+    protected void checkForInterruption() {
+        if (Thread.currentThread().isInterrupted() || interrupted) {
+            warn("We were interrupted...");
+            log.info("Interrupted {} ", Thread.currentThread());
+            throw new CancellationException();
+        }
+    }    
     
     protected TypedProperties getTypedProperties() {
         if (properties == null) {
