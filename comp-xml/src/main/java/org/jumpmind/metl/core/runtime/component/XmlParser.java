@@ -82,7 +82,8 @@ public class XmlParser extends AbstractXMLComponentRuntime {
 
         for (ComponentEntitySetting compEntitySetting : component.getEntitySettings()) {
             if (compEntitySetting.getName().equals(XML_FORMATTER_XPATH)) {
-                XPathExpression<?> expression = XPathFactory.instance().compile(compEntitySetting.getValue());
+                String entityXPath = compEntitySetting.getValue();
+                XPathExpression<?> expression = XPathFactory.instance().compile(entityXPath);
                 XmlFormatterEntitySetting entitySetting = new XmlFormatterEntitySetting(compEntitySetting, expression);
                 
                 entitySettingsForPath = entitySettingsByPath.get(compEntitySetting.getValue());
@@ -97,7 +98,11 @@ public class XmlParser extends AbstractXMLComponentRuntime {
                         .getAttributeSettingsFor(entitySetting.getSetting().getEntityId());
                 for (ComponentAttributeSetting componentAttributeSetting : attributeSettings) {
                     if (componentAttributeSetting.getName().equals(XML_FORMATTER_XPATH)) {
-                        expression = XPathFactory.instance().compile(componentAttributeSetting.getValue());
+                        String attributeXPath = componentAttributeSetting.getValue();
+                        if (!optimizeForSpeed && attributeXPath.startsWith(entityXPath) && attributeXPath.length() > entityXPath.length()) {
+                            attributeXPath = "//" +attributeXPath.substring(entityXPath.length()+1);
+                        }
+                        expression = XPathFactory.instance().compile(attributeXPath);
                         entitySetting.getAttributeSettings().add(new XmlFormatterAttributeSetting(componentAttributeSetting, expression));
                     }
                 }

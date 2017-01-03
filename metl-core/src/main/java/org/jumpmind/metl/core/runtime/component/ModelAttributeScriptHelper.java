@@ -137,10 +137,48 @@ public class ModelAttributeScriptHelper {
     }
 
     public BigDecimal parseBigDecimal() {
+        return parseBigDecimal(value);
+    }
+    
+    public BigDecimal parseBigDecimal(Object value) {
         String text = value != null ? value.toString() : "0";
         text = isNotBlank(text) ? text : "0";
         return new BigDecimal(text);
     }
+    
+    public Number biggest(Number... numbers) {
+        Number biggest = null;
+        for (int i = 0; i < numbers.length; i++) {
+            if (biggest == null || biggest.doubleValue() < numbers[i].doubleValue()) {
+                biggest = numbers[i];
+            }
+        }
+        return biggest;
+    }
+    
+    public Serializable subtract(String startingValueAttributeName, String... attributeNames) {
+        BigDecimal value = parseBigDecimal(data.get(entity.getModelAttributeByName(startingValueAttributeName).getId()));
+        for(int i = 0; i < attributeNames.length; i++) {
+            value = value.subtract(parseBigDecimal(data.get(entity.getModelAttributeByName(attributeNames[i]).getId())));    
+        }
+        return value;
+    }
+    
+    public Serializable subtract(String startingValueAttributeName, Number... numbers) {
+        BigDecimal value = parseBigDecimal(data.get(entity.getModelAttributeByName(startingValueAttributeName).getId()));
+        for(int i = 0; i < numbers.length; i++) {
+            value = value.subtract(new BigDecimal(numbers[i].toString()));    
+        }
+        return value;
+    }    
+    
+    public Serializable add(String... attributeNames) {
+        BigDecimal value = BigDecimal.ZERO;
+        for(int i = 0; i < attributeNames.length; i++) {
+            value = value.add(parseBigDecimal(data.get(entity.getModelAttributeByName(attributeNames[i]).getId())));    
+        }
+        return value;
+    }    
 
     public Serializable map(Map<Object, Serializable> lookup, Serializable defaultValue) {
         if (value != null) {
