@@ -427,7 +427,7 @@ public class ModelAttributeScriptHelper {
         return signatures.toArray(new String[signatures.size()]);
     }
 
-    public static Object eval(Message message, ComponentContext context, ModelAttribute attribute, Object value, ModelEntity entity,
+    public static Object eval(Message message, ComponentContext context, ModelAttribute attribute, Object value, Model model, ModelEntity entity,
             EntityData data, String expression) {
         ScriptEngine engine = scriptEngine.get();
         if (engine == null) {
@@ -437,6 +437,7 @@ public class ModelAttributeScriptHelper {
         engine.put("value", value);
         engine.put("data", data);
         engine.put("entity", entity);
+        engine.put("model", model);
         engine.put("attribute", attribute);
         engine.put("message", message);
         engine.put("context", context);
@@ -444,7 +445,7 @@ public class ModelAttributeScriptHelper {
         try {
             String importString = "import org.jumpmind.metl.core.runtime.component.ModelAttributeScriptHelper;\n";
             String code = String.format(
-                    "return new ModelAttributeScriptHelper(message, context, attribute, entity, data, value) { public Object eval() { return %s } }.eval()",
+                    "return new ModelAttributeScriptHelper(message, context, attribute, entity, model, data, value) { public Object eval() { return %s } }.eval()",
                     expression);
             return engine.eval(importString + code);
         } catch (ScriptException e) {

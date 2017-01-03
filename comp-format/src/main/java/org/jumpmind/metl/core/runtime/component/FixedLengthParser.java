@@ -110,7 +110,7 @@ public class FixedLengthParser extends AbstractComponentRuntime {
                 Object value = inputRow.substring(0, length).trim();
                 inputRow = inputRow.substring(length);
                 if (isNotBlank(attribute.getFormatFunction())) {
-                    value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), value, attribute.getEntity(), data,
+                    value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), value, getOutputModel(), attribute.getEntity(), data,
                             attribute.getFormatFunction());
                 }
 
