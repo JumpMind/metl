@@ -120,7 +120,7 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
         for (AttributeFormat attribute : attributesList) {
             Object value = inputRow.get(attribute.getAttributeId());
             if (isNotBlank(attribute.getFormatFunction())) {
-                value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), value, attribute.getEntity(),
+                value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), value, getInputModel(), attribute.getEntity(),
                         inputRow, attribute.getFormatFunction());
             }
             if (value != null) {
