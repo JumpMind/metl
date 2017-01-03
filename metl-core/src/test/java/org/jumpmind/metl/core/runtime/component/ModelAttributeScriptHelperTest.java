@@ -29,10 +29,10 @@ public class ModelAttributeScriptHelperTest {
 
     @Test
     public void testParsedateWithNullValue() {
-        ModelAttributeScriptHelper helper = new ModelAttributeScriptHelper(null, null, null, null, null, "0000-00-01");
+        ModelAttributeScriptHelper helper = new ModelAttributeScriptHelper(null, null, null, null, null, null, "0000-00-01");
         assertNull(helper.parsedate("yyyy-MM-dd", "0000-00-01"));
         
-        helper = new ModelAttributeScriptHelper(null, null, null, null, null, "2015-01-01");
+        helper = new ModelAttributeScriptHelper(null, null, null, null, null, null, "2015-01-01");
         assertNotNull(helper.parsedate("yyyy-MM-dd", "0000-00-01"));
 
     }

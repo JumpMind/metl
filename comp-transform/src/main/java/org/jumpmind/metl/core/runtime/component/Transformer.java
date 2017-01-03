@@ -129,12 +129,13 @@ public class Transformer extends AbstractComponentRuntime {
 							    long ts = System.currentTimeMillis();
 						        scriptEngine.put("entity", entity);
 						        scriptEngine.put("attribute", attribute);
-						        scriptEngine.put("context", context);        
+						        scriptEngine.put("context", context);      
+						        scriptEngine.put("model", getInputModel());
 
 						        try {
 						            String importString = "import org.jumpmind.metl.core.runtime.component.ModelAttributeScriptHelper;\n";
 						            String code = String.format(
-						                    "return new ModelAttributeScriptHelper(context, attribute, entity) { public Object eval() { return %s } }",
+						                    "return new ModelAttributeScriptHelper(context, attribute, entity, model) { public Object eval() { return %s } }",
 						                    transform);
 						            helper = (ModelAttributeScriptHelper)scriptEngine.eval(importString + code);
 						            helpers.put(attribute.getId(), helper);
