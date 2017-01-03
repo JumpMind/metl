@@ -733,10 +733,15 @@ public class PropertySheet extends AbsoluteLayout {
         combo.setDescription(definition.getDescription());
         combo.setNullSelectionAllowed(false);
         combo.setRequired(definition.isRequired());
-        Set<String> types = context.getDefinitionFactory().getResourceCategories(projectVersionId);
+        Set<XMLResourceDefinition> types = context.getDefinitionFactory().getResourceDefinitions(projectVersionId, category);
         if (types != null) {
+            String[] typeStrings = new String[types.size()];
+            int i = 0;
+            for (XMLResourceDefinition type : types) {
+                typeStrings[i++] = type.getId();
+            }
             List<Resource> resources = context.getConfigurationService().findResourcesByTypes(projectVersionId,
-                    types.toArray(new String[types.size()]));
+                    typeStrings);
             if (resources != null) {
                 for (Resource resource : resources) {
                     combo.addItem(resource.getId());
