@@ -144,8 +144,13 @@ public class ModelAttributeScriptHelper {
 
     public Serializable map(Map<Object, Serializable> lookup, Serializable defaultValue) {
         if (value != null) {
-            return lookup.get(value);
+            value = lookup.get(value);
         }
+        
+        if (value == null) {
+            value = defaultValue;
+        }
+        
         return (Serializable) value;
     }
 
@@ -309,7 +314,7 @@ public class ModelAttributeScriptHelper {
         for (EntityData entityData : datas) {
             for (String attributeName : attributeNamesToLookAt) {
                 List<ModelAttribute> attributes = model.getAttributesByName(attributeName);
-                for (ModelAttribute attribute : attributes) {                    
+                for (ModelAttribute attribute : attributes) {
                     long currentValue = 0;
                     Object obj = entityData.get(attribute.getId());
                     if (obj instanceof Number) {
