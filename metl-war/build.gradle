@@ -64,7 +64,7 @@ task copyPluginsForDevelopment (type:Copy) {
 }
 
 task zipPlugins (type:Zip) {
-    rootProject.allprojects.findAll { it.name.startsWith('comp') }.each {
+    rootProject.allprojects.findAll { it.name.startsWith('comp') || it.name.startsWith('resource') }.each {
         dependsOn ":$it.name:publishMavenJavaPublicationToMavenRepository"
     }
     
