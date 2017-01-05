@@ -16,13 +16,13 @@ dependencies {
     compile "org.slf4j:jcl-over-slf4j:$slf4jVersion"
     compile "org.slf4j:slf4j-log4j12:$slf4jVersion"        
     compile "org.springframework:spring-context:$springVersion"
-    compile (group:"org.jumpmind.symmetric", name:"symmetric-util", version:"$symmetricVersion", changing:true) {
+    compile (group:"org.jumpmind.symmetric", name:"symmetric-util", version:"$symmetricVersion") {
         exclude group: 'bouncycastle'
     }
-    compile group:"org.jumpmind.symmetric", name:"symmetric-db", version:"$symmetricVersion", changing:true
-    compile group:"org.jumpmind.symmetric", name:"symmetric-jdbc", version:"$symmetricVersion", changing:true
-    compile group:"org.jumpmind.symmetric", name:"symmetric-io", version:"$symmetricVersion", changing:true
-    compile group:"org.jumpmind.symmetric", name:"symmetric-core", version:"$symmetricVersion", changing:true
+    compile group:"org.jumpmind.symmetric", name:"symmetric-db", version:"$symmetricVersion"
+    compile group:"org.jumpmind.symmetric", name:"symmetric-jdbc", version:"$symmetricVersion"
+    compile group:"org.jumpmind.symmetric", name:"symmetric-io", version:"$symmetricVersion"
+    compile group:"org.jumpmind.symmetric", name:"symmetric-core", version:"$symmetricVersion"
     compile (group: 'jcifs', name: 'jcifs', version: '1.3.17') {
         exclude group: 'javax.servlet'
     }
