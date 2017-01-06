@@ -55,9 +55,20 @@ public class ImportDialog extends Window {
         importLayout = new HorizontalLayout();
         importLayout.setWidth(100, Unit.PERCENTAGE);
         
-        Upload upload;
+        layout.addComponent(importLayout);
+        layout.setExpandRatio(importLayout, 1);
+
+        HorizontalLayout buttonLayout = new HorizontalLayout();
+        buttonLayout.setStyleName(ValoTheme.WINDOW_BOTTOM_TOOLBAR);
+        buttonLayout.setSpacing(true);
+        buttonLayout.setWidth(100, Unit.PERCENTAGE);
+
+        Label spacer = new Label(" ");
+        buttonLayout.addComponent(spacer);
+        buttonLayout.setExpandRatio(spacer, 1);
+        
         final UploadHandler handler = new UploadHandler();
-        upload = new Upload(null, handler);
+        Upload upload = new Upload(null, handler);
         upload.setImmediate(true);
         upload.setButtonCaption("Upload");
         upload.addFinishedListener(new Upload.FinishedListener() {
@@ -86,23 +97,13 @@ public class ImportDialog extends Window {
                 }                
             }
         });
-        importLayout.addComponent(upload);
-        importLayout.setComponentAlignment(upload, Alignment.MIDDLE_CENTER);
-        layout.addComponent(importLayout);
-        layout.setExpandRatio(importLayout, 1);
 
-        HorizontalLayout buttonLayout = new HorizontalLayout();
-        buttonLayout.setStyleName(ValoTheme.WINDOW_BOTTOM_TOOLBAR);
-        buttonLayout.setSpacing(true);
-        buttonLayout.setWidth(100, Unit.PERCENTAGE);
+        buttonLayout.addComponent(upload);
 
-        Label spacer = new Label(" ");
-        buttonLayout.addComponent(spacer);
-        buttonLayout.setExpandRatio(spacer, 1);
-
-        Button cancelButton = new Button("Close");
-        cancelButton.setClickShortcut(KeyCode.ESCAPE);
-        cancelButton.addClickListener(new ClickListener() {
+        Button closeButton = new Button("Close");
+        closeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        closeButton.setClickShortcut(KeyCode.ESCAPE);
+        closeButton.addClickListener(new ClickListener() {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -110,7 +111,7 @@ public class ImportDialog extends Window {
                 UI.getCurrent().removeWindow(ImportDialog.this);
             }
         });
-        buttonLayout.addComponent(cancelButton);
+        buttonLayout.addComponent(closeButton);
         
         layout.addComponent(buttonLayout);
         

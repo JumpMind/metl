@@ -15,7 +15,7 @@ import java.util.Date
 	apply plugin: 'maven'
 	
 	ext {
-	    pluginBuildNumber = buildNumber = 'dev'.equals(buildNumber) ?  ('dev' + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())) : ''
+	    pluginBuildNumber = buildNumber = 'dev'.equals(buildNumber) ?  ('dev' + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())) : buildNumber
 	}
 	
 	buildNumber = 'dev'.equals(buildNumber) ?  ('dev' + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())) : buildNumber
