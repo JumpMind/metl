@@ -47,7 +47,7 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 
-public class SftpDirectory implements IDirectory {
+public class SftpDirectory extends AbstractDirectory {
 
     protected String server;
     protected Integer port;

@@ -31,7 +31,7 @@ import org.jumpmind.exception.IoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HttpOutputStream extends OutputStream {
+public class HttpOutputStream extends OutputStream implements IOutputStreamWithResponse {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -50,6 +50,7 @@ public class HttpOutputStream extends OutputStream {
         }
     }
 
+    @Override
     public String getResponse() {
         return response.toString();
     }

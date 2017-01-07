@@ -35,7 +35,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Resource;
 
-public class LocalFileDirectory implements IDirectory {
+public class LocalFileDirectory extends AbstractDirectory {
 
     String basePath;
 

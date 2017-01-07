@@ -3,6 +3,7 @@ package org.jumpmind.metl.core.runtime.resource;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 
 abstract public class AbstractDirectory implements IDirectory {
 
@@ -32,10 +33,22 @@ abstract public class AbstractDirectory implements IDirectory {
     public InputStream getInputStream(String relativePath, boolean mustExist, boolean closeSession) {
         return null;
     }
+    
+    @Override
+    public InputStream getInputStream(String relativePath, boolean mustExist, boolean closeSession, Map<String, String> headers,
+            Map<String, String> parameters) {
+        return getInputStream(relativePath, mustExist, closeSession);
+    }
 
     @Override
     public boolean supportsOutputStream() {
         return false;
+    }
+    
+    @Override
+    public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession, boolean append, Map<String, String> headers,
+            Map<String, String> parameters) {
+        return getOutputStream(relativePath, mustExist, closeSession, append);
     }
 
     @Override

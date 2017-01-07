@@ -183,7 +183,7 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
 
     @Override
     public OutputStream getOutputStream(String relativePath, boolean mustExist) {
-        return new CloseableOutputStream(relativePath, false);
+        return new CloseableOutputStream(relativePath, true);
     }
 
     @Override

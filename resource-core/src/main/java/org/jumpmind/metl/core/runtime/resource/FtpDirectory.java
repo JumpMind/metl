@@ -40,7 +40,7 @@ import org.jumpmind.symmetric.transport.AuthenticationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FtpDirectory implements IDirectory {
+public class FtpDirectory extends AbstractDirectory {
 
     protected static final Logger log = LoggerFactory.getLogger(FtpDirectory.class);
 
