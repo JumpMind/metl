@@ -22,7 +22,7 @@
 -->
 <ui>
     <component-ui id="Excel File Reader UI" componentId="2b1aa706-9ec7-11e6-80f5-76304dec7eb7">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/excel-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/excel-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditExcelReaderPanel</className>        
     </component-ui>       
 </ui>

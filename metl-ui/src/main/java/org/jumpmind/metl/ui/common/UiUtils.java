@@ -24,6 +24,8 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.Enumeration;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -119,13 +121,23 @@ public final class UiUtils {
 
     public static InputStream getComponentImageInputStream(String projectVersionId, String type, ApplicationContext context) {
         String icon = "/org/jumpmind/metl/core/runtime/component/metl-puzzle-48x48-color.png";
-        XMLComponentUI def = context.getUiFactory().getUiDefinition(projectVersionId, type);
+        XMLComponentUI definition = context.getUiFactory().getUiDefinition(projectVersionId, type);
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        if (def != null && isNotBlank(def.getIconImage())) {
-            icon = def.getIconImage();
-            classLoader = def.getClassLoader();            
+        InputStream is = null;
+        if (definition != null && isNotBlank(definition.getIconImage())) {
+            try {
+                icon = definition.getIconImage();
+                classLoader = definition.getClassLoader();     
+                final Enumeration<URL> systemResources = classLoader.getResources(icon);
+                while (systemResources.hasMoreElements()) {
+                    URL url = systemResources.nextElement();
+                    is = url.openStream();
+                    break;
+                }
+            } catch (IOException e) {
+            }    
         }
-        InputStream is = classLoader.getResourceAsStream(icon);
+        
         if (is == null) {
             is = UiUtils.class.getResourceAsStream(icon);
         }

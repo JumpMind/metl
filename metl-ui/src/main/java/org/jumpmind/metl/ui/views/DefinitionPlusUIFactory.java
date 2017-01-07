@@ -77,8 +77,10 @@ public class DefinitionPlusUIFactory extends DefinitionFactory implements IDefin
                     XMLUI ui = root.getValue();
                     List<XMLComponentUI> componentUis = ui.getComponentUis();
                     for (XMLComponentUI xmlComponentUI : componentUis) {
-                        xmlComponentUI.setClassLoader(classLoader);
-                        componentsById.put(xmlComponentUI.getComponentId(), xmlComponentUI);
+                        if (!componentsById.containsKey(xmlComponentUI.getComponentId())) {
+                            xmlComponentUI.setClassLoader(classLoader);
+                            componentsById.put(xmlComponentUI.getComponentId(), xmlComponentUI);
+                        }
                     }
                 }
             } finally {

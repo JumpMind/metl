@@ -306,8 +306,7 @@ public class DefinitionFactory implements IDefinitionFactory {
                     List<XMLComponentDefinition> componentList = components.getComponent();
                     for (XMLComponentDefinition xmlComponent : componentList) {
                         String id = xmlComponent.getId();
-                        addXMLAbstractDefition(pluginId, xmlComponent);
-
+                        addXMLAbstractDefinition(pluginId, xmlComponent);
                         if (!componentsById.containsKey(id)) {
                             xmlComponent.setClassLoader(classLoader);
                             componentsById.put(id, xmlComponent);
@@ -341,7 +340,7 @@ public class DefinitionFactory implements IDefinitionFactory {
                     List<XMLResourceDefinition> resourceList = components.getResource();
                     for (XMLResourceDefinition xmlResource : resourceList) {
                         String id = xmlResource.getId();
-                        addXMLAbstractDefition(pluginId, xmlResource);
+                        addXMLAbstractDefinition(pluginId, xmlResource);
 
                         if (!componentsById.containsKey(id)) {
                             xmlResource.setClassLoader(classLoader);
@@ -379,7 +378,7 @@ public class DefinitionFactory implements IDefinitionFactory {
         }
     }
 
-    private final void addXMLAbstractDefition(String pluginId, XMLAbstractDefinition definition) {
+    private final void addXMLAbstractDefinition(String pluginId, XMLAbstractDefinition definition) {
         List<XMLAbstractDefinition> componentsForPluginId = definitionsByPluginId.get(pluginId);
         if (componentsForPluginId == null) {
             componentsForPluginId = new ArrayList<>();

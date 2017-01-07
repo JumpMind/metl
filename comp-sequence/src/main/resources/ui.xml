@@ -22,6 +22,6 @@
 -->
 <ui>
     <component-ui id="Sequence UI" componentId="Sequence">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-sequencing-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-sequencing-48x48-color.png</iconImage>
     </component-ui>       
 </ui>

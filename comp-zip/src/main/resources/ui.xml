@@ -22,9 +22,9 @@
 -->
 <ui>
     <component-ui id="Zip UI" componentId="Zip">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-zip-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-zip-48x48-color.png</iconImage>
     </component-ui>   
     <component-ui id="UnZip UI" componentId="UnZip">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-unzip-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-unzip-48x48-color.png</iconImage>
     </component-ui>      
 </ui>

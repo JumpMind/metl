@@ -22,7 +22,7 @@
 -->
 <ui>
     <component-ui id="Transformer UI" componentId="Transformer">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-transform-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-transform-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditTransformerPanel</className>
     </component-ui>
 </ui>
