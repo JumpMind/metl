@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Resource;
@@ -188,15 +189,16 @@ public class LocalFileDirectory extends AbstractDirectory {
         File[] files = dir.listFiles();
         if (files != null) {
             for (File file : files) {
-                String path = file.getAbsolutePath();
-                int index = path.indexOf(basePath);
+                String normPath = FilenameUtils.normalize(file.getAbsolutePath());
+                String normBasePath = FilenameUtils.normalize(basePath);
+                int index = normPath.indexOf(normBasePath);
                 if (index >= 0) {
-                    if (!basePath.endsWith(fileSeparator)) {
+                    if (!normBasePath.endsWith(fileSeparator)) {
                         index++;
                     }
-                    path = path.substring(index + basePath.length());
+                    normPath = normPath.substring(index + normBasePath.length());
                 }
-                list.add(new FileInfo(path, file.isDirectory(), file.lastModified(), file.length()));
+                list.add(new FileInfo(normPath, file.isDirectory(), file.lastModified(), file.length()));
             }
         }
         return list;
