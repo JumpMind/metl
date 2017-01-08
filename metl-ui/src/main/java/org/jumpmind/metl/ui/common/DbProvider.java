@@ -30,6 +30,11 @@ import java.util.List;
 
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.metl.core.model.Agent;
+import org.jumpmind.metl.core.model.Project;
+import org.jumpmind.metl.core.model.ProjectVersion;
+import org.jumpmind.metl.core.model.Resource;
+import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.plugin.XMLResourceDefinition;
 import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
@@ -41,7 +46,7 @@ import org.slf4j.LoggerFactory;
 public class DbProvider implements IDbProvider, Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     final protected Logger log = LoggerFactory.getLogger(getClass());
 
     transient List<IDb> dbs = new ArrayList<>();
@@ -51,7 +56,7 @@ public class DbProvider implements IDbProvider, Serializable {
     public DbProvider(ApplicationContext context) {
         this.context = context;
     }
-    
+
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         dbs = new ArrayList<>();
@@ -67,18 +72,37 @@ public class DbProvider implements IDbProvider, Serializable {
 
         dbs.clear();
 
+        IConfigurationService configurationService = context.getConfigurationService();
+        List<Project> projects = configurationService.findProjects();
+        for (Project project : projects) {
+            ProjectVersion version = project.getLatestProjectVersion();
+            if (version != null) {
+                XMLResourceDefinition defintion = context.getDefinitionFactory().getResourceDefintion(version.getId(), "Database");
+                List<Resource> resources = configurationService.findResourcesByTypes(version.getId(), "Database");
+                for (Resource resource : resources) {
+                    if (resource.getBoolean("show.on.explore.screen", false)) {
+                        DbResource db = new DbResource("Design > " + resource.getName(),
+                                resource.toTypedProperties(defintion.getSettings().getSetting()));
+                        dbs.add(db);
+                    }
+                }
+            }
+        }
+
         IAgentManager agentManager = context.getAgentManager();
         Collection<Agent> agents = agentManager.getAvailableAgents();
         for (Agent agent : agents) {
-            AgentRuntime runtime = agentManager.getAgentRuntime(agent.getId());
-            Collection<IResourceRuntime> resources = runtime.getDeployedResources();
-            for (IResourceRuntime iResource : resources) {
-                if (iResource.getResource().getType().equals("Database")) {
-                    DbResource db = new DbResource(agent, iResource);
-                    dbs.add(db);
+            if (agent.isShowResourcesInExploreView()) {
+                AgentRuntime runtime = agentManager.getAgentRuntime(agent.getId());
+                Collection<IResourceRuntime> resources = runtime.getDeployedResources();
+                for (IResourceRuntime iResource : resources) {
+                    if (iResource.getResource().getType().equals("Database")) {
+                        DbResource db = new DbResource(agent.getName() + " > " + iResource.getResource().getName(),
+                                iResource.getResourceRuntimeSettings());
+                        dbs.add(db);
+                    }
                 }
             }
-
         }
 
         Collections.sort(dbs, new Comparator<IDb>() {
@@ -97,7 +121,7 @@ public class DbProvider implements IDbProvider, Serializable {
     public List<IDb> getDatabases() {
         return dbs;
     }
-    
+
     class ExecutionMetlDb implements IDb, Serializable {
         private static final long serialVersionUID = 1L;
 
@@ -112,7 +136,7 @@ public class DbProvider implements IDbProvider, Serializable {
         }
 
     }
-    
+
     class MetlDb implements IDb, Serializable {
         private static final long serialVersionUID = 1L;
 

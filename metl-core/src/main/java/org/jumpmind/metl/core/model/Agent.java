@@ -57,6 +57,8 @@ public class Agent extends AbstractNamedObject {
 
     boolean deleted;
     
+    boolean showResourcesInExploreView;
+    
     int execThreadCount = 10;
 
     public Agent(String name, String host) {
@@ -73,6 +75,14 @@ public class Agent extends AbstractNamedObject {
     public Agent(Folder folder) {
         this();
         setFolder(folder);
+    }
+    
+    public void setShowResourcesInExploreView(boolean showResourcesOnSupportScreen) {
+        this.showResourcesInExploreView = showResourcesOnSupportScreen;
+    }
+    
+    public boolean isShowResourcesInExploreView() {
+        return showResourcesInExploreView;
     }
 
     public void setFolder(Folder folder) {

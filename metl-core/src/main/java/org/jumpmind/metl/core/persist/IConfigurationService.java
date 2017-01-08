@@ -183,7 +183,7 @@ public interface IConfigurationService {
 
     public ProjectVersion findProjectVersion(String projectVersionId);
 
-    public Resource findResource(String id);
+    public Resource findResource(String id);    
 
     public List<Resource> findResourcesByTypes(String projectVersionId, String... types);
 
