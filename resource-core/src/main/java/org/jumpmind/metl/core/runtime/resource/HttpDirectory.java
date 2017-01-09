@@ -170,10 +170,11 @@ public class HttpDirectory implements IDirectory {
 
     @Override
     public InputStream getInputStream(String relativePath, boolean mustExist) {
-        return getInputStream(relativePath, null, null);
+        return getInputStream(relativePath, mustExist, false, null, null);
     }
-
-    public InputStream getInputStream(String relativePath, Map<String, String> headers,
+    
+    @Override
+    public InputStream getInputStream(String relativePath, boolean mustExist, boolean closeSession, Map<String, String> headers,
             Map<String, String> parameters) {
         try {
             HttpURLConnection httpConnection = buildHttpUrlConnection(relativePath, headers,
@@ -203,11 +204,13 @@ public class HttpDirectory implements IDirectory {
 
     @Override
     public OutputStream getOutputStream(String relativePath, boolean mustExist) {
-        return getOutputStream(relativePath, null, null);
+        return getOutputStream(relativePath, mustExist, false, false, null, null);
     }
-
-    public OutputStream getOutputStream(String relativePath, Map<String, String> headers,
-            Map<String, String> parameters) {
+    
+    
+    @Override
+    public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession, boolean append,
+            Map<String, String> headers, Map<String, String> parameters) {
         HttpURLConnection httpUrlConnection = buildHttpUrlConnection(relativePath, headers,
                 parameters);
         return new HttpOutputStream(httpUrlConnection);
@@ -216,7 +219,7 @@ public class HttpDirectory implements IDirectory {
     @Override
     public OutputStream getOutputStream(String relativePath, boolean mustExist,
             boolean closeSession, boolean append) {
-        return getOutputStream(relativePath, mustExist);
+        return getOutputStream(relativePath, mustExist, closeSession, append, null, null);
     }
 
     protected HttpURLConnection buildHttpUrlConnection(String relativePath,

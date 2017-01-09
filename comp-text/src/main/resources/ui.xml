@@ -22,10 +22,10 @@
 -->
 <ui>
     <component-ui id="Text Replace UI" componentId="Text Replace">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-regex-replace-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-regex-replace-48x48-color.png</iconImage>
     </component-ui>    
     <component-ui id="Text Constant UI" componentId="Text Constant">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-text-constant-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-text-constant-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditTextConstant</className>
     </component-ui>    
 </ui>

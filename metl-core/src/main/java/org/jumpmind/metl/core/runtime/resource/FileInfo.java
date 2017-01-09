@@ -1,5 +1,7 @@
 package org.jumpmind.metl.core.runtime.resource;
 
+import org.apache.commons.io.FilenameUtils;
+
 public class FileInfo {
 
     long size;
@@ -7,19 +9,13 @@ public class FileInfo {
     boolean directory;
     long lastUpdated;
     String name;
-    
+
     public FileInfo(String path, boolean directory, long lastUpdated, long size) {
         this.relativePath = path;
         this.directory = directory;
         this.lastUpdated = lastUpdated;
         this.size = size;
-        int index = relativePath.lastIndexOf("/");
-        if (index > 0) {
-            name = relativePath.substring(index + 1, relativePath.length());
-        } else {
-            name = relativePath;
-        }
-
+        name = FilenameUtils.getName(relativePath);
     }
     
     public long getSize() {

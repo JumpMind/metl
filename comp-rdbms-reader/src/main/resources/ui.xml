@@ -22,7 +22,7 @@
 -->
 <ui>
     <component-ui id="RDBMS Reader UI" componentId="RDBMS Reader">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-reader-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-reader-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditRdbmsReaderPanel</className>
     </component-ui>
 </ui>

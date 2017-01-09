@@ -22,7 +22,7 @@
 -->
 <ui>
     <component-ui id="RDBMS Writer UI" componentId="RDBMS Writer">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-writer-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-writer-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditRdbmsWriterPanel</className>
     </component-ui>
 </ui>

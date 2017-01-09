@@ -22,7 +22,7 @@
 -->
 <ui>
     <component-ui id="Mapping UI" componentId="Mapping">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-mapping-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-mapping-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.mapping.EditMappingPanel</className>
     </component-ui>
 </ui>

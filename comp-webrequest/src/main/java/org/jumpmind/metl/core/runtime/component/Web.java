@@ -25,6 +25,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -39,9 +40,11 @@ import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
-import org.jumpmind.metl.core.runtime.resource.Http;
-import org.jumpmind.metl.core.runtime.resource.HttpDirectory;
-import org.jumpmind.metl.core.runtime.resource.HttpOutputStream;
+import org.jumpmind.metl.core.runtime.resource.IDirectory;
+import org.jumpmind.metl.core.runtime.resource.IOutputStreamWithResponse;
+//import org.jumpmind.metl.core.runtime.resource.Http;
+//import org.jumpmind.metl.core.runtime.resource.HttpDirectory;
+//import org.jumpmind.metl.core.runtime.resource.HttpOutputStream;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.util.FormatUtils;
 
@@ -80,10 +83,8 @@ public class Web extends AbstractComponentRuntime {
     @Override
     public void start() {
         IResourceRuntime httpResource = getResourceRuntime();
-        if (httpResource == null || !(httpResource instanceof Http)) {
-            throw new IllegalStateException(String.format(
-                    "A msgTarget resource of type %s must be chosen.  Please choose a resource.",
-                    Http.TYPE));
+        if (httpResource == null) {
+            throw new IllegalStateException("An HTTP resource must be configured");
         }
         Component component = getComponent();
         bodyFrom = component.get(BODY_FROM, "Message");
@@ -97,11 +98,10 @@ public class Web extends AbstractComponentRuntime {
     }
 
 	@Override
-	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-	    
+	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {	    
 		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
 				|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
-			HttpDirectory streamable = getResourceReference();
+			IDirectory streamable = getResourceReference();
 			httpHeaders = getHttpHeaderConfigEntries(inputMessage);
 			httpParameters = getHttpParameterConfigEntries(inputMessage);
 			assembleRelativePathPlusParameters();
@@ -124,22 +124,24 @@ public class Web extends AbstractComponentRuntime {
 						
                         if (isNotBlank(requestContent)) {
                             info("sending content to %s", path);
-                            HttpOutputStream os = (HttpOutputStream) streamable
-                                    .getOutputStream(path, httpHeaders, httpParameters);
+                            OutputStream os = streamable
+                                    .getOutputStream(path, false, false, false, httpHeaders, httpParameters);
                             BufferedWriter writer = new BufferedWriter(
                                     new OutputStreamWriter(os, DEFAULT_CHARSET));
                             try {
                                 writer.write(requestContent);
                             } finally {
                                 writer.close();
-                                String response = os.getResponse();
-                                if (response != null) {
-                                    outputPayload.add(response);
+                                if (os instanceof IOutputStreamWithResponse) {
+                                    String response = ((IOutputStreamWithResponse) os).getResponse();
+                                    if (response != null) {
+                                        outputPayload.add(response);
+                                    }
                                 }
                             }
                         } else {
                             info("getting content from %s", path);
-                            InputStream is = streamable.getInputStream(path, httpHeaders, httpParameters);
+                            InputStream is = streamable.getInputStream(path, false, false, httpHeaders, httpParameters);
                             try {
                                 String response = IOUtils.toString(is);
                                 if (response != null) {

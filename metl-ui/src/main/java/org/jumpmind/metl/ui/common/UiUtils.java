@@ -118,16 +118,23 @@ public final class UiUtils {
     }
 
     public static InputStream getComponentImageInputStream(String projectVersionId, String type, ApplicationContext context) {
-        String icon = "/org/jumpmind/metl/core/runtime/component/metl-puzzle-48x48-color.png";
-        XMLComponentUI def = context.getUiFactory().getUiDefinition(projectVersionId, type);
+        XMLComponentUI definition = context.getUiFactory().getUiDefinition(projectVersionId, type);
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        if (def != null && isNotBlank(def.getIconImage())) {
-            icon = def.getIconImage();
-            classLoader = def.getClassLoader();            
+        InputStream is = null;
+        if (definition != null && isNotBlank(definition.getIconImage())) {
+                String icon = definition.getIconImage();
+                classLoader = definition.getClassLoader();     
+                is = classLoader.getResourceAsStream(icon);
+                if (is == null && icon.startsWith("/")) {
+                    is  = classLoader.getResourceAsStream(icon.substring(1));
+                }
+                if (is == null && !icon.startsWith("/")) {
+                    is = classLoader.getResourceAsStream("/" + icon);
+                }
         }
-        InputStream is = classLoader.getResourceAsStream(icon);
+        
         if (is == null) {
-            is = UiUtils.class.getResourceAsStream(icon);
+            is = UiUtils.class.getResourceAsStream("/org/jumpmind/metl/core/runtime/component/metl-puzzle-48x48-color.png");
         }
         return is;
     }

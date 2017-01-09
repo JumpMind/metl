@@ -76,7 +76,10 @@
             <setting id='db.connection.properties' required='false' type='text'>
                 <name>Connection Properties</name>
             </setting>
-
+            <setting id='show.on.explore.screen' required='true' type='boolean'>
+                <name>Show On Explore Screen</name>
+                <defaultValue>false</defaultValue>
+            </setting>
         </settings>
     </resource>
 

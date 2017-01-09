@@ -22,7 +22,7 @@
 -->
 <ui>
     <component-ui id="Sorter UI" componentId="Sorter">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-sorter-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-sorter-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditSorterPanel</className>        
     </component-ui> 
 </ui>

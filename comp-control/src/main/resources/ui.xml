@@ -22,12 +22,12 @@
 -->
 <ui>
     <component-ui id="Last Unit of Work UI" componentId="Last Unit of Work">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delay-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-delay-48x48-color.png</iconImage>
     </component-ui>    
     <component-ui id="Gate UI" componentId="Gate">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-gate-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-gate-48x48-color.png</iconImage>
     </component-ui>    
     <component-ui id="Delay UI" componentId="Delay">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delay-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-delay-48x48-color.png</iconImage>
     </component-ui>   
 </ui>

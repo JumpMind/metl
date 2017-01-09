@@ -22,7 +22,7 @@
 -->
 <ui> 
     <component-ui id="Script UI" componentId="Script">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-script-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-script-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditScriptPanel</className>
     </component-ui>
 </ui>

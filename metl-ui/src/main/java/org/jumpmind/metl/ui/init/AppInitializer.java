@@ -94,6 +94,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
 
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
+        System.out.println("Version: " + VersionUtils.getCurrentVersion());
         properties = loadProperties();
         LogUtils.initLogging(getConfigDir(false), properties);
         AnnotationConfigWebApplicationContext applicationContext = new AnnotationConfigWebApplicationContext();

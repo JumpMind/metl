@@ -22,7 +22,7 @@
 -->
 <ui>
     <component-ui id="Web UI" componentId="Web">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-web-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-web-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditWebPanel</className>
     </component-ui>
 </ui>

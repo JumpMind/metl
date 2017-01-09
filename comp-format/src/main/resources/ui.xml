@@ -22,19 +22,19 @@
 -->
 <ui>
     <component-ui id="Format Delimited UI" componentId="Format Delimited">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delimitedformatter-out-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-delimitedformatter-out-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditFormatPanel</className>
     </component-ui>
     <component-ui id="Parse Delimited UI" componentId="Parse Delimited">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delimitedformatter-in-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-delimitedformatter-in-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditFormatPanel</className>
     </component-ui>      
     <component-ui id="Format Fixed UI" componentId="Format Fixed">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-fixed-length-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-fixed-length-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditFormatPanel</className>
     </component-ui>
     <component-ui id="Parse Fixed UI" componentId="Parse Fixed">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-fixed-length-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-fixed-length-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditFormatPanel</className>
     </component-ui>
 </ui>

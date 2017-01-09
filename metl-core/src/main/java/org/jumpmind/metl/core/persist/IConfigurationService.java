@@ -183,9 +183,13 @@ public interface IConfigurationService {
 
     public ProjectVersion findProjectVersion(String projectVersionId);
 
-    public Resource findResource(String id);
+<<<<<<< HEAD
+    public Resource findResource(String id);    
     
     public List<Resource> findResourcesByName(String projectVersionId, String resourceName);
+=======
+    public Resource findResource(String id);    
+>>>>>>> branch 'master' of https://github.com/JumpMind/metl.git
 
     public List<Resource> findResourcesByTypes(String projectVersionId, String... types);
 

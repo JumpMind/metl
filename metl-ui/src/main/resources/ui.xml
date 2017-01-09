@@ -22,29 +22,29 @@
 -->
 <ui>
     <component-ui id="Call Flow UI" componentId="Call Flow">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-flow-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-flow-48x48-color.png</iconImage>
     </component-ui>
     <component-ui id="Merger UI" componentId="Merger">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-merger-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-merger-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditMergerPanel</className>
     </component-ui>
     <component-ui id="Lookup UI" componentId="Lookup">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-lookup-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-lookup-48x48-color.png</iconImage>
     </component-ui>    
     <component-ui id="Deduper UI" componentId="Deduper">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-deduper-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-deduper-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditDeduperPanel</className>        
     </component-ui>    
     <component-ui id="Delay UI" componentId="Delay">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delay-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-delay-48x48-color.png</iconImage>
     </component-ui>   
     <component-ui id="Message Logger UI" componentId="Message Logger">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-message-logger-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-message-logger-48x48-color.png</iconImage>
     </component-ui>
     <component-ui id="Multiplier UI" componentId="Multiplier">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-multiplier-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-multiplier-48x48-color.png</iconImage>
     </component-ui>   
     <component-ui id="Union UI" componentId="Union">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-union-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-union-48x48-color.png</iconImage>
     </component-ui>
 </ui>

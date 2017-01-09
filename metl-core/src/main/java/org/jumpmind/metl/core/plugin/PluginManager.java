@@ -178,10 +178,10 @@ public class PluginManager implements IPluginManager {
 
     protected void checkForNewerVersion(List<Plugin> listToCheck) {
         Set<String> checked = new HashSet<>();
+        List<Plugin> existing = configurationService.findPlugins();
         for (Plugin plugin : listToCheck) {
             String id = String.format("%s:%s", plugin.getArtifactGroup(), plugin.getArtifactName());
             if (!checked.contains(id)) {
-                List<Plugin> existing = configurationService.findPlugins();
                 String latestVersion = getLatestLocalVersion(plugin.getArtifactGroup(), plugin.getArtifactName());
                 if (latestVersion != null) {
                     Plugin potentialNewVersion = new Plugin(plugin.getArtifactGroup(), plugin.getArtifactName(), latestVersion,

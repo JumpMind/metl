@@ -22,7 +22,7 @@
 -->
 <ui>
     <component-ui id="Data Diff UI" componentId="DataDiff">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-diff-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-diff-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditDataDiffPanel</className>        
     </component-ui>
 </ui>

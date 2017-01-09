@@ -215,8 +215,9 @@ public class EditAgentPanel extends VerticalLayout
         editAgentLayout.addComponent(exportButton);
         editAgentLayout.setComponentAlignment(exportButton, Alignment.BOTTOM_LEFT);
 
-        CheckBox autoRefresh = new CheckBox("Auto Refresh", Boolean.valueOf(agent.isAutoRefresh()));
+        CheckBox autoRefresh = new CheckBox("Refresh?", Boolean.valueOf(agent.isAutoRefresh()));
         autoRefresh.setImmediate(true);
+        autoRefresh.setDescription("Automatically refresh flow from database before execution?");
         autoRefresh.addValueChangeListener(event -> {
             agent.setAutoRefresh(autoRefresh.getValue());
             EditAgentPanel.this.context.getConfigurationService().save((AbstractObject) agent);
@@ -224,9 +225,22 @@ public class EditAgentPanel extends VerticalLayout
         });
         editAgentLayout.addComponent(autoRefresh);
         editAgentLayout.setComponentAlignment(autoRefresh, Alignment.BOTTOM_LEFT);
+        
+        CheckBox showInExploreViewField = new CheckBox("Explore?",
+                Boolean.valueOf(agent.isShowResourcesInExploreView()));
+        showInExploreViewField.setDescription("Show resources deployed to this agent in the explore view");
+        showInExploreViewField.setImmediate(true);
+        showInExploreViewField.addValueChangeListener(event -> {
+            agent.setShowResourcesInExploreView(showInExploreViewField.getValue());
+            EditAgentPanel.this.context.getConfigurationService().save((AbstractObject) agent);
+            EditAgentPanel.this.context.getAgentManager().refresh(agent);
+        });
+        editAgentLayout.addComponent(showInExploreViewField);
+        editAgentLayout.setComponentAlignment(showInExploreViewField, Alignment.BOTTOM_LEFT);
 
-        CheckBox allowTestFlowsField = new CheckBox("Allow Test Flows",
+        CheckBox allowTestFlowsField = new CheckBox("Allow Tests?",
                 Boolean.valueOf(agent.isAllowTestFlows()));
+        allowTestFlowsField.setDescription("Allow test flows to be deployed to this agent");
         allowTestFlowsField.setImmediate(true);
         allowTestFlowsField.addValueChangeListener(event -> {
             agent.setAllowTestFlows(allowTestFlowsField.getValue());

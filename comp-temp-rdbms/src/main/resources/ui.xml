@@ -22,7 +22,7 @@
 -->
 <ui>
     <component-ui id="Temp RDBMS UI" componentId="Temp RDBMS">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-temp-rdbms-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-temp-rdbms-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditTempRdbmsPanel</className>
     </component-ui>  
 </ui>

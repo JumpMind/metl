@@ -22,6 +22,6 @@
 -->
 <ui>
     <component-ui id="Stamp UI" componentId="3b053254-c87c-4e59-b34b-0b2e2dc6deca">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-rubberstamp-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-rubberstamp-48x48-color.png</iconImage>
     </component-ui>
 </ui>

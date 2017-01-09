@@ -14,7 +14,7 @@ import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
 import jcifs.smb.SmbFileOutputStream;
 
-public class SMBDirectory implements IDirectory {
+public class SMBDirectory extends AbstractDirectory {
     
     protected String baseUrl;
     protected String user;

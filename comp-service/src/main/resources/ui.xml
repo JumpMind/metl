@@ -22,9 +22,9 @@
 -->
 <ui>    
     <component-ui id="HttpRequest UI" componentId="HttpRequest">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-web-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-web-48x48-color.png</iconImage>
     </component-ui>                                                    
     <component-ui id="Http Response UI" componentId="16170152-eee5-11e5-9ce9-5e5517507c66">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-web-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-web-48x48-color.png</iconImage>
     </component-ui> 
 </ui>

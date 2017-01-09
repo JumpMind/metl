@@ -23,6 +23,7 @@ package org.jumpmind.metl.core.runtime.resource;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 
 public interface IDirectory {
 
@@ -32,17 +33,20 @@ public interface IDirectory {
     
     public boolean supportsInputStream();
     
+    public InputStream getInputStream(String relativePath, boolean mustExist, boolean closeSession, Map<String, String> headers, Map<String, String> parameters);
+    
     public InputStream getInputStream(String relativePath, boolean mustExist);
     
     public InputStream getInputStream(String relativePath, boolean mustExist, boolean closeSession);
     
     public boolean supportsOutputStream();
     
+    public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession, boolean append, Map<String, String> headers, Map<String, String> parameters);
+    
     public OutputStream getOutputStream(String relativePath, boolean mustExist);
 
     public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession, boolean append);
     
-    @Deprecated
     public void close();
     
     public boolean delete(String relativePath);
