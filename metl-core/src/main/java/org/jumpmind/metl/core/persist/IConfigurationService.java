@@ -184,6 +184,8 @@ public interface IConfigurationService {
     public ProjectVersion findProjectVersion(String projectVersionId);
 
     public Resource findResource(String id);
+    
+    public List<Resource> findResourcesByName(String projectVersionId, String resourceName);
 
     public List<Resource> findResourcesByTypes(String projectVersionId, String... types);
 
@@ -262,6 +264,8 @@ public interface IConfigurationService {
     public Flow copy(Flow original);
 
     public Model copy(Model original);
+    
+    public Resource copy(Resource original);
 
     public void delete(Plugin plugin);
 

@@ -45,7 +45,6 @@ public class FlowMenuManager extends AbstractDesignSelectedValueMenuManager {
                 "Edit|Rename",
                 "Edit|Cut",
                 "Edit|Copy",
-                "Edit|Paste",
                 "Edit|Remove"
         });
     }

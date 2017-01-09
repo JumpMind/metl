@@ -43,5 +43,11 @@ public class FolderName extends AbstractName {
     public String getParentFolderId() {
         return parentFolderId;
     }
+
+    @Override
+    public String getProjectVersionId() {
+        return this.getId().substring(this.getId().indexOf("-")+1, this.getId().length());
+    }
+
     
 }

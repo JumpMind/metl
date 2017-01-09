@@ -1,6 +1,10 @@
 package org.jumpmind.metl.ui.views.design.menu;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.jumpmind.metl.core.model.Flow;
+import org.jumpmind.metl.core.model.FolderName;
+import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
 
 public class FolderMenuManager extends AbstractDesignSelectedValueMenuManager {
@@ -20,7 +24,8 @@ public class FolderMenuManager extends AbstractDesignSelectedValueMenuManager {
     
     @Override
     protected String[] getEnabledPaths(Object selected) {
-        return (String[])ArrayUtils.addAll(super.getEnabledPaths(selected), new String[] {
+        
+        String[] enabledPaths = (String[]) ArrayUtils.addAll(super.getEnabledPaths(selected), new String[] {
                 "File|New|Project Dependency",
                 "File|New|Flow|Design",
                 "File|New|Flow|Test",
@@ -34,7 +39,25 @@ public class FolderMenuManager extends AbstractDesignSelectedValueMenuManager {
                 "File|New|Resource|HTTP",
                 "File|New|Resource|Mail Session",
                 "File|Import...",        
-                "File|Export...",                
+                "File|Export..."
         });
+        
+        FolderName folder = (FolderName) selected;
+
+        //if we have something in the clipboard, ensure paste is enabled for the proper folders
+        //based on the type of object we have in the clipboard
+        if (navigator.getContext().getClipboard().containsKey(DesignNavigator.CLIPBOARD_OBJECT_TYPE)) {
+            if ((folder.getName().equalsIgnoreCase(DesignNavigator.LABEL_FLOWS) &&
+                    navigator.getContext().getClipboard().get(DesignNavigator.CLIPBOARD_OBJECT_TYPE) == Flow.class) ||
+                    (folder.getName().equalsIgnoreCase(DesignNavigator.LABEL_RESOURCES) &&
+                    navigator.getContext().getClipboard().get(DesignNavigator.CLIPBOARD_OBJECT_TYPE) == Resource.class) ||
+                    (folder.getName().equalsIgnoreCase(DesignNavigator.LABEL_MODELS) &&
+                    navigator.getContext().getClipboard().get(DesignNavigator.CLIPBOARD_OBJECT_TYPE) == Model.class)) {
+                
+                enabledPaths = (String[]) ArrayUtils.add(enabledPaths, "Edit|Paste");
+            }
+        }    
+        
+        return enabledPaths;
     }
 }

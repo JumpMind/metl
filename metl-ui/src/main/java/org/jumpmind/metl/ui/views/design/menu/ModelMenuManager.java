@@ -21,7 +21,6 @@ public class ModelMenuManager extends AbstractDesignSelectedValueMenuManager {
     @Override
     protected String[] getDisabledPaths(Object selected) {
         return (String[])ArrayUtils.addAll(super.getDisabledPaths(selected), new String[] {
-                "Edit|Copy"
         });
     }
     
@@ -44,8 +43,9 @@ public class ModelMenuManager extends AbstractDesignSelectedValueMenuManager {
                 "File|Import...",        
                 "File|Export...",                
                 "Edit|Rename",
+                "Edit|Cut",
                 "Edit|Copy",
-                "Edit|Remove",
+                "Edit|Remove"
         });
     }
 }

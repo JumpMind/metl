@@ -254,6 +254,16 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         AbstractObjectNameBasedSorter.sort(flows);
         return flows;
     }
+    
+    @Override
+    public List<Resource> findResourcesByName(String projectVersionId, String name) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("deleted",0);
+        params.put("name", name);
+        params.put("projectVersionId", projectVersionId);
+        List<Resource> resources = find(Resource.class, params);
+        return resources;
+    }
 
     @Override
     public List<Resource> findResourcesByTypes(String projectVersionId, String... types) {
@@ -1385,6 +1395,11 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         return copy(new HashMap<>(), original);
     }
 
+    @Override
+    public Resource copy(Resource original) {
+        return copy(new HashMap<>(), original);
+    }
+    
     protected Resource copy(Map<String, AbstractObject> oldToNewUUIDMapping, Resource original) {
         Resource newResource = copyWithNewUUID(oldToNewUUIDMapping, original);
         newResource.setSettings(new ArrayList<>());
