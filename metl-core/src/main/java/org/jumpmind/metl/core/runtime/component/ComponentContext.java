@@ -54,6 +54,8 @@ public class ComponentContext {
     Map<Integer, IComponentRuntime> componentRuntimeByThread = new HashMap<>();
     
     boolean startStep = false;
+    
+    static public final ThreadLocal<String> projectVersionId = new ThreadLocal<>();
 
     public ComponentContext(AgentDeployment deployment, FlowStep flowStep, Flow manipulatedFlow, IExecutionTracker executionTracker,
             Map<String, IResourceRuntime> deployedResources, Map<String, String> flowParameters, Map<String, String> globalSettings) {
