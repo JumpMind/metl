@@ -28,7 +28,7 @@ import com.mockrunner.mock.jdbc.MockDatabaseMetaData;
 import com.mockrunner.mock.jdbc.MockParameterMap;
 import com.mockrunner.mock.jdbc.MockResultSet;
 
-public class MockDriver extends com.mockrunner.mock.jdbc.MockDriver {
+public class MockJdbcDriver extends com.mockrunner.mock.jdbc.MockDriver {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
     protected StatementResultSetHandler statementHandler;
@@ -36,10 +36,10 @@ public class MockDriver extends com.mockrunner.mock.jdbc.MockDriver {
     protected CallableStatementResultSetHandler callableStatementHandler;
     protected IConfigurationService configurationService;
 
-    public MockDriver() {
+    public MockJdbcDriver() {
     }
 
-    public MockDriver(IConfigurationService configurationService) {
+    public MockJdbcDriver(IConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
 

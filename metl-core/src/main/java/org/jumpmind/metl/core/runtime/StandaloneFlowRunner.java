@@ -61,7 +61,7 @@ import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMappingRegistry;
 import org.jumpmind.metl.core.security.SecurityService;
 import org.jumpmind.metl.core.util.LogUtils;
-import org.jumpmind.metl.core.util.MockDriver;
+import org.jumpmind.metl.core.util.MockJdbcDriver;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.AppUtils;
@@ -168,7 +168,7 @@ public class StandaloneFlowRunner {
                 new ConfigDatabaseUpgrader("/schema-exec.xml", databasePlatform, true, "METL").upgrade();
                 persistenceManager = new SqlPersistenceManager(databasePlatform);
                 configurationService = new ConfigurationSqlService(new SecurityService(), databasePlatform, persistenceManager, "METL");
-                MockDriver mockDriver = new MockDriver(configurationService);
+                MockJdbcDriver mockDriver = new MockJdbcDriver(configurationService);
                 DriverManager.registerDriver(mockDriver);
                 PluginManager pluginManager = new PluginManager("working/plugins", configurationService);
                 pluginManager.init();

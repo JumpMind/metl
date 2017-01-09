@@ -72,7 +72,7 @@ import org.jumpmind.metl.core.security.SecurityService;
 import org.jumpmind.metl.core.util.AppConstants;
 import org.jumpmind.metl.core.util.EnvConstants;
 import org.jumpmind.metl.core.util.LogUtils;
-import org.jumpmind.metl.core.util.MockDriver;
+import org.jumpmind.metl.core.util.MockJdbcDriver;
 import org.jumpmind.metl.ui.persist.AuditableConfigurationService;
 import org.jumpmind.metl.ui.views.DefinitionPlusUIFactory;
 import org.jumpmind.metl.ui.views.IDefinitionPlusUIFactory;
@@ -143,7 +143,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     
     Service brokerService;
     
-    MockDriver mockDriver;
+    MockJdbcDriver mockDriver;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -176,9 +176,9 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     
     @Bean
     @Scope(value = "singleton")
-    MockDriver mockDriver() {
+    MockJdbcDriver mockDriver() {
         if (mockDriver == null) {
-            mockDriver = new MockDriver(configurationService());
+            mockDriver = new MockJdbcDriver(configurationService());
             try {
                 DriverManager.registerDriver(mockDriver);
             } catch (SQLException e) {
