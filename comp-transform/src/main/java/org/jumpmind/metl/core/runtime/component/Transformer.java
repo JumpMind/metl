@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.script.ScriptEngine;
@@ -124,6 +123,7 @@ public class Transformer extends AbstractComponentRuntime {
 						if (isNotBlank(transform)) {
 							ModelAttribute attribute = inputModel.getAttributeById(attributeId);
 							ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
+							
 
 							ModelAttributeScriptHelper helper = helpers.get(attribute.getId());
 							if (helper == null) {
@@ -155,8 +155,9 @@ public class Transformer extends AbstractComponentRuntime {
 							try {
 							    value = helper.eval();
 							} catch (Exception e) {
-							    throw new RuntimeException("Groovy script evaluation resulted in an exception.  Attribute ==> " + attribute.getName() + ".  Value ==> "
-                                        + (value==null ? "null" : value.toString()) + ".", e);
+							    throw new RuntimeException("Groovy script evaluation resulted in an exception.  Attribute ==> " 
+							            + attribute.getName() + ".  Value ==> " + (value==null ? "null" : value.toString()) 
+							            + ".  Payload ==>\n" + getComponent().toRow(inData, false, false), e);
 							}
 							totalTime += (System.currentTimeMillis()-ts);
 							totalCalls ++;   
