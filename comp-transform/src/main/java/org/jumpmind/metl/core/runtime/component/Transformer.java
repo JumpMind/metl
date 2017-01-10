@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.script.ScriptEngine;
@@ -141,7 +142,7 @@ public class Transformer extends AbstractComponentRuntime {
 						            helpers.put(attribute.getId(), helper);
 						        } catch (ScriptException e) {
 						            throw new RuntimeException("Unable to evaluate groovy script.  Attribute ==> " + attribute.getName() + ".  Value ==> "
-						                    + value.toString() + "." + e.getCause().getMessage(), e);
+						                    + (value==null ? "null" : value.toString()) + "." + e.getCause().getMessage(), e);
 						        }
 						        
 						        log.debug("It took " + (System.currentTimeMillis()-ts) + "ms to create class");
@@ -155,7 +156,7 @@ public class Transformer extends AbstractComponentRuntime {
 							    value = helper.eval();
 							} catch (Exception e) {
 							    throw new RuntimeException("Groovy script evaluation resulted in an exception.  Attribute ==> " + attribute.getName() + ".  Value ==> "
-                                        + value.toString() + ".", e);
+                                        + (value==null ? "null" : value.toString()) + ".", e);
 							}
 							totalTime += (System.currentTimeMillis()-ts);
 							totalCalls ++;   
