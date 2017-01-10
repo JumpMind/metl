@@ -26,31 +26,26 @@ import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.ComponentName;
-import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
-import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FolderName;
-import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDependency;
-import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.UserSetting;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.common.CutCopyPasteManager;
 import org.jumpmind.metl.ui.common.EnableFocusTextField;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.SelectProjectVersionDialog;
@@ -99,20 +94,6 @@ public class DesignNavigator extends VerticalLayout {
 
     public static final String LABEL_RESOURCES = "Resources";
     
-    public static final String CLIPBOARD_OBJECT_TYPE = "objectType";
-    
-    public static final String CLIPBOARD_ACTION = "action";
-    
-    public static final String CLIPBOARD_CUT = "cut";
-    
-    public static final String CLIPBOARD_COPY = "copy";
-    
-    public static final String CLIPBOARD_FLOW = "flow";
-    
-    public static final String CLIPBOARD_MODELS = "models";
-    
-    public static final String CLIPBOARD_RESOURCES = "resources";
-
     final Logger log = LoggerFactory.getLogger(getClass());
 
     ApplicationContext context;
@@ -129,13 +110,13 @@ public class DesignNavigator extends VerticalLayout {
     
     IConfigurationService configurationService;
     
-    Map<String, Object> clipboard;
+    CutCopyPasteManager cutCopyPasteManager;
 
     public DesignNavigator(ApplicationContext context, TabbedPanel tabs) {
         this.context = context;
         this.tabs = tabs;
         this.configurationService = context.getConfigurationService();
-        this.clipboard = context.getClipboard();
+        this.cutCopyPasteManager = new CutCopyPasteManager(context);
         
         setSizeFull();
         addStyleName(ValoTheme.MENU_ROOT);
@@ -516,7 +497,6 @@ public class DesignNavigator extends VerticalLayout {
         if (models.size() == 0) {
             this.treeTable.removeItem(folder);
         }
-
     }
 
     protected void selectAndExpand(Object value) {
@@ -572,20 +552,9 @@ public class DesignNavigator extends VerticalLayout {
         ImportDialog.show("Import Config", "Click the import button to import your config", new ImportConfigurationListener());
     }
 
-    //TODO: move this code to CutCopyPasteManager in org.jumpmind.metl.ui.common - then instantiate the manager in the constructor of this class
-    
-    public void doCopy() {
+    public void doNewVersion() {
         Object object = treeTable.getValue();
-        if (object instanceof ModelName) {
-            Model model = configurationService.findModel(((ModelName) object).getId());
-            saveToClipboard(model);
-        } else if (object instanceof ResourceName) {
-            Resource resource = configurationService.findResource(((ResourceName) object).getId());
-            saveToClipboard(resource);
-        } else if (object instanceof FlowName) {
-            Flow flow = configurationService.findFlow(((FlowName) object).getId());
-            saveToClipboard(flow);
-        } else if (object instanceof ProjectVersion) {
+        if (object instanceof ProjectVersion) {
             ProjectVersion original = (ProjectVersion) object;
             String nextVersionLabel = original.attemptToCalculateNextVersionLabel();
             configurationService.refresh(original.getProject());
@@ -610,205 +579,30 @@ public class DesignNavigator extends VerticalLayout {
             treeTable.setChildrenAllowed(newVersion, false);
             treeTable.setValue(newVersion);
             startEditingItem((AbstractNamedObject) treeTable.getValue());
-
         }
     }
-
+    
     public void doCut() {
-        //TODO:  Do something about flows in the deployed agents when things are cut or moved
-        clipboard.clear();
-        clipboard.put(CLIPBOARD_ACTION, CLIPBOARD_CUT);
         Object object = treeTable.getValue();
-        if (object instanceof FlowName) {
-            Flow flow = configurationService.findFlow(((FlowName) object).getId());
-            saveToClipboard(flow);
-        } else if (object instanceof ModelName) {
-            Model model = configurationService.findModel(((ModelName) object).getId());
-            List<Flow> affectedFlows = configurationService.findAffectedFlowsByModel(model.getId());
-            if (affectedFlows.size() > 0) {
-                CommonUiUtils.notify("The model is currently in use.  It cannot be cut or moved.", Type.WARNING_MESSAGE);            
-            } else {
-                saveToClipboard(model);
-            }
-        } else if (object instanceof ResourceName) {
-            Resource resource = configurationService.findResource(((ResourceName) object).getId());
-            List<Flow> affectedFlows = configurationService.findAffectedFlowsByResource(resource.getId());
-            if (affectedFlows.size() > 0) {
-                CommonUiUtils.notify("The resource is currently in use.  It cannot be cut or moved.", Type.WARNING_MESSAGE);                            
-            }
-            saveToClipboard(resource);
-        }
+        cutCopyPasteManager.cut(object);
     }
-    
-    private void saveToClipboard(Model model) {
-        clipboard.put(CLIPBOARD_OBJECT_TYPE, Model.class);
-        HashSet<Model> models = new HashSet<Model>();
-        models.add(model);
-        clipboard.put(CLIPBOARD_MODELS, models);
-    }
-    
-    private void saveToClipboard(Resource resource) {
-        clipboard.put(CLIPBOARD_OBJECT_TYPE, Resource.class);
-        HashSet<Resource> resources = new HashSet<Resource>();
-        resources.add(resource);
-        clipboard.put(CLIPBOARD_RESOURCES, resources);        
-    }
-    
-    private void saveToClipboard(Flow flow) {
-        clipboard.put(CLIPBOARD_OBJECT_TYPE, Flow.class);
-        clipboard.put(CLIPBOARD_FLOW, flow);
-        clipboard.put(CLIPBOARD_MODELS, new HashSet<Model>(configurationService.findDependentModels(flow.getId())));
-        //TODO: update findDependentResources to look for resources in the settings as well as in the resource_id column of the component
-        clipboard.put(CLIPBOARD_RESOURCES, new HashSet<Resource>(configurationService.findDependentResources(flow.getId())));   
+        
+    public void doCopy() {
+        Object object = treeTable.getValue();
+        cutCopyPasteManager.copy(object);
     }
 
-    @SuppressWarnings("unchecked")
-    private void pasteResources(String newProjectVersionId) {
-        HashSet<Resource> origResources = (HashSet<Resource>) clipboard.get(CLIPBOARD_RESOURCES);
-        HashSet<Resource> newResources = new HashSet<Resource>();
-        for (Resource resource : origResources) {
-            if (!destinationHasResource(resource, newProjectVersionId)) {
-                //make a copy only if the resource is still in use by another flow
-                //resource alone can't be cut if they have dependent flows
-                if ((clipboard.containsKey(CLIPBOARD_ACTION) &&
-                        ((String) clipboard.get(CLIPBOARD_ACTION)).equalsIgnoreCase(CLIPBOARD_COPY)) ||
-                        configurationService.findAffectedFlowsByResource(resource.getId()).size() > 1) {
-                    newResources.add(configurationService.copy(resource));
-                } else {
-                    newResources.add(resource);
-                }
-            }
-        }
-        for (Resource resource : newResources) {
-            resource.setProjectVersionId(newProjectVersionId);
-            resource.setName(calculateResourceName(resource));           
-            configurationService.save(resource);
-        }  
-    }
-
-    private boolean destinationHasResource(Resource resource, String newProjectVersionId) {
-        boolean destinationHasResource = false;
-        List<Resource> existingResources = configurationService.findResourcesByName(newProjectVersionId, resource.getName());
-        for (Resource existingResource : existingResources) {
-            //findByName doesn't do deep fetch
-            existingResource = configurationService.findResource(existingResource.getId());
-            if (resourcesMatchAcrossProjects(resource, existingResource)) {
-                destinationHasResource = true;
-                break;
-            }
-        }
-        return destinationHasResource;
-    }
-    
-    private boolean resourcesMatchAcrossProjects(Resource resource1, Resource resource2) {
-        boolean matches = true;
-        List<Setting> settings1 = resource1.getSettings();
-        List<Setting> settings2 = resource2.getSettings();
-        for (Setting setting1 : settings1) {
-            boolean foundMatch = false;
-            for (Setting setting2 : settings2) {
-                if (setting1.getName().equalsIgnoreCase(setting2.getName()) &&
-                        setting1.getValue().equalsIgnoreCase(setting2.getValue())) {
-                    foundMatch = true;
-                }
-            }
-            if (!foundMatch) {
-                matches = false;
-                break;
-            }
-        }        
-        return matches;
-    }
-    
-    private String calculateResourceName(Resource resource) {
-        //this has the new project version id and the old name
-        String name = resource.getName();
-        boolean calculatedName = false;
-        int copyNumber = 1;
-        do {
-            List<Resource> existingResources = configurationService.findResourcesByName(
-                    resource.getProjectVersionId(), name);
-            if (existingResources.size() == 0) {
-                calculatedName = true;
-            } else {
-                name = resource.getName() + " - " + String.valueOf(copyNumber);
-                copyNumber++;
-            }
-        } while (!calculatedName);
-        return name;
-    }
-    
-    @SuppressWarnings("unchecked")
-    private void pasteModels(String newProjectVersionId) {
-        
-        HashSet<Model> origModels = (HashSet<Model>) clipboard.get(CLIPBOARD_MODELS);
-        HashSet<Model> newModels = new HashSet<Model>();
-        
-        for (Model model : origModels) {
-            //make a copy only if the model is still in use by another flow
-            //resource alone can't be cut if they have dependent flows
-            if ((clipboard.containsKey(CLIPBOARD_ACTION) &&
-                    ((String) clipboard.get(CLIPBOARD_ACTION)).equalsIgnoreCase(CLIPBOARD_COPY)) ||
-                    configurationService.findAffectedFlowsByModel(model.getId()).size() > 1) {
-                newModels.add(configurationService.copy(model));
-            } else {
-                newModels.add(model);
-            }            
-        }
-        for (Model model : newModels) {
-            model.setProjectVersionId(newProjectVersionId);
-            configurationService.save(model);
-        }        
-    }
-    
-    private void pasteFlow(String newProjectVersionId) {
-        pasteResources(newProjectVersionId);
-        pasteModels(newProjectVersionId);
-        Flow flow = (Flow) clipboard.get(CLIPBOARD_FLOW);
-        
-        List<Resource> resources = configurationService.findDependentResources(flow.getId());
-        for (Resource resource : resources) {
-            List<Resource> newResources = configurationService.findResourcesByName(newProjectVersionId, resource.getName());
-            String newResourceId = newResources.get(0).getId();
-            if (!newResourceId.equalsIgnoreCase(resource.getId())) {
-                restampResource(flow, resource.getId(), newResources.get(0).getId());
-            }
-        }
-        
-        flow.setProjectVersionId(newProjectVersionId);
-        configurationService.save(flow);
-    }
-    
-    private void restampResource(Flow flow, String existingResourceId, String newResourceId) {
-        List<FlowStep> flowSteps = flow.getFlowSteps();
-        for (FlowStep flowStep : flowSteps) {
-            org.jumpmind.metl.core.model.Component component = flowStep.getComponent();
-            if (component.getResourceId() != null && 
-                    component.getResourceId().equalsIgnoreCase(existingResourceId)) {
-                component.setResourceId(newResourceId);
-                configurationService.save(component);
-            }
-            List<Setting> settings = component.getSettings();
-            for (Setting setting : settings) {
-                if (setting.getValue().equalsIgnoreCase(existingResourceId)) {
-                    setting.setValue(newResourceId);
-                    configurationService.save(setting);
-                }
-            }
-        }
-    }
-    
     public void doPaste() {
         Object object = treeTable.getValue();        
         if (object instanceof FolderName) {
             FolderName folderName = (FolderName) object; 
             String newProjectVersionId = folderName.getProjectVersionId();            
             if (folderName.getName().equalsIgnoreCase(LABEL_RESOURCES)) {
-                pasteResources(newProjectVersionId);                
+                cutCopyPasteManager.pasteResources(newProjectVersionId);                
             } else if (folderName.getName().equalsIgnoreCase(LABEL_MODELS)) {
-                pasteModels(newProjectVersionId);
+                cutCopyPasteManager.pasteModels(newProjectVersionId);
             } else if (folderName.getName().equalsIgnoreCase(LABEL_FLOWS)) {
-                pasteFlow(newProjectVersionId);
+                cutCopyPasteManager.pasteFlow(newProjectVersionId);
             }
         }
         refresh();

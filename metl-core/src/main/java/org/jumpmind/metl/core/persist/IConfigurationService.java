@@ -183,13 +183,11 @@ public interface IConfigurationService {
 
     public ProjectVersion findProjectVersion(String projectVersionId);
 
-<<<<<<< HEAD
     public Resource findResource(String id);    
     
     public List<Resource> findResourcesByName(String projectVersionId, String resourceName);
-=======
-    public Resource findResource(String id);    
->>>>>>> branch 'master' of https://github.com/JumpMind/metl.git
+
+    public List<Model> findModelsByName(String projectVersionId, String modelName);
 
     public List<Resource> findResourcesByTypes(String projectVersionId, String... types);
 
@@ -266,6 +264,8 @@ public interface IConfigurationService {
     Group findGroupByName(String name);
 
     public Flow copy(Flow original);
+
+    public Flow copy(Map<String, AbstractObject> oldToNewUUIDMapping, Flow original);
 
     public Model copy(Model original);
     

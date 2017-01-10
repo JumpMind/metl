@@ -266,6 +266,16 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     }
 
     @Override
+    public List<Model> findModelsByName(String projectVersionId, String name) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("deleted",0);
+        params.put("name", name);
+        params.put("projectVersionId", projectVersionId);
+        List<Model> models = find(Model.class, params);
+        return models;
+    }
+        
+    @Override
     public List<Resource> findResourcesByTypes(String projectVersionId, String... types) {
         List<Resource> list = new ArrayList<Resource>();
         if (types != null) {
@@ -1319,8 +1329,13 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     public Flow copy(Flow original) {
         Map<String, AbstractObject> oldToNewUUIDMapping = new HashMap<>();
         return copy(oldToNewUUIDMapping, original, false);
+    }    
+    
+    @Override
+    public Flow copy(Map<String, AbstractObject> oldToNewUUIDMapping, Flow original) {
+        return copy(oldToNewUUIDMapping, original);
     }
-
+    
     protected Flow copy(Map<String, AbstractObject> oldToNewUUIDMapping, Flow original, boolean newProjectVersion) {
         Flow newFlow = copyWithNewUUID(oldToNewUUIDMapping, original);
         newFlow.setFlowParameters(new ArrayList<FlowParameter>());
