@@ -75,7 +75,7 @@ public class MockJdbcDriver extends com.mockrunner.mock.jdbc.MockDriver {
             @Override
             public void addParameterMapForExecutedStatement(String sql, MockParameterMap parameters) {
                 super.addParameterMapForExecutedStatement(sql, parameters);
-                log.info(new LogSqlBuilder().buildDynamicSqlForLog(sql, toObjectArray(parameters), null));
+                log.info(new LogSqlBuilder().buildDynamicSqlForLog(sql, toObjectArray(parameters), null) + ";");
             }
         };
         callableStatementHandler = new CallableStatementResultSetHandler();
@@ -113,6 +113,8 @@ public class MockJdbcDriver extends com.mockrunner.mock.jdbc.MockDriver {
                                         typeNumber = Types.NUMERIC;
                                     } else if (type.isBoolean()) {
                                         typeNumber = Types.BOOLEAN;
+                                    } else if (type.isTimestamp()) {
+                                        typeNumber = Types.TIMESTAMP;
                                     }
                                     columns.addRow(new Object[] { tableNamePattern, attribute.getName(), type.name(), typeNumber });
                                 }
