@@ -100,7 +100,7 @@ public class XmlParser extends AbstractXMLComponentRuntime {
                     if (componentAttributeSetting.getName().equals(XML_FORMATTER_XPATH)) {
                         String attributeXPath = componentAttributeSetting.getValue();
                         if (!optimizeForSpeed && attributeXPath.startsWith(entityXPath) && attributeXPath.length() > entityXPath.length()) {
-                            attributeXPath = "//" +attributeXPath.substring(entityXPath.length()+1);
+                            attributeXPath = "/*/" + attributeXPath.substring(entityXPath.length()+1);
                         }
                         expression = XPathFactory.instance().compile(attributeXPath);
                         entitySetting.getAttributeSettings().add(new XmlFormatterAttributeSetting(componentAttributeSetting, expression));
