@@ -206,6 +206,7 @@ public class StepRuntime implements Runnable {
                             componentRuntime.getComponentDefintion().getName());
                 }
                 componentContext.getExecutionTracker().flowStepStarted(componentRuntime.getThreadNumber(), componentContext);
+                ComponentContext.projectVersionId.set(componentContext.getManipulatedFlow().getProjectVersionId());
                 componentRuntime.start();                
             }
         } catch (RuntimeException ex) {
@@ -336,6 +337,7 @@ public class StepRuntime implements Runnable {
             long ts = System.currentTimeMillis();
             
             try {
+                ComponentContext.projectVersionId.set(componentContext.getManipulatedFlow().getProjectVersionId());
                 componentRuntime.handle(inputMessage, callback, unitOfWorkBoundaryReached);
             } catch (CancellationException e) {
                 log.info("Handle was interrupted by cancellation for {}", componentContext.getFlowStep().getName());

@@ -61,6 +61,9 @@ dependencies {
     compile "de.saly:javamail-mock2-halfmock:0.5-beta4"
     compile "com.sun.jersey.contribs.jersey-oauth:oauth-signature:1.19.2"
     compile "org.apache.poi:poi-ooxml:$apachePOIVersion"
+    compile (group: 'com.mockrunner', name: 'mockrunner-jdbc', version: '1.1.2') {
+        exclude group: 'xerces'
+    }
     testCompile "org.mockito:mockito-all:$mockitoVersion"
     testCompile "org.powermock:powermock-api-mockito:$powerMockVersion"
     testCompile "org.powermock:powermock-module-junit4:$powerMockVersion"    

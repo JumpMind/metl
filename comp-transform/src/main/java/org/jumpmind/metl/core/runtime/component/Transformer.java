@@ -123,25 +123,26 @@ public class Transformer extends AbstractComponentRuntime {
 						if (isNotBlank(transform)) {
 							ModelAttribute attribute = inputModel.getAttributeById(attributeId);
 							ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
+							
 
 							ModelAttributeScriptHelper helper = helpers.get(attribute.getId());
 							if (helper == null) {
+							    
 							    long ts = System.currentTimeMillis();
 						        scriptEngine.put("entity", entity);
 						        scriptEngine.put("attribute", attribute);
 						        scriptEngine.put("context", context);      
 						        scriptEngine.put("model", getInputModel());
-
 						        try {
 						            String importString = "import org.jumpmind.metl.core.runtime.component.ModelAttributeScriptHelper;\n";
 						            String code = String.format(
-						                    "return new ModelAttributeScriptHelper(context, attribute, entity, model) { public Object eval() { return %s } }",
+						                    "return new ModelAttributeScriptHelper(context, attribute, entity, model) { public Object eval() { return %s \r\n } }",
 						                    transform);
 						            helper = (ModelAttributeScriptHelper)scriptEngine.eval(importString + code);
 						            helpers.put(attribute.getId(), helper);
 						        } catch (ScriptException e) {
 						            throw new RuntimeException("Unable to evaluate groovy script.  Attribute ==> " + attribute.getName() + ".  Value ==> "
-						                    + value.toString() + "." + e.getCause().getMessage(), e);
+						                    + (value==null ? "null" : value.toString()) + "." + e.getCause().getMessage(), e);
 						        }
 						        
 						        log.debug("It took " + (System.currentTimeMillis()-ts) + "ms to create class");
@@ -151,9 +152,15 @@ public class Transformer extends AbstractComponentRuntime {
 							helper.setValue(value);
 							helper.setMessage(inputMessage);
 							long ts = System.currentTimeMillis();
-							value = helper.eval();
+							try {
+							    value = helper.eval();
+							} catch (Exception e) {
+							    throw new RuntimeException("Groovy script evaluation resulted in an exception.  Attribute ==> " 
+							            + attribute.getName() + ".  Value ==> " + (value==null ? "null" : value.toString()) 
+							            + ".  Payload ==>\n" + getComponent().toRow(inData, false, false), e);
+							}
 							totalTime += (System.currentTimeMillis()-ts);
-							totalCalls ++;
+							totalCalls ++;   
 						}
 						if (value != ModelAttributeScriptHelper.REMOVE_ATTRIBUTE) {
 							outData.put(attributeId, value);
