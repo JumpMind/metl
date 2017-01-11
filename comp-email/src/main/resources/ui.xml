@@ -21,50 +21,7 @@
 
 -->
 <ui>
-    <component-ui id="Assert UI" componentId="Assert">
-        <iconImage>org/jumpmind/metl/core/runtime/component/metl-assert-48x48-color.png</iconImage>
-    </component-ui>
-    <component-ui id="Call Flow UI" componentId="Call Flow">
-        <iconImage>org/jumpmind/metl/core/runtime/component/metl-flow-48x48-color.png</iconImage>
-    </component-ui>
     <component-ui id="Email UI" componentId="35c4c0ae-b040-4f93-b212-5b92619c4064">
         <iconImage>org/jumpmind/metl/core/runtime/component/metl-email-48x48-color.png</iconImage>
-    </component-ui>
-    <component-ui id="Merger UI" componentId="Merger">
-        <iconImage>org/jumpmind/metl/core/runtime/component/metl-merger-48x48-color.png</iconImage>
-        <className>org.jumpmind.metl.ui.views.design.EditMergerPanel</className>
-    </component-ui>
-    <component-ui id="Lookup UI" componentId="Lookup">
-        <iconImage>org/jumpmind/metl/core/runtime/component/metl-lookup-48x48-color.png</iconImage>
-    </component-ui>    
-    <component-ui id="Deduper UI" componentId="Deduper">
-        <iconImage>org/jumpmind/metl/core/runtime/component/metl-deduper-48x48-color.png</iconImage>
-        <className>org.jumpmind.metl.ui.views.design.EditDeduperPanel</className>        
-    </component-ui>    
-    <component-ui id="Delay UI" componentId="Delay">
-        <iconImage>org/jumpmind/metl/core/runtime/component/metl-delay-48x48-color.png</iconImage>
-    </component-ui>   
-    <component-ui id="Execute UI" componentId="Execute">
-        <iconImage>org/jumpmind/metl/core/runtime/component/metl-execute-48x48-color.png</iconImage>
-    </component-ui>  
-    <component-ui id="Message Logger UI" componentId="Message Logger">
-        <iconImage>org/jumpmind/metl/core/runtime/component/metl-message-logger-48x48-color.png</iconImage>
-    </component-ui>
-    <component-ui id="Multiplier UI" componentId="Multiplier">
-        <iconImage>org/jumpmind/metl/core/runtime/component/metl-multiplier-48x48-color.png</iconImage>
-    </component-ui>   
-    <component-ui id="Text Replace UI" componentId="Text Replace">
-        <iconImage>org/jumpmind/metl/core/runtime/component/metl-regex-replace-48x48-color.png</iconImage>
-    </component-ui>    
-    <component-ui id="Web UI" componentId="Web">
-        <iconImage>org/jumpmind/metl/core/runtime/component/metl-web-48x48-color.png</iconImage>
-        <className>org.jumpmind.metl.ui.views.design.EditWebPanel</className>
-    </component-ui>
-    <component-ui id="Text Constant UI" componentId="Text Constant">
-        <iconImage>org/jumpmind/metl/core/runtime/component/metl-text-constant-48x48-color.png</iconImage>
-        <className>org.jumpmind.metl.ui.views.design.EditTextConstant</className>
-    </component-ui>    
-    <component-ui id="Union UI" componentId="Union">
-        <iconImage>org/jumpmind/metl/core/runtime/component/metl-union-48x48-color.png</iconImage>
     </component-ui>
 </ui>
