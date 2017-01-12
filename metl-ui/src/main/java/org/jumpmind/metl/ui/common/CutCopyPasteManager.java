@@ -89,7 +89,7 @@ public class CutCopyPasteManager {
                         .equalsIgnoreCase(CLIPBOARD_CUT))
                 && configurationService.findAffectedFlowsByFlow(flow.getId())
                         .size() == 0) {            
-            configurationService.delete(flow);
+            configurationService.deleteFlow(flow);
         }        
     }
     
