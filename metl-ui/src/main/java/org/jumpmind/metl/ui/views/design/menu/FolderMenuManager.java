@@ -1,10 +1,6 @@
 package org.jumpmind.metl.ui.views.design.menu;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.jumpmind.metl.core.model.Flow;
-import org.jumpmind.metl.core.model.FolderName;
-import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.ui.common.CutCopyPasteManager;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
 
@@ -42,22 +38,11 @@ public class FolderMenuManager extends AbstractDesignSelectedValueMenuManager {
                 "File|Import...",        
                 "File|Export..."
         });
-        
-        FolderName folder = (FolderName) selected;
 
-        //if we have something in the clipboard, ensure paste is enabled for the proper folders
-        //based on the type of object we have in the clipboard
-        if (navigator.getContext().getClipboard().containsKey(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE)) {
-            if ((folder.getName().equalsIgnoreCase(DesignNavigator.LABEL_FLOWS) &&
-                    navigator.getContext().getClipboard().get(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE) == Flow.class) ||
-                    (folder.getName().equalsIgnoreCase(DesignNavigator.LABEL_RESOURCES) &&
-                    navigator.getContext().getClipboard().get(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE) == Resource.class) ||
-                    (folder.getName().equalsIgnoreCase(DesignNavigator.LABEL_MODELS) &&
-                    navigator.getContext().getClipboard().get(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE) == Model.class)) {
-                
-                enabledPaths = (String[]) ArrayUtils.add(enabledPaths, "Edit|Paste");
-            }
-        }            
+        if (navigator.getContext().getClipboard()
+                .containsKey(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE)) {
+            enabledPaths = (String[]) ArrayUtils.add(enabledPaths, "Edit|Paste");
+        }
         return enabledPaths;
     }
 }

@@ -265,11 +265,15 @@ public interface IConfigurationService {
 
     public Flow copy(Flow original);
 
-    public Flow copy(Map<String, AbstractObject> oldToNewUUIDMapping, Flow original);
+    public Flow copy(Map<String, AbstractObject> oldToNewUUIDMapping, Flow original, boolean newProjectVersion);
 
     public Model copy(Model original);
     
+    public Model copy(Map<String, AbstractObject> oldToNewUUIDMapping, Model original);
+    
     public Resource copy(Resource original);
+    
+    public Resource copy(Map<String, AbstractObject> oldToNewUUIDMapping, Resource original);
 
     public void delete(Plugin plugin);
 

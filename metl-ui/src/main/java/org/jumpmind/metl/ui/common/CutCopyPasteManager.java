@@ -81,7 +81,8 @@ public class CutCopyPasteManager {
         pasteResources(oldToNewUUIDMapping, newProjectVersionId);
         pasteModels(oldToNewUUIDMapping, newProjectVersionId);        
         Flow flow = (Flow) clipboard.get(CLIPBOARD_FLOW);
-        Flow newFlow = configurationService.copy(flow);
+        boolean newProjectVersion = flow.getProjectVersionId() != newProjectVersionId;
+        Flow newFlow = configurationService.copy(oldToNewUUIDMapping, flow, newProjectVersion);
         newFlow.setProjectVersionId(newProjectVersionId);
         configurationService.save(newFlow);
         if ((clipboard.containsKey(CLIPBOARD_ACTION)
@@ -103,18 +104,21 @@ public class CutCopyPasteManager {
         HashSet<Resource> origResources = (HashSet<Resource>) clipboard.get(CLIPBOARD_RESOURCES);
         HashSet<Resource> newResources = new HashSet<Resource>();
         for (Resource resource : origResources) {
-            if (!destinationHasResource(resource, newProjectVersionId)) {
+            String existingResourceId = destinationHasResource(resource, newProjectVersionId);
+            if (existingResourceId == null) {
                 //make a copy only if the resource is still in use by another flow
                 //resource alone can't be cut if they have dependent flows
                 if ((clipboard.containsKey(CLIPBOARD_ACTION) &&
                         ((String) clipboard.get(CLIPBOARD_ACTION)).equalsIgnoreCase(CLIPBOARD_COPY)) ||
                         configurationService.findAffectedFlowsByResource(resource.getId()).size() > 1) {
-                    Resource newResource = configurationService.copy(resource);
+                    Resource newResource = configurationService.copy(oldToNewUUIDMapping, resource);
                     newResources.add(newResource);
-                    oldToNewUUIDMapping.put(resource.getId(), newResource);
                 } else {
                     newResources.add(resource);
                 }
+            } else {
+                Resource existingResource = configurationService.findResource(existingResourceId);
+                mapResourceOldToNewUUID(oldToNewUUIDMapping, resource, existingResource);
             }
         }
         for (Resource resource : newResources) {
@@ -124,18 +128,29 @@ public class CutCopyPasteManager {
         }  
     }
     
-    private boolean destinationHasResource(Resource resource, String newProjectVersionId) {
-        boolean destinationHasResource = false;
+    private void mapResourceOldToNewUUID(Map<String, AbstractObject> oldToNewUUIDMapping, Resource oldResource, Resource newResource) {
+        oldToNewUUIDMapping.put(oldResource.getId(), newResource);
+        
+        for (Setting oldSetting : oldResource.getSettings()) {
+            for (Setting newSetting : newResource.getSettings()) {
+                if (oldSetting.getName().equalsIgnoreCase(newSetting.getName())) {
+                    oldToNewUUIDMapping.put(oldSetting.getId(), newSetting);
+                    break;
+                }
+            }
+        }
+    }
+    
+    private String destinationHasResource(Resource resource, String newProjectVersionId) {
         List<Resource> existingResources = configurationService.findResourcesByName(newProjectVersionId, resource.getName());
         for (Resource existingResource : existingResources) {
             //findByName doesn't do deep fetch
             existingResource = configurationService.findResource(existingResource.getId());
             if (resourcesMatchAcrossProjects(resource, existingResource)) {
-                destinationHasResource = true;
-                break;
+                return existingResource.getId();
             }
         }
-        return destinationHasResource;
+        return null;
     }
 
     private String calculateResourceName(Resource resource) {
@@ -205,7 +220,8 @@ public class CutCopyPasteManager {
         HashSet<Model> origModels = (HashSet<Model>) clipboard.get(CLIPBOARD_MODELS);
         HashSet<Model> newModels = new HashSet<Model>();
         for (Model model : origModels) {
-            if (!destinationHasModel(model, newProjectVersionId)) {
+            String existingModelId = destinationHasModel(model, newProjectVersionId);
+            if (existingModelId == null) {
                 // make a copy only if the model is still in use by another flow
                 // model alone can't be cut if they have dependent flows
                 if ((clipboard.containsKey(CLIPBOARD_ACTION)
@@ -213,12 +229,14 @@ public class CutCopyPasteManager {
                                 .equalsIgnoreCase(CLIPBOARD_COPY))
                         || configurationService.findAffectedFlowsByModel(model.getId())
                                 .size() > 1) {
-                    Model newModel = configurationService.copy(model);
+                    Model newModel = configurationService.copy(oldToNewUUIDMapping, model);
                     newModels.add(newModel);
-                    oldToNewUUIDMapping.put(model.getId(), newModel);
                 } else {
                     newModels.add(model);
                 }
+            } else {
+                Model existingModel = configurationService.findModel(existingModelId);
+                mapModelOldToNewUUID(oldToNewUUIDMapping, model, existingModel);
             }
         }
         for (Model model : newModels) {
@@ -228,18 +246,28 @@ public class CutCopyPasteManager {
         }        
     }
     
-    private boolean destinationHasModel(Model model, String newProjectVersionId) {
-        boolean destinationHasModel = false;
+    private void mapModelOldToNewUUID(Map<String, AbstractObject> oldToNewUUIDMapping, Model oldModel, Model newModel) {
+        oldToNewUUIDMapping.put(oldModel.getId(), newModel);
+        for (ModelEntity oldEntity : oldModel.getModelEntities()) {
+            ModelEntity newEntity = newModel.getEntityByName(oldEntity.getName());
+            oldToNewUUIDMapping.put(oldEntity.getId(), newEntity);
+            for (ModelAttribute oldAttribute : oldEntity.getModelAttributes()) {
+                ModelAttribute newAttribute = newModel.getAttributeByName(oldEntity.getName(), oldAttribute.getName());
+                oldToNewUUIDMapping.put(oldAttribute.getId(), newAttribute);
+            }
+        }
+    }    
+    
+    private String destinationHasModel(Model model, String newProjectVersionId) {
         List<Model> existingModels = configurationService.findModelsByName(newProjectVersionId, model.getName());
         for (Model existingModel : existingModels) {
             //findByName doesn't do deep fetch
             existingModel = configurationService.findModel(existingModel.getId());
             if (modelsMatchAcrossProjects(model, existingModel)) {
-                destinationHasModel = true;
-                break;
+                return existingModel.getId();
             }
         }
-        return destinationHasModel;
+        return null;
     }
     
     private boolean modelsMatchAcrossProjects(Model model1, Model model2) {

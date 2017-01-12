@@ -1330,13 +1330,9 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         Map<String, AbstractObject> oldToNewUUIDMapping = new HashMap<>();
         return copy(oldToNewUUIDMapping, original, false);
     }    
-    
+
     @Override
-    public Flow copy(Map<String, AbstractObject> oldToNewUUIDMapping, Flow original) {
-        return copy(oldToNewUUIDMapping, original);
-    }
-    
-    protected Flow copy(Map<String, AbstractObject> oldToNewUUIDMapping, Flow original, boolean newProjectVersion) {
+    public Flow copy(Map<String, AbstractObject> oldToNewUUIDMapping, Flow original, boolean newProjectVersion) {
         Flow newFlow = copyWithNewUUID(oldToNewUUIDMapping, original);
         newFlow.setFlowParameters(new ArrayList<FlowParameter>());
         newFlow.setFlowStepLinks(new ArrayList<FlowStepLink>());
@@ -1415,7 +1411,8 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         return copy(new HashMap<>(), original);
     }
     
-    protected Resource copy(Map<String, AbstractObject> oldToNewUUIDMapping, Resource original) {
+    @Override
+    public Resource copy(Map<String, AbstractObject> oldToNewUUIDMapping, Resource original) {
         Resource newResource = copyWithNewUUID(oldToNewUUIDMapping, original);
         newResource.setSettings(new ArrayList<>());
         for (Setting setting : original.getSettings()) {
@@ -1426,11 +1423,13 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         return newResource;
     }
 
-    protected Model copy(Map<String, AbstractObject> oldToNewUUIDMapping, Model original) {
+    @Override
+    public Model copy(Map<String, AbstractObject> oldToNewUUIDMapping, Model original) {
         Model newModel = copyWithNewUUID(oldToNewUUIDMapping, original);
         newModel.setModelEntities(new ArrayList<>());
         for (ModelEntity originalModelEntity : original.getModelEntities()) {
             ModelEntity newModelEntity = copyWithNewUUID(oldToNewUUIDMapping, originalModelEntity);
+            //TODO: do we really need this put here as it should be done with the copyWithNewUUID above...
             oldToNewUUIDMapping.put(originalModelEntity.getId(), newModelEntity);
             newModelEntity.setModelId(newModel.getId());
             newModelEntity.setModelAttributes(new ArrayList<>());

@@ -33,13 +33,16 @@ import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.ComponentName;
+import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FolderName;
+import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDependency;
+import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.UserSetting;
@@ -593,19 +596,35 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public void doPaste() {
-        Object object = treeTable.getValue();        
+        Object object = treeTable.getValue();   
+
+        String newProjectVersionId=null;
         if (object instanceof FolderName) {
-            FolderName folderName = (FolderName) object; 
-            String newProjectVersionId = folderName.getProjectVersionId();            
-            if (folderName.getName().equalsIgnoreCase(LABEL_RESOURCES)) {
-                cutCopyPasteManager.pasteResources(newProjectVersionId);                
-            } else if (folderName.getName().equalsIgnoreCase(LABEL_MODELS)) {
-                cutCopyPasteManager.pasteModels(newProjectVersionId);
-            } else if (folderName.getName().equalsIgnoreCase(LABEL_FLOWS)) {
-                cutCopyPasteManager.pasteFlow(newProjectVersionId);
+            FolderName folderName = (FolderName) object;
+            newProjectVersionId = folderName.getProjectVersionId();
+        } else if (object instanceof ResourceName) {
+            ResourceName resourceName = (ResourceName) object;
+            newProjectVersionId = resourceName.getProjectVersionId();
+        } else if (object instanceof ModelName) {
+            ModelName modelName = (ModelName) object;
+            newProjectVersionId = modelName.getProjectVersionId();
+        } else if (object instanceof FlowName) {
+            FlowName flowName = (FlowName) object;
+            newProjectVersionId = flowName.getProjectVersionId();
+        }
+        
+        if (newProjectVersionId != null) {
+            if (context.getClipboard().containsKey(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE)) {
+                if (context.getClipboard().get(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE).equals(Model.class)) {
+                    cutCopyPasteManager.pasteModels(newProjectVersionId);
+                } else if (context.getClipboard().get(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE).equals(Resource.class)) {
+                    cutCopyPasteManager.pasteResources(newProjectVersionId);
+                } else if (context.getClipboard().get(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE).equals(Flow.class)) {
+                    cutCopyPasteManager.pasteFlow(newProjectVersionId);
+                }
+                refresh();
             }
         }
-        refresh();
     }
     
     public void doRemove() {

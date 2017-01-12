@@ -22,6 +22,7 @@ public class ProjectVersionMenuManager extends AbstractDesignSelectedValueMenuMa
     protected String[] getEnabledPaths(Object selected) {
         return (String[])ArrayUtils.addAll(super.getEnabledPaths(selected), new String[] {
                 "File|New|Project Dependency",
+                "File|New|Project Version",
                 "File|New|Flow|Design",
                 "File|New|Flow|Test",
                 "File|New|Model",
