@@ -77,7 +77,6 @@ public class CutCopyPasteManager {
     }  
     
     public void pasteFlow(String newProjectVersionId) {
-        
         pasteResources(oldToNewUUIDMapping, newProjectVersionId);
         pasteModels(oldToNewUUIDMapping, newProjectVersionId);        
         Flow flow = (Flow) clipboard.get(CLIPBOARD_FLOW);
