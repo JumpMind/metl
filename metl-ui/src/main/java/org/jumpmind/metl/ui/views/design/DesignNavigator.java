@@ -42,11 +42,13 @@ import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDependency;
+import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.UserSetting;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.common.CutCopyPasteManager;
 import org.jumpmind.metl.ui.common.EnableFocusTextField;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.SelectProjectVersionDialog;
@@ -85,12 +87,16 @@ import com.vaadin.ui.themes.ValoTheme;
 @SuppressWarnings("serial")
 public class DesignNavigator extends VerticalLayout {
 
-    private static final String LABEL_DEPENDENCIES = "Dependencies";
+    public static final String LABEL_DEPENDENCIES = "Dependencies";
 
-    private static final String LABEL_MODELS = "Models";
+    public static final String LABEL_FLOWS = "Flows";
+    
+    public static final String LABEL_TESTS = "Tests";
+    
+    public static final String LABEL_MODELS = "Models";
 
-    private static final String LABEL_RESOURCES = "Resources";
-
+    public static final String LABEL_RESOURCES = "Resources";
+    
     final Logger log = LoggerFactory.getLogger(getClass());
 
     ApplicationContext context;
@@ -104,11 +110,17 @@ public class DesignNavigator extends VerticalLayout {
     FileDownloader fileDownloader;
 
     DesignMenuBar menuBar;
+    
+    IConfigurationService configurationService;
+    
+    CutCopyPasteManager cutCopyPasteManager;
 
     public DesignNavigator(ApplicationContext context, TabbedPanel tabs) {
         this.context = context;
         this.tabs = tabs;
-
+        this.configurationService = context.getConfigurationService();
+        this.cutCopyPasteManager = new CutCopyPasteManager(context);
+        
         setSizeFull();
         addStyleName(ValoTheme.MENU_ROOT);
 
@@ -126,7 +138,6 @@ public class DesignNavigator extends VerticalLayout {
         version.setVersionLabel("1.0.0");
         version.setProject(project);
         project.getProjectVersions().add(version);
-        IConfigurationService configurationService = context.getConfigurationService();
         configurationService.save(project);
         configurationService.save(version);
         context.getDefinitionFactory().refresh(version.getId());
@@ -223,7 +234,7 @@ public class DesignNavigator extends VerticalLayout {
         if (object != null) {
             Setting setting = context.getUser().findSetting(UserSetting.SETTING_DESIGN_NAVIGATOR_SELECTION_ID);
             setting.setValue(object.getId());
-            context.getConfigurationService().save(setting);
+            configurationService.save(setting);
         }
     }
 
@@ -268,7 +279,6 @@ public class DesignNavigator extends VerticalLayout {
     protected void finishEditingItem(String value) {
         if (itemBeingEdited != null && isNotBlank(value)) {
             itemBeingEdited.setName(value);
-            IConfigurationService configurationService = context.getConfigurationService();
             Object selected = itemBeingEdited;
             Method method = null;
             try {
@@ -324,7 +334,6 @@ public class DesignNavigator extends VerticalLayout {
 
     protected void refreshProjects() {
         Object selected = treeTable.getValue();
-        IConfigurationService configurationService = context.getConfigurationService();
         List<Project> projects = configurationService.findProjects();
         treeTable.removeAllItems();
         for (Project project : projects) {
@@ -343,8 +352,8 @@ public class DesignNavigator extends VerticalLayout {
                 }
                 treeTable.setChildrenAllowed(projectVersion, true);
                 treeTable.setParent(projectVersion, project);
-                addFlowsToFolder(addVirtualFolder("Flows", projectVersion), projectVersion, false);
-                addFlowsToFolder(addVirtualFolder("Tests", projectVersion), projectVersion, true);
+                addFlowsToFolder(addVirtualFolder(LABEL_FLOWS, projectVersion), projectVersion, false);
+                addFlowsToFolder(addVirtualFolder(LABEL_TESTS, projectVersion), projectVersion, true);
                 addModelsToFolder(addVirtualFolder(LABEL_MODELS, projectVersion), projectVersion);
                 addResourcesToFolder(addVirtualFolder(LABEL_RESOURCES, projectVersion), projectVersion);
                 addDependenciesToFolder(addVirtualFolder(LABEL_DEPENDENCIES, projectVersion), projectVersion);
@@ -405,7 +414,6 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     protected void addResourcesToFolder(FolderName folder, ProjectVersion projectVersion) {
-        IConfigurationService configurationService = context.getConfigurationService();
         List<ResourceName> resources = configurationService.findResourcesInProject(projectVersion.getId());
         AbstractObjectNameBasedSorter.sort(resources);
         for (ResourceName resource : resources) {
@@ -429,7 +437,6 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     protected void addSharedComponentsToFolder(FolderName folder, ProjectVersion projectVersion) {
-        IConfigurationService configurationService = context.getConfigurationService();
         List<ComponentName> components = configurationService.findSharedComponentsInProject(projectVersion.getId());
         AbstractObjectNameBasedSorter.sort(components);
         for (ComponentName component : components) {
@@ -446,7 +453,6 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     protected void addDependenciesToFolder(FolderName folder, ProjectVersion projectVersion) {
-        IConfigurationService configurationService = context.getConfigurationService();
         List<ProjectVersionDependency> dependencies = configurationService.findProjectDependencies(projectVersion.getId());
         AbstractObjectNameBasedSorter.sort(dependencies);
         for (ProjectVersionDependency dependency : dependencies) {
@@ -464,7 +470,6 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     protected void addFlowsToFolder(FolderName folder, ProjectVersion projectVersion, boolean test) {
-        IConfigurationService configurationService = context.getConfigurationService();
         List<FlowName> flows = configurationService.findFlowsInProject(projectVersion.getId(), test);
         AbstractObjectNameBasedSorter.sort(flows);
         for (FlowName flow : flows) {
@@ -482,7 +487,6 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     protected void addModelsToFolder(FolderName folder, ProjectVersion projectVersion) {
-        IConfigurationService configurationService = context.getConfigurationService();
         List<ModelName> models = configurationService.findModelsInProject(projectVersion.getId());
         AbstractObjectNameBasedSorter.sort(models);
         for (ModelName model : models) {
@@ -496,7 +500,6 @@ public class DesignNavigator extends VerticalLayout {
         if (models.size() == 0) {
             this.treeTable.removeItem(folder);
         }
-
     }
 
     protected void selectAndExpand(Object value) {
@@ -534,7 +537,7 @@ public class DesignNavigator extends VerticalLayout {
             ResourceName resource = (ResourceName) item;
             ProjectVersion projectVersion = findProjectVersion(resource);
             PropertySheet sheet = new PropertySheet(context, tabs, context.isReadOnly(projectVersion, Privilege.DESIGN));
-            sheet.setSource(context.getConfigurationService().findResource(resource.getId()));
+            sheet.setSource(configurationService.findResource(resource.getId()));
             tabs.addCloseableTab(resource.getId(), resource.getName(), treeTable.getItemIcon(item), sheet);
         } else if (item instanceof ProjectVersion) {
             ProjectVersion projectVersion = (ProjectVersion) item;
@@ -552,45 +555,9 @@ public class DesignNavigator extends VerticalLayout {
         ImportDialog.show("Import Config", "Click the import button to import your config", new ImportConfigurationListener());
     }
 
-    public void doCopy() {
-        IConfigurationService configurationService = context.getConfigurationService();
+    public void doNewVersion() {
         Object object = treeTable.getValue();
-        if (object instanceof ModelName) {
-            Model oldModel = configurationService.findModel(((ModelName) object).getId());
-            Model newModel = configurationService.copy(oldModel);
-            newModel.setName(newModel.getName() + " Copy");
-            context.getConfigurationService().save(newModel);
-
-            ModelName model = new ModelName();
-            model.setName(newModel.getName());
-            model.setProjectVersionId(newModel.getProjectVersionId());
-            model.setId(newModel.getId());
-
-            treeTable.addItem(model);
-            treeTable.setItemIcon(model, Icons.MODEL);
-            treeTable.setParent(model, treeTable.getParent(object));
-            treeTable.setChildrenAllowed(model, false);
-            treeTable.setValue(model);
-            startEditingItem((AbstractNamedObject) treeTable.getValue());
-        } else if (object instanceof FlowName) {
-            Flow oldFlow = configurationService.findFlow(((FlowName) object).getId());
-            Flow newFlow = configurationService.copy((Flow) oldFlow);
-            newFlow.setName(newFlow.getName() + " Copy");
-            context.getConfigurationService().save(newFlow);
-
-            FlowName flow = new FlowName();
-            flow.setName(newFlow.getName());
-            flow.setProjectVersionId(newFlow.getProjectVersionId());
-            flow.setId(newFlow.getId());
-            flow.setTest(newFlow.isTest());
-
-            treeTable.addItem(flow);
-            treeTable.setItemIcon(flow, Icons.FLOW);
-            treeTable.setParent(flow, treeTable.getParent(object));
-            treeTable.setChildrenAllowed(flow, false);
-            treeTable.setValue(flow);
-            startEditingItem((AbstractNamedObject) treeTable.getValue());
-        } else if (object instanceof ProjectVersion) {
+        if (object instanceof ProjectVersion) {
             ProjectVersion original = (ProjectVersion) object;
             String nextVersionLabel = original.attemptToCalculateNextVersionLabel();
             configurationService.refresh(original.getProject());
@@ -615,10 +582,51 @@ public class DesignNavigator extends VerticalLayout {
             treeTable.setChildrenAllowed(newVersion, false);
             treeTable.setValue(newVersion);
             startEditingItem((AbstractNamedObject) treeTable.getValue());
-
         }
     }
+    
+    public void doCut() {
+        Object object = treeTable.getValue();
+        cutCopyPasteManager.cut(object);
+    }
+        
+    public void doCopy() {
+        Object object = treeTable.getValue();
+        cutCopyPasteManager.copy(object);
+    }
 
+    public void doPaste() {
+        Object object = treeTable.getValue();   
+
+        String newProjectVersionId=null;
+        if (object instanceof FolderName) {
+            FolderName folderName = (FolderName) object;
+            newProjectVersionId = folderName.getProjectVersionId();
+        } else if (object instanceof ResourceName) {
+            ResourceName resourceName = (ResourceName) object;
+            newProjectVersionId = resourceName.getProjectVersionId();
+        } else if (object instanceof ModelName) {
+            ModelName modelName = (ModelName) object;
+            newProjectVersionId = modelName.getProjectVersionId();
+        } else if (object instanceof FlowName) {
+            FlowName flowName = (FlowName) object;
+            newProjectVersionId = flowName.getProjectVersionId();
+        }
+        
+        if (newProjectVersionId != null) {
+            if (context.getClipboard().containsKey(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE)) {
+                if (context.getClipboard().get(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE).equals(Model.class)) {
+                    cutCopyPasteManager.pasteModels(newProjectVersionId);
+                } else if (context.getClipboard().get(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE).equals(Resource.class)) {
+                    cutCopyPasteManager.pasteResources(newProjectVersionId);
+                } else if (context.getClipboard().get(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE).equals(Flow.class)) {
+                    cutCopyPasteManager.pasteFlow(newProjectVersionId);
+                }
+                refresh();
+            }
+        }
+    }
+    
     public void doRemove() {
         Object object = treeTable.getValue();
         if (object instanceof FlowName) {
@@ -632,7 +640,7 @@ public class DesignNavigator extends VerticalLayout {
 
         } else if (object instanceof ModelName) {
             ModelName model = (ModelName) object;
-            if (!context.getConfigurationService().isModelUsed(model.getId())) {
+            if (!configurationService.isModelUsed(model.getId())) {
                 ConfirmDialog.show("Delete Model?", "Are you sure you want to delete the '" + model.getName() + "' model?",
                         new DeleteModelConfirmationListener(model));
             } else {
@@ -648,10 +656,9 @@ public class DesignNavigator extends VerticalLayout {
             ConfirmDialog.show("Delete Project Version?", "Are you sure you want to delete the '" + namedObject.getName() + "' version?",
                     new DeleteProjectVersionConfirmationListener(namedObject));
         } else if (object instanceof ProjectVersionDependency) {
-            context.getConfigurationService().delete((ProjectVersionDependency) object);
+            configurationService.delete((ProjectVersionDependency) object);
             treeTable.removeItem(object);
         }
-
     }
 
     protected FolderName findFolderWithName(String name) {
@@ -698,7 +705,6 @@ public class DesignNavigator extends VerticalLayout {
 
     public void addNewDependency(ProjectVersion targetVersion) {
         ProjectVersion projectVersion = findProjectVersion();
-        IConfigurationService configurationService = context.getConfigurationService();
         List<ProjectVersionDependency> dependencies = configurationService.findProjectDependencies(projectVersion.getId());
         boolean add = true;
         for (ProjectVersionDependency projectVersionDependency : dependencies) {
@@ -743,7 +749,7 @@ public class DesignNavigator extends VerticalLayout {
         flow.setProjectVersionId(projectVersion.getId());
         flow.setName("New Flow");
         flow.setTest(testFlow);
-        context.getConfigurationService().save(flow);
+        configurationService.save(flow);
 
         treeTable.addItem(flow);
         treeTable.setItemIcon(flow, Icons.FLOW);
@@ -801,7 +807,7 @@ public class DesignNavigator extends VerticalLayout {
         resource.setName(defaultName);
         resource.setProjectVersionId(projectVersion.getId());
         resource.setType(type);
-        context.getConfigurationService().save(resource);
+        configurationService.save(resource);
 
         treeTable.addItem(resource);
         treeTable.setItemIcon(resource, icon);
@@ -824,7 +830,7 @@ public class DesignNavigator extends VerticalLayout {
         ModelName model = new ModelName();
         model.setName("New Model");
         model.setProjectVersionId(projectVersion.getId());
-        context.getConfigurationService().save(model);
+        configurationService.save(model);
 
         treeTable.addItem(model);
         treeTable.setItemIcon(model, Icons.MODEL);
@@ -836,6 +842,10 @@ public class DesignNavigator extends VerticalLayout {
         startEditingItem(model);
     }
 
+    public ApplicationContext getContext() {
+        return this.context;
+    }
+    
     class ImportConfigurationListener implements IImportListener {
 
         @Override
@@ -858,7 +868,7 @@ public class DesignNavigator extends VerticalLayout {
 
         @Override
         public boolean onOk() {
-            context.getConfigurationService().deleteFlow(context.getConfigurationService().findFlow(toDelete.getId()));
+            configurationService.deleteFlow(configurationService.findFlow(toDelete.getId()));
             tabs.closeTab(toDelete.getId());
             Object parent = treeTable.getParent(toDelete);
             refresh();
@@ -881,7 +891,7 @@ public class DesignNavigator extends VerticalLayout {
 
         @Override
         public boolean onOk() {
-            context.getConfigurationService().delete(context.getConfigurationService().findResource(toDelete.getId()));
+            configurationService.delete(configurationService.findResource(toDelete.getId()));
             tabs.closeTab(toDelete.getId());
             Object parent = treeTable.getParent(toDelete);
             refresh();
@@ -904,7 +914,7 @@ public class DesignNavigator extends VerticalLayout {
 
         @Override
         public boolean onOk() {
-            context.getConfigurationService().delete(context.getConfigurationService().findModel(toDelete.getId()));
+            configurationService.delete(configurationService.findModel(toDelete.getId()));
             tabs.closeTab(toDelete.getId());
             Object parent = treeTable.getParent(toDelete);
             refresh();
@@ -928,7 +938,7 @@ public class DesignNavigator extends VerticalLayout {
         @Override
         public boolean onOk() {
             toDelete.setDeleted(true);
-            context.getConfigurationService().save(toDelete);
+            configurationService.save(toDelete);
             tabs.closeAll();
             Object parent = treeTable.getParent(toDelete);
             refresh();
@@ -951,7 +961,7 @@ public class DesignNavigator extends VerticalLayout {
         @Override
         public boolean onOk() {
             toDelete.setDeleted(true);
-            context.getConfigurationService().save(toDelete);
+            configurationService.save(toDelete);
             tabs.closeAll();
             Object parent = treeTable.getParent(toDelete);
             refresh();
@@ -960,5 +970,4 @@ public class DesignNavigator extends VerticalLayout {
             return true;
         }
     }
-
 }

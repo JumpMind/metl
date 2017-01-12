@@ -30,6 +30,7 @@ public class DesignMenuBar extends AbstractMenuBar {
     @Override
     protected void buildMenu() {
         add("File|New|Project");
+        add("File|New|Project Version");
         add("File|New|Project Dependency");
         add("File|New|Flow|Design");
         add("File|New|Flow|Test");
@@ -48,7 +49,9 @@ public class DesignMenuBar extends AbstractMenuBar {
         add("File|Export...");
         
         add("Edit|Rename");
+        add("Edit|Cut");
         add("Edit|Copy");
+        add("Edit|Paste");
         addSeparator("Edit");
         add("Edit|Remove");
 

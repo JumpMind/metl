@@ -1,6 +1,7 @@
 package org.jumpmind.metl.ui.views.design.menu;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.jumpmind.metl.ui.common.CutCopyPasteManager;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
 
 public class FlowMenuManager extends AbstractDesignSelectedValueMenuManager {
@@ -21,13 +22,12 @@ public class FlowMenuManager extends AbstractDesignSelectedValueMenuManager {
     @Override
     protected String[] getDisabledPaths(Object selected) {
         return (String[])ArrayUtils.addAll(super.getDisabledPaths(selected), new String[] {
-                "Edit|Copy"
         });
     }
     
     @Override
     protected String[] getEnabledPaths(Object selected) {
-        return (String[])ArrayUtils.addAll(super.getEnabledPaths(selected), new String[] {
+        String[] enabledPaths = (String[]) ArrayUtils.addAll(super.getEnabledPaths(selected), new String[] {
                 "File|New|Project Dependency",
                 "File|New|Flow|Design",
                 "File|New|Flow|Test",
@@ -44,8 +44,14 @@ public class FlowMenuManager extends AbstractDesignSelectedValueMenuManager {
                 "File|Import...",        
                 "File|Export...",
                 "Edit|Rename",
+                "Edit|Cut",
                 "Edit|Copy",
                 "Edit|Remove"
-        });
+        });        
+        if (navigator.getContext().getClipboard()
+                .containsKey(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE)) {
+            enabledPaths = (String[]) ArrayUtils.add(enabledPaths, "Edit|Paste");
+        }
+        return enabledPaths; 
     }
 }

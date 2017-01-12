@@ -21,7 +21,9 @@
 package org.jumpmind.metl.ui.common;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.metl.core.model.FlowName;
@@ -98,6 +100,8 @@ public class ApplicationContext implements Serializable {
     
     FlowName currentFlow;
     
+    Map<String, Object> clipboard = new HashMap<String, Object>();
+    
     public IConfigurationService getConfigurationService() {
         return configurationService;
     }
@@ -172,8 +176,16 @@ public class ApplicationContext implements Serializable {
     
     public FlowName getCurrentFlow() {
         return currentFlow;
-    }    
+    } 
     
+    public Map<String, Object> getClipboard() {
+        return clipboard;
+    }
+
+    public void setClipboard(Map<String, Object> clipboard) {
+        this.clipboard = clipboard;
+    }
+
     public boolean isReadOnly(ProjectVersion projectVersion, Privilege privilege) {
         boolean readOnly = projectVersion.locked();
         if (!readOnly) {

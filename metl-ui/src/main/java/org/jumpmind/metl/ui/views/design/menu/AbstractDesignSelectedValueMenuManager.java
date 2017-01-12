@@ -25,7 +25,10 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
                 return true;
             } else if ("File|New|Project Dependency".equals(menuSelected)) {
                 navigator.promptForNewDependency();
-                return true;                
+                return true;
+            } else if ("File|New|Project Version".equals(menuSelected)) {
+                navigator.doNewVersion();
+                return true;
             } else if ("File|New|Flow|Design".equals(menuSelected)) {
                 navigator.addNewFlow(false);
                 return true;
@@ -71,9 +74,14 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
             } else if ("Edit|Remove".equals(menuSelected)) {
                 navigator.doRemove();
                 return true;
+            } else if ("Edit|Cut".equals(menuSelected)) {
+                navigator.doCut();
+                return true;
             } else if ("Edit|Copy".equals(menuSelected)) {
                 navigator.doCopy();
                 return true;
+            } else if ("Edit|Paste".equals(menuSelected)) {
+                navigator.doPaste();
             }
         }
         return handled;

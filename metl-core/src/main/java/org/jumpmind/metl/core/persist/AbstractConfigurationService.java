@@ -254,7 +254,27 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         AbstractObjectNameBasedSorter.sort(flows);
         return flows;
     }
+    
+    @Override
+    public List<Resource> findResourcesByName(String projectVersionId, String name) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("deleted",0);
+        params.put("name", name);
+        params.put("projectVersionId", projectVersionId);
+        List<Resource> resources = find(Resource.class, params);
+        return resources;
+    }
 
+    @Override
+    public List<Model> findModelsByName(String projectVersionId, String name) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("deleted",0);
+        params.put("name", name);
+        params.put("projectVersionId", projectVersionId);
+        List<Model> models = find(Model.class, params);
+        return models;
+    }
+        
     @Override
     public List<Resource> findResourcesByTypes(String projectVersionId, String... types) {
         List<Resource> list = new ArrayList<Resource>();
@@ -1303,9 +1323,10 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     public Flow copy(Flow original) {
         Map<String, AbstractObject> oldToNewUUIDMapping = new HashMap<>();
         return copy(oldToNewUUIDMapping, original, false);
-    }
+    }    
 
-    protected Flow copy(Map<String, AbstractObject> oldToNewUUIDMapping, Flow original, boolean newProjectVersion) {
+    @Override
+    public Flow copy(Map<String, AbstractObject> oldToNewUUIDMapping, Flow original, boolean newProjectVersion) {
         Flow newFlow = copyWithNewUUID(oldToNewUUIDMapping, original);
         newFlow.setFlowParameters(new ArrayList<FlowParameter>());
         newFlow.setFlowStepLinks(new ArrayList<FlowStepLink>());
@@ -1379,7 +1400,13 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         return copy(new HashMap<>(), original);
     }
 
-    protected Resource copy(Map<String, AbstractObject> oldToNewUUIDMapping, Resource original) {
+    @Override
+    public Resource copy(Resource original) {
+        return copy(new HashMap<>(), original);
+    }
+    
+    @Override
+    public Resource copy(Map<String, AbstractObject> oldToNewUUIDMapping, Resource original) {
         Resource newResource = copyWithNewUUID(oldToNewUUIDMapping, original);
         newResource.setSettings(new ArrayList<>());
         for (Setting setting : original.getSettings()) {
@@ -1390,11 +1417,13 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         return newResource;
     }
 
-    protected Model copy(Map<String, AbstractObject> oldToNewUUIDMapping, Model original) {
+    @Override
+    public Model copy(Map<String, AbstractObject> oldToNewUUIDMapping, Model original) {
         Model newModel = copyWithNewUUID(oldToNewUUIDMapping, original);
         newModel.setModelEntities(new ArrayList<>());
         for (ModelEntity originalModelEntity : original.getModelEntities()) {
             ModelEntity newModelEntity = copyWithNewUUID(oldToNewUUIDMapping, originalModelEntity);
+            //TODO: do we really need this put here as it should be done with the copyWithNewUUID above...
             oldToNewUUIDMapping.put(originalModelEntity.getId(), newModelEntity);
             newModelEntity.setModelId(newModel.getId());
             newModelEntity.setModelAttributes(new ArrayList<>());
