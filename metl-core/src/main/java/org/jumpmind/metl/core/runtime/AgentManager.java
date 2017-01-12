@@ -31,7 +31,6 @@ import javax.annotation.PreDestroy;
 
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
-import org.jumpmind.metl.core.model.AgentStartMode;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
@@ -129,29 +128,18 @@ public class AgentManager implements IAgentManager {
         }
     }
 
-    @Override
-    public boolean isAgentLocal(Agent agent) {
-        String hostName = agent.getHost();
-        return "localhost".equals(hostName) || "127.0.0.1".equals(hostName) || "::1".equals(hostName)
-                || AppUtils.getHostName().equals(hostName) || AppUtils.getIpAddress().equals(hostName);
-    }
-
     protected AgentRuntime createAndStartRuntime(Agent agent) {
         AgentRuntime engine = new AgentRuntime(agent, configurationService, executionService, componentRuntimeFactory, 
                 definitionFactory, httpRequestMappingRegistry);
         engines.put(agent.getId(), engine);
-        if (agent.getAgentStartMode() == AgentStartMode.AUTO) {
-            engine.start();
-        } else {
-            log.info("The '{}' agent is configured to be started manually. It will not be auto started.", agent.toString());
-        }
+        engine.start();
         return engine;
     }
 
     @Override
     public AgentRuntime refresh(Agent agent) {
         AgentRuntime engine = engines.get(agent);
-        if (isAgentLocal(agent) && !agent.isDeleted()) {
+        if (!agent.isDeleted()) {
             if (engine == null) {
                 engine = createAndStartRuntime(agent);
             } else {

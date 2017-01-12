@@ -37,8 +37,6 @@ public interface IAgentManager {
     
     public AgentRuntime getAgentRuntime(String agentId);
     
-    public boolean isAgentLocal(Agent agent);
-    
     public void undeploy(AgentDeployment deployment);
     
     public AgentDeployment deploy(String agentId, Flow flow, Map<String, String> parameters);

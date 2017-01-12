@@ -64,7 +64,6 @@ import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.MockJdbcDriver;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.util.AppUtils;
 import org.springframework.core.env.StandardEnvironment;
 
 public class StandaloneFlowRunner {
@@ -179,7 +178,7 @@ public class StandaloneFlowRunner {
                         configurationService, new SecurityService());
 
                 executionService = new ExecutionSqlService(databasePlatform, persistenceManager, "METL", new StandardEnvironment());
-                agentRuntime = new AgentRuntime(new Agent("test", AppUtils.getHostName()), configurationService, executionService,
+                agentRuntime = new AgentRuntime(new Agent("test"), configurationService, executionService,
                         new ComponentRuntimeFactory(componentDefinitionFactory), componentDefinitionFactory,
                         new HttpRequestMappingRegistry());
                 agentRuntime.start();
