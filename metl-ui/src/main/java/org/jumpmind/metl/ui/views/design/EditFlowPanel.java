@@ -28,7 +28,6 @@ import java.util.Set;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
-import org.jumpmind.metl.core.model.AgentStartMode;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
@@ -410,10 +409,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             }
 
             myDesignAgent = new Agent();
-            myDesignAgent.setHost(AppUtils.getHostName());
             myDesignAgent.setName(AGENT_NAME);
             myDesignAgent.setFolder(folder);
-            myDesignAgent.setStartMode(AgentStartMode.AUTO.name());
             configurationService.save(myDesignAgent);
             agentManager.refresh(myDesignAgent);
         }

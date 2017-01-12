@@ -493,7 +493,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         long ts = System.currentTimeMillis();
         try {
             return transaction.addRow(marker, data, dmlStatement.getTypes());
-        } catch (SqlException ex) {
+        } catch (Exception ex) {
             if (!(replaceRows && ex instanceof UniqueKeyException)) {
                 if (continueOnError) {
                     log(LogLevel.WARN, String.format("Failed to run the following sql: \n%s\nWith values: \n%s\nWith types: \n%s\n."

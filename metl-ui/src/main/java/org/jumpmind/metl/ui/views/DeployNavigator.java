@@ -38,7 +38,6 @@ import org.jumpmind.metl.ui.common.EnableFocusTextField;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.views.deploy.EditAgentPanel;
-import org.jumpmind.util.AppUtils;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog.IConfirmListener;
@@ -513,7 +512,6 @@ public class DeployNavigator extends VerticalLayout {
         Agent agent = new Agent();
         agent.setName("New Agent");
         agent.setFolder(folder);
-        agent.setHost(AppUtils.getHostName());
         context.getConfigurationService().save(agent);
         context.getAgentManager().refresh(agent);
         AgentName name = new AgentName(agent);

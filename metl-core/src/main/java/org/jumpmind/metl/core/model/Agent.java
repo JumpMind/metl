@@ -35,11 +35,7 @@ public class Agent extends AbstractNamedObject {
 
     String name;
 
-    String host;
-
     boolean allowTestFlows = false;
-
-    String startMode = AgentStartMode.AUTO.name();
 
     String status = AgentStatus.STOPPED.name();
 
@@ -61,10 +57,9 @@ public class Agent extends AbstractNamedObject {
     
     int execThreadCount = 10;
 
-    public Agent(String name, String host) {
+    public Agent(String name) {
         this();
         this.name = name;
-        this.host = host;
     }
 
     public Agent() {
@@ -87,10 +82,6 @@ public class Agent extends AbstractNamedObject {
 
     public void setFolder(Folder folder) {
         this.folder = folder;
-    }
-
-    public AgentStartMode getAgentStartMode() {
-        return startMode == null ? AgentStartMode.MANUAL : AgentStartMode.valueOf(startMode);
     }
 
     public AgentStatus getAgentStatus() {
@@ -125,22 +116,6 @@ public class Agent extends AbstractNamedObject {
 
     public String getFolderId() {
         return folder != null ? folder.getId() : null;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public void setStartMode(String startMode) {
-        this.startMode = startMode;
-    }
-
-    public String getStartMode() {
-        return startMode;
     }
 
     public String getStatus() {

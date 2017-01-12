@@ -377,7 +377,7 @@ public class ExecutionApi {
 
                 if (basic.equalsIgnoreCase("Basic")) {
                     try {
-                        String credentials = new String(Base64.decodeBase64(st.nextToken()), "UTF-8");
+                        String credentials = new String(Base64.decodeBase64(st.nextToken().getBytes()));
                         int p = credentials.indexOf(":");
                         if (p != -1) {
                             String _username = credentials.substring(0, p).trim();

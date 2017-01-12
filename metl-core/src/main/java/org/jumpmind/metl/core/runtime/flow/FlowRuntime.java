@@ -386,7 +386,7 @@ public class FlowRuntime {
         }
         params.put("_versionName", agentDeployment.getProjectVersion().getVersionLabel());
         params.put("_flowName", agentDeployment.getFlow().getName());
-        params.put("_host", agent.getHost());
+        params.put("_host", AppUtils.getHostName());
         params.put("_date", DateFormatUtils.format(date, DATE_FORMAT));
         params.put("_time", DateFormatUtils.format(date, TIME_FORMAT));
         params.put("_startDate", DateFormatUtils.format(date, DATE_FORMAT));

@@ -100,7 +100,6 @@ public class TestUtils {
         agent.setCreateTime(new Date());
         agent.setFolderId(folder.getId());
         agent.setHeartbeatTime(new Date());
-        agent.setHost("localhost");
         agent.setId(name);
         agent.setLastUpdateBy("Test");
         agent.setLastUpdateTime(new Date());
