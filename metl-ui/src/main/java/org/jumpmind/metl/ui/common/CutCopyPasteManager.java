@@ -83,6 +83,7 @@ public class CutCopyPasteManager {
         boolean newProjectVersion = flow.getProjectVersionId() != newProjectVersionId;
         Flow newFlow = configurationService.copy(oldToNewUUIDMapping, flow, newProjectVersion);
         newFlow.setProjectVersionId(newProjectVersionId);
+        newFlow.setName(calculateFlowName(newFlow));
         configurationService.save(newFlow);
         if ((clipboard.containsKey(CLIPBOARD_ACTION)
                 && ((String) clipboard.get(CLIPBOARD_ACTION))
@@ -104,7 +105,8 @@ public class CutCopyPasteManager {
         HashSet<Resource> newResources = new HashSet<Resource>();
         for (Resource resource : origResources) {
             String existingResourceId = destinationHasResource(resource, newProjectVersionId);
-            if (existingResourceId == null) {
+            //make another copy if same project version.  If diff project version try and use existing
+            if (existingResourceId == null || resource.getProjectVersionId() == newProjectVersionId) {
                 //make a copy only if the resource is still in use by another flow
                 //resource alone can't be cut if they have dependent flows
                 if ((clipboard.containsKey(CLIPBOARD_ACTION) &&
@@ -152,6 +154,24 @@ public class CutCopyPasteManager {
         return null;
     }
 
+    private String calculateFlowName(Flow flow) {
+        //this has the new project version id and the old name
+        String name = flow.getName();
+        boolean calculatedName = false;
+        int copyNumber = 1;
+        do {
+            List<Flow> existingFlows = configurationService.findFlowsByName(
+                    flow.getProjectVersionId(), name);
+            if (existingFlows.size() == 0) {
+                calculatedName = true;
+            } else {
+                name = flow.getName() + " - " + String.valueOf(copyNumber);
+                copyNumber++;
+            }
+        } while (!calculatedName);
+        return name;
+    }
+    
     private String calculateResourceName(Resource resource) {
         //this has the new project version id and the old name
         String name = resource.getName();
@@ -220,7 +240,7 @@ public class CutCopyPasteManager {
         HashSet<Model> newModels = new HashSet<Model>();
         for (Model model : origModels) {
             String existingModelId = destinationHasModel(model, newProjectVersionId);
-            if (existingModelId == null) {
+            if (existingModelId == null || model.getProjectVersionId() == newProjectVersionId) {
                 // make a copy only if the model is still in use by another flow
                 // model alone can't be cut if they have dependent flows
                 if ((clipboard.containsKey(CLIPBOARD_ACTION)

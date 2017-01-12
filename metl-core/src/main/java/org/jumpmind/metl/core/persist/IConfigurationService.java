@@ -183,6 +183,8 @@ public interface IConfigurationService {
 
     public Resource findResource(String id);    
     
+    public List<Flow> findFlowsByName(String projectVersionId, String flowName);
+    
     public List<Resource> findResourcesByName(String projectVersionId, String resourceName);
 
     public List<Model> findModelsByName(String projectVersionId, String modelName);

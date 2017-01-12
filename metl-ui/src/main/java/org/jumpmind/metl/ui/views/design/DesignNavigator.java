@@ -42,7 +42,6 @@ import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDependency;
-import org.jumpmind.metl.core.model.ProjectVersionName;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
