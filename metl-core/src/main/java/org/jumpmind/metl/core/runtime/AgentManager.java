@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,7 +38,6 @@ import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.plugin.IDefinitionFactory;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
-import org.jumpmind.util.AppUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +79,7 @@ public class AgentManager implements IAgentManager {
     }
 
     public void start() {
-        Set<Agent> agents = findLocalAgents();
+        List<Agent> agents = configurationService.findAgents();
         for (Agent agent : agents) {
             createAndStartRuntime(agent);
         }
@@ -109,13 +109,6 @@ public class AgentManager implements IAgentManager {
             deployment = engine.deploy(flow, parameters);
         }
         return deployment;
-    }
-
-    protected Set<Agent> findLocalAgents() {
-        Set<Agent> agents = new HashSet<Agent>(configurationService.findAgentsForHost(AppUtils.getHostName()));
-        agents.addAll(configurationService.findAgentsForHost(AppUtils.getIpAddress()));
-        agents.addAll(configurationService.findAgentsForHost("localhost"));
-        return agents;
     }
 
     @PreDestroy

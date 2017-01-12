@@ -354,16 +354,10 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     }
 
     @Override
-    public List<Agent> findAgentsForHost(String hostName) {
+    public List<Agent> findAgents() {
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("host", hostName);
         params.put("deleted", 0);
         return findAgents(params);
-    }
-
-    @Override
-    public List<Agent> findAgents() {
-        return persistenceManager.find(Agent.class, null, null, tableName(Agent.class));
     }
     
     @Override

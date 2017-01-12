@@ -107,8 +107,6 @@ public interface IConfigurationService {
 
     public List<Agent> findAgents();
 
-    public List<Agent> findAgentsForHost(String hostName);
-
     public List<AgentName> findAgentsInFolder(Folder folder);
 
     public void refresh(PluginRepository pluginRepository);
