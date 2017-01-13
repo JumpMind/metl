@@ -49,7 +49,6 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.util.FormatUtils;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 
-// TODO move this to comp-abstract
 public class ModelAttributeScriptHelper {
 
     protected Object value;
