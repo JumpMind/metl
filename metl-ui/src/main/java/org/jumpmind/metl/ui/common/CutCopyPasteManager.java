@@ -364,7 +364,6 @@ public class CutCopyPasteManager {
         clipboard.put(CLIPBOARD_OBJECT_TYPE, Flow.class);
         clipboard.put(CLIPBOARD_FLOW, flow);
         clipboard.put(CLIPBOARD_MODELS, new HashSet<Model>(configurationService.findDependentModels(flow.getId())));
-        //TODO: update findDependentResources to look for resources in the settings as well as in the resource_id column of the component
         clipboard.put(CLIPBOARD_RESOURCES, new HashSet<Resource>(configurationService.findDependentResources(flow.getId())));   
     }
 }

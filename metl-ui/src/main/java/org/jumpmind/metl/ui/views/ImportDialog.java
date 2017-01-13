@@ -38,7 +38,7 @@ public class ImportDialog extends Window {
         setCaption(caption);
         setModal(true);
         setResizable(true);
-        setWidth(300, Unit.PIXELS);
+        setWidth(305, Unit.PIXELS);
         setClosable(false);
 
         VerticalLayout layout = new VerticalLayout();

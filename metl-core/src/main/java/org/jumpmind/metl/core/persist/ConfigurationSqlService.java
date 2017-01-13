@@ -273,7 +273,9 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
     public List<Resource> findDependentResources(String flowId) {
 
         List<Resource> resources = new ArrayList<Resource>();
-        final String RESOURCES_BY_FLOW_SQL = "select distinct c.resource_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s' and resource_id is not null";
+        final String RESOURCES_BY_FLOW_SQL = "select distinct c.resource_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s' and resource_id is not null " +
+                "union select distinct cs.value from metl_flow_step fs inner join metl_component c on fs.component_id = c.id inner join metl_component_setting cs on cs.component_id = c.id where fs.flow_id = '%2$s' " +
+                "and cs.name in ('source.resource','target.resource')";
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         List<Row> ids = template.query(String.format(RESOURCES_BY_FLOW_SQL, tablePrefix, flowId));
         for (Row row : ids) {

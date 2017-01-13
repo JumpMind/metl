@@ -552,7 +552,7 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public void doImport() {
-        ImportDialog.show("Import Config", "Click the import button to import your config", new ImportConfigurationListener());
+        ImportDialog.show("Import Config", "Click the upload button to import your config", new ImportConfigurationListener());
     }
 
     public void doNewVersion() {
