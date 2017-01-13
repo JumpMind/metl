@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.ui.mapping;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
@@ -63,7 +65,7 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
 
     TextField srcTextFilter;
 
-    TextField dstTextFilter;
+    TextField dstTextFilter;       
 
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
@@ -104,6 +106,7 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
         addComponent(filterHeader);
 
         srcTextFilter = new TextField();
+        srcTextFilter.setWidth(20, Unit.EM);
         srcTextFilter.setInputPrompt("Filter");
         srcTextFilter.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
         srcTextFilter.setIcon(FontAwesome.SEARCH);
@@ -118,6 +121,7 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
         srcFilterHeader.addComponent(srcMapFilter);
 
         dstTextFilter = new TextField();
+        dstTextFilter.setWidth(20, Unit.EM);
         dstTextFilter.setInputPrompt("Filter");
         dstTextFilter.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
         dstTextFilter.setIcon(FontAwesome.SEARCH);
@@ -142,6 +146,17 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
         addComponent(panel);
         setExpandRatio(panel, 1.0f);
         diagram.addListener(new EventListener());
+    }
+    
+    @Override
+    public void selected() {
+        if (isNotBlank(srcTextFilter.getValue()) || srcMapFilter.getValue()) {
+            diagram.filterInputModel(srcTextFilter.getValue().trim(), srcMapFilter.getValue());
+        }
+        
+        if (isNotBlank(dstTextFilter.getValue()) || dstMapFilter.getValue()) {
+            diagram.filterOutputModel(dstTextFilter.getValue().trim(), dstMapFilter.getValue());
+        }
     }
 
     protected void autoMap(boolean fuzzy) {

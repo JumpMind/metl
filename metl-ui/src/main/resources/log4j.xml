@@ -23,33 +23,46 @@
 -->
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="false">
+
     <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%d %5.5p [%30.30t] %m%n" />
         </layout>
     </appender>
+    
     <category name="org">
         <priority value="WARN" />
     </category>
+    
     <category name="com.vaadin">
         <priority value="ERROR" />
     </category>
+    
     <category name="org.jumpmind">
         <priority value="INFO" />
     </category>
+    
     <!-- Disable the not found override properties file warnings to avoid confusion -->
     <category name="org.jumpmind.symmetric.ClientSymmetricEngine$PropertiesFactoryBean">
         <priority value="ERROR" />
     </category>
+    
     <category name="org.jumpmind.symmetric.service.impl.ParameterService">
         <priority value="ERROR" />
     </category>
+    
     <category name="org.jumpmind.symmetric.db.SqlScript">
         <priority value="ERROR" />
     </category>
+    
     <category name="org.springframework">
         <priority value="ERROR" />
-    </category>    
+    </category>
+    
+    <category name="org.jumpmind.db.platform.JdbcDatabasePlatformFactory">
+        <priority value="WARN" />
+    </category>
+        
     <!-- To print out SQL    
     <category name="org.jumpmind.db.sql">
         <priority value="DEBUG" />
@@ -66,7 +79,7 @@
     <category name="com.vaadin.server.DefaultDeploymentConfiguration">
         <priority value="ERROR" />
     </category>
-    
+        
     <!-- 
     <category name="org.jumpmind.metl.core.plugin.PluginManager">
         <priority value="DEBUG" />
@@ -81,4 +94,5 @@
         <priority value="WARN" />
         <appender-ref ref="CONSOLE" />
     </root>
+    
 </log4j:configuration>
