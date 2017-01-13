@@ -20,6 +20,10 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.jumpmind.db.model.Table;
 import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ResettableBasicDataSource;
 import org.jumpmind.properties.TypedProperties;
@@ -66,6 +70,8 @@ public class Datasource extends AbstractResourceRuntime implements IResourceRunt
     
     ResettableBasicDataSource dataSource = new ResettableBasicDataSource();
     
+    protected Map<String, Table> tableCache = new HashMap<String, Table>();
+    
     @Override
     protected void start(TypedProperties properties) {
         this.dataSource = BasicDataSourceFactory
@@ -87,6 +93,17 @@ public class Datasource extends AbstractResourceRuntime implements IResourceRunt
     public <T> T reference() {
         return (T)dataSource;
     }
+    
+    public void putTableInCache(String catalogName, String schemaName, String tableName, Table table) {
+        String key = Table.getFullyQualifiedTableName(catalogName, schemaName, tableName);
+        tableCache.put(key, table);
+    }
+    
+    public Table getTableFromCache(String catalogName, String schemaName, String tableName) {
+        String key = Table.getFullyQualifiedTableName(catalogName, schemaName, tableName);
+        return tableCache.get(key);
+    }
+
     
 
 }

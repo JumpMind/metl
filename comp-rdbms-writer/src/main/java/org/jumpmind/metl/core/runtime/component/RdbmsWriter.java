@@ -55,6 +55,7 @@ import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
+import org.jumpmind.metl.core.runtime.resource.Datasource;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
@@ -108,10 +109,10 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         error = null;
 
         if (getResourceRuntime() == null) {
-            throw new IllegalStateException("A databasePlatform writer must have a datasource defined");
+            throw new IllegalStateException("An RDBMS writer must have a datasource defined");
         }
         if (getInputModel() == null) {
-            throw new IllegalStateException("A databasePlatform writer must have an input model defined");
+            throw new IllegalStateException("An RDBMS writer must have an input model defined");
         }
 
         TypedProperties properties = getTypedProperties();
@@ -171,7 +172,12 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                     targetTables = new ArrayList<TargetTableDefintion>();
                     for (ModelEntity entity : model.getModelEntities()) {
                         String tableName = tablePrefix + entity.getName() + tableSuffix;
-                        Table table = databasePlatform.getTableFromCache(catalogName, schemaName, tableName, !useCachedMetadata);
+                        Datasource resource = (Datasource)getResourceRuntime();
+                        Table table = resource.getTableFromCache(catalogName, schemaName, tableName);
+                        if (table == null || !useCachedMetadata) {
+                            table = databasePlatform.getTableFromCache(catalogName, schemaName, tableName, true);
+                            resource.putTableInCache(catalogName, schemaName, tableName, table);
+                        }
                         if (table == null && autoCreateTable) {
                             table = createTableFromEntity(entity, tableName);
                             log(LogLevel.INFO, "Creating table: " + table.getName() + "  on db: " + databasePlatform.getDataSource().toString());
