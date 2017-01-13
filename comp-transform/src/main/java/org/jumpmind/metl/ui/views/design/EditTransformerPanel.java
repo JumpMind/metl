@@ -43,8 +43,6 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.ComboBox;
@@ -59,7 +57,7 @@ import com.vaadin.ui.UI;
 public class EditTransformerPanel extends AbstractComponentEditPanel {
 
     Table table = new Table();
-    
+
     Table exportTable = new Table();
 
     TextField filterField;
@@ -84,27 +82,27 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         filterPopField.addItem(SHOW_ALL);
         filterPopField.addItem(SHOW_POPULATED_ENTITIES);
         filterPopField.addItem(SHOW_POPULATED_ATTRIBUTES);
+        if (component.getInputModel() != null) {
+            for (ModelEntity entity : component.getInputModel().getModelEntities()) {
+                filterPopField.addItem(entity.getName());
+            }
+        }
         filterPopField.setNullSelectionAllowed(false);
         filterPopField.setImmediate(true);
         filterPopField.setWidth(20, Unit.EM);
         filterPopField.setValue(SHOW_ALL);
-        filterPopField.addValueChangeListener(new ValueChangeListener() {
-            public void valueChange(ValueChangeEvent event) {
-                updateTable(filterField.getValue());
-            }
+        filterPopField.addValueChangeListener(event ->  {
+            filterField.clear();
+            updateTable((String)filterPopField.getValue());
         });
         buttonBar.addLeft(filterPopField);
 
-        buttonBar.addButtonRight("Export", FontAwesome.DOWNLOAD, (e)->export());
-        
-        filterField = buttonBar.addFilter();
-        filterField.addTextChangeListener(new TextChangeListener() {
+        buttonBar.addButtonRight("Export", FontAwesome.DOWNLOAD, (e) -> export());
 
-            @Override
-            public void textChange(TextChangeEvent event) {
-                filterField.setValue(event.getText());
-                updateTable(event.getText());
-            }
+        filterField = buttonBar.addFilter();
+        filterField.addTextChangeListener(event -> {
+            filterPopField.setValue(SHOW_ALL);
+            updateTable(event.getText());
         });
 
         addComponent(buttonBar);
@@ -150,17 +148,20 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         if (component.getInputModel() != null) {
 
             componentAttributes = component.getAttributeSettings();
-            
+
             List<ComponentAttributeSetting> toRemove = new ArrayList<ComponentAttributeSetting>();
             for (ComponentAttributeSetting componentAttribute : componentAttributes) {
                 Model model = component.getInputModel();
                 ModelAttribute attribute1 = model.getAttributeById(componentAttribute.getAttributeId());
                 if (attribute1 == null) {
-                    /* invalid attribute.  model must have changed.  lets remove it */
+                    /*
+                     * invalid attribute. model must have changed. lets remove
+                     * it
+                     */
                     toRemove.add(componentAttribute);
                 }
             }
-            
+
             for (ComponentAttributeSetting componentAttributeSetting : toRemove) {
                 componentAttributes.remove(componentAttributeSetting);
                 context.getConfigurationService().delete(componentAttributeSetting);
@@ -171,15 +172,14 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
                     boolean found = false;
                     for (ComponentAttributeSetting componentAttribute : componentAttributes) {
                         if (componentAttribute.getAttributeId().equals(attr.getId())
-                                && componentAttribute.getName().equals(
-                                        Transformer.TRANSFORM_EXPRESSION)) {
+                                && componentAttribute.getName().equals(Transformer.TRANSFORM_EXPRESSION)) {
                             found = true;
                             break;
                         }
                     }
                     if (!found) {
-                        componentAttributes.add(new ComponentAttributeSetting(attr.getId(),
-                                component.getId(), Transformer.TRANSFORM_EXPRESSION, null));
+                        componentAttributes
+                                .add(new ComponentAttributeSetting(attr.getId(), component.getId(), Transformer.TRANSFORM_EXPRESSION, null));
                     }
                 }
             }
@@ -204,7 +204,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         }
 
         updateTable(null);
-        
+
         exportTable.setContainerDataSource(exportContainer);
         exportTable.setVisibleColumns(new Object[] { "entityName", "attributeName", "value" });
         exportTable.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Transform" });
@@ -213,45 +213,45 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
     protected void updateTable(String filter) {
         boolean showPopulatedEntities = filterPopField.getValue().equals(SHOW_POPULATED_ENTITIES);
         boolean showPopulatedAttributes = filterPopField.getValue().equals(SHOW_POPULATED_ATTRIBUTES);
-    
+
         if (componentAttributes != null) {
             Model model = component.getInputModel();
             Collection<String> entityNames = new ArrayList<>();
 
             filter = filter != null ? filter.toLowerCase() : null;
             if (model != null) {
-            	table.removeAllItems();
-            	// loop through the attributes with transforms to get a list of entities
-	            for (ComponentAttributeSetting componentAttribute : componentAttributes) {
-	                ModelAttribute attribute = model.getAttributeById(componentAttribute.getAttributeId());
-	                ModelEntity entity = model.getEntityById(attribute.getEntityId());
-	                if (isNotBlank(componentAttribute.getValue())
-	                		&& !entityNames.contains(entity.getName())) {
-	                	entityNames.add(entity.getName());
-	                }
-	            }
+                table.removeAllItems();
+                // loop through the attributes with transforms to get a list of
+                // entities
+                for (ComponentAttributeSetting componentAttribute : componentAttributes) {
+                    ModelAttribute attribute = model.getAttributeById(componentAttribute.getAttributeId());
+                    ModelEntity entity = model.getEntityById(attribute.getEntityId());
+                    if (isNotBlank(componentAttribute.getValue()) && !entityNames.contains(entity.getName())) {
+                        entityNames.add(entity.getName());
+                    }
+                }
 
-            	for (ComponentAttributeSetting componentAttribute : componentAttributes) {
-	                ModelAttribute attribute = model.getAttributeById(componentAttribute.getAttributeId());
-	                ModelEntity entity = model.getEntityById(attribute.getEntityId());
-	                
-	                boolean populated = (showPopulatedEntities && entityNames.contains(entity.getName())) ||
-	                (showPopulatedAttributes && isNotBlank(componentAttribute.getValue())) || 
-	                (!showPopulatedAttributes && !showPopulatedEntities); 
-	                if (isBlank(filter) || entity.getName().toLowerCase().contains(filter)
-	                        || attribute.getName().toLowerCase().contains(filter)) {
-	                	if (populated) {
-	                		table.addItem(componentAttribute);
-	                	}
-	                }
-	            }
+                for (ComponentAttributeSetting componentAttribute : componentAttributes) {
+                    ModelAttribute attribute = model.getAttributeById(componentAttribute.getAttributeId());
+                    ModelEntity entity = model.getEntityById(attribute.getEntityId());
+
+                    boolean populated = (showPopulatedEntities && entityNames.contains(entity.getName()))
+                            || (showPopulatedAttributes && isNotBlank(componentAttribute.getValue()))
+                            || (!showPopulatedAttributes && !showPopulatedEntities);
+                    if (isBlank(filter) || entity.getName().toLowerCase().contains(filter)
+                            || attribute.getName().toLowerCase().contains(filter)) {
+                        if (populated) {
+                            table.addItem(componentAttribute);
+                        }
+                    }
+                }
             }
         }
     }
 
     protected void export() {
-    	exportTable.removeAllItems();
-    	updateExportTable(filterField.getValue());
+        exportTable.removeAllItems();
+        updateExportTable(filterField.getValue());
         String fileNamePrefix = component.getName().toLowerCase().replace(' ', '-');
         ExportDialog dialog = new ExportDialog(exportTable, fileNamePrefix, component.getName());
         UI.getCurrent().addWindow(dialog);
@@ -260,45 +260,45 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
     protected void updateExportTable(String filter) {
         boolean showPopulatedEntities = filterPopField.getValue().equals(SHOW_POPULATED_ENTITIES);
         boolean showPopulatedAttributes = filterPopField.getValue().equals(SHOW_POPULATED_ATTRIBUTES);
-    
+
         if (componentAttributes != null) {
             Model model = component.getInputModel();
             Collection<String> entityNames = new ArrayList<>();
 
             filter = filter != null ? filter.toLowerCase() : null;
             if (model != null) {
-            	exportTable.removeAllItems();
-            	// loop through the attributes with transforms to get a list of entities
-	            for (ComponentAttributeSetting componentAttribute : componentAttributes) {
-	                ModelAttribute attribute = model.getAttributeById(componentAttribute.getAttributeId());
-	                ModelEntity entity = model.getEntityById(attribute.getEntityId());
-	                if (isNotBlank(componentAttribute.getValue())
-	                		&& !entityNames.contains(entity.getName())) {
-	                	entityNames.add(entity.getName());
-	                }
-	            }
+                exportTable.removeAllItems();
+                // loop through the attributes with transforms to get a list of
+                // entities
+                for (ComponentAttributeSetting componentAttribute : componentAttributes) {
+                    ModelAttribute attribute = model.getAttributeById(componentAttribute.getAttributeId());
+                    ModelEntity entity = model.getEntityById(attribute.getEntityId());
+                    if (isNotBlank(componentAttribute.getValue()) && !entityNames.contains(entity.getName())) {
+                        entityNames.add(entity.getName());
+                    }
+                }
 
-            	for (ComponentAttributeSetting componentAttribute : componentAttributes) {
-	                ModelAttribute attribute = model.getAttributeById(componentAttribute.getAttributeId());
-	                ModelEntity entity = model.getEntityById(attribute.getEntityId());
-	                
-	                boolean populated = (showPopulatedEntities && entityNames.contains(entity.getName())) ||
-	                (showPopulatedAttributes && isNotBlank(componentAttribute.getValue())) || 
-	                (!showPopulatedAttributes && !showPopulatedEntities); 
-	                if (isBlank(filter) || entity.getName().toLowerCase().contains(filter)
-	                        || attribute.getName().toLowerCase().contains(filter)) {
-	                	if (populated) {
-	                		exportTable.addItem(new Record(entity, attribute));
-	                	}
-	                }
-	            }
+                for (ComponentAttributeSetting componentAttribute : componentAttributes) {
+                    ModelAttribute attribute = model.getAttributeById(componentAttribute.getAttributeId());
+                    ModelEntity entity = model.getEntityById(attribute.getEntityId());
+
+                    boolean populated = (showPopulatedEntities && entityNames.contains(entity.getName()))
+                            || (showPopulatedAttributes && isNotBlank(componentAttribute.getValue()))
+                            || (!showPopulatedAttributes && !showPopulatedEntities);
+                    if (isBlank(filter) || entity.getName().toLowerCase().contains(filter)
+                            || attribute.getName().toLowerCase().contains(filter)) {
+                        if (populated) {
+                            exportTable.addItem(new Record(entity, attribute));
+                        }
+                    }
+                }
             }
         }
     }
-    
+
     class EditFieldFactory implements TableFieldFactory {
-        public Field<?> createField(final Container dataContainer, final Object itemId,
-                final Object propertyId, com.vaadin.ui.Component uiContext) {
+        public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId,
+                com.vaadin.ui.Component uiContext) {
             final ComponentAttributeSetting setting = (ComponentAttributeSetting) itemId;
             Field<?> field = null;
 
@@ -333,9 +333,9 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         ModelAttribute modelAttribute;
 
         String entityName = "";
-        
+
         String attributeName = "";
-        
+
         String value = "";
 
         public Record(ModelEntity modelEntity, ModelAttribute modelAttribute) {
@@ -349,7 +349,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             if (modelAttribute != null) {
                 this.attributeName = modelAttribute.getName();
                 ComponentAttributeSetting setting = component.getSingleAttributeSetting(modelAttribute.getId(),
-                		Transformer.TRANSFORM_EXPRESSION);
+                        Transformer.TRANSFORM_EXPRESSION);
                 if (setting != null) {
                     this.value = setting.getValue();
                 }
@@ -375,5 +375,5 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         public void setValue(String value) {
             this.value = value;
         }
-    }    
+    }
 }
