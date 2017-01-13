@@ -173,10 +173,12 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                     for (ModelEntity entity : model.getModelEntities()) {
                         String tableName = tablePrefix + entity.getName() + tableSuffix;
                         Datasource resource = (Datasource)getResourceRuntime();
-                        Table table = resource.getTableFromCache(catalogName, schemaName, tableName);
+                        Table table = resource != null ? resource.getTableFromCache(catalogName, schemaName, tableName) : null;
                         if (table == null || !useCachedMetadata) {
                             table = databasePlatform.getTableFromCache(catalogName, schemaName, tableName, true);
-                            resource.putTableInCache(catalogName, schemaName, tableName, table);
+                            if (resource != null) {
+                                resource.putTableInCache(catalogName, schemaName, tableName, table);
+                            }
                         }
                         if (table == null && autoCreateTable) {
                             table = createTableFromEntity(entity, tableName);
