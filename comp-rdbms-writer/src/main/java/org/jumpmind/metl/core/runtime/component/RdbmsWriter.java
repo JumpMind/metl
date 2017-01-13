@@ -55,7 +55,7 @@ import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
-import org.jumpmind.metl.core.runtime.resource.Datasource;
+import org.jumpmind.metl.core.runtime.resource.IDatasourceRuntime;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
@@ -172,7 +172,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                     targetTables = new ArrayList<TargetTableDefintion>();
                     for (ModelEntity entity : model.getModelEntities()) {
                         String tableName = tablePrefix + entity.getName() + tableSuffix;
-                        Datasource resource = (Datasource)getResourceRuntime();
+                        IDatasourceRuntime resource = (IDatasourceRuntime)getResourceRuntime();
                         Table table = resource != null ? resource.getTableFromCache(catalogName, schemaName, tableName) : null;
                         if (table == null || !useCachedMetadata) {
                             table = databasePlatform.getTableFromCache(catalogName, schemaName, tableName, true);

@@ -28,7 +28,7 @@ import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ResettableBasicDataSource;
 import org.jumpmind.properties.TypedProperties;
 
-public class Datasource extends AbstractResourceRuntime implements IResourceRuntime {
+public class Datasource extends AbstractResourceRuntime implements IDatasourceRuntime {
 
     public static final String TYPE = "Database";
     

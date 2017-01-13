@@ -49,6 +49,7 @@ public class MessageFilter extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
         if (scriptEngine == null) {
             scriptEngine = new GroovyScriptEngineImpl();
         }

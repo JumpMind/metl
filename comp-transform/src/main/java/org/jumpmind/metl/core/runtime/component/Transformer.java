@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -54,7 +53,7 @@ public class Transformer extends AbstractComponentRuntime {
 
     Map<String, String> transformsByAttributeId = new HashMap<String, String>();
     
-    ScriptEngine scriptEngine;
+    GroovyScriptEngineImpl scriptEngine;
     
     Map<String, ModelAttributeScriptHelper> helpers = new HashMap<>();
        
@@ -98,6 +97,7 @@ public class Transformer extends AbstractComponentRuntime {
     @SuppressWarnings("unchecked")
     @Override
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+        Thread.currentThread().setContextClassLoader(Transformer.class.getClassLoader());
         if (scriptEngine == null) {
             scriptEngine = new GroovyScriptEngineImpl();
         }
