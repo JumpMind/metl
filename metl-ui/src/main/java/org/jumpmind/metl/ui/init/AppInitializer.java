@@ -124,19 +124,21 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
 
     protected void initPlugins(WebApplicationContext ctx) {
         InputStream is = ctx.getServletContext().getResourceAsStream("/plugins.zip");
+        boolean newPluginsUnzipped = false;
         if (is != null) {
             ZipInputStream zip = null;
             try {
                 zip = new ZipInputStream(is);
                 ZipEntry entry = null;
-                File dir = new File(getConfigDir(false), AppConstants.PLUGINS_DIR);
+                File dir = new File(getConfigDir(false), AppConstants.PLUGINS_DIR);                
                 for (entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
                     File f = new File(dir, entry.getName());
-                    if (!f.exists()) {
+                    if (!f.exists() || (f.getName().startsWith("maven-metadata") && newPluginsUnzipped)) {
                         if (entry.isDirectory()) {
                             f.mkdirs();
                         } else {
                             getLogger().info("Extracting: " + f.getAbsolutePath());
+                            newPluginsUnzipped = true;
                             f.getParentFile().mkdirs();
                             OutputStream os = new BufferedOutputStream(new FileOutputStream(f));
                             try {
