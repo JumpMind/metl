@@ -17,7 +17,7 @@ buildscript {
     }
 }
 
-buildNumber = 'a'.equals(buildNumber) ?  ('a' + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())) : buildNumber
+buildNumber = 'a'.equals(buildNumber) ?  ('a.' + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())) : buildNumber
 version = version + "." + buildNumber
 
 ext {
