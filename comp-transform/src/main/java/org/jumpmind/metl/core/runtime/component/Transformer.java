@@ -85,10 +85,14 @@ public class Transformer extends AbstractComponentRuntime {
         Set<String> attributeIds = data.keySet();
         for (String attributeId : attributeIds) {
             ModelAttribute attribute = inputModel.getAttributeById(attributeId);
-            ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
-            List<ModelAttribute> attributes = entity.getModelAttributes();
-            for (ModelAttribute modelAttribute : attributes) {
-                allAttributesForIncludedEntities.add(modelAttribute.getId());
+            if (attribute != null) {
+                ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
+                List<ModelAttribute> attributes = entity.getModelAttributes();
+                for (ModelAttribute modelAttribute : attributes) {
+                    allAttributesForIncludedEntities.add(modelAttribute.getId());
+                }
+            } else {
+                log.warn("Found an attribute that wasn't in the configured model.  The attribute id was: {}", attributeId);
             }
         }
         return allAttributesForIncludedEntities;

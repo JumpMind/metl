@@ -88,7 +88,6 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
 	protected void cleanupAttributes(Component c) {
 	    // Look for any broken links.
 	    Iterator<ComponentAttributeSetting> iter = c.getAttributeSettings().iterator();
-	    boolean dirty = false;
 	    while (iter.hasNext()) {
 	        ComponentAttributeSetting setting = iter.next();
             if (Mapping.ATTRIBUTE_MAPS_TO.equals(setting.getName())) {
@@ -97,13 +96,10 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
                 if (srcAttribute == null || dstAttribute == null) {
                     // Remove link setting if source or target can't be found.
                     iter.remove();
-                    dirty = true;
+                    context.getConfigurationService().delete(setting);
                 }
             }
         }
-	    if (dirty) {
-	        context.getConfigurationService().save(c);
-	    }
 	}
     
     @Override
