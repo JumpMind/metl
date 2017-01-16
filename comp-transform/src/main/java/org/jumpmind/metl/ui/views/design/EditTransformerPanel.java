@@ -92,8 +92,14 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         filterPopField.setWidth(20, Unit.EM);
         filterPopField.setValue(SHOW_ALL);
         filterPopField.addValueChangeListener(event ->  {
-            filterField.clear();
-            updateTable((String)filterPopField.getValue());
+            if (isNotBlank(filterField.getValue())) {
+                filterField.clear();
+            }
+            String filter = (String)filterPopField.getValue();
+            if (filter.equals(SHOW_ALL) || filter.equals(SHOW_POPULATED_ATTRIBUTES) || filter.equals(SHOW_POPULATED_ENTITIES)) {
+                filter = null;
+            }
+            updateTable(filter);
         });
         buttonBar.addLeft(filterPopField);
 
