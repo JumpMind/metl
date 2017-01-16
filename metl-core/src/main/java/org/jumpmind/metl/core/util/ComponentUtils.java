@@ -52,6 +52,16 @@ final public class ComponentUtils {
         return null;
     }
     
+    public static void setAttributeValue(Model model, EntityData data, String entityName, String attributeName, Object value) {
+        ModelEntity modelEntity = model.getEntityByName(entityName);
+        if (modelEntity != null) {
+            ModelAttribute attribute = modelEntity.getModelAttributeByName(attributeName);
+            if (attribute != null) {
+                data.put(attribute.getId(), value);
+            }
+        }
+    }    
+    
     public static boolean containsEntity(Model model, EntityData data, String entityName) {
         ModelEntity modelEntity = model.getEntityByName(entityName);
         if (modelEntity != null) {

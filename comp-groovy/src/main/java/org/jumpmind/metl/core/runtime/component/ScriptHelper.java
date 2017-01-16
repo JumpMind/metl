@@ -451,6 +451,11 @@ public class ScriptHelper {
         ArrayList<EntityData> rows = ((EntityDataMessage) inputMessage).getPayload();
         return ComponentUtils.getAttributeValues(model, rows, entityName, attributeName);
     }
+    
+    protected void setAttributeValue(String entityName, String attributeName, EntityData data, Object value) {
+        Model model = flowStep.getComponent().getInputModel();
+        ComponentUtils.setAttributeValue(model, data, entityName, attributeName, value);
+    }
 
     /**
      * Helper method to forward the current {@link #inputMessage}.
