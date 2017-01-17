@@ -109,9 +109,6 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         filterField.addTextChangeListener(event -> {
             String text = event.getText();
             filterPopField.setValue(SHOW_ALL);
-            if (isBlank(filterField.getValue())) {
-                filterField.setValue(text);
-            }
             updateTable(text);
         });
 
