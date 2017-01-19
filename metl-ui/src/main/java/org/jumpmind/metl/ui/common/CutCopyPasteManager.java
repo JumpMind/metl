@@ -1,5 +1,6 @@
 package org.jumpmind.metl.ui.common;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelName;
+import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
@@ -143,17 +145,33 @@ public class CutCopyPasteManager {
     }
     
     private String destinationHasResource(Resource resource, String newProjectVersionId) {
-        List<Resource> existingResources = configurationService.findResourcesByName(newProjectVersionId, resource.getName());
-        for (Resource existingResource : existingResources) {
-            //findByName doesn't do deep fetch
-            existingResource = configurationService.findResource(existingResource.getId());
-            if (resourcesMatchAcrossProjects(resource, existingResource)) {
-                return existingResource.getId();
+        
+        List<String> projectVersionIds = new ArrayList<String>();
+        projectVersionIds.add(newProjectVersionId);
+        projectVersionIds.addAll(getDependentProjectVersionIds(newProjectVersionId));
+        
+        for (String projectVersionId : projectVersionIds) {
+            List<Resource> existingResources = configurationService.findResourcesByName(projectVersionId, resource.getName());
+            for (Resource existingResource : existingResources) {
+                //findByName doesn't do deep fetch            
+                existingResource = configurationService.findResource(existingResource.getId());
+                if (resourcesMatchAcrossProjects(resource, existingResource)) {
+                    return existingResource.getId();
+                }                
             }
         }
         return null;
     }
 
+    private List<String> getDependentProjectVersionIds(String projectVersionId) {
+        List<String> dependentProjectVersionIds = new ArrayList<String>();
+        List<ProjectVersionDependency> projectDependencies = configurationService.findProjectDependencies(projectVersionId);
+        for (ProjectVersionDependency projectDependency : projectDependencies) {
+            dependentProjectVersionIds.add(projectDependency.getTargetProjectVersionId());
+        }
+        return dependentProjectVersionIds;
+    }
+    
     private String calculateFlowName(Flow flow) {
         //this has the new project version id and the old name
         String name = flow.getName();
@@ -278,12 +296,19 @@ public class CutCopyPasteManager {
     }    
     
     private String destinationHasModel(Model model, String newProjectVersionId) {
-        List<Model> existingModels = configurationService.findModelsByName(newProjectVersionId, model.getName());
-        for (Model existingModel : existingModels) {
-            //findByName doesn't do deep fetch
-            existingModel = configurationService.findModel(existingModel.getId());
-            if (modelsMatchAcrossProjects(model, existingModel)) {
-                return existingModel.getId();
+        
+        List<String> projectVersionIds = new ArrayList<String>();
+        projectVersionIds.add(newProjectVersionId);
+        projectVersionIds.addAll(getDependentProjectVersionIds(newProjectVersionId));
+        
+        for (String projectVersionId : projectVersionIds) {        
+            List<Model> existingModels = configurationService.findModelsByName(projectVersionId, model.getName());
+            for (Model existingModel : existingModels) {
+                //findByName doesn't do deep fetch
+                existingModel = configurationService.findModel(existingModel.getId());
+                if (modelsMatchAcrossProjects(model, existingModel)) {
+                    return existingModel.getId();
+                }
             }
         }
         return null;
