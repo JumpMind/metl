@@ -20,12 +20,20 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.runtime.ControlMessage;
@@ -36,6 +44,7 @@ import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.FileInfo;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
+import org.jumpmind.metl.core.runtime.resource.LocalFile;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 import org.springframework.util.AntPathMatcher;
@@ -47,6 +56,7 @@ public class FilePoller extends AbstractComponentRuntime {
     public static final String ACTION_NONE = "None";
     public static final String ACTION_DELETE = "Delete";
     public static final String ACTION_ARCHIVE = "Archive";
+    public static final String ACTION_COMPRESS_ARCHIVE = "ZIP Archive";
 
     public final static String SETTING_FILE_PATTERN = "file.pattern";
     
@@ -327,6 +337,8 @@ public class FilePoller extends AbstractComponentRuntime {
             archive(archiveOnErrorPath);
         } else if (ACTION_DELETE.equals(actionOnError)) {
             deleteFiles();
+		} else if (ACTION_COMPRESS_ARCHIVE.equals(actionOnError)) {
+			compressedArchive(archiveOnErrorPath);
         }
     }
 
@@ -336,6 +348,8 @@ public class FilePoller extends AbstractComponentRuntime {
             archive(archiveOnSuccessPath);
         } else if (ACTION_DELETE.equals(actionOnSuccess)) {
             deleteFiles();
+		} else if (ACTION_COMPRESS_ARCHIVE.equals(actionOnSuccess)) {
+			compressedArchive(archiveOnSuccessPath);
         }
     }
 
@@ -357,6 +371,45 @@ public class FilePoller extends AbstractComponentRuntime {
         }
     }
     
+	protected void compressedArchive(String archivePath) {
+		String path = getResourceRuntime().getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
+		IDirectory directory = getResourceReference();
+		ZipOutputStream zos = null;
+		for (FileInfo srcFileName : filesSent) {
+			try {
+				String destinationZipFile = path + File.separator + archivePath + File.separator + srcFileName.getName()
+						+ ".zip";
+				String sourceFile = srcFileName.getRelativePath();
+				FileOutputStream fos = new FileOutputStream(destinationZipFile);
+				zos = new ZipOutputStream(fos);
+				ZipEntry entry = new ZipEntry(srcFileName.getName());
+				entry.setSize(srcFileName.getSize());
+				entry.setTime(srcFileName.getLastUpdated());
+				zos.putNextEntry(entry);
+				log(LogLevel.INFO, "Adding %s", srcFileName.getName());
+				InputStream fis = directory.getInputStream(sourceFile, true);
+				if (fis != null) {
+					try {
+						IOUtils.copy(fis, zos);
+					} finally {
+						IOUtils.closeQuietly(fis);
+					}
+				}
+				zos.closeEntry();
+				info("Compress Archiving %s to %s", sourceFile, destinationZipFile);
+				// Delete source file after archive
+				if (directory.delete(srcFileName.getRelativePath())) {
+					log(LogLevel.INFO, "Deleted %s", srcFileName.getRelativePath());
+				} else {
+					log(LogLevel.WARN, "Failed to delete %s", srcFileName.getRelativePath());
+				}
+			} catch (IOException e) {
+				throw new IoException(e);
+			} finally {
+				IOUtils.closeQuietly(zos);
+			}
+		}
+	}
     public void setRunWhen(String runWhen) {
         this.runWhen = runWhen;
     }

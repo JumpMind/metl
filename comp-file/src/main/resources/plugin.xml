@@ -63,6 +63,7 @@
                 <choices>
                     <choice>None</choice>
                     <choice>Archive</choice>
+                    <choice>ZIP Archive</choice>
                     <choice>Delete</choice>
                 </choices>
             </setting>
@@ -75,6 +76,7 @@
                 <choices>
                     <choice>None</choice>
                     <choice>Archive</choice>
+                    <choice>ZIP Archive</choice>
                     <choice>Delete</choice>
                 </choices>
             </setting>
