@@ -337,8 +337,8 @@ public class FilePoller extends AbstractComponentRuntime {
             archive(archiveOnErrorPath);
         } else if (ACTION_DELETE.equals(actionOnError)) {
             deleteFiles();
-		} else if (ACTION_COMPRESS_ARCHIVE.equals(actionOnError)) {
-			compressedArchive(archiveOnErrorPath);
+        } else if (ACTION_COMPRESS_ARCHIVE.equals(actionOnError)) {
+            compressedArchive(archiveOnErrorPath);
         }
     }
 
@@ -371,45 +371,45 @@ public class FilePoller extends AbstractComponentRuntime {
         }
     }
     
-	protected void compressedArchive(String archivePath) {
-		String path = getResourceRuntime().getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
-		IDirectory directory = getResourceReference();
-		ZipOutputStream zos = null;
-		for (FileInfo srcFileName : filesSent) {
-			try {
-				String destinationZipFile = path + File.separator + archivePath + File.separator + srcFileName.getName()
-						+ ".zip";
-				String sourceFile = srcFileName.getRelativePath();
-				FileOutputStream fos = new FileOutputStream(destinationZipFile);
-				zos = new ZipOutputStream(fos);
-				ZipEntry entry = new ZipEntry(srcFileName.getName());
-				entry.setSize(srcFileName.getSize());
-				entry.setTime(srcFileName.getLastUpdated());
-				zos.putNextEntry(entry);
-				log(LogLevel.INFO, "Adding %s", srcFileName.getName());
-				InputStream fis = directory.getInputStream(sourceFile, true);
-				if (fis != null) {
-					try {
-						IOUtils.copy(fis, zos);
-					} finally {
-						IOUtils.closeQuietly(fis);
-					}
-				}
-				zos.closeEntry();
-				info("Compress Archiving %s to %s", sourceFile, destinationZipFile);
-				// Delete source file after archive
-				if (directory.delete(srcFileName.getRelativePath())) {
-					log(LogLevel.INFO, "Deleted %s", srcFileName.getRelativePath());
-				} else {
-					log(LogLevel.WARN, "Failed to delete %s", srcFileName.getRelativePath());
-				}
-			} catch (IOException e) {
-				throw new IoException(e);
-			} finally {
-				IOUtils.closeQuietly(zos);
-			}
-		}
-	}
+    protected void compressedArchive(String archivePath) {
+        String path = getResourceRuntime().getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
+        IDirectory directory = getResourceReference();
+        ZipOutputStream zos = null;
+        for (FileInfo srcFileName : filesSent) {
+            try {
+                String destinationZipFile = path + File.separator + archivePath + File.separator + srcFileName.getName() + ".zip";
+                String sourceFile = srcFileName.getRelativePath();
+                FileOutputStream fos = new FileOutputStream(destinationZipFile);
+                zos = new ZipOutputStream(fos);
+                ZipEntry entry = new ZipEntry(srcFileName.getName());
+                entry.setSize(srcFileName.getSize());
+                entry.setTime(srcFileName.getLastUpdated());
+                zos.putNextEntry(entry);
+                log(LogLevel.INFO, "Adding %s", srcFileName.getName());
+                InputStream fis = directory.getInputStream(sourceFile, true);
+                if (fis != null) {
+                    try {
+                        IOUtils.copy(fis, zos);
+                    } finally {
+                        IOUtils.closeQuietly(fis);
+                    }
+                }
+                zos.closeEntry();
+                info("Compress Archiving %s to %s", sourceFile, destinationZipFile);
+                // Delete source file after archive
+                if (directory.delete(srcFileName.getRelativePath())) {
+                    log(LogLevel.INFO, "Deleted %s", srcFileName.getRelativePath());
+                } else {
+                    log(LogLevel.WARN, "Failed to delete %s", srcFileName.getRelativePath());
+                }
+            } catch (IOException e) {
+                throw new IoException(e);
+            } finally {
+                IOUtils.closeQuietly(zos);
+            }
+        }
+    }
+	
     public void setRunWhen(String runWhen) {
         this.runWhen = runWhen;
     }
