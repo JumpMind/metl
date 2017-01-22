@@ -108,6 +108,7 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
                     throw new IoException("Error writing to stream for formatted output. " + e.getMessage());
                 }
                 outputPayload.add(writer.toString());
+                useHeader = false;
             }
 
             String outputRec;
