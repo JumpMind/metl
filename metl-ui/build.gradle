@@ -9,7 +9,7 @@ dependencies {
     }
     compile "com.cybercom:spring-ui-scope:0.0.2"
     compile "org.springframework:spring-webmvc:$springVersion"
-    compile (group:"org.peimari", name:"maddon", version:"1.20") {
+    compile (group:"org.vaadin", name:"viritin", version:"1.61") {
        exclude group:'com.vaadin'
     }    
     compile "org.apache.poi:poi:3.11"
