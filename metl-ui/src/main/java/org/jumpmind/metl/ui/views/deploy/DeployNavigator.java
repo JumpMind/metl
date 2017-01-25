@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jumpmind.metl.ui.views;
+package org.jumpmind.metl.ui.views.deploy;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -37,7 +37,6 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.EnableFocusTextField;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
-import org.jumpmind.metl.ui.views.deploy.EditAgentPanel;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog.IConfirmListener;

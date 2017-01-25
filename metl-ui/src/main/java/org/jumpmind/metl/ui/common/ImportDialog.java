@@ -1,4 +1,4 @@
-package org.jumpmind.metl.ui.views;
+package org.jumpmind.metl.ui.common;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 

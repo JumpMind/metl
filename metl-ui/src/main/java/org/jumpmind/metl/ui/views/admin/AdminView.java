@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jumpmind.metl.ui.views;
+package org.jumpmind.metl.ui.views.admin;
 
 import javax.annotation.PostConstruct;
 
@@ -28,18 +28,6 @@ import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.TopBarLink;
-import org.jumpmind.metl.ui.views.admin.AboutPanel;
-import org.jumpmind.metl.ui.views.admin.ActiveUsersPanel;
-import org.jumpmind.metl.ui.views.admin.ApiPanel;
-import org.jumpmind.metl.ui.views.admin.AuditEventPanel;
-import org.jumpmind.metl.ui.views.admin.GeneralSettingsPanel;
-import org.jumpmind.metl.ui.views.admin.GroupPanel;
-import org.jumpmind.metl.ui.views.admin.LoggingPanel;
-import org.jumpmind.metl.ui.views.admin.MailServerPanel;
-import org.jumpmind.metl.ui.views.admin.NotificationPanel;
-import org.jumpmind.metl.ui.views.admin.PluginRepositoriesPanel;
-import org.jumpmind.metl.ui.views.admin.PluginsPanel;
-import org.jumpmind.metl.ui.views.admin.UserPanel;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package org.jumpmind.metl.ui.views;
+package org.jumpmind.metl.ui.common;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -20,7 +20,6 @@ import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.persist.IConfigurationService;
-import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.slf4j.Logger;

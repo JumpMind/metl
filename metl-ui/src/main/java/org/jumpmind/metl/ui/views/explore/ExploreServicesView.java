@@ -18,15 +18,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jumpmind.metl.ui.views;
+package org.jumpmind.metl.ui.views.explore;
 
 import javax.annotation.PostConstruct;
 
-import org.jumpmind.metl.ui.common.UIConstants;
-import org.jumpmind.metl.ui.views.design.DesignNavigator;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
-import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,49 +31,39 @@ import org.springframework.context.annotation.Scope;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
+import com.vaadin.server.Page;
+import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
-@Scope(value = "ui")
-@TopBarLink(category = Category.Design, name = "Design", id = "design", icon = FontAwesome.SHARE_ALT, menuOrder = 1, useAsDefault = true)
-public class DesignView extends HorizontalLayout implements View {
+@Scope("ui")
+@TopBarLink(id = "exploreServices", category = Category.Explore, menuOrder = 30, name = "Services", icon = FontAwesome.GLOBE)
+public class ExploreServicesView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = 1L;
 
     @Autowired
     ApplicationContext context;
 
-    DesignNavigator projectNavigator;
-
-    TabbedPanel tabbedPanel;
-
+    public ExploreServicesView() {
+        setSizeFull();
+        String url = Page.getCurrent()
+                .getLocation().getPath();
+        BrowserFrame e = new BrowserFrame(null, new ExternalResource(url.substring(0, url.lastIndexOf("/")) + "/ws-api.html"));
+        e.setSizeFull();
+        addComponent(e);
+        
+    }
+    
     @PostConstruct
     protected void init() {
-        setSizeFull();
-
-        tabbedPanel = new TabbedPanel();
-
-        HorizontalSplitPanel leftSplit = new HorizontalSplitPanel();
-        leftSplit.setSizeFull();
-        leftSplit.setSplitPosition(UIConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS);
-
-        projectNavigator = new DesignNavigator(context, tabbedPanel);
-
-        leftSplit.setFirstComponent(projectNavigator);
-        VerticalLayout container = new VerticalLayout();
-        container.setSizeFull();
-        container.addComponent(tabbedPanel);
-        leftSplit.setSecondComponent(container);
-
-        addComponent(leftSplit);
     }
 
     @Override
     public void enter(ViewChangeEvent event) {
-        projectNavigator.refresh();
     }
+
 
 }

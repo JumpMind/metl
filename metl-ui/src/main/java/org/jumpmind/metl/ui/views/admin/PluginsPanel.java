@@ -31,7 +31,7 @@ import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.TabbedPanel;
-import org.jumpmind.metl.ui.views.UiConstants;
+import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
 import com.vaadin.data.util.BeanItemContainer;
@@ -91,7 +91,7 @@ public class PluginsPanel extends VerticalLayout implements IUiPanel {
         table.setContainerDataSource(container);
         table.setVisibleColumns("artifactGroup", "artifactName", "artifactVersion", "lastUpdateTime");
         table.setColumnHeaders("Group", "Name", "Version", "Updated");
-        table.setColumnWidth("lastUpdateTime", UiConstants.DATETIME_WIDTH_PIXELS);
+        table.setColumnWidth("lastUpdateTime", UIConstants.DATETIME_WIDTH_PIXELS);
         table.addValueChangeListener(e -> setButtonsEnabled());
 
         addComponent(table);

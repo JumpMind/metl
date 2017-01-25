@@ -18,56 +18,64 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jumpmind.metl.ui.views;
+package org.jumpmind.metl.ui.views.design;
 
 import javax.annotation.PostConstruct;
 
 import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
-import org.jumpmind.metl.ui.common.DbProvider;
+import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.vaadin.ui.common.UiComponent;
-import org.jumpmind.vaadin.ui.sqlexplorer.SqlExplorer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
-@Scope("ui")
-@TopBarLink(id = "exploreDataSources", category = Category.Explore, menuOrder = 10, name = "DataSource", icon = FontAwesome.DATABASE)
-public class ExploreDataSourceView extends VerticalLayout implements View {
+@Scope(value = "ui")
+@TopBarLink(category = Category.Design, name = "Design", id = "design", icon = FontAwesome.SHARE_ALT, menuOrder = 1, useAsDefault = true)
+public class DesignView extends HorizontalLayout implements View {
 
     private static final long serialVersionUID = 1L;
 
     @Autowired
     ApplicationContext context;
-    
-    DbProvider dbProvider;
-    
-    SqlExplorer explorer;
 
-    public ExploreDataSourceView() {
-        setSizeFull();
-    }
-    
+    DesignNavigator projectNavigator;
+
+    TabbedPanel tabbedPanel;
+
     @PostConstruct
-    protected void init () {
-        dbProvider = new DbProvider(context);
-        explorer = new SqlExplorer(context.getConfigDir(),
-                dbProvider, context.getUser().getLoginId(), UIConstants.DEFAULT_LEFT_SPLIT);
-        addComponent(explorer);
+    protected void init() {
+        setSizeFull();
+
+        tabbedPanel = new TabbedPanel();
+
+        HorizontalSplitPanel leftSplit = new HorizontalSplitPanel();
+        leftSplit.setSizeFull();
+        leftSplit.setSplitPosition(UIConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS);
+
+        projectNavigator = new DesignNavigator(context, tabbedPanel);
+
+        leftSplit.setFirstComponent(projectNavigator);
+        VerticalLayout container = new VerticalLayout();
+        container.setSizeFull();
+        container.addComponent(tabbedPanel);
+        leftSplit.setSecondComponent(container);
+
+        addComponent(leftSplit);
     }
 
     @Override
     public void enter(ViewChangeEvent event) {
-        dbProvider.refresh();
-        explorer.refresh();
+        projectNavigator.refresh();
     }
-
 
 }

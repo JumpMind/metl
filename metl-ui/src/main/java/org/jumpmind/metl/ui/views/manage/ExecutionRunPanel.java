@@ -48,14 +48,14 @@ import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
+import org.jumpmind.metl.ui.common.IFlowRunnable;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
+import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.metl.ui.common.UiUtils;
 import org.jumpmind.metl.ui.diagram.Node;
 import org.jumpmind.metl.ui.diagram.NodeSelectedEvent;
 import org.jumpmind.metl.ui.diagram.RunDiagram;
-import org.jumpmind.metl.ui.views.IFlowRunnable;
-import org.jumpmind.metl.ui.views.UiConstants;
 import org.jumpmind.util.AppUtils;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
@@ -292,9 +292,9 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         stepTable.addColumn("payloadProduced", Integer.class).setHeaderCaption("Payload Sent")
                 .setWidth(120);
         stepTable.addColumn("startTime", Date.class).setHeaderCaption("Start").setWidth(120)
-                .setMaximumWidth(170).setRenderer(new DateRenderer(UiConstants.TIME_FORMAT));
+                .setMaximumWidth(170).setRenderer(new DateRenderer(UIConstants.TIME_FORMAT));
         stepTable.addColumn("endTime", Date.class).setHeaderCaption("End").setWidth(120)
-                .setMaximumWidth(170).setRenderer(new DateRenderer(UiConstants.TIME_FORMAT));
+                .setMaximumWidth(170).setRenderer(new DateRenderer(UIConstants.TIME_FORMAT));
         stepTable.addColumn("handleDurationString", String.class).setHeaderCaption("Run Duration")
                 .setWidth(140);
         stepTable.addColumn("queueDurationString", String.class).setHeaderCaption("Wait Duration")
@@ -330,7 +330,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         logTable.addColumn("level", String.class).setHeaderCaption("Level").setWidth(110)
                 .setMaximumWidth(200);
         logTable.addColumn("createTime", Date.class).setHeaderCaption("Time").setWidth(120)
-                .setMaximumWidth(200).setRenderer(new DateRenderer(UiConstants.TIME_FORMAT));
+                .setMaximumWidth(200).setRenderer(new DateRenderer(UIConstants.TIME_FORMAT));
         logTable.addColumn("logText", String.class).setHeaderCaption("Message").setExpandRatio(1);
         logTable.setContainerDataSource(logContainer);
         logTable.setSizeFull();
