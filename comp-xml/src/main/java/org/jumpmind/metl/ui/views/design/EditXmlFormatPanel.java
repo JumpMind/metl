@@ -111,7 +111,7 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
         grid.setEditorEnabled(!readOnly);
         container = new BeanItemContainer<Record>(Record.class);
         grid.setContainerDataSource(container);
-        grid.setColumnOrder("entityName", "attributeName", "xpath");
+        grid.setColumns("entityName", "attributeName", "xpath");
         HeaderRow filterRow = grid.appendHeaderRow();
 
         addColumn("entityName", filterRow);

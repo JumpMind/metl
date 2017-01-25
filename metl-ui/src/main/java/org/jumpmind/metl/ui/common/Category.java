@@ -22,6 +22,6 @@ package org.jumpmind.metl.ui.common;
 
 public enum Category {
 
-    Design, Deploy, Manage, Explore, Admin, Help
+    Design, Release, Deploy, Manage, Explore, Admin, Help
     
 }
