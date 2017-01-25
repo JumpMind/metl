@@ -18,10 +18,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jumpmind.metl.ui;
+package org.jumpmind.metl.ui.definition;
 
 import org.jumpmind.metl.core.plugin.IDefinitionFactory;
-import org.jumpmind.metl.ui.definition.XMLComponentUI;
 import org.jumpmind.metl.ui.views.design.IComponentEditPanel;
 
 public interface IDefinitionPlusUIFactory extends IDefinitionFactory {

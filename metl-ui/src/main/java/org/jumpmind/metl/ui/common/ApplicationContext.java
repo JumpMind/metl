@@ -40,7 +40,7 @@ import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
 import org.jumpmind.metl.core.security.ISecurityService;
-import org.jumpmind.metl.ui.IDefinitionPlusUIFactory;
+import org.jumpmind.metl.ui.definition.IDefinitionPlusUIFactory;
 import org.jumpmind.metl.ui.init.BackgroundRefresherService;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;

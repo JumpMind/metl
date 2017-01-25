@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jumpmind.metl.ui;
+package org.jumpmind.metl.ui.definition;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
@@ -37,9 +37,6 @@ import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.plugin.DefinitionFactory;
 import org.jumpmind.metl.core.plugin.IPluginManager;
-import org.jumpmind.metl.ui.definition.ObjectFactory;
-import org.jumpmind.metl.ui.definition.XMLComponentUI;
-import org.jumpmind.metl.ui.definition.XMLUI;
 import org.jumpmind.metl.ui.views.design.IComponentEditPanel;
 
 public class DefinitionPlusUIFactory extends DefinitionFactory implements IDefinitionPlusUIFactory {
