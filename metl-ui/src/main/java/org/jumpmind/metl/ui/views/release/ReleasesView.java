@@ -22,6 +22,7 @@ package org.jumpmind.metl.ui.views.release;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 
 import javax.annotation.PostConstruct;
 
@@ -48,7 +49,7 @@ import com.vaadin.ui.VerticalLayout;
 @UiComponent
 @Scope("ui")
 @TopBarLink(id = "release", category = Category.Release, menuOrder = 20, name = "Release", icon = FontAwesome.CUBE)
-public class ReleasesView extends VerticalLayout implements View {
+public class ReleasesView extends VerticalLayout implements View, IReleasePackageListener {
 
     private static final long serialVersionUID = 1L;
 
@@ -77,9 +78,9 @@ public class ReleasesView extends VerticalLayout implements View {
 
         ButtonBar buttonBar = new ButtonBar();
         addButton = buttonBar.addButton("Add", FontAwesome.PLUS, e -> add());
-        editButton = buttonBar.addButton("Edit", FontAwesome.EDIT, e -> add());
-        exportButton = buttonBar.addButton("Export", FontAwesome.DOWNLOAD, e -> add());
-        archiveButton = buttonBar.addButton("Archive", FontAwesome.ARCHIVE, e -> add());
+        editButton = buttonBar.addButton("Edit", FontAwesome.EDIT, e -> edit());
+        exportButton = buttonBar.addButton("Export", FontAwesome.DOWNLOAD, e -> export());
+        archiveButton = buttonBar.addButton("Archive", FontAwesome.ARCHIVE, e -> archive());
         finalizeButton = buttonBar.addButton("Finalize", FontAwesome.CUBE, e -> finalize());
 
         addComponent(buttonBar);
@@ -96,6 +97,10 @@ public class ReleasesView extends VerticalLayout implements View {
 
     }
 
+    @Override
+    public void updated(ReleasePackage releasePackage) {
+    }
+
     @PostConstruct
     protected void init() {
     }
@@ -103,20 +108,29 @@ public class ReleasesView extends VerticalLayout implements View {
     protected void refresh() {
         container.removeAllItems();
         try {
+            // TODO get release packages from configuration service 
             container.addItem(new ReleasePackage("MDS", "6.0.0", new SimpleDateFormat("yyyy-MM-dd").parse("2016-07-15"), true));
             container.addItem(new ReleasePackage("MDS", "6.1.0", new SimpleDateFormat("yyyy-MM-dd").parse("2016-08-02"), true));
             container.addItem(new ReleasePackage("MDS", "7.0.0", new SimpleDateFormat("yyyy-MM-dd").parse("2017-05-01"), false));
         } catch (ParseException e) {
         }
-
     }
 
     protected void add() {
-
+        new EditReleasePackageDialog(null, context, this).show();
     }
 
     protected void edit() {
-
+        new EditReleasePackageDialog(getFirstSelectedReleasePackage(), context, this).show();
+    }
+    
+    protected ReleasePackage getFirstSelectedReleasePackage() {
+        Collection<Object> collection = grid.getSelectedRows();
+        if (collection.size() > 0) {
+            return (ReleasePackage)collection.iterator().next();
+        } else {
+            return null;
+        }
     }
 
     protected void archive() {
@@ -128,11 +142,12 @@ public class ReleasesView extends VerticalLayout implements View {
     }
 
     protected void finalize() {
-
+        // TODO prompt for confirmation,  call service methods to rename master and create a new master
     }
 
     protected void rowSelected() {
-        //Collection<Object> packages = grid.getSelectedRows();
+        // Collection<Object> packages = grid.getSelectedRows();
+        // TODO enable or diable buttons
 
     }
 
