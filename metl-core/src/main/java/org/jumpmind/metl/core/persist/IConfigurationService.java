@@ -52,6 +52,7 @@ import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDefinitionPlugin;
 import org.jumpmind.metl.core.model.ProjectVersionDependency;
+import org.jumpmind.metl.core.model.ReleasePackage;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
@@ -278,5 +279,7 @@ public interface IConfigurationService {
     public void delete(Plugin plugin);
 
     Map<String, ProjectVersion> findProjectVersions();
+    
+    public List<ReleasePackage> findReleasePackages();
 
 }

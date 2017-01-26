@@ -578,7 +578,32 @@
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />        
     </table>                    
-                        
-
+       
+    <table name="release_package" description="">
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="released" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this package is released"/>
+        <column name="name" type="VARCHAR" size="255" description="A name for the release package" />
+		<column name="version_label" type="VARCHAR" size="255" description="Label for the version" />		
+        <column name="release_date" type="TIMESTAMP" description="The date the package was released." />
+        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
+        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />                
+    </table>
+    
+	<table name="release_package_project_version" description="">
+        <column name="release_package_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="project_version_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
+        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />   
+        <foreign-key foreignTable="release_package" name="fk_rlspkgprjver_2_rlspkg">
+            <reference local="release_package_id" foreign="id" />
+        </foreign-key>
+        <foreign-key foreignTable="project_version" name="fk_rlspkgprjver_2_prjver">
+            <reference local="project_version_id" foreign="id" />
+        </foreign-key>
+    </table>
 </database>
     

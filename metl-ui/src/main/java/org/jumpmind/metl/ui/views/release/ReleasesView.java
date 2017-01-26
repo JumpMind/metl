@@ -20,13 +20,13 @@
  */
 package org.jumpmind.metl.ui.views.release;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 
 import org.jumpmind.metl.core.model.ReleasePackage;
+import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.Category;
@@ -47,7 +47,7 @@ import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
-@Scope("ui")
+@Scope(value = "ui")
 @TopBarLink(id = "release", category = Category.Release, menuOrder = 20, name = "Release", icon = FontAwesome.CUBE)
 public class ReleasesView extends VerticalLayout implements View, IReleasePackageListener {
 
@@ -71,6 +71,8 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     Grid grid;
 
     BeanItemContainer<ReleasePackage> container;
+    
+    IConfigurationService configService;
 
     public ReleasesView() {
         setSizeFull();
@@ -94,7 +96,6 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
         grid.setColumns("name", "version", "releaseDate", "released");
         addComponent(grid);
         setExpandRatio(grid, 1);
-
     }
 
     @Override
@@ -103,17 +104,13 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
 
     @PostConstruct
     protected void init() {
+        configService = context.getConfigurationService();
     }
 
     protected void refresh() {
         container.removeAllItems();
-        try {
-            // TODO get release packages from configuration service 
-            container.addItem(new ReleasePackage("MDS", "6.0.0", new SimpleDateFormat("yyyy-MM-dd").parse("2016-07-15"), true));
-            container.addItem(new ReleasePackage("MDS", "6.1.0", new SimpleDateFormat("yyyy-MM-dd").parse("2016-08-02"), true));
-            container.addItem(new ReleasePackage("MDS", "7.0.0", new SimpleDateFormat("yyyy-MM-dd").parse("2017-05-01"), false));
-        } catch (ParseException e) {
-        }
+        List<ReleasePackage> releasePackages = configService.findReleasePackages();
+        container.addAll(releasePackages);
     }
 
     protected void add() {

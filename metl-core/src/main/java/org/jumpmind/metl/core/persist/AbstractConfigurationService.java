@@ -70,6 +70,7 @@ import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDefinitionPlugin;
 import org.jumpmind.metl.core.model.ProjectVersionDependency;
+import org.jumpmind.metl.core.model.ReleasePackage;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.ResourceSetting;
@@ -1555,4 +1556,12 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         return previousResource;
     }
 
+    @Override
+    public List<ReleasePackage> findReleasePackages() {
+        Map<String, Object> params = new HashMap<String, Object>();
+        List<ReleasePackage> releasePackages = find(ReleasePackage.class, params);
+        AbstractObjectNameBasedSorter.sort(releasePackages);
+        return releasePackages;
+    }
+    
 }
