@@ -17,10 +17,10 @@ public class ReleasePackage extends AbstractNamedObject {
     public ReleasePackage() {
     }
 
-    public ReleasePackage(String name, String version, Date releaseDate, boolean realeased) {
+    public ReleasePackage(String name, String versionLabel, Date releaseDate, boolean realeased) {
         super();
         this.name = name;
-        this.versionLabel = version;
+        this.versionLabel = versionLabel;
         this.releaseDate = releaseDate;
         this.released = realeased;
     }
@@ -56,11 +56,11 @@ public class ReleasePackage extends AbstractNamedObject {
         return releaseDate;
     }
     
-    public void setVersion(String version) {
-        this.versionLabel = version;
+    public void setVersionLabel(String versionLabel) {
+        this.versionLabel = versionLabel;
     }
     
-    public String getVersion() {
+    public String getVersionLabel() {
         return versionLabel;
     }
 

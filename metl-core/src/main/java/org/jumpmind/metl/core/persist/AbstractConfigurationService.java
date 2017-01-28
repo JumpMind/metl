@@ -71,6 +71,7 @@ import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDefinitionPlugin;
 import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.ReleasePackage;
+import org.jumpmind.metl.core.model.ReleasePackageProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.ResourceSetting;
@@ -567,6 +568,18 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         return resource;
     }
 
+    @Override
+    public List<String> findProjectVersionsInReleasePackage(String releasePackageId) {
+        List<String> projectVersions = new ArrayList<String>();
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("releasePackageId", releasePackageId);
+        List<ReleasePackageProjectVersion> rppvs = persistenceManager.find(ReleasePackageProjectVersion.class, params, null, null, tableName(ReleasePackageProjectVersion.class));
+        for (ReleasePackageProjectVersion rppv : rppvs) {
+            projectVersions.add(rppv.getProjectVersionId());
+        }
+        return projectVersions;
+    }
+    
     protected Component findComponent(String id, boolean readRelations) {
         Component component = new Component();
         component.setId(id);

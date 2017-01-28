@@ -354,4 +354,11 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
         return flows;
     }
 
+    @Override
+    public void deleteReleasePackageProjectVersionsForReleasePackage(String releasePackageId) {
+        final String DELETE_RELEASE_PACKAGE_VERSIONS_FOR_RELEASE_PACKAGE = "delete from %1$s_release_package_project_version " +
+                "where release_package_id = '%2$s'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        template.update(String.format(DELETE_RELEASE_PACKAGE_VERSIONS_FOR_RELEASE_PACKAGE, tablePrefix, releasePackageId));                
+    }
 }

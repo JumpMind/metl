@@ -129,6 +129,8 @@ public interface IConfigurationService {
     public void delete(User user);
 
     public void delete(Group group);
+    
+    public void deleteReleasePackageProjectVersionsForReleasePackage(String releasePackageId);
 
     public List<String> findAllProjectVersionIds();
 
@@ -208,6 +210,8 @@ public interface IConfigurationService {
 
     public List<User> findUsersByGroup(String groupId);
 
+    public List<String> findProjectVersionsInReleasePackage(String releasePackageId);
+    
     public String getLastKnownVersion();
 
     public boolean isDeployed(Flow flow);

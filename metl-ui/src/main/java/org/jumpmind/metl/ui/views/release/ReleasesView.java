@@ -84,8 +84,8 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
         exportButton = buttonBar.addButton("Export", FontAwesome.DOWNLOAD, e -> export());
         archiveButton = buttonBar.addButton("Archive", FontAwesome.ARCHIVE, e -> archive());
         finalizeButton = buttonBar.addButton("Finalize", FontAwesome.CUBE, e -> finalize());
-
         addComponent(buttonBar);
+        enableDisableButtonsForSelectionSize(0);
 
         grid = new Grid();
         grid.setSizeFull();
@@ -93,13 +93,14 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
         grid.addSelectionListener((e) -> rowSelected());
         container = new BeanItemContainer<>(ReleasePackage.class);
         grid.setContainerDataSource(container);
-        grid.setColumns("name", "version", "releaseDate", "released");
+        grid.setColumns("name", "versionLabel", "releaseDate", "released");
         addComponent(grid);
         setExpandRatio(grid, 1);
     }
 
     @Override
     public void updated(ReleasePackage releasePackage) {
+        refresh();
     }
 
     @PostConstruct
@@ -131,11 +132,11 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     }
 
     protected void archive() {
-
+        // TODO
     }
 
     protected void export() {
-
+        // TODO 
     }
 
     protected void finalize() {
@@ -143,11 +144,24 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     }
 
     protected void rowSelected() {
-        // Collection<Object> packages = grid.getSelectedRows();
-        // TODO enable or diable buttons
-
+        Collection<Object> packages = grid.getSelectedRows();
+        enableDisableButtonsForSelectionSize(packages.size());
     }
 
+    protected void enableDisableButtonsForSelectionSize(int nbrRowsSelected) {
+        if (nbrRowsSelected == 0) {
+            editButton.setEnabled(false);
+            exportButton.setEnabled(false);
+            archiveButton.setEnabled(false);
+            finalizeButton.setEnabled(false);
+        } else {
+            editButton.setEnabled(true);
+            exportButton.setEnabled(true);
+            archiveButton.setEnabled(true);
+            finalizeButton.setEnabled(true);            
+        }
+    }
+    
     @Override
     public void enter(ViewChangeEvent event) {
         refresh();
