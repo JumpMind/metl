@@ -168,6 +168,7 @@ public class DefinitionFactory implements IDefinitionFactory {
 
                     List<XMLAbstractDefinition> definitions = definitionsByPluginId.get(pluginId);
                     if (definitions != null) {
+                        definitions = new ArrayList<>(definitionsByPluginId.get(pluginId));
                         for (XMLAbstractDefinition definition : definitions) {
                             ProjectVersionDefinitionPlugin plugin = new ProjectVersionDefinitionPlugin();
                             plugin.setProjectVersionId(projectVersionId);
