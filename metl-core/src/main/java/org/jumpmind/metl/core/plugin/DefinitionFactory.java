@@ -42,6 +42,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -66,13 +73,15 @@ public class DefinitionFactory implements IDefinitionFactory {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    Map<String, Map<String, XMLAbstractDefinition>> definitionsByProjectVersionIdById;
+    protected Map<String, Map<String, XMLAbstractDefinition>> definitionsByProjectVersionIdById;
 
-    Map<String, List<XMLAbstractDefinition>> definitionsByPluginId;
+    protected Map<String, List<XMLAbstractDefinition>> definitionsByPluginId;
 
     protected IConfigurationService configurationService;
 
     protected IPluginManager pluginManager;
+
+    protected JAXBContext xmlContext;
 
     public DefinitionFactory() {
         definitionsByProjectVersionIdById = new HashMap<>();
@@ -86,15 +95,18 @@ public class DefinitionFactory implements IDefinitionFactory {
     }
 
     @Override
-    synchronized public void refresh() {
-        pluginManager.refresh();
+    public void refresh() {
         definitionsByProjectVersionIdById = new HashMap<>();
         definitionsByPluginId = new HashMap<>();
         if (pluginManager != null && configurationService != null) {
+            pluginManager.refresh();
             List<String> projectVersionIds = configurationService.findAllProjectVersionIds();
+            ExecutorService executor = Executors.newFixedThreadPool(projectVersionIds.size(), new RefreshThreadFactory());
+            List<Future<?>> futures = new ArrayList<Future<?>>();
             for (String projectVersionId : projectVersionIds) {
-                refresh(projectVersionId);
+                futures.add(executor.submit(() -> refresh(projectVersionId)));
             }
+            awaitTermination(executor, futures);
         }
     }
 
@@ -285,18 +297,25 @@ public class DefinitionFactory implements IDefinitionFactory {
 
     protected void loadComponentsForClassloader(String projectVersionId, String pluginId, ClassLoader classLoader) {
         try {
-
-            JAXBContext jc = JAXBContext.newInstance(XMLDefinitions.class, XMLComponentDefinition.class, XMLSetting.class, XMLSettings.class,
-                    XMLSettingChoices.class, ObjectFactory.class);
-            Unmarshaller unmarshaller = jc.createUnmarshaller();
-            List<InputStream> componentXmls = new ArrayList<>();
-            componentXmls.addAll(loadResources("plugin.xml", classLoader));
-            componentXmls.addAll(loadResources("component.xml", classLoader));
             Map<String, XMLAbstractDefinition> componentsById = definitionsByProjectVersionIdById.get(projectVersionId);
             if (componentsById == null) {
                 componentsById = new HashMap<>();
                 definitionsByProjectVersionIdById.put(projectVersionId, componentsById);
             }
+
+            if (xmlContext == null) {
+                synchronized (this) {
+                    if (xmlContext == null) {
+                        xmlContext = JAXBContext.newInstance(XMLDefinitions.class, XMLComponentDefinition.class, XMLSetting.class,
+                                XMLSettings.class, XMLSettingChoices.class, ObjectFactory.class);
+                    }
+                }
+            }
+            Unmarshaller unmarshaller = xmlContext.createUnmarshaller();
+            List<InputStream> componentXmls = new ArrayList<>();
+            componentXmls.addAll(loadResources("plugin.xml", classLoader));
+            componentXmls.addAll(loadResources("component.xml", classLoader));
+
             try {
                 for (InputStream inputStream : componentXmls) {
                     InputStreamReader reader = new InputStreamReader(inputStream);
@@ -369,7 +388,6 @@ public class DefinitionFactory implements IDefinitionFactory {
                 for (InputStream inputStream : componentXmls) {
                     IOUtils.closeQuietly(inputStream);
                 }
-
             }
         } catch (RuntimeException e) {
             throw e;
@@ -378,7 +396,7 @@ public class DefinitionFactory implements IDefinitionFactory {
         }
     }
 
-    private final void addXMLAbstractDefinition(String pluginId, XMLAbstractDefinition definition) {
+    private synchronized final void addXMLAbstractDefinition(String pluginId, XMLAbstractDefinition definition) {
         List<XMLAbstractDefinition> componentsForPluginId = definitionsByPluginId.get(pluginId);
         if (componentsForPluginId == null) {
             componentsForPluginId = new ArrayList<>();
@@ -403,6 +421,50 @@ public class DefinitionFactory implements IDefinitionFactory {
             return list;
         } catch (IOException e) {
             throw new IoException(e);
+        }
+    }
+
+    protected void awaitTermination(ExecutorService executor, List<Future<?>> futures) {
+        executor.shutdown();
+        try {
+            if (executor.awaitTermination(1, TimeUnit.HOURS)) {
+                for (Future<?> future : futures) {
+                    if (future.isDone()) {
+                        future.get();
+                    }
+                }
+            } else {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause != null) {
+                if (cause instanceof RuntimeException) {
+                    throw (RuntimeException) cause;
+                } else {
+                    throw new RuntimeException(cause);
+                }
+            }
+            throw new RuntimeException(e);
+        }
+    }
+
+    class RefreshThreadFactory implements ThreadFactory {
+        AtomicInteger threadNumber = new AtomicInteger(1);
+
+        public Thread newThread(Runnable runnable) {
+            Thread thread = new Thread(runnable);
+            thread.setName("refresh-plugins-" + threadNumber.getAndIncrement());
+            if (thread.isDaemon()) {
+                thread.setDaemon(false);
+            }
+            if (thread.getPriority() != Thread.NORM_PRIORITY) {
+                thread.setPriority(Thread.NORM_PRIORITY);
+            }
+            return thread;
         }
     }
 }

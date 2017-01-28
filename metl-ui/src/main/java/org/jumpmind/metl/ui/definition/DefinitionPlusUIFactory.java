@@ -43,6 +43,8 @@ public class DefinitionPlusUIFactory extends DefinitionFactory implements IDefin
 
     protected Map<String, Map<String, XMLComponentUI>> uisByProjectVersionIdByComponentId;
 
+    protected JAXBContext xmlUiContext;
+
     public DefinitionPlusUIFactory(IConfigurationService configurationService, IPluginManager pluginManager) {
         super(configurationService, pluginManager);
     }
@@ -63,8 +65,14 @@ public class DefinitionPlusUIFactory extends DefinitionFactory implements IDefin
             uisByProjectVersionIdByComponentId.put(projectVersionId, componentsById);
         }
         try {
-            JAXBContext jc = JAXBContext.newInstance(XMLUI.class, XMLComponentUI.class, ObjectFactory.class);
-            Unmarshaller unmarshaller = jc.createUnmarshaller();
+            if (xmlUiContext == null) {
+                synchronized (this) {
+                    if (xmlUiContext == null) {
+                        xmlUiContext = JAXBContext.newInstance(XMLUI.class, XMLComponentUI.class, ObjectFactory.class);
+                    }
+                }
+            }
+            Unmarshaller unmarshaller = xmlUiContext.createUnmarshaller();
 
             List<InputStream> componentXmls = loadResources("ui.xml", classLoader);
             try {
