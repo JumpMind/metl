@@ -1,6 +1,8 @@
 package org.jumpmind.metl.core.model;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class ReleasePackage extends AbstractNamedObject {
 
@@ -13,18 +15,13 @@ public class ReleasePackage extends AbstractNamedObject {
     protected String name;
     
     protected String versionLabel;
+    
+    protected List<ReleasePackageProjectVersion> projectVersions;
 
     public ReleasePackage() {
+        this.projectVersions = new ArrayList<ReleasePackageProjectVersion>();
     }
 
-    public ReleasePackage(String name, String versionLabel, Date releaseDate, boolean realeased) {
-        super();
-        this.name = name;
-        this.versionLabel = versionLabel;
-        this.releaseDate = releaseDate;
-        this.released = realeased;
-    }
-    
     @Override
     public boolean isSettingNameAllowed() {
         return true;
@@ -63,5 +60,12 @@ public class ReleasePackage extends AbstractNamedObject {
     public String getVersionLabel() {
         return versionLabel;
     }
+    
+    public List<ReleasePackageProjectVersion> getProjectVersions() {
+        return projectVersions;
+    }
 
+    public void setProjectVersions(List<ReleasePackageProjectVersion> projectVersions) {
+        this.projectVersions = projectVersions;
+    }
 }

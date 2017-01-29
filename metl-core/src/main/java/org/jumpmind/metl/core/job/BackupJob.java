@@ -56,7 +56,7 @@ public class BackupJob implements Runnable {
         todaysDir.mkdirs();
         Collection<ProjectVersion> versions = configurationService.findProjectVersions().values();
         for (ProjectVersion version : versions) {
-            String json = importExportService.export(version.getId(), AppConstants.SYSTEM_USER);
+            String json = importExportService.exportProjectVersion(version.getId(), AppConstants.SYSTEM_USER);
             FileUtils.write(new File(todaysDir,
                     version.getName().toLowerCase().replaceAll(" - ", " ").replaceAll(" ", "-") + ".json"),
                     json);

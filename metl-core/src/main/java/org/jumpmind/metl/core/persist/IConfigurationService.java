@@ -53,6 +53,7 @@ import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDefinitionPlugin;
 import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.ReleasePackage;
+import org.jumpmind.metl.core.model.ReleasePackageProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
@@ -130,8 +131,6 @@ public interface IConfigurationService {
 
     public void delete(Group group);
     
-    public void deleteReleasePackageProjectVersionsForReleasePackage(String releasePackageId);
-
     public List<String> findAllProjectVersionIds();
 
     public String export(Agent agent);
@@ -210,8 +209,6 @@ public interface IConfigurationService {
 
     public List<User> findUsersByGroup(String groupId);
 
-    public List<String> findProjectVersionsInReleasePackage(String releasePackageId);
-    
     public String getLastKnownVersion();
 
     public boolean isDeployed(Flow flow);
@@ -284,6 +281,13 @@ public interface IConfigurationService {
 
     Map<String, ProjectVersion> findProjectVersions();
     
+    public ReleasePackage findReleasePackage(String releasePackageId);
+    
     public List<ReleasePackage> findReleasePackages();
+    
+    public void deleteReleasePackageProjectVersionsForReleasePackage(String releasePackageId);
 
+    public List<ReleasePackageProjectVersion> findReleasePackageProjectVersions(String releasePackageId);
+    
+    public void refresh(ReleasePackage releasePackage);
 }

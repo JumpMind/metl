@@ -3,9 +3,11 @@ package org.jumpmind.metl.ui.views.release;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.jumpmind.metl.core.model.Project;
@@ -93,7 +95,11 @@ public class EditReleasePackageDialog extends ResizableWindow {
         return form;
     }
 
-    protected VerticalLayout buildProjectsAndVersions(String releasePackageId) {
+    protected Panel buildProjectsAndVersions(String releasePackageId) {
+
+        Panel projectsAndVersionsPanel = new Panel("Projects and Versions");
+        projectsAndVersionsPanel.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
+        projectsAndVersionsPanel.setSizeFull();
 
         VerticalLayout projectLayout = new VerticalLayout();
         projectLayout.setMargin(true);
@@ -106,16 +112,19 @@ public class EditReleasePackageDialog extends ResizableWindow {
             checkBox.setData(project.getId());
             projectLayout.addComponent(checkBox);
             //now put the project version options for each project            
-            OptionGroup optionGroup = new OptionGroup();
-            List<String> projectVersionsInReleasePackage = configurationService.findProjectVersionsInReleasePackage(releasePackageId);
+            OptionGroup optionGroup = new OptionGroup();            
+            List<ReleasePackageProjectVersion> rppvs = configurationService.findReleasePackageProjectVersions(releasePackageId);
+            Set<String> projectVersionsInReleasePackage = getListOfProjectVersionsInReleasePackages(rppvs);
             for (ProjectVersion projectVersion : project.getProjectVersions()) {
                 optionGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
                 optionGroup.addItem(projectVersion.getId());
+                optionGroup.setEnabled(false);
                 //TODO when name goes away we need to change this to go after the type label (master, branch)
                 optionGroup.setItemCaption(projectVersion.getId(),projectVersion.getName());
                 if (projectVersionsInReleasePackage.contains(projectVersion.getId())) {
                     checkBox.setValue(true);
                     optionGroup.select(projectVersion.getId());
+                    optionGroup.setEnabled(true);
                 }
                 projectVersionOptionGroups.put(project.getId(), optionGroup);
                 projectLayout.addComponent(optionGroup);
@@ -123,7 +132,17 @@ public class EditReleasePackageDialog extends ResizableWindow {
             projectCheckboxes.add(checkBox);
             checkBox.addValueChangeListener(e -> projectSelectionListener(e));
         }
-        return projectLayout;
+        
+        projectsAndVersionsPanel.setContent(projectLayout);
+        return projectsAndVersionsPanel;
+    }
+    
+    protected Set<String> getListOfProjectVersionsInReleasePackages(List<ReleasePackageProjectVersion> rppvs) {
+        Set<String> projectVersionsInRelease = new HashSet<String>();
+        for (ReleasePackageProjectVersion rppv : rppvs) {
+            projectVersionsInRelease.add(rppv.getProjectVersionId());
+        }
+        return projectVersionsInRelease;
     }
     
     protected void projectSelectionListener(ValueChangeEvent event) {
@@ -132,11 +151,13 @@ public class EditReleasePackageDialog extends ResizableWindow {
         OptionGroup optionGroup = projectVersionOptionGroups.get(projectId);
         if (checkbox.getValue() == false) {
             optionGroup.clear();
+            optionGroup.setEnabled(false);
         } else {
             @SuppressWarnings("unchecked")
             Collection<String> projectVersionIds = (Collection<String>) optionGroup.getItemIds();
             Iterator<String> itr = projectVersionIds.iterator();
             optionGroup.select(itr.next());
+            optionGroup.setEnabled(true);
         }
     }
     

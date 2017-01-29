@@ -20,17 +20,25 @@
  */
 package org.jumpmind.metl.ui.views.release;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 
 import org.jumpmind.metl.core.model.ReleasePackage;
 import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.persist.IImportExportService;
+import org.jumpmind.metl.core.util.AppConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.TopBarLink;
+import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,9 +49,14 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
+import com.vaadin.server.ResourceReference;
+import com.vaadin.server.StreamResource;
+import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
@@ -73,11 +86,12 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     BeanItemContainer<ReleasePackage> container;
     
     IConfigurationService configService;
+    
+    IImportExportService importExportService;
 
     public ReleasesView() {
         setSizeFull();
         setMargin(false);
-
         ButtonBar buttonBar = new ButtonBar();
         addButton = buttonBar.addButton("Add", FontAwesome.PLUS, e -> add());
         editButton = buttonBar.addButton("Edit", FontAwesome.EDIT, e -> edit());
@@ -86,7 +100,6 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
         finalizeButton = buttonBar.addButton("Finalize", FontAwesome.CUBE, e -> finalize());
         addComponent(buttonBar);
         enableDisableButtonsForSelectionSize(0);
-
         grid = new Grid();
         grid.setSizeFull();
         grid.setSelectionMode(SelectionMode.MULTI);
@@ -106,6 +119,7 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     @PostConstruct
     protected void init() {
         configService = context.getConfigurationService();
+        importExportService = context.getImportExportService();
     }
 
     protected void refresh() {
@@ -136,7 +150,10 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     }
 
     protected void export() {
-        // TODO 
+        //TODO this should be release package name and then refreshed to releaespackage
+        ReleasePackage releasePackage = getFirstSelectedReleasePackage();
+        String export = importExportService.exportReleasePackage(releasePackage.getId(), AppConstants.SYSTEM_USER);
+        downloadExport(export, releasePackage.getName());
     }
 
     protected void finalize() {
@@ -166,5 +183,26 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     public void enter(ViewChangeEvent event) {
         refresh();
     }
+    
+    protected void downloadExport(final String export, String filename) {
 
+        StreamSource ss = new StreamSource() {
+            private static final long serialVersionUID = 1L;
+
+            public InputStream getStream() {
+                try {
+                    return new ByteArrayInputStream(export.getBytes(Charset.forName("utf-8")));
+                } catch (Exception e) {
+                    log.error("Failed to export configuration", e);
+                    CommonUiUtils.notify("Failed to export configuration.", Type.ERROR_MESSAGE);
+                    return null;
+                }
+            }
+        };
+        String datetime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        StreamResource resource = new StreamResource(ss, String.format("%s-config-%s.json", filename, datetime));
+        final String KEY = "export";
+        setResource(KEY, resource);
+        Page.getCurrent().open(ResourceReference.create(resource, this, KEY).getURL(), null);
+    }    
 }
