@@ -25,7 +25,6 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,15 +35,9 @@ import org.apache.commons.lang.builder.CompareToBuilder;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
-import org.jumpmind.metl.core.model.AgentDeploymentParameter;
 import org.jumpmind.metl.core.model.AgentDeploymentSummary;
 import org.jumpmind.metl.core.model.AgentResource;
 import org.jumpmind.metl.core.model.DeploymentStatus;
-import org.jumpmind.metl.core.model.Flow;
-import org.jumpmind.metl.core.model.FlowName;
-import org.jumpmind.metl.core.model.FlowParameter;
-import org.jumpmind.metl.core.model.ProjectVersion;
-import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
@@ -55,7 +48,6 @@ import org.jumpmind.metl.ui.init.BackgroundRefresherService;
 import org.jumpmind.metl.ui.views.design.CallWebServicePanel;
 import org.jumpmind.metl.ui.views.manage.ExecutionRunPanel;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
-import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.vaadin.ui.common.NotifyDialog;
@@ -86,7 +78,6 @@ import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -117,8 +108,6 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
     Button editButton;
 
     Button runButton;
-
-    FlowSelectDialog flowSelectWindow;
 
     TextField filterField;
 
@@ -202,8 +191,8 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        addDeploymentButton = buttonBar.addButton("Add Deployment", Icons.DEPLOYMENT);
-        addDeploymentButton.addClickListener(new AddDeploymentClickListener());
+        addDeploymentButton = buttonBar.addButton("Deploy", Icons.DEPLOYMENT);
+        addDeploymentButton.addClickListener(e->new DeployDialog(context, this).show());
 
         editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
         editButton.addClickListener(event -> editClicked());
@@ -251,6 +240,10 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         refresh();
         setButtonsEnabled();
         backgroundRefresherService.register(this);
+    }
+    
+    public Agent getAgent() {
+        return agent;
     }
 
     protected void exportConfiguration() {
@@ -401,6 +394,10 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
     protected Set<AgentDeploymentSummary> getSelectedItems() {
         return (Set<AgentDeploymentSummary>) table.getValue();
     }
+    
+    protected List<AgentDeploymentSummary> getAgentDeploymentSummary() {
+        return container.getItemIds();
+    }
 
     protected void setSelectedItems(Set<AgentDeploymentSummary> selectedItems) {
         table.setValue(null);
@@ -410,90 +407,6 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
                 AgentDeploymentSummary updatedSummary = beanItem.getBean();
                 table.select(updatedSummary);
             }
-        }
-    }
-
-    class AddDeploymentClickListener implements ClickListener, IFlowSelectListener {
-        private static final long serialVersionUID = 1L;
-
-        public void buttonClick(ClickEvent event) {
-            if (flowSelectWindow == null) {
-                String introText = "Select one or more flows for deployment to this agent.";
-                flowSelectWindow = new FlowSelectDialog(context, "Add Deployment", introText, agent.isAllowTestFlows());
-                flowSelectWindow.setFlowSelectListener(this);
-            }
-            UI.getCurrent().addWindow(flowSelectWindow);
-        }
-
-        public void selected(Collection<FlowName> flowCollection) {
-            StringBuilder alreadyDeployedFlows = new StringBuilder();
-            List<AgentDeploymentSummary> summaries = container.getItemIds();
-            for (FlowName flowName : flowCollection) {
-                for (AgentDeploymentSummary agentDeploymentSummary : summaries) {
-                    if (flowName.getId().equals(agentDeploymentSummary.getArtifactId())) {
-                        if (alreadyDeployedFlows.length() > 0) {
-                            alreadyDeployedFlows.append(", ");
-                        }
-                        alreadyDeployedFlows.append("'").append(flowName.getName()).append("'");
-                    }
-                }
-            }
-
-            if (alreadyDeployedFlows.length() > 0) {
-                ConfirmDialog.show("Flows already deployed",
-                        String.format(
-                                "There are flows that have already been deployed.  Press OK to deploy another version. The following flows are already deployed: %s",
-                                alreadyDeployedFlows),
-                        () -> {
-                            deployFlows(flowCollection);
-                            return true;
-                        });
-            } else {
-                deployFlows(flowCollection);
-            }
-        }
-
-        protected void deployFlows(Collection<FlowName> flowCollection) {
-            for (FlowName flowName : flowCollection) {
-                IConfigurationService configurationService = context.getConfigurationService();
-                Flow flow = configurationService.findFlow(flowName.getId());
-                ProjectVersion projectVersion = configurationService.findProjectVersion(flow.getProjectVersionId());
-                AgentDeployment deployment = new AgentDeployment();
-                deployment.setProjectVersion(projectVersion);
-                deployment.setAgentId(agent.getId());
-                deployment.setFlow(flow);
-                deployment.setName(getName(flow.getName()));
-                List<AgentDeploymentParameter> deployParams = deployment.getAgentDeploymentParameters();
-                for (FlowParameter flowParam : flow.getFlowParameters()) {
-                    AgentDeploymentParameter deployParam = new AgentDeploymentParameter();
-                    deployParam.setFlowParameterId(flowParam.getId());
-                    deployParam.setAgentDeploymentId(deployment.getId());
-                    deployParam.setName(flowParam.getName());
-                    deployParam.setValue(flowParam.getDefaultValue());
-                    deployParams.add(deployParam);
-                }
-                context.getConfigurationService().save(deployment);
-            }
-            refresh();
-
-        }
-
-        protected String getName(String name) {
-            for (Object deployment : container.getItemIds()) {
-                if (deployment instanceof AgentDeployment) {
-                    AgentDeployment agentDeployment = (AgentDeployment) deployment;
-                    if (name.equals(agentDeployment.getName())) {
-                        if (name.matches(".*\\([0-9]+\\)$")) {
-                            String num = name.substring(name.lastIndexOf("(") + 1, name.lastIndexOf(")"));
-                            name = name.replaceAll("\\([0-9]+\\)$", "(" + (Integer.parseInt(num) + 1) + ")");
-                        } else {
-                            name += " (1)";
-                        }
-                        return getName(name);
-                    }
-                }
-            }
-            return name;
         }
     }
 

@@ -35,19 +35,16 @@ import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Icons;
-import org.jumpmind.vaadin.ui.common.ResizableWindow;
 
-import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class FlowSelectDialog extends ResizableWindow {
+public class SelectFlowsPanel extends VerticalLayout {
     
     private static final long serialVersionUID = 1L;
 
@@ -57,13 +54,10 @@ public class FlowSelectDialog extends ResizableWindow {
     
     Map<Object, IDatabasePlatform> platformByItemId = new HashMap<Object, IDatabasePlatform>();
     
-    IFlowSelectListener listener;
-    
     Project firstProject;
     
-    public FlowSelectDialog(ApplicationContext context, String caption, String introText,
+    public SelectFlowsPanel(ApplicationContext context, String introText,
     		boolean includeTestFlows) {
-        super(caption);
         this.context = context;
         
         tree.setMultiSelect(true);
@@ -78,42 +72,19 @@ public class FlowSelectDialog extends ResizableWindow {
         });
         addProjects();
         
-        setWidth(600.0f, Unit.PIXELS);
-        setHeight(600.0f, Unit.PIXELS);
-        
-        VerticalLayout layout = new VerticalLayout();
-        layout.setSpacing(true);
-        layout.setMargin(true);
-        layout.setSizeFull();        
-        layout.addComponent(new Label(introText));
+        setSpacing(true);
+        setMargin(true);
+        setSizeFull();        
+        addComponent(new Label(introText));
         
         Panel scrollable = new Panel();
         scrollable.addStyleName(ValoTheme.PANEL_BORDERLESS);
         scrollable.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
         scrollable.setSizeFull();
         scrollable.setContent(tree);
-        layout.addComponent(scrollable);
-        layout.setExpandRatio(scrollable, 1.0f);
-        addComponent(layout, 1);
-        
-        Button cancelButton = new Button("Cancel");
-        Button selectButton = new Button("Select");
-        selectButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
-        selectButton.setClickShortcut(KeyCode.ENTER);
-        addComponent(buildButtonFooter(cancelButton, selectButton));
-        
-        cancelButton.addClickListener(event -> {
-            close();
-        });
-
-        selectButton.addClickListener(event -> {
-            Collection<FlowName> flowCollection = getFlowCollection(includeTestFlows);
-            if (flowCollection.size() > 0) {
-                listener.selected(flowCollection);
-                close();
-            }
-        });
-        
+        addComponent(scrollable);
+        setExpandRatio(scrollable, 1.0f);
+                
         Set<Object> selected = new HashSet<>();
         if (firstProject != null) {
             selected.add(firstProject);
@@ -123,7 +94,7 @@ public class FlowSelectDialog extends ResizableWindow {
     }
 
     @SuppressWarnings("unchecked")
-    protected Collection<FlowName> getFlowCollection(boolean includeTestFlows) {
+    public Collection<FlowName> getSelectedFlows(boolean includeTestFlows) {
         Collection<FlowName> flowCollection = new TreeSet<FlowName>();
         addFlowsToCollection(flowCollection, (Collection<Object>) tree.getValue(), includeTestFlows);
         return flowCollection;
@@ -181,10 +152,6 @@ public class FlowSelectDialog extends ResizableWindow {
         tree.setItemIcon(itemId, icon);
         tree.setParent(itemId, parent);
         tree.setChildrenAllowed(itemId, areChildrenAllowed);
-    }
-    
-    public void setFlowSelectListener(IFlowSelectListener listener) {
-        this.listener = listener;
     }
 
 }
