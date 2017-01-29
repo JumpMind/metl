@@ -73,7 +73,6 @@ public class SelectFlowsPanel extends VerticalLayout {
         addProjects();
         
         setSpacing(true);
-        setMargin(true);
         setSizeFull();        
         addComponent(new Label(introText));
         
