@@ -1299,6 +1299,7 @@ abstract class AbstractConfigurationService extends AbstractService
         Map<String, AbstractObject> oldToNewUUIDMapping = new HashMap<>();
         ProjectVersion newVersion = copyWithNewUUID(oldToNewUUIDMapping, original);
         newVersion.setVersionLabel(newVersionLabel);
+        newVersion.setVersionType(ProjectVersion.VersionType.BRANCH.toString());
         newVersion.setReleased(false);
         newVersion.setDeleted(false);
         newVersion.setArchived(false);

@@ -26,8 +26,8 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
             } else if ("File|New|Project Dependency".equals(menuSelected)) {
                 navigator.promptForNewDependency();
                 return true;
-            } else if ("File|New|Project Version".equals(menuSelected)) {
-                navigator.doNewVersion();
+            } else if ("File|New|Project Branch".equals(menuSelected)) {
+                navigator.doNewProjectBranch();
                 return true;
             } else if ("File|New|Flow|Design".equals(menuSelected)) {
                 navigator.addNewFlow(false);

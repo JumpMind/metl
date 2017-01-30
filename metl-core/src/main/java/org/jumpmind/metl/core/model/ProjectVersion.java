@@ -27,6 +27,10 @@ public class ProjectVersion extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
 
+    public enum VersionType { 
+        TRUNK, BRANCH, RELEASE 
+    }
+        
     Project project;
 
     String description = "";
@@ -34,6 +38,8 @@ public class ProjectVersion extends AbstractNamedObject {
     String origVersionId;
 
     String versionLabel;
+    
+    String versionType;
 
     boolean released;
 
@@ -136,6 +142,14 @@ public class ProjectVersion extends AbstractNamedObject {
         return true;
     }
 
+    public String getVersionType() {
+        return versionType;
+    }
+
+    public void setVersionType(String versionType) {
+        this.versionType = versionType;
+    }
+    
     public String attemptToCalculateNextVersionLabel() {
         return attemptToCalculateNextVersionLabel(versionLabel);
     }
@@ -160,5 +174,4 @@ public class ProjectVersion extends AbstractNamedObject {
         }
         return nextVersion;
     }
-
 }

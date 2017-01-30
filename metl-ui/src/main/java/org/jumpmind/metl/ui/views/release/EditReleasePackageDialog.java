@@ -97,7 +97,7 @@ public class EditReleasePackageDialog extends ResizableWindow {
 
     protected Panel buildProjectsAndVersions(String releasePackageId) {
 
-        Panel projectsAndVersionsPanel = new Panel("Projects and Versions");
+        Panel projectsAndVersionsPanel = new Panel("Projects and Branches");
         projectsAndVersionsPanel.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
         projectsAndVersionsPanel.setSizeFull();
 
@@ -116,18 +116,19 @@ public class EditReleasePackageDialog extends ResizableWindow {
             List<ReleasePackageProjectVersion> rppvs = configurationService.findReleasePackageProjectVersions(releasePackageId);
             Set<String> projectVersionsInReleasePackage = getListOfProjectVersionsInReleasePackages(rppvs);
             for (ProjectVersion projectVersion : project.getProjectVersions()) {
-                optionGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
-                optionGroup.addItem(projectVersion.getId());
-                optionGroup.setEnabled(false);
-                //TODO when name goes away we need to change this to go after the type label (master, branch)
-                optionGroup.setItemCaption(projectVersion.getId(),projectVersion.getName());
-                if (projectVersionsInReleasePackage.contains(projectVersion.getId())) {
-                    checkBox.setValue(true);
-                    optionGroup.select(projectVersion.getId());
-                    optionGroup.setEnabled(true);
+                if (!projectVersion.getVersionType().equals(ProjectVersion.VersionType.RELEASE)) {
+                    optionGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
+                    optionGroup.addItem(projectVersion.getId());
+                    optionGroup.setEnabled(false);
+                    optionGroup.setItemCaption(projectVersion.getId(),projectVersion.getName());
+                    if (projectVersionsInReleasePackage.contains(projectVersion.getId())) {
+                        checkBox.setValue(true);
+                        optionGroup.select(projectVersion.getId());
+                        optionGroup.setEnabled(true);
+                    }
+                    projectVersionOptionGroups.put(project.getId(), optionGroup);
+                    projectLayout.addComponent(optionGroup);
                 }
-                projectVersionOptionGroups.put(project.getId(), optionGroup);
-                projectLayout.addComponent(optionGroup);
             }
             projectCheckboxes.add(checkBox);
             checkBox.addValueChangeListener(e -> projectSelectionListener(e));

@@ -1,6 +1,7 @@
 package org.jumpmind.metl.ui.views.design.menu;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.ui.common.CutCopyPasteManager;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
 
@@ -23,7 +24,6 @@ public class ProjectVersionMenuManager extends AbstractDesignSelectedValueMenuMa
     protected String[] getEnabledPaths(Object selected) {
         String[] enabledPaths = (String[]) ArrayUtils.addAll(super.getEnabledPaths(selected), new String[] {
                 "File|New|Project Dependency",
-                "File|New|Project Version",
                 "File|New|Flow|Design",
                 "File|New|Flow|Test",
                 "File|New|Model",
@@ -46,6 +46,12 @@ public class ProjectVersionMenuManager extends AbstractDesignSelectedValueMenuMa
                 .containsKey(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE)) {
             enabledPaths = (String[]) ArrayUtils.add(enabledPaths, "Edit|Paste");
         }
+        ProjectVersion version = (ProjectVersion) selected;
+        if (version.getVersionType().equalsIgnoreCase(ProjectVersion.VersionType.RELEASE.toString()) ||
+                version.getVersionType().equalsIgnoreCase(ProjectVersion.VersionType.TRUNK.toString())) {
+            enabledPaths = (String[]) ArrayUtils.add(enabledPaths, "File|New|Project Branch");
+        }
+        
         return enabledPaths;
     }
 }

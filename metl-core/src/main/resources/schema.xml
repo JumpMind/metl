@@ -39,6 +39,7 @@
     
     <table name="project_version" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="version_type" type="VARCHAR" size="10" primaryKey="false" description="The type of projectversion, trunk, branch or release" />
         <column name="version_label" type="VARCHAR" size="255" description="Label for the version" />
         <column name="project_id" type="CHAR" size="36" description="A unique identifier" />        
         <column name="orig_version_id" type="CHAR" size="36" description="A unique identifier" />

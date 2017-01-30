@@ -23,9 +23,7 @@ package org.jumpmind.metl.ui.views.design;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
-import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -53,9 +51,9 @@ import org.jumpmind.metl.ui.common.EnableFocusTextField;
 import org.jumpmind.metl.ui.common.ExportDialog;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.ImportDialog;
+import org.jumpmind.metl.ui.common.ImportDialog.IImportListener;
 import org.jumpmind.metl.ui.common.SelectProjectVersionDialog;
 import org.jumpmind.metl.ui.common.TabbedPanel;
-import org.jumpmind.metl.ui.common.ImportDialog.IImportListener;
 import org.jumpmind.metl.ui.views.design.menu.DesignMenuBar;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
@@ -555,33 +553,27 @@ public class DesignNavigator extends VerticalLayout {
         ImportDialog.show("Import Config", "Click the upload button to import your config", new ImportConfigurationListener());
     }
 
-    public void doNewVersion() {
+    public void doNewProjectBranch() {
         Object object = treeTable.getValue();
-        if (object instanceof ProjectVersion) {
+        if (object instanceof ProjectVersion) {            
             ProjectVersion original = (ProjectVersion) object;
-            String nextVersionLabel = original.attemptToCalculateNextVersionLabel();
-            configurationService.refresh(original.getProject());
+            configurationService.refresh(original.getProject());            
             List<ProjectVersion> versions = original.getProject().getProjectVersions();
-            boolean unique = true;
-            for (ProjectVersion projectVersion : versions) {
-                if (projectVersion.getVersionLabel().equals(nextVersionLabel)) {
-                    unique = false;
+            for (ProjectVersion version : versions) {
+                if (version.getVersionType().equalsIgnoreCase(ProjectVersion.VersionType.BRANCH.toString())) {
+                    CommonUiUtils.notify("Existing branch already exists for this project.  Cannot create a new one.",
+                            Type.WARNING_MESSAGE);
+                    return;
                 }
             }
-
-            if (!unique) {
-                nextVersionLabel = original.getVersionLabel() + "." + new SimpleDateFormat("yyyyMMddmmhhss").format(new Date());
-                unique = true;
-            }
-            ProjectVersion newVersion = configurationService.saveNewVersion(nextVersionLabel, original);
+            ProjectVersion newVersion = configurationService.saveNewVersion("branch", original);
             context.getDefinitionFactory().refresh(newVersion.getId());
-
             treeTable.addItem(newVersion);
             treeTable.setItemIcon(newVersion, Icons.PROJECT_VERSION);
             treeTable.setParent(newVersion, treeTable.getParent(object));
             treeTable.setChildrenAllowed(newVersion, false);
             treeTable.setValue(newVersion);
-            startEditingItem((AbstractNamedObject) treeTable.getValue());
+            refreshProjects();
         }
     }
     
