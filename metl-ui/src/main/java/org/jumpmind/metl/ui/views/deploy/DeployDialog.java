@@ -10,19 +10,23 @@ import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FlowParameter;
 import org.jumpmind.metl.core.model.ProjectVersion;
+import org.jumpmind.metl.core.model.ReleasePackage;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class DeployDialog extends ResizableWindow {
@@ -73,6 +77,7 @@ public class DeployDialog extends ResizableWindow {
         layout.addComponent(deployByOptionGroup);
 
         selectDeploymentLayout = new VerticalLayout();
+        selectDeploymentLayout.setSizeFull();
         selectDeploymentLayout.setMargin(new MarginInfo(true, false));
         layout.addComponent(selectDeploymentLayout);
         layout.setExpandRatio(selectDeploymentLayout, 1);
@@ -90,7 +95,12 @@ public class DeployDialog extends ResizableWindow {
 
     protected boolean isDeployByFlow() {
         Object deployByChoice = deployByOptionGroup.getValue();
-        return DEPLOY_BY_FLOW.equals(deployByChoice);
+        return deployByOptionGroup.isVisible() && DEPLOY_BY_FLOW.equals(deployByChoice);
+    }
+
+    protected boolean isDeployByPackage() {
+        Object deployByChoice = deployByOptionGroup.getValue();
+        return deployByOptionGroup.isVisible() && DEPLOY_BY_PACKAGE.equals(deployByChoice);
     }
 
     protected void deployByChanged() {
@@ -106,25 +116,59 @@ public class DeployDialog extends ResizableWindow {
 
     protected Component buildDeployByFlow() {
         if (selectFlowsPanel == null) {
-            String introText = "Select one or more flows for deployment to this agent.";
+            String introText = "Select one or more flows for deployment to this agent:";
             selectFlowsPanel = new SelectFlowsPanel(context, introText, parentPanel.getAgent().isAllowTestFlows());
         }
+        actionButton.setCaption("Deploy");
         return selectFlowsPanel;
     }
 
     protected Component buildDeployByPackage() {
-        return new Label("by package");
+        // TODO this could become it's own SelectPackagePanel
+        VerticalLayout layout = new VerticalLayout();
+        layout.setSpacing(true);
+        layout.setSizeFull();
+        layout.addComponent(new Label("Select a package to deploy:"));
+        Grid grid = new Grid();
+        grid.setSizeFull();
+        grid.setSelectionMode(SelectionMode.MULTI);
+        BeanItemContainer<?> container = new BeanItemContainer<>(ReleasePackage.class);
+        grid.setContainerDataSource(container);
+        grid.setColumns("name", "version", "released");
+        layout.addComponent(grid);
+        layout.setExpandRatio(grid, 1);
+        actionButton.setCaption("Next");
+        return layout;
+    }
+    
+    protected Component buildValidatePackageDeploymentAction() {
+        // TODO this could become ValidateReleasePackageDeploymentPanel
+        return new Label("Validate deployment action screen goes here");
     }
 
     protected void takeAction() {
         if (isDeployByFlow()) {
             Collection<FlowName> flows = selectFlowsPanel.getSelectedFlows(parentPanel.getAgent().isAllowTestFlows());
             verfiyDeployFlows(flows);
+        } else if (isDeployByPackage()) {
+            deployByOptionGroup.setVisible(false);
+            backButton.setCaption("Previous");
+            actionButton.setCaption("Deploy");
+            selectDeploymentLayout.removeAllComponents();
+            selectDeploymentLayout.addComponent(buildValidatePackageDeploymentAction());
+        } else {
+            log.info("Do package deployment now!");
         }
     }
 
     protected void back() {
-        close();
+        if (deployByOptionGroup.isVisible()) {
+            close();
+        } else {
+            deployByOptionGroup.setVisible(true);
+            backButton.setCaption("Cancel");
+            deployByChanged();
+        }
     }
 
     protected void verfiyDeployFlows(Collection<FlowName> flowCollection) {
