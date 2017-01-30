@@ -6,7 +6,9 @@ public interface IImportExportService {
     
     public void importConfiguration(String dataToImport, String userId);
     
-    public String export(String projectVersionId, String usedId);
+    public String exportProjectVersion(String projectVersionId, String userdId);
     
-    public String export(String projectVersionId, List<String> flowIds, List<String> modelIds, List<String> resoruceIds, String userId);
+    public String exportFlows(String projectVersionId, List<String> flowIds, List<String> modelIds, List<String> resoruceIds, String userId);
+    
+    public String exportReleasePackage(String releasePackageId, String userId);
 }

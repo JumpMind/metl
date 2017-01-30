@@ -1,4 +1,13 @@
 {
+  "versionNumber" : "2.0.0",
+  "hostName" : "Gregs-MBP.loc",
+  "releasePackageData" : [ {
+    "tableName" : "METL_RELEASE_PACKAGE",
+    "tableData" : { }
+  }, {
+    "tableName" : "METL_RELEASE_PACKAGE_PROJECT_VERSION",
+    "tableData" : { }
+  } ],
   "projectData" : [ {
     "tableName" : "METL_PROJECT",
     "tableData" : {
@@ -15,15 +24,22 @@
     "tableData" : {
       "f55241fd-9564-4f6a-bd0d-95a50a729000" : {
         "ID" : "f55241fd-9564-4f6a-bd0d-95a50a729000",
-        "VERSION_LABEL" : "1.0",
+        "VERSION_TYPE" : "trunk",
+        "VERSION_LABEL" : "trunk",
         "PROJECT_ID" : "10a34bb6-fa5b-45fb-9921-7b48daf219e7",
         "ORIG_VERSION_ID" : null,
         "DESCRIPTION" : null,
-        "READ_ONLY" : 0,
+        "RELEASED" : 0,
         "ARCHIVED" : 0,
         "DELETED" : 0
       }
     }
+  }, {
+    "tableName" : "METL_PROJECT_VERSION_DEFINITION_PLUGIN",
+    "tableData" : { }
+  }, {
+    "tableName" : "METL_PROJECT_VERSION_DEPENDENCY",
+    "tableData" : { }
   } ],
   "resourceData" : [ {
     "tableName" : "METL_RESOURCE",
@@ -226,6 +242,7 @@
       "673f280b-ddc8-467f-ab65-f9b2417680dd" : {
         "ID" : "673f280b-ddc8-467f-ab65-f9b2417680dd",
         "ENTITY_ID" : "0352d619-f9bd-4cbf-8b77-64d5d296c8aa",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "LAST_NAME",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -235,6 +252,7 @@
       "8409b9b5-f209-4049-a832-c08ae7f35443" : {
         "ID" : "8409b9b5-f209-4049-a832-c08ae7f35443",
         "ENTITY_ID" : "bc32da03-8c5e-4b7e-85c9-ae4f425b6c15",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "HOME_PHONE",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -244,6 +262,7 @@
       "e5756c1f-18de-41a9-a39a-b4652b7a654e" : {
         "ID" : "e5756c1f-18de-41a9-a39a-b4652b7a654e",
         "ENTITY_ID" : "8ebd3bc0-11bf-48a4-b344-be54d146e4a4",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "FIRST_NAME",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -253,6 +272,7 @@
       "a5b884e2-d97e-43f9-b7f5-cb6c784506b7" : {
         "ID" : "a5b884e2-d97e-43f9-b7f5-cb6c784506b7",
         "ENTITY_ID" : "0352d619-f9bd-4cbf-8b77-64d5d296c8aa",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "ID",
         "DESCRIPTION" : null,
         "TYPE" : "INTEGER",
@@ -262,6 +282,7 @@
       "fccb5d85-a7f4-4bd0-b68e-ae809d3f240b" : {
         "ID" : "fccb5d85-a7f4-4bd0-b68e-ae809d3f240b",
         "ENTITY_ID" : "bc32da03-8c5e-4b7e-85c9-ae4f425b6c15",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "FIRST_NAME",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -271,6 +292,7 @@
       "f61565d6-6a4a-47ba-be62-2c30dae0a5fc" : {
         "ID" : "f61565d6-6a4a-47ba-be62-2c30dae0a5fc",
         "ENTITY_ID" : "f64a8029-8bed-4ab2-9f75-ac1530fa6977",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "WEATHER_ID",
         "DESCRIPTION" : null,
         "TYPE" : "INTEGER",
@@ -280,6 +302,7 @@
       "872a0a25-b9df-47b6-a56b-6b62d1abaf48" : {
         "ID" : "872a0a25-b9df-47b6-a56b-6b62d1abaf48",
         "ENTITY_ID" : "6c48b80a-813a-4583-bbcb-f7b4df8b4ddc",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "LAST_NAME",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -289,6 +312,7 @@
       "8c825b18-54bf-47d1-b1ee-f29760da6dde" : {
         "ID" : "8c825b18-54bf-47d1-b1ee-f29760da6dde",
         "ENTITY_ID" : "51ae7f6a-e7a0-4f44-a0d1-06e50e39908f",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "ID",
         "DESCRIPTION" : null,
         "TYPE" : "INTEGER",
@@ -298,6 +322,7 @@
       "47afd16a-aa41-4799-a2d6-a637b7f0b8b3" : {
         "ID" : "47afd16a-aa41-4799-a2d6-a637b7f0b8b3",
         "ENTITY_ID" : "f64a8029-8bed-4ab2-9f75-ac1530fa6977",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "PRECIP_PCT_NIGHT",
         "DESCRIPTION" : null,
         "TYPE" : "INTEGER",
@@ -307,6 +332,7 @@
       "d9eb7258-0266-43b8-97dc-a317a3fb5ada" : {
         "ID" : "d9eb7258-0266-43b8-97dc-a317a3fb5ada",
         "ENTITY_ID" : "51ae7f6a-e7a0-4f44-a0d1-06e50e39908f",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "PHONE_TYPE",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -316,6 +342,7 @@
       "d60bf357-6e57-4830-99c4-57a978821a22" : {
         "ID" : "d60bf357-6e57-4830-99c4-57a978821a22",
         "ENTITY_ID" : "bc32da03-8c5e-4b7e-85c9-ae4f425b6c15",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "WORK_PHONE",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -325,6 +352,7 @@
       "cbcf5bee-21f4-4eeb-afc2-d0b1b8896f36" : {
         "ID" : "cbcf5bee-21f4-4eeb-afc2-d0b1b8896f36",
         "ENTITY_ID" : "dc5e9df9-eba8-4f53-abd0-0e61e16fb515",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "ADDRESS2",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -334,6 +362,7 @@
       "bc395e2d-af35-422c-a1b1-f5e69b524862" : {
         "ID" : "bc395e2d-af35-422c-a1b1-f5e69b524862",
         "ENTITY_ID" : "efa68385-fabb-4679-b5f7-74aac2405198",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "FIRST_NAME",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -343,6 +372,7 @@
       "30fef0ca-20ba-4528-8a33-206cf583baab" : {
         "ID" : "30fef0ca-20ba-4528-8a33-206cf583baab",
         "ENTITY_ID" : "6c48b80a-813a-4583-bbcb-f7b4df8b4ddc",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "HOME_PHONE",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -352,6 +382,7 @@
       "9c358d65-496f-410f-9c0c-0f6c8bf0ea6d" : {
         "ID" : "9c358d65-496f-410f-9c0c-0f6c8bf0ea6d",
         "ENTITY_ID" : "dc5e9df9-eba8-4f53-abd0-0e61e16fb515",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "STATE",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -361,6 +392,7 @@
       "b32f78a0-27c4-4782-b4ae-3a8ddb45b63e" : {
         "ID" : "b32f78a0-27c4-4782-b4ae-3a8ddb45b63e",
         "ENTITY_ID" : "8ebd3bc0-11bf-48a4-b344-be54d146e4a4",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "ID",
         "DESCRIPTION" : null,
         "TYPE" : "INTEGER",
@@ -370,6 +402,7 @@
       "5b18eb1e-603a-4f22-9bd3-e079196b3b86" : {
         "ID" : "5b18eb1e-603a-4f22-9bd3-e079196b3b86",
         "ENTITY_ID" : "efa68385-fabb-4679-b5f7-74aac2405198",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "ID",
         "DESCRIPTION" : null,
         "TYPE" : "INTEGER",
@@ -379,6 +412,7 @@
       "2f787a29-8942-4f92-84e1-51f00c7ee727" : {
         "ID" : "2f787a29-8942-4f92-84e1-51f00c7ee727",
         "ENTITY_ID" : "6c48b80a-813a-4583-bbcb-f7b4df8b4ddc",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "STATE",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -388,6 +422,7 @@
       "5f3cecf4-15d2-4910-916b-47beae752d47" : {
         "ID" : "5f3cecf4-15d2-4910-916b-47beae752d47",
         "ENTITY_ID" : "a8c52b29-f90b-4680-a9cd-5c48c8be83e8",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "FIRST_NAME",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -397,6 +432,7 @@
       "5d2f4b2e-a03b-4c15-a04c-c29c84d9c0f0" : {
         "ID" : "5d2f4b2e-a03b-4c15-a04c-c29c84d9c0f0",
         "ENTITY_ID" : "dc5e9df9-eba8-4f53-abd0-0e61e16fb515",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "ADDRESS1",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -406,6 +442,7 @@
       "635b6c7a-584a-49af-a25b-e31b0dff2917" : {
         "ID" : "635b6c7a-584a-49af-a25b-e31b0dff2917",
         "ENTITY_ID" : "a23efac5-a048-4402-814e-0141b3930e81",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "FIRST_NAME",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -415,6 +452,7 @@
       "1ec40c64-2258-4af6-b0a9-af17c6abf85c" : {
         "ID" : "1ec40c64-2258-4af6-b0a9-af17c6abf85c",
         "ENTITY_ID" : "f64a8029-8bed-4ab2-9f75-ac1530fa6977",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "DESCRIPTION",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -424,6 +462,7 @@
       "8492743f-7e1f-494f-b2cd-bc172006a7c4" : {
         "ID" : "8492743f-7e1f-494f-b2cd-bc172006a7c4",
         "ENTITY_ID" : "bc32da03-8c5e-4b7e-85c9-ae4f425b6c15",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "LAST_NAME",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -433,6 +472,7 @@
       "5a61c037-4b36-4152-9e4d-adb0e6d7c0ec" : {
         "ID" : "5a61c037-4b36-4152-9e4d-adb0e6d7c0ec",
         "ENTITY_ID" : "4af8c184-1fda-4c10-af1f-12fb70994156",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "LAST_NAME",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -442,6 +482,7 @@
       "4cb7dbee-baf8-4b79-a6bc-01dc18952fd5" : {
         "ID" : "4cb7dbee-baf8-4b79-a6bc-01dc18952fd5",
         "ENTITY_ID" : "6c48b80a-813a-4583-bbcb-f7b4df8b4ddc",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "CELL_PHONE",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -451,6 +492,7 @@
       "a133f2f0-2bd4-4c4a-adfd-202ae8ebc7fe" : {
         "ID" : "a133f2f0-2bd4-4c4a-adfd-202ae8ebc7fe",
         "ENTITY_ID" : "6c48b80a-813a-4583-bbcb-f7b4df8b4ddc",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "CITY",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -460,6 +502,7 @@
       "c5532f09-e105-4c7a-bb7a-ecbc8e9f0d2c" : {
         "ID" : "c5532f09-e105-4c7a-bb7a-ecbc8e9f0d2c",
         "ENTITY_ID" : "0352d619-f9bd-4cbf-8b77-64d5d296c8aa",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "GENDER",
         "DESCRIPTION" : null,
         "TYPE" : "CHAR",
@@ -469,6 +512,7 @@
       "242365fa-e6cb-49b9-b5c5-00a4807f2d8d" : {
         "ID" : "242365fa-e6cb-49b9-b5c5-00a4807f2d8d",
         "ENTITY_ID" : "a8c52b29-f90b-4680-a9cd-5c48c8be83e8",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "LAST_NAME",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -478,6 +522,7 @@
       "3565ebd1-69a1-46d8-87be-fdc4beafdc9a" : {
         "ID" : "3565ebd1-69a1-46d8-87be-fdc4beafdc9a",
         "ENTITY_ID" : "a23efac5-a048-4402-814e-0141b3930e81",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "LAST_NAME",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -487,6 +532,7 @@
       "3d7ce26b-9cd5-4b6e-96c2-96e32000f60e" : {
         "ID" : "3d7ce26b-9cd5-4b6e-96c2-96e32000f60e",
         "ENTITY_ID" : "dc5e9df9-eba8-4f53-abd0-0e61e16fb515",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "PERSON_ID",
         "DESCRIPTION" : null,
         "TYPE" : "INTEGER",
@@ -496,6 +542,7 @@
       "19fb814d-0734-48e4-8777-41a2ced2d59b" : {
         "ID" : "19fb814d-0734-48e4-8777-41a2ced2d59b",
         "ENTITY_ID" : "bc32da03-8c5e-4b7e-85c9-ae4f425b6c15",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "ADDRESS2",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -505,6 +552,7 @@
       "40c56640-2371-46d8-bf14-e86a418a5d18" : {
         "ID" : "40c56640-2371-46d8-bf14-e86a418a5d18",
         "ENTITY_ID" : "bc32da03-8c5e-4b7e-85c9-ae4f425b6c15",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "CELL_PHONE",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -514,6 +562,7 @@
       "f4442bb0-242e-46fd-8447-cc7475b058ec" : {
         "ID" : "f4442bb0-242e-46fd-8447-cc7475b058ec",
         "ENTITY_ID" : "dff9002a-2ce7-4612-a1c6-9345a01c7c82",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "POSTAL_CODE",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -523,6 +572,7 @@
       "3954107d-325b-4c45-90fd-8aae09d5a100" : {
         "ID" : "3954107d-325b-4c45-90fd-8aae09d5a100",
         "ENTITY_ID" : "8ebd3bc0-11bf-48a4-b344-be54d146e4a4",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "LAST_NAME",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -532,6 +582,7 @@
       "ee4b5695-c4c7-4cb1-b3ac-ff4f96e7dea0" : {
         "ID" : "ee4b5695-c4c7-4cb1-b3ac-ff4f96e7dea0",
         "ENTITY_ID" : "6c48b80a-813a-4583-bbcb-f7b4df8b4ddc",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "FIRST_NAME",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -541,6 +592,7 @@
       "16975d48-db0e-4200-9d35-e796926e8dd1" : {
         "ID" : "16975d48-db0e-4200-9d35-e796926e8dd1",
         "ENTITY_ID" : "6c48b80a-813a-4583-bbcb-f7b4df8b4ddc",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "ADDRESS1",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -550,6 +602,7 @@
       "3a98c162-b325-41c2-876d-348cf62d67af" : {
         "ID" : "3a98c162-b325-41c2-876d-348cf62d67af",
         "ENTITY_ID" : "efa68385-fabb-4679-b5f7-74aac2405198",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "LAST_NAME",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -559,6 +612,7 @@
       "a8fdf11c-c361-4eb4-aa14-990871a89281" : {
         "ID" : "a8fdf11c-c361-4eb4-aa14-990871a89281",
         "ENTITY_ID" : "f64a8029-8bed-4ab2-9f75-ac1530fa6977",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "FORECAST_DATE",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -568,6 +622,7 @@
       "09244d5c-1483-40c2-a51b-2ee2840d2282" : {
         "ID" : "09244d5c-1483-40c2-a51b-2ee2840d2282",
         "ENTITY_ID" : "f64a8029-8bed-4ab2-9f75-ac1530fa6977",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "CITY",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -577,6 +632,7 @@
       "489e7e47-6e51-4716-8b1d-4656d2413bfc" : {
         "ID" : "489e7e47-6e51-4716-8b1d-4656d2413bfc",
         "ENTITY_ID" : "f64a8029-8bed-4ab2-9f75-ac1530fa6977",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "MORNING_LOW",
         "DESCRIPTION" : null,
         "TYPE" : "INTEGER",
@@ -586,6 +642,7 @@
       "dc2a1b38-7872-439c-a5b6-7bda0d675b5e" : {
         "ID" : "dc2a1b38-7872-439c-a5b6-7bda0d675b5e",
         "ENTITY_ID" : "f64a8029-8bed-4ab2-9f75-ac1530fa6977",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "DAYTIME_HIGH",
         "DESCRIPTION" : null,
         "TYPE" : "INTEGER",
@@ -595,6 +652,7 @@
       "28bc9b7b-8ed6-4e3d-bb17-e62176fe017c" : {
         "ID" : "28bc9b7b-8ed6-4e3d-bb17-e62176fe017c",
         "ENTITY_ID" : "bc32da03-8c5e-4b7e-85c9-ae4f425b6c15",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "STATE",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -604,6 +662,7 @@
       "1ee4b406-7f36-422d-be81-b90b7538554a" : {
         "ID" : "1ee4b406-7f36-422d-be81-b90b7538554a",
         "ENTITY_ID" : "dc5e9df9-eba8-4f53-abd0-0e61e16fb515",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "POSTAL_CODE",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -613,6 +672,7 @@
       "3fc7e489-4498-4985-8848-b8b5517d2cd9" : {
         "ID" : "3fc7e489-4498-4985-8848-b8b5517d2cd9",
         "ENTITY_ID" : "6c48b80a-813a-4583-bbcb-f7b4df8b4ddc",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "GENDER",
         "DESCRIPTION" : null,
         "TYPE" : "CHAR",
@@ -622,6 +682,7 @@
       "3afbf5f6-5623-48bd-b00f-073a5161db2c" : {
         "ID" : "3afbf5f6-5623-48bd-b00f-073a5161db2c",
         "ENTITY_ID" : "0352d619-f9bd-4cbf-8b77-64d5d296c8aa",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "FIRST_NAME",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -631,6 +692,7 @@
       "f7014e97-65e6-471f-8b69-e7401a4c74cd" : {
         "ID" : "f7014e97-65e6-471f-8b69-e7401a4c74cd",
         "ENTITY_ID" : "bc32da03-8c5e-4b7e-85c9-ae4f425b6c15",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "GENDER",
         "DESCRIPTION" : null,
         "TYPE" : "CHAR",
@@ -640,6 +702,7 @@
       "d11339ec-3aab-4047-91b4-e7150ffce4b9" : {
         "ID" : "d11339ec-3aab-4047-91b4-e7150ffce4b9",
         "ENTITY_ID" : "a8c52b29-f90b-4680-a9cd-5c48c8be83e8",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "ID",
         "DESCRIPTION" : null,
         "TYPE" : "INTEGER",
@@ -649,6 +712,7 @@
       "0bd96d60-e7e1-4518-a471-df9dfa484154" : {
         "ID" : "0bd96d60-e7e1-4518-a471-df9dfa484154",
         "ENTITY_ID" : "bc32da03-8c5e-4b7e-85c9-ae4f425b6c15",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "POSTAL_CODE",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -658,6 +722,7 @@
       "e97d3af3-e770-4742-8587-9bdca14a766e" : {
         "ID" : "e97d3af3-e770-4742-8587-9bdca14a766e",
         "ENTITY_ID" : "bc32da03-8c5e-4b7e-85c9-ae4f425b6c15",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "ADDRESS1",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -667,6 +732,7 @@
       "d4346793-83fb-4cbf-9b34-713bc76d955d" : {
         "ID" : "d4346793-83fb-4cbf-9b34-713bc76d955d",
         "ENTITY_ID" : "6c48b80a-813a-4583-bbcb-f7b4df8b4ddc",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "POSTAL_CODE",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -676,6 +742,7 @@
       "3e039b3e-e3d5-4f1d-9b56-6dc3ee367680" : {
         "ID" : "3e039b3e-e3d5-4f1d-9b56-6dc3ee367680",
         "ENTITY_ID" : "f64a8029-8bed-4ab2-9f75-ac1530fa6977",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "PRECIP_PCT_DAY",
         "DESCRIPTION" : null,
         "TYPE" : "INTEGER",
@@ -685,6 +752,7 @@
       "22c774f5-e4f4-4595-b693-18987e83d57b" : {
         "ID" : "22c774f5-e4f4-4595-b693-18987e83d57b",
         "ENTITY_ID" : "6c48b80a-813a-4583-bbcb-f7b4df8b4ddc",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "WORK_PHONE",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -694,6 +762,7 @@
       "742ae01b-564d-42f4-85ad-2c224bc4aec4" : {
         "ID" : "742ae01b-564d-42f4-85ad-2c224bc4aec4",
         "ENTITY_ID" : "dc5e9df9-eba8-4f53-abd0-0e61e16fb515",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "ID",
         "DESCRIPTION" : null,
         "TYPE" : "INTEGER",
@@ -703,6 +772,7 @@
       "a375d0f6-6e6c-4801-a853-d0bb66aa913a" : {
         "ID" : "a375d0f6-6e6c-4801-a853-d0bb66aa913a",
         "ENTITY_ID" : "dc5e9df9-eba8-4f53-abd0-0e61e16fb515",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "CITY",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -712,6 +782,7 @@
       "9e1ff189-28b6-4119-9f98-50919bcddf97" : {
         "ID" : "9e1ff189-28b6-4119-9f98-50919bcddf97",
         "ENTITY_ID" : "51ae7f6a-e7a0-4f44-a0d1-06e50e39908f",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "PHONE_NUMBER",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -721,6 +792,7 @@
       "94c3d263-68fc-4ddc-a4c4-2817f84fed9c" : {
         "ID" : "94c3d263-68fc-4ddc-a4c4-2817f84fed9c",
         "ENTITY_ID" : "a8c52b29-f90b-4680-a9cd-5c48c8be83e8",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "GENDER",
         "DESCRIPTION" : null,
         "TYPE" : "CHAR",
@@ -730,6 +802,7 @@
       "9038b75a-fbae-4e67-b00e-6c983d718f93" : {
         "ID" : "9038b75a-fbae-4e67-b00e-6c983d718f93",
         "ENTITY_ID" : "a23efac5-a048-4402-814e-0141b3930e81",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "ID",
         "DESCRIPTION" : null,
         "TYPE" : "INTEGER",
@@ -739,6 +812,7 @@
       "c6b15156-b011-4c79-8ac5-2b712d4fec43" : {
         "ID" : "c6b15156-b011-4c79-8ac5-2b712d4fec43",
         "ENTITY_ID" : "6c48b80a-813a-4583-bbcb-f7b4df8b4ddc",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "ADDRESS2",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -748,6 +822,7 @@
       "26186aa6-1af7-4a99-9e87-e6df04fb71dd" : {
         "ID" : "26186aa6-1af7-4a99-9e87-e6df04fb71dd",
         "ENTITY_ID" : "4af8c184-1fda-4c10-af1f-12fb70994156",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "ID",
         "DESCRIPTION" : null,
         "TYPE" : "INTEGER",
@@ -757,6 +832,7 @@
       "878ab011-a39e-4a8a-a6b6-492291eba318" : {
         "ID" : "878ab011-a39e-4a8a-a6b6-492291eba318",
         "ENTITY_ID" : "51ae7f6a-e7a0-4f44-a0d1-06e50e39908f",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "PERSON_ID",
         "DESCRIPTION" : null,
         "TYPE" : "INTEGER",
@@ -766,6 +842,7 @@
       "2012e243-647f-487c-a970-4174f6b064b8" : {
         "ID" : "2012e243-647f-487c-a970-4174f6b064b8",
         "ENTITY_ID" : "4af8c184-1fda-4c10-af1f-12fb70994156",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "FIRST_NAME",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -775,6 +852,7 @@
       "b410194d-057f-4c51-9c8f-4f7acd80565e" : {
         "ID" : "b410194d-057f-4c51-9c8f-4f7acd80565e",
         "ENTITY_ID" : "bc32da03-8c5e-4b7e-85c9-ae4f425b6c15",
+        "ATTRIBUTE_ORDER" : 0,
         "NAME" : "CITY",
         "DESCRIPTION" : null,
         "TYPE" : "VARCHAR",
@@ -4477,6 +4555,7 @@
         "TEST" : 0,
         "WEB_SERVICE" : 1,
         "NAME" : "Service Get Person By Id",
+        "NOTES" : null,
         "FOLDER_ID" : null
       },
       "34e6001c-e886-4203-96f0-00ac12e209aa" : {
@@ -4487,6 +4566,7 @@
         "TEST" : 0,
         "WEB_SERVICE" : 0,
         "NAME" : "Enhance Entities using Rdbms Reader",
+        "NOTES" : null,
         "FOLDER_ID" : null
       },
       "2bfd1a28-5825-4fd8-b6c1-af05900dc09e" : {
@@ -4497,6 +4577,7 @@
         "TEST" : 0,
         "WEB_SERVICE" : 0,
         "NAME" : "Partition By Gender",
+        "NOTES" : null,
         "FOLDER_ID" : null
       },
       "0b0f8a9e-d7de-4ab0-bb73-088f6a41f62e" : {
@@ -4507,6 +4588,7 @@
         "TEST" : 0,
         "WEB_SERVICE" : 0,
         "NAME" : "WSDL Service Call",
+        "NOTES" : null,
         "FOLDER_ID" : null
       },
       "fdd32a7f-aad7-4976-b49a-3c9bd77aec68" : {
@@ -4517,6 +4599,7 @@
         "TEST" : 0,
         "WEB_SERVICE" : 0,
         "NAME" : "Relational Database to Flat File",
+        "NOTES" : null,
         "FOLDER_ID" : null
       },
       "5bde83fe-b7ed-4102-94f2-91cb08487da3" : {
@@ -4527,6 +4610,7 @@
         "TEST" : 0,
         "WEB_SERVICE" : 0,
         "NAME" : "Calculate Differences Only",
+        "NOTES" : null,
         "FOLDER_ID" : null
       },
       "0ad66607-84a4-4f73-a663-fbcdf464e068" : {
@@ -4537,6 +4621,7 @@
         "TEST" : 0,
         "WEB_SERVICE" : 0,
         "NAME" : "Normalized Table to Denormalized File v2",
+        "NOTES" : null,
         "FOLDER_ID" : null
       },
       "62a5e75e-ce09-425f-a952-3c8b31d14329" : {
@@ -4547,6 +4632,7 @@
         "TEST" : 0,
         "WEB_SERVICE" : 0,
         "NAME" : "List Files In Temp Directory",
+        "NOTES" : null,
         "FOLDER_ID" : null
       },
       "d58d3a28-fecd-42f8-99b2-22bf7a313541" : {
@@ -4557,6 +4643,7 @@
         "TEST" : 0,
         "WEB_SERVICE" : 1,
         "NAME" : "Service Get All Persons",
+        "NOTES" : null,
         "FOLDER_ID" : null
       },
       "1409be3a-d67e-46e5-82bf-95cf9d4ad600" : {
@@ -4567,6 +4654,7 @@
         "TEST" : 0,
         "WEB_SERVICE" : 1,
         "NAME" : "Service Upsert Persons",
+        "NOTES" : null,
         "FOLDER_ID" : null
       },
       "eb24b7b5-3517-4a80-a95a-d20eae5264e8" : {
@@ -4577,6 +4665,7 @@
         "TEST" : 0,
         "WEB_SERVICE" : 0,
         "NAME" : "DB request to WSDL to DB results",
+        "NOTES" : null,
         "FOLDER_ID" : null
       },
       "7d489ca3-f9cf-428e-ae62-e8e401b41d27" : {
@@ -4587,6 +4676,7 @@
         "TEST" : 0,
         "WEB_SERVICE" : 0,
         "NAME" : "Remove Duplicates",
+        "NOTES" : null,
         "FOLDER_ID" : null
       },
       "d9448c61-20d9-4850-88af-b9c1283dec86" : {
@@ -4597,6 +4687,7 @@
         "TEST" : 0,
         "WEB_SERVICE" : 0,
         "NAME" : "Test Lookup",
+        "NOTES" : null,
         "FOLDER_ID" : null
       },
       "1ddf97fc-5546-455e-836f-f1f5bd02922f" : {
@@ -4607,6 +4698,7 @@
         "TEST" : 0,
         "WEB_SERVICE" : 0,
         "NAME" : "Sort Records",
+        "NOTES" : null,
         "FOLDER_ID" : null
       },
       "aaffac0c-4448-496c-8e53-5b3862d4aa58" : {
@@ -4617,6 +4709,7 @@
         "TEST" : 0,
         "WEB_SERVICE" : 0,
         "NAME" : "Normalized Table to Denormalized File",
+        "NOTES" : null,
         "FOLDER_ID" : null
       },
       "55cd705b-662e-495f-b288-1738d949814f" : {
@@ -4627,6 +4720,7 @@
         "TEST" : 0,
         "WEB_SERVICE" : 0,
         "NAME" : "Flat File to Relational Database",
+        "NOTES" : null,
         "FOLDER_ID" : null
       },
       "cef7a338-35f7-418f-a4a2-cffaeb0bcf4c" : {
@@ -4637,6 +4731,7 @@
         "TEST" : 0,
         "WEB_SERVICE" : 1,
         "NAME" : "Service Get All Persons Custom XML",
+        "NOTES" : null,
         "FOLDER_ID" : null
       }
     }

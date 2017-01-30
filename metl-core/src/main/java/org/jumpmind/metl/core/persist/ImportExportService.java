@@ -28,6 +28,8 @@ import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.ProjectVersion;
+import org.jumpmind.metl.core.model.ReleasePackage;
+import org.jumpmind.metl.core.model.ReleasePackageProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.security.ISecurityService;
@@ -44,7 +46,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class ImportExportService extends AbstractService implements IImportExportService {
     
-    
     final static Integer TABLE = new Integer(0);
     final static Integer SQL = new Integer(1);
     final static Integer KEY_COLUMNS = new Integer(2);
@@ -59,7 +60,13 @@ public class ImportExportService extends AbstractService implements IImportExpor
     final static Integer LAST_UPDATE_TIME_IDX = new Integer(1);
     final static Integer CREATE_BY_IDX = new Integer(2);
     final static Integer LAST_UPDATE_BY_IDX = new Integer(3);
-    
+
+    final String[][] RELEASE_PACKAGE_SQL = {
+            {"_RELEASE_PACKAGE","SELECT * FROM %1$s_RELEASE_PACKAGE WHERE ID='%2$s' ORDER BY ID", "ID"},
+            {"_RELEASE_PACKAGE_PROJECT_VERSION","SELECT * FROM %1$s_RELEASE_PACKAGE_PROJECT_VERSION WHERE " +
+                    "RELEASE_PACKAGE_ID='%2$s' ORDER BY RELEASE_PACKAGE_ID", "RELEASE_PACKAGE_ID, PROJECT_VERSION_ID"}
+    };
+
     final String[][] PROJECT_SQL = {
             {"_PROJECT","SELECT * FROM %1$s_PROJECT WHERE ID IN (SELECT PROJECT_ID FROM %1$s_PROJECT_VERSION WHERE ID='%2$s') UNION SELECT * FROM %1$s_PROJECT WHERE ID='%3$s' ORDER BY ID","ID"},
             {"_PROJECT_VERSION","SELECT * FROM %1$s_PROJECT_VERSION WHERE ID='%2$s' ORDER BY ID","ID"},
@@ -128,7 +135,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
     }
     
     @Override
-    public String export(String projectVersionId, String userId) {
+    public String exportProjectVersion(String projectVersionId, String userId) {
         List<FlowName> flows = new ArrayList<>();
         flows.addAll(configurationService.findFlowsInProject(projectVersionId, true));
         flows.addAll(configurationService.findFlowsInProject(projectVersionId, false));
@@ -149,27 +156,48 @@ public class ImportExportService extends AbstractService implements IImportExpor
         for (ResourceName resource : resources) {
             resourceIds.add(resource.getId());
         }
-
-        return export(projectVersionId, flowIds, modelIds, resourceIds, userId);
-
+        return exportFlows(projectVersionId, flowIds, modelIds, resourceIds, userId);
     }
 
     @Override
-    public String export(String projectVersionId, List<String> flowIds, List<String> modelIds,
-            List<String> resourceIds, String userId) {        
+    public String exportReleasePackage(String releasePackageId, String userId) {        
+        
+        Set<FlowName> flows = new HashSet<FlowName>();
+        Set<ModelName> models = new HashSet<ModelName>();
+        Set<ResourceName> resources = new HashSet<ResourceName>();
+        ConfigData exportData = initExport();
+        
+        ReleasePackage releasePackage = configurationService.findReleasePackage(releasePackageId);
+        addConfigData(exportData.getReleasePackageData(), RELEASE_PACKAGE_SQL, releasePackageId, releasePackageId);
+        for (ReleasePackageProjectVersion rppv : releasePackage.getProjectVersions()) {
+            flows.addAll(configurationService.findFlowsInProject(rppv.getProjectVersionId(), false));
+            models.addAll(configurationService.findModelsInProject(rppv.getProjectVersionId()));
+            resources.addAll(configurationService.findResourcesInProject(rppv.getProjectVersionId()));            
+            addConfigData(exportData.getProjectData(), PROJECT_SQL, rppv.getProjectVersionId(), null);
+        }        
+        for (FlowName flow : flows) {
+            addConfigData(exportData.getFlowData(), FLOW_SQL, flow.getProjectVersionId(), flow.getId());
+        }
+        for (ModelName model : models) {
+            addConfigData(exportData.getModelData(), MODEL_SQL, model.getProjectVersionId(), model.getId());
+        }
+        for (ResourceName resource : resources) {
+            addConfigData(exportData.getResourceData(), RESOURCE_SQL, resource.getProjectVersionId(), resource.getId());
+        }        
+        save(new AuditEvent(AuditEvent.EventType.EXPORT, String.format("%s, flows: %d, models %d, resources: %d", 
+                releasePackage.getName(), flows.size(), models.size(), resources.size()), userId));
+        return serializeExportToJson(exportData);
+    }
+
+    @Override
+    public String exportFlows(String projectVersionId, List<String> flowIds, List<String> modelIds,
+            List<String> resourceIds, String userId) {     
+        
         ProjectVersion version = configurationService.findProjectVersion(projectVersionId);
         save(new AuditEvent(AuditEvent.EventType.EXPORT, String.format("%s, flows: %d, models %d, resources: %d", 
                 version.getName(), flowIds.size(), modelIds.size(), resourceIds.size()), userId));
 
-        ConfigData exportData = new ConfigData();
-        exportData.setHostName(AppUtils.getHostName());
-        exportData.setVersionNumber(VersionUtils.getCurrentVersion());
-        
-        initConfigData(exportData.getProjectData(), PROJECT_SQL);
-        initConfigData(exportData.getModelData(), MODEL_SQL);
-        initConfigData(exportData.getResourceData(), RESOURCE_SQL);
-        initConfigData(exportData.getFlowData(), FLOW_SQL);
-
+        ConfigData exportData = initExport();
         addConfigData(exportData.getProjectData(), PROJECT_SQL, projectVersionId, null);
         for (String flowId : flowIds) {
             addConfigData(exportData.getFlowData(), FLOW_SQL, projectVersionId, flowId);
@@ -180,10 +208,23 @@ public class ImportExportService extends AbstractService implements IImportExpor
         for (String resourceId : resourceIds) {
             addConfigData(exportData.getResourceData(), RESOURCE_SQL, projectVersionId, resourceId);
         }
-
         return serializeExportToJson(exportData);
     }
 
+    protected ConfigData initExport() {
+        ConfigData exportData = new ConfigData();
+        exportData.setHostName(AppUtils.getHostName());
+        exportData.setVersionNumber(VersionUtils.getCurrentVersion());
+
+        initConfigData(exportData.getReleasePackageData(), RELEASE_PACKAGE_SQL);
+        initConfigData(exportData.getProjectData(), PROJECT_SQL);
+        initConfigData(exportData.getModelData(), MODEL_SQL);
+        initConfigData(exportData.getResourceData(), RESOURCE_SQL);
+        initConfigData(exportData.getFlowData(), FLOW_SQL);
+
+        return exportData;        
+    }
+    
     @Override
     public void importConfiguration(String configDataString, String userId) {
         ConfigData configData = deserializeConfigurationData(configDataString);
@@ -714,18 +755,20 @@ public class ImportExportService extends AbstractService implements IImportExpor
 
         String versionNumber;
         String hostName;
+        List<TableData> releasePackageData = new ArrayList<TableData>();
         List<TableData> projectData = new ArrayList<TableData>();
         List<TableData> resourceData = new ArrayList<TableData>();
         List<TableData> modelData = new ArrayList<TableData>();
         List<TableData> flowData = new ArrayList<TableData>();
 
         public ConfigData() {
+            releasePackageData = new ArrayList<TableData>();
             projectData = new ArrayList<TableData>();
             resourceData = new ArrayList<TableData>();
             modelData = new ArrayList<TableData>();
             flowData = new ArrayList<TableData>();
         }
-        
+
         public void setVersionNumber(String versionNumber) {
             this.versionNumber = versionNumber;
         }
@@ -742,6 +785,14 @@ public class ImportExportService extends AbstractService implements IImportExpor
             return hostName;
         }
 
+        public List<TableData> getReleasePackageData() {
+            return releasePackageData;
+        }
+
+        public void setReleasePackageData(List<TableData> releasePackageData) {
+            this.releasePackageData = releasePackageData;
+        }        
+        
         public List<TableData> getResourceData() {
             return resourceData;
         }
@@ -780,6 +831,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         public ImportConfigData(ConfigData configData) {
             this.hostName = configData.getHostName();
             this.versionNumber = configData.getVersionNumber();
+            this.releasePackageData = configData.releasePackageData;
             this.projectData = configData.projectData;
             this.resourceData = configData.resourceData;
             this.modelData = configData.modelData;
