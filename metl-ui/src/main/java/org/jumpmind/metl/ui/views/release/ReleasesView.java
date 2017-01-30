@@ -30,7 +30,9 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ReleasePackage;
+import org.jumpmind.metl.core.model.ReleasePackageProjectVersion;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IImportExportService;
 import org.jumpmind.metl.core.util.AppConstants;
@@ -146,7 +148,12 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     }
 
     protected void archive() {
-        // TODO
+        ReleasePackage releasePackage = getFirstSelectedReleasePackage();
+        for (ReleasePackageProjectVersion rppv : releasePackage.getProjectVersions()) {
+            ProjectVersion projectVersion = configService.findProjectVersion(rppv.getProjectVersionId());
+            projectVersion.setArchived(true);
+            configService.save(projectVersion);
+        }
     }
 
     protected void export() {
