@@ -135,7 +135,7 @@ public class PluginManager implements IPluginManager {
         List<PluginRepository> repositories = configurationService.findPluginRepositories();
         for (Plugin plugin : existing) {
             try {
-                if (null != getClassLoader(plugin.getArtifactGroup(), plugin.getArtifactName(), plugin.getArtifactVersion(), repositories)) {
+                if (null == getClassLoader(plugin.getArtifactGroup(), plugin.getArtifactName(), plugin.getArtifactVersion(), repositories)) {
                     logger.warn("Deleting plugin that could not be loaded: {}:{}:{}", plugin.getArtifactGroup(), plugin.getArtifactName(), plugin.getArtifactVersion());
                     configurationService.delete(plugin);
                 }
