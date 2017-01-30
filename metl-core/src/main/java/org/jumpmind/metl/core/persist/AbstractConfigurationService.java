@@ -1300,7 +1300,6 @@ abstract class AbstractConfigurationService extends AbstractService
         ProjectVersion newVersion = copyWithNewUUID(oldToNewUUIDMapping, original);
         newVersion.setVersionLabel(newVersionLabel);
         newVersion.setVersionType(projectVersionType);
-        newVersion.setReleased(false);
         newVersion.setDeleted(false);
         newVersion.setArchived(false);
         newVersion.setCreateTime(new Date());

@@ -93,8 +93,6 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
         formLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         CheckBox releasedCheckBox = new CheckBox("Released");
         releasedCheckBox.setImmediate(true);
-        releasedCheckBox.setValue(projectVersion.isReleased());
-        releasedCheckBox.addValueChangeListener(e->toggleReleased(e));
         formLayout.addComponent(releasedCheckBox);
         
         CheckBox archiveCheckBox = new CheckBox("Archived");
@@ -201,16 +199,7 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
         ((AbstractLayout)getContent()).addComponent(componentHeaderWrapper);
     }
     
-    protected void toggleReleased(ValueChangeEvent event) {
-        Boolean value = (Boolean)event.getProperty().getValue();
-        projectVersion.setReleased(value);
-        context.getConfigurationService().save(projectVersion);
-        designNavigator.refresh();
-    }
-    
     protected void toggleArchived(ValueChangeEvent event) {
-        Boolean value = (Boolean)event.getProperty().getValue();
-        projectVersion.setReleased(value);
         context.getConfigurationService().save(projectVersion);
         designNavigator.refresh();
     }

@@ -41,7 +41,7 @@ public class ProjectVersion extends AbstractNamedObject {
     
     String versionType;
 
-    boolean released;
+    Date releaseDate;
 
     boolean archived;
 
@@ -109,16 +109,8 @@ public class ProjectVersion extends AbstractNamedObject {
         return archived;
     }
 
-    public void setReleased(boolean released) {
-        this.released = released;
-    }
-
-    public boolean isReleased() {
-        return released;
-    }
-    
     public boolean locked() {
-        return released || archived || deleted;
+        return isReleased() || archived || deleted;
     }
 
     public void setDeleted(boolean deleted) {
@@ -148,6 +140,18 @@ public class ProjectVersion extends AbstractNamedObject {
 
     public void setVersionType(String versionType) {
         this.versionType = versionType;
+    }
+
+    public Date getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(Date releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    public boolean isReleased() {
+        return releaseDate != null;
     }
     
     public String attemptToCalculateNextVersionLabel() {

@@ -207,6 +207,8 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
                     original.setName(releasePackage.getVersionLabel());
                     original.setVersionType(ProjectVersion.VersionType.RELEASE.toString());
                     original.setArchived(true);
+                    Date releaseDate = new Date();
+                    original.setReleaseDate(releaseDate);
                     configService.save(original);                    
                 }
             }
