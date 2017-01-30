@@ -116,7 +116,7 @@ public class EditReleasePackageDialog extends ResizableWindow {
             List<ReleasePackageProjectVersion> rppvs = configurationService.findReleasePackageProjectVersions(releasePackageId);
             Set<String> projectVersionsInReleasePackage = getListOfProjectVersionsInReleasePackages(rppvs);
             for (ProjectVersion projectVersion : project.getProjectVersions()) {
-                if (!projectVersion.getVersionType().equals(ProjectVersion.VersionType.RELEASE)) {
+                if (!projectVersion.getVersionType().equalsIgnoreCase(ProjectVersion.VersionType.RELEASE.toString())) {
                     optionGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
                     optionGroup.addItem(projectVersion.getId());
                     optionGroup.setEnabled(false);

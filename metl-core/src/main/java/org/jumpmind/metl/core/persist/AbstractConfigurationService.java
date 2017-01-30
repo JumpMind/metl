@@ -1295,11 +1295,11 @@ abstract class AbstractConfigurationService extends AbstractService
     }
 
     @Override
-    public ProjectVersion saveNewVersion(String newVersionLabel, ProjectVersion original) {
+    public ProjectVersion saveNewVersion(String newVersionLabel, ProjectVersion original, String projectVersionType) {
         Map<String, AbstractObject> oldToNewUUIDMapping = new HashMap<>();
         ProjectVersion newVersion = copyWithNewUUID(oldToNewUUIDMapping, original);
         newVersion.setVersionLabel(newVersionLabel);
-        newVersion.setVersionType(ProjectVersion.VersionType.BRANCH.toString());
+        newVersion.setVersionType(projectVersionType);
         newVersion.setReleased(false);
         newVersion.setDeleted(false);
         newVersion.setArchived(false);

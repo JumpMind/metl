@@ -193,17 +193,20 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
         Collection<Object> collection = grid.getSelectedRows();
         Iterator<Object> itr = collection.iterator();
         while (itr.hasNext()) {
-            ReleasePackage releasePackage = (ReleasePackage) itr.next();
+            ReleasePackage releasePackage = (ReleasePackage) itr.next();            
             if (releasePackage.getReleaseDate() != null) {
                 CommonUiUtils.notify(String.format(
                         "Release Package %s is already released.  It cannot be re-released.  Skipping this release package.",
                         releasePackage.getName()));
             } else {
+                releasePackage = configService.findReleasePackage(releasePackage.getId());
                 List<ReleasePackageProjectVersion> rppvs = releasePackage.getProjectVersions();
                 for (ReleasePackageProjectVersion rppv : rppvs) {
                     ProjectVersion original = configService.findProjectVersion(rppv.getProjectVersionId());
-                    configService.saveNewVersion("trunk", original);
+                    configService.saveNewVersion("trunk", original, "trunk");
                     original.setName(releasePackage.getVersionLabel());
+                    original.setVersionType(ProjectVersion.VersionType.RELEASE.toString());
+                    original.setArchived(true);
                     configService.save(original);                    
                 }
             }

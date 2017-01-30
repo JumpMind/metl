@@ -566,7 +566,7 @@ public class DesignNavigator extends VerticalLayout {
                     return;
                 }
             }
-            ProjectVersion newVersion = configurationService.saveNewVersion("branch", original);
+            ProjectVersion newVersion = configurationService.saveNewVersion("branch", original, "branch");
             context.getDefinitionFactory().refresh(newVersion.getId());
             treeTable.addItem(newVersion);
             treeTable.setItemIcon(newVersion, Icons.PROJECT_VERSION);
