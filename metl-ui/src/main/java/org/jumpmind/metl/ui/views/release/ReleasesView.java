@@ -26,6 +26,7 @@ import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -148,16 +149,21 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     }
 
     protected void archive() {
-        ReleasePackage releasePackage = getFirstSelectedReleasePackage();
-        for (ReleasePackageProjectVersion rppv : releasePackage.getProjectVersions()) {
-            ProjectVersion projectVersion = configService.findProjectVersion(rppv.getProjectVersionId());
-            projectVersion.setArchived(true);
-            configService.save(projectVersion);
+        Collection<Object> collection = grid.getSelectedRows();
+        Iterator<Object> itr = collection.iterator();
+        while (itr.hasNext()) {        
+            ReleasePackage releasePackage = (ReleasePackage) itr.next();
+            for (ReleasePackageProjectVersion rppv : releasePackage.getProjectVersions()) {
+                ProjectVersion projectVersion = configService.findProjectVersion(rppv.getProjectVersionId());
+                projectVersion.setArchived(true);
+                configService.save(projectVersion);
+            }
         }
     }
 
     protected void export() {
         //TODO this should be release package name and then refreshed to releaespackage
+        //TODO we should let people export an entire list of release packages vs one
         ReleasePackage releasePackage = getFirstSelectedReleasePackage();
         String export = importExportService.exportReleasePackage(releasePackage.getId(), AppConstants.SYSTEM_USER);
         downloadExport(export, releasePackage.getName());
