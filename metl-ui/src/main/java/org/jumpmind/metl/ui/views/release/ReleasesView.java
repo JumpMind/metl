@@ -42,6 +42,7 @@ import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
+import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -180,7 +181,15 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     }
 
     protected void finalize() {
-        // TODO prompt for confirmation
+
+        ConfirmDialog.show("Release the selected packages?",
+                "Are you sure you want to release the selected packages?", () -> {
+                    finalizeSelectedReleasePackages();
+                    return true;
+                });                
+    }
+    
+    protected void finalizeSelectedReleasePackages() {
         Collection<Object> collection = grid.getSelectedRows();
         Iterator<Object> itr = collection.iterator();
         while (itr.hasNext()) {
@@ -193,9 +202,9 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
                 List<ReleasePackageProjectVersion> rppvs = releasePackage.getProjectVersions();
                 for (ReleasePackageProjectVersion rppv : rppvs) {
                     ProjectVersion original = configService.findProjectVersion(rppv.getProjectVersionId());
+                    configService.saveNewVersion("trunk", original);
                     original.setName(releasePackage.getVersionLabel());
-                    
-                    
+                    configService.save(original);                    
                 }
             }
         }

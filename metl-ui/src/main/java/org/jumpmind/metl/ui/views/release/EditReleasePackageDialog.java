@@ -75,7 +75,7 @@ public class EditReleasePackageDialog extends ResizableWindow {
         
         Panel projectPanel = new Panel();
         projectPanel.setSizeFull();
-        projectPanel.setContent(buildProjectsAndVersions(releasePackage.getId()));
+        projectPanel.setContent(buildProjectsAndVersions(this.releasePackage.getId()));
         vLayout.addComponent(projectPanel);        
         addComponent(vLayout,1);        
         addComponent(buildButtonBar());
