@@ -828,6 +828,11 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     public void delete(Plugin plugin) {
         persistenceManager.delete(plugin, null, null, tableName(Plugin.class));
     }
+    
+    @Override
+    public void delete(ProjectVersionDefinitionPlugin projectVersionDefinitionPlugin) {
+        persistenceManager.delete(projectVersionDefinitionPlugin, null, null, tableName(ProjectVersionDefinitionPlugin.class));
+    }
 
     @Override
     public boolean delete(FlowStepLink link) {

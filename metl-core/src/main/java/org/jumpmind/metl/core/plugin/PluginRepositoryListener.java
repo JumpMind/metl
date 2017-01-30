@@ -28,7 +28,7 @@ public class PluginRepositoryListener extends AbstractRepositoryListener {
     }
 
     public void artifactDescriptorMissing(RepositoryEvent event) {
-        logger.info("Missing artifact descriptor for " + event.getArtifact());
+        logger.debug("Missing artifact descriptor for " + event.getArtifact());
     }
 
     public void artifactInstalled(RepositoryEvent event) {

@@ -150,8 +150,14 @@ public class DefinitionFactory implements IDefinitionFactory {
                             }
                         }
 
-                        load(projectVersionId, pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion(),
+                        matched = null != load(projectVersionId, pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion(),
                                 remoteRepostiories);
+                        
+                        if (!matched) {
+                            logger.warn("Deleting the reference to {}:{}:{}", pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion());
+                            configurationService.delete(pvcp);
+                            configurationService.delete(configuredPlugin);
+                        }
 
                     } catch (InvalidVersionSpecificationException e) {
                         logger.error("", e);
@@ -215,9 +221,10 @@ public class DefinitionFactory implements IDefinitionFactory {
     protected String load(String projectVersionId, String artifactGroup, String artifactName, String artifactVersion,
             List<PluginRepository> pluginRepository) {
         ClassLoader classLoader = pluginManager.getClassLoader(artifactGroup, artifactName, artifactVersion, pluginRepository);
-        String pluginId = pluginManager.toPluginId(artifactGroup, artifactName, artifactVersion);
+        String pluginId = null;
         if (classLoader != null) {
-            loadComponentsForClassloader(projectVersionId, pluginId, classLoader);
+            pluginId = pluginManager.toPluginId(artifactGroup, artifactName, artifactVersion);
+            loadComponentsForClassloader(projectVersionId, pluginId, classLoader);            
         } else {
             logger.warn("Could not find plugin with the id of {}", pluginId);
         }

@@ -277,6 +277,8 @@ public interface IConfigurationService {
     public Resource copy(Map<String, AbstractObject> oldToNewUUIDMapping, Resource original);
 
     public void delete(Plugin plugin);
+    
+    public void delete(ProjectVersionDefinitionPlugin plugin);
 
     Map<String, ProjectVersion> findProjectVersions();
     
