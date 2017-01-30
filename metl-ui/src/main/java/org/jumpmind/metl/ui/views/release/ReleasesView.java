@@ -87,9 +87,9 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     Grid grid;
 
     BeanItemContainer<ReleasePackage> container;
-    
+
     IConfigurationService configService;
-    
+
     IImportExportService importExportService;
 
     public ReleasesView() {
@@ -138,11 +138,11 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     protected void edit() {
         new EditReleasePackageDialog(getFirstSelectedReleasePackage(), context, this).show();
     }
-    
+
     protected ReleasePackage getFirstSelectedReleasePackage() {
         Collection<Object> collection = grid.getSelectedRows();
         if (collection.size() > 0) {
-            return (ReleasePackage)collection.iterator().next();
+            return (ReleasePackage) collection.iterator().next();
         } else {
             return null;
         }
@@ -151,26 +151,54 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     protected void archive() {
         Collection<Object> collection = grid.getSelectedRows();
         Iterator<Object> itr = collection.iterator();
-        while (itr.hasNext()) {        
+        while (itr.hasNext()) {
             ReleasePackage releasePackage = (ReleasePackage) itr.next();
-            for (ReleasePackageProjectVersion rppv : releasePackage.getProjectVersions()) {
-                ProjectVersion projectVersion = configService.findProjectVersion(rppv.getProjectVersionId());
-                projectVersion.setArchived(true);
-                configService.save(projectVersion);
+            if (releasePackage.getReleaseDate() != null) {
+                for (ReleasePackageProjectVersion rppv : releasePackage.getProjectVersions()) {
+                    ProjectVersion projectVersion = configService
+                            .findProjectVersion(rppv.getProjectVersionId());
+                    projectVersion.setArchived(true);
+                    configService.save(projectVersion);
+                }
+            } else {
+                CommonUiUtils.notify(String.format(String.format(
+                        "Release Package %s is not released, it cannot be archived.  Skipping this release package",
+                        releasePackage.getName())), Type.WARNING_MESSAGE);
             }
         }
     }
 
     protected void export() {
-        //TODO this should be release package name and then refreshed to releaespackage
-        //TODO we should let people export an entire list of release packages vs one
+        // TODO this should be release package name and then refreshed to
+        // releaespackage
+        // TODO we should let people export an entire list of release packages
+        // vs one
         ReleasePackage releasePackage = getFirstSelectedReleasePackage();
-        String export = importExportService.exportReleasePackage(releasePackage.getId(), AppConstants.SYSTEM_USER);
+        String export = importExportService.exportReleasePackage(releasePackage.getId(),
+                AppConstants.SYSTEM_USER);
         downloadExport(export, releasePackage.getName());
     }
 
     protected void finalize() {
-        // TODO prompt for confirmation,  call service methods to rename master and create a new master
+        // TODO prompt for confirmation
+        Collection<Object> collection = grid.getSelectedRows();
+        Iterator<Object> itr = collection.iterator();
+        while (itr.hasNext()) {
+            ReleasePackage releasePackage = (ReleasePackage) itr.next();
+            if (releasePackage.getReleaseDate() != null) {
+                CommonUiUtils.notify(String.format(
+                        "Release Package %s is already released.  It cannot be re-released.  Skipping this release package.",
+                        releasePackage.getName()));
+            } else {
+                List<ReleasePackageProjectVersion> rppvs = releasePackage.getProjectVersions();
+                for (ReleasePackageProjectVersion rppv : rppvs) {
+                    ProjectVersion original = configService.findProjectVersion(rppv.getProjectVersionId());
+                    original.setName(releasePackage.getVersionLabel());
+                    
+                    
+                }
+            }
+        }
     }
 
     protected void rowSelected() {
@@ -188,15 +216,15 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
             editButton.setEnabled(true);
             exportButton.setEnabled(true);
             archiveButton.setEnabled(true);
-            finalizeButton.setEnabled(true);            
+            finalizeButton.setEnabled(true);
         }
     }
-    
+
     @Override
     public void enter(ViewChangeEvent event) {
         refresh();
     }
-    
+
     protected void downloadExport(final String export, String filename) {
 
         StreamSource ss = new StreamSource() {
@@ -213,9 +241,10 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
             }
         };
         String datetime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        StreamResource resource = new StreamResource(ss, String.format("%s-config-%s.json", filename, datetime));
+        StreamResource resource = new StreamResource(ss,
+                String.format("%s-config-%s.json", filename, datetime));
         final String KEY = "export";
         setResource(KEY, resource);
         Page.getCurrent().open(ResourceReference.create(resource, this, KEY).getURL(), null);
-    }    
+    }
 }
