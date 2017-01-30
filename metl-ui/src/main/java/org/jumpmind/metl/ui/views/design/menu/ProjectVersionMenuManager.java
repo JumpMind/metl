@@ -47,8 +47,8 @@ public class ProjectVersionMenuManager extends AbstractDesignSelectedValueMenuMa
             enabledPaths = (String[]) ArrayUtils.add(enabledPaths, "Edit|Paste");
         }
         ProjectVersion version = (ProjectVersion) selected;
-        if (version.getVersionType().equalsIgnoreCase(ProjectVersion.VersionType.RELEASE.toString()) ||
-                version.getVersionType().equalsIgnoreCase(ProjectVersion.VersionType.TRUNK.toString())) {
+        if (version.getVersionType() != null && (version.getVersionType().equalsIgnoreCase(ProjectVersion.VersionType.RELEASE.toString())
+                || version.getVersionType().equalsIgnoreCase(ProjectVersion.VersionType.TRUNK.toString()))) {
             enabledPaths = (String[]) ArrayUtils.add(enabledPaths, "File|New|Project Branch");
         }
         
