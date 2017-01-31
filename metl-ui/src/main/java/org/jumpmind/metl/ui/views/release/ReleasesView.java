@@ -33,7 +33,6 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.jumpmind.metl.core.model.FlowParameter;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ReleasePackage;
 import org.jumpmind.metl.core.model.ReleasePackageProjectVersion;
