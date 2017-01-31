@@ -179,8 +179,6 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     }
 
     protected void export() {
-        // TODO this should be release package name and then refreshed to
-        // releaespackage
         // TODO we should let people export an entire list of release packages
         // vs one
         ReleasePackage releasePackage = getFirstSelectedReleasePackage();
@@ -215,8 +213,8 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
                 List<ReleasePackageProjectVersion> rppvs = releasePackage.getProjectVersions();
                 for (ReleasePackageProjectVersion rppv : rppvs) {
                     ProjectVersion original = configService.findProjectVersion(rppv.getProjectVersionId());
-                    if (original.getVersionType().equalsIgnoreCase(ProjectVersion.VersionType.TRUNK.toString())) {
-                        configService.saveNewVersion("trunk", original, "trunk");
+                    if (original.getVersionType().equalsIgnoreCase(ProjectVersion.VersionType.MASTER.toString())) {
+                        configService.saveNewVersion("master", original, "master");
                     }
                     original.setName(releasePackage.getVersionLabel());
                     original.setVersionType(ProjectVersion.VersionType.RELEASE.toString());
@@ -236,16 +234,21 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     }
 
     protected void enableDisableButtonsForSelectionSize(int nbrRowsSelected) {
-        if (nbrRowsSelected == 0) {
-            editButton.setEnabled(false);
-            exportButton.setEnabled(false);
-            archiveButton.setEnabled(false);
-            finalizeButton.setEnabled(false);
-        } else {
+
+        if (nbrRowsSelected > 0) {
             editButton.setEnabled(true);
             exportButton.setEnabled(true);
             archiveButton.setEnabled(true);
             finalizeButton.setEnabled(true);
+            if (nbrRowsSelected > 1) {
+                editButton.setEnabled(false);
+                exportButton.setEnabled(false);
+            }
+        } else {
+            editButton.setEnabled(false);
+            exportButton.setEnabled(false);
+            archiveButton.setEnabled(false);
+            finalizeButton.setEnabled(false);            
         }
     }
 

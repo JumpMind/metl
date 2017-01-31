@@ -28,7 +28,7 @@ public class ProjectVersion extends AbstractNamedObject {
     private static final long serialVersionUID = 1L;
 
     public enum VersionType { 
-        TRUNK, BRANCH, RELEASE 
+        MASTER, BRANCH, RELEASE 
     }
         
     Project project;

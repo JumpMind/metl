@@ -134,7 +134,7 @@ public class DeployDialog extends ResizableWindow {
         grid.setSelectionMode(SelectionMode.MULTI);
         BeanItemContainer<?> container = new BeanItemContainer<>(ReleasePackage.class);
         grid.setContainerDataSource(container);
-        grid.setColumns("name", "version", "released");
+        grid.setColumns("name", "versionLabel", "released");
         layout.addComponent(grid);
         layout.setExpandRatio(grid, 1);
         actionButton.setCaption("Next");

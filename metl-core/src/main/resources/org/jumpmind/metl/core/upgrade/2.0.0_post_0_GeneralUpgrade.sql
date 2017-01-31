@@ -1,4 +1,4 @@
-update metl_project_version set version_type='TRUNK', version_label='trunk'
+update metl_project_version set version_type='MASTER', version_label='master'
 where id in
 (
    select
@@ -18,5 +18,5 @@ where id in
          and mpv.create_time = mct.max_create_time
 );
 
-update metl_project_version set version_type='RELEASE', released=1
+update metl_project_version set version_type='RELEASE', release_date='2017-01-01'
 where version_type is null;

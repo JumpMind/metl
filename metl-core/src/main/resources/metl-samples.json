@@ -24,8 +24,8 @@
     "tableData" : {
       "f55241fd-9564-4f6a-bd0d-95a50a729000" : {
         "ID" : "f55241fd-9564-4f6a-bd0d-95a50a729000",
-        "VERSION_TYPE" : "trunk",
-        "VERSION_LABEL" : "trunk",
+        "VERSION_TYPE" : "MASTER",
+        "VERSION_LABEL" : "master",
         "PROJECT_ID" : "10a34bb6-fa5b-45fb-9921-7b48daf219e7",
         "ORIG_VERSION_ID" : null,
         "DESCRIPTION" : null,

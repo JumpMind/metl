@@ -567,6 +567,9 @@ public class DesignNavigator extends VerticalLayout {
                 }
             }
             ProjectVersion newVersion = configurationService.saveNewVersion("branch", original, "branch");
+            newVersion = configurationService.findProjectVersion(newVersion.getId());
+            newVersion.setReleaseDate(null);
+            configurationService.save(newVersion);
             context.getDefinitionFactory().refresh(newVersion.getId());
             treeTable.addItem(newVersion);
             treeTable.setItemIcon(newVersion, Icons.PROJECT_VERSION);
@@ -576,6 +579,8 @@ public class DesignNavigator extends VerticalLayout {
             refreshProjects();
         }
     }
+    
+    
     
     public void doCut() {
         Object object = treeTable.getValue();
