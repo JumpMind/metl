@@ -25,12 +25,15 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.jumpmind.metl.core.model.FlowParameter;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ReleasePackage;
 import org.jumpmind.metl.core.model.ReleasePackageProjectVersion;
@@ -57,6 +60,7 @@ import com.vaadin.server.Page;
 import com.vaadin.server.ResourceReference;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
+import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
@@ -111,6 +115,7 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
         container = new BeanItemContainer<>(ReleasePackage.class);
         grid.setContainerDataSource(container);
         grid.setColumns("name", "versionLabel", "releaseDate", "released");
+        grid.sort("releaseDate", SortDirection.DESCENDING);
         addComponent(grid);
         setExpandRatio(grid, 1);
     }
@@ -129,6 +134,11 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     protected void refresh() {
         container.removeAllItems();
         List<ReleasePackage> releasePackages = configService.findReleasePackages();
+        Collections.sort(releasePackages, Collections.reverseOrder(new Comparator<ReleasePackage>() {
+            public int compare(ReleasePackage o1, ReleasePackage o2) {
+                return new Date(o1.getReleaseDate().getTime()).compareTo(new Date(o2.getReleaseDate().getTime()));
+            }
+        }));
         container.addAll(releasePackages);
     }
 
@@ -193,17 +203,22 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
         Collection<Object> collection = grid.getSelectedRows();
         Iterator<Object> itr = collection.iterator();
         while (itr.hasNext()) {
-            ReleasePackage releasePackage = (ReleasePackage) itr.next();            
-            if (releasePackage.getReleaseDate() != null) {
+            ReleasePackage releasePackage = (ReleasePackage) itr.next();
+            releasePackage = configService.findReleasePackage(releasePackage.getId());
+            if (releasePackage.isReleased()) {
                 CommonUiUtils.notify(String.format(
                         "Release Package %s is already released.  It cannot be re-released.  Skipping this release package.",
                         releasePackage.getName()));
             } else {
-                releasePackage = configService.findReleasePackage(releasePackage.getId());
+                releasePackage.setReleaseDate(new Date());
+                releasePackage.setReleased(true);
+                configService.save(releasePackage);
                 List<ReleasePackageProjectVersion> rppvs = releasePackage.getProjectVersions();
                 for (ReleasePackageProjectVersion rppv : rppvs) {
                     ProjectVersion original = configService.findProjectVersion(rppv.getProjectVersionId());
-                    configService.saveNewVersion("trunk", original, "trunk");
+                    if (original.getVersionType().equalsIgnoreCase(ProjectVersion.VersionType.TRUNK.toString())) {
+                        configService.saveNewVersion("trunk", original, "trunk");
+                    }
                     original.setName(releasePackage.getVersionLabel());
                     original.setVersionType(ProjectVersion.VersionType.RELEASE.toString());
                     original.setArchived(true);
@@ -211,6 +226,7 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
                     original.setReleaseDate(releaseDate);
                     configService.save(original);                    
                 }
+                refresh();
             }
         }
     }

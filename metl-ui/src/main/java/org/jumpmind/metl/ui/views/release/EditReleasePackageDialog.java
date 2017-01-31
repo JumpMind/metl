@@ -22,6 +22,7 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.DateField;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.OptionGroup;
@@ -45,6 +46,8 @@ public class EditReleasePackageDialog extends ResizableWindow {
     TextField nameField;
     
     TextField versionLabelField;
+    
+    DateField releaseDateField;
     
     List<CheckBox> projectCheckboxes = new ArrayList<CheckBox>();
     
@@ -79,8 +82,8 @@ public class EditReleasePackageDialog extends ResizableWindow {
         vLayout.addComponent(projectPanel);        
         addComponent(vLayout,1);        
         addComponent(buildButtonBar());
-        vLayout.setExpandRatio(formPanel,  0.2f);
-        vLayout.setExpandRatio(projectPanel, 0.8f);
+        vLayout.setExpandRatio(formPanel,  0.3f);
+        vLayout.setExpandRatio(projectPanel, 0.7f);
     }
 
     protected FormLayout buildEntryForm() {
@@ -92,6 +95,9 @@ public class EditReleasePackageDialog extends ResizableWindow {
         versionLabelField = new TextField("Version");
         versionLabelField.setValue(releasePackage.getVersionLabel() != null ? releasePackage.getVersionLabel() : "");
         form.addComponent(versionLabelField);
+        releaseDateField = new DateField("Release Date");
+        releaseDateField.setValue(releasePackage.getReleaseDate() != null ? releasePackage.getReleaseDate() : null);
+        form.addComponent(releaseDateField);
         return form;
     }
 
@@ -173,6 +179,7 @@ public class EditReleasePackageDialog extends ResizableWindow {
     protected void save() {
         releasePackage.setName(nameField.getValue());
         releasePackage.setVersionLabel(versionLabelField.getValue());
+        releasePackage.setReleaseDate(releaseDateField.getValue());
         configurationService.save(releasePackage);
         
         configurationService.deleteReleasePackageProjectVersionsForReleasePackage(releasePackage.getId());
