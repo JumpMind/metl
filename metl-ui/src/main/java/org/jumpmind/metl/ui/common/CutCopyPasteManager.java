@@ -375,6 +375,7 @@ public class CutCopyPasteManager {
 
     public void copy(Object object) {
         clipboard.clear();
+        clipboard.put(CLIPBOARD_ACTION, CLIPBOARD_COPY);
         oldToNewUUIDMapping.clear();
         if (object instanceof ModelName) {
             Model model = configurationService.findModel(((ModelName) object).getId());
