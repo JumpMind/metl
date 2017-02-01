@@ -766,13 +766,13 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
                 }
                 updateStatus();
             }
+            
+            lastDataRefreshWasDone = isDone();
+            
+            rerunButton.setVisible(lastDataRefreshWasDone && flowRunnable != null);
+            removeButton.setVisible(lastDataRefreshWasDone);
+            cancelButton.setVisible(!lastDataRefreshWasDone);
         }
-
-        rerunButton.setVisible(isDone() && flowRunnable != null);
-        removeButton.setVisible(isDone());
-        cancelButton.setVisible(!isDone());
-
-        lastDataRefreshWasDone = isDone();
     }
 
     protected String formatDate(Date date) {
