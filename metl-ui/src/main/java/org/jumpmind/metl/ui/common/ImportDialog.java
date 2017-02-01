@@ -33,8 +33,16 @@ public class ImportDialog extends Window {
     final protected Logger log = LoggerFactory.getLogger(getClass()); 
     
     HorizontalLayout importLayout;
+    
+    IImportListener importListener;
+    
+    Upload upload;
+    
+    HorizontalLayout buttonLayout;
 
-    public ImportDialog(String caption, String text, final IImportListener importListener) {
+    public ImportDialog(String caption, String text, IImportListener importListener) {
+        this.importListener = importListener;
+        
         setCaption(caption);
         setModal(true);
         setResizable(true);
@@ -58,17 +66,41 @@ public class ImportDialog extends Window {
         layout.addComponent(importLayout);
         layout.setExpandRatio(importLayout, 1);
 
-        HorizontalLayout buttonLayout = new HorizontalLayout();
+        buttonLayout = new HorizontalLayout();
         buttonLayout.setStyleName(ValoTheme.WINDOW_BOTTOM_TOOLBAR);
         buttonLayout.setSpacing(true);
         buttonLayout.setWidth(100, Unit.PERCENTAGE);
 
         Label spacer = new Label(" ");
         buttonLayout.addComponent(spacer);
-        buttonLayout.setExpandRatio(spacer, 1);
+        buttonLayout.setExpandRatio(spacer, 1);       
+
+        Button closeButton = new Button("Close");
+        closeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        closeButton.setClickShortcut(KeyCode.ESCAPE);
+        closeButton.addClickListener(new ClickListener() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void buttonClick(ClickEvent event) {
+                UI.getCurrent().removeWindow(ImportDialog.this);
+            }
+        });
+        buttonLayout.addComponent(closeButton);
         
+        layout.addComponent(buttonLayout);
+        
+        replaceUploadButton();
+        
+        
+    }
+    
+    protected void replaceUploadButton() {
+        if (upload != null) {
+            buttonLayout.removeComponent(upload);
+        }
         final UploadHandler handler = new UploadHandler();
-        Upload upload = new Upload(null, handler);
+        upload = new Upload(null, handler);
         upload.setImmediate(true);
         upload.setButtonCaption("Upload");
         upload.addFinishedListener(new Upload.FinishedListener() {
@@ -94,29 +126,12 @@ public class ImportDialog extends Window {
                     label.setStyleName(ValoTheme.LABEL_FAILURE);
                     importLayout.addComponent(label);
                     importLayout.setComponentAlignment(label, Alignment.MIDDLE_CENTER);
-                }                
+                }             
+                replaceUploadButton();
             }
         });
 
-        buttonLayout.addComponent(upload);
-
-        Button closeButton = new Button("Close");
-        closeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
-        closeButton.setClickShortcut(KeyCode.ESCAPE);
-        closeButton.addClickListener(new ClickListener() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void buttonClick(ClickEvent event) {
-                UI.getCurrent().removeWindow(ImportDialog.this);
-            }
-        });
-        buttonLayout.addComponent(closeButton);
-        
-        layout.addComponent(buttonLayout);
-        
-        upload.focus();
-        
+        buttonLayout.addComponent(upload, 1);
     }
 
     public static void show(String caption, String text, IImportListener listener) {
