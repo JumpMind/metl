@@ -52,6 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
@@ -110,6 +111,7 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
         grid = new Grid();
         grid.setSizeFull();
         grid.setSelectionMode(SelectionMode.MULTI);
+        grid.addItemClickListener(e->rowClicked(e));
         grid.addSelectionListener((e) -> rowSelected());
         container = new BeanItemContainer<>(ReleasePackage.class);
         grid.setContainerDataSource(container);
@@ -123,6 +125,18 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     public void updated(ReleasePackage releasePackage) {
         refresh();
     }
+    
+    protected void rowClicked(ItemClickEvent event) {
+        ReleasePackage object =  (ReleasePackage)event.getItemId();
+        if (grid.getSelectedRows().contains(object)) {
+            grid.deselect(object);
+        } else if (event.isCtrlKey() || event.isAltKey() || event.isShiftKey()) {
+            grid.select(object);
+        } else {
+            grid.deselectAll();
+            grid.select(object);
+        }
+    }
 
     @PostConstruct
     protected void init() {
@@ -135,7 +149,15 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
         List<ReleasePackage> releasePackages = configService.findReleasePackages();
         Collections.sort(releasePackages, Collections.reverseOrder(new Comparator<ReleasePackage>() {
             public int compare(ReleasePackage o1, ReleasePackage o2) {
-                return new Date(o1.getReleaseDate().getTime()).compareTo(new Date(o2.getReleaseDate().getTime()));
+                Date releaseDate1 = o1.getReleaseDate();
+                if (releaseDate1 == null) {
+                    releaseDate1 = new Date();
+                }
+                Date releaseDate2 = o2.getReleaseDate();
+                if (releaseDate2 == null) {
+                    releaseDate2 = new Date();
+                }
+                return releaseDate1.compareTo(releaseDate2);
             }
         }));
         container.addAll(releasePackages);
