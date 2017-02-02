@@ -135,7 +135,7 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
                 viewToButtonMapping.put(menuLink.id(), menuItem);
             }
         }
-        viewManager.navigateTo(viewManager.getDefaultView());
+        viewManager.navigateTo(Page.getCurrent().getUriFragment());
     }
 
     protected GlobalSetting getGlobalSetting(String name, String defaultValue) {

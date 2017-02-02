@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.ui.common;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -98,8 +100,13 @@ public class ViewManager implements Serializable {
     }
 
     public void navigateTo(String viewName) {
-        if (viewName != null) {
+        if (isNotBlank(viewName)) {
+            if (viewName.startsWith("!")) {
+                viewName = viewName.substring(1);
+            }
             navigator.navigateTo(viewName);
+        } else {
+            navigateToDefault();
         }
     }
     
