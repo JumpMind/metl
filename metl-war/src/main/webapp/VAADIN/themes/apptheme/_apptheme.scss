@@ -2,6 +2,10 @@
 	
   @include valo;
   
+   .v-select-optiongroup-indent {
+      padding-left: 35px;
+   }
+  
    .v-treetable .v-table-body {
       -webkit-touch-callout: none;
       -webkit-user-select: none;

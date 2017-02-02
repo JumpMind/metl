@@ -71,10 +71,8 @@ public class EditReleasePackageDialog extends ResizableWindow {
         VerticalLayout vLayout = new VerticalLayout();
         vLayout.setSizeFull();
         vLayout.setMargin(true);
-        Panel formPanel = new Panel();
-        formPanel.setSizeFull();
-        formPanel.setContent(buildEntryForm());
-        vLayout.addComponent(formPanel);
+        FormLayout form = buildEntryForm();
+        vLayout.addComponent(form);
         
         Panel projectPanel = new Panel();
         projectPanel.setSizeFull();
@@ -82,12 +80,12 @@ public class EditReleasePackageDialog extends ResizableWindow {
         vLayout.addComponent(projectPanel);        
         addComponent(vLayout,1);        
         addComponent(buildButtonBar());
-        vLayout.setExpandRatio(formPanel,  0.3f);
-        vLayout.setExpandRatio(projectPanel, 0.7f);
+        vLayout.setExpandRatio(projectPanel, 1);
     }
 
     protected FormLayout buildEntryForm() {
         FormLayout form = new FormLayout();
+        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         form.setMargin(true);
         nameField = new TextField("Name");
         nameField.setValue(releasePackage.getName() != null ? releasePackage.getName() : "");
@@ -102,7 +100,6 @@ public class EditReleasePackageDialog extends ResizableWindow {
     }
 
     protected Panel buildProjectsAndVersions(String releasePackageId) {
-
         Panel projectsAndVersionsPanel = new Panel("Projects and Branches");
         projectsAndVersionsPanel.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
         projectsAndVersionsPanel.setSizeFull();
@@ -118,7 +115,8 @@ public class EditReleasePackageDialog extends ResizableWindow {
             checkBox.setData(project.getId());
             projectLayout.addComponent(checkBox);
             //now put the project version options for each project            
-            OptionGroup optionGroup = new OptionGroup();            
+            OptionGroup optionGroup = new OptionGroup();   
+            optionGroup.addStyleName("indent");
             List<ReleasePackageProjectVersion> rppvs = configurationService.findReleasePackageProjectVersions(releasePackageId);
             Set<String> projectVersionsInReleasePackage = getListOfProjectVersionsInReleasePackages(rppvs);
             for (ProjectVersion projectVersion : project.getProjectVersions()) {
