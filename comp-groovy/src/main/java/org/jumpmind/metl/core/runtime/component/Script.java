@@ -151,7 +151,6 @@ public class Script extends AbstractComponentRuntime {
     
     @Override
     public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkBoundaryReached) {
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
         invoke("setInputMessage", inputMessage);
         invoke("setSendMessageCallback", messageTarget);
         invoke("setUnitOfWorkBoundaryReached", unitOfWorkBoundaryReached);

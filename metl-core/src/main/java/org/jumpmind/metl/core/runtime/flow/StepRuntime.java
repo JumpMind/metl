@@ -338,6 +338,7 @@ public class StepRuntime implements Runnable {
             
             try {
                 ComponentContext.projectVersionId.set(componentContext.getManipulatedFlow().getProjectVersionId());
+                Thread.currentThread().setContextClassLoader(componentRuntime.getClass().getClassLoader());
                 componentRuntime.handle(inputMessage, callback, unitOfWorkBoundaryReached);
             } catch (CancellationException e) {
                 log.info("Handle was interrupted by cancellation for {}", componentContext.getFlowStep().getName());

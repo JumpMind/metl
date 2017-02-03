@@ -100,7 +100,6 @@ public class ContentRouter extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
         if (inputMessage instanceof EntityDataMessage) {
             handleEntityListPayload((EntityDataMessage)inputMessage, callback, unitOfWorkBoundaryReached);
         } else if (inputMessage instanceof TextMessage) {

@@ -101,7 +101,6 @@ public class Transformer extends AbstractComponentRuntime {
     @SuppressWarnings("unchecked")
     @Override
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        Thread.currentThread().setContextClassLoader(Transformer.class.getClassLoader());
         if (scriptEngine == null) {
             scriptEngine = new GroovyScriptEngineImpl();
         }
