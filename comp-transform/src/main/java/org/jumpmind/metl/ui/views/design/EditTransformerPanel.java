@@ -37,19 +37,25 @@ import org.jumpmind.metl.core.runtime.component.ModelAttributeScriptHelper;
 import org.jumpmind.metl.core.runtime.component.Transformer;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UiUtils;
+import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ExportDialog;
+import org.jumpmind.vaadin.ui.common.ResizableWindow;
+import org.vaadin.aceeditor.AceEditor;
+import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.event.FieldEvents.TextChangeListener;
+import com.vaadin.event.ItemClickEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.AbstractSelect;
+import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Field;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnGenerator;
-import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 
@@ -95,11 +101,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             if (isNotBlank(filterField.getValue())) {
                 filterField.clear();
             }
-            String filter = (String)filterPopField.getValue();
-            if (filter.equals(SHOW_ALL) || filter.equals(SHOW_POPULATED_ATTRIBUTES) || filter.equals(SHOW_POPULATED_ENTITIES)) {
-                filter = null;
-            }
-            updateTable(filter);
+            updateTable();
         });
         buttonBar.addLeft(filterPopField);
 
@@ -142,15 +144,53 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
                 return UiUtils.getName(filterField.getValue(), attribute.getName());
             }
         });
-        table.setVisibleColumns(new Object[] { "entityName", "attributeName", "value" });
+        table.addGeneratedColumn("attributeValue", new ColumnGenerator() {
+
+            @Override
+            public Object generateCell(Table source, Object itemId, Object columnId) {
+                ComponentAttributeSetting setting = (ComponentAttributeSetting) itemId;
+                String value = setting.getValue();
+                if (value != null) {
+                    // Show first line only. Display ellipses in the case of an ommision.
+                    String[] lines = value.split("\r\n|\r|\n", 2);
+                    if (lines.length > 1) {
+                        value = lines[0] + "...";
+                    }
+                }
+                return value;
+            }
+        });
+        table.addGeneratedColumn("editButton", new ColumnGenerator() {
+
+            @Override
+            public Object generateCell(Table source, Object itemId, Object columnId) {
+                ComponentAttributeSetting setting = (ComponentAttributeSetting) itemId;
+                Button button = new Button();
+                button.setIcon(FontAwesome.GEAR);
+                button.addClickListener((event) -> new EditTransformWindow(setting).showAtSize(.75));
+                return button;
+            }
+        });
+        
+        // Edit by double clicking or clicking the edit button.
+        table.addItemClickListener(new ItemClickEvent.ItemClickListener() {
+            @Override
+            public void itemClick(ItemClickEvent event) {
+                if (event.isDoubleClick()) {
+                    new EditTransformWindow((ComponentAttributeSetting)event.getItemId()).showAtSize(.75);
+                }
+            }
+        });
+        
+        table.setVisibleColumns(new Object[] { "entityName", "attributeName", "attributeValue", "editButton" });
         table.setColumnWidth("entityName", 250);
         table.setColumnWidth("attributeName", 250);
-        table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Transform" });
-        table.setColumnExpandRatio("value", 1);
-        table.setTableFieldFactory(new EditFieldFactory());
+        table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Transform", "Edit" });
+        table.setColumnExpandRatio("attributeValue", 1);
         table.setEditable(true);
         addComponent(table);
         setExpandRatio(table, 1.0f);
+        
 
         if (component.getInputModel() != null) {
 
@@ -215,6 +255,14 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         exportTable.setContainerDataSource(exportContainer);
         exportTable.setVisibleColumns(new Object[] { "entityName", "attributeName", "value" });
         exportTable.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Transform" });
+    }
+    
+    protected void updateTable() {
+        String filter = (String)filterPopField.getValue();
+        if (filter.equals(SHOW_ALL) || filter.equals(SHOW_POPULATED_ATTRIBUTES) || filter.equals(SHOW_POPULATED_ENTITIES)) {
+            filter = null;
+        }
+        updateTable(filter);
     }
 
     protected void updateTable(String filter) {
@@ -303,37 +351,6 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         }
     }
 
-    class EditFieldFactory implements TableFieldFactory {
-        public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId,
-                com.vaadin.ui.Component uiContext) {
-            final ComponentAttributeSetting setting = (ComponentAttributeSetting) itemId;
-            Field<?> field = null;
-
-            if (propertyId.equals("value")) {
-                final ComboBox combo = new ComboBox();
-                combo.setWidth(100, Unit.PERCENTAGE);
-                String[] functions = ModelAttributeScriptHelper.getSignatures();
-                for (String function : functions) {
-                    combo.addItem(function);
-                }
-                combo.setPageLength(functions.length > 20 ? 20 : functions.length);
-                if (setting.getValue() != null && !combo.getItemIds().contains(setting.getValue())) {
-                    combo.addItem(setting.getValue());
-                }
-                combo.setImmediate(true);
-                combo.setNewItemsAllowed(true);
-                combo.addValueChangeListener(new ValueChangeListener() {
-                    public void valueChange(ValueChangeEvent event) {
-                        setting.setValue((String) combo.getValue());
-                        context.getConfigurationService().save(setting);
-                    }
-                });
-                field = combo;
-            }
-            return field;
-        }
-    }
-
     public class Record {
         ModelEntity modelEntity;
 
@@ -382,5 +399,83 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         public void setValue(String value) {
             this.value = value;
         }
+    }
+    
+    class EditTransformWindow extends ResizableWindow {
+        private static final long serialVersionUID = 1L;
+        
+        AceEditor editor;
+
+        public EditTransformWindow(ComponentAttributeSetting setting) {
+            super("Transform");
+            setWidth(800f, Unit.PIXELS);
+            setHeight(600f, Unit.PIXELS);
+            content.setMargin(true);
+            
+            ButtonBar buttonBar = new ButtonBar();
+            addComponent(buttonBar);
+            
+            ComboBox combo = new ComboBox();
+            combo.setWidth(400, Unit.PIXELS);
+            String[] functions = ModelAttributeScriptHelper.getSignatures();
+            for (String function : functions) {
+                combo.addItem(function);
+            }
+            combo.setValue(combo.getItemIds().iterator().next());
+            combo.setNullSelectionAllowed(false);
+            combo.setPageLength(functions.length > 20 ? 20 : functions.length);
+            combo.setImmediate(true);
+            
+            buttonBar.addLeft(combo);
+
+            buttonBar.addButton("Insert", FontAwesome.SIGN_IN,
+                    new ClickListener() {
+                            
+                        @Override
+                        public void buttonClick(ClickEvent event) {
+                            String script  = (editor.getValue()==null) ? "" : editor.getValue();
+                            StringBuilder builder = new StringBuilder(script);
+                            String substring = (String) combo.getValue();
+                            int startPosition = editor.getCursorPosition();
+                            builder.insert(startPosition, substring);
+                            editor.setValue(builder.toString());
+                            editor.setSelection(startPosition, startPosition + substring.length());
+                            // Manually save text since TextChangeListener is not firing.
+                            setting.setValue(editor.getValue());
+                            EditTransformerPanel.this.context.getConfigurationService()
+                                    .save(setting);
+                        }
+                    });
+            
+            
+            editor = CommonUiUtils.createAceEditor();
+            editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
+            editor.setTextChangeTimeout(200);
+            editor.setMode(AceMode.java);
+            
+            editor.addTextChangeListener(new TextChangeListener() {
+
+                @Override
+                public void textChange(TextChangeEvent event) {
+                    setting.setValue(event.getText());
+                    EditTransformerPanel.this.context.getConfigurationService()
+                            .save(setting);
+                }
+            });
+            editor.setValue(setting.getValue());
+            
+            content.addComponent(editor);
+            content.setExpandRatio(editor, 1);
+            
+            addComponent(buildButtonFooter(buildCloseButton()));
+            
+        }
+        
+        @Override
+        public void close() {
+            super.close();
+            updateTable();
+        }
+
     }
 }
