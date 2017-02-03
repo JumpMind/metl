@@ -278,6 +278,8 @@ public class XmlParser extends AbstractXMLComponentRuntime {
                                             data.put(attributeSetting.getSetting().getAttributeId(), ((Content) object).getValue());
                                         } else if (object instanceof Element) {
                                             data.put(attributeSetting.getSetting().getAttributeId(), ((Element) object).getTextTrim());
+                                        } else {
+                                            data.put(attributeSetting.getSetting().getAttributeId(), object);
                                         }
                                     }
 
