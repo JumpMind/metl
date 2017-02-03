@@ -139,12 +139,14 @@ public class TextFileWriter extends AbstractFileWriter {
         }
 
         if ((inputMessage instanceof ControlMessage || unitOfWorkBoundaryReached) && callback != null) {
-            closeFile();
+            if (!CLOSE_ON_MESSAGE.equals(closeOn)) {
+                closeFile();
+            }
             closeDirectory();
             ArrayList<String> results = new ArrayList<>(1);
             results.add("{\"status\":\"success\"}");
             callback.sendTextMessage(null, results);
-        } else if (CLOSE_ON_MESSAGE.equals(closeOn)) {
+        } else if (inputMessage instanceof ContentMessage && CLOSE_ON_MESSAGE.equals(closeOn)) {
             closeFile();
         }
 
