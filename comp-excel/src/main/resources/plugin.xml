@@ -53,6 +53,12 @@
                type='boolean'>
         <name>Must Exist</name>
         <defaultValue>false</defaultValue>
+      </setting>  
+      <setting id='ignore.error'
+               required='true'
+               type='boolean'>
+        <defaultValue>false</defaultValue>
+        <name>Ignore on Formula Error?</name>
       </setting>
       <setting id='relative.path'
                required='false'

@@ -39,10 +39,14 @@ public class ExcelFileReader extends AbstractFileReader {
 
     public static final String SETTING_EXCEL_MAPPING = "excel.mapping";
 
+    public final static String IGNORE_ERROR = "ignore.error";
+    
     int rowsPerMessage = 1000;
 
     int headerLinesToSkip = 0;
 
+    boolean ignoreError = false;
+    
     Model outputModel;
 
     Set<String> worsheetsToRead;
@@ -56,6 +60,7 @@ public class ExcelFileReader extends AbstractFileReader {
         TypedProperties properties = getTypedProperties();
         rowsPerMessage = properties.getInt(SETTING_ROWS_PER_MESSAGE, rowsPerMessage);
         headerLinesToSkip = properties.getInt(SETTING_HEADER_LINES_TO_SKIP, headerLinesToSkip);
+        ignoreError = properties.is(IGNORE_ERROR, false);
         convertAttributeSettingsToMaps();
     }
 
@@ -167,10 +172,28 @@ public class ExcelFileReader extends AbstractFileReader {
                                     case Cell.CELL_TYPE_BLANK:
                                         cellValue = null;
                                         break;
+                                    case Cell.CELL_TYPE_FORMULA:
+                                    	// If a formula cell get the value the formula evaluates to.
+                                    	// Some Errors appear as a formula, in these cases need to determine if user
+                                    	// wants to fail the process or replace the error formula with null 
+                                    	try {
+                                        	cellValue = cell.getRichStringCellValue();   
+                                    	} catch (IllegalStateException ise) {
+                                    		if (ignoreError) {
+                                    			cellValue = null;
+                                    		} else {
+                                                throw new UnsupportedOperationException(
+                                                        "Error in cell formula: " + cell.getCellFormula() + " .  Invalid cell (RowIdx:ColIdx): " 
+                                                                + (cell.getRowIndex()+1) + ":" + (cell.getColumnIndex()+1));
+                                    		}
+                                    	}
+                                        break;
                                     default:
                                         throw new UnsupportedOperationException(
                                                 "Invalid cell type value.  Cell Type ==>"
-                                                        + cell.getCellType());
+                                                        + cell.getCellType() 
+                                                        + "  Invalid cell (RowIdx:ColIdx): " 
+                                                        + (cell.getRowIndex()+1) + ":" + (cell.getColumnIndex()+1));
                                 }
                                 data.put(worksheetColumnArray[cell.getColumnIndex()], cellValue);
                             } //end if worksheetColumnArray != null i.e. this cell is mapped
