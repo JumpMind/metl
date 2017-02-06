@@ -58,7 +58,7 @@
                required='true'
                type='boolean'>
         <defaultValue>false</defaultValue>
-        <name>Ignore on Formula Error?</name>
+        <name>Ignore on Formula Error</name>
       </setting>
       <setting id='relative.path'
                required='false'
