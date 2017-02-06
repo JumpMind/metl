@@ -101,12 +101,14 @@ public class DefinitionFactory implements IDefinitionFactory {
         if (pluginManager != null && configurationService != null) {
             pluginManager.refresh();
             List<String> projectVersionIds = configurationService.findAllProjectVersionIds();
-            ExecutorService executor = Executors.newFixedThreadPool(projectVersionIds.size(), new RefreshThreadFactory());
-            List<Future<?>> futures = new ArrayList<Future<?>>();
-            for (String projectVersionId : projectVersionIds) {
-                futures.add(executor.submit(() -> refresh(projectVersionId)));
+            if (projectVersionIds.size() > 0) {
+                ExecutorService executor = Executors.newFixedThreadPool(projectVersionIds.size(), new RefreshThreadFactory());
+                List<Future<?>> futures = new ArrayList<Future<?>>();
+                for (String projectVersionId : projectVersionIds) {
+                    futures.add(executor.submit(() -> refresh(projectVersionId)));
+                }
+                awaitTermination(executor, futures);
             }
-            awaitTermination(executor, futures);
         }
     }
 

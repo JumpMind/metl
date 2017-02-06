@@ -2,6 +2,8 @@ package org.jumpmind.metl.core.persist;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -14,6 +16,8 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.tools.ant.Project;
+import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
+import org.jgrapht.graph.DefaultEdge;
 import org.jumpmind.db.model.Column;
 import org.jumpmind.db.model.Table;
 import org.jumpmind.db.platform.IDatabasePlatform;
@@ -22,12 +26,14 @@ import org.jumpmind.db.sql.DmlStatement.DmlType;
 import org.jumpmind.db.sql.ISqlTemplate;
 import org.jumpmind.db.sql.ISqlTransaction;
 import org.jumpmind.db.sql.Row;
+import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AuditEvent;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.ProjectVersion;
+import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.ReleasePackage;
 import org.jumpmind.metl.core.model.ReleasePackageProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
@@ -55,6 +61,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
     final static Integer MODEL_IDX = new Integer(0);
     final static Integer RESOURCE_IDX = new Integer(0);
     final static Integer FLOW_IDX = new Integer(4);
+    final static Integer RELEASE_PACKAGE_IDX = new Integer(0);
     
     final static Integer CREATE_TIME_IDX = new Integer(0);
     final static Integer LAST_UPDATE_TIME_IDX = new Integer(1);
@@ -64,7 +71,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
     final String[][] RELEASE_PACKAGE_SQL = {
             {"_RELEASE_PACKAGE","SELECT * FROM %1$s_RELEASE_PACKAGE WHERE ID='%2$s' ORDER BY ID", "ID"},
             {"_RELEASE_PACKAGE_PROJECT_VERSION","SELECT * FROM %1$s_RELEASE_PACKAGE_PROJECT_VERSION WHERE " +
-                    "RELEASE_PACKAGE_ID='%2$s' ORDER BY RELEASE_PACKAGE_ID", "RELEASE_PACKAGE_ID, PROJECT_VERSION_ID"}
+                    "RELEASE_PACKAGE_ID='%2$s' ORDER BY RELEASE_PACKAGE_ID", "RELEASE_PACKAGE_ID,PROJECT_VERSION_ID"}
     };
 
     final String[][] PROJECT_SQL = {
@@ -162,33 +169,65 @@ public class ImportExportService extends AbstractService implements IImportExpor
     @Override
     public String exportReleasePackage(String releasePackageId, String userId) {        
         
-        Set<FlowName> flows = new HashSet<FlowName>();
-        Set<ModelName> models = new HashSet<ModelName>();
-        Set<ResourceName> resources = new HashSet<ResourceName>();
         ConfigData exportData = initExport();
-        
         ReleasePackage releasePackage = configurationService.findReleasePackage(releasePackageId);
-        addConfigData(exportData.getReleasePackageData(), RELEASE_PACKAGE_SQL, releasePackageId, releasePackageId);
+        
+        DirectedAcyclicGraph<String, DefaultEdge> dag = new DirectedAcyclicGraph<String, DefaultEdge>(DefaultEdge.class);
         for (ReleasePackageProjectVersion rppv : releasePackage.getProjectVersions()) {
-            flows.addAll(configurationService.findFlowsInProject(rppv.getProjectVersionId(), false));
-            models.addAll(configurationService.findModelsInProject(rppv.getProjectVersionId()));
-            resources.addAll(configurationService.findResourcesInProject(rppv.getProjectVersionId()));            
-            addConfigData(exportData.getProjectData(), PROJECT_SQL, rppv.getProjectVersionId(), null);
-        }        
-        for (FlowName flow : flows) {
-            addConfigData(exportData.getFlowData(), FLOW_SQL, flow.getProjectVersionId(), flow.getId());
+            dag.addVertex(rppv.getProjectVersionId());
+            List<ProjectVersionDependency> dependencies = configurationService.findProjectDependencies(rppv.getProjectVersionId());
+            for (ProjectVersionDependency dependency: dependencies) {
+                dag.addVertex(dependency.getTargetProjectVersionId());
+                dag.addEdge(dependency.getTargetProjectVersionId(), rppv.getProjectVersionId());
+            }
+        }      
+        
+        //add projects to the export in topological order
+        Iterator<String> itr = dag.iterator();
+        while (itr.hasNext()) {                        
+            String projectVersionId = itr.next();
+            initProjectVersionExport(exportData, projectVersionId);            
+            Set<String> flowIds = new HashSet<String>();
+            Set<String> modelIds = new HashSet<String>();
+            Set<String> resourceIds = new HashSet<String>();               
+            flowIds.addAll(convertAbstractNamesToIds(configurationService.findFlowsInProject(projectVersionId, false)));
+            modelIds.addAll(convertAbstractNamesToIds(configurationService.findModelsInProject(projectVersionId)));
+            resourceIds.addAll(convertAbstractNamesToIds(configurationService.findResourcesInProject(projectVersionId)));   
+            addProjectVersionToConfigData(projectVersionId, exportData, flowIds, modelIds, resourceIds);
+            
+            save(new AuditEvent(AuditEvent.EventType.EXPORT, String.format("%s, flows: %d, models %d, resources: %d", 
+                    releasePackage.getName(), flowIds.size(), modelIds.size(), resourceIds.size()), userId));
         }
-        for (ModelName model : models) {
-            addConfigData(exportData.getModelData(), MODEL_SQL, model.getProjectVersionId(), model.getId());
-        }
-        for (ResourceName resource : resources) {
-            addConfigData(exportData.getResourceData(), RESOURCE_SQL, resource.getProjectVersionId(), resource.getId());
-        }        
-        save(new AuditEvent(AuditEvent.EventType.EXPORT, String.format("%s, flows: %d, models %d, resources: %d", 
-                releasePackage.getName(), flows.size(), models.size(), resources.size()), userId));
+        
+        addConfigData(exportData.getReleasePackageData(), RELEASE_PACKAGE_SQL, releasePackageId, releasePackageId);
+
         return serializeExportToJson(exportData);
     }
 
+    protected Set<String> convertAbstractNamesToIds(List<? extends AbstractObject> objectNames) {
+        Set<String> ids = new HashSet<String>();
+        for (AbstractObject objectName : objectNames) {
+            ids.add(objectName.getId());
+        }
+        return ids;
+    }
+    
+    protected void addProjectVersionToConfigData(String projectVersionId,ConfigData exportData,
+            Set<String> flowIds, Set<String> modelIds, Set<String> resourceIds) {
+        ProjectVersionData projectVersionData = exportData.getProjectVersionData().get(exportData.getProjectVersionData().size()-1);
+        
+        addConfigData(projectVersionData.getProjectData(), PROJECT_SQL, projectVersionId, null);            
+        for (String flowId : flowIds) {
+            addConfigData(projectVersionData.getFlowData(), FLOW_SQL, projectVersionId, flowId);
+        }
+        for (String modelId : modelIds) {
+            addConfigData(projectVersionData.getModelData(), MODEL_SQL, projectVersionId, modelId);
+        }
+        for (String resourceId : resourceIds) {
+            addConfigData(projectVersionData.getResourceData(), RESOURCE_SQL, projectVersionId, resourceId);
+        }        
+    }
+    
     @Override
     public String exportFlows(String projectVersionId, List<String> flowIds, List<String> modelIds,
             List<String> resourceIds, String userId) {     
@@ -196,18 +235,10 @@ public class ImportExportService extends AbstractService implements IImportExpor
         ProjectVersion version = configurationService.findProjectVersion(projectVersionId);
         save(new AuditEvent(AuditEvent.EventType.EXPORT, String.format("%s, flows: %d, models %d, resources: %d", 
                 version.getName(), flowIds.size(), modelIds.size(), resourceIds.size()), userId));
-
         ConfigData exportData = initExport();
-        addConfigData(exportData.getProjectData(), PROJECT_SQL, projectVersionId, null);
-        for (String flowId : flowIds) {
-            addConfigData(exportData.getFlowData(), FLOW_SQL, projectVersionId, flowId);
-        }
-        for (String modelId : modelIds) {
-            addConfigData(exportData.getModelData(), MODEL_SQL, projectVersionId, modelId);
-        }
-        for (String resourceId : resourceIds) {
-            addConfigData(exportData.getResourceData(), RESOURCE_SQL, projectVersionId, resourceId);
-        }
+        initProjectVersionExport(exportData, projectVersionId);
+        addProjectVersionToConfigData(projectVersionId, exportData, new HashSet<String>(flowIds), new HashSet<String>(modelIds), new HashSet<String>(resourceIds));
+        
         return serializeExportToJson(exportData);
     }
 
@@ -215,14 +246,21 @@ public class ImportExportService extends AbstractService implements IImportExpor
         ConfigData exportData = new ConfigData();
         exportData.setHostName(AppUtils.getHostName());
         exportData.setVersionNumber(VersionUtils.getCurrentVersion());
-
         initConfigData(exportData.getReleasePackageData(), RELEASE_PACKAGE_SQL);
-        initConfigData(exportData.getProjectData(), PROJECT_SQL);
-        initConfigData(exportData.getModelData(), MODEL_SQL);
-        initConfigData(exportData.getResourceData(), RESOURCE_SQL);
-        initConfigData(exportData.getFlowData(), FLOW_SQL);
 
         return exportData;        
+    }
+    
+    protected void initProjectVersionExport(ConfigData exportData, String projectVersionId) {
+        ProjectVersionData projectVersionData = new ProjectVersionData();
+        projectVersionData.setProjectVersionId(projectVersionId);
+        
+        initConfigData(projectVersionData.getProjectData(), PROJECT_SQL);
+        initConfigData(projectVersionData.getModelData(), MODEL_SQL);
+        initConfigData(projectVersionData.getResourceData(), RESOURCE_SQL);
+        initConfigData(projectVersionData.getFlowData(), FLOW_SQL);
+        
+        exportData.getProjectVersionData().add(projectVersionData);
     }
     
     @Override
@@ -232,8 +270,10 @@ public class ImportExportService extends AbstractService implements IImportExpor
     }
 
     private String serializeExportToJson(ConfigData exportData) {
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();        
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        mapper.setDateFormat(df);
         String outData;
 
         try {
@@ -291,25 +331,27 @@ public class ImportExportService extends AbstractService implements IImportExpor
         ImportConfigData importData = new ImportConfigData(configData);
         ISqlTransaction transaction = databasePlatform.getSqlTemplate().startSqlTransaction();
         try {
-
-            if (importData.getProjectData().size() > 0
-                    && importData.getProjectData().get(PROJECT_IDX).rows.size() > 0) {
-                importProjectConfiguration(importData, transaction, userId);
+            for (ProjectVersionData data : importData.getProjectVersionData()) {
+                String projectVersionId = data.getProjectVersionId();
+                if (data.getProjectData().size() > 0
+                        && data.getProjectData().get(PROJECT_IDX).rows.size() > 0) {
+                    importProjectConfiguration(projectVersionId, importData, transaction, userId);
+                }
+                if (data.getResourceData().size() > 0
+                        && data.getResourceData().get(RESOURCE_IDX).rows.size() > 0) {
+                    importResourceConfiguration(projectVersionId, importData, transaction, userId);
+                }
+                if (data.getModelData().size() > 0
+                        && data.getModelData().get(MODEL_IDX).rows.size() > 0) {
+                    importModelConfiguration(projectVersionId, importData, transaction, userId);
+                }
+                if (data.getFlowData().size() > 0
+                        && data.getFlowData().get(FLOW_IDX).rows.size() > 0) {
+                    importFlowConfiguration(projectVersionId, importData, transaction, userId);
+                }
+                processDeletes(importData, transaction);                
             }
-            if (importData.getResourceData().size() > 0
-                    && importData.getResourceData().get(RESOURCE_IDX).rows.size() > 0) {
-                importResourceConfiguration(importData, transaction, userId);
-            }
-            if (importData.getModelData().size() > 0
-                    && importData.getModelData().get(MODEL_IDX).rows.size() > 0) {
-                importModelConfiguration(importData, transaction, userId);
-            }
-            if (importData.getFlowData().size() > 0
-                    && importData.getFlowData().get(FLOW_IDX).rows.size() > 0) {
-                importFlowConfiguration(importData, transaction, userId);
-            }
-            processDeletes(importData, transaction);
-
+            importReleasePackageConfiguration(importData, transaction, userId);
             transaction.commit();
 
         } catch (Exception e) {
@@ -351,24 +393,52 @@ public class ImportExportService extends AbstractService implements IImportExpor
         processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_MODEL"), transaction);
     }
 
-    private void importProjectConfiguration(ImportConfigData importData,
-            ISqlTransaction transaction, String userId) {        
-        String projectVersionId = (String)getOneRow(importData.getProjectData().get(PROJECT_VERSION_IDX)).get("ID");
-        List<TableData> existingProjectData = new ArrayList<TableData>();
-        initConfigData(existingProjectData, PROJECT_SQL);
+    private void importReleasePackageConfiguration(ImportConfigData importData,
+            ISqlTransaction transaction, String userId) {
+
+        List<TableData> existingReleasePackageData = new ArrayList<TableData>();
+        initConfigData(existingReleasePackageData, RELEASE_PACKAGE_SQL);        
         
-        Iterator<String> itr = importData.getProjectData().get(PROJECT_IDX)
+        Iterator<String> itr = importData.getReleasePackageData().get(RELEASE_PACKAGE_IDX)
                 .getTableData().keySet().iterator();
         while (itr.hasNext()) {
             String key = itr.next();
-            LinkedCaseInsensitiveMap<Object> row = importData.getProjectData().get(PROJECT_IDX).getTableData().get(key);
+            LinkedCaseInsensitiveMap<Object> row = importData.getReleasePackageData().get(RELEASE_PACKAGE_IDX).getTableData().get(key);
+            addConfigData(existingReleasePackageData, RELEASE_PACKAGE_SQL, (String) row.get(RELEASE_PACKAGE_SQL[RELEASE_PACKAGE_IDX][KEY_COLUMNS]),
+                    (String) row.get(RELEASE_PACKAGE_SQL[RELEASE_PACKAGE_IDX][KEY_COLUMNS]));
+        }
+        
+        for (int i = 0; i <= RELEASE_PACKAGE_SQL.length - 1; i++) {
+            if (importData.releasePackageData.size() > i) {
+                TableData importReleasePackageData = importData.releasePackageData.get(i);
+                try {
+                    processConfigTableData(importData, existingReleasePackageData.get(i), importReleasePackageData,
+                            RELEASE_PACKAGE_SQL[i][KEY_COLUMNS], transaction, userId);
+                } catch (RuntimeException e) {
+                    throw e;
+                }
+            }
+        }   
+    }
+     
+    private void importProjectConfiguration(String projectVersionId, ImportConfigData importData,
+            ISqlTransaction transaction, String userId) {        
+        List<TableData> existingProjectData = new ArrayList<TableData>();
+        initConfigData(existingProjectData, PROJECT_SQL);
+        ProjectVersionData data = importData.getProjectVersion(projectVersionId);
+        
+        Iterator<String> itr = data.getProjectData().get(PROJECT_IDX)
+                .getTableData().keySet().iterator();
+        while (itr.hasNext()) {
+            String key = itr.next();
+            LinkedCaseInsensitiveMap<Object> row = data.getProjectData().get(PROJECT_IDX).getTableData().get(key);
             addConfigData(existingProjectData, PROJECT_SQL, projectVersionId,
                     (String) row.get(PROJECT_SQL[PROJECT_IDX][KEY_COLUMNS]));
         }
         
         for (int i = 0; i <= PROJECT_SQL.length - 1; i++) {
-            if (importData.projectData.size() > i) {
-                TableData importProjectData = importData.projectData.get(i);
+            if (data.projectData.size() > i) {
+                TableData importProjectData = data.projectData.get(i);
                 try {
                     processConfigTableData(importData, existingProjectData.get(i), importProjectData,
                             PROJECT_SQL[i][KEY_COLUMNS], transaction, userId);
@@ -391,85 +461,71 @@ public class ImportExportService extends AbstractService implements IImportExpor
         }   
     }
 
-    private void importResourceConfiguration(ImportConfigData importData,
+    private void importResourceConfiguration(String projectVersionId, ImportConfigData importData,
             ISqlTransaction transaction, String userId) {
-        String projectVersionId = (String)getOneRow(importData.getResourceData().get(RESOURCE_IDX)).get("PROJECT_VERSION_ID");        
         List<TableData> existingResourceData = new ArrayList<TableData>();
         initConfigData(existingResourceData, RESOURCE_SQL);
+        ProjectVersionData data = importData.getProjectVersion(projectVersionId);
         
-        Iterator<String> itr = importData.getResourceData().get(RESOURCE_IDX)
+        Iterator<String> itr = data.getResourceData().get(RESOURCE_IDX)
                 .getTableData().keySet().iterator();        
         while (itr.hasNext()) {
             String key = itr.next();
-            LinkedCaseInsensitiveMap<Object> row = importData.getResourceData().get(RESOURCE_IDX).getTableData().get(key);
+            LinkedCaseInsensitiveMap<Object> row = data.getResourceData().get(RESOURCE_IDX).getTableData().get(key);
             addConfigData(existingResourceData, RESOURCE_SQL, projectVersionId,
                     (String) row.get(RESOURCE_SQL[RESOURCE_IDX][KEY_COLUMNS]));
         }       
         
         for (int i = 0; i <= RESOURCE_SQL.length - 1; i++) {
-            TableData importResourceData = importData.resourceData.get(i);
+            TableData importResourceData = data.resourceData.get(i);
             processConfigTableData(importData, existingResourceData.get(i), importResourceData,
                     RESOURCE_SQL[i][KEY_COLUMNS], transaction, userId);
         }
     }
 
-    private void importModelConfiguration(ImportConfigData importData,
+    private void importModelConfiguration(String projectVersionId, ImportConfigData importData,
             ISqlTransaction transaction, String userId) {
-        String projectVersionId = (String)getOneRow(importData.getModelData().get(MODEL_IDX)).get("PROJECT_VERSION_ID");        
         List<TableData> existingModelData = new ArrayList<TableData>();
         initConfigData(existingModelData, MODEL_SQL);
+        ProjectVersionData data = importData.getProjectVersion(projectVersionId);
         
-        Iterator<String> itr = importData.getModelData().get(MODEL_IDX)
+        Iterator<String> itr = data.getModelData().get(MODEL_IDX)
                 .getTableData().keySet().iterator();        
         while (itr.hasNext()) {
             String key = itr.next();
-            LinkedCaseInsensitiveMap<Object> row = importData.getModelData().get(MODEL_IDX).getTableData().get(key);
+            LinkedCaseInsensitiveMap<Object> row = data.getModelData().get(MODEL_IDX).getTableData().get(key);
             addConfigData(existingModelData, MODEL_SQL, projectVersionId,
                     (String) row.get(MODEL_SQL[MODEL_IDX][KEY_COLUMNS]));
         }
         
         for (int i = 0; i <= MODEL_SQL.length - 1; i++) {
-            TableData importModelData = importData.modelData.get(i);
+            TableData importModelData = data.modelData.get(i);
             processConfigTableData(importData, existingModelData.get(i), importModelData,
                     MODEL_SQL[i][KEY_COLUMNS], transaction, userId);
         }
     }
 
-    private void importFlowConfiguration(ImportConfigData importData, ISqlTransaction transaction, String userId) {
-        String projectVersionId = (String)getOneRow(importData.getFlowData().get(FLOW_IDX)).get("PROJECT_VERSION_ID");        
+    private void importFlowConfiguration(String projectVersionId, ImportConfigData importData, ISqlTransaction transaction, String userId) {
         List<TableData> existingFlowData = new ArrayList<TableData>();
         initConfigData(existingFlowData, FLOW_SQL);
+        ProjectVersionData data = importData.getProjectVersion(projectVersionId);
                 
-        Iterator<String> itr = importData.getFlowData().get(FLOW_IDX)
+        Iterator<String> itr = data.getFlowData().get(FLOW_IDX)
                 .getTableData().keySet().iterator();        
         while (itr.hasNext()) {
             String key = itr.next();
-            LinkedCaseInsensitiveMap<Object> row = importData.getFlowData().get(FLOW_IDX).getTableData().get(key);
+            LinkedCaseInsensitiveMap<Object> row = data.getFlowData().get(FLOW_IDX).getTableData().get(key);
             addConfigData(existingFlowData, FLOW_SQL, projectVersionId,
                     (String) row.get(FLOW_SQL[FLOW_IDX][KEY_COLUMNS]));
         }  
 
         for (int i = 0; i <= FLOW_SQL.length - 1; i++) {
-            TableData importFlowData = importData.flowData.get(i);
+            TableData importFlowData = data.flowData.get(i);
             processConfigTableData(importData, existingFlowData.get(i), importFlowData,
                     FLOW_SQL[i][KEY_COLUMNS], transaction, userId);
         }
     }
-
-    private LinkedCaseInsensitiveMap<Object> getOneRow(TableData tableData) {        
-        Iterator<String> keyItr = tableData.rows.keySet().iterator();
-        String key = null;
-        while (keyItr.hasNext()) {
-            key = keyItr.next();
-            break;
-        }
-        if (key != null) {
-            return tableData.rows.get(key);
-        } else {
-            return null;
-        }
-    }
-    
+   
     private final boolean isPassword(String name) {
         return isNotBlank(name) && name.contains("password");
     }
@@ -748,25 +804,43 @@ public class ImportExportService extends AbstractService implements IImportExpor
         public void setTableData(Map<String, LinkedCaseInsensitiveMap<Object>> tableData) {
             this.rows = tableData;
         }
-
     }
 
     static class ConfigData {
 
         String versionNumber;
         String hostName;
-        List<TableData> releasePackageData = new ArrayList<TableData>();
-        List<TableData> projectData = new ArrayList<TableData>();
-        List<TableData> resourceData = new ArrayList<TableData>();
-        List<TableData> modelData = new ArrayList<TableData>();
-        List<TableData> flowData = new ArrayList<TableData>();
+        List<TableData> releasePackageData;
+        List<ProjectVersionData> projectVersionData;
 
         public ConfigData() {
             releasePackageData = new ArrayList<TableData>();
-            projectData = new ArrayList<TableData>();
-            resourceData = new ArrayList<TableData>();
-            modelData = new ArrayList<TableData>();
-            flowData = new ArrayList<TableData>();
+            projectVersionData = new ArrayList<ProjectVersionData>();
+        }
+        
+        public List<TableData> getReleasePackageData() {
+            return releasePackageData;
+        }
+
+        public ProjectVersionData getProjectVersion(String projectVersionId) {
+            for (ProjectVersionData data : projectVersionData) {
+                if (projectVersionId.equalsIgnoreCase(data.getProjectVersionId())) {
+                    return data;
+                }
+            }
+            return null;
+        }
+        
+        public void setReleasePackageData(List<TableData> releasePackageData) {
+            this.releasePackageData = releasePackageData;
+        }
+        
+        public List<ProjectVersionData> getProjectVersionData() {
+            return projectVersionData;
+        }
+
+        public void setProjectVersionData(List<ProjectVersionData> projectVersionData) {
+            this.projectVersionData = projectVersionData;
         }
 
         public void setVersionNumber(String versionNumber) {
@@ -783,16 +857,32 @@ public class ImportExportService extends AbstractService implements IImportExpor
         
         public String getHostName() {
             return hostName;
-        }
+        }    
+    }
+    
+    static class ProjectVersionData {
 
-        public List<TableData> getReleasePackageData() {
-            return releasePackageData;
-        }
+        String projectVersionId;
+        List<TableData> projectData;
+        List<TableData> resourceData;
+        List<TableData> modelData;
+        List<TableData> flowData;
 
-        public void setReleasePackageData(List<TableData> releasePackageData) {
-            this.releasePackageData = releasePackageData;
-        }        
+        public ProjectVersionData() {
+            projectData = new ArrayList<TableData>();
+            resourceData = new ArrayList<TableData>();
+            modelData = new ArrayList<TableData>();
+            flowData = new ArrayList<TableData>();
+        }
         
+        public String getProjectVersionId() {
+            return projectVersionId;
+        }
+
+        public void setProjectVersionId(String projectVersionId) {
+            this.projectVersionId = projectVersionId;
+        }
+
         public List<TableData> getResourceData() {
             return resourceData;
         }
@@ -824,6 +914,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         public void setProjectData(List<TableData> projectData) {
             this.projectData = projectData;
         }
+        
     }
 
     static class ImportConfigData extends ConfigData {
@@ -832,13 +923,9 @@ public class ImportExportService extends AbstractService implements IImportExpor
             this.hostName = configData.getHostName();
             this.versionNumber = configData.getVersionNumber();
             this.releasePackageData = configData.releasePackageData;
-            this.projectData = configData.projectData;
-            this.resourceData = configData.resourceData;
-            this.modelData = configData.modelData;
-            this.flowData = configData.flowData;
+            this.projectVersionData = configData.projectVersionData;
             this.deletesToProcess = new HashMap<String, TableData>();
         }
-
         Map<String, TableData> deletesToProcess;
 
     }

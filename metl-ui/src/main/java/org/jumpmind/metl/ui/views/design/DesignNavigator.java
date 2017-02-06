@@ -133,7 +133,8 @@ public class DesignNavigator extends VerticalLayout {
         Project project = new Project();
         project.setName("New Project");
         ProjectVersion version = new ProjectVersion();
-        version.setVersionLabel("1.0.0");
+        version.setVersionType(ProjectVersion.VersionType.MASTER.toString());
+        version.setVersionLabel("master");
         version.setProject(project);
         project.getProjectVersions().add(version);
         configurationService.save(project);
@@ -579,8 +580,6 @@ public class DesignNavigator extends VerticalLayout {
             refreshProjects();
         }
     }
-    
-    
     
     public void doCut() {
         Object object = treeTable.getValue();
