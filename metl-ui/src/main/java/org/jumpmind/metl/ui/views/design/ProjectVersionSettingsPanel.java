@@ -46,6 +46,7 @@ import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.DateField;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
@@ -91,9 +92,11 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
         
         FormLayout formLayout = new FormLayout();
         formLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        CheckBox releasedCheckBox = new CheckBox("Released");
-        releasedCheckBox.setImmediate(true);
-        formLayout.addComponent(releasedCheckBox);
+        DateField releaseDateField = new DateField("Release Date");
+        releaseDateField.setValue(projectVersion.getReleaseDate());
+        releaseDateField.setEnabled(false);
+        
+        formLayout.addComponent(releaseDateField);
         
         CheckBox archiveCheckBox = new CheckBox("Archived");
         archiveCheckBox.setImmediate(true);
