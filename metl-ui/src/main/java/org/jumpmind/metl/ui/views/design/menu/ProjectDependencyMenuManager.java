@@ -21,8 +21,7 @@ public class ProjectDependencyMenuManager extends AbstractDesignSelectedValueMen
     @Override
     protected String[] getDisabledPaths(Object selected) {
         return (String[])ArrayUtils.addAll(super.getDisabledPaths(selected), new String[] {
-                "Edit|Copy",
-                "Edit|Remove"
+                "Edit|Copy"
         });
     }
     
