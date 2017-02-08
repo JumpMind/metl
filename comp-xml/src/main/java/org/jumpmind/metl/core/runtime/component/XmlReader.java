@@ -21,6 +21,7 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.io.IOUtils.closeQuietly;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -121,7 +122,9 @@ public class XmlReader extends AbstractComponentRuntime {
         XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
         for (String file : files) {
             ArrayList<String> outboundPayload = new ArrayList<String>();
-            log(LogLevel.INFO, "Reading %s", file);
+            if (isNotBlank(file)) {
+                log(LogLevel.INFO, "Reading %s", file);
+            }
             Map<String, Serializable> headers = new HashMap<>();
             headers.put("source.file.path", file);
             LineNumberReader lineNumberReader = null;
@@ -202,7 +205,9 @@ public class XmlReader extends AbstractComponentRuntime {
                         eventType = parser.next();
                     }
                 } else {
-                    info("File %s didn't exist, but Must Exist setting was false.  Continuing",file);                    
+                    if (isNotBlank(file)) {
+                       info("File %s didn't exist, but must exist setting was false.  Continuing",file);
+                    }
                 }
             } finally {
                 closeQuietly(lineNumberReader);

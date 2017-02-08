@@ -132,7 +132,9 @@ public class TextFileReader extends AbstractFileReader {
                             }
                             linesInMessage = 0;
                         } else {
-                            info("File %s didn't exist, but Must Exist setting was false.  Continuing", file);
+                            if (isNotBlank(file)) {
+                                info("File %s didn't exist, but must exist setting was false.  Continuing", file);
+                            }
                             readContent = false;
                         }
                     } finally {

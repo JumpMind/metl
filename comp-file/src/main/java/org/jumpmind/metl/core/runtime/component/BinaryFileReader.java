@@ -1,5 +1,7 @@
 package org.jumpmind.metl.core.runtime.component;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -46,7 +48,9 @@ public class BinaryFileReader extends AbstractFileReader {
             headers.put("source.file.path", file);
             InputStream inStream = null;
             try {
-                info("Reading file: %s", file);
+                if (isNotBlank(file)) {
+                    info("Reading file: %s", file);
+                }
                 String filePath = resolveParamsAndHeaders(file, inputMessage);
                 inStream = directory.getInputStream(filePath, mustExist);
                 //TODO: if the file is bigger than the allowable message size, this doesn't work
@@ -55,7 +59,9 @@ public class BinaryFileReader extends AbstractFileReader {
                     callback.sendBinaryMessage(headers, payload);
                     getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);               
                 } else {
-                    info("File %s didn't exist, but Must Exist setting was false.  Continuing",file);
+                    if (isNotBlank(file)) {
+                        info("File %s didn't exist, but must exist setting was false.  Continuing", file);
+                    }
                 }
             } catch (IOException e) {
                 throw new IoException("Error reading from file " + e.getMessage());
