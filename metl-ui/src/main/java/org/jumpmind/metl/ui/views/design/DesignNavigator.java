@@ -850,6 +850,7 @@ public class DesignNavigator extends VerticalLayout {
         @Override
         public void onFinished(String dataToImport) {
             context.getImportExportService().importConfiguration(dataToImport, context.getUser().getLoginId());
+            context.getDefinitionFactory().refresh();
             refresh();
         }
 
