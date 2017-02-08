@@ -94,8 +94,7 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
         formLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         DateField releaseDateField = new DateField("Release Date");
         releaseDateField.setValue(projectVersion.getReleaseDate());
-        releaseDateField.setEnabled(false);
-        
+        releaseDateField.setEnabled(false);        
         formLayout.addComponent(releaseDateField);
         
         CheckBox archiveCheckBox = new CheckBox("Archived");
