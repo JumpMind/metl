@@ -37,14 +37,17 @@ import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_URL;
 import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_USER;
 import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_VALIDATION_QUERY;
 
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.sql.DataSource;
 
 import org.h2.Driver;
+import org.h2.tools.Server;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
+import org.jumpmind.db.sql.SqlException;
 import org.jumpmind.db.sql.SqlPersistenceManager;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.BasicDataSourceFactory;
@@ -104,6 +107,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class AppConfig extends WebMvcConfigurerAdapter {
 
     protected static final Logger log = LoggerFactory.getLogger(AppConfig.class);
+    
+    final String EXECUTION = "execution.";
 
     @Autowired
     Environment env;
@@ -137,6 +142,24 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     DataSource configDataSource;
     
     DataSource executionDataSource;
+    
+    Server h2Server;
+    
+    @Bean
+    @Scope(value="singleton")
+    Server h2Server() {
+        String configDbUrl = env.getProperty(DB_POOL_URL, "jdbc:h2:mem:config");
+        String execDbUrl = env.getProperty(EXECUTION + DB_POOL_DRIVER, env.getProperty(DB_POOL_DRIVER, Driver.class.getName()));
+        if (h2Server == null && (configDbUrl.contains("h2:tcp") || execDbUrl.contains("h2:tcp"))) {
+            try {
+                h2Server = Server.createTcpServer("-tcpPort", env.getProperty("h2.port", "9092"));
+                h2Server.start();
+            } catch (SQLException e) {
+                throw new SqlException(e);
+            }
+        }
+        return h2Server;
+    }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -171,33 +194,37 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton")
     DataSource configDataSource() {
         if (configDataSource == null) {
-        TypedProperties properties = new TypedProperties();
-        properties.put(DB_POOL_DRIVER, env.getProperty(DB_POOL_DRIVER, Driver.class.getName()));
-        properties.put(DB_POOL_URL, env.getProperty(DB_POOL_URL, "jdbc:h2:mem:config"));
-        properties.put(DB_POOL_USER, env.getProperty(DB_POOL_USER));
-        properties.put(DB_POOL_PASSWORD, env.getProperty(DB_POOL_PASSWORD));
-        properties.put(DB_POOL_INITIAL_SIZE, env.getProperty(DB_POOL_INITIAL_SIZE, "100"));
-        properties.put(DB_POOL_MAX_ACTIVE, env.getProperty(DB_POOL_MAX_ACTIVE, "100"));
-        properties.put(DB_POOL_MAX_IDLE, env.getProperty(DB_POOL_MAX_IDLE, "100"));
-        properties.put(DB_POOL_MIN_IDLE, env.getProperty(DB_POOL_MIN_IDLE, "100"));
-        properties.put(DB_POOL_MAX_WAIT, env.getProperty(DB_POOL_MAX_WAIT, "30000"));
-        properties.put(DB_POOL_MIN_EVICTABLE_IDLE_TIME_MILLIS,
-                env.getProperty(DB_POOL_MIN_EVICTABLE_IDLE_TIME_MILLIS, "120000"));
-        properties.put(DB_POOL_VALIDATION_QUERY, env.getProperty(DB_POOL_VALIDATION_QUERY));
-        properties.put(DB_POOL_TEST_ON_BORROW, env.getProperty(DB_POOL_TEST_ON_BORROW, "false"));
-        properties.put(DB_POOL_TEST_ON_RETURN, env.getProperty(DB_POOL_TEST_ON_RETURN, "false"));
-        properties.put(DB_POOL_TEST_WHILE_IDLE, env.getProperty(DB_POOL_TEST_WHILE_IDLE, "true"));
-        properties.put(DB_POOL_INIT_SQL, env.getProperty(DB_POOL_INIT_SQL));
-        properties.put(DB_POOL_CONNECTION_PROPERTIES,
-                env.getProperty(DB_POOL_CONNECTION_PROPERTIES));
-        log.info(
-                "About to initialize the configuration datasource using the following driver:"
-                        + " '{}' and the following url: '{}' and the following user: '{}'",
-                new Object[] { properties.get(DB_POOL_DRIVER), properties.get(DB_POOL_URL),
-                        properties.get(DB_POOL_USER) });
+            h2Server();
+            TypedProperties properties = new TypedProperties();
+            properties.put(DB_POOL_DRIVER, env.getProperty(DB_POOL_DRIVER, Driver.class.getName()));
+            properties.put(DB_POOL_URL, env.getProperty(DB_POOL_URL, "jdbc:h2:mem:config"));
+            properties.put(DB_POOL_USER, env.getProperty(DB_POOL_USER));
+            properties.put(DB_POOL_PASSWORD, env.getProperty(DB_POOL_PASSWORD));
+            properties.put(DB_POOL_INITIAL_SIZE, env.getProperty(DB_POOL_INITIAL_SIZE, "100"));
+            properties.put(DB_POOL_MAX_ACTIVE, env.getProperty(DB_POOL_MAX_ACTIVE, "100"));
+            properties.put(DB_POOL_MAX_IDLE, env.getProperty(DB_POOL_MAX_IDLE, "100"));
+            properties.put(DB_POOL_MIN_IDLE, env.getProperty(DB_POOL_MIN_IDLE, "100"));
+            properties.put(DB_POOL_MAX_WAIT, env.getProperty(DB_POOL_MAX_WAIT, "30000"));
+            properties.put(DB_POOL_MIN_EVICTABLE_IDLE_TIME_MILLIS,
+                    env.getProperty(DB_POOL_MIN_EVICTABLE_IDLE_TIME_MILLIS, "120000"));
+            properties.put(DB_POOL_VALIDATION_QUERY, env.getProperty(DB_POOL_VALIDATION_QUERY));
+            properties.put(DB_POOL_TEST_ON_BORROW,
+                    env.getProperty(DB_POOL_TEST_ON_BORROW, "false"));
+            properties.put(DB_POOL_TEST_ON_RETURN,
+                    env.getProperty(DB_POOL_TEST_ON_RETURN, "false"));
+            properties.put(DB_POOL_TEST_WHILE_IDLE,
+                    env.getProperty(DB_POOL_TEST_WHILE_IDLE, "true"));
+            properties.put(DB_POOL_INIT_SQL, env.getProperty(DB_POOL_INIT_SQL));
+            properties.put(DB_POOL_CONNECTION_PROPERTIES,
+                    env.getProperty(DB_POOL_CONNECTION_PROPERTIES));
+            log.info(
+                    "About to initialize the configuration datasource using the following driver:"
+                            + " '{}' and the following url: '{}' and the following user: '{}'",
+                    new Object[] { properties.get(DB_POOL_DRIVER), properties.get(DB_POOL_URL),
+                            properties.get(DB_POOL_USER) });
 
-        configDataSource = BasicDataSourceFactory.create(properties,
-                SecurityServiceFactory.create());
+            configDataSource = BasicDataSourceFactory.create(properties,
+                    SecurityServiceFactory.create());
         }
         return configDataSource;
     }
@@ -206,8 +233,8 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton")
     DataSource executionDataSource() {
         if (executionDataSource == null) {
-            TypedProperties properties = new TypedProperties();
-            final String EXECUTION = "execution.";
+            h2Server();
+            TypedProperties properties = new TypedProperties();            
             properties.put(DB_POOL_DRIVER, env.getProperty(EXECUTION + DB_POOL_DRIVER, env.getProperty(DB_POOL_DRIVER, Driver.class.getName())));
             properties.put(DB_POOL_URL, env.getProperty(EXECUTION + DB_POOL_URL, env.getProperty(DB_POOL_URL,"jdbc:h2:mem:exec")));
             properties.put(DB_POOL_USER, env.getProperty(EXECUTION + DB_POOL_USER, env.getProperty(DB_POOL_USER)));
