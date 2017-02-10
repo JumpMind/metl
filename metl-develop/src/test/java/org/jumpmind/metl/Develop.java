@@ -42,6 +42,7 @@ public class Develop {
         
         System.out.println(IOUtils.toString(new FileInputStream("../metl-server/src/main/resources/Metl.asciiart")));
 
+        new File(System.getProperty("java.io.tmpdir")).mkdirs();
         new File("working").mkdirs();
         System.setProperty("org.jumpmind.metl.ui.init.config.dir","working");
         
@@ -53,8 +54,8 @@ public class Develop {
         webapp.setParentLoaderPriority(true);
         webapp.setConfigurationDiscovered(true);
         webapp.setContextPath("/metl");
-        webapp.setWar("../metl-ui/src/main/webapp");
-        webapp.setResourceBase("../metl-ui/src/main/webapp");
+        webapp.setWar("../metl-war/src/main/webapp");
+        webapp.setResourceBase("../metl-war/src/main/webapp");
 
         ConcurrentHashMap<String, ConcurrentHashSet<String>> map = new ClassInheritanceMap();
         ConcurrentHashSet<String> set = new ConcurrentHashSet<>();
@@ -66,7 +67,7 @@ public class Develop {
         
         ServerContainer webSocketServer = WebSocketServerContainerInitializer.configureContext(webapp);
         webSocketServer.setDefaultMaxSessionIdleTimeout(10000000);        
-
+        
         server.start();
         server.join();
 
