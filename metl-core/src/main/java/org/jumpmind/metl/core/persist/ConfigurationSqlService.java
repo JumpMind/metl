@@ -62,6 +62,17 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
     public boolean isInstalled() {
         return databasePlatform.getTableFromCache(tableName(Component.class), false) != null;
     }
+    
+    @Override
+    public List<Plugin> findDistinctPlugins() {
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        return template.query(String.format("select distinct artifact_group, artifact_name, min(load_order) as load_order from "
+                + "%1$s_plugin group by artifact_group, artifact_name", tablePrefix), new ISqlRowMapper<Plugin>() {
+                    public Plugin mapRow(Row row) {
+                        return new Plugin(row.getString("artifact_group"), row.getString("artifact_name"), row.getInt("load_order"));
+                    }
+                });
+    }
 
     @Override
     public List<Plugin> findActivePlugins() {

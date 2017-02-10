@@ -70,6 +70,8 @@ public interface IConfigurationService {
     public FlowStep copy(FlowStep original);
 
     public List<PluginRepository> findPluginRepositories();
+    
+    public List<Plugin> findDistinctPlugins();
 
     public List<Plugin> findActivePlugins();
 

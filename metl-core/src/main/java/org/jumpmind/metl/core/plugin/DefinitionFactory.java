@@ -100,12 +100,13 @@ public class DefinitionFactory implements IDefinitionFactory {
         definitionsByPluginId = new HashMap<>();
         if (pluginManager != null && configurationService != null) {
             pluginManager.refresh();
+            List<Plugin> distinctPlugins = configurationService.findDistinctPlugins();
             List<String> projectVersionIds = configurationService.findAllProjectVersionIds();
             if (projectVersionIds.size() > 0) {
-                ExecutorService executor = Executors.newFixedThreadPool(projectVersionIds.size(), new RefreshThreadFactory());
+                ExecutorService executor = Executors.newFixedThreadPool(projectVersionIds.size()/2, new RefreshThreadFactory());
                 List<Future<?>> futures = new ArrayList<Future<?>>();
                 for (String projectVersionId : projectVersionIds) {
-                    futures.add(executor.submit(() -> refresh(projectVersionId)));
+                    futures.add(executor.submit(() -> refresh(projectVersionId, distinctPlugins)));
                 }
                 awaitTermination(executor, futures);
             }
@@ -114,13 +115,18 @@ public class DefinitionFactory implements IDefinitionFactory {
 
     @Override
     public void refresh(String projectVersionId) {
+        List<Plugin> distinctPlugins = configurationService.findDistinctPlugins();
+        refresh(projectVersionId, distinctPlugins);
+    }        
+        
+    protected void refresh(String projectVersionId, List<Plugin> distinctPlugins) {
         long ts = System.currentTimeMillis();
         loadComponentsForClassloader(projectVersionId, "org.jumpmind.metl:metl-core:" + VersionUtils.getCurrentVersion(),
                 getClass().getClassLoader());
         List<PluginRepository> remoteRepostiories = configurationService.findPluginRepositories();
         List<ProjectVersionDefinitionPlugin> pvcps = configurationService.findProjectVersionComponentPlugins(projectVersionId);
-        GenericVersionScheme versionScheme = new GenericVersionScheme();
-        for (Plugin configuredPlugin : configurationService.findPlugins()) {
+        GenericVersionScheme versionScheme = new GenericVersionScheme();        
+        for (Plugin configuredPlugin : distinctPlugins) {
             boolean matched = false;
             for (ProjectVersionDefinitionPlugin pvcp : pvcps) {
                 if (pvcp.matches(configuredPlugin)) {
@@ -151,19 +157,21 @@ public class DefinitionFactory implements IDefinitionFactory {
                                 }
                             }
                         }
-
+                        
                         matched = null != load(projectVersionId, pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion(),
                                 remoteRepostiories);
                         
                         if (!matched) {
                             logger.warn("Deleting the reference to {}:{}:{}", pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion());
                             configurationService.delete(pvcp);
-                            configurationService.delete(configuredPlugin);
-                        }
+                            configurationService.delete((Plugin)pvcp);
+                        }                        
 
                     } catch (InvalidVersionSpecificationException e) {
                         logger.error("", e);
-                    }
+                    } 
+                    
+                    break;
                 }
             }
 
