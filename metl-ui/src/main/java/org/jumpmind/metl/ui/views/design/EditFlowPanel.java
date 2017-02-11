@@ -230,10 +230,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
     @Override
     public void selected() {
-        long ts = System.currentTimeMillis();
         context.setCurrentFlow(new FlowName(flow));
         propertySheet.setSource(propertySheet.getValue());
-        log.info("Flow panel selected in {}ms", (System.currentTimeMillis()-ts));
     }
 
     public Flow getFlow() {

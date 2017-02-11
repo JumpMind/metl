@@ -309,7 +309,6 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public void refresh() {
-        long ts = System.currentTimeMillis();
         refreshProjects();
 
         menuBar.refresh();
@@ -329,7 +328,6 @@ public class DesignNavigator extends VerticalLayout {
         }
 
         treeTable.refreshRowCache();
-        log.info("It took {}ms to refresh the design view", (System.currentTimeMillis()-ts));
 
     }
 
