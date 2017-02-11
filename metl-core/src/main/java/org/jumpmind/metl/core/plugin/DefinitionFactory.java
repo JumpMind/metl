@@ -102,8 +102,9 @@ public class DefinitionFactory implements IDefinitionFactory {
             pluginManager.refresh();
             List<Plugin> distinctPlugins = configurationService.findDistinctPlugins();
             List<String> projectVersionIds = configurationService.findAllProjectVersionIds();
-            if (projectVersionIds.size() > 0) {
-                ExecutorService executor = Executors.newFixedThreadPool(projectVersionIds.size()/2, new RefreshThreadFactory());
+            int numOfVersions = projectVersionIds.size(); 
+            if (numOfVersions > 0) {
+                ExecutorService executor = Executors.newFixedThreadPool(numOfVersions > 10 ? numOfVersions/2 : numOfVersions, new RefreshThreadFactory());
                 List<Future<?>> futures = new ArrayList<Future<?>>();
                 for (String projectVersionId : projectVersionIds) {
                     futures.add(executor.submit(() -> refresh(projectVersionId, distinctPlugins)));
