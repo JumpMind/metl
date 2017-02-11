@@ -359,6 +359,7 @@ public class DesignNavigator extends VerticalLayout {
                 addModelsToFolder(addVirtualFolder(LABEL_MODELS, projectVersion), projectVersion);
                 addResourcesToFolder(addVirtualFolder(LABEL_RESOURCES, projectVersion), projectVersion);
                 addDependenciesToFolder(addVirtualFolder(LABEL_DEPENDENCIES, projectVersion), projectVersion);
+                //log.info("It took {}ms (so far) to refresh projects in the design view", (System.currentTimeMillis()-ts));
             }
         }
 

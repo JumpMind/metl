@@ -75,7 +75,7 @@ public class DbProvider implements IDbProvider, Serializable {
         IConfigurationService configurationService = context.getConfigurationService();
         List<Project> projects = configurationService.findProjects();
         for (Project project : projects) {
-            ProjectVersion version = project.getLatestProjectVersion();
+            ProjectVersion version = project.getMasterVersion();
             if (version != null) {
                 XMLResourceDefinition defintion = context.getDefinitionFactory().getResourceDefintion(version.getId(), "Database");
                 List<Resource> resources = configurationService.findResourcesByTypes(version.getId(), "Database");

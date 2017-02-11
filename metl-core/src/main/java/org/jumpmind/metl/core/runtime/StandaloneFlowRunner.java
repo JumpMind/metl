@@ -111,7 +111,7 @@ public class StandaloneFlowRunner {
         List<FlowName> flows = new ArrayList<>();
         List<Project> projects = configurationService.findProjects();
         for (Project project : projects) {
-            String projectVersionId = project.getLatestProjectVersion().getId();
+            String projectVersionId = project.getMasterVersion().getId();
             if (includeRegularFlows) {
                 flows.addAll(configurationService.findFlowsInProject(projectVersionId, false));
             }
