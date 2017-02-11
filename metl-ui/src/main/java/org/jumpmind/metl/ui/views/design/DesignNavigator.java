@@ -309,6 +309,7 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public void refresh() {
+        long ts = System.currentTimeMillis();
         refreshProjects();
 
         menuBar.refresh();
@@ -328,10 +329,12 @@ public class DesignNavigator extends VerticalLayout {
         }
 
         treeTable.refreshRowCache();
+        log.info("It took {}ms to refresh the design view", (System.currentTimeMillis()-ts));
 
     }
 
     protected void refreshProjects() {
+        long ts = System.currentTimeMillis();
         Object selected = treeTable.getValue();
         List<Project> projects = configurationService.findProjects();
         treeTable.removeAllItems();
@@ -378,6 +381,7 @@ public class DesignNavigator extends VerticalLayout {
         }
 
         selectAndExpand(selected);
+        log.info("It took {}ms to refresh projects in the design view", (System.currentTimeMillis()-ts));
     }
 
     protected Object findChild(String id, Object parent) {
@@ -525,7 +529,9 @@ public class DesignNavigator extends VerticalLayout {
     protected void open(Object item) {
         if (item instanceof FlowName) {
             FlowName flow = (FlowName) item;
+            long ts = System.currentTimeMillis();
             EditFlowPanel flowLayout = new EditFlowPanel(context, flow.getId(), this, tabs);
+            log.info("It took {}ms to create the edit flow panel", (System.currentTimeMillis()-ts));
             tabs.addCloseableTab(flow.getId(), flow.getName(), Icons.FLOW, flowLayout);
         } else if (item instanceof ModelName) {
             ModelName model = (ModelName) item;
