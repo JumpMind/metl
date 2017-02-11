@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import org.jumpmind.metl.core.model.AbstractObject;
@@ -126,18 +127,18 @@ abstract class AbstractConfigurationService extends AbstractService
 
     @Override
     public List<FlowName> findFlowsInProject(String projectVersionId, boolean test) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("projectVersionId", projectVersionId);
+        Map<String, Object> params = new TreeMap<String, Object>();
         params.put("deleted", 0);
+        params.put("projectVersionId", projectVersionId);
         params.put("test", test ? 1 : 0);
         return find(FlowName.class, params, Flow.class);
     }
 
     @Override
     public List<ModelName> findModelsInProject(String projectVersionId) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("projectVersionId", projectVersionId);
+        Map<String, Object> params = new TreeMap<String, Object>();
         params.put("deleted", 0);
+        params.put("projectVersionId", projectVersionId);
         return find(ModelName.class, params, Model.class);
     }
 
@@ -158,9 +159,9 @@ abstract class AbstractConfigurationService extends AbstractService
 
     @Override
     public List<ResourceName> findResourcesInProject(String projectVersionId) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("projectVersionId", projectVersionId);
+        Map<String, Object> params = new TreeMap<String, Object>();
         params.put("deleted", 0);
+        params.put("projectVersionId", projectVersionId);
         return find(ResourceName.class, params, Resource.class);
     }
 
