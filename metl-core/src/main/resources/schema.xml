@@ -71,6 +71,9 @@
         <foreign-key foreignTable="project_version" name="fk_dep_tgt_2_v">
             <reference local="target_project_version_id" foreign="id" />
         </foreign-key>                
+        <index name="idx_pvd_pv">
+            <index-column name="project_version_id" />
+        </index>         
     </table>       
     
     <table name="project_version_definition_plugin" description="">
@@ -128,6 +131,10 @@
         <foreign-key foreignTable="project_version" name="fk_m_2_v">
             <reference local="project_version_id" foreign="id" />
         </foreign-key>        
+        <index name="idx_model_pv">
+            <index-column name="deleted" />           
+            <index-column name="project_version_id" />         
+        </index>                
     </table>
 
     <table name="model_entity" description="">
@@ -182,7 +189,11 @@
         </foreign-key>
         <foreign-key foreignTable="project_version" name="fk_r_2_v">
             <reference local="project_version_id" foreign="id" />
-        </foreign-key>        
+        </foreign-key>     
+        <index name="idx_resource_pv">
+            <index-column name="deleted" />
+            <index-column name="project_version_id" />
+        </index>                           
     </table>
 
     <table name="resource_setting" description="">
@@ -300,7 +311,12 @@
         </foreign-key>
         <foreign-key foreignTable="project_version" name="fk_flw_2_v">
             <reference local="project_version_id" foreign="id" />
-        </foreign-key>        
+        </foreign-key>       
+        <index name="idx_flow_pv">
+            <index-column name="deleted" />
+            <index-column name="project_version_id" />
+            <index-column name="test" />
+        </index>          
     </table>
     
     <table name="flow_parameter" description="">
