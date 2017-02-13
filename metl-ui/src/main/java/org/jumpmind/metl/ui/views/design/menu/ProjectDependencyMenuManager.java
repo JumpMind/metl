@@ -16,13 +16,19 @@ public class ProjectDependencyMenuManager extends AbstractDesignSelectedValueMen
         } else {
             return false;
         }
-    }
+    }    
     
     @Override
     protected String[] getDisabledPaths(Object selected) {
-        return (String[])ArrayUtils.addAll(super.getDisabledPaths(selected), new String[] {
-                "Edit|Copy"
-        });
+        if (isReadOnly(selected)) {
+            return (String[])ArrayUtils.addAll(super.getDisabledPaths(selected), new String[] { "Edit|Remove",
+                    "Edit|Change Dependency Version"
+            });            
+        } else {
+            return (String[])ArrayUtils.addAll(super.getDisabledPaths(selected), new String[] {
+                    "Edit|Copy"
+            });
+        }
     }
     
     @Override
