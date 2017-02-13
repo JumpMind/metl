@@ -1320,11 +1320,17 @@ public class ConfigurationService extends AbstractService
             updateProjectVersionWithNewDependencyGUIDs(oldToNewResourceIdMap, oldToNewModelIdMap,
                     oldToNewModelEntityIdMap, oldToNewModelAttributeIdMap, newTargetProjectVersionId,
                     transaction);
+            updateProjectDependencyWithNewVersion(dependency, newTargetProjectVersionId);
             transaction.commit();
         } catch (Exception e) {
             log.error(String.format("Error updating project version dependencies %s",e.getMessage()));
             transaction.rollback();
         }
+    }
+    
+    private void updateProjectDependencyWithNewVersion(ProjectVersionDependency dependency, String newTargetProjectVersionId) {        
+        dependency.setTargetProjectVersionId(newTargetProjectVersionId);
+        save(dependency);
     }
     
     private Map<String, String> getOldToNewResourceIdMap(ProjectVersionDependency dependency, String newTargetProjectVersionId) {
