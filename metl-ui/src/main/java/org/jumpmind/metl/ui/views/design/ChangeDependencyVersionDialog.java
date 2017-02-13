@@ -31,15 +31,17 @@ public class ChangeDependencyVersionDialog extends ResizableWindow  {
     IConfigurationService configService;
     OptionGroup optionGroup;
     ProjectVersionDependency dependency;
+    DesignNavigator designNavigator;
 
-    public ChangeDependencyVersionDialog(ApplicationContext context, Object selectedElement) {
+    public ChangeDependencyVersionDialog(ApplicationContext context, Object selectedElement, DesignNavigator designNavigator) {
         super("Change Dependency Version");
         this.configService = context.getConfigurationService();
+        this.designNavigator = designNavigator;
         initWindow(selectedElement);
     }
 
-    public static void show(ApplicationContext context, Object selectedElement) {
-        ChangeDependencyVersionDialog dialog = new ChangeDependencyVersionDialog(context, selectedElement);
+    public static void show(DesignNavigator designNavigator, ApplicationContext context, Object selectedElement) {
+        ChangeDependencyVersionDialog dialog = new ChangeDependencyVersionDialog(context, selectedElement, designNavigator);
         UI.getCurrent().addWindow(dialog);
     }
 
@@ -122,7 +124,8 @@ public class ChangeDependencyVersionDialog extends ResizableWindow  {
 
     protected void change() {
         String selectedVersionId = (String) optionGroup.getValue();
-        configService.updateProjectVersionDependency(dependency, selectedVersionId);        
+        configService.updateProjectVersionDependency(dependency, selectedVersionId);  
+        designNavigator.refresh();
         close();
     }
     

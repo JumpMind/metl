@@ -72,6 +72,8 @@ public interface IConfigurationService {
     public List<Flow> findAffectedFlowsByResource(String resourceId);
 
     public List<ProjectVersionDependency> findProjectDependencies(String projectVersionId);
+    
+    public List<ProjectVersionDependency> findProjectDependenciesThatTarget(String projectVersionId);
 
     public List<ComponentName> findComponentsInProject(String projectVersionId);
 

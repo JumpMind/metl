@@ -539,7 +539,7 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public void doChangeDependencyVersion() {
-        ChangeDependencyVersionDialog.show(context, treeTable.getValue());
+        ChangeDependencyVersionDialog.show(this, context, treeTable.getValue());
         refresh();
     }
 

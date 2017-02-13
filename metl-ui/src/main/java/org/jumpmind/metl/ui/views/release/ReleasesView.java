@@ -28,12 +28,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
 import org.jumpmind.metl.core.model.ProjectVersion;
+import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.ReleasePackage;
 import org.jumpmind.metl.core.model.ReleasePackageProjectVersion;
 import org.jumpmind.metl.core.persist.IConfigurationService;
@@ -226,24 +229,43 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
             releasePackage = configurationService.findReleasePackage(releasePackage.getId());
             if (releasePackage.isReleased()) {
                 CommonUiUtils.notify(String.format(
-                        "Release Package %s is already released.  It cannot be re-released.  Skipping this release package.",
-                        releasePackage.getName()));
+                        "The release package '%s:%s' is already released.  It cannot be re-released.  Skipping this release package.",
+                        releasePackage.getName(), releasePackage.getVersionLabel()));
             } else {
                 releasePackage.setReleaseDate(new Date());
                 releasePackage.setReleased(true);
                 configurationService.save(releasePackage);
                 List<ReleasePackageProjectVersion> rppvs = new ReleasePackageProjectVersionSorter(configurationService).sort(releasePackage);
+                Map<String, String> projectVersionDependenciesMap = new HashMap<>();
                 for (ReleasePackageProjectVersion rppv : rppvs) {
                     ProjectVersion original = configurationService.findProjectVersion(rppv.getProjectVersionId());
                     if (original.getVersionType().equalsIgnoreCase(ProjectVersion.VersionType.MASTER.toString())) {
-                        configurationService.saveNewVersion("master", original, "master");
+                        ProjectVersion newMaster = configurationService.saveNewVersion("master", original, "master");
+                        projectVersionDependenciesMap.put(original.getId(), newMaster.getId());
                     }
                     original.setName(releasePackage.getVersionLabel());
                     original.setVersionType(ProjectVersion.VersionType.RELEASE.toString());
                     Date releaseDate = new Date();
                     original.setReleaseDate(releaseDate);
                     configurationService.save(original);
-                }                
+                }
+                
+                for (String oldMasterProjectVersionId : projectVersionDependenciesMap.keySet()) {
+                    List<ProjectVersionDependency> needsUpdated = configurationService.findProjectDependenciesThatTarget(oldMasterProjectVersionId);
+                    for (ProjectVersionDependency projectVersionDependency : needsUpdated) {
+                        boolean isInRelease = false;
+                        for (ReleasePackageProjectVersion rppv2 : rppvs) {
+                            if (rppv2.getProjectVersionId().equals(projectVersionDependency.getProjectVersionId())) {
+                                isInRelease = true;
+                            }
+                        }
+                        if (!isInRelease) {
+                            configurationService.updateProjectVersionDependency(projectVersionDependency, projectVersionDependenciesMap.get(oldMasterProjectVersionId));
+                        }
+                    }                                            
+                }
+                
+
                 refresh();
             }
         }

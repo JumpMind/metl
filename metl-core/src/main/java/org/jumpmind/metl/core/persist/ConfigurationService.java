@@ -100,6 +100,19 @@ public class ConfigurationService extends AbstractService
         }
         return list;
     }
+    
+    @Override
+    public List<ProjectVersionDependency> findProjectDependenciesThatTarget(String projectVersionId) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("targetProjectVersionId", projectVersionId);
+        List<ProjectVersionDependency> list = find(ProjectVersionDependency.class, params,
+                ProjectVersionDependency.class);
+        for (ProjectVersionDependency projectVersionDependency : list) {
+            projectVersionDependency.setTargetProjectVersion(
+                    findProjectVersion(projectVersionDependency.getTargetProjectVersionId()));
+        }
+        return list;
+    }
 
     @Override
     public List<FlowName> findFlowsInProject(String projectVersionId, boolean test) {
