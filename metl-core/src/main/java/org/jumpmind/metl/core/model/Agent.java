@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.core.model;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -185,7 +187,7 @@ public class Agent extends AbstractNamedObject {
 
     public AgentDeployment getAgentDeploymentFor(Flow flow) {
         for (AgentDeployment agentDeployment : agentDeployments) {
-            if (agentDeployment.getFlow().equals(flow)) {
+            if (isNotBlank(agentDeployment.getFlowId()) && agentDeployment.getFlowId().equals(flow.getId())) {
                 return agentDeployment;
             }
         }

@@ -115,7 +115,7 @@ public class PluginRepositoriesPanel extends VerticalLayout implements IUiPanel 
 
     public void refresh() {
         container.removeAllItems();
-        container.addAll(context.getConfigurationService().findPluginRepositories());
+        container.addAll(context.getPluginService().findPluginRepositories());
         table.sort();
         setButtonsEnabled();
     }
@@ -153,7 +153,7 @@ public class PluginRepositoriesPanel extends VerticalLayout implements IUiPanel 
     class EditClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
             PluginRepository pluginRepository = getFirstSelectedItem();
-            context.getConfigurationService().refresh(pluginRepository);
+            context.getPluginService().refresh(pluginRepository);
             PluginRepositoryEditPanel editPanel = new PluginRepositoryEditPanel(context, pluginRepository);
             tabbedPanel.addCloseableTab(pluginRepository.getId(), "Edit Repository", getIcon(), editPanel);
         }

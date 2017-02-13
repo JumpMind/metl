@@ -73,10 +73,10 @@ public class Project extends AbstractNamedObject {
         return deleted;
     }
     
-    public ProjectVersion getLatestProjectVersion() {
+    public ProjectVersion getMasterVersion() {
         ProjectVersion version = null;
         for (ProjectVersion projectVersion : projectVersions) {
-            if (version == null || version.getCreateTime().before(projectVersion.getCreateTime())) {
+            if (version == null || projectVersion.isMaster()) {
                 version = projectVersion;
             }
         }

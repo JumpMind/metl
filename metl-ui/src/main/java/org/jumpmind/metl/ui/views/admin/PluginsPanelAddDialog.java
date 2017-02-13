@@ -13,7 +13,6 @@ import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
-import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
@@ -78,7 +77,7 @@ public class PluginsPanelAddDialog extends ResizableWindow {
         super("Add Plugins");
         this.context = context;
         this.pluginsPanel = pluginsPanel;
-        this.pluginRepositories = context.getConfigurationService().findPluginRepositories();
+        this.pluginRepositories = context.getPluginService().findPluginRepositories();
 
         TabSheet tabSheet = new TabSheet();
 
@@ -127,7 +126,7 @@ public class PluginsPanelAddDialog extends ResizableWindow {
         IPluginManager pluginManager = context.getPluginManager();
         if (searchButton.isVisible()) {
             Plugin newVersion = new Plugin((String)groupCombo.getValue(), (String)nameCombo.getValue(), (String)versionSelect.getValue(), 0);
-            context.getConfigurationService().save(newVersion);
+            context.getPluginService().save(newVersion);
             pluginManager.refresh();
             close();
         } else if (uploadButton.isVisible() && jarContents != null) {
@@ -155,8 +154,7 @@ public class PluginsPanelAddDialog extends ResizableWindow {
         FormLayout layout = new FormLayout();
         layout.setMargin(true);
 
-        IConfigurationService configurationService = context.getConfigurationService();
-        List<Plugin> existingPlugins = configurationService.findPlugins();
+        List<Plugin> existingPlugins = context.getPluginService().findPlugins();
         Set<String> groups = new HashSet<>();
         Set<String> names = new HashSet<>();
         for (Plugin plugin : existingPlugins) {
@@ -217,7 +215,7 @@ public class PluginsPanelAddDialog extends ResizableWindow {
     protected void search() {
         List<String> versions = context.getPluginManager().getAvailableVersions((String) groupCombo.getValue(), (String) nameCombo.getValue(),
                 pluginRepositories);
-        List<Plugin> plugins = context.getConfigurationService().findPlugins();
+        List<Plugin> plugins = context.getPluginService().findPlugins();
         for (Plugin plugin : plugins) {
             if (plugin.matches((String) groupCombo.getValue(), (String) nameCombo.getValue())) {
                 versions.remove(plugin.getArtifactVersion());

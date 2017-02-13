@@ -32,7 +32,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.Group;
 import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.model.UserGroup;
-import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
@@ -78,7 +78,7 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
         passwordField.addValueChangeListener(new PasswordChangeListener());
         form.addComponent(passwordField);
 
-        List<Group> groups = context.getConfigurationService().findGroups();
+        List<Group> groups = context.getOperationsSerivce().findGroups();
         groupsById = new HashMap<String, Group>();
         TwinColSelect groupSelect = new TwinColSelect();
         for (Group group : groups) {
@@ -140,7 +140,7 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
     class PasswordChangeListener implements ValueChangeListener {
         public void valueChange(ValueChangeEvent event) {
             if (isNotBlank(user.getLoginId())) {                
-                context.getConfigurationService().savePassword(user, (String) event.getProperty().getValue());
+                context.getOperationsSerivce().savePassword(user, (String) event.getProperty().getValue());
             }
         }
     }
@@ -149,12 +149,12 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
         @SuppressWarnings("unchecked")
         public void valueChange(ValueChangeEvent event) {
             Set<String> groups = (Set<String>) event.getProperty().getValue();
-            IConfigurationService configurationService = context.getConfigurationService();
+            IOperationsService operationsSerivce = context.getOperationsSerivce();
             for (String id : groups) {
                 if (!lastGroups.contains(id)) {
                     UserGroup userGroup = new UserGroup(user.getId(), id);
                     user.getGroups().add(groupsById.get(id));
-                    if (configurationService.findUser(user.getId()) != null) {
+                    if (operationsSerivce.findUser(user.getId()) != null) {
                         context.getConfigurationService().save(userGroup);
                     }
                 }
@@ -163,7 +163,7 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
             for (String id : lastGroups) {
                 if (!groups.contains(id)) {
                     user.getGroups().remove(groupsById.get(id));
-                    if (configurationService.findUser(user.getId()) != null) {
+                    if (operationsSerivce.findUser(user.getId()) != null) {
                         context.getConfigurationService().delete(new UserGroup(user.getId(), id));
                     }
                 }

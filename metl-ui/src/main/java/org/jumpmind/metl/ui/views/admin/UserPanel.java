@@ -113,7 +113,7 @@ public class UserPanel extends VerticalLayout implements IUiPanel {
 
     public void refresh() {
         container.removeAllItems();
-        container.addAll(context.getConfigurationService().findUsers());
+        container.addAll(context.getOperationsSerivce().findUsers());
         table.sort();
         setButtonsEnabled();
     }
@@ -151,7 +151,7 @@ public class UserPanel extends VerticalLayout implements IUiPanel {
     class EditClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
             User user = getFirstSelectedItem();
-            context.getConfigurationService().refresh(user);
+            context.getOperationsSerivce().refresh(user);
             UserEditPanel editPanel = new UserEditPanel(context, user);
             tabbedPanel.addCloseableTab(user.getId(), "Edit User", getIcon(), editPanel);
         }

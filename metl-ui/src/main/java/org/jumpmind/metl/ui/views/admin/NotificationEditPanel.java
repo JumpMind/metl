@@ -197,15 +197,15 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
         if (isChanged) {
             String level = notification.getLevel();
             if (level.equals(Notification.Level.GLOBAL.toString())) {
-                for (Agent agent : context.getConfigurationService().findAgents()) {
+                for (Agent agent : context.getOperationsSerivce().findAgents()) {
                     refreshAgent(agent);
                 }
             } else if (level.equals(Notification.Level.AGENT.toString()) && notification.getLinkId() != null) {
-                refreshAgent(context.getConfigurationService().findAgent(notification.getLinkId(), false));
+                refreshAgent(context.getOperationsSerivce().findAgent(notification.getLinkId(), false));
             } else if (level.equals(Notification.Level.DEPLOYMENT.toString()) && notification.getLinkId() != null) {
-                AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(notification.getLinkId());
+                AgentDeployment deployment = context.getOperationsSerivce().findAgentDeployment(notification.getLinkId());
                 if (deployment != null) {
-                    refreshAgent(context.getConfigurationService().findAgent(deployment.getAgentId(), false));
+                    refreshAgent(context.getOperationsSerivce().findAgent(deployment.getAgentId(), false));
                 }
             }
         }
@@ -241,7 +241,7 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
             linkField.setEnabled(false);
         } else if (level.equals(Notification.Level.AGENT.toString())) {
             linkField.setEnabled(true);
-            for (Agent agent : context.getConfigurationService().findAgents()) {
+            for (Agent agent : context.getOperationsSerivce().findAgents()) {
                 if (agent.isDeleted()) {
                     linkField.addItem(agent.getId());
                     linkField.setItemCaption(agent.getId(), agent.getName());
@@ -249,10 +249,10 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
             }
         } else if (level.equals(Notification.Level.DEPLOYMENT.toString())) {
             linkField.setEnabled(true);
-            List<Agent> agents = context.getConfigurationService().findAgents();
+            List<Agent> agents = context.getOperationsSerivce().findAgents();
             for (Agent agent : agents) {
                 if (!agent.isDeleted()) {
-                    agent = context.getConfigurationService().findAgent(agent.getId(), true);
+                    agent = context.getOperationsSerivce().findAgent(agent.getId(), true);
                     for (AgentDeployment deployment : agent.getAgentDeployments()) {
                         linkField.addItem(deployment.getId());
                         linkField.setItemCaption(deployment.getId(), agent.getName() + "/" + deployment.getName());                        

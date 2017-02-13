@@ -118,7 +118,7 @@ public class GroupPanel extends VerticalLayout implements IUiPanel {
 
     public void refresh() {
         container.removeAllItems();
-        container.addAll(context.getConfigurationService().findGroups());
+        container.addAll(context.getOperationsSerivce().findGroups());
         table.sort();
         setButtonsEnabled();
     }
@@ -156,7 +156,7 @@ public class GroupPanel extends VerticalLayout implements IUiPanel {
     class EditClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
             Group group = getFirstSelectedItem();
-            context.getConfigurationService().refresh(group);
+            context.getOperationsSerivce().refresh(group);
             GroupEditPanel editPanel = new GroupEditPanel(context, group);
             tabbedPanel.addCloseableTab(group.getId(), "Edit Group", getIcon(), editPanel);
         }
@@ -166,7 +166,7 @@ public class GroupPanel extends VerticalLayout implements IUiPanel {
         public void buttonClick(ClickEvent event) {
             List<User> users = new ArrayList<User>();
             for (Group group : getSelectedItems()) {
-                users.addAll(context.getConfigurationService().findUsersByGroup(group.getId()));
+                users.addAll(context.getOperationsSerivce().findUsersByGroup(group.getId()));
                 if (users.size() > 10) {
                     break;
                 }

@@ -48,17 +48,21 @@ import org.jumpmind.metl.core.model.ExecutionStep;
 import org.jumpmind.metl.core.model.ExecutionStepLog;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.Project;
-import org.jumpmind.metl.core.persist.ConfigurationSqlService;
-import org.jumpmind.metl.core.persist.ExecutionSqlService;
+import org.jumpmind.metl.core.persist.ConfigurationService;
+import org.jumpmind.metl.core.persist.ExecutionService;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.persist.IImportExportService;
+import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.core.persist.ImportExportService;
+import org.jumpmind.metl.core.persist.OperationsService;
+import org.jumpmind.metl.core.persist.PluginService;
 import org.jumpmind.metl.core.plugin.DefinitionFactory;
 import org.jumpmind.metl.core.plugin.PluginManager;
 import org.jumpmind.metl.core.runtime.component.ComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMappingRegistry;
+import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.security.SecurityService;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.MockJdbcDriver;
@@ -79,6 +83,8 @@ public class StandaloneFlowRunner {
     IConfigurationService configurationService;
 
     IExecutionService executionService;
+    
+    IOperationsService operationsService;
 
     AgentRuntime agentRuntime;
 
@@ -111,7 +117,7 @@ public class StandaloneFlowRunner {
         List<FlowName> flows = new ArrayList<>();
         List<Project> projects = configurationService.findProjects();
         for (Project project : projects) {
-            String projectVersionId = project.getLatestProjectVersion().getId();
+            String projectVersionId = project.getMasterVersion().getId();
             if (includeRegularFlows) {
                 flows.addAll(configurationService.findFlowsInProject(projectVersionId, false));
             }
@@ -166,19 +172,23 @@ public class StandaloneFlowRunner {
                 new ConfigDatabaseUpgrader("/schema.xml", databasePlatform, true, "METL").upgrade();
                 new ConfigDatabaseUpgrader("/schema-exec.xml", databasePlatform, true, "METL").upgrade();
                 persistenceManager = new SqlPersistenceManager(databasePlatform);
-                configurationService = new ConfigurationSqlService(new SecurityService(), databasePlatform, persistenceManager, "METL");
+                ISecurityService securityService = new SecurityService();
+                final String tablePrefix = "METL";
+                operationsService = new OperationsService(securityService, persistenceManager, databasePlatform, tablePrefix);
+                configurationService = new ConfigurationService(operationsService, securityService, databasePlatform, persistenceManager, tablePrefix);
                 MockJdbcDriver mockDriver = new MockJdbcDriver(configurationService);
                 DriverManager.registerDriver(mockDriver);
-                PluginManager pluginManager = new PluginManager("working/plugins", configurationService);
+                PluginService pluginService = new PluginService(securityService, persistenceManager, databasePlatform, tablePrefix);
+                PluginManager pluginManager = new PluginManager("working/plugins", pluginService);
                 pluginManager.init();
 
-                DefinitionFactory componentDefinitionFactory = new DefinitionFactory(configurationService, pluginManager);
+                DefinitionFactory componentDefinitionFactory = new DefinitionFactory(pluginService, configurationService, pluginManager);
 
-                IImportExportService importService = new ImportExportService(databasePlatform, persistenceManager, "METL",
+                IImportExportService importService = new ImportExportService(databasePlatform, persistenceManager, tablePrefix,
                         configurationService, new SecurityService());
 
-                executionService = new ExecutionSqlService(databasePlatform, persistenceManager, "METL", new StandardEnvironment());
-                agentRuntime = new AgentRuntime(new Agent("test"), configurationService, executionService,
+                executionService = new ExecutionService(securityService, persistenceManager, databasePlatform, tablePrefix, new StandardEnvironment());
+                agentRuntime = new AgentRuntime(new Agent("test"), operationsService, configurationService, executionService,
                         new ComponentRuntimeFactory(componentDefinitionFactory), componentDefinitionFactory,
                         new HttpRequestMappingRegistry());
                 agentRuntime.start();

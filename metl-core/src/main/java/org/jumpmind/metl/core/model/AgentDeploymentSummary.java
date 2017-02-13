@@ -52,13 +52,14 @@ public class AgentDeploymentSummary extends AbstractNamedObject {
     public AgentDeploymentSummary() {
     }
 
-    public AgentDeploymentSummary(AgentDeployment agentDeployment) {
+    public void copy(AgentProjectVersionFlowDeployment deployment) {
+        AgentDeployment agentDeployment = deployment.getAgentDeployment();
+        projectName = deployment.getProjectVersion().getName();
         copy(agentDeployment);
     }
-
+    
     public void copy(AgentDeployment agentDeployment) {
         setId(agentDeployment.getId());
-        projectName = agentDeployment.getProjectVersion().getName();
         name = agentDeployment.getName();
         type = TYPE_FLOW;
         status = agentDeployment.getStatus();

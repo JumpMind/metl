@@ -30,7 +30,6 @@ import java.util.List;
 import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
-import org.jumpmind.metl.core.model.ComponentName;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FolderName;
@@ -332,6 +331,7 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     protected void refreshProjects() {
+        long ts = System.currentTimeMillis();
         Object selected = treeTable.getValue();
         List<Project> projects = configurationService.findProjects();
         treeTable.removeAllItems();
@@ -356,6 +356,7 @@ public class DesignNavigator extends VerticalLayout {
                 addModelsToFolder(addVirtualFolder(LABEL_MODELS, projectVersion), projectVersion);
                 addResourcesToFolder(addVirtualFolder(LABEL_RESOURCES, projectVersion), projectVersion);
                 addDependenciesToFolder(addVirtualFolder(LABEL_DEPENDENCIES, projectVersion), projectVersion);
+                //log.info("It took {}ms (so far) to refresh projects in the design view", (System.currentTimeMillis()-ts));
             }
         }
 
@@ -378,6 +379,7 @@ public class DesignNavigator extends VerticalLayout {
         }
 
         selectAndExpand(selected);
+        log.info("It took {}ms to refresh projects in the design view", (System.currentTimeMillis()-ts));
     }
 
     protected Object findChild(String id, Object parent) {
@@ -433,22 +435,6 @@ public class DesignNavigator extends VerticalLayout {
             this.treeTable.removeItem(folder);
         }
 
-    }
-
-    protected void addSharedComponentsToFolder(FolderName folder, ProjectVersion projectVersion) {
-        List<ComponentName> components = configurationService.findSharedComponentsInProject(projectVersion.getId());
-        AbstractObjectNameBasedSorter.sort(components);
-        for (ComponentName component : components) {
-            this.treeTable.setChildrenAllowed(folder, true);
-            this.treeTable.addItem(component);
-            this.treeTable.setItemIcon(component, Icons.COMPONENT);
-            this.treeTable.setParent(component, folder);
-            this.treeTable.setChildrenAllowed(component, false);
-        }
-
-        if (components.size() == 0) {
-            this.treeTable.removeItem(folder);
-        }
     }
 
     protected void addDependenciesToFolder(FolderName folder, ProjectVersion projectVersion) {
@@ -525,7 +511,9 @@ public class DesignNavigator extends VerticalLayout {
     protected void open(Object item) {
         if (item instanceof FlowName) {
             FlowName flow = (FlowName) item;
+            long ts = System.currentTimeMillis();
             EditFlowPanel flowLayout = new EditFlowPanel(context, flow.getId(), this, tabs);
+            log.info("It took {}ms to create the edit flow panel", (System.currentTimeMillis()-ts));
             tabs.addCloseableTab(flow.getId(), flow.getName(), Icons.FLOW, flowLayout);
         } else if (item instanceof ModelName) {
             ModelName model = (ModelName) item;

@@ -207,7 +207,15 @@ public class StepRuntime implements Runnable {
                 }
                 componentContext.getExecutionTracker().flowStepStarted(componentRuntime.getThreadNumber(), componentContext);
                 ComponentContext.projectVersionId.set(componentContext.getManipulatedFlow().getProjectVersionId());
-                componentRuntime.start();                
+                Thread thread = Thread.currentThread();
+                ClassLoader previousLoader = thread.getContextClassLoader();
+                try {
+                    thread.setContextClassLoader(componentRuntime.getClass().getClassLoader());
+                    componentRuntime.start();
+                } finally {
+                    thread.setContextClassLoader(previousLoader);
+
+                }
             }
         } catch (RuntimeException ex) {
             recordError(1, ex);

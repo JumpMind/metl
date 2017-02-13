@@ -55,11 +55,15 @@ import org.jumpmind.db.sql.SqlPersistenceManager;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
-import org.jumpmind.metl.core.persist.ExecutionSqlService;
+import org.jumpmind.metl.core.persist.ExecutionService;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.persist.IImportExportService;
+import org.jumpmind.metl.core.persist.IOperationsService;
+import org.jumpmind.metl.core.persist.IPluginService;
 import org.jumpmind.metl.core.persist.ImportExportService;
+import org.jumpmind.metl.core.persist.OperationsService;
+import org.jumpmind.metl.core.persist.PluginService;
 import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.core.plugin.PluginManager;
 import org.jumpmind.metl.core.runtime.AgentManager;
@@ -111,7 +115,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class AppConfig extends WebMvcConfigurerAdapter {
 
     protected static final Logger log = LoggerFactory.getLogger(AppConfig.class);
-    
+
     protected static final String EXECUTION = "execution.";
 
     @Autowired
@@ -148,8 +152,12 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     Service brokerService;
 
     MockJdbcDriver mockDriver;
-    
+
     Server h2Server;
+
+    IPluginService pluginService;
+
+    IOperationsService operationsService;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -175,9 +183,9 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         set.add("application/json");
         return set;
     }
-    
+
     @Bean
-    @Scope(value="singleton")
+    @Scope(value = "singleton")
     Server h2Server() {
         String configDbUrl = env.getProperty(DB_POOL_URL, "jdbc:h2:mem:config");
         String execDbUrl = env.getProperty(EXECUTION + DB_POOL_DRIVER, env.getProperty(DB_POOL_DRIVER, Driver.class.getName()));
@@ -348,12 +356,30 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
+    public IOperationsService operationsService() {
+        if (operationsService == null) {
+            operationsService = new OperationsService(securityService(), persistenceManager(), configDatabasePlatform(), tablePrefix());
+        }
+        return operationsService;
+    }
+
+    @Bean
+    @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IConfigurationService configurationService() {
         if (configurationService == null) {
-            configurationService = new AuditableConfigurationService(securityService(), configDatabasePlatform(), persistenceManager(),
-                    tablePrefix());
+            configurationService = new AuditableConfigurationService(operationsService(), securityService(), configDatabasePlatform(),
+                    persistenceManager(), tablePrefix());
         }
         return configurationService;
+    }
+
+    @Bean
+    @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
+    public IPluginService pluginServive() {
+        if (pluginService == null) {
+            pluginService = new PluginService(securityService(), persistenceManager(), configDatabasePlatform(), tablePrefix());
+        }
+        return pluginService;
     }
 
     @Bean
@@ -370,7 +396,8 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IExecutionService executionService() {
         if (executionService == null) {
-            executionService = new ExecutionSqlService(executionDatabasePlatform(), executionPersistenceManager(), tablePrefix(), env);
+            executionService = new ExecutionService(securityService(), executionPersistenceManager(), executionDatabasePlatform(),
+                    tablePrefix(), env);
         }
         return executionService;
     }
@@ -380,7 +407,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     public IPluginManager pluginManager() {
         if (pluginManager == null) {
             String localPluginDir = String.format("%s/%s", env.getProperty(AppConstants.PROP_CONFIG_DIR), AppConstants.PLUGINS_DIR);
-            pluginManager = new PluginManager(localPluginDir, configurationService());
+            pluginManager = new PluginManager(localPluginDir, pluginServive());
         }
         return pluginManager;
     }
@@ -398,7 +425,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IDefinitionPlusUIFactory componentDefinitionPlusUIFactory() {
         if (componentDefinitionPlusUIFactory == null) {
-            componentDefinitionPlusUIFactory = new DefinitionPlusUIFactory(configurationService(), pluginManager());
+            componentDefinitionPlusUIFactory = new DefinitionPlusUIFactory(pluginServive(), configurationService(), pluginManager());
         }
         return componentDefinitionPlusUIFactory;
     }
@@ -406,7 +433,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IAgentManager agentManager() {
-        IAgentManager agentManager = new AgentManager(configurationService(), executionService(), componentRuntimeFactory(),
+        IAgentManager agentManager = new AgentManager(operationsService(), configurationService(), executionService(), componentRuntimeFactory(),
                 componentDefinitionPlusUIFactory(), httpRequestMappingRegistry());
         return agentManager;
     }

@@ -7,9 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentProjectVersionFlowDeployment;
 import org.jumpmind.metl.core.model.Component;
-import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.plugin.XMLComponentDefinition;
 import org.jumpmind.metl.core.plugin.XMLSetting;
@@ -31,8 +30,8 @@ public class HttpRequestDeploymentListener implements IComponentDeploymentListen
     IHttpRequestMappingRegistry httpRequestMappingRegistry;
 
     @Override
-    public void onDeploy(Agent agent, AgentDeployment deployment, Flow flow, FlowStep flowStep, XMLComponentDefinition componentDefinition) {
-        HttpRequestMapping requestMapping = buildMapping(agent, deployment, flow, flowStep, componentDefinition);
+    public void onDeploy(Agent agent, AgentProjectVersionFlowDeployment agentProjectVersionFlowDeployment, FlowStep flowStep, XMLComponentDefinition componentDefinition) {
+        HttpRequestMapping requestMapping = buildMapping(agent, agentProjectVersionFlowDeployment, flowStep, componentDefinition);
         if (!requestMapping.getPath().substring(0,1).equalsIgnoreCase("/")) {
             requestMapping.setPath("/" + requestMapping.getPath());
         }
@@ -40,8 +39,8 @@ public class HttpRequestDeploymentListener implements IComponentDeploymentListen
     }
 
     @Override
-    public void onUndeploy(Agent agent, AgentDeployment deployment, Flow flow, FlowStep flowStep, XMLComponentDefinition componentDefinition) {
-        httpRequestMappingRegistry.unregister(buildMapping(agent, deployment, flow, flowStep, componentDefinition));
+    public void onUndeploy(Agent agent, AgentProjectVersionFlowDeployment agentProjectVersionFlowDeployment, FlowStep flowStep, XMLComponentDefinition componentDefinition) {
+        httpRequestMappingRegistry.unregister(buildMapping(agent, agentProjectVersionFlowDeployment, flowStep, componentDefinition));
     }
 
     @Override
@@ -49,11 +48,10 @@ public class HttpRequestDeploymentListener implements IComponentDeploymentListen
         this.httpRequestMappingRegistry = httpRequestMappingRegistry;
     }
 
-    protected HttpRequestMapping buildMapping(Agent agent, AgentDeployment deployment, Flow flow, FlowStep flowStep, XMLComponentDefinition componentDefinition) {
-        TypedProperties properties = getTypedProperties(flowStep, componentDefinition);
-        
+    protected HttpRequestMapping buildMapping(Agent agent, AgentProjectVersionFlowDeployment agentProjectVersionFlowDeployment, FlowStep flowStep, XMLComponentDefinition componentDefinition) {
+        TypedProperties properties = getTypedProperties(flowStep, componentDefinition);        
         String path = properties.get(HttpRequest.PATH);
-        Map<String, String> replacements = FlowRuntime.getFlowParameters(flow, agent, deployment);
+        Map<String, String> replacements = FlowRuntime.getFlowParameters(agent, agentProjectVersionFlowDeployment);
         for(String key: replacements.keySet()) {
             String value = replacements.get(key);
             replacements.put(key, GeneralUtils.replaceSpecialCharacters(value));
@@ -63,7 +61,7 @@ public class HttpRequestDeploymentListener implements IComponentDeploymentListen
         String method = properties.get(HttpRequest.HTTP_METHOD, HttpMethod.GET.name());
         
         String responseDescription = null;
-        List<Component> components = flow.findComponentsOfType(HttpResponse.TYPE);
+        List<Component> components = agentProjectVersionFlowDeployment.getFlow().findComponentsOfType(HttpResponse.TYPE);
         for (Component component : components) {
             String desc = component.get(NOTES);
             if (responseDescription == null) {
@@ -80,9 +78,9 @@ public class HttpRequestDeploymentListener implements IComponentDeploymentListen
         mapping.setSecurityUsername(properties.get(HttpRequest.SECURE_USERNAME));
         mapping.setSecurityPassword(properties.get(HttpRequest.SECURE_PASSWORD));
         mapping.setRequestDescription(properties.get(NOTES));
-        mapping.setFlowDescription(flow.getNotes());
+        mapping.setFlowDescription(agentProjectVersionFlowDeployment.getFlow().getNotes());
         mapping.setResponseDescription(responseDescription);
-        mapping.setDeployment(deployment);
+        mapping.setDeployment(agentProjectVersionFlowDeployment.getAgentDeployment());
         return mapping;
     }
 

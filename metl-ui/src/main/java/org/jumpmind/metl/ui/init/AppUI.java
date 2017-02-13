@@ -40,7 +40,7 @@ import org.jumpmind.metl.core.model.GroupPrivilege;
 import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.model.UserGroup;
-import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.core.util.VersionUtils;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.TopBar;
@@ -195,31 +195,31 @@ public class AppUI extends UI implements LoginListener {
 
         Responsive.makeResponsive(this);
         ApplicationContext appCtx = ctx.getBean(ApplicationContext.class);
-        IConfigurationService configurationService = appCtx.getConfigurationService();
-        if (configurationService.isUserLoginEnabled()) {
+        IOperationsService operationsService = appCtx.getOperationsSerivce();
+        if (operationsService.isUserLoginEnabled()) {
             LoginDialog login = new LoginDialog(appCtx, this);
             UI.getCurrent().addWindow(login);
         } else {
-            User user = configurationService.findUserByLoginId(DEFAULT_USER);
+            User user = operationsService.findUserByLoginId(DEFAULT_USER);
             if (user == null) {
                 user = new User();
                 user.setLoginId(DEFAULT_USER);
-                configurationService.save(user);
+                operationsService.save(user);
 
-                Group group = configurationService.findGroupByName(DEFAULT_GROUP);
+                Group group = operationsService.findGroupByName(DEFAULT_GROUP);
                 if (group == null) {
                     group = new Group(DEFAULT_GROUP);
                     user.getGroups().add(group);
-                    configurationService.save(group);
+                    operationsService.save(group);
                     for (Privilege priv : Privilege.values()) {
                         GroupPrivilege groupPriv = new GroupPrivilege(group.getId(), priv.name());
                         group.getGroupPrivileges().add(groupPriv);
-                        configurationService.save(groupPriv);
+                        operationsService.save(groupPriv);
                     }
                 }
 
                 UserGroup userGroup = new UserGroup(user.getId(), group.getId());
-                configurationService.save(userGroup);
+                operationsService.save(userGroup);
             }
             appCtx.setUser(user);
             login(user);

@@ -24,7 +24,8 @@ import org.jumpmind.metl.core.model.IAuditable;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
-import org.jumpmind.metl.core.persist.ConfigurationSqlService;
+import org.jumpmind.metl.core.persist.ConfigurationService;
+import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.init.AppUI;
@@ -32,7 +33,7 @@ import org.jumpmind.persist.IPersistenceManager;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.context.WebApplicationContext;
 
-public class AuditableConfigurationService extends ConfigurationSqlService {
+public class AuditableConfigurationService extends ConfigurationService {
 
     ThreadPoolTaskScheduler scheduler;
 
@@ -41,11 +42,9 @@ public class AuditableConfigurationService extends ConfigurationSqlService {
 
     long lastAuditTimeInMs = System.currentTimeMillis();
 
-    public AuditableConfigurationService(ISecurityService securityService,
-            IDatabasePlatform databasePlatform, IPersistenceManager persistenceManager,
-            String tablePrefix) {
-        super(securityService, databasePlatform, persistenceManager,
-                tablePrefix);
+    public AuditableConfigurationService(IOperationsService operationsService, ISecurityService securityService,
+            IDatabasePlatform databasePlatform, IPersistenceManager persistenceManager, String tablePrefix) {
+        super(operationsService, securityService, databasePlatform, persistenceManager, tablePrefix);
     }
 
     @Override
@@ -104,7 +103,7 @@ public class AuditableConfigurationService extends ConfigurationSqlService {
             }
         }
     }
-   
+
     @Override
     public void doInBackground() {
         recordAudit();
@@ -124,26 +123,25 @@ public class AuditableConfigurationService extends ConfigurationSqlService {
                     projectVersions.put(projectVersion.getId(), projectVersion);
                 }
                 int changes = byUser.get(flow).size();
-                AuditEvent event = new AuditEvent(EventType.CONFIG, String.format(
-                        "%d changes were made since %s to '%s' in '%s'", changes, SimpleDateFormat.getTimeInstance().format(new Date(lastAuditTimeInMs)), flow.getName(), projectVersion.getName()), userId);
+                AuditEvent event = new AuditEvent(EventType.CONFIG, String.format("%d changes were made since %s to '%s' in '%s'", changes,
+                        SimpleDateFormat.getTimeInstance().format(new Date(lastAuditTimeInMs)), flow.getName(), projectVersion.getName()),
+                        userId);
                 save(event);
             }
         }
         lastAuditTimeInMs = System.currentTimeMillis();
     }
-    
+
     protected void purgeAudit() {
-        GlobalSetting retentionInDays = findGlobalSetting(GlobalSetting.AUDIT_EVENT_RETENTION_IN_DAYS);
+        GlobalSetting retentionInDays = operationsService.findGlobalSetting(GlobalSetting.AUDIT_EVENT_RETENTION_IN_DAYS);
         int daysToKeep = GlobalSetting.DEFAULT_AUDIT_EVENT_RETENTION_IN_DAYS;
         if (retentionInDays != null) {
             daysToKeep = Integer.parseInt(retentionInDays.getValue());
         }
-        
+
         Date cutOff = DateUtils.addDays(new Date(), -daysToKeep);
         ISqlTemplate template = databasePlatform.getSqlTemplate();
-        int deleted = template.update(String.format(
-                "delete from %1$s_audit_event where create_time < ? ",
-                tablePrefix), cutOff);
+        int deleted = template.update(String.format("delete from %1$s_audit_event where create_time < ? ", tablePrefix), cutOff);
         if (deleted > 0) {
             log.info("Purged {} audit events", deleted);
         }

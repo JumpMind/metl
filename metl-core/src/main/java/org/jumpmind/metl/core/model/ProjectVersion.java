@@ -157,6 +157,10 @@ public class ProjectVersion extends AbstractNamedObject {
     public String attemptToCalculateNextVersionLabel() {
         return attemptToCalculateNextVersionLabel(versionLabel);
     }
+    
+    public boolean isMaster() {
+        return VersionType.MASTER.toString().equalsIgnoreCase(versionType);
+    }
         
     public static String attemptToCalculateNextVersionLabel(String versionLabel) {
         String datetime = new SimpleDateFormat("yyyyMMddmmhhss").format(new Date());

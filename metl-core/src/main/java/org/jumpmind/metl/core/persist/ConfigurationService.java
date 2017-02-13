@@ -29,20 +29,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 
+import org.jumpmind.db.platform.IDatabasePlatform;
+import org.jumpmind.db.sql.ISqlRowMapper;
+import org.jumpmind.db.sql.ISqlTemplate;
+import org.jumpmind.db.sql.ISqlTransaction;
+import org.jumpmind.db.sql.Row;
+import org.jumpmind.db.sql.mapper.StringMapper;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AbstractObjectCreateTimeDescSorter;
-import org.jumpmind.metl.core.model.AbstractObjectLastUpdateTimeDescSorter;
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.model.AgentDeployment;
-import org.jumpmind.metl.core.model.AgentDeploymentParameter;
-import org.jumpmind.metl.core.model.AgentName;
-import org.jumpmind.metl.core.model.AgentParameter;
-import org.jumpmind.metl.core.model.AgentResource;
-import org.jumpmind.metl.core.model.AgentResourceSetting;
-import org.jumpmind.metl.core.model.AuditEvent;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
@@ -56,16 +55,10 @@ import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.FolderName;
 import org.jumpmind.metl.core.model.FolderType;
-import org.jumpmind.metl.core.model.GlobalSetting;
-import org.jumpmind.metl.core.model.Group;
-import org.jumpmind.metl.core.model.GroupPrivilege;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelName;
-import org.jumpmind.metl.core.model.Notification;
-import org.jumpmind.metl.core.model.Plugin;
-import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDefinitionPlugin;
@@ -76,39 +69,24 @@ import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.ResourceSetting;
 import org.jumpmind.metl.core.model.Setting;
-import org.jumpmind.metl.core.model.User;
-import org.jumpmind.metl.core.model.UserGroup;
-import org.jumpmind.metl.core.model.UserHist;
-import org.jumpmind.metl.core.model.UserSetting;
 import org.jumpmind.metl.core.model.Version;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.security.SecurityConstants;
 import org.jumpmind.metl.core.util.NameValue;
 import org.jumpmind.persist.IPersistenceManager;
-import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 
-abstract class AbstractConfigurationService extends AbstractService
+public class ConfigurationService extends AbstractService
         implements IConfigurationService {
+    
+    protected IOperationsService operationsService;
+    protected IDatabasePlatform databasePlatform;
 
-    ISecurityService securityService;
-
-    AbstractConfigurationService(ISecurityService securityService,
+    public ConfigurationService(IOperationsService operationsService, ISecurityService securityService, IDatabasePlatform databasePlatform,
             IPersistenceManager persistenceManager, String tablePrefix) {
-        super(persistenceManager, tablePrefix);
-        this.securityService = securityService;
-    }
-
-    @Override
-    public List<Plugin> findPlugins() {
-        List<Plugin> plugins = find(Plugin.class, null, Plugin.class);
-        Collections.sort(plugins);
-        return plugins;
-    }
-
-    @Override
-    public List<PluginRepository> findPluginRepositories() {
-        return find(PluginRepository.class, null, PluginRepository.class);
+        super(securityService, persistenceManager, tablePrefix);
+        this.operationsService = operationsService;
+        this.databasePlatform = databasePlatform;
     }
 
     @Override
@@ -126,18 +104,18 @@ abstract class AbstractConfigurationService extends AbstractService
 
     @Override
     public List<FlowName> findFlowsInProject(String projectVersionId, boolean test) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("projectVersionId", projectVersionId);
+        Map<String, Object> params = new TreeMap<String, Object>();
         params.put("deleted", 0);
+        params.put("projectVersionId", projectVersionId);
         params.put("test", test ? 1 : 0);
         return find(FlowName.class, params, Flow.class);
     }
 
     @Override
     public List<ModelName> findModelsInProject(String projectVersionId) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("projectVersionId", projectVersionId);
+        Map<String, Object> params = new TreeMap<String, Object>();
         params.put("deleted", 0);
+        params.put("projectVersionId", projectVersionId);
         return find(ModelName.class, params, Model.class);
     }
 
@@ -158,20 +136,20 @@ abstract class AbstractConfigurationService extends AbstractService
 
     @Override
     public List<ResourceName> findResourcesInProject(String projectVersionId) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("projectVersionId", projectVersionId);
+        Map<String, Object> params = new TreeMap<String, Object>();
         params.put("deleted", 0);
+        params.put("projectVersionId", projectVersionId);
         return find(ResourceName.class, params, Resource.class);
     }
 
-    @Override
-    public List<ComponentName> findSharedComponentsInProject(String projectVersionId) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("projectVersionId", projectVersionId);
-        params.put("deleted", 0);
-        params.put("shared", 1);
-        return find(ComponentName.class, params, Component.class);
-    }
+//    @Override
+//    public List<ComponentName> findSharedComponentsInProject(String projectVersionId) {
+//        Map<String, Object> params = new HashMap<String, Object>();
+//        params.put("projectVersionId", projectVersionId);
+//        params.put("deleted", 0);
+//        params.put("shared", 1);
+//        return find(ComponentName.class, params, Component.class);
+//    }
 
     @Override
     public List<ComponentName> findComponentsInProject(String projectVersionId) {
@@ -187,6 +165,13 @@ abstract class AbstractConfigurationService extends AbstractService
         params.put("projectVersionId", projectVersionId);
         params.put("deleted", 0);
         return find(FolderName.class, params, Folder.class);
+    }
+    
+    @Override
+    public FlowName findFlowName(String id) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("id", id);
+        return findOne(FlowName.class, params);
     }
 
     @Override
@@ -234,22 +219,6 @@ abstract class AbstractConfigurationService extends AbstractService
         }
 
         return rootFolders;
-    }
-
-    protected Map<String, Folder> foldersById(String projectVersionId, FolderType type) {
-        Map<String, Object> byType = new HashMap<String, Object>();
-        byType.put("type", type.name());
-        if (isNotBlank(projectVersionId)) {
-            byType.put("projectVersionId", projectVersionId);
-        }
-        byType.put("deleted", 0);
-        List<Folder> folders = find(Folder.class, byType);
-
-        Map<String, Folder> all = new HashMap<String, Folder>();
-        for (Folder folder : folders) {
-            all.put(folder.getId(), folder);
-        }
-        return all;
     }
 
     @Override
@@ -327,11 +296,6 @@ abstract class AbstractConfigurationService extends AbstractService
     }
 
     @Override
-    public void refresh(PluginRepository pluginRepository) {
-        persistenceManager.refresh(pluginRepository, null, null, tableName(PluginRepository.class));
-    }
-
-    @Override
     public void refresh(Project project) {
         persistenceManager.refresh(project, null, null, tableName(Project.class));
         Map<String, Object> params = new HashMap<>();
@@ -359,17 +323,6 @@ abstract class AbstractConfigurationService extends AbstractService
     }
 
     @Override
-    public List<ProjectVersion> findProjectVersionsByProject(String projectId) {
-        
-        Map<String, Object> params = new HashMap<>();
-        params.put("deleted", 0);
-        params.put("projectId", projectId);
-        List<ProjectVersion> versions = persistenceManager.find(ProjectVersion.class, params, null,
-                null, tableName(ProjectVersion.class));       
-        return versions;
-    }
-    
-    @Override
     public List<Project> findProjects() {
         List<Project> list = persistenceManager.find(Project.class, new NameValue("deleted", 0),
                 null, null, tableName(Project.class));
@@ -391,205 +344,8 @@ abstract class AbstractConfigurationService extends AbstractService
         return list;
     }
 
-    @Override
-    public List<AgentName> findAgentsInFolder(Folder folder) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        String folderId = null;
-        if (folder != null) {
-            folderId = folder.getId();
-        }
-        params.put("folderId", folderId);
-        params.put("deleted", 0);
-        return find(AgentName.class, params, Agent.class);
-    }
 
-    @Override
-    public List<Agent> findAgents() {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("deleted", 0);
-        return findAgents(params);
-    }
 
-    @Override
-    public List<AuditEvent> findAuditEvents(int limit) {
-        List<AuditEvent> list = persistenceManager.find(AuditEvent.class, null, null,
-                tableName(AuditEvent.class));
-        AbstractObjectCreateTimeDescSorter.sort(list);
-        return list;
-    }
-
-    @Override
-    public Agent findAgent(String agentId, boolean includeDeployments) {
-        Agent agent = findOne(Agent.class, new NameValue("id", agentId));
-        if (agent.getFolder() != null) {
-            refresh(agent.getFolder());
-        }
-        refreshAgentParameters(agent);
-        refreshAgentResourceSettings(agent);
-        if (includeDeployments) {
-            refreshAgentDeployments(agent);
-        }
-        return agent;
-    }
-
-    protected List<Agent> findAgents(Map<String, Object> params) {
-        return findAgents(params, null);
-    }
-
-    protected List<Agent> findAgents(Map<String, Object> params, Folder folder) {
-        List<Agent> list = persistenceManager.find(Agent.class, params, null, null,
-                tableName(Agent.class));
-        Map<String, Folder> folderMapById = new HashMap<String, Folder>();
-        if (folder != null) {
-            folderMapById.put(folder.getId(), folder);
-        } else {
-            folderMapById = foldersById(null, FolderType.AGENT);
-        }
-
-        for (Agent agent : list) {
-            refreshAgentParameters(agent);
-            refreshAgentResourceSettings(agent);
-            refreshAgentDeployments(agent);
-            agent.setFolder(folderMapById.get(agent.getFolderId()));
-        }
-
-        Collections.sort(list, new Comparator<Agent>() {
-            @Override
-            public int compare(Agent o1, Agent o2) {
-                return o1.getCreateTime().compareTo(o2.getCreateTime());
-            }
-        });
-        return list;
-    }
-
-    public synchronized void refreshAgentParameters(Agent agent) {
-        Map<String, Object> settingParams = new HashMap<String, Object>();
-        settingParams.put("agentId", agent.getId());
-        List<AgentParameter> parameters = persistenceManager.find(AgentParameter.class,
-                settingParams, null, null, tableName(AgentParameter.class));
-        agent.setAgentParameters(parameters);
-    }
-
-    protected List<? extends Setting> findSettings(Class<? extends Setting> clazz,
-            Map<String, Object> params) {
-        List<? extends Setting> settings = persistenceManager.find(clazz, params, null, null,
-                tableName(clazz));
-        for (Setting setting : settings) {
-            if (isPassword(setting)) {
-                String value = setting.getValue();
-                if (value != null && value.startsWith(SecurityConstants.PREFIX_ENC)) {
-                    try {
-                        setting.setValue(securityService.decrypt(
-                                value.substring(SecurityConstants.PREFIX_ENC.length() - 1)));
-                    } catch (Exception ex) {
-                        setting.setValue(null);
-                        log.error("Failed to decrypt password for the setting: " + setting.getName()
-                                + ".  The encrypted value was: " + value
-                                + ".  Please check your keystore.", ex);
-                    }
-                }
-            }
-        }
-        AbstractObjectLastUpdateTimeDescSorter.sort(settings);
-        return settings;
-    }
-
-    protected void refreshAgentResourceSettings(Agent agent) {
-        Map<String, Object> settingParams = new HashMap<String, Object>();
-        settingParams.put("agentId", agent.getId());
-        @SuppressWarnings("unchecked")
-        List<AgentResourceSetting> settings = (List<AgentResourceSetting>) findSettings(
-                AgentResourceSetting.class, settingParams);
-        agent.setAgentResourceSettings(settings);
-    }
-
-    protected void refreshAgentDeployments(Agent agent) {
-        Map<String, Object> settingParams = new HashMap<String, Object>();
-        settingParams.put("agentId", agent.getId());
-        List<AgentDeployment> deployments = persistenceManager.find(AgentDeployment.class,
-                settingParams, null, null, tableName(AgentDeployment.class));
-        List<AgentDeployment> list = new ArrayList<>(deployments.size());
-        for (AgentDeployment agentDeployment : deployments) {
-            refreshAgentDeploymentRelations(agentDeployment, true);
-            /*
-             * If the flow has been deleted out from under the deployment, then
-             * don't add it
-             */
-            if (isNotBlank(agentDeployment.getFlow().getProjectVersionId())
-                    || agentDeployment.getFlow().isDeleted()) {
-                list.add(agentDeployment);
-            } else {
-                log.warn(
-                        "Invalid agent deployment '{}' on the '{}' agent. The flow has been deleted.  Cleaning up the deployment",
-                        agentDeployment.getName(), agent.getName());
-                delete(agentDeployment);
-            }
-        }
-        agent.setAgentDeployments(list);
-    }
-
-    protected void refreshAgentDeploymentRelations(AgentDeployment agentDeployment,
-            boolean refreshFlow) {
-        if (agentDeployment != null) {
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("agentDeploymentId", agentDeployment.getId());
-            agentDeployment.setAgentDeploymentParameters(
-                    persistenceManager.find(AgentDeploymentParameter.class, params, null, null,
-                            tableName(AgentDeploymentParameter.class)));
-            if (refreshFlow) {
-                refresh(agentDeployment.getFlow());
-            }
-            if (isNotBlank(agentDeployment.getFlow().getProjectVersionId())) {
-                ProjectVersion projectVersion = findProjectVersion(
-                        agentDeployment.getFlow().getProjectVersionId());
-                agentDeployment.setProjectVersion(projectVersion);
-            }
-        }
-    }
-
-    @Override
-    public AgentDeployment findAgentDeployment(String id) {
-        AgentDeployment agentDeployment = findOne(AgentDeployment.class, new NameValue("id", id));
-        refreshAgentDeploymentRelations(agentDeployment, true);
-        return agentDeployment;
-    }
-
-    @Override
-    public AgentResource findAgentResource(String agentId, String resourceId) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("agentId", agentId);
-        params.put("resourceId", resourceId);
-        @SuppressWarnings("unchecked")
-        List<AgentResourceSetting> settings = (List<AgentResourceSetting>) findSettings(
-                AgentResourceSetting.class, params);
-
-        Resource resource = findResource(resourceId);
-        for (Setting resourceSetting : resource.getSettings()) {
-            boolean exists = false;
-            for (AgentResourceSetting setting : settings) {
-                if (setting.getName().equals(resourceSetting.getName())) {
-                    exists = true;
-                }
-            }
-            if (!exists) {
-                AgentResourceSetting setting = new AgentResourceSetting();
-                setting.setId(resourceId);
-                setting.setAgentId(agentId);
-                setting.setResourceId(resourceId);
-                setting.setName(resourceSetting.getName());
-                setting.setValue(resourceSetting.getValue());
-                settings.add(setting);
-            }
-        }
-
-        AgentResource agentResource = new AgentResource();
-        agentResource.setProjectVersionId(resource.getProjectVersionId());
-        agentResource.setId(resource.getId());
-        agentResource.setAgentId(agentId);
-        agentResource.setType(resource.getType());
-        agentResource.setSettings(settings);
-        return agentResource;
-    }
 
     @Override
     public Resource findResource(String id) {
@@ -611,6 +367,21 @@ abstract class AbstractConfigurationService extends AbstractService
     public void refresh(ProjectVersion projectVersion) {
         refresh((AbstractObject) projectVersion);
         refresh((AbstractObject) projectVersion.getProject());
+    }
+    
+
+    @Override
+    public void refresh(Resource resource) {
+        refresh((AbstractObject) resource);
+
+        Map<String, Object> folderParams = new HashMap<String, Object>();
+        folderParams.put("id", resource.getFolderId());
+        resource.setFolder(findOne(Folder.class, folderParams));
+
+        Map<String, Object> settingParams = new HashMap<String, Object>();
+        settingParams.put("resourceId", resource.getId());
+        List<? extends Setting> settings = findSettings(ResourceSetting.class, settingParams);
+        resource.setSettings(settings);
     }
 
     @Override
@@ -654,8 +425,6 @@ abstract class AbstractConfigurationService extends AbstractService
         refresh(model);
         return model;
     }
-
-    abstract protected List<ModelAttribute> findAllAttributesForModel(String modelId);
 
     protected Model refreshModelRelations(Model model) {
         model.setModelEntities(new ArrayList<>());
@@ -701,95 +470,7 @@ abstract class AbstractConfigurationService extends AbstractService
         return list;
     }
 
-    @Override
-    public User findUser(String id) {
-        User user = null;
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("id", id);
-        List<User> users = persistenceManager.find(User.class, params, null, null,
-                tableName(User.class));
-        if (users.size() > 0) {
-            user = users.get(0);
-            refresh(user);
-        }
-        return user;
-    }
 
-    @Override
-    public User findUserByLoginId(String loginId) {
-        User user = null;
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("loginId", loginId);
-        List<User> users = persistenceManager.find(User.class, params, null, null,
-                tableName(User.class));
-        if (users.size() > 0) {
-            user = users.get(0);
-            refresh(user);
-        }
-        return user;
-    }
-
-    @Override
-    public List<User> findUsersByGroup(String groupId) {
-        List<User> users = new ArrayList<User>();
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("groupId", groupId);
-        List<UserGroup> userGroups = persistenceManager.find(UserGroup.class, params, null, null,
-                tableName(UserGroup.class));
-        for (UserGroup userGroup : userGroups) {
-            users.add(findUser(userGroup.getUserId()));
-        }
-        return users;
-    }
-
-    @Override
-    public List<User> findUsers() {
-        return persistenceManager.find(User.class, null, null, null, tableName(User.class));
-    }
-
-    @Override
-    public Group findGroup(String id) {
-        Group group = null;
-        Map<String, Object> params = new HashMap<String, Object>();
-        params = new HashMap<String, Object>();
-        params.put("id", id);
-        List<Group> groups = persistenceManager.find(Group.class, params, null, null,
-                tableName(Group.class));
-        if (groups.size() > 0) {
-            group = groups.get(0);
-            refresh(group);
-        }
-        return group;
-    }
-
-    @Override
-    public Group findGroupByName(String name) {
-        Group group = null;
-        Map<String, Object> params = new HashMap<String, Object>();
-        params = new HashMap<String, Object>();
-        params.put("name", name);
-        List<Group> groups = persistenceManager.find(Group.class, params, null, null,
-                tableName(Group.class));
-        if (groups.size() > 0) {
-            group = groups.get(0);
-            refresh(group);
-        }
-        return group;
-    }
-
-    @Override
-    public List<Group> findGroups() {
-        return persistenceManager.find(Group.class, null, null, null, tableName(Group.class));
-    }
-
-    @Override
-    public void delete(AgentDeployment agentDeployment) {
-        List<AgentDeploymentParameter> params = agentDeployment.getAgentDeploymentParameters();
-        for (AgentDeploymentParameter agentDeploymentParameter : params) {
-            delete((AbstractObject) agentDeploymentParameter);
-        }
-        delete((AbstractObject) agentDeployment);
-    }
 
     @Override
     public void delete(Flow flow, FlowStep flowStep) {
@@ -860,22 +541,6 @@ abstract class AbstractConfigurationService extends AbstractService
     }
 
     @Override
-    public void delete(Agent agent) {
-        agent.setDeleted(true);
-        save((AbstractObject) agent);
-    }
-
-    @Override
-    public void delete(Plugin plugin) {
-        persistenceManager.delete(plugin, null, null, tableName(Plugin.class));
-    }
-    
-    @Override
-    public void delete(ProjectVersionDefinitionPlugin projectVersionDefinitionPlugin) {
-        persistenceManager.delete(projectVersionDefinitionPlugin, null, null, tableName(ProjectVersionDefinitionPlugin.class));
-    }
-
-    @Override
     public boolean delete(FlowStepLink link) {
         return persistenceManager.delete(link, null, null, tableName(FlowStepLink.class));
     }
@@ -893,78 +558,9 @@ abstract class AbstractConfigurationService extends AbstractService
         save((AbstractObject) flow);
     }
 
-    @Override
-    public void delete(User user) {
-        refresh(user);
-        for (Setting setting : user.getSettings()) {
-            persistenceManager.delete(setting, null, null, tableName(UserSetting.class));
-        }
-        for (Group group : user.getGroups()) {
-            persistenceManager.delete(new UserGroup(user.getId(), group.getId()), null, null,
-                    tableName(UserGroup.class));
-        }
-
-        List<UserHist> history = findUserHist(user.getId());
-        for (UserHist userHist : history) {
-            persistenceManager.delete(userHist, null, null, tableName(UserHist.class));
-        }
-
-        persistenceManager.delete(user, null, null, tableName(User.class));
-    }
-
-    @Override
-    public void delete(Group group) {
-        refresh(group);
-        for (GroupPrivilege groupPriv : group.getGroupPrivileges()) {
-            persistenceManager.delete(groupPriv, null, null, tableName(GroupPrivilege.class));
-        }
-        persistenceManager.delete(group, null, null, tableName(Group.class));
-    }
-
-    @Override
-    public void refresh(Resource resource) {
-        refresh((AbstractObject) resource);
-
-        Map<String, Object> folderParams = new HashMap<String, Object>();
-        folderParams.put("id", resource.getFolderId());
-        resource.setFolder(findOne(Folder.class, folderParams));
-
-        Map<String, Object> settingParams = new HashMap<String, Object>();
-        settingParams.put("resourceId", resource.getId());
-        List<? extends Setting> settings = findSettings(ResourceSetting.class, settingParams);
-        resource.setSettings(settings);
-    }
-
     protected void refresh(Flow flow) {
         refresh((AbstractObject) flow);
         refreshFlowRelations(flow);
-    }
-
-    @Override
-    public void refresh(User user) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params = new HashMap<String, Object>();
-        params.put("userId", user.getId());
-
-        @SuppressWarnings("unchecked")
-        List<UserSetting> settings = (List<UserSetting>) findSettings(UserSetting.class, params);
-        user.setSettings(settings);
-
-        List<Group> groups = new ArrayList<Group>();
-        List<UserGroup> userGroups = persistenceManager.find(UserGroup.class, params, null, null,
-                tableName(UserGroup.class));
-        for (UserGroup userGroup : userGroups) {
-            groups.add(findGroup(userGroup.getGroupId()));
-        }
-        user.setGroups(groups);
-    }
-
-    @Override
-    public void refresh(Group group) {
-        HashMap<String, Object> params = new HashMap<String, Object>();
-        params.put("groupId", group.getId());
-        group.setGroupPrivileges(persistenceManager.find(GroupPrivilege.class, params, null, null,
-                tableName(GroupPrivilege.class)));
     }
 
     private void refreshFlowRelations(Flow flow) {
@@ -1036,15 +632,6 @@ abstract class AbstractConfigurationService extends AbstractService
     }
 
     @Override
-    public void save(AgentDeployment agentDeployment) {
-        save((AbstractObject) agentDeployment);
-        List<AgentDeploymentParameter> parameters = agentDeployment.getAgentDeploymentParameters();
-        for (AgentDeploymentParameter agentDeploymentParameter : parameters) {
-            save((AbstractObject) agentDeploymentParameter);
-        }
-    }
-
-    @Override
     public void save(Component component) {
         save((AbstractObject) component);
 
@@ -1105,10 +692,6 @@ abstract class AbstractConfigurationService extends AbstractService
         save(flow, false);
     }
 
-    protected boolean isPassword(Setting setting) {
-        return setting.getName().contains("password");
-    }
-
     @Override
     public void save(Setting setting) {
         boolean isPassword = isPassword(setting);
@@ -1141,12 +724,6 @@ abstract class AbstractConfigurationService extends AbstractService
             save(parm);
         }
 
-    }
-
-    @Override
-    public void save(Plugin plugin) {
-        plugin.setLastUpdateTime(new Date());
-        persistenceManager.save(plugin, null, null, tableName(Plugin.class));
     }
 
     @Override
@@ -1218,87 +795,6 @@ abstract class AbstractConfigurationService extends AbstractService
     }
 
     @Override
-    public List<Notification> findNotifications() {
-        return persistenceManager.find(Notification.class, null, null, null,
-                tableName(Notification.class));
-    }
-
-    @Override
-    public List<Notification> findNotificationsForAgent(String agentId) {
-        Map<String, Object> param = new HashMap<String, Object>();
-        param.put("level", Notification.Level.AGENT.toString());
-        param.put("linkId", agentId);
-        param.put("enabled", 1);
-        List<Notification> agentNotifications = persistenceManager.find(Notification.class, param,
-                null, null, tableName(Notification.class));
-
-        param = new HashMap<String, Object>();
-        param.put("level", Notification.Level.GLOBAL.toString());
-        param.put("enabled", 1);
-        List<Notification> notifications = persistenceManager.find(Notification.class, param, null,
-                null, tableName(Notification.class));
-        notifications.addAll(agentNotifications);
-        return notifications;
-    }
-
-    @Override
-    public List<Notification> findNotificationsForDeployment(AgentDeployment deployment) {
-        List<Notification> notifications = findNotificationsForAgent(deployment.getAgentId());
-        Map<String, Object> param = new HashMap<String, Object>();
-        param.put("level", Notification.Level.DEPLOYMENT.toString());
-        param.put("linkId", deployment.getId());
-        param.put("enabled", 1);
-        List<Notification> agentNotifications = persistenceManager.find(Notification.class, param,
-                null, null, tableName(Notification.class));
-        notifications.addAll(agentNotifications);
-        return notifications;
-    }
-
-    @Override
-    public void refresh(Notification notification) {
-        refresh((AbstractObject) notification);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<GlobalSetting> findGlobalSettings() {
-        return (List<GlobalSetting>) findSettings(GlobalSetting.class, null);
-    }
-
-    @Override
-    public GlobalSetting findGlobalSetting(String name) {
-        Map<String, Object> param = new HashMap<String, Object>();
-        param.put("name", name);
-        @SuppressWarnings("unchecked")
-        List<GlobalSetting> settings = (List<GlobalSetting>) findSettings(GlobalSetting.class,
-                param);
-        if (settings.size() > 0) {
-            return settings.get(0);
-        }
-        return null;
-    }
-
-    @Override
-    public TypedProperties findGlobalSetttingsAsProperties() {
-        TypedProperties properties = new TypedProperties();
-        for (GlobalSetting setting : findGlobalSettings()) {
-            properties.put(setting.getName(), setting.getValue());
-        }
-        return properties;
-    }
-
-    @Override
-    public Map<String, String> findGlobalSettingsAsMap() {
-        Map<String, String> globalSettings = new HashMap<String, String>();
-        for (GlobalSetting setting : findGlobalSettings()) {
-            globalSettings.put(setting.getName(), setting.getValue());
-        }
-        return globalSettings;
-    }
-
-    protected abstract boolean doesTableExist(Class<?> clazz);
-
-    @Override
     public String getLastKnownVersion() {
         if (doesTableExist(Version.class)) {
             List<Version> versions = persistenceManager.find(Version.class, null, null,
@@ -1366,32 +862,6 @@ abstract class AbstractConfigurationService extends AbstractService
         }
 
         return newVersion;
-    }
-
-    @Override
-    public List<UserHist> findUserHist(String id) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("userId", id);
-        List<UserHist> list = find(UserHist.class, params);
-        AbstractObjectLastUpdateTimeDescSorter.sort(list);
-        return list;
-    }
-
-    @Override
-    public void savePassword(User user, String newPassword) {
-        UserHist hist = new UserHist();
-        hist.setUserId(user.getId());
-        hist.setLastUpdateTime(user.getLastPasswordTime());
-        hist.setPassword(user.getPassword());
-        hist.setSalt(user.getSalt());
-        hist.setAuthMethod(user.getAuthMethod());
-        save(hist);
-
-        user.setAuthMethod(SecurityConstants.PASSWORD_AUTH_METHOD_SHASH);
-        user.setSalt(securityService.nextSecureHexString(10));
-        user.setLastPasswordTime(new Date());
-        user.setPassword(securityService.hash(user.getSalt(), newPassword));
-        save(user);
     }
 
     @Override
@@ -1664,4 +1134,480 @@ abstract class AbstractConfigurationService extends AbstractService
         releasePackage
                 .setProjectVersions(findReleasePackageProjectVersions(releasePackage.getId()));
     }
+    
+    @Override
+    public void doInBackground() {
+    }
+
+    @Override
+    public boolean isInstalled() {
+        return databasePlatform.getTableFromCache(tableName(Component.class), false) != null;
+    }
+
+    @Override
+    public boolean isDeployed(Flow flow) {
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        return template.queryForInt(String.format("select count(*) from %1$s_agent_deployment where flow_id = ? ", tablePrefix),
+                flow.getId()) > 0;
+    }
+
+    @Override
+    public List<String> findAllProjectVersionIds() {
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        return template.query(String.format("select id from %1$s_project_version where deleted=0", tablePrefix), new StringMapper());
+    }
+
+    protected List<ModelAttribute> findAllAttributesForModel(String modelId) {
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        String sql = String.format(
+                "select * from %1$s_model_attribute where entity_id in (select id from %1$s_model_entity where model_id=?)", tablePrefix);
+        return template.query(sql, new ISqlRowMapper<ModelAttribute>() {
+            @Override
+            public ModelAttribute mapRow(Row row) {
+                return persistenceManager.map(row, ModelAttribute.class, null, null, tableName(ModelAttribute.class));
+            }
+        }, new Object[] { modelId });
+    }
+
+    protected String getComponentIds(Flow flow) {
+        StringBuilder componentIds = new StringBuilder();
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> results = template.query(String.format(
+                "SELECT ID, SHARED FROM %1$s_COMPONENT WHERE ID IN (SELECT COMPONENT_ID FROM %1$s_FLOW_STEP WHERE FLOW_ID='%2$s')",
+                tablePrefix, flow.getId()));
+        for (Row row : results) {
+            componentIds.append("'");
+            componentIds.append(row.get("ID"));
+            componentIds.append("'");
+            componentIds.append(",");
+            if (row.getString("SHARED").equals("1")) {
+                throw new UnsupportedOperationException("Cannot export flows that utilize shared components");
+            }
+        }
+        componentIds.deleteCharAt(componentIds.length() - 1);
+        return componentIds.toString();
+    }
+
+    private boolean doesTableExist(Class<?> clazz) {
+        return databasePlatform.getTableFromCache(tableName(clazz), false) != null;
+    }
+
+    @Override
+    public List<Component> findDependentSharedComponents(String flowId) {
+        List<Component> sharedComponents = new ArrayList<Component>();
+        final String SHARED_COMPONENTS_BY_FLOW_SQL = "select distinct c.id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s' and c.shared=1";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(SHARED_COMPONENTS_BY_FLOW_SQL, tablePrefix, flowId));
+        for (Row row : ids) {
+            sharedComponents.add(this.findComponent(row.getString("id"), false));
+        }
+        return sharedComponents;
+    }
+
+    @Override
+    public List<Resource> findDependentResources(String flowId) {
+
+        List<Resource> resources = new ArrayList<Resource>();
+        final String RESOURCES_BY_FLOW_SQL = "select distinct c.resource_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s' and resource_id is not null " +
+                "union select distinct cs.value from metl_flow_step fs inner join metl_component c on fs.component_id = c.id inner join metl_component_setting cs on cs.component_id = c.id where fs.flow_id = '%2$s' " +
+                "and cs.name in ('source.resource','target.resource')";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(RESOURCES_BY_FLOW_SQL, tablePrefix, flowId));
+        for (Row row : ids) {
+            resources.add(this.findResource(row.getString("resource_id")));
+        }
+        return resources;
+    }
+
+    @Override
+    public List<Model> findDependentModels(String flowId) {
+        List<Model> models = new ArrayList<Model>();
+        final String MODELS_BY_FLOW_SQL = "select distinct model_id from  "
+                + "(select distinct output_model_id as model_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s' and output_model_id is not null union "
+                + " select distinct input_model_id as model_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s' and input_model_id is not null)";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(MODELS_BY_FLOW_SQL, tablePrefix, flowId));
+        for (Row row : ids) {
+            models.add(this.findModel(row.getString("model_id")));
+        }
+        return models;
+    }
+
+    @Override
+    public List<Flow> findDependentFlows(String projectVersionId) {
+        List<Flow> flows = new ArrayList<Flow>();
+        final String FLOWS_BY_PROJECT_SQL = "select distinct id from %1$s_flow where project_version_id =  '%2$s'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(FLOWS_BY_PROJECT_SQL, tablePrefix, projectVersionId));
+        for (Row row : ids) {
+            flows.add(this.findFlow(row.getString("id")));
+        }
+        return flows;
+    }
+
+    @Override
+    public List<Flow> findAffectedFlowsByFlow(String flowId) {
+        List<Flow> flows = new ArrayList<Flow>();
+
+        final String AFFECTED_FLOWS_BY_FLOW_SQL = "select distinct flow_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id "
+                + "inner join %1$s_component_setting cs on cs.component_id = c.id " + "where cs.name='flow.id' and cs.value = '%2$s'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(AFFECTED_FLOWS_BY_FLOW_SQL, tablePrefix, flowId));
+        for (Row row : ids) {
+            flows.add(this.findFlow(row.getString("flow_id")));
+        }
+
+        return flows;
+    }
+
+    @Override
+    public List<Flow> findAffectedFlowsByResource(String resourceId) {
+        List<Flow> flows = new ArrayList<Flow>();
+
+        final String AFFECTED_FLOWS_BY_RESOURCE_SQL = "select distinct flow_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id "
+                + "where c.resource_id = '%2$s'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(AFFECTED_FLOWS_BY_RESOURCE_SQL, tablePrefix, resourceId));
+        for (Row row : ids) {
+            flows.add(this.findFlow(row.getString("flow_id")));
+        }
+
+        return flows;
+    }
+
+    @Override
+    public List<Flow> findAffectedFlowsByModel(String modelId) {
+        List<Flow> flows = new ArrayList<Flow>();
+
+        final String AFFECTED_FLOWS_BY_MODEL_SQL = "select distinct flow_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id "
+                + "where c.input_model_id = '%2$s' or c.output_model_id = '%2$s'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(AFFECTED_FLOWS_BY_MODEL_SQL, tablePrefix, modelId));
+        for (Row row : ids) {
+            flows.add(this.findFlow(row.getString("flow_id")));
+        }
+        return flows;
+    }
+
+    @Override
+    public void deleteReleasePackageProjectVersionsForReleasePackage(String releasePackageId) {
+        final String DELETE_RELEASE_PACKAGE_VERSIONS_FOR_RELEASE_PACKAGE = "delete from %1$s_release_package_project_version " +
+                "where release_package_id = '%2$s'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        template.update(String.format(DELETE_RELEASE_PACKAGE_VERSIONS_FOR_RELEASE_PACKAGE, tablePrefix, releasePackageId));                
+    }
+
+    @Override
+    public List<ProjectVersion> findProjectVersionsByProject(String projectId) {
+        
+        Map<String, Object> params = new HashMap<>();
+        params.put("deleted", 0);
+        params.put("projectId", projectId);
+        List<ProjectVersion> versions = persistenceManager.find(ProjectVersion.class, params, null,
+                null, tableName(ProjectVersion.class));       
+        return versions;
+    }
+    @Override
+    public void updateProjectVersionDependency(ProjectVersionDependency dependency, String newTargetProjectVersionId) {
+        //TODO: audit events
+        Map<String, String> oldToNewResourceIdMap = getOldToNewResourceIdMap(dependency, newTargetProjectVersionId);
+        Map<String, String> oldToNewModelIdMap = getOldToNewModelIdMap(dependency, newTargetProjectVersionId);
+        Map<String, String> oldToNewModelEntityIdMap = getOldToNewModelEntityIdMap(oldToNewModelIdMap);
+        Map<String, String> oldToNewModelAttributeIdMap = getOldToNewModelAttributeIdMap(oldToNewModelEntityIdMap);
+
+        ISqlTransaction transaction = databasePlatform.getSqlTemplate().startSqlTransaction();
+        try {        
+            updateProjectVersionWithNewDependencyGUIDs(oldToNewResourceIdMap, oldToNewModelIdMap,
+                    oldToNewModelEntityIdMap, oldToNewModelAttributeIdMap, newTargetProjectVersionId,
+                    transaction);
+            transaction.commit();
+        } catch (Exception e) {
+            log.error(String.format("Error updating project version dependencies %s",e.getMessage()));
+            transaction.rollback();
+        }
+    }
+    
+    private Map<String, String> getOldToNewResourceIdMap(ProjectVersionDependency dependency, String newTargetProjectVersionId) {
+        Map<String, String> oldToNewResourceIdMap = new HashMap<String, String>();
+        final String RESOURCES_USED_FROM_DEPENDENT_PROJECTS = 
+                "select \n" + 
+                "   distinct c.resource_id\n" + 
+                "   ,nr.id\n" + 
+                "from \n" + 
+                "   %1$s_component c\n" + 
+                "   inner join %1$s_project_version pv\n" + 
+                "      on c.project_version_id = pv.id\n" + 
+                "   left outer join %1$s_resource cr\n" + 
+                "      on cr.id = c.resource_id\n" + 
+                "      and cr.project_version_id = pv.id\n" + 
+                "   inner join %1$s_project_version_dependency pvd\n" + 
+                "      on pvd.project_version_id = pv.id\n" + 
+                "   inner join %1$s_resource dr\n" + 
+                "      on dr.project_version_id = pvd.target_project_version_id\n" + 
+                "      and dr.id = c.resource_id\n" + 
+                "   inner join %1$s_resource nr\n" + 
+                "      on nr.project_version_id = '%2$s'" + 
+                "      and dr.row_id = nr.row_id\n" + 
+                "where\n" + 
+                "   cr.id is null\n" + 
+                "   and pv.id = '%3$s'" + 
+                "union\n" + 
+                "select\n" + 
+                "   distinct cs.value\n" + 
+                "   , nr.id\n" + 
+                "from\n" + 
+                "   %1$s_component_setting cs\n" + 
+                "   inner join %1$s_component c\n" + 
+                "      on cs.component_id = c.id\n" + 
+                "   inner join %1$s_project_version pv\n" + 
+                "      on c.project_version_id = pv.id\n" + 
+                "   left outer join %1$s_resource r\n" + 
+                "      on r.id = c.resource_id\n" + 
+                "      and r.project_version_id = pv.id\n" + 
+                "   inner join %1$s_project_version_dependency pvd\n" + 
+                "      on pvd.project_version_id = pv.id\n" + 
+                "   inner join %1$s_resource dr\n" + 
+                "      on dr.project_version_id = pvd.target_project_version_id\n" + 
+                "      and dr.id = cs.value\n" + 
+                "   inner join %1$s_resource nr\n" + 
+                "      on nr.project_version_id = '%2$s'" + 
+                "      and dr.row_id = nr.row_id\n" + 
+                "where\n" + 
+                "   cs.name in ('target.resource','source.resource')\n" + 
+                "   and r.id is null\n" + 
+                "   and pv.id = '%3$s'";
+//TODO: come up with every uuid and then check against metl_resource to  ensure that it is a resource or not       
+        
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(RESOURCES_USED_FROM_DEPENDENT_PROJECTS, tablePrefix, newTargetProjectVersionId, dependency.getProjectVersionId()));
+        for (Row row : ids) {
+            oldToNewResourceIdMap.put(row.getString("resource_id"), row.getString("id"));
+        }        
+        return oldToNewResourceIdMap;
+    }
+
+    private Map<String, String> getOldToNewModelIdMap(ProjectVersionDependency dependency, String newTargetProjectVersionId) {
+        Map<String, String> oldToNewModelIdMap = new HashMap<String, String>();
+        final String MODELS_USED_FROM_DEPENDENT_PROJECTS =
+                "select \n" + 
+                "   distinct c.input_model_id\n" + 
+                "   ,nm.id\n" + 
+                "from \n" + 
+                "   %1$s_component c\n" + 
+                "   inner join %1$s_project_version pv\n" + 
+                "      on c.project_version_id = pv.id\n" + 
+                "   left outer join %1$s_model cm\n" + 
+                "      on cm.id = c.input_model_id\n" + 
+                "      and cm.project_version_id = pv.id\n" + 
+                "   inner join %1$s_project_version_dependency pvd\n" + 
+                "      on pvd.project_version_id = pv.id\n" + 
+                "   inner join %1$s_model dm\n" + 
+                "      on dm.project_version_id = pvd.target_project_version_id\n" + 
+                "      and dm.id = c.input_model_id\n" + 
+                "   inner join %1$s_model nm\n" + 
+                "      on nm.project_version_id = '%2$s'" + 
+                "      and dm.row_id = nm.row_id\n" + 
+                "where\n" + 
+                "   cm.id is null\n" + 
+                "   and pv.id = '%3$s'" + 
+                "union\n" + 
+                "select \n" + 
+                "   distinct c.output_model_id\n" + 
+                "   ,nm.id\n" + 
+                "from \n" + 
+                "   %1$s_component c\n" + 
+                "   inner join %1$s_project_version pv\n" + 
+                "      on c.project_version_id = pv.id\n" + 
+                "   left outer join %1$s_model cm\n" + 
+                "      on cm.id = c.output_model_id\n" + 
+                "      and cm.project_version_id = pv.id\n" + 
+                "   inner join %1$s_project_version_dependency pvd\n" + 
+                "      on pvd.project_version_id = pv.id\n" + 
+                "   inner join %1$s_model dm\n" + 
+                "      on dm.project_version_id = pvd.target_project_version_id\n" + 
+                "      and dm.id = c.output_model_id\n" + 
+                "   inner join %1$s_model nm\n" + 
+                "      on nm.project_version_id = '%2$s'" + 
+                "      and dm.row_id = nm.row_id\n" + 
+                "where\n" + 
+                "   cm.id is null\n" + 
+                "   and pv.id = '%3$s' ";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(MODELS_USED_FROM_DEPENDENT_PROJECTS, tablePrefix, newTargetProjectVersionId, dependency.getProjectVersionId()));
+        for (Row row : ids) {
+            oldToNewModelIdMap.put(row.getString("input_model_id"), row.getString("id"));
+        }        
+        return oldToNewModelIdMap;
+    }
+
+    private Map<String, String> getOldToNewModelEntityIdMap(Map<String, String> oldToNewModelIdMap) {
+        Map<String, String> oldToNewModelEntityIdMap = new HashMap<String, String>();
+        final String MODEL_ENTITIES_USED_FROM_DEPENDENT_PROJECTS =
+                "select \n" + 
+                "   ome.id\n" + 
+                "   ,nme.id\n" + 
+                "from\n" + 
+                "   %1$s_model_entity ome\n" + 
+                "   left outer join %1$s_model_entity nme\n" + 
+                "      on ome.name = nme.name\n" + 
+                "where\n" + 
+                "   ome.model_id = '%2$s'\n" + 
+                "   and nme.model_id = '%3$s'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+
+        for (Map.Entry<String,String> entry : oldToNewModelIdMap.entrySet()) {
+            List<Row> ids = template.query(String.format(MODEL_ENTITIES_USED_FROM_DEPENDENT_PROJECTS, tablePrefix, entry.getKey(),entry.getValue()));
+            for (Row row : ids) {
+                oldToNewModelEntityIdMap.put(row.getString("id"), row.getString("id_1"));
+            }                    
+        }
+        return oldToNewModelEntityIdMap;
+    }
+
+    private Map<String, String> getOldToNewModelAttributeIdMap(Map<String, String> oldToNewModelEntityIdMap) {
+        Map<String, String> oldToNewModelAttributeIdMap = new HashMap<String, String>();
+        final String MODEL_ENTITIES_USED_FROM_DEPENDENT_PROJECTS =
+                "select \n" + 
+                "   oma.id\n" + 
+                "   ,nma.id\n" + 
+                "from\n" + 
+                "   %1$s_model_attribute oma\n" + 
+                "   left outer join %1$s_model_attribute nma\n" + 
+                "      on oma.name = nma.name\n" + 
+                "where\n" + 
+                "   oma.model_id = '%2$s'\n" + 
+                "   and nma.model_id = '%3$s'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+
+        for (Map.Entry<String,String> entry : oldToNewModelEntityIdMap.entrySet()) {
+            List<Row> ids = template.query(String.format(MODEL_ENTITIES_USED_FROM_DEPENDENT_PROJECTS, tablePrefix, entry.getKey(),entry.getValue()));
+            for (Row row : ids) {
+                oldToNewModelAttributeIdMap.put(row.getString("id"), row.getString("id_1"));
+            }                    
+        }
+        return oldToNewModelAttributeIdMap;
+    }
+    
+    private void updateProjectVersionWithNewDependencyGUIDs(Map<String,String> oldToNewResourceIdMap, Map<String,String> oldToNewModelIdMap,
+                Map<String,String> oldToNewModelEntityIdMap, Map<String,String> oldToNewModelAttributeIdMap,
+                String targetProjectVersionId, ISqlTransaction transaction) {
+
+        updateProjectVersionWithNewResources(oldToNewResourceIdMap, targetProjectVersionId, transaction);
+        updateProjectVersionWithNewModels(oldToNewModelIdMap, oldToNewModelEntityIdMap,
+                oldToNewModelAttributeIdMap, targetProjectVersionId, transaction);
+    }
+    
+    private void updateProjectVersionWithNewResources(Map<String, String> oldToNewResourceIdMap, String targetProjectVersionId,
+            ISqlTransaction transaction) {
+
+        final String UPDATE_RESOURCE_IN_COMPONENT_OLD_TO_NEW = 
+                "update %1$s_component set resource_id='%2$s' where resource_id='%3$s' and project_version_id='%4$s'";
+        final String UPDATE_RESOURCE_IN_COMPONENT_SETTING_OLD_TO_NEW = 
+                "update %1$s_component_setting as cs\n" + 
+                "   set cs.value='%2$s'\n" + 
+                "where \n" + 
+                "   cs.value='%3$s'\n" + 
+                "   and cs.name in ('source.resource','target.resource')\n" + 
+                "   and cs.component_id in \n" + 
+                "   (\n" + 
+                "      select \n" + 
+                "         c.id\n" + 
+                "      from \n" + 
+                "         %1$s_component c\n" + 
+                "      where \n" + 
+                "         cs.component_id = c.id         \n" + 
+                "         and c.project_version_id='%4$s'\n" + 
+                "   )\n";
+//TODO same comment here as above - look for uuid and then compare against metl_resource              
+        for (Map.Entry<String, String> entry : oldToNewResourceIdMap.entrySet()) {
+            transaction.execute(String.format(UPDATE_RESOURCE_IN_COMPONENT_OLD_TO_NEW, tablePrefix, entry.getValue(), entry.getKey(), targetProjectVersionId));    
+            transaction.execute(String.format(UPDATE_RESOURCE_IN_COMPONENT_SETTING_OLD_TO_NEW, tablePrefix, entry.getValue(), entry.getKey(), targetProjectVersionId));                
+        }                
+    }
+    
+    private void updateProjectVersionWithNewModels(Map<String, String> oldToNewModelIdMap, 
+            Map<String, String> oldToNewModelEntityIdMap, Map<String, String> oldToNewModelAttributeIdMap,
+            String targetProjectVersionId, ISqlTransaction transaction) {
+        
+        final String UPDATE_INPUT_MODEL_IN_COMPONENT_OLD_TO_NEW = 
+                "update %1$s_component set input_model_id='%2$s' where input_model_id='%3$s' and project_version_id='%4$s'";
+        final String UPDATE_OUTPUT_MODEL_IN_COMPONENT_OLD_TO_NEW = 
+                "update %1$s_component set output_model_id='%2$s' where output_model_id='%3$s' and project_version_id='%4$s'";
+              
+        for (Map.Entry<String, String> entry : oldToNewModelIdMap.entrySet()) {        
+            transaction.execute(String.format(UPDATE_INPUT_MODEL_IN_COMPONENT_OLD_TO_NEW, tablePrefix, entry.getValue(), entry.getKey(), targetProjectVersionId));
+            transaction.execute(String.format(UPDATE_OUTPUT_MODEL_IN_COMPONENT_OLD_TO_NEW, tablePrefix, entry.getValue(), entry.getKey(), targetProjectVersionId));            
+        }        
+        updateProjectVersionWithNewModelEntityIds(oldToNewModelEntityIdMap, targetProjectVersionId, transaction);
+        updateProjectVersionWithNewModelAttributeIds(oldToNewModelAttributeIdMap, targetProjectVersionId, transaction);        
+    }
+
+    private void updateProjectVersionWithNewModelEntityIds(
+            Map<String, String> oldToNewModelEntityIdMap, String targetProjectVersionId, ISqlTransaction transaction) {
+
+        final String UPDATE_COMPONENT_ENTITY_SETTING_OLD_TO_NEW = 
+                "update %1$s_component_entity_setting as ces\n" + 
+                "   set ces.entity_id='%2$s'\n" + 
+                "where \n" + 
+                "   ces.entity_id='%3$s'\n" + 
+                "   and ces.component_id in \n" + 
+                "   (\n" + 
+                "      select \n" + 
+                "         c.id\n" + 
+                "      from \n" + 
+                "         %1$s_component c\n" + 
+                "      where \n" + 
+                "         ces.component_id = c.id         \n" + 
+                "         and c.project_version_id='%4$s'\n" + 
+                "   )\n";
+     
+        for (Map.Entry<String, String> entry : oldToNewModelEntityIdMap.entrySet()) {        
+            transaction.execute(String.format(UPDATE_COMPONENT_ENTITY_SETTING_OLD_TO_NEW, tablePrefix, 
+                    entry.getValue(), entry.getKey(), targetProjectVersionId));                    
+        }                
+    }   
+        
+    private void updateProjectVersionWithNewModelAttributeIds(
+            Map<String, String> oldToNewModelAttributeIdMap, String targetProjectVersionId, ISqlTransaction transaction) {
+
+        final String UPDATE_COMPONENT_ATTRIBUTE_SETTING_OLD_TO_NEW = 
+                "update %1$s_component_attribute_setting as ces\n" + 
+                "   set ces.entity_id='%2$s'\n" + 
+                "where \n" + 
+                "   ces.entity_id='%3$s'\n" + 
+                "   and ces.component_id in \n" + 
+                "   (\n" + 
+                "      select \n" + 
+                "         c.id\n" + 
+                "      from \n" + 
+                "         %1$s_component c\n" + 
+                "      where \n" + 
+                "         ces.component_id = c.id         \n" + 
+                "         and c.project_version_id='%4$s'\n" + 
+                "   )\n";
+
+        final String UPDATE_MODEL_ATTRIBUTE_IN_COMPONENT_SETTING_OLD_TO_NEW = 
+                "update %1$s_component_setting as cs\n" + 
+                "   set cs.value='%2$s'\n" + 
+                "where \n" + 
+                "   cs.value='%3$s'\n" + 
+                "   and cs.name in ('lookup.key.attribute','lookup.value.attribute','replacement.key.attribute','replacement.value.attribute','sequence.attribute')\n" + 
+                "   and cs.component_id in \n" + 
+                "   (\n" + 
+                "      select \n" + 
+                "         c.id\n" + 
+                "      from \n" + 
+                "         %1$s_component c\n" + 
+                "      where \n" + 
+                "         cs.component_id = c.id         \n" + 
+                "         and c.project_version_id='%4$s'\n" + 
+                "   )\n";
+              
+        for (Map.Entry<String, String> entry : oldToNewModelAttributeIdMap.entrySet()) {        
+            transaction.execute(String.format(UPDATE_COMPONENT_ATTRIBUTE_SETTING_OLD_TO_NEW, tablePrefix, 
+                    entry.getValue(), entry.getKey(), targetProjectVersionId));
+            transaction.execute(String.format(UPDATE_MODEL_ATTRIBUTE_IN_COMPONENT_SETTING_OLD_TO_NEW, tablePrefix, 
+                    entry.getValue(), entry.getKey(), targetProjectVersionId));            
+        }                
+    }    
 }

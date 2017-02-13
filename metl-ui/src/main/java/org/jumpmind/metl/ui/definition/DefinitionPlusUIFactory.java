@@ -35,6 +35,7 @@ import javax.xml.bind.Unmarshaller;
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.persist.IPluginService;
 import org.jumpmind.metl.core.plugin.DefinitionFactory;
 import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.ui.views.design.IComponentEditPanel;
@@ -45,8 +46,8 @@ public class DefinitionPlusUIFactory extends DefinitionFactory implements IDefin
 
     protected JAXBContext xmlUiContext;
 
-    public DefinitionPlusUIFactory(IConfigurationService configurationService, IPluginManager pluginManager) {
-        super(configurationService, pluginManager);
+    public DefinitionPlusUIFactory(IPluginService pluginService, IConfigurationService configurationService, IPluginManager pluginManager) {
+        super(pluginService, configurationService, pluginManager);
     }
 
     @Override

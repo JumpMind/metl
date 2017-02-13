@@ -9,7 +9,6 @@ import org.jumpmind.metl.core.model.AgentDeploymentSummary;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FlowParameter;
-import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
@@ -192,12 +191,10 @@ public class DeployDialog extends ResizableWindow {
         for (FlowName flowName : flowCollection) {
             IConfigurationService configurationService = context.getConfigurationService();
             Flow flow = configurationService.findFlow(flowName.getId());
-            ProjectVersion projectVersion = configurationService.findProjectVersion(flow.getProjectVersionId());
             AgentDeployment deployment = new AgentDeployment();
-            deployment.setProjectVersion(projectVersion);
             deployment.setAgentId(parentPanel.getAgent().getId());
-            deployment.setFlow(flow);
             deployment.setName(getName(flow.getName()));
+            deployment.setFlowId(flow.getId());
             List<AgentDeploymentParameter> deployParams = deployment.getAgentDeploymentParameters();
             for (FlowParameter flowParam : flow.getFlowParameters()) {
                 AgentDeploymentParameter deployParam = new AgentDeploymentParameter();
@@ -207,7 +204,7 @@ public class DeployDialog extends ResizableWindow {
                 deployParam.setValue(flowParam.getDefaultValue());
                 deployParams.add(deployParam);
             }
-            context.getConfigurationService().save(deployment);
+            context.getOperationsSerivce().save(deployment);
         }
         parentPanel.refresh();
         close();

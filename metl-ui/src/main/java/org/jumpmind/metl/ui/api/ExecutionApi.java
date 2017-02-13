@@ -50,7 +50,8 @@ import org.jumpmind.metl.core.model.Execution;
 import org.jumpmind.metl.core.model.ExecutionStatus;
 import org.jumpmind.metl.core.model.ExecutionStep;
 import org.jumpmind.metl.core.model.ExecutionStepLog;
-import org.jumpmind.metl.core.model.Flow;
+import org.jumpmind.metl.core.model.FlowName;
+import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.IAgentManager;
@@ -116,6 +117,9 @@ public class ExecutionApi {
 
     @Autowired
     IExecutionService executionService;
+    
+    @Autowired
+    IConfigurationService configurationService;
 
     @Autowired
     IHttpRequestMappingRegistry requestRegistry;
@@ -210,7 +214,7 @@ public class ExecutionApi {
 
             List<AgentDeployment> deployments = agent.getAgentDeployments();
             for (AgentDeployment agentDeployment : deployments) {
-                Flow flow = agentDeployment.getFlow();
+                FlowName flow = configurationService.findFlowName(agentDeployment.getFlowId());
                 if (flow.isWebService()) {
                     List<HttpRequestMapping> mappings = requestRegistry.getHttpRequestMappingsFor(agentDeployment);
                     for (HttpRequestMapping httpRequestMapping : mappings) {

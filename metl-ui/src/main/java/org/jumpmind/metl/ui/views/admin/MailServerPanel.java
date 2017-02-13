@@ -174,7 +174,7 @@ public class MailServerPanel extends VerticalLayout implements IUiPanel {
     @Override
     public boolean closing() {
         if (isChanged) {
-            for (Agent agent : context.getConfigurationService().findAgents()) {
+            for (Agent agent : context.getOperationsSerivce().findAgents()) {
                 if (!agent.isDeleted() && agent.getStatus().equals(AgentStatus.RUNNING.name())) {
                     agent.setStatus(AgentStatus.REQUEST_REFRESH.name());
                     context.getConfigurationService().save(agent);
@@ -193,7 +193,7 @@ public class MailServerPanel extends VerticalLayout implements IUiPanel {
     }
 
     private GlobalSetting getGlobalSetting(String name, String defaultValue) {
-        GlobalSetting setting = context.getConfigurationService().findGlobalSetting(name);
+        GlobalSetting setting = context.getOperationsSerivce().findGlobalSetting(name);
         if (setting == null) {
             setting = new GlobalSetting();
             setting.setName(name);
@@ -204,7 +204,7 @@ public class MailServerPanel extends VerticalLayout implements IUiPanel {
 
     class TestClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            MailSession mailSession = new MailSession(context.getConfigurationService().findGlobalSettingsAsMap());
+            MailSession mailSession = new MailSession(context.getOperationsSerivce().findGlobalSettingsAsMap());
             try {                
                 mailSession.getTransport();                
                 CommonUiUtils.notify("SMTP Test", "Success!");

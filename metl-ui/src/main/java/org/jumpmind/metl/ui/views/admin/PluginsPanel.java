@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.jumpmind.metl.core.model.Plugin;
-import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.persist.IPluginService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.TabbedPanel;
@@ -123,7 +123,7 @@ public class PluginsPanel extends VerticalLayout implements IUiPanel {
     public void refresh() {
         container.removeAllItems();
 
-        plugins = context.getConfigurationService().findPlugins();
+        plugins = context.getPluginService().findPlugins();
         Collections.sort(plugins, new Comparator<Plugin>() {
             @Override
             public int compare(Plugin o1, Plugin o2) {
@@ -171,7 +171,7 @@ public class PluginsPanel extends VerticalLayout implements IUiPanel {
         for (Plugin plugin : plugins) {
             if (loadOrder != plugin.getLoadOrder()) {
                 plugin.setLoadOrder(loadOrder);
-                context.getConfigurationService().save(plugin);
+                context.getPluginService().save(plugin);
             }
             loadOrder++;
         }
@@ -212,10 +212,10 @@ public class PluginsPanel extends VerticalLayout implements IUiPanel {
     }
 
     protected void purgeUnused() {
-        IConfigurationService configurationService = context.getConfigurationService();
-        List<Plugin> plugins = configurationService.findUnusedPlugins();
+        IPluginService pluginService = context.getPluginService();
+        List<Plugin> plugins = pluginService.findUnusedPlugins();
         for (Plugin plugin : plugins) {
-            configurationService.delete(plugin);
+            pluginService.delete(plugin);
             /*
              * TODO: Before enabling this need to figure out logic to calculate if the
              * plug-in is required by other plug-ins that ARE currently

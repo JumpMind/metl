@@ -43,9 +43,9 @@ import javax.mail.internet.MimeMessage;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.AgentDeploymentParameter;
 import org.jumpmind.metl.core.model.AgentParameter;
+import org.jumpmind.metl.core.model.AgentProjectVersionFlowDeployment;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowParameter;
 import org.jumpmind.metl.core.model.FlowStep;
@@ -53,6 +53,7 @@ import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Notification;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
+import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.core.plugin.IDefinitionFactory;
 import org.jumpmind.metl.core.plugin.XMLComponentDefinition;
 import org.jumpmind.metl.core.runtime.ControlMessage;
@@ -82,7 +83,7 @@ public class FlowRuntime {
 
     private static final String TIME_FORMAT = "HH:mm:ss";
 
-    AgentDeployment deployment;
+    AgentProjectVersionFlowDeployment agentProjectVersionFlowDeployment;
 
     Map<FlowStep, IComponentRuntime> endpointRuntimes = new HashMap<FlowStep, IComponentRuntime>();
 
@@ -118,31 +119,34 @@ public class FlowRuntime {
     
     Flow manipulatedFlow;
 
-    public FlowRuntime(String executionId, String userId, AgentDeployment deployment, Agent agent,
+    public FlowRuntime(String executionId, String userId, AgentProjectVersionFlowDeployment deployment, Agent agent,
             IComponentRuntimeFactory componentRuntimeFactory,
-            IDefinitionFactory componentDefinitionFactory,
+            IDefinitionFactory componentDefinitionFactory,            
             ExecutorService threadService,
+            IOperationsService operationsService,
             IConfigurationService configurationService, IExecutionService executionService,
             Map<String, IResourceRuntime> deployedResources, List<Notification> notifications,
             Map<String, String> globalSettings) {
         this(executionId, userId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
-                threadService, configurationService, executionService,
+                threadService, operationsService, configurationService, executionService,
                 deployedResources, notifications, globalSettings, null);
     }
 
-    public FlowRuntime(String executionId, String userId, AgentDeployment deployment, Agent agent,
+    public FlowRuntime(String executionId, String userId, AgentProjectVersionFlowDeployment deployment, Agent agent,
             IComponentRuntimeFactory componentRuntimeFactory,
             IDefinitionFactory definitionFactory,
-            ExecutorService threadService,
+            ExecutorService threadService, IOperationsService operationsService,
             IConfigurationService configurationService, IExecutionService executionService,
             Map<String, IResourceRuntime> deployedResources, List<Notification> notifications,
             Map<String, String> globalSettings, Map<String, String> runtimeParameters) {
-        if (agent.isAutoRefresh() && configurationService != null) {
-            deployment = configurationService.findAgentDeployment(deployment.getId());
-            configurationService.refreshAgentParameters(agent);
+        
+        if (agent.isAutoRefresh() && configurationService != null && operationsService != null) {
+            deployment.setFlow(configurationService.findFlow(deployment.getFlow().getId()));
+            deployment.setAgentDeployment(operationsService.findAgentDeployment(deployment.getAgentDeployment().getId()));
+            operationsService.refreshAgentParameters(agent);
         }
         this.executionId = executionId;
-        this.deployment = deployment;
+        this.agentProjectVersionFlowDeployment = deployment;
         this.agent = agent;
         this.notifications = notifications;
         this.componentRuntimeFactory = componentRuntimeFactory;
@@ -175,7 +179,7 @@ public class FlowRuntime {
             boolean enabled = flowStep.getComponent().getBoolean(AbstractComponentRuntime.ENABLED,
                     true);
             if (enabled) {
-                ComponentContext context = new ComponentContext(deployment, flowStep,
+                ComponentContext context = new ComponentContext(deployment.getAgentDeployment(), flowStep,
                         manipulatedFlow, executionTracker, deployedResources, flowParameters,
                         globalSettings);
                 StepRuntime stepRuntime = new StepRuntime(componentRuntimeFactory,
@@ -215,8 +219,8 @@ public class FlowRuntime {
         manipulatedFlow.calculateApproximateOrder();        
     }
 
-    public AgentDeployment getDeployment() {
-        return deployment;
+    public AgentProjectVersionFlowDeployment getAgentProjectVersionFlowDeployment() {
+        return agentProjectVersionFlowDeployment;
     }
     
     public IHasSecurity getHasSecurity() {
@@ -343,10 +347,10 @@ public class FlowRuntime {
         return clone;
     }
 
-    public static Map<String, String> getFlowParameters(Flow flow, Agent agent,
-            AgentDeployment agentDeployment) {
+    public static Map<String, String> getFlowParameters(Agent agent,
+            AgentProjectVersionFlowDeployment agentDeployment) {
         Map<String, String> params = new HashMap<String, String>();
-        List<FlowParameter> flowParameters = flow.getFlowParameters();
+        List<FlowParameter> flowParameters = agentDeployment.getFlow().getFlowParameters();
         for (FlowParameter flowParameter : flowParameters) {
             params.put(flowParameter.getName(), flowParameter.getDefaultValue());
         }
@@ -354,8 +358,8 @@ public class FlowRuntime {
     }
 
     public static Map<String, String> getFlowParameters(Map<String, String> params, Agent agent,
-            AgentDeployment agentDeployment) {
-        List<AgentDeploymentParameter> deployParameters = agentDeployment
+            AgentProjectVersionFlowDeployment agentDeployment) {
+        List<AgentDeploymentParameter> deployParameters = agentDeployment.getAgentDeployment()
                 .getAgentDeploymentParameters();
         List<AgentParameter> agentParameters = agent.getAgentParameters();
         Set<String> overridable = new HashSet<>();
@@ -468,7 +472,7 @@ public class FlowRuntime {
     protected List<StepRuntime> findStartSteps() {
         List<StepRuntime> starterSteps = new ArrayList<StepRuntime>();
         for (String stepId : stepRuntimes.keySet()) {
-            List<FlowStepLink> links = deployment.getFlow().getFlowStepLinks();
+            List<FlowStepLink> links = manipulatedFlow.getFlowStepLinks();
             boolean isTargetStep = false;
             for (FlowStepLink flowStepLink : links) {
                 if (stepRuntimes.get(flowStepLink.getSourceStepId()) != null
