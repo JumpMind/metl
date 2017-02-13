@@ -126,7 +126,6 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         ButtonBar buttonBar2 = new ButtonBar();
         addComponent(buttonBar2);
 
-        if (!readOnly) {
             addEntityButton = buttonBar1.addButton("Add Entity", FontAwesome.TABLE);
             addEntityButton.addClickListener(new AddEntityClickListener());
 
@@ -148,7 +147,6 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
             importButton = buttonBar1.addButtonRight("Import ...", FontAwesome.UPLOAD,
                     new ImportClickListener());
-        }
 
         buttonBar1.addButtonRight("Export...", FontAwesome.DOWNLOAD, (e) -> export());
 
@@ -465,8 +463,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
             moveTopButton.setEnabled(enableMove);
             moveUpButton.setEnabled(enableMove);
             moveDownButton.setEnabled(enableMove);
-
         } else {
+            addEntityButton.setEnabled(false);
             addAttributeButton.setEnabled(false);
             removeButton.setEnabled(false);
             editButton.setEnabled(false);
@@ -474,6 +472,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
             moveTopButton.setEnabled(false);
             moveUpButton.setEnabled(false);
             moveDownButton.setEnabled(false);
+            importButton.setEnabled(false);
         }
     }
 
