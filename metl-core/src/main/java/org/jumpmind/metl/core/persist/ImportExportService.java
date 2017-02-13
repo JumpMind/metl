@@ -294,14 +294,11 @@ public class ImportExportService extends AbstractService implements IImportExpor
     }
 
     private void addConfigData(List<TableData> tableData, String[][] sqlElements,
-            String projectVersionId, String keyValue) {
-        
+            String projectVersionId, String keyValue) {        
         ProjectVersion version = configurationService.findProjectVersion(projectVersionId);
-        
         for (int i = 0; i <= sqlElements.length - 1; i++) {
-            //TODO greg finish this
             if (!sqlElements[0][0].equalsIgnoreCase("_PROJECT") ||
-                    !projectsExported.contains(version.getProjectId()) ) {                
+                    version == null || !projectsExported.contains(version.getProjectId()) ) {                
                 String[] entry = sqlElements[i];
                 List<Row> rows = getConfigTableData(String.format(entry[SQL], 
                         tablePrefix, projectVersionId, keyValue));
@@ -322,7 +319,10 @@ public class ImportExportService extends AbstractService implements IImportExpor
                 }
             }
         }
-        projectsExported.add(version.getProjectId());
+        
+        if (version != null) {
+            projectsExported.add(version.getProjectId());
+        }
     }
 
     private List<Row> getConfigTableData(String sql) {

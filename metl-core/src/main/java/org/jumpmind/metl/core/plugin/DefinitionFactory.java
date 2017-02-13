@@ -100,6 +100,7 @@ public class DefinitionFactory implements IDefinitionFactory {
 
     @Override
     public void refresh() {
+        long ts = System.currentTimeMillis();
         definitionsByProjectVersionIdById = new HashMap<>();
         definitionsByPluginId = new HashMap<>();
         if (pluginManager != null && configurationService != null) {
@@ -115,6 +116,7 @@ public class DefinitionFactory implements IDefinitionFactory {
                 }
                 awaitTermination(executor, futures);
             }
+            logger.info("It took {}ms to refresh {} project versions", (System.currentTimeMillis()-ts), numOfVersions);
         }
     }
 
