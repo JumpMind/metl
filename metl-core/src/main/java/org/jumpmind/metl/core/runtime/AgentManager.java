@@ -35,6 +35,7 @@ import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
+import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.core.plugin.IDefinitionFactory;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
@@ -50,6 +51,8 @@ public class AgentManager implements IAgentManager {
     IConfigurationService configurationService;
 
     IExecutionService executionService;
+    
+    IOperationsService operationsService;
 
     IComponentRuntimeFactory componentRuntimeFactory;
 
@@ -59,9 +62,10 @@ public class AgentManager implements IAgentManager {
 
     Map<String, AgentRuntime> engines = new HashMap<String, AgentRuntime>();
 
-    public AgentManager(IConfigurationService configurationService, IExecutionService executionService,
+    public AgentManager(IOperationsService operationsService, IConfigurationService configurationService, IExecutionService executionService,
             IComponentRuntimeFactory componentFactory, IDefinitionFactory componentDefinitionFactory,
             IHttpRequestMappingRegistry httpRequestMappingRegistry) {
+        this.operationsService = operationsService;
         this.executionService = executionService;
         this.configurationService = configurationService;
         this.componentRuntimeFactory = componentFactory;
@@ -79,7 +83,7 @@ public class AgentManager implements IAgentManager {
     }
 
     public void start() {
-        List<Agent> agents = configurationService.findAgents();
+        List<Agent> agents = operationsService.findAgents();
         for (Agent agent : agents) {
             createAndStartRuntime(agent);
         }
@@ -122,7 +126,7 @@ public class AgentManager implements IAgentManager {
     }
 
     protected AgentRuntime createAndStartRuntime(Agent agent) {
-        AgentRuntime engine = new AgentRuntime(agent, configurationService, executionService, componentRuntimeFactory, 
+        AgentRuntime engine = new AgentRuntime(agent, operationsService, configurationService, executionService, componentRuntimeFactory, 
                 definitionFactory, httpRequestMappingRegistry);
         engines.put(agent.getId(), engine);
         engine.start();

@@ -63,11 +63,6 @@
         <priority value="WARN" />
     </category>
         
-    <!-- To print out SQL    
-    <category name="org.jumpmind.db.sql">
-        <priority value="DEBUG" />
-    </category>    
-     --> 
     <category name="org.atmosphere.cpr">
         <priority value="ERROR" />
     </category>
@@ -89,6 +84,12 @@
         <priority value="DEBUG" />
     </category>        
      -->
+     
+    <!-- To print out config SQL     
+    <category name="org.jumpmind.db.sql">
+        <priority value="DEBUG" />
+    </category>    
+         -->     
     
     <root>
         <priority value="WARN" />

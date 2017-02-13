@@ -176,7 +176,7 @@ public class GeneralSettingsPanel extends VerticalLayout implements IUiPanel {
     }
 
     private GlobalSetting getGlobalSetting(String name, String defaultValue) {
-        GlobalSetting setting = context.getConfigurationService().findGlobalSetting(name);
+        GlobalSetting setting = context.getOperationsSerivce().findGlobalSetting(name);
         if (setting == null) {
             setting = new GlobalSetting();
             setting.setName(name);

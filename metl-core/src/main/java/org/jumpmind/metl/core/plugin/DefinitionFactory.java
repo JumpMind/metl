@@ -63,6 +63,7 @@ import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.model.ProjectVersionDefinitionPlugin;
 import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.persist.IPluginService;
 import org.jumpmind.metl.core.plugin.XMLComponentDefinition.ResourceCategory;
 import org.jumpmind.metl.core.plugin.XMLSetting.Type;
 import org.jumpmind.metl.core.util.VersionUtils;
@@ -78,6 +79,8 @@ public class DefinitionFactory implements IDefinitionFactory {
     protected Map<String, List<XMLAbstractDefinition>> definitionsByPluginId;
 
     protected IConfigurationService configurationService;
+    
+    protected IPluginService pluginService;
 
     protected IPluginManager pluginManager;
 
@@ -88,10 +91,11 @@ public class DefinitionFactory implements IDefinitionFactory {
         definitionsByPluginId = new HashMap<>();
     }
 
-    public DefinitionFactory(IConfigurationService configurationService, IPluginManager pluginManager) {
+    public DefinitionFactory(IPluginService pluginService, IConfigurationService configurationService, IPluginManager pluginManager) {
         this();
         this.configurationService = configurationService;
         this.pluginManager = pluginManager;
+        this.pluginService = pluginService;
     }
 
     @Override
@@ -100,7 +104,7 @@ public class DefinitionFactory implements IDefinitionFactory {
         definitionsByPluginId = new HashMap<>();
         if (pluginManager != null && configurationService != null) {
             pluginManager.refresh();
-            List<Plugin> distinctPlugins = configurationService.findDistinctPlugins();
+            List<Plugin> distinctPlugins = pluginService.findDistinctPlugins();
             List<String> projectVersionIds = configurationService.findAllProjectVersionIds();
             int numOfVersions = projectVersionIds.size(); 
             if (numOfVersions > 0) {
@@ -116,7 +120,7 @@ public class DefinitionFactory implements IDefinitionFactory {
 
     @Override
     public void refresh(String projectVersionId) {
-        List<Plugin> distinctPlugins = configurationService.findDistinctPlugins();
+        List<Plugin> distinctPlugins = pluginService.findDistinctPlugins();
         refresh(projectVersionId, distinctPlugins);
     }        
         
@@ -124,7 +128,7 @@ public class DefinitionFactory implements IDefinitionFactory {
         long ts = System.currentTimeMillis();
         loadComponentsForClassloader(projectVersionId, "org.jumpmind.metl:metl-core:" + VersionUtils.getCurrentVersion(),
                 getClass().getClassLoader());
-        List<PluginRepository> remoteRepostiories = configurationService.findPluginRepositories();
+        List<PluginRepository> remoteRepostiories = pluginService.findPluginRepositories();
         List<ProjectVersionDefinitionPlugin> pvcps = configurationService.findProjectVersionComponentPlugins(projectVersionId);
         GenericVersionScheme versionScheme = new GenericVersionScheme();        
         for (Plugin configuredPlugin : distinctPlugins) {
@@ -164,8 +168,8 @@ public class DefinitionFactory implements IDefinitionFactory {
                         
                         if (!matched) {
                             logger.warn("Deleting the reference to {}:{}:{}", pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion());
-                            configurationService.delete(pvcp);
-                            configurationService.delete((Plugin)pvcp);
+                            pluginService.delete(pvcp);
+                            pluginService.delete((Plugin)pvcp);
                         }                        
 
                     } catch (InvalidVersionSpecificationException e) {

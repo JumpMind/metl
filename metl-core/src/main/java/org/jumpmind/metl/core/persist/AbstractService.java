@@ -20,12 +20,21 @@
  */
 package org.jumpmind.metl.core.persist;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.AbstractObject;
+import org.jumpmind.metl.core.model.AbstractObjectLastUpdateTimeDescSorter;
+import org.jumpmind.metl.core.model.Folder;
+import org.jumpmind.metl.core.model.FolderType;
+import org.jumpmind.metl.core.model.Setting;
+import org.jumpmind.metl.core.security.ISecurityService;
+import org.jumpmind.metl.core.security.SecurityConstants;
 import org.jumpmind.persist.IPersistenceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,10 +46,13 @@ public abstract class AbstractService {
     protected IPersistenceManager persistenceManager;
     
     protected String tablePrefix;
+    
+    protected ISecurityService securityService;
 
-    AbstractService(IPersistenceManager persistenceManager, String tablePrefix) {
+    AbstractService(ISecurityService securityService, IPersistenceManager persistenceManager, String tablePrefix) {
         this.persistenceManager = persistenceManager;
         this.tablePrefix = tablePrefix;
+        this.securityService = securityService;
     }
     
     protected String tableName(Class<?> clazz) {
@@ -112,5 +124,49 @@ public abstract class AbstractService {
         }
     }
 
+    protected List<? extends Setting> findSettings(Class<? extends Setting> clazz,
+            Map<String, Object> params) {
+        List<? extends Setting> settings = persistenceManager.find(clazz, params, null, null,
+                tableName(clazz));
+        for (Setting setting : settings) {
+            if (isPassword(setting)) {
+                String value = setting.getValue();
+                if (value != null && value.startsWith(SecurityConstants.PREFIX_ENC)) {
+                    try {
+                        setting.setValue(securityService.decrypt(
+                                value.substring(SecurityConstants.PREFIX_ENC.length() - 1)));
+                    } catch (Exception ex) {
+                        setting.setValue(null);
+                        log.error("Failed to decrypt password for the setting: " + setting.getName()
+                                + ".  The encrypted value was: " + value
+                                + ".  Please check your keystore.", ex);
+                    }
+                }
+            }
+        }
+        AbstractObjectLastUpdateTimeDescSorter.sort(settings);
+        return settings;
+    }    
     
+    protected boolean isPassword(Setting setting) {
+        return setting.getName().contains("password");
+    }
+
+    protected Map<String, Folder> foldersById(String projectVersionId, FolderType type) {
+        Map<String, Object> byType = new HashMap<String, Object>();
+        byType.put("type", type.name());
+        if (isNotBlank(projectVersionId)) {
+            byType.put("projectVersionId", projectVersionId);
+        }
+        byType.put("deleted", 0);
+        List<Folder> folders = find(Folder.class, byType);
+
+        Map<String, Folder> all = new HashMap<String, Folder>();
+        for (Folder folder : folders) {
+            all.put(folder.getId(), folder);
+        }
+        return all;
+    }
+
+
 }

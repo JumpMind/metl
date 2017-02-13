@@ -33,7 +33,7 @@ public class AgentDeployment extends AbstractNamedObject {
 
     String name;
 
-    Flow flow;
+    String flowId;
 
     String agentId;
 
@@ -48,21 +48,9 @@ public class AgentDeployment extends AbstractNamedObject {
     String startExpression;
     
     List<AgentDeploymentParameter> agentDeploymentParameters;
-    
-    ProjectVersion projectVersion;
 
     public AgentDeployment() {
         agentDeploymentParameters = new ArrayList<AgentDeploymentParameter>();
-    }
-
-    public AgentDeployment(Flow flow) {
-        this();
-        this.name = flow.getName();
-        setFlow(flow);
-    }
-
-    public void setFlow(Flow flow) {
-        this.flow = flow;
     }
 
     public String getAgentId() {
@@ -74,16 +62,11 @@ public class AgentDeployment extends AbstractNamedObject {
     }
 
     public String getFlowId() {
-        return flow != null ? flow.getId() : null;
+        return flowId;
     }
 
     public void setFlowId(String flowId) {
-        if (flowId != null) {
-            this.flow = new Flow();
-            this.flow.setId(flowId);
-        } else {
-            this.flow = null;
-        }
+        this.flowId = flowId;
     }
 
     public String getStatus() {
@@ -114,10 +97,6 @@ public class AgentDeployment extends AbstractNamedObject {
     @Override
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Flow getFlow() {
-        return flow;
     }
 
     public void setStartExpression(String startExpression) {
@@ -168,17 +147,9 @@ public class AgentDeployment extends AbstractNamedObject {
     public List<AgentDeploymentParameter> getAgentDeploymentParameters() {
         return agentDeploymentParameters;
     }
-    
-    public void setProjectVersion(ProjectVersion projectVersion) {
-        this.projectVersion = projectVersion;
-    }
-    
-    public ProjectVersion getProjectVersion() {
-        return projectVersion;
-    }
 
     @Override
     public String toString() {
-        return flow.getName();
+        return name;
     }
 }

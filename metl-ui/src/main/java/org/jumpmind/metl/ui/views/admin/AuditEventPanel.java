@@ -75,7 +75,7 @@ public class AuditEventPanel extends VerticalLayout implements IUiPanel {
         grid.removeColumn("lastUpdateTime");
         grid.removeColumn("settingNameAllowed");
         grid.setSizeFull();
-        List<AuditEvent> list = context.getConfigurationService().findAuditEvents(-1);
+        List<AuditEvent> list = context.getOperationsSerivce().findAuditEvents(-1);
         for (AuditEvent event : list) {
             container.addItem(event, event);
         }

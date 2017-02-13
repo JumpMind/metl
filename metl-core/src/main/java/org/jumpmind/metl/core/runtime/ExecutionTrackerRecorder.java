@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentProjectVersionFlowDeployment;
 import org.jumpmind.metl.core.model.Execution;
 import org.jumpmind.metl.core.model.ExecutionStatus;
 import org.jumpmind.metl.core.model.ExecutionStep;
@@ -57,7 +57,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     
     String parameters;
 
-    public ExecutionTrackerRecorder(Agent agent, AgentDeployment agentDeployment,  ExecutorService threadService, IExecutionService executionService, String userId, String parameters) {
+    public ExecutionTrackerRecorder(Agent agent, AgentProjectVersionFlowDeployment agentDeployment,  ExecutorService threadService, IExecutionService executionService, String userId, String parameters) {
         super(agentDeployment);
         this.agent = agent;
         this.userId = userId;
@@ -79,13 +79,13 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         execution.setId(executionId);
         execution.setStartTime(startTime);
         execution.setStatus(ExecutionStatus.RUNNING.name());
-        execution.setAgentId(deployment.getAgentId());
-        execution.setFlowId(deployment.getFlowId());
+        execution.setAgentId(deployment.getAgentDeployment().getAgentId());
+        execution.setFlowId(deployment.getAgentDeployment().getFlowId());
         execution.setAgentName(agent.getName());
         execution.setHostName(AppUtils.getHostName());
         execution.setFlowName(deployment.getFlow().getName());
         execution.setDeploymentName(deployment.getName());
-        execution.setDeploymentId(deployment.getId());
+        execution.setDeploymentId(deployment.getAgentDeployment().getId());
         execution.setLastUpdateTime(new Date());
         execution.setCreateBy(userId);
         execution.setLastUpdateBy(userId);

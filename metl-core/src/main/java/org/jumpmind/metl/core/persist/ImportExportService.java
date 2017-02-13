@@ -2,6 +2,7 @@ package org.jumpmind.metl.core.persist;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,10 +24,12 @@ import org.jumpmind.db.model.Table;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.sql.DmlStatement;
 import org.jumpmind.db.sql.DmlStatement.DmlType;
+import org.jumpmind.exception.IoException;
 import org.jumpmind.db.sql.ISqlTemplate;
 import org.jumpmind.db.sql.ISqlTransaction;
 import org.jumpmind.db.sql.Row;
 import org.jumpmind.metl.core.model.AbstractObject;
+import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AuditEvent;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
@@ -43,6 +46,8 @@ import org.jumpmind.metl.core.security.SecurityConstants;
 import org.jumpmind.metl.core.util.MessageException;
 import org.jumpmind.metl.core.util.VersionUtils;
 import org.jumpmind.persist.IPersistenceManager;
+import org.jumpmind.symmetric.io.data.DbExport;
+import org.jumpmind.symmetric.io.data.DbExport.Format;
 import org.jumpmind.util.AppUtils;
 import org.jumpmind.util.LinkedCaseInsensitiveMap;
 
@@ -112,7 +117,6 @@ public class ImportExportService extends AbstractService implements IImportExpor
     
     private IDatabasePlatform databasePlatform;
     private IConfigurationService configurationService;
-    private ISecurityService securityService;
     private String tablePrefix;
     private String[] columnsToExclude;
     private Set<String> importsToAudit = new HashSet<>();
@@ -120,8 +124,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
     public ImportExportService(IDatabasePlatform databasePlatform,
             IPersistenceManager persistenceManager, String tablePrefix,
             IConfigurationService configurationService, ISecurityService securityService) {
-        super(persistenceManager, tablePrefix);
-        this.securityService = securityService;
+        super(securityService, persistenceManager, tablePrefix);
         this.databasePlatform = databasePlatform;
         this.configurationService = configurationService;
         this.tablePrefix = tablePrefix;
@@ -775,6 +778,70 @@ public class ImportExportService extends AbstractService implements IImportExpor
         for (int i = 0; i <= sqlElements.length - 1; i++) {
             tableData.add(new TableData(tablePrefix + sqlElements[i][0]));
         }
+    }
+    
+    @Override
+    public String export(Agent agent) {
+        try {
+            StringBuilder out = new StringBuilder();
+
+            /* @formatter:off */
+            String[][] CONFIG = {
+                    {"AGENT", "WHERE ID='%2$s' AND DELETED=0"," ORDER BY ID",                                                                                                                                                                              },
+                    {"AGENT_DEPLOYMENT", "WHERE AGENT_ID='%2$s'"," ORDER BY ID",                                                                                                                                                                                                                                },
+                    {"AGENT_DEPLOYMENT_PARAMETER", "WHERE AGENT_DEPLOYMENT_ID in (SELECT ID FROM %1$s_AGENT_DEPLOYMENT WHERE AGENT_ID='%2$s')"," ORDER BY ID",                                                                                                                                                                                                                         },
+                    {"AGENT_PARAMETER", "WHERE AGENT_ID='%2$s'"," ORDER BY ID",                                                                                                                                                                                                            },
+                    {"AGENT_RESOURCE_SETTING", "WHERE AGENT_ID='%2$s'"," ORDER BY RESOURCE_ID, NAME",                                                                                                                                                       },
+            };
+            /* @formatter:on */
+
+            for (int i = CONFIG.length - 1; i >= 0; i--) {
+                String[] entry = CONFIG[i];
+                out.append(String.format("DELETE FROM %s_%s %s;\n", tablePrefix, entry[0],
+                        String.format(entry[1], tablePrefix, agent.getId()).replace("AND DELETED=0", "")));
+            }
+
+            for (int i = 0; i < CONFIG.length; i++) {
+                String[] entry = CONFIG[i];
+                out.append(export(entry[0], entry[1], entry[2], agent));
+            }
+
+            return out.toString();
+        } catch (IOException e) {
+            throw new IoException(e);
+        }
+    }
+    
+    protected String export(String table, String where, String orderBy, Agent agent) throws IOException {
+        DbExport export = new DbExport(databasePlatform);
+        export.setWhereClause(String.format(where + orderBy, tablePrefix, agent.getId()));
+        export.setFormat(Format.SQL);
+        export.setUseQuotedIdentifiers(false);
+        export.setNoCreateInfo(true);
+        return export.exportTables(new String[] { String.format("%s_%s", tablePrefix, table) });
+    }
+
+    protected String export(String table, String where, String orderBy, ProjectVersion projectVersion, String[] columnsToExclude)
+            throws IOException {
+        DbExport export = new DbExport(databasePlatform);
+        export.setWhereClause(String.format(where + orderBy, tablePrefix, projectVersion.getId(), projectVersion.getProjectId()));
+        export.setFormat(Format.SQL);
+        export.setUseQuotedIdentifiers(false);
+        export.setNoCreateInfo(true);
+        export.setExcludeColumns(columnsToExclude);
+        return export.exportTables(new String[] { String.format("%s_%s", tablePrefix, table) });
+    }
+
+    protected String export(String table, String where, String orderBy, ProjectVersion projectVersion, Flow flow, String componentIds,
+            String[] columnsToExclude) throws IOException {
+        DbExport export = new DbExport(databasePlatform);
+        export.setWhereClause(String.format(where + orderBy, tablePrefix, projectVersion.getId(), projectVersion.getProjectId(), flow.getId(),
+                componentIds));
+        export.setFormat(Format.SQL);
+        export.setUseQuotedIdentifiers(false);
+        export.setNoCreateInfo(true);
+        export.setExcludeColumns(columnsToExclude);
+        return export.exportTables(new String[] { String.format("%s_%s", tablePrefix, table) });
     }
 
     static class TableData {

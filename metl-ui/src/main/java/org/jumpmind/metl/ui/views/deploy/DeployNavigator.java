@@ -148,7 +148,7 @@ public class DeployNavigator extends VerticalLayout {
             addChildren(folder);
         }
         
-        List<AgentName> agents = context.getConfigurationService().findAgentsInFolder(null);
+        List<AgentName> agents = context.getOperationsSerivce().findAgentsInFolder(null);
         for (AgentName agent : agents) {
             addAgent(null, agent);
         }
@@ -413,7 +413,7 @@ public class DeployNavigator extends VerticalLayout {
     protected void openItem(Object item) {
         if (item instanceof AgentName) {
             AgentName agentName = (AgentName) item;
-            Agent agent = context.getConfigurationService().findAgent(agentName.getId(), false);
+            Agent agent = context.getOperationsSerivce().findAgent(agentName.getId(), false);
             tabbedPanel.addCloseableTab(agent.getId(), agent.getName(), Icons.AGENT,
                     new EditAgentPanel(context, tabbedPanel, agent));
         }
@@ -544,7 +544,7 @@ public class DeployNavigator extends VerticalLayout {
             addChildren(child);
         }
 
-        List<AgentName> agents = context.getConfigurationService().findAgentsInFolder(folder);
+        List<AgentName> agents = context.getOperationsSerivce().findAgentsInFolder(folder);
         for (AgentName agent : agents) {
             addAgent(folder, agent);
         }
@@ -557,7 +557,7 @@ public class DeployNavigator extends VerticalLayout {
             ConfirmDialog.show("Delete Agent?",
                     "Are you sure you want to delete the '" + agentName.getName() + "' agent?",
                     () -> {
-                        Agent agent = context.getConfigurationService().findAgent(agentName.getId(),
+                        Agent agent = context.getOperationsSerivce().findAgent(agentName.getId(),
                                 false);
                         context.getConfigurationService().delete(agent);
                         context.getAgentManager().refresh(agent);

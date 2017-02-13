@@ -129,10 +129,10 @@ public class NotificationPanel extends VerticalLayout implements IUiPanel, TextC
     public void refresh() {
         container.removeAllItems();
         if (StringUtils.isEmpty(filterField.getValue())) {
-            container.addAll(context.getConfigurationService().findNotifications());
+            container.addAll(context.getOperationsSerivce().findNotifications());
         } else {
             String filter = filterField.getValue().toUpperCase();
-            for (Notification notification : context.getConfigurationService().findNotifications()) {
+            for (Notification notification : context.getOperationsSerivce().findNotifications()) {
                 if (notification.getLevel().indexOf(filter) != -1 || notification.getName().indexOf(filter) != -1 ||
                     notification.getEventType().indexOf(filter) != -1) {
                     container.addItem(notification);
@@ -177,7 +177,7 @@ public class NotificationPanel extends VerticalLayout implements IUiPanel, TextC
     class EditClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
             Notification item = getFirstSelectedItem();
-            context.getConfigurationService().refresh(item);
+            context.getOperationsSerivce().refresh(item);
             NotificationEditPanel editPanel = new NotificationEditPanel(context, item);
             tabbedPanel.addCloseableTab(item.getId(), "Edit Notification", getIcon(), editPanel);
         }

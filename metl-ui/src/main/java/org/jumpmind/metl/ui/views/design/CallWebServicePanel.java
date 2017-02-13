@@ -103,7 +103,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
         this.context = context;
         this.tabs = tabs;
         IConfigurationService configurationService = context.getConfigurationService();
-        Flow flow = configurationService.findFlow(deployment.getFlow().getId());
+        Flow flow = configurationService.findFlow(deployment.getFlowId());
 
         ButtonBar buttonBar = new ButtonBar();
         buttonBar.addButton("Call Service", Icons.RUN, (e) -> runFlow());
@@ -230,7 +230,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
         if (isNotBlank(executionId)) {
             ExecutionRunPanel logPanel = new ExecutionRunPanel(executionId, context, tabs, this);
             logPanel.onBackgroundUIRefresh(logPanel.onBackgroundDataRefresh());
-            tabs.addCloseableTab(executionId, "Run " + deployment.getFlow().getName(), Icons.LOG,
+            tabs.addCloseableTab(executionId, "Run " + deployment.getName(), Icons.LOG,
                     logPanel);
         }
     }

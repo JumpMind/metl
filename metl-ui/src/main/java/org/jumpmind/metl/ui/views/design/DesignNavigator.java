@@ -30,7 +30,6 @@ import java.util.List;
 import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
-import org.jumpmind.metl.core.model.ComponentName;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FolderName;
@@ -436,22 +435,6 @@ public class DesignNavigator extends VerticalLayout {
             this.treeTable.removeItem(folder);
         }
 
-    }
-
-    protected void addSharedComponentsToFolder(FolderName folder, ProjectVersion projectVersion) {
-        List<ComponentName> components = configurationService.findSharedComponentsInProject(projectVersion.getId());
-        AbstractObjectNameBasedSorter.sort(components);
-        for (ComponentName component : components) {
-            this.treeTable.setChildrenAllowed(folder, true);
-            this.treeTable.addItem(component);
-            this.treeTable.setItemIcon(component, Icons.COMPONENT);
-            this.treeTable.setParent(component, folder);
-            this.treeTable.setChildrenAllowed(component, false);
-        }
-
-        if (components.size() == 0) {
-            this.treeTable.removeItem(folder);
-        }
     }
 
     protected void addDependenciesToFolder(FolderName folder, ProjectVersion projectVersion) {

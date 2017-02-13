@@ -139,7 +139,7 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
     }
 
     protected GlobalSetting getGlobalSetting(String name, String defaultValue) {
-        GlobalSetting setting = context.getConfigurationService().findGlobalSetting(name);
+        GlobalSetting setting = context.getOperationsSerivce().findGlobalSetting(name);
         if (setting == null) {
             setting = new GlobalSetting();
             setting.setName(name);

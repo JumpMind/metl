@@ -38,6 +38,8 @@ import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.AgentDeploymentSummary;
 import org.jumpmind.metl.core.model.AgentResource;
 import org.jumpmind.metl.core.model.DeploymentStatus;
+import org.jumpmind.metl.core.model.FlowName;
+import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
@@ -138,7 +140,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
                 try {
                     int value = Integer.parseInt(text);
                     agent.setExecThreadCount(value);
-                    context.getConfigurationService().save((AbstractObject) agent);
+                    context.getOperationsSerivce().save((AbstractObject) agent);
                     EditAgentPanel.this.context.getAgentManager().refresh(agent);
                 } catch (NumberFormatException ex) {
                     NotifyDialog.show("Number required", "Please enter a valid number", null, Type.WARNING_MESSAGE);
@@ -160,7 +162,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         autoRefresh.setDescription("Automatically refresh flow from database before execution?");
         autoRefresh.addValueChangeListener(event -> {
             agent.setAutoRefresh(autoRefresh.getValue());
-            EditAgentPanel.this.context.getConfigurationService().save((AbstractObject) agent);
+            EditAgentPanel.this.context.getOperationsSerivce().save((AbstractObject) agent);
             EditAgentPanel.this.context.getAgentManager().refresh(agent);
         });
         editAgentLayout.addComponent(autoRefresh);
@@ -171,7 +173,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         showInExploreViewField.setImmediate(true);
         showInExploreViewField.addValueChangeListener(event -> {
             agent.setShowResourcesInExploreView(showInExploreViewField.getValue());
-            EditAgentPanel.this.context.getConfigurationService().save((AbstractObject) agent);
+            EditAgentPanel.this.context.getOperationsSerivce().save((AbstractObject) agent);
             EditAgentPanel.this.context.getAgentManager().refresh(agent);
         });
         editAgentLayout.addComponent(showInExploreViewField);
@@ -182,7 +184,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         allowTestFlowsField.setImmediate(true);
         allowTestFlowsField.addValueChangeListener(event -> {
             agent.setAllowTestFlows(allowTestFlowsField.getValue());
-            EditAgentPanel.this.context.getConfigurationService().save((AbstractObject) agent);
+            EditAgentPanel.this.context.getOperationsSerivce().save((AbstractObject) agent);
             EditAgentPanel.this.context.getAgentManager().refresh(agent);
         });
         editAgentLayout.addComponent(allowTestFlowsField);
@@ -247,7 +249,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
     }
 
     protected void exportConfiguration() {
-        final String export = context.getConfigurationService().export(agent);
+        final String export = context.getImportExportService().export(agent);
         StreamSource ss = new StreamSource() {
             private static final long serialVersionUID = 1L;
 
@@ -305,7 +307,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
     }
 
     protected List<AgentDeploymentSummary> getRefreshData() {
-        List<AgentDeploymentSummary> summaries = context.getConfigurationService().findAgentDeploymentSummary(agent.getId());
+        List<AgentDeploymentSummary> summaries = context.getOperationsSerivce().findAgentDeploymentSummary(agent.getId());
         String filterString = filterField.getValue();
         if (isNotBlank(filterString)) {
             filterString = filterString.toLowerCase();
@@ -413,9 +415,10 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
     protected void runClicked() {
         AgentDeploymentSummary summary = (AgentDeploymentSummary) getSelectedItems().iterator().next();
         if (summary.isFlow()) {
-            AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(summary.getId());
+            AgentDeployment deployment = context.getOperationsSerivce().findAgentDeployment(summary.getId());
             IAgentManager agentManager = context.getAgentManager();
-            if (deployment.getFlow().isWebService()) {
+            FlowName flow = context.getConfigurationService().findFlowName(deployment.getFlowId());
+            if (flow.isWebService()) {
                 CallWebServicePanel panel = new CallWebServicePanel(deployment, context, tabbedPanel);
                 tabbedPanel.addCloseableTab(deployment.getId(), "Call " + deployment.getName(), Icons.RUN, panel);
             } else {
@@ -432,11 +435,12 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
     protected void editClicked() {
         AgentDeploymentSummary summary = (AgentDeploymentSummary) getSelectedItems().iterator().next();
         if (summary.isFlow()) {
-            AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(summary.getId());
+            AgentDeployment deployment = context.getOperationsSerivce().findAgentDeployment(summary.getId());
             EditAgentDeploymentPanel editPanel = new EditAgentDeploymentPanel(context, deployment, EditAgentPanel.this, tabbedPanel);
             tabbedPanel.addCloseableTab(deployment.getId(), deployment.getName(), Icons.DEPLOYMENT, editPanel);
         } else {
-            AgentResource agentResource = context.getConfigurationService().findAgentResource(agent.getId(), summary.getId());
+            Resource resource = context.getConfigurationService().findResource(summary.getId());
+            AgentResource agentResource = context.getOperationsSerivce().findAgentResource(agent.getId(), resource);
             EditAgentResourcePanel editPanel = new EditAgentResourcePanel(context, agentResource);
             FontAwesome icon = Icons.GENERAL_RESOURCE;
             if (agentResource.getType().equals("Database")) {
@@ -452,10 +456,10 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         Set<AgentDeploymentSummary> selectedIds = getSelectedItems();
         for (AgentDeploymentSummary summary : selectedIds) {
             if (summary.isFlow()) {
-                AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(summary.getId());
+                AgentDeployment deployment = context.getOperationsSerivce().findAgentDeployment(summary.getId());
                 deployment.setStatus(DeploymentStatus.REQUEST_ENABLE.name());
                 summary.setStatus(DeploymentStatus.REQUEST_ENABLE.name());
-                context.getConfigurationService().save(deployment);
+                context.getOperationsSerivce().save(deployment);
                 updateItem(summary);
             }
         }
@@ -465,10 +469,10 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         Set<AgentDeploymentSummary> selectedIds = getSelectedItems();
         for (AgentDeploymentSummary summary : selectedIds) {
             if (summary.isFlow()) {
-                AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(summary.getId());
+                AgentDeployment deployment = context.getOperationsSerivce().findAgentDeployment(summary.getId());
                 deployment.setStatus(DeploymentStatus.REQUEST_DISABLE.name());
                 summary.setStatus(DeploymentStatus.REQUEST_DISABLE.name());
-                context.getConfigurationService().save(deployment);
+                context.getOperationsSerivce().save(deployment);
                 updateItem(summary);
             }
         }
@@ -478,10 +482,10 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         Set<AgentDeploymentSummary> selectedIds = getSelectedItems();
         for (AgentDeploymentSummary summary : selectedIds) {
             if (summary.isFlow()) {
-                AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(summary.getId());
+                AgentDeployment deployment = context.getOperationsSerivce().findAgentDeployment(summary.getId());
                 deployment.setStatus(DeploymentStatus.REQUEST_REMOVE.name());
                 summary.setStatus(DeploymentStatus.REQUEST_REMOVE.name());
-                context.getConfigurationService().save(deployment);
+                context.getOperationsSerivce().save(deployment);
                 updateItem(summary);
             }
         }

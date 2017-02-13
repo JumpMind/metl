@@ -40,7 +40,7 @@ import org.apache.commons.lang.time.DateUtils;
 import org.jumpmind.metl.core.model.GlobalSetting;
 import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.model.UserHist;
-import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.properties.TypedProperties;
@@ -91,7 +91,7 @@ public class LoginDialog extends Window {
         this.loginListener = loginListener;
 
         settings = new TypedProperties();
-        settings.putAll(context.getConfigurationService().findGlobalSettingsAsMap());
+        settings.putAll(context.getOperationsSerivce().findGlobalSettingsAsMap());
         passwordExpiresInDays = settings.getInt(GlobalSetting.PASSWORD_EXPIRE_DAYS, 60);
 
         setWidth(300, Unit.PIXELS);
@@ -156,8 +156,7 @@ public class LoginDialog extends Window {
             passedTest = false;
         } else {
             TypedProperties settings = new TypedProperties();
-            settings.putAll(context.getConfigurationService().findGlobalSettingsAsMap());
-            IConfigurationService configurationService = context.getConfigurationService();
+            settings.putAll(context.getOperationsSerivce().findGlobalSettingsAsMap());
             ISecurityService securityService = context.getSecurityService();
 
             int minPasswordLength = settings.getInt(PASSWORD_MIN_LENGTH, 6);
@@ -170,7 +169,7 @@ public class LoginDialog extends Window {
 
             int prohibitNPreviousPasswords = settings.getInt(PASSWORD_PROHIBIT_PREVIOUS, 5);
             if (passedTest && prohibitNPreviousPasswords != 0) {
-                List<UserHist> histories = configurationService
+                List<UserHist> histories = context.getOperationsSerivce()
                         .findUserHist(context.getUser().getId());
                 if (prohibitNPreviousPasswords < 0) {
                     prohibitNPreviousPasswords = histories.size();
@@ -297,13 +296,13 @@ public class LoginDialog extends Window {
     protected void login() {
         boolean login = false;
         ISecurityService securityService = context.getSecurityService();
-        IConfigurationService configurationService = context.getConfigurationService();
-        User user = configurationService.findUserByLoginId(userNameField.getValue());
+        IOperationsService operationsService = context.getOperationsSerivce();
+        User user = operationsService.findUserByLoginId(userNameField.getValue());
         if (user != null) {
             String password = securityService.hash(user.getSalt(), passwordField.getValue());            
             if (isNewPasswordMode()) {
                 if (testPassword(passwordField, validatePasswordField, context)) {
-                    configurationService.savePassword(user, passwordField.getValue());
+                    operationsService.savePassword(user, passwordField.getValue());
                     login = true;
                 }
             } else if (user.getPassword() != null

@@ -38,6 +38,7 @@ import org.jumpmind.metl.core.model.Name;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
+import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Icons;
 
@@ -245,11 +246,11 @@ public class ManageNavigator extends Panel {
     }
 
     protected void addAgentsToFolder(Folder folder) {
-        IConfigurationService configurationService = context.getConfigurationService();
-        List<AgentName> agents = configurationService.findAgentsInFolder(folder);
+        IOperationsService operationsService = context.getOperationsSerivce();
+        List<AgentName> agents = operationsService.findAgentsInFolder(folder);
         for (AgentName agent : agents) {
 
-            List<AgentDeploymentSummary> deployments = configurationService.findAgentDeploymentSummary(agent.getId());
+            List<AgentDeploymentSummary> deployments = operationsService.findAgentDeploymentSummary(agent.getId());
 
             treeTable.addItem(agent);
             treeTable.setItemIcon(agent, Icons.AGENT);

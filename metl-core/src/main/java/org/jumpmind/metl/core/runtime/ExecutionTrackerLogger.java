@@ -23,7 +23,7 @@ package org.jumpmind.metl.core.runtime;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentProjectVersionFlowDeployment;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.util.LogUtils;
@@ -34,13 +34,13 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
 
     final Logger log = LoggerFactory.getLogger(getClass());
     
-    AgentDeployment deployment;
+    AgentProjectVersionFlowDeployment deployment;
     
     String executionId;
     
     Map<String, Long> stepStartTimes = new HashMap<String, Long>();
 
-    public ExecutionTrackerLogger(AgentDeployment deployment) {
+    public ExecutionTrackerLogger(AgentProjectVersionFlowDeployment deployment) {
         this.deployment = deployment;
     }
 

@@ -14,6 +14,7 @@ import org.apache.commons.lang.time.DateUtils;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IImportExportService;
+import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.core.util.AppConstants;
 import org.jumpmind.properties.TypedProperties;
 import org.slf4j.Logger;
@@ -27,19 +28,22 @@ public class BackupJob implements Runnable {
 
     IConfigurationService configurationService;
     
+    IOperationsService operationsService;
+    
     String configDir;
 
     public BackupJob(IImportExportService importExportService,
-            IConfigurationService configurationService, String configDir) {
+            IConfigurationService configurationService, IOperationsService operationsService, String configDir) {
         this.importExportService = importExportService;
         this.configurationService = configurationService;
+        this.operationsService = operationsService;
         this.configDir = configDir;
     }
 
     @Override
     public void run() {
         try {
-            TypedProperties properties = configurationService.findGlobalSetttingsAsProperties();
+            TypedProperties properties = operationsService.findGlobalSetttingsAsProperties();
             File backupDir = new File(configDir, "backups");
             backupDir.mkdirs();
             backup(properties, backupDir);

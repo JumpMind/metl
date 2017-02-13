@@ -45,7 +45,7 @@ import org.h2.store.fs.FileUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
-import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.persist.IPluginService;
 import org.jumpmind.metl.core.util.ChildFirstURLClassLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,11 +64,11 @@ public class PluginManager implements IPluginManager {
 
     Map<String, ClassLoader> plugins = new HashMap<>();
 
-    IConfigurationService configurationService;
+    IPluginService pluginService;
 
-    public PluginManager(String localRepositoryPath, IConfigurationService configurationService) {
+    public PluginManager(String localRepositoryPath, IPluginService pluginService) {
         this.localRepositoryPath = localRepositoryPath;
-        this.configurationService = configurationService;
+        this.pluginService = pluginService;
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-rdbms-reader", 10));
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-rdbms-writer", 20));
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-data-diff", 30));
@@ -131,13 +131,13 @@ public class PluginManager implements IPluginManager {
     }
 
     protected void loadAll() {
-        List<Plugin> existing = configurationService.findPlugins();
-        List<PluginRepository> repositories = configurationService.findPluginRepositories();
+        List<Plugin> existing = pluginService.findPlugins();
+        List<PluginRepository> repositories = pluginService.findPluginRepositories();
         for (Plugin plugin : existing) {
             try {
                 if (null == getClassLoader(plugin.getArtifactGroup(), plugin.getArtifactName(), plugin.getArtifactVersion(), repositories)) {
                     logger.warn("Deleting plugin that could not be loaded: {}:{}:{}", plugin.getArtifactGroup(), plugin.getArtifactName(), plugin.getArtifactVersion());
-                    configurationService.delete(plugin);
+                    pluginService.delete(plugin);
                 }
             } catch (Exception ex) {
                 logger.warn("Failed to load plugin: %s", plugin);
@@ -176,12 +176,12 @@ public class PluginManager implements IPluginManager {
     }
 
     protected void checkForNewConfiguredVersions() {
-        checkForNewerVersion(configurationService.findActivePlugins());
+        checkForNewerVersion(pluginService.findActivePlugins());
     }
 
     protected void checkForNewerVersion(List<Plugin> listToCheck) {
         Set<String> checked = new HashSet<>();
-        List<Plugin> existing = configurationService.findPlugins();
+        List<Plugin> existing = pluginService.findPlugins();
         for (Plugin plugin : listToCheck) {
             String id = String.format("%s:%s", plugin.getArtifactGroup(), plugin.getArtifactName());
             if (!checked.contains(id)) {
@@ -199,7 +199,7 @@ public class PluginManager implements IPluginManager {
                     }
                     if (!matched) {
                         logger.info("Found a new version of {}.  Recording it", potentialNewVersion);
-                        configurationService.save(potentialNewVersion);
+                        pluginService.save(potentialNewVersion);
                     }
                     checked.add(id);
                 }
@@ -317,7 +317,7 @@ public class PluginManager implements IPluginManager {
             repositorySystem.install(repositorySystemSession, request);
             pomFile.delete();
             Plugin newVersion = new Plugin(groupId, artifactId, version, 0);
-            configurationService.save(newVersion);
+            pluginService.save(newVersion);
         } catch (IOException e) {
             throw new IoException(e);
         } catch (InstallationException e) {

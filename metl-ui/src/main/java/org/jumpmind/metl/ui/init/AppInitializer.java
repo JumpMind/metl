@@ -59,6 +59,7 @@ import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.model.Version;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IImportExportService;
+import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.core.plugin.IDefinitionFactory;
 import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.core.runtime.IAgentManager;
@@ -192,6 +193,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         try {
             IConfigurationService configurationService = ctx.getBean(IConfigurationService.class);
             IImportExportService importExportService = ctx.getBean(IImportExportService.class);
+            IOperationsService operationsService = ctx.getBean(IOperationsService.class);
             
             jobScheduler = new ThreadPoolTaskScheduler();
             jobScheduler.setDaemon(true);
@@ -199,9 +201,9 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
             jobScheduler.setPoolSize(2);
             jobScheduler.initialize();
 
-            TypedProperties properties = configurationService.findGlobalSetttingsAsProperties();
+            TypedProperties properties = operationsService.findGlobalSetttingsAsProperties();
             if (properties.is(CONFIG_BACKUP_ENABLED, DEFAULT_CONFIG_BACKUP_ENABLED)) {
-                jobScheduler.schedule(new BackupJob(importExportService, configurationService, getConfigDir(false)),
+                jobScheduler.schedule(new BackupJob(importExportService, configurationService, operationsService, getConfigDir(false)),
                         new CronTrigger(
                                 properties.get(CONFIG_BACKUP_CRON, DEFAULT_CONFIG_BACKUP_CRON)));
             }

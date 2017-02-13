@@ -21,7 +21,7 @@
 package org.jumpmind.metl.ui.init;
 
 import org.jumpmind.metl.core.model.User;
-import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.slf4j.Logger;
@@ -122,12 +122,12 @@ public class ChangePasswordDialog extends Window {
 
     protected void changePassword() {
         ISecurityService securityService = context.getSecurityService();
-        IConfigurationService configurationService = context.getConfigurationService();
+        IOperationsService operationsService = context.getOperationsSerivce();
         User user = context.getUser();
         String password = securityService.hash(user.getSalt(), currentPasswordField.getValue());
         if (user != null && user.getPassword() != null && user.getPassword().equals(password)) {
             if (testNewPassword()) {
-                configurationService.savePassword(user, newPasswordField.getValue());
+                operationsService.savePassword(user, newPasswordField.getValue());
                 close();
             }
         } else {
