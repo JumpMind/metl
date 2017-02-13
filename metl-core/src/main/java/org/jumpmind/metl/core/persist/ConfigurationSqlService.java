@@ -22,11 +22,14 @@ package org.jumpmind.metl.core.persist;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.sql.ISqlRowMapper;
 import org.jumpmind.db.sql.ISqlTemplate;
+import org.jumpmind.db.sql.ISqlTransaction;
 import org.jumpmind.db.sql.Row;
 import org.jumpmind.db.sql.mapper.StringMapper;
 import org.jumpmind.exception.IoException;
@@ -38,6 +41,7 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.ProjectVersion;
+import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.persist.IPersistenceManager;
@@ -360,5 +364,310 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
                 "where release_package_id = '%2$s'";
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         template.update(String.format(DELETE_RELEASE_PACKAGE_VERSIONS_FOR_RELEASE_PACKAGE, tablePrefix, releasePackageId));                
+    }
+    
+    
+    @Override
+    public void updateProjectVersionDependency(ProjectVersionDependency dependency, String newTargetProjectVersionId) {
+        //TODO: audit events
+        Map<String, String> oldToNewResourceIdMap = getOldToNewResourceIdMap(dependency, newTargetProjectVersionId);
+        Map<String, String> oldToNewModelIdMap = getOldToNewModelIdMap(dependency, newTargetProjectVersionId);
+        Map<String, String> oldToNewModelEntityIdMap = getOldToNewModelEntityIdMap(oldToNewModelIdMap);
+        Map<String, String> oldToNewModelAttributeIdMap = getOldToNewModelAttributeIdMap(oldToNewModelEntityIdMap);
+
+        ISqlTransaction transaction = databasePlatform.getSqlTemplate().startSqlTransaction();
+        try {        
+            updateProjectVersionWithNewDependencyGUIDs(oldToNewResourceIdMap, oldToNewModelIdMap,
+                    oldToNewModelEntityIdMap, oldToNewModelAttributeIdMap, newTargetProjectVersionId,
+                    transaction);
+            transaction.commit();
+        } catch (Exception e) {
+            log.error(String.format("Error updating project version dependencies %s",e.getMessage()));
+            transaction.rollback();
+        }
+    }
+    
+    private Map<String, String> getOldToNewResourceIdMap(ProjectVersionDependency dependency, String newTargetProjectVersionId) {
+        Map<String, String> oldToNewResourceIdMap = new HashMap<String, String>();
+        final String RESOURCES_USED_FROM_DEPENDENT_PROJECTS = 
+                "select \n" + 
+                "   distinct c.resource_id\n" + 
+                "   ,nr.id\n" + 
+                "from \n" + 
+                "   %1$s_component c\n" + 
+                "   inner join %1$s_project_version pv\n" + 
+                "      on c.project_version_id = pv.id\n" + 
+                "   left outer join %1$s_resource cr\n" + 
+                "      on cr.id = c.resource_id\n" + 
+                "      and cr.project_version_id = pv.id\n" + 
+                "   inner join %1$s_project_version_dependency pvd\n" + 
+                "      on pvd.project_version_id = pv.id\n" + 
+                "   inner join %1$s_resource dr\n" + 
+                "      on dr.project_version_id = pvd.target_project_version_id\n" + 
+                "      and dr.id = c.resource_id\n" + 
+                "   inner join %1$s_resource nr\n" + 
+                "      on nr.project_version_id = '%2$s'" + 
+                "      and dr.row_id = nr.row_id\n" + 
+                "where\n" + 
+                "   cr.id is null\n" + 
+                "   and pv.id = '%3$s'" + 
+                "union\n" + 
+                "select\n" + 
+                "   distinct cs.value\n" + 
+                "   , nr.id\n" + 
+                "from\n" + 
+                "   %1$s_component_setting cs\n" + 
+                "   inner join %1$s_component c\n" + 
+                "      on cs.component_id = c.id\n" + 
+                "   inner join %1$s_project_version pv\n" + 
+                "      on c.project_version_id = pv.id\n" + 
+                "   left outer join %1$s_resource r\n" + 
+                "      on r.id = c.resource_id\n" + 
+                "      and r.project_version_id = pv.id\n" + 
+                "   inner join %1$s_project_version_dependency pvd\n" + 
+                "      on pvd.project_version_id = pv.id\n" + 
+                "   inner join %1$s_resource dr\n" + 
+                "      on dr.project_version_id = pvd.target_project_version_id\n" + 
+                "      and dr.id = cs.value\n" + 
+                "   inner join %1$s_resource nr\n" + 
+                "      on nr.project_version_id = '%2$s'" + 
+                "      and dr.row_id = nr.row_id\n" + 
+                "where\n" + 
+                "   cs.name in ('target.resource','source.resource')\n" + 
+                "   and r.id is null\n" + 
+                "   and pv.id = '%3$s'";
+//TODO: come up with every uuid and then check against metl_resource to  ensure that it is a resource or not       
+        
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(RESOURCES_USED_FROM_DEPENDENT_PROJECTS, tablePrefix, newTargetProjectVersionId, dependency.getProjectVersionId()));
+        for (Row row : ids) {
+            oldToNewResourceIdMap.put(row.getString("resource_id"), row.getString("id"));
+        }        
+        return oldToNewResourceIdMap;
+    }
+
+    private Map<String, String> getOldToNewModelIdMap(ProjectVersionDependency dependency, String newTargetProjectVersionId) {
+        Map<String, String> oldToNewModelIdMap = new HashMap<String, String>();
+        final String MODELS_USED_FROM_DEPENDENT_PROJECTS =
+                "select \n" + 
+                "   distinct c.input_model_id\n" + 
+                "   ,nm.id\n" + 
+                "from \n" + 
+                "   %1$s_component c\n" + 
+                "   inner join %1$s_project_version pv\n" + 
+                "      on c.project_version_id = pv.id\n" + 
+                "   left outer join %1$s_model cm\n" + 
+                "      on cm.id = c.input_model_id\n" + 
+                "      and cm.project_version_id = pv.id\n" + 
+                "   inner join %1$s_project_version_dependency pvd\n" + 
+                "      on pvd.project_version_id = pv.id\n" + 
+                "   inner join %1$s_model dm\n" + 
+                "      on dm.project_version_id = pvd.target_project_version_id\n" + 
+                "      and dm.id = c.input_model_id\n" + 
+                "   inner join %1$s_model nm\n" + 
+                "      on nm.project_version_id = '%2$s'" + 
+                "      and dm.row_id = nm.row_id\n" + 
+                "where\n" + 
+                "   cm.id is null\n" + 
+                "   and pv.id = '%3$s'" + 
+                "union\n" + 
+                "select \n" + 
+                "   distinct c.output_model_id\n" + 
+                "   ,nm.id\n" + 
+                "from \n" + 
+                "   %1$s_component c\n" + 
+                "   inner join %1$s_project_version pv\n" + 
+                "      on c.project_version_id = pv.id\n" + 
+                "   left outer join %1$s_model cm\n" + 
+                "      on cm.id = c.output_model_id\n" + 
+                "      and cm.project_version_id = pv.id\n" + 
+                "   inner join %1$s_project_version_dependency pvd\n" + 
+                "      on pvd.project_version_id = pv.id\n" + 
+                "   inner join %1$s_model dm\n" + 
+                "      on dm.project_version_id = pvd.target_project_version_id\n" + 
+                "      and dm.id = c.output_model_id\n" + 
+                "   inner join %1$s_model nm\n" + 
+                "      on nm.project_version_id = '%2$s'" + 
+                "      and dm.row_id = nm.row_id\n" + 
+                "where\n" + 
+                "   cm.id is null\n" + 
+                "   and pv.id = '%3$s' ";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(MODELS_USED_FROM_DEPENDENT_PROJECTS, tablePrefix, newTargetProjectVersionId, dependency.getProjectVersionId()));
+        for (Row row : ids) {
+            oldToNewModelIdMap.put(row.getString("input_model_id"), row.getString("id"));
+        }        
+        return oldToNewModelIdMap;
+    }
+
+    private Map<String, String> getOldToNewModelEntityIdMap(Map<String, String> oldToNewModelIdMap) {
+        Map<String, String> oldToNewModelEntityIdMap = new HashMap<String, String>();
+        final String MODEL_ENTITIES_USED_FROM_DEPENDENT_PROJECTS =
+                "select \n" + 
+                "   ome.id\n" + 
+                "   ,nme.id\n" + 
+                "from\n" + 
+                "   %1$s_model_entity ome\n" + 
+                "   left outer join %1$s_model_entity nme\n" + 
+                "      on ome.name = nme.name\n" + 
+                "where\n" + 
+                "   ome.model_id = '%2$s'\n" + 
+                "   and nme.model_id = '%3$s'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+
+        for (Map.Entry<String,String> entry : oldToNewModelIdMap.entrySet()) {
+            List<Row> ids = template.query(String.format(MODEL_ENTITIES_USED_FROM_DEPENDENT_PROJECTS, tablePrefix, entry.getKey(),entry.getValue()));
+            for (Row row : ids) {
+                oldToNewModelEntityIdMap.put(row.getString("id"), row.getString("id_1"));
+            }                    
+        }
+        return oldToNewModelEntityIdMap;
+    }
+
+    private Map<String, String> getOldToNewModelAttributeIdMap(Map<String, String> oldToNewModelEntityIdMap) {
+        Map<String, String> oldToNewModelAttributeIdMap = new HashMap<String, String>();
+        final String MODEL_ENTITIES_USED_FROM_DEPENDENT_PROJECTS =
+                "select \n" + 
+                "   oma.id\n" + 
+                "   ,nma.id\n" + 
+                "from\n" + 
+                "   %1$s_model_attribute oma\n" + 
+                "   left outer join %1$s_model_attribute nma\n" + 
+                "      on oma.name = nma.name\n" + 
+                "where\n" + 
+                "   oma.model_id = '%2$s'\n" + 
+                "   and nma.model_id = '%3$s'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+
+        for (Map.Entry<String,String> entry : oldToNewModelEntityIdMap.entrySet()) {
+            List<Row> ids = template.query(String.format(MODEL_ENTITIES_USED_FROM_DEPENDENT_PROJECTS, tablePrefix, entry.getKey(),entry.getValue()));
+            for (Row row : ids) {
+                oldToNewModelAttributeIdMap.put(row.getString("id"), row.getString("id_1"));
+            }                    
+        }
+        return oldToNewModelAttributeIdMap;
+    }
+    
+    private void updateProjectVersionWithNewDependencyGUIDs(Map<String,String> oldToNewResourceIdMap, Map<String,String> oldToNewModelIdMap,
+                Map<String,String> oldToNewModelEntityIdMap, Map<String,String> oldToNewModelAttributeIdMap,
+                String targetProjectVersionId, ISqlTransaction transaction) {
+
+        updateProjectVersionWithNewResources(oldToNewResourceIdMap, targetProjectVersionId, transaction);
+        updateProjectVersionWithNewModels(oldToNewModelIdMap, oldToNewModelEntityIdMap,
+                oldToNewModelAttributeIdMap, targetProjectVersionId, transaction);
+    }
+    
+    private void updateProjectVersionWithNewResources(Map<String, String> oldToNewResourceIdMap, String targetProjectVersionId,
+            ISqlTransaction transaction) {
+
+        final String UPDATE_RESOURCE_IN_COMPONENT_OLD_TO_NEW = 
+                "update %1$s_component set resource_id='%2$s' where resource_id='%3$s' and project_version_id='%4$s'";
+        final String UPDATE_RESOURCE_IN_COMPONENT_SETTING_OLD_TO_NEW = 
+                "update %1$s_component_setting as cs\n" + 
+                "   set cs.value='%2$s'\n" + 
+                "where \n" + 
+                "   cs.value='%3$s'\n" + 
+                "   and cs.name in ('source.resource','target.resource')\n" + 
+                "   and cs.component_id in \n" + 
+                "   (\n" + 
+                "      select \n" + 
+                "         c.id\n" + 
+                "      from \n" + 
+                "         %1$s_component c\n" + 
+                "      where \n" + 
+                "         cs.component_id = c.id         \n" + 
+                "         and c.project_version_id='%4$s'\n" + 
+                "   )\n";
+//TODO same comment here as above - look for uuid and then compare against metl_resource              
+        for (Map.Entry<String, String> entry : oldToNewResourceIdMap.entrySet()) {
+            transaction.execute(String.format(UPDATE_RESOURCE_IN_COMPONENT_OLD_TO_NEW, tablePrefix, entry.getValue(), entry.getKey(), targetProjectVersionId));    
+            transaction.execute(String.format(UPDATE_RESOURCE_IN_COMPONENT_SETTING_OLD_TO_NEW, tablePrefix, entry.getValue(), entry.getKey(), targetProjectVersionId));                
+        }                
+    }
+    
+    private void updateProjectVersionWithNewModels(Map<String, String> oldToNewModelIdMap, 
+            Map<String, String> oldToNewModelEntityIdMap, Map<String, String> oldToNewModelAttributeIdMap,
+            String targetProjectVersionId, ISqlTransaction transaction) {
+        
+        final String UPDATE_INPUT_MODEL_IN_COMPONENT_OLD_TO_NEW = 
+                "update %1$s_component set input_model_id='%2$s' where input_model_id='%3$s' and project_version_id='%4$s'";
+        final String UPDATE_OUTPUT_MODEL_IN_COMPONENT_OLD_TO_NEW = 
+                "update %1$s_component set output_model_id='%2$s' where output_model_id='%3$s' and project_version_id='%4$s'";
+              
+        for (Map.Entry<String, String> entry : oldToNewModelIdMap.entrySet()) {        
+            transaction.execute(String.format(UPDATE_INPUT_MODEL_IN_COMPONENT_OLD_TO_NEW, tablePrefix, entry.getValue(), entry.getKey(), targetProjectVersionId));
+            transaction.execute(String.format(UPDATE_OUTPUT_MODEL_IN_COMPONENT_OLD_TO_NEW, tablePrefix, entry.getValue(), entry.getKey(), targetProjectVersionId));            
+        }        
+        updateProjectVersionWithNewModelEntityIds(oldToNewModelEntityIdMap, targetProjectVersionId, transaction);
+        updateProjectVersionWithNewModelAttributeIds(oldToNewModelAttributeIdMap, targetProjectVersionId, transaction);        
+    }
+
+    private void updateProjectVersionWithNewModelEntityIds(
+            Map<String, String> oldToNewModelEntityIdMap, String targetProjectVersionId, ISqlTransaction transaction) {
+
+        final String UPDATE_COMPONENT_ENTITY_SETTING_OLD_TO_NEW = 
+                "update %1$s_component_entity_setting as ces\n" + 
+                "   set ces.entity_id='%2$s'\n" + 
+                "where \n" + 
+                "   ces.entity_id='%3$s'\n" + 
+                "   and ces.component_id in \n" + 
+                "   (\n" + 
+                "      select \n" + 
+                "         c.id\n" + 
+                "      from \n" + 
+                "         %1$s_component c\n" + 
+                "      where \n" + 
+                "         ces.component_id = c.id         \n" + 
+                "         and c.project_version_id='%4$s'\n" + 
+                "   )\n";
+     
+        for (Map.Entry<String, String> entry : oldToNewModelEntityIdMap.entrySet()) {        
+            transaction.execute(String.format(UPDATE_COMPONENT_ENTITY_SETTING_OLD_TO_NEW, tablePrefix, 
+                    entry.getValue(), entry.getKey(), targetProjectVersionId));                    
+        }                
+    }   
+        
+    private void updateProjectVersionWithNewModelAttributeIds(
+            Map<String, String> oldToNewModelAttributeIdMap, String targetProjectVersionId, ISqlTransaction transaction) {
+
+        final String UPDATE_COMPONENT_ATTRIBUTE_SETTING_OLD_TO_NEW = 
+                "update %1$s_component_attribute_setting as ces\n" + 
+                "   set ces.entity_id='%2$s'\n" + 
+                "where \n" + 
+                "   ces.entity_id='%3$s'\n" + 
+                "   and ces.component_id in \n" + 
+                "   (\n" + 
+                "      select \n" + 
+                "         c.id\n" + 
+                "      from \n" + 
+                "         %1$s_component c\n" + 
+                "      where \n" + 
+                "         ces.component_id = c.id         \n" + 
+                "         and c.project_version_id='%4$s'\n" + 
+                "   )\n";
+
+        final String UPDATE_MODEL_ATTRIBUTE_IN_COMPONENT_SETTING_OLD_TO_NEW = 
+                "update %1$s_component_setting as cs\n" + 
+                "   set cs.value='%2$s'\n" + 
+                "where \n" + 
+                "   cs.value='%3$s'\n" + 
+                "   and cs.name in ('lookup.key.attribute','lookup.value.attribute','replacement.key.attribute','replacement.value.attribute','sequence.attribute')\n" + 
+                "   and cs.component_id in \n" + 
+                "   (\n" + 
+                "      select \n" + 
+                "         c.id\n" + 
+                "      from \n" + 
+                "         %1$s_component c\n" + 
+                "      where \n" + 
+                "         cs.component_id = c.id         \n" + 
+                "         and c.project_version_id='%4$s'\n" + 
+                "   )\n";
+              
+        for (Map.Entry<String, String> entry : oldToNewModelAttributeIdMap.entrySet()) {        
+            transaction.execute(String.format(UPDATE_COMPONENT_ATTRIBUTE_SETTING_OLD_TO_NEW, tablePrefix, 
+                    entry.getValue(), entry.getKey(), targetProjectVersionId));
+            transaction.execute(String.format(UPDATE_MODEL_ATTRIBUTE_IN_COMPONENT_SETTING_OLD_TO_NEW, tablePrefix, 
+                    entry.getValue(), entry.getKey(), targetProjectVersionId));            
+        }                
     }
 }

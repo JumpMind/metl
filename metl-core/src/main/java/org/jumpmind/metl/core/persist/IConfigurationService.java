@@ -283,6 +283,8 @@ public interface IConfigurationService {
 
     Map<String, ProjectVersion> findProjectVersions();
     
+    public List<ProjectVersion> findProjectVersionsByProject(String projectId);
+    
     public ReleasePackage findReleasePackage(String releasePackageId);
     
     public List<ReleasePackage> findReleasePackages();
@@ -292,4 +294,6 @@ public interface IConfigurationService {
     public List<ReleasePackageProjectVersion> findReleasePackageProjectVersions(String releasePackageId);
     
     public void refresh(ReleasePackage releasePackage);
+    
+    public void updateProjectVersionDependency(ProjectVersionDependency dependency, String newTargetProjectVersionId);
 }

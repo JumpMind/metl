@@ -40,6 +40,7 @@ public class ProjectDependencyMenuManager extends AbstractDesignSelectedValueMen
                 "File|New|Resource|Directory|SMB",
                 "File|New|Resource|HTTP",
                 "File|New|Resource|Mail Session",
+                "Edit|Change Dependency Version",
                 "Edit|Remove",
         });
     }

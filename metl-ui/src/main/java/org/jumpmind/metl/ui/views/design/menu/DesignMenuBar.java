@@ -53,8 +53,9 @@ public class DesignMenuBar extends AbstractMenuBar {
         add("Edit|Copy");
         add("Edit|Paste");
         addSeparator("Edit");
+        add("Edit|Change Dependency Version");
+        addSeparator("Edit");
         add("Edit|Remove");
-
     }
 
     static class NothingSelectAction extends AbstractDesignSelectedValueMenuManager {

@@ -359,6 +359,17 @@ abstract class AbstractConfigurationService extends AbstractService
     }
 
     @Override
+    public List<ProjectVersion> findProjectVersionsByProject(String projectId) {
+        
+        Map<String, Object> params = new HashMap<>();
+        params.put("deleted", 0);
+        params.put("projectId", projectId);
+        List<ProjectVersion> versions = persistenceManager.find(ProjectVersion.class, params, null,
+                null, tableName(ProjectVersion.class));       
+        return versions;
+    }
+    
+    @Override
     public List<Project> findProjects() {
         List<Project> list = persistenceManager.find(Project.class, new NameValue("deleted", 0),
                 null, null, tableName(Project.class));

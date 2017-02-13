@@ -550,6 +550,10 @@ public class DesignNavigator extends VerticalLayout {
         ExportDialog.show(context, treeTable.getValue());
     }
 
+    public void doChangeDependencyVersion() {
+        ChangeDependencyVersionDialog.show(context, treeTable.getValue());
+    }
+
     public void doImport() {
         ImportDialog.show("Import Config", "Click the upload button to import your config", new ImportConfigurationListener());
     }

@@ -116,6 +116,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
     private String tablePrefix;
     private String[] columnsToExclude;
     private Set<String> importsToAudit = new HashSet<>();
+    private Set<String> projectsExported = new HashSet<>();
 
     public ImportExportService(IDatabasePlatform databasePlatform,
             IPersistenceManager persistenceManager, String tablePrefix,
@@ -143,6 +144,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
     
     @Override
     public String exportProjectVersion(String projectVersionId, String userId) {
+        projectsExported.clear();
         List<FlowName> flows = new ArrayList<>();
         flows.addAll(configurationService.findFlowsInProject(projectVersionId, true));
         flows.addAll(configurationService.findFlowsInProject(projectVersionId, false));
@@ -168,7 +170,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
 
     @Override
     public String exportReleasePackage(String releasePackageId, String userId) {        
-        
+        projectsExported.clear();
         ConfigData exportData = initExport();
         ReleasePackage releasePackage = configurationService.findReleasePackage(releasePackageId);
         
@@ -214,9 +216,12 @@ public class ImportExportService extends AbstractService implements IImportExpor
     
     protected void addProjectVersionToConfigData(String projectVersionId,ConfigData exportData,
             Set<String> flowIds, Set<String> modelIds, Set<String> resourceIds) {
+        
+        ProjectVersion version = configurationService.findProjectVersion(projectVersionId);
         ProjectVersionData projectVersionData = exportData.getProjectVersionData().get(exportData.getProjectVersionData().size()-1);
         
         addConfigData(projectVersionData.getProjectData(), PROJECT_SQL, projectVersionId, null);            
+        projectsExported.add(version.getProjectId());
         for (String flowId : flowIds) {
             addConfigData(projectVersionData.getFlowData(), FLOW_SQL, projectVersionId, flowId);
         }
@@ -287,28 +292,34 @@ public class ImportExportService extends AbstractService implements IImportExpor
 
     private void addConfigData(List<TableData> tableData, String[][] sqlElements,
             String projectVersionId, String keyValue) {
+        
+        ProjectVersion version = configurationService.findProjectVersion(projectVersionId);
+        
         for (int i = 0; i <= sqlElements.length - 1; i++) {
-            String[] entry = sqlElements[i];
-
-            List<Row> rows = getConfigTableData(String.format(entry[SQL], 
-                    tablePrefix, projectVersionId, keyValue));
-            
-            for (Row row : rows) {
-                if (isPassword(row.getString("NAME", false))) {
-                    String value = row.getString("VALUE", false);
-                    if (isNotBlank(value)) {
-                        if (value.startsWith(SecurityConstants.PREFIX_ENC)) {
-                            try {
-                                row.put("VALUE", securityService.decrypt(
-                                        value.substring(SecurityConstants.PREFIX_ENC.length() - 1)));
-                            } catch (Exception e) {
+            //TODO greg finish this
+            if (!sqlElements[0][0].equalsIgnoreCase("_PROJECT") ||
+                    !projectsExported.contains(version.getProjectId()) ) {                
+                String[] entry = sqlElements[i];
+                List<Row> rows = getConfigTableData(String.format(entry[SQL], 
+                        tablePrefix, projectVersionId, keyValue));
+                for (Row row : rows) {
+                    if (isPassword(row.getString("NAME", false))) {
+                        String value = row.getString("VALUE", false);
+                        if (isNotBlank(value)) {
+                            if (value.startsWith(SecurityConstants.PREFIX_ENC)) {
+                                try {
+                                    row.put("VALUE", securityService.decrypt(
+                                            value.substring(SecurityConstants.PREFIX_ENC.length() - 1)));
+                                } catch (Exception e) {
+                                }
                             }
                         }
                     }
+                    tableData.get(i).rows.put(getPkDataAsString(row, entry[KEY_COLUMNS]), row);
                 }
-                tableData.get(i).rows.put(getPkDataAsString(row, entry[KEY_COLUMNS]), row);
             }
         }
+        projectsExported.add(version.getProjectId());
     }
 
     private List<Row> getConfigTableData(String sql) {
@@ -927,6 +938,5 @@ public class ImportExportService extends AbstractService implements IImportExpor
             this.deletesToProcess = new HashMap<String, TableData>();
         }
         Map<String, TableData> deletesToProcess;
-
     }
 }
