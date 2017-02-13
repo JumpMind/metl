@@ -1,0 +1,650 @@
+{
+  "versionNumber" : "2.0.0",
+  "hostName" : "chenson42.loc",
+  "releasePackageData" : [ {
+    "tableName" : "METL_RELEASE_PACKAGE",
+    "tableData" : { }
+  }, {
+    "tableName" : "METL_RELEASE_PACKAGE_PROJECT_VERSION",
+    "tableData" : { }
+  } ],
+  "projectVersionData" : [ {
+    "projectVersionId" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+    "projectData" : [ {
+      "tableName" : "METL_PROJECT",
+      "tableData" : {
+        "64e7dcaa-cab7-46ac-a431-abc49b4f9e3e" : {
+          "ID" : "64e7dcaa-cab7-46ac-a431-abc49b4f9e3e",
+          "NAME" : "BinaryFileWriter Flow Test",
+          "DESCRIPTION" : "This project contains tests for Metl.  It is run during the build.",
+          "DELETED" : 0,
+          "WORKING_VERSION" : null
+        }
+      }
+    }, {
+      "tableName" : "METL_PROJECT_VERSION",
+      "tableData" : {
+        "a27e7f8c-7ef5-4684-9041-a2fa5682b366" : {
+          "ID" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+          "VERSION_TYPE" : null,
+          "VERSION_LABEL" : "1.0",
+          "PROJECT_ID" : "64e7dcaa-cab7-46ac-a431-abc49b4f9e3e",
+          "ORIG_VERSION_ID" : null,
+          "DESCRIPTION" : null,
+          "RELEASE_DATE" : null,
+          "ARCHIVED" : 0,
+          "DELETED" : 0
+        }
+      }
+    }, {
+      "tableName" : "METL_PROJECT_VERSION_DEFINITION_PLUGIN",
+      "tableData" : {
+        "a27e7f8c-7ef5-4684-9041-a2fa5682b366null" : {
+          "PROJECT_VERSION_ID" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+          "DEFINITION_TYPE" : "Resource",
+          "DEFINITION_TYPE_ID" : "Sftp",
+          "DEFINITION_NAME" : "SFTP",
+          "ARTIFACT_NAME" : "comp-rdbms-writer",
+          "ARTIFACT_GROUP" : "org.jumpmind.metl",
+          "ARTIFACT_VERSION" : "2.0.0.a.201702131000",
+          "LATEST_ARTIFACT_VERSION" : "2.0.0.a.201702131000",
+          "ENABLED" : 1,
+          "PIN_VERSION" : 0
+        }
+      }
+    }, {
+      "tableName" : "METL_PROJECT_VERSION_DEPENDENCY",
+      "tableData" : { }
+    } ],
+    "resourceData" : [ {
+      "tableName" : "METL_RESOURCE",
+      "tableData" : {
+        "333e4c84-63cf-4c8b-87c3-d8ab917955a8" : {
+          "ID" : "333e4c84-63cf-4c8b-87c3-d8ab917955a8",
+          "ROW_ID" : "df577961-8caf-4de8-8b96-68a0a3c40ae5",
+          "PROJECT_VERSION_ID" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+          "DELETED" : 0,
+          "NAME" : "directory1",
+          "TYPE" : "Local File System",
+          "FOLDER_ID" : null
+        },
+        "e15810d9-c756-4e60-a274-283991cf510c" : {
+          "ID" : "e15810d9-c756-4e60-a274-283991cf510c",
+          "ROW_ID" : "dd7fb3a7-4ab1-4334-b795-1e6514697b53",
+          "PROJECT_VERSION_ID" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+          "DELETED" : 0,
+          "NAME" : "database",
+          "TYPE" : "Database",
+          "FOLDER_ID" : null
+        },
+        "2c185046-1121-4b25-a5f6-1c747c6b9136" : {
+          "ID" : "2c185046-1121-4b25-a5f6-1c747c6b9136",
+          "ROW_ID" : "cfdb1a8b-7520-4a11-8064-01dba8c96511",
+          "PROJECT_VERSION_ID" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+          "DELETED" : 0,
+          "NAME" : "directory2",
+          "TYPE" : "Local File System",
+          "FOLDER_ID" : null
+        }
+      }
+    }, {
+      "tableName" : "METL_RESOURCE_SETTING",
+      "tableData" : {
+        "2c185046-1121-4b25-a5f6-1c747c6b9136localfile.path" : {
+          "RESOURCE_ID" : "2c185046-1121-4b25-a5f6-1c747c6b9136",
+          "NAME" : "localfile.path",
+          "VALUE" : "working/directory2"
+        },
+        "333e4c84-63cf-4c8b-87c3-d8ab917955a8localfile.path" : {
+          "RESOURCE_ID" : "333e4c84-63cf-4c8b-87c3-d8ab917955a8",
+          "NAME" : "localfile.path",
+          "VALUE" : "working/directory1"
+        }
+      }
+    } ],
+    "modelData" : [ {
+      "tableName" : "METL_MODEL",
+      "tableData" : {
+        "7d66e4dd-9434-4e43-9554-6ea871352e23" : {
+          "ID" : "7d66e4dd-9434-4e43-9554-6ea871352e23",
+          "ROW_ID" : "047302b7-0915-43be-a78e-2f95d4602588",
+          "PROJECT_VERSION_ID" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+          "DELETED" : 0,
+          "NAME" : "OneColumnEntity",
+          "SHARED" : 0,
+          "FOLDER_ID" : null
+        },
+        "f72fa005-e58b-4adf-946a-4b206ee6cfd3" : {
+          "ID" : "f72fa005-e58b-4adf-946a-4b206ee6cfd3",
+          "ROW_ID" : "273aec0e-01d2-4c1c-ab7a-6dfa9e9fad4e",
+          "PROJECT_VERSION_ID" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+          "DELETED" : 0,
+          "NAME" : "TwoColumnEntity",
+          "SHARED" : 0,
+          "FOLDER_ID" : null
+        }
+      }
+    }, {
+      "tableName" : "METL_MODEL_ENTITY",
+      "tableData" : {
+        "425f003c-9249-4e93-ae85-9c8ff2ee196d" : {
+          "ID" : "425f003c-9249-4e93-ae85-9c8ff2ee196d",
+          "MODEL_ID" : "f72fa005-e58b-4adf-946a-4b206ee6cfd3",
+          "NAME" : "TwoColumnEntity",
+          "DESCRIPTION" : null
+        },
+        "79d82d44-97bc-4e11-9a32-da2469fdde91" : {
+          "ID" : "79d82d44-97bc-4e11-9a32-da2469fdde91",
+          "MODEL_ID" : "7d66e4dd-9434-4e43-9554-6ea871352e23",
+          "NAME" : "OneColumnEntity",
+          "DESCRIPTION" : null
+        }
+      }
+    }, {
+      "tableName" : "METL_MODEL_ATTRIBUTE",
+      "tableData" : {
+        "3057f2f1-2385-40ce-9ad6-9b3021652a5a" : {
+          "ID" : "3057f2f1-2385-40ce-9ad6-9b3021652a5a",
+          "ENTITY_ID" : "425f003c-9249-4e93-ae85-9c8ff2ee196d",
+          "ATTRIBUTE_ORDER" : 0,
+          "NAME" : "COL1",
+          "DESCRIPTION" : null,
+          "TYPE" : "VARCHAR",
+          "TYPE_ENTITY_ID" : null,
+          "PK" : 0
+        },
+        "281e88e6-ccdb-44b7-bad9-2c0676ef8ea4" : {
+          "ID" : "281e88e6-ccdb-44b7-bad9-2c0676ef8ea4",
+          "ENTITY_ID" : "79d82d44-97bc-4e11-9a32-da2469fdde91",
+          "ATTRIBUTE_ORDER" : 0,
+          "NAME" : "Col1",
+          "DESCRIPTION" : null,
+          "TYPE" : "VARCHAR",
+          "TYPE_ENTITY_ID" : null,
+          "PK" : 0
+        },
+        "e42ca641-df40-475f-a634-bc6ea76e4caf" : {
+          "ID" : "e42ca641-df40-475f-a634-bc6ea76e4caf",
+          "ENTITY_ID" : "425f003c-9249-4e93-ae85-9c8ff2ee196d",
+          "ATTRIBUTE_ORDER" : 0,
+          "NAME" : "ID",
+          "DESCRIPTION" : null,
+          "TYPE" : "INTEGER",
+          "TYPE_ENTITY_ID" : null,
+          "PK" : 1
+        }
+      }
+    } ],
+    "flowData" : [ {
+      "tableName" : "METL_COMPONENT",
+      "tableData" : {
+        "bddf0bf7-9790-4743-8da5-f10377f88153" : {
+          "ID" : "bddf0bf7-9790-4743-8da5-f10377f88153",
+          "ROW_ID" : "d6485c79-435a-49aa-a4d7-cb04bca12746",
+          "PROJECT_VERSION_ID" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+          "DELETED" : 0,
+          "NAME" : "File Poller",
+          "TYPE" : "File Poller",
+          "FOLDER_ID" : null,
+          "SHARED" : 0,
+          "INPUT_MODEL_ID" : null,
+          "OUTPUT_MODEL_ID" : null,
+          "RESOURCE_ID" : "2c185046-1121-4b25-a5f6-1c747c6b9136"
+        },
+        "0328bc3b-49b1-4d0b-b2e8-2e53869b14c0" : {
+          "ID" : "0328bc3b-49b1-4d0b-b2e8-2e53869b14c0",
+          "ROW_ID" : "92b06b1c-d1c5-47bb-b59f-b9b4b1e28f90",
+          "PROJECT_VERSION_ID" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+          "DELETED" : 0,
+          "NAME" : "Assert",
+          "TYPE" : "Assert",
+          "FOLDER_ID" : null,
+          "SHARED" : 0,
+          "INPUT_MODEL_ID" : null,
+          "OUTPUT_MODEL_ID" : null,
+          "RESOURCE_ID" : null
+        },
+        "57b74a50-a612-41c1-bae7-d0db5a947882" : {
+          "ID" : "57b74a50-a612-41c1-bae7-d0db5a947882",
+          "ROW_ID" : "035084f0-b343-4404-8a12-ee9711e8d6cd",
+          "PROJECT_VERSION_ID" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+          "DELETED" : 0,
+          "NAME" : "Binary File Reader",
+          "TYPE" : "Binary File Reader",
+          "FOLDER_ID" : null,
+          "SHARED" : 0,
+          "INPUT_MODEL_ID" : null,
+          "OUTPUT_MODEL_ID" : null,
+          "RESOURCE_ID" : "333e4c84-63cf-4c8b-87c3-d8ab917955a8"
+        },
+        "43aefaa0-40ea-4140-8eef-5fd0d74d9900" : {
+          "ID" : "43aefaa0-40ea-4140-8eef-5fd0d74d9900",
+          "ROW_ID" : "631d017e-6f5b-46f9-8ec9-aab12234c2dd",
+          "PROJECT_VERSION_ID" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+          "DELETED" : 0,
+          "NAME" : "File Poller",
+          "TYPE" : "File Poller",
+          "FOLDER_ID" : null,
+          "SHARED" : 0,
+          "INPUT_MODEL_ID" : null,
+          "OUTPUT_MODEL_ID" : null,
+          "RESOURCE_ID" : "333e4c84-63cf-4c8b-87c3-d8ab917955a8"
+        },
+        "4e51fd79-739f-434d-a516-7086aa643d73" : {
+          "ID" : "4e51fd79-739f-434d-a516-7086aa643d73",
+          "ROW_ID" : "ecf930fa-e908-4451-b58e-50e16fb56c37",
+          "PROJECT_VERSION_ID" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+          "DELETED" : 0,
+          "NAME" : "Setup",
+          "TYPE" : "Script",
+          "FOLDER_ID" : null,
+          "SHARED" : 0,
+          "INPUT_MODEL_ID" : null,
+          "OUTPUT_MODEL_ID" : null,
+          "RESOURCE_ID" : "333e4c84-63cf-4c8b-87c3-d8ab917955a8"
+        },
+        "ae82ccba-6ba7-43bd-b5e0-b17f1ba8d7b8" : {
+          "ID" : "ae82ccba-6ba7-43bd-b5e0-b17f1ba8d7b8",
+          "ROW_ID" : "49d4097a-cdbb-4d07-a495-56ee41a2f69d",
+          "PROJECT_VERSION_ID" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+          "DELETED" : 0,
+          "NAME" : "Assert File Exists",
+          "TYPE" : "Script",
+          "FOLDER_ID" : null,
+          "SHARED" : 0,
+          "INPUT_MODEL_ID" : null,
+          "OUTPUT_MODEL_ID" : null,
+          "RESOURCE_ID" : null
+        },
+        "e244bc39-53bb-44b0-8cc9-d174791a0d2f" : {
+          "ID" : "e244bc39-53bb-44b0-8cc9-d174791a0d2f",
+          "ROW_ID" : "631d017e-6f5b-46f9-8ec9-aab12234c2dd",
+          "PROJECT_VERSION_ID" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+          "DELETED" : 0,
+          "NAME" : "File Poller",
+          "TYPE" : "File Poller",
+          "FOLDER_ID" : null,
+          "SHARED" : 0,
+          "INPUT_MODEL_ID" : null,
+          "OUTPUT_MODEL_ID" : null,
+          "RESOURCE_ID" : "333e4c84-63cf-4c8b-87c3-d8ab917955a8"
+        },
+        "1bde79b1-c9e0-4238-b3f9-03cd6bca4084" : {
+          "ID" : "1bde79b1-c9e0-4238-b3f9-03cd6bca4084",
+          "ROW_ID" : "ecf930fa-e908-4451-b58e-50e16fb56c37",
+          "PROJECT_VERSION_ID" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+          "DELETED" : 0,
+          "NAME" : "Script",
+          "TYPE" : "Script",
+          "FOLDER_ID" : null,
+          "SHARED" : 0,
+          "INPUT_MODEL_ID" : null,
+          "OUTPUT_MODEL_ID" : null,
+          "RESOURCE_ID" : "333e4c84-63cf-4c8b-87c3-d8ab917955a8"
+        },
+        "1114ac37-97f6-45c5-b85b-0e2f604afd5f" : {
+          "ID" : "1114ac37-97f6-45c5-b85b-0e2f604afd5f",
+          "ROW_ID" : "8f8b5f7a-267c-4046-9e38-23efd234f377",
+          "PROJECT_VERSION_ID" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+          "DELETED" : 0,
+          "NAME" : "Binary File Writer",
+          "TYPE" : "Binary File Writer",
+          "FOLDER_ID" : null,
+          "SHARED" : 0,
+          "INPUT_MODEL_ID" : null,
+          "OUTPUT_MODEL_ID" : null,
+          "RESOURCE_ID" : "2c185046-1121-4b25-a5f6-1c747c6b9136"
+        },
+        "a06ba3d3-054b-4dd0-bbd1-72ca08e591dd" : {
+          "ID" : "a06ba3d3-054b-4dd0-bbd1-72ca08e591dd",
+          "ROW_ID" : "035084f0-b343-4404-8a12-ee9711e8d6cd",
+          "PROJECT_VERSION_ID" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+          "DELETED" : 0,
+          "NAME" : "Binary File Reader",
+          "TYPE" : "Binary File Reader",
+          "FOLDER_ID" : null,
+          "SHARED" : 0,
+          "INPUT_MODEL_ID" : null,
+          "OUTPUT_MODEL_ID" : null,
+          "RESOURCE_ID" : "333e4c84-63cf-4c8b-87c3-d8ab917955a8"
+        },
+        "df0ac23e-e75b-4824-837e-1df1fd1896aa" : {
+          "ID" : "df0ac23e-e75b-4824-837e-1df1fd1896aa",
+          "ROW_ID" : "8f8b5f7a-267c-4046-9e38-23efd234f377",
+          "PROJECT_VERSION_ID" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+          "DELETED" : 0,
+          "NAME" : "Binary File Writer",
+          "TYPE" : "Binary File Writer",
+          "FOLDER_ID" : null,
+          "SHARED" : 0,
+          "INPUT_MODEL_ID" : null,
+          "OUTPUT_MODEL_ID" : null,
+          "RESOURCE_ID" : "2c185046-1121-4b25-a5f6-1c747c6b9136"
+        }
+      }
+    }, {
+      "tableName" : "METL_COMPONENT_SETTING",
+      "tableData" : {
+        "76ce2a10-dead-4db6-b968-9740758ad53c" : {
+          "ID" : "76ce2a10-dead-4db6-b968-9740758ad53c",
+          "COMPONENT_ID" : "1bde79b1-c9e0-4238-b3f9-03cd6bca4084",
+          "NAME" : "run.when",
+          "VALUE" : "PER UNIT OF WORK"
+        },
+        "a9888312-05f7-4629-a384-a3bd4a455fa3" : {
+          "ID" : "a9888312-05f7-4629-a384-a3bd4a455fa3",
+          "COMPONENT_ID" : "e244bc39-53bb-44b0-8cc9-d174791a0d2f",
+          "NAME" : "file.pattern",
+          "VALUE" : "inbox/*.txt"
+        },
+        "7f51ff65-2283-493c-887b-dfaf0f733ba7" : {
+          "ID" : "7f51ff65-2283-493c-887b-dfaf0f733ba7",
+          "COMPONENT_ID" : "1bde79b1-c9e0-4238-b3f9-03cd6bca4084",
+          "NAME" : "handle.msg.script",
+          "VALUE" : "File workingDir = new File(\"working/directory1\")\ndeleteQuietly(workingDir)\ndeleteQuietly(new File(\"working/directory2\"))\nFile inboxDir = new File(workingDir, \"inbox\")\ninboxDir.mkdirs()\nwriteStringToFile(new File(inboxDir, \"a.txt\"), \"this is the first file\")\nwriteStringToFile(new File(inboxDir, \"b.txt\"), \"this is the second file\")"
+        },
+        "ab0b3c52-c170-49b4-9416-a0a949c10ba8" : {
+          "ID" : "ab0b3c52-c170-49b4-9416-a0a949c10ba8",
+          "COMPONENT_ID" : "a06ba3d3-054b-4dd0-bbd1-72ca08e591dd",
+          "NAME" : "get.file.name.from.message",
+          "VALUE" : "true"
+        },
+        "b14af825-ded7-4883-889f-91e4cbff819f" : {
+          "ID" : "b14af825-ded7-4883-889f-91e4cbff819f",
+          "COMPONENT_ID" : "a06ba3d3-054b-4dd0-bbd1-72ca08e591dd",
+          "NAME" : "control.message.on.eof",
+          "VALUE" : "true"
+        },
+        "a9606543-52c2-4a82-b3e8-b61765302fcb" : {
+          "ID" : "a9606543-52c2-4a82-b3e8-b61765302fcb",
+          "COMPONENT_ID" : "57b74a50-a612-41c1-bae7-d0db5a947882",
+          "NAME" : "run.when",
+          "VALUE" : "PER MESSAGE"
+        },
+        "0e93f0b3-e7a9-4401-96ec-137446d55c3e" : {
+          "ID" : "0e93f0b3-e7a9-4401-96ec-137446d55c3e",
+          "COMPONENT_ID" : "a06ba3d3-054b-4dd0-bbd1-72ca08e591dd",
+          "NAME" : "run.when",
+          "VALUE" : "PER MESSAGE"
+        },
+        "255afc74-66b4-4d38-b498-dc2a5cd7317f" : {
+          "ID" : "255afc74-66b4-4d38-b498-dc2a5cd7317f",
+          "COMPONENT_ID" : "0328bc3b-49b1-4d0b-b2e8-2e53869b14c0",
+          "NAME" : "expected.text.messages.count",
+          "VALUE" : "2"
+        },
+        "28e0eec0-fa96-4d84-9641-23b282811be0" : {
+          "ID" : "28e0eec0-fa96-4d84-9641-23b282811be0",
+          "COMPONENT_ID" : "0328bc3b-49b1-4d0b-b2e8-2e53869b14c0",
+          "NAME" : "expected.control.messages.count",
+          "VALUE" : "1"
+        },
+        "160112fe-287a-4b64-961b-afba1dc4d642" : {
+          "ID" : "160112fe-287a-4b64-961b-afba1dc4d642",
+          "COMPONENT_ID" : "bddf0bf7-9790-4743-8da5-f10377f88153",
+          "NAME" : "run.when",
+          "VALUE" : "PER UNIT OF WORK"
+        },
+        "c90763e8-da37-4a2d-870e-bf742ef48c36" : {
+          "ID" : "c90763e8-da37-4a2d-870e-bf742ef48c36",
+          "COMPONENT_ID" : "1114ac37-97f6-45c5-b85b-0e2f604afd5f",
+          "NAME" : "get.file.name.from.message",
+          "VALUE" : "false"
+        },
+        "e812d7dd-8a94-4401-8c8a-a79323d5dc3b" : {
+          "ID" : "e812d7dd-8a94-4401-8c8a-a79323d5dc3b",
+          "COMPONENT_ID" : "ae82ccba-6ba7-43bd-b5e0-b17f1ba8d7b8",
+          "NAME" : "handle.msg.script",
+          "VALUE" : "File workingDir = new File(\"working/directory2/testdir\")\nFile testFile = new File(workingDir, \"a.txt\")\nif (!testFile.exists()) {\n    throw new AssertException(\"${testFile.getAbsolutePath()} does not exist\");\n}"
+        },
+        "411d13f1-14f2-41a9-8fde-2dfeeb758ae8" : {
+          "ID" : "411d13f1-14f2-41a9-8fde-2dfeeb758ae8",
+          "COMPONENT_ID" : "1114ac37-97f6-45c5-b85b-0e2f604afd5f",
+          "NAME" : "relative.path",
+          "VALUE" : "$(subdir)/$(source.file.path)"
+        },
+        "ac9224fd-2176-4cef-8770-fadb84a781a4" : {
+          "ID" : "ac9224fd-2176-4cef-8770-fadb84a781a4",
+          "COMPONENT_ID" : "df0ac23e-e75b-4824-837e-1df1fd1896aa",
+          "NAME" : "get.file.name.from.message",
+          "VALUE" : "true"
+        },
+        "6daedc97-8e6d-44a2-8cf3-fecb2a51f7cb" : {
+          "ID" : "6daedc97-8e6d-44a2-8cf3-fecb2a51f7cb",
+          "COMPONENT_ID" : "1114ac37-97f6-45c5-b85b-0e2f604afd5f",
+          "NAME" : "filename.message.header",
+          "VALUE" : "true"
+        },
+        "73b0e439-894d-466a-badd-b26de97fb2aa" : {
+          "ID" : "73b0e439-894d-466a-badd-b26de97fb2aa",
+          "COMPONENT_ID" : "57b74a50-a612-41c1-bae7-d0db5a947882",
+          "NAME" : "get.file.name.from.message",
+          "VALUE" : "true"
+        },
+        "40aef88f-1205-46ea-a364-6bc218d0348d" : {
+          "ID" : "40aef88f-1205-46ea-a364-6bc218d0348d",
+          "COMPONENT_ID" : "43aefaa0-40ea-4140-8eef-5fd0d74d9900",
+          "NAME" : "file.pattern",
+          "VALUE" : "*.txt"
+        },
+        "ad547591-0351-43dc-8fc7-1c41654decc9" : {
+          "ID" : "ad547591-0351-43dc-8fc7-1c41654decc9",
+          "COMPONENT_ID" : "4e51fd79-739f-434d-a516-7086aa643d73",
+          "NAME" : "handle.msg.script",
+          "VALUE" : "File workingDir = new File(\"working/directory1\")\ndeleteQuietly(workingDir)\ndeleteQuietly(new File(\"working/directory2\"))\nwriteStringToFile(new File(workingDir, \"a.txt\"), \"this is the first file\")"
+        },
+        "1c9490e9-b9a6-41e3-b86d-8fcfc0e775b4" : {
+          "ID" : "1c9490e9-b9a6-41e3-b86d-8fcfc0e775b4",
+          "COMPONENT_ID" : "df0ac23e-e75b-4824-837e-1df1fd1896aa",
+          "NAME" : "filename.property",
+          "VALUE" : "source.file.path"
+        },
+        "da0523af-db9c-46c6-9a5b-54aebb6c8aa2" : {
+          "ID" : "da0523af-db9c-46c6-9a5b-54aebb6c8aa2",
+          "COMPONENT_ID" : "1114ac37-97f6-45c5-b85b-0e2f604afd5f",
+          "NAME" : "filename.property",
+          "VALUE" : "source.file.path"
+        },
+        "171ff7e0-3aa1-4225-be74-238ff6dafe69" : {
+          "ID" : "171ff7e0-3aa1-4225-be74-238ff6dafe69",
+          "COMPONENT_ID" : "df0ac23e-e75b-4824-837e-1df1fd1896aa",
+          "NAME" : "filename.message.header",
+          "VALUE" : "true"
+        },
+        "85a7dbc4-20e9-40a7-aa1c-ef5683552feb" : {
+          "ID" : "85a7dbc4-20e9-40a7-aa1c-ef5683552feb",
+          "COMPONENT_ID" : "4e51fd79-739f-434d-a516-7086aa643d73",
+          "NAME" : "run.when",
+          "VALUE" : "PER UNIT OF WORK"
+        },
+        "e28021c2-334c-4ba2-99dc-331a58a470b3" : {
+          "ID" : "e28021c2-334c-4ba2-99dc-331a58a470b3",
+          "COMPONENT_ID" : "bddf0bf7-9790-4743-8da5-f10377f88153",
+          "NAME" : "file.pattern",
+          "VALUE" : "inbox/*.txt"
+        },
+        "1c3ee93b-22f3-4c2c-a393-851ca51a7b92" : {
+          "ID" : "1c3ee93b-22f3-4c2c-a393-851ca51a7b92",
+          "COMPONENT_ID" : "57b74a50-a612-41c1-bae7-d0db5a947882",
+          "NAME" : "control.message.on.eof",
+          "VALUE" : "false"
+        }
+      }
+    }, {
+      "tableName" : "METL_COMPONENT_ENTITY_SETTING",
+      "tableData" : { }
+    }, {
+      "tableName" : "METL_COMPONENT_ATTRIBUTE_SETTING",
+      "tableData" : { }
+    }, {
+      "tableName" : "METL_FLOW",
+      "tableData" : {
+        "4cc8c5eb-3119-46dd-867e-36d6d81d317f" : {
+          "ID" : "4cc8c5eb-3119-46dd-867e-36d6d81d317f",
+          "ROW_ID" : "ac3aecda-f4fe-4b06-8db1-2724243ba1a6",
+          "PROJECT_VERSION_ID" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+          "DELETED" : 0,
+          "TEST" : 1,
+          "WEB_SERVICE" : 0,
+          "NAME" : "BinaryFileWriter - Test Parameter and Header Token Replacement",
+          "NOTES" : null,
+          "FOLDER_ID" : null
+        },
+        "c8a1b3e8-e324-48ff-9083-5f3f34e93a76" : {
+          "ID" : "c8a1b3e8-e324-48ff-9083-5f3f34e93a76",
+          "ROW_ID" : "93860b34-291a-4e6c-a2c4-caf8b8eb1177",
+          "PROJECT_VERSION_ID" : "a27e7f8c-7ef5-4684-9041-a2fa5682b366",
+          "DELETED" : 0,
+          "TEST" : 1,
+          "WEB_SERVICE" : 0,
+          "NAME" : "BinaryFileWriter - Test Multiple File Writes",
+          "NOTES" : null,
+          "FOLDER_ID" : null
+        }
+      }
+    }, {
+      "tableName" : "METL_FLOW_PARAMETER",
+      "tableData" : {
+        "aa0a641c-2f5f-40df-a24c-92b299a6bba5" : {
+          "ID" : "aa0a641c-2f5f-40df-a24c-92b299a6bba5",
+          "FLOW_ID" : "4cc8c5eb-3119-46dd-867e-36d6d81d317f",
+          "NAME" : "subdir",
+          "DEFAULT_VALUE" : "testdir",
+          "POSITION" : 1
+        }
+      }
+    }, {
+      "tableName" : "METL_FLOW_STEP",
+      "tableData" : {
+        "2eff0573-65ca-4df6-82a8-b647fa39b94d" : {
+          "ID" : "2eff0573-65ca-4df6-82a8-b647fa39b94d",
+          "FLOW_ID" : "c8a1b3e8-e324-48ff-9083-5f3f34e93a76",
+          "COMPONENT_ID" : "0328bc3b-49b1-4d0b-b2e8-2e53869b14c0",
+          "X" : 390,
+          "Y" : 180,
+          "APPROXIMATE_ORDER" : 6
+        },
+        "964fa2d6-d54f-47ad-8465-13082d1ca3b9" : {
+          "ID" : "964fa2d6-d54f-47ad-8465-13082d1ca3b9",
+          "FLOW_ID" : "c8a1b3e8-e324-48ff-9083-5f3f34e93a76",
+          "COMPONENT_ID" : "df0ac23e-e75b-4824-837e-1df1fd1896aa",
+          "X" : 470,
+          "Y" : 20,
+          "APPROXIMATE_ORDER" : 3
+        },
+        "140da742-2ba8-4d4c-8d29-3cfd20d87893" : {
+          "ID" : "140da742-2ba8-4d4c-8d29-3cfd20d87893",
+          "FLOW_ID" : "4cc8c5eb-3119-46dd-867e-36d6d81d317f",
+          "COMPONENT_ID" : "1114ac37-97f6-45c5-b85b-0e2f604afd5f",
+          "X" : 410,
+          "Y" : 20,
+          "APPROXIMATE_ORDER" : 3
+        },
+        "e420aa09-1c15-40d6-9ae4-6d4360231172" : {
+          "ID" : "e420aa09-1c15-40d6-9ae4-6d4360231172",
+          "FLOW_ID" : "c8a1b3e8-e324-48ff-9083-5f3f34e93a76",
+          "COMPONENT_ID" : "e244bc39-53bb-44b0-8cc9-d174791a0d2f",
+          "X" : 170,
+          "Y" : 20,
+          "APPROXIMATE_ORDER" : 1
+        },
+        "75117be5-6732-4f55-b8c4-9d45e56afdd7" : {
+          "ID" : "75117be5-6732-4f55-b8c4-9d45e56afdd7",
+          "FLOW_ID" : "c8a1b3e8-e324-48ff-9083-5f3f34e93a76",
+          "COMPONENT_ID" : "1bde79b1-c9e0-4238-b3f9-03cd6bca4084",
+          "X" : 30,
+          "Y" : 20,
+          "APPROXIMATE_ORDER" : 0
+        },
+        "9bdf6f5b-9e42-40af-936c-d6d1e27f034c" : {
+          "ID" : "9bdf6f5b-9e42-40af-936c-d6d1e27f034c",
+          "FLOW_ID" : "4cc8c5eb-3119-46dd-867e-36d6d81d317f",
+          "COMPONENT_ID" : "43aefaa0-40ea-4140-8eef-5fd0d74d9900",
+          "X" : 150,
+          "Y" : 20,
+          "APPROXIMATE_ORDER" : 1
+        },
+        "8256dad9-4ccf-4374-a79c-4ff77f7c2f3e" : {
+          "ID" : "8256dad9-4ccf-4374-a79c-4ff77f7c2f3e",
+          "FLOW_ID" : "4cc8c5eb-3119-46dd-867e-36d6d81d317f",
+          "COMPONENT_ID" : "ae82ccba-6ba7-43bd-b5e0-b17f1ba8d7b8",
+          "X" : 540,
+          "Y" : 20,
+          "APPROXIMATE_ORDER" : 4
+        },
+        "33d3b1e8-8aca-4258-b971-c8d712f1a22c" : {
+          "ID" : "33d3b1e8-8aca-4258-b971-c8d712f1a22c",
+          "FLOW_ID" : "c8a1b3e8-e324-48ff-9083-5f3f34e93a76",
+          "COMPONENT_ID" : "bddf0bf7-9790-4743-8da5-f10377f88153",
+          "X" : 240,
+          "Y" : 180,
+          "APPROXIMATE_ORDER" : 5
+        },
+        "c9917d1c-b694-45a6-8b9e-8cac00051de5" : {
+          "ID" : "c9917d1c-b694-45a6-8b9e-8cac00051de5",
+          "FLOW_ID" : "c8a1b3e8-e324-48ff-9083-5f3f34e93a76",
+          "COMPONENT_ID" : "57b74a50-a612-41c1-bae7-d0db5a947882",
+          "X" : 320,
+          "Y" : 20,
+          "APPROXIMATE_ORDER" : 2
+        },
+        "d07ff0a6-03c9-4aab-812f-5ff78b6fb084" : {
+          "ID" : "d07ff0a6-03c9-4aab-812f-5ff78b6fb084",
+          "FLOW_ID" : "4cc8c5eb-3119-46dd-867e-36d6d81d317f",
+          "COMPONENT_ID" : "a06ba3d3-054b-4dd0-bbd1-72ca08e591dd",
+          "X" : 280,
+          "Y" : 20,
+          "APPROXIMATE_ORDER" : 2
+        },
+        "47798f9c-58db-4ac0-85b3-bb57a2f964c5" : {
+          "ID" : "47798f9c-58db-4ac0-85b3-bb57a2f964c5",
+          "FLOW_ID" : "4cc8c5eb-3119-46dd-867e-36d6d81d317f",
+          "COMPONENT_ID" : "4e51fd79-739f-434d-a516-7086aa643d73",
+          "X" : 20,
+          "Y" : 20,
+          "APPROXIMATE_ORDER" : 0
+        }
+      }
+    }, {
+      "tableName" : "METL_FLOW_STEP_LINK",
+      "tableData" : {
+        "964fa2d6-d54f-47ad-8465-13082d1ca3b933d3b1e8-8aca-4258-b971-c8d712f1a22c" : {
+          "SOURCE_STEP_ID" : "964fa2d6-d54f-47ad-8465-13082d1ca3b9",
+          "TARGET_STEP_ID" : "33d3b1e8-8aca-4258-b971-c8d712f1a22c"
+        },
+        "33d3b1e8-8aca-4258-b971-c8d712f1a22c2eff0573-65ca-4df6-82a8-b647fa39b94d" : {
+          "SOURCE_STEP_ID" : "33d3b1e8-8aca-4258-b971-c8d712f1a22c",
+          "TARGET_STEP_ID" : "2eff0573-65ca-4df6-82a8-b647fa39b94d"
+        },
+        "c9917d1c-b694-45a6-8b9e-8cac00051de5964fa2d6-d54f-47ad-8465-13082d1ca3b9" : {
+          "SOURCE_STEP_ID" : "c9917d1c-b694-45a6-8b9e-8cac00051de5",
+          "TARGET_STEP_ID" : "964fa2d6-d54f-47ad-8465-13082d1ca3b9"
+        },
+        "140da742-2ba8-4d4c-8d29-3cfd20d878938256dad9-4ccf-4374-a79c-4ff77f7c2f3e" : {
+          "SOURCE_STEP_ID" : "140da742-2ba8-4d4c-8d29-3cfd20d87893",
+          "TARGET_STEP_ID" : "8256dad9-4ccf-4374-a79c-4ff77f7c2f3e"
+        },
+        "9bdf6f5b-9e42-40af-936c-d6d1e27f034cd07ff0a6-03c9-4aab-812f-5ff78b6fb084" : {
+          "SOURCE_STEP_ID" : "9bdf6f5b-9e42-40af-936c-d6d1e27f034c",
+          "TARGET_STEP_ID" : "d07ff0a6-03c9-4aab-812f-5ff78b6fb084"
+        },
+        "d07ff0a6-03c9-4aab-812f-5ff78b6fb084140da742-2ba8-4d4c-8d29-3cfd20d87893" : {
+          "SOURCE_STEP_ID" : "d07ff0a6-03c9-4aab-812f-5ff78b6fb084",
+          "TARGET_STEP_ID" : "140da742-2ba8-4d4c-8d29-3cfd20d87893"
+        },
+        "47798f9c-58db-4ac0-85b3-bb57a2f964c59bdf6f5b-9e42-40af-936c-d6d1e27f034c" : {
+          "SOURCE_STEP_ID" : "47798f9c-58db-4ac0-85b3-bb57a2f964c5",
+          "TARGET_STEP_ID" : "9bdf6f5b-9e42-40af-936c-d6d1e27f034c"
+        },
+        "e420aa09-1c15-40d6-9ae4-6d4360231172c9917d1c-b694-45a6-8b9e-8cac00051de5" : {
+          "SOURCE_STEP_ID" : "e420aa09-1c15-40d6-9ae4-6d4360231172",
+          "TARGET_STEP_ID" : "c9917d1c-b694-45a6-8b9e-8cac00051de5"
+        },
+        "75117be5-6732-4f55-b8c4-9d45e56afdd7e420aa09-1c15-40d6-9ae4-6d4360231172" : {
+          "SOURCE_STEP_ID" : "75117be5-6732-4f55-b8c4-9d45e56afdd7",
+          "TARGET_STEP_ID" : "e420aa09-1c15-40d6-9ae4-6d4360231172"
+        }
+      }
+    } ]
+  } ]
+}

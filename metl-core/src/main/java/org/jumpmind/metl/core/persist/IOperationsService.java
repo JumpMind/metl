@@ -15,6 +15,7 @@ import org.jumpmind.metl.core.model.GlobalSetting;
 import org.jumpmind.metl.core.model.Group;
 import org.jumpmind.metl.core.model.Notification;
 import org.jumpmind.metl.core.model.Resource;
+import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.model.UserHist;
 import org.jumpmind.properties.TypedProperties;
@@ -22,6 +23,8 @@ import org.jumpmind.properties.TypedProperties;
 public interface IOperationsService {
     
     public void save(AbstractObject obj);
+    
+    public void save(Setting setting);
 
     public void delete(Agent agent);
 

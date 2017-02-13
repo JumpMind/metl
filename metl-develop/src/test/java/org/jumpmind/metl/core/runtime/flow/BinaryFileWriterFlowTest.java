@@ -47,7 +47,7 @@ public class BinaryFileWriterFlowTest {
 
     @Parameters(name = "{0}")
     public static Collection<Object[]> getFlows() throws Exception {
-        standaloneFlowRunner = new StandaloneTestFlowRunner("/binaryfilewriter-flow-test-config.sql");
+        standaloneFlowRunner = new StandaloneTestFlowRunner("/binaryfilewriter-flow-test-config.json");
         return standaloneFlowRunner.getFlowAsTestParams();
     }
 

@@ -167,6 +167,19 @@ public abstract class AbstractService {
         }
         return all;
     }
+    
+    public void save(Setting setting) {
+        boolean isPassword = isPassword(setting);
+        String unencrypted = setting.getValue();
+        if (isPassword && isNotBlank(unencrypted)) {
+            String encrypted = SecurityConstants.PREFIX_ENC + securityService.encrypt(unencrypted);
+            setting.setValue(encrypted);
+        }
+        save((AbstractObject) setting);
+        if (isPassword) {
+            setting.setValue(unencrypted);
+        }
+    }
 
 
 }

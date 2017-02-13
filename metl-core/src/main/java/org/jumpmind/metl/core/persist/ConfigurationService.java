@@ -71,7 +71,6 @@ import org.jumpmind.metl.core.model.ResourceSetting;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.Version;
 import org.jumpmind.metl.core.security.ISecurityService;
-import org.jumpmind.metl.core.security.SecurityConstants;
 import org.jumpmind.metl.core.util.NameValue;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.util.FormatUtils;
@@ -690,20 +689,6 @@ public class ConfigurationService extends AbstractService
     @Override
     public void save(Flow flow) {
         save(flow, false);
-    }
-
-    @Override
-    public void save(Setting setting) {
-        boolean isPassword = isPassword(setting);
-        String unencrypted = setting.getValue();
-        if (isPassword && isNotBlank(unencrypted)) {
-            String encrypted = SecurityConstants.PREFIX_ENC + securityService.encrypt(unencrypted);
-            setting.setValue(encrypted);
-        }
-        save((AbstractObject) setting);
-        if (isPassword) {
-            setting.setValue(unencrypted);
-        }
     }
 
     protected void save(Flow flow, boolean newProjectVersion) {
