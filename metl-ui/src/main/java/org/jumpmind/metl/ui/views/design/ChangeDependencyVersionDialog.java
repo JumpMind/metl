@@ -28,14 +28,12 @@ public class ChangeDependencyVersionDialog extends ResizableWindow  {
 
     final Logger log = LoggerFactory.getLogger(getClass());
     private static final long serialVersionUID = 1L;
-    private ApplicationContext context;
     IConfigurationService configService;
     OptionGroup optionGroup;
     ProjectVersionDependency dependency;
 
     public ChangeDependencyVersionDialog(ApplicationContext context, Object selectedElement) {
         super("Change Dependency Version");
-        this.context = context;
         this.configService = context.getConfigurationService();
         initWindow(selectedElement);
     }
@@ -67,6 +65,7 @@ public class ChangeDependencyVersionDialog extends ResizableWindow  {
         vLayout.setExpandRatio(projectVersionPanel, 1);       
     }
     
+    @SuppressWarnings("unchecked")
     protected Panel buildPossibleTargetVersions(ProjectVersion targetProjectVersion) {
 
         Panel possibleTargetVersionsPanel = new Panel("Available Target Versions");        
@@ -79,7 +78,7 @@ public class ChangeDependencyVersionDialog extends ResizableWindow  {
         optionGroup.setItemCaptionMode(ItemCaptionMode.PROPERTY);
         optionGroup.setItemCaptionPropertyId("versionLabel");
         optionGroup.addStyleName("indent");
-                
+
         List<ProjectVersion> projectVersions = configService.findProjectVersionsByProject(targetProjectVersion.getProjectId());        
         container.addContainerProperty("versionLabel", String.class, null); 
         for (ProjectVersion version : projectVersions) {

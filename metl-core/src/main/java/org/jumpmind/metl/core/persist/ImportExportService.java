@@ -17,17 +17,15 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.tools.ant.Project;
-import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
-import org.jgrapht.graph.DefaultEdge;
 import org.jumpmind.db.model.Column;
 import org.jumpmind.db.model.Table;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.sql.DmlStatement;
 import org.jumpmind.db.sql.DmlStatement.DmlType;
-import org.jumpmind.exception.IoException;
 import org.jumpmind.db.sql.ISqlTemplate;
 import org.jumpmind.db.sql.ISqlTransaction;
 import org.jumpmind.db.sql.Row;
+import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AuditEvent;
@@ -36,7 +34,6 @@ import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.ProjectVersion;
-import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.ReleasePackage;
 import org.jumpmind.metl.core.model.ReleasePackageProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
@@ -177,20 +174,9 @@ public class ImportExportService extends AbstractService implements IImportExpor
         ConfigData exportData = initExport();
         ReleasePackage releasePackage = configurationService.findReleasePackage(releasePackageId);
         
-        DirectedAcyclicGraph<String, DefaultEdge> dag = new DirectedAcyclicGraph<String, DefaultEdge>(DefaultEdge.class);
-        for (ReleasePackageProjectVersion rppv : releasePackage.getProjectVersions()) {
-            dag.addVertex(rppv.getProjectVersionId());
-            List<ProjectVersionDependency> dependencies = configurationService.findProjectDependencies(rppv.getProjectVersionId());
-            for (ProjectVersionDependency dependency: dependencies) {
-                dag.addVertex(dependency.getTargetProjectVersionId());
-                dag.addEdge(dependency.getTargetProjectVersionId(), rppv.getProjectVersionId());
-            }
-        }      
-        
-        //add projects to the export in topological order
-        Iterator<String> itr = dag.iterator();
-        while (itr.hasNext()) {                        
-            String projectVersionId = itr.next();
+        List<ReleasePackageProjectVersion> versions = new ReleasePackageProjectVersionSorter(configurationService).sort(releasePackage);
+        for (ReleasePackageProjectVersion releasePackageProjectVersion : versions) {
+            String projectVersionId = releasePackageProjectVersion.getProjectVersionId();
             initProjectVersionExport(exportData, projectVersionId);            
             Set<String> flowIds = new HashSet<String>();
             Set<String> modelIds = new HashSet<String>();

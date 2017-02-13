@@ -1435,8 +1435,8 @@ public class ConfigurationService extends AbstractService
         Map<String, String> oldToNewModelEntityIdMap = new HashMap<String, String>();
         final String MODEL_ENTITIES_USED_FROM_DEPENDENT_PROJECTS =
                 "select \n" + 
-                "   ome.id\n" + 
-                "   ,nme.id\n" + 
+                "   ome.id as id\n" + 
+                "   ,nme.id as id_1\n" + 
                 "from\n" + 
                 "   %1$s_model_entity ome\n" + 
                 "   left outer join %1$s_model_entity nme\n" + 
@@ -1459,15 +1459,15 @@ public class ConfigurationService extends AbstractService
         Map<String, String> oldToNewModelAttributeIdMap = new HashMap<String, String>();
         final String MODEL_ENTITIES_USED_FROM_DEPENDENT_PROJECTS =
                 "select \n" + 
-                "   oma.id\n" + 
-                "   ,nma.id\n" + 
-                "from\n" + 
+                "   oma.id as id\n" + 
+                "   ,nma.id as id_1\n" + 
+                "from\n" +
                 "   %1$s_model_attribute oma\n" + 
                 "   left outer join %1$s_model_attribute nma\n" + 
                 "      on oma.name = nma.name\n" + 
                 "where\n" + 
-                "   oma.model_id = '%2$s'\n" + 
-                "   and nma.model_id = '%3$s'";
+                "   oma.entity_id = '%2$s'\n" + 
+                "   and nma.entity_id = '%3$s'";
         ISqlTemplate template = databasePlatform.getSqlTemplate();
 
         for (Map.Entry<String,String> entry : oldToNewModelEntityIdMap.entrySet()) {
@@ -1563,9 +1563,9 @@ public class ConfigurationService extends AbstractService
 
         final String UPDATE_COMPONENT_ATTRIBUTE_SETTING_OLD_TO_NEW = 
                 "update %1$s_component_attribute_setting as ces\n" + 
-                "   set ces.entity_id='%2$s'\n" + 
+                "   set ces.attribute_id='%2$s'\n" + 
                 "where \n" + 
-                "   ces.entity_id='%3$s'\n" + 
+                "   ces.attribute_id='%3$s'\n" + 
                 "   and ces.component_id in \n" + 
                 "   (\n" + 
                 "      select \n" + 

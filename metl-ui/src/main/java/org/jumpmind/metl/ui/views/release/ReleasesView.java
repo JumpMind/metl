@@ -38,6 +38,7 @@ import org.jumpmind.metl.core.model.ReleasePackage;
 import org.jumpmind.metl.core.model.ReleasePackageProjectVersion;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IImportExportService;
+import org.jumpmind.metl.core.persist.ReleasePackageProjectVersionSorter;
 import org.jumpmind.metl.core.util.AppConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
@@ -93,7 +94,7 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
 
     BeanItemContainer<ReleasePackage> container;
 
-    IConfigurationService configService;
+    IConfigurationService configurationService;
 
     IImportExportService importExportService;
 
@@ -140,13 +141,13 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
 
     @PostConstruct
     protected void init() {
-        configService = context.getConfigurationService();
+        configurationService = context.getConfigurationService();
         importExportService = context.getImportExportService();
     }
 
     protected void refresh() {
         container.removeAllItems();
-        List<ReleasePackage> releasePackages = configService.findReleasePackages();
+        List<ReleasePackage> releasePackages = configurationService.findReleasePackages();
         Collections.sort(releasePackages, Collections.reverseOrder(new Comparator<ReleasePackage>() {
             public int compare(ReleasePackage o1, ReleasePackage o2) {
                 Date releaseDate1 = o1.getReleaseDate();
@@ -187,10 +188,10 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
             ReleasePackage releasePackage = (ReleasePackage) itr.next();
             if (releasePackage.getReleaseDate() != null) {
                 for (ReleasePackageProjectVersion rppv : releasePackage.getProjectVersions()) {
-                    ProjectVersion projectVersion = configService
+                    ProjectVersion projectVersion = configurationService
                             .findProjectVersion(rppv.getProjectVersionId());
                     projectVersion.setArchived(true);
-                    configService.save(projectVersion);
+                    configurationService.save(projectVersion);
                 }
             } else {
                 CommonUiUtils.notify(String.format(String.format(
@@ -210,7 +211,6 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     }
 
     protected void finalize() {
-
         ConfirmDialog.show("Release the selected packages?",
                 "Are you sure you want to release the selected packages?", () -> {
                     finalizeSelectedReleasePackages();
@@ -223,7 +223,7 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
         Iterator<Object> itr = collection.iterator();
         while (itr.hasNext()) {
             ReleasePackage releasePackage = (ReleasePackage) itr.next();
-            releasePackage = configService.findReleasePackage(releasePackage.getId());
+            releasePackage = configurationService.findReleasePackage(releasePackage.getId());
             if (releasePackage.isReleased()) {
                 CommonUiUtils.notify(String.format(
                         "Release Package %s is already released.  It cannot be re-released.  Skipping this release package.",
@@ -231,20 +231,19 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
             } else {
                 releasePackage.setReleaseDate(new Date());
                 releasePackage.setReleased(true);
-                configService.save(releasePackage);
-                List<ReleasePackageProjectVersion> rppvs = releasePackage.getProjectVersions();
+                configurationService.save(releasePackage);
+                List<ReleasePackageProjectVersion> rppvs = new ReleasePackageProjectVersionSorter(configurationService).sort(releasePackage);
                 for (ReleasePackageProjectVersion rppv : rppvs) {
-                    ProjectVersion original = configService.findProjectVersion(rppv.getProjectVersionId());
+                    ProjectVersion original = configurationService.findProjectVersion(rppv.getProjectVersionId());
                     if (original.getVersionType().equalsIgnoreCase(ProjectVersion.VersionType.MASTER.toString())) {
-                        configService.saveNewVersion("master", original, "master");
+                        configurationService.saveNewVersion("master", original, "master");
                     }
                     original.setName(releasePackage.getVersionLabel());
                     original.setVersionType(ProjectVersion.VersionType.RELEASE.toString());
-                    original.setArchived(true);
                     Date releaseDate = new Date();
                     original.setReleaseDate(releaseDate);
-                    configService.save(original);                    
-                }
+                    configurationService.save(original);
+                }                
                 refresh();
             }
         }

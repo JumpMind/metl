@@ -109,7 +109,8 @@ public class DefinitionFactory implements IDefinitionFactory {
             List<String> projectVersionIds = configurationService.findAllProjectVersionIds();
             int numOfVersions = projectVersionIds.size(); 
             if (numOfVersions > 0) {
-                ExecutorService executor = Executors.newFixedThreadPool(numOfVersions > 10 ? numOfVersions/2 : numOfVersions, new RefreshThreadFactory());
+                int numOfExecutors = numOfVersions > 10 ? numOfVersions/2 : numOfVersions;
+                ExecutorService executor = Executors.newFixedThreadPool(numOfExecutors, new RefreshThreadFactory());
                 List<Future<?>> futures = new ArrayList<Future<?>>();
                 for (String projectVersionId : projectVersionIds) {
                     futures.add(executor.submit(() -> refresh(projectVersionId, distinctPlugins)));
@@ -134,6 +135,7 @@ public class DefinitionFactory implements IDefinitionFactory {
         List<ProjectVersionDefinitionPlugin> pvcps = configurationService.findProjectVersionComponentPlugins(projectVersionId);
         GenericVersionScheme versionScheme = new GenericVersionScheme();        
         for (Plugin configuredPlugin : distinctPlugins) {
+            logger.info("configuring: {}:{}", configuredPlugin.toString(), projectVersionId);
             boolean matched = false;
             for (ProjectVersionDefinitionPlugin pvcp : pvcps) {
                 if (pvcp.matches(configuredPlugin)) {
@@ -238,9 +240,8 @@ public class DefinitionFactory implements IDefinitionFactory {
     protected String load(String projectVersionId, String artifactGroup, String artifactName, String artifactVersion,
             List<PluginRepository> pluginRepository) {
         ClassLoader classLoader = pluginManager.getClassLoader(artifactGroup, artifactName, artifactVersion, pluginRepository);
-        String pluginId = null;
+        String pluginId = pluginManager.toPluginId(artifactGroup, artifactName, artifactVersion);
         if (classLoader != null) {
-            pluginId = pluginManager.toPluginId(artifactGroup, artifactName, artifactVersion);
             loadComponentsForClassloader(projectVersionId, pluginId, classLoader);            
         } else {
             logger.warn("Could not find plugin with the id of {}", pluginId);
