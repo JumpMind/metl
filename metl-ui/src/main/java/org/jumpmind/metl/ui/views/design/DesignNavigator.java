@@ -436,6 +436,8 @@ public class DesignNavigator extends VerticalLayout {
                 this.treeTable.setItemIcon(resource, Icons.DATABASE);
             } else if ("Http".equals(resource.getType())) {
                 this.treeTable.setItemIcon(resource, Icons.WEB);
+            } else if ("MailSession".equals(resource.getType())) {
+                this.treeTable.setItemIcon(resource, Icons.EMAIL);
             } else {
                 this.treeTable.setItemIcon(resource, Icons.FILE_SYSTEM);
             }
