@@ -320,14 +320,19 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
     protected static int countColumnSeparatingCommas(String value) {
         int count = 0;
-
+        
+        // parenthesis
         int p = 0;
+        // quote
+        int q = 0;
         for (char c : value.toCharArray()) {
             if (c == '(') {
                 p++;
             } else if (c == ')') {
                 p--;
-            } else if (c == ',' && p == 0) {
+            } else if (c == '\'') {
+                q++;
+            } else if (c == ',' && p == 0 && q%2==0) {
                 count++;
             }
         }
