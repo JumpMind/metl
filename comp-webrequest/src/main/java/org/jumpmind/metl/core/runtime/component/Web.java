@@ -46,6 +46,7 @@ import org.jumpmind.metl.core.runtime.resource.IOutputStreamWithResponse;
 //import org.jumpmind.metl.core.runtime.resource.HttpDirectory;
 //import org.jumpmind.metl.core.runtime.resource.HttpOutputStream;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
+import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 
 public class Web extends AbstractComponentRuntime {
@@ -90,6 +91,7 @@ public class Web extends AbstractComponentRuntime {
         bodyFrom = component.get(BODY_FROM, "Message");
         bodyText = component.get(BODY_TEXT);
         runWhen = getComponent().get(RUN_WHEN, PER_MESSAGE);
+        parameterReplacement = component.getBoolean(PARAMETER_REPLACEMENT, false);
     }
     
     @Override
