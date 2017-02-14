@@ -67,6 +67,7 @@ import org.jumpmind.metl.core.util.AppConstants;
 import org.jumpmind.metl.core.util.DatabaseScriptContainer;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.VersionUtils;
+import org.jumpmind.metl.ui.persist.IUICache;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 import org.slf4j.Logger;
@@ -178,6 +179,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         initDatabase(ctx);
         initPlugins(ctx);        
         auditStartup(ctx);
+        initUICache(ctx);
         initAgentRuntime(ctx);
         initBackgroundJobs(ctx);
     }
@@ -187,6 +189,10 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         if (jobScheduler != null) {
             jobScheduler.destroy();
         }
+    }
+    
+    protected void initUICache(WebApplicationContext ctx) {
+        ctx.getBean(IUICache.class).init();
     }
     
     protected void initBackgroundJobs(WebApplicationContext ctx) {
