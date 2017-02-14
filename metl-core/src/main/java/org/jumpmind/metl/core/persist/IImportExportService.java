@@ -6,6 +6,8 @@ import org.jumpmind.metl.core.model.Agent;
 
 public interface IImportExportService {
     
+    public void addConfigurationChangeListener(IConfigurationChangedListener listener);
+    
     public void importConfiguration(String dataToImport, String userId);
     
     public String exportProjectVersion(String projectVersionId, String userdId);

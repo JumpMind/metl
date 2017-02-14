@@ -79,13 +79,37 @@ public class ConfigurationService extends AbstractService
         implements IConfigurationService {
     
     protected IOperationsService operationsService;
+    
     protected IDatabasePlatform databasePlatform;
+    
+    private List<IConfigurationChangedListener> configurationChangedListeners = Collections.synchronizedList(new ArrayList<>());
 
     public ConfigurationService(IOperationsService operationsService, ISecurityService securityService, IDatabasePlatform databasePlatform,
             IPersistenceManager persistenceManager, String tablePrefix) {
         super(securityService, persistenceManager, tablePrefix);
         this.operationsService = operationsService;
         this.databasePlatform = databasePlatform;
+    }
+    
+    @Override
+    public void addConfigurationChangeListener(IConfigurationChangedListener listener) {
+        configurationChangedListeners.add(listener);
+    }
+    
+    @Override
+    public void save(AbstractObject data) {
+        super.save(data);
+        for (IConfigurationChangedListener l : configurationChangedListeners) {
+            l.onSave(data);
+        }
+    }
+    
+    @Override
+    public void delete(AbstractObject data) {
+        super.delete(data);
+        for (IConfigurationChangedListener l : configurationChangedListeners) {
+            l.onDelete(data);
+        }
     }
 
     @Override
@@ -153,15 +177,6 @@ public class ConfigurationService extends AbstractService
         params.put("projectVersionId", projectVersionId);
         return find(ResourceName.class, params, Resource.class);
     }
-
-//    @Override
-//    public List<ComponentName> findSharedComponentsInProject(String projectVersionId) {
-//        Map<String, Object> params = new HashMap<String, Object>();
-//        params.put("projectVersionId", projectVersionId);
-//        params.put("deleted", 0);
-//        params.put("shared", 1);
-//        return find(ComponentName.class, params, Component.class);
-//    }
 
     @Override
     public List<ComponentName> findComponentsInProject(String projectVersionId) {
@@ -231,6 +246,35 @@ public class ConfigurationService extends AbstractService
         }
 
         return rootFolders;
+    }
+    
+    @Override
+    public List<ModelName> findModels() {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("deleted", 0);
+        List<ModelName> objects = find(ModelName.class, params);
+        AbstractObjectNameBasedSorter.sort(objects);
+        return objects;
+    }
+    
+    @Override
+    public List<ResourceName> findResources() {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("deleted", 0);
+        List<ResourceName> objects = find(ResourceName.class, params);
+        AbstractObjectNameBasedSorter.sort(objects);
+        return objects;
+    }
+    
+    @Override
+    public List<ProjectVersionDependency> findProjectVersionDependencies() {
+        List<ProjectVersionDependency> objects = find(ProjectVersionDependency.class, new HashMap<>(0));
+        AbstractObjectNameBasedSorter.sort(objects);
+        for (ProjectVersionDependency projectVersionDependency : objects) {
+            projectVersionDependency.setTargetProjectVersion(
+                    findProjectVersion(projectVersionDependency.getTargetProjectVersionId()));
+        }
+        return objects;
     }
 
     @Override
@@ -1314,6 +1358,10 @@ public class ConfigurationService extends AbstractService
         } catch (Exception e) {
             log.error(String.format("Error updating project version dependencies %s",e.getMessage()));
             transaction.rollback();
+        }
+        
+        for (IConfigurationChangedListener l : configurationChangedListeners) {
+            l.onMultiRowUpdate();
         }
     }
     

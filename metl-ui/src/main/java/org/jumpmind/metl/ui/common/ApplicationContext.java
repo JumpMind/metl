@@ -44,6 +44,7 @@ import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.ui.definition.IDefinitionPlusUIFactory;
 import org.jumpmind.metl.ui.init.BackgroundRefresherService;
+import org.jumpmind.metl.ui.persist.IUICache;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -53,6 +54,9 @@ import org.springframework.context.annotation.Scope;
 public class ApplicationContext implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    
+    @Autowired
+    IUICache uiCache;
     
     @Autowired
     IPluginManager pluginManager;
@@ -200,6 +204,10 @@ public class ApplicationContext implements Serializable {
     
     public IPluginService getPluginService() {
         return pluginService;
+    }
+    
+    public IUICache getUiCache() {
+        return uiCache;
     }
 
     public boolean isReadOnly(ProjectVersion projectVersion, Privilege privilege) {

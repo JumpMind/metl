@@ -222,7 +222,10 @@ public class DefinitionFactory implements IDefinitionFactory {
                 }
             }
         }
-        logger.info("It took {}ms to refresh plugins for project version: {}", (System.currentTimeMillis() - ts), projectVersionId);
+        long time = System.currentTimeMillis()-ts;
+        if (time > 1000) {
+            logger.info("It took {}ms to refresh plugins for project version: {}", time, projectVersionId);
+        }
     }
 
     @Override
