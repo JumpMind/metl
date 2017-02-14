@@ -1599,9 +1599,12 @@ public class ConfigurationService extends AbstractService
                 "   )\n";
               
         for (Map.Entry<String, String> entry : oldToNewModelAttributeIdMap.entrySet()) {        
-            transaction.execute(String.format(UPDATE_COMPONENT_ATTRIBUTE_SETTING_OLD_TO_NEW, tablePrefix, 
+            int rowsUpdated = transaction.execute(String.format(UPDATE_COMPONENT_ATTRIBUTE_SETTING_OLD_TO_NEW, tablePrefix, 
                     entry.getValue(), entry.getKey(), sourceProjectVersionId));
-            transaction.execute(String.format(UPDATE_MODEL_ATTRIBUTE_IN_COMPONENT_SETTING_OLD_TO_NEW, tablePrefix, 
+            if (rowsUpdated > 0) {
+                System.out.println("here");
+            }
+            int rowsUpdated2 = transaction.execute(String.format(UPDATE_MODEL_ATTRIBUTE_IN_COMPONENT_SETTING_OLD_TO_NEW, tablePrefix, 
                     entry.getValue(), entry.getKey(), sourceProjectVersionId));            
         }                
     }    
