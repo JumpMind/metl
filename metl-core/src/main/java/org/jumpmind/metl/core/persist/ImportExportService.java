@@ -7,6 +7,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -118,6 +119,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
     private String[] columnsToExclude;
     private Set<String> importsToAudit = new HashSet<>();
     private Set<String> projectsExported = new HashSet<>();
+    private List<IConfigurationChangedListener> configurationChangedListeners = Collections.synchronizedList(new ArrayList<>());
 
     public ImportExportService(IDatabasePlatform databasePlatform,
             IPersistenceManager persistenceManager, String tablePrefix,
@@ -132,6 +134,11 @@ public class ImportExportService extends AbstractService implements IImportExpor
         importsToAudit.add(tableName(Model.class).toUpperCase());
         importsToAudit.add(tableName(Resource.class).toUpperCase());
         setColumnsToExclude();
+    }
+    
+    @Override
+    public void addConfigurationChangeListener(IConfigurationChangedListener listener) {
+        configurationChangedListeners.add(listener);
     }
 
     private void setColumnsToExclude() {
@@ -262,6 +269,9 @@ public class ImportExportService extends AbstractService implements IImportExpor
     public void importConfiguration(String configDataString, String userId) {
         ConfigData configData = deserializeConfigurationData(configDataString);
         importConfiguration(configData, userId);
+        for (IConfigurationChangedListener l : configurationChangedListeners) {
+            l.onMultiRowUpdate();
+        }
     }
 
     private String serializeExportToJson(ConfigData exportData) {
@@ -584,7 +594,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
                 row.put("LAST_UPDATE_TIME", createTime);
                 useDefaultsForMissingRequiredColumns(table, row);                
                 transaction.prepareAndExecute(stmt.getSql(), row);
-            }              
+            }
 
     }
 

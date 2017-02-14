@@ -52,6 +52,8 @@ public interface IConfigurationService {
     public List<ProjectVersionDefinitionPlugin> findProjectVersionComponentPlugins(String projectVersionId);
 
     public void doInBackground();
+    
+    public void addConfigurationChangeListener(IConfigurationChangedListener listener);
 
     public FlowStep copy(FlowStep original);
 
@@ -70,8 +72,6 @@ public interface IConfigurationService {
     public List<Flow> findAffectedFlowsByModel(String modelId);
 
     public List<Flow> findAffectedFlowsByResource(String resourceId);
-
-    public List<ProjectVersionDependency> findProjectDependencies(String projectVersionId);
     
     public List<ProjectVersionDependency> findProjectDependenciesThatTarget(String projectVersionId);
 
@@ -104,16 +104,26 @@ public interface IConfigurationService {
     public FlowName findFlowName(String id);
 
     public List<FlowName> findFlows();
-
-    public List<FlowName> findFlowsInProject(String projectVersionId, boolean testFlows);
+    
+    public List<ResourceName> findResources();
+    
+    public List<ModelName> findModels();
+    
+    public List<ProjectVersionDependency> findProjectVersionDependencies();
 
     public List<Folder> findFolders(String projectVersionId, FolderType type);
 
     public List<FolderName> findFoldersInProject(String projectVersionId);
 
     public Model findModel(String id);
+    
+    public List<ProjectVersionDependency> findProjectDependencies(String projectVersionId);
+    
+    public List<FlowName> findFlowsInProject(String projectVersionId, boolean testFlows);
 
     public List<ModelName> findModelsInProject(String projectVersionId);
+    
+    public List<ResourceName> findResourcesInProject(String projectVersionId);
 
     public List<Project> findProjects();
 
@@ -129,11 +139,7 @@ public interface IConfigurationService {
 
     public List<Resource> findResourcesByTypes(String projectVersionId, String... types);
 
-    public List<ResourceName> findResourcesInProject(String projectVersionId);
-
     public Resource findPreviousVersionResource(Resource currentResource);
-
-//    public List<ComponentName> findSharedComponentsInProject(String projectVersionId);
 
     public String getLastKnownVersion();
 

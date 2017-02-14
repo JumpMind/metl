@@ -27,9 +27,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.jumpmind.metl.core.model.AbstractName;
 import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.AbstractObject;
-import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FolderName;
@@ -87,13 +87,13 @@ public class DesignNavigator extends VerticalLayout {
     public static final String LABEL_DEPENDENCIES = "Dependencies";
 
     public static final String LABEL_FLOWS = "Flows";
-    
+
     public static final String LABEL_TESTS = "Tests";
-    
+
     public static final String LABEL_MODELS = "Models";
 
     public static final String LABEL_RESOURCES = "Resources";
-    
+
     final Logger log = LoggerFactory.getLogger(getClass());
 
     ApplicationContext context;
@@ -107,9 +107,9 @@ public class DesignNavigator extends VerticalLayout {
     FileDownloader fileDownloader;
 
     DesignMenuBar menuBar;
-    
+
     IConfigurationService configurationService;
-    
+
     CutCopyPasteManager cutCopyPasteManager;
 
     public DesignNavigator(ApplicationContext context, TabbedPanel tabs) {
@@ -117,7 +117,7 @@ public class DesignNavigator extends VerticalLayout {
         this.tabs = tabs;
         this.configurationService = context.getConfigurationService();
         this.cutCopyPasteManager = new CutCopyPasteManager(context);
-        
+
         setSizeFull();
         addStyleName(ValoTheme.MENU_ROOT);
 
@@ -172,7 +172,6 @@ public class DesignNavigator extends VerticalLayout {
         treeTable.setSelectable(true);
         treeTable.setEditable(true);
         treeTable.setContainerDataSource(new BeanItemContainer<AbstractNamedObject>(AbstractNamedObject.class));
-
         treeTable.setTableFieldFactory(new DefaultFieldFactory() {
             @Override
             public Field<?> createField(Container container, Object itemId, Object propertyId, Component uiContext) {
@@ -193,9 +192,11 @@ public class DesignNavigator extends VerticalLayout {
                 }
             }
         });
-        treeTable.addExpandListener(event -> {
-            if (event.getItemId() instanceof FolderName) {
-                treeTable.setItemIcon(event.getItemId(), Icons.FOLDER_OPEN);
+        treeTable.addExpandListener(e -> {
+            if (e.getItemId() instanceof FolderName) {
+                treeTable.setItemIcon(e.getItemId(), Icons.FOLDER_OPEN);
+            } else if (e.getItemId() instanceof Project && !treeTable.hasChildren(e.getItemId())) {
+                addProjectVersions((Project) e.getItemId());
             }
         });
         treeTable.addCollapseListener(event -> {
@@ -233,6 +234,13 @@ public class DesignNavigator extends VerticalLayout {
             Setting setting = context.getUser().findSetting(UserSetting.SETTING_DESIGN_NAVIGATOR_SELECTION_ID);
             setting.setValue(object.getId());
             configurationService.save(setting);
+
+            if (!(object instanceof Project)) {
+                String projectId = findProjectVersion().getProjectId();
+                setting = context.getUser().findSetting(UserSetting.SETTING_DESIGN_NAVIGATOR_SELECTED_PROJECT_ID);
+                setting.setValue(projectId);
+                configurationService.save(setting);
+            }
         }
     }
 
@@ -330,6 +338,26 @@ public class DesignNavigator extends VerticalLayout {
 
     }
 
+    protected void addProjectVersions(Project project) {
+        List<ProjectVersion> versions = project.getProjectVersions();
+        for (ProjectVersion projectVersion : versions) {
+            treeTable.addItem(projectVersion);
+            if (projectVersion.locked()) {
+                treeTable.setItemIcon(projectVersion, FontAwesome.LOCK);
+            } else {
+                treeTable.setItemIcon(projectVersion, Icons.PROJECT_VERSION);
+            }
+
+            treeTable.setChildrenAllowed(projectVersion, true);
+            treeTable.setParent(projectVersion, project);
+            addFlowsToFolder(LABEL_FLOWS, projectVersion, false);
+            addFlowsToFolder(LABEL_TESTS, projectVersion, true);
+            addModelsToFolder(LABEL_MODELS, projectVersion);
+            addResourcesToFolder(LABEL_RESOURCES, projectVersion);
+            addDependenciesToFolder(LABEL_DEPENDENCIES, projectVersion);
+        }
+    }
+
     protected void refreshProjects() {
         long ts = System.currentTimeMillis();
         Object selected = treeTable.getValue();
@@ -337,40 +365,21 @@ public class DesignNavigator extends VerticalLayout {
         treeTable.removeAllItems();
         for (Project project : projects) {
             List<ProjectVersion> versions = project.getProjectVersions();
-
             treeTable.addItem(project);
             treeTable.setItemIcon(project, Icons.PROJECT);
             treeTable.setChildrenAllowed(project, versions.size() > 0);
-
-            for (ProjectVersion projectVersion : versions) {
-                treeTable.addItem(projectVersion);
-                if (projectVersion.locked()) {
-                    treeTable.setItemIcon(projectVersion, FontAwesome.LOCK);
-                } else {
-                    treeTable.setItemIcon(projectVersion, Icons.PROJECT_VERSION);
-                }
-                treeTable.setChildrenAllowed(projectVersion, true);
-                treeTable.setParent(projectVersion, project);
-                addFlowsToFolder(addVirtualFolder(LABEL_FLOWS, projectVersion), projectVersion, false);
-                addFlowsToFolder(addVirtualFolder(LABEL_TESTS, projectVersion), projectVersion, true);
-                addModelsToFolder(addVirtualFolder(LABEL_MODELS, projectVersion), projectVersion);
-                addResourcesToFolder(addVirtualFolder(LABEL_RESOURCES, projectVersion), projectVersion);
-                addDependenciesToFolder(addVirtualFolder(LABEL_DEPENDENCIES, projectVersion), projectVersion);
-                //log.info("It took {}ms (so far) to refresh projects in the design view", (System.currentTimeMillis()-ts));
-            }
         }
 
         if (selected == null) {
-            Setting setting = context.getUser().findSetting(UserSetting.SETTING_DESIGN_NAVIGATOR_SELECTION_ID);
-            if (isNotBlank(setting.getValue())) {
-                Collection<?> items = treeTable.getItemIds();
-                for (Object object : items) {
-                    if (setting.getValue().equals(((AbstractObject) object).getId())) {
-                        selected = object;
-                        break;
-                    } else {
-                        selected = findChild(setting.getValue(), object);
-                        if (selected != null) {
+            String selectedId = context.getUser().findSetting(UserSetting.SETTING_DESIGN_NAVIGATOR_SELECTION_ID).getValue();
+            if (isNotBlank(selectedId)) {
+                String projectId = context.getUser().findSetting(UserSetting.SETTING_DESIGN_NAVIGATOR_SELECTED_PROJECT_ID).getValue();
+                if (isNotBlank(projectId)) {
+                    Collection<?> items = treeTable.getItemIds();
+                    for (Object object : items) {
+                        if (object instanceof Project && ((Project) object).getId().equals(projectId)) {
+                            addProjectVersions((Project)object);
+                            selected = findChild(selectedId, object);
                             break;
                         }
                     }
@@ -379,7 +388,7 @@ public class DesignNavigator extends VerticalLayout {
         }
 
         selectAndExpand(selected);
-        log.info("It took {}ms to refresh projects in the design view", (System.currentTimeMillis()-ts));
+        log.info("It took {}ms to refresh projects in the design view", (System.currentTimeMillis() - ts));
     }
 
     protected Object findChild(String id, Object parent) {
@@ -414,10 +423,13 @@ public class DesignNavigator extends VerticalLayout {
         return folder;
     }
 
-    protected void addResourcesToFolder(FolderName folder, ProjectVersion projectVersion) {
-        List<ResourceName> resources = configurationService.findResourcesInProject(projectVersion.getId());
-        AbstractObjectNameBasedSorter.sort(resources);
+    protected void addResourcesToFolder(String folderName, ProjectVersion projectVersion) {
+        FolderName folder = null;
+        List<ResourceName> resources = context.getUiCache().findResourcesInProject(projectVersion.getId());
         for (ResourceName resource : resources) {
+            if (folder == null) {
+                folder = addVirtualFolder(folderName, projectVersion);
+            }
             this.treeTable.setChildrenAllowed(folder, true);
             this.treeTable.addItem(resource);
             if ("Database".equals(resource.getType())) {
@@ -431,63 +443,83 @@ public class DesignNavigator extends VerticalLayout {
             this.treeTable.setParent(resource, folder);
         }
 
-        if (resources.size() == 0) {
-            this.treeTable.removeItem(folder);
-        }
-
     }
 
-    protected void addDependenciesToFolder(FolderName folder, ProjectVersion projectVersion) {
-        List<ProjectVersionDependency> dependencies = configurationService.findProjectDependencies(projectVersion.getId());
-        AbstractObjectNameBasedSorter.sort(dependencies);
+    protected void addDependenciesToFolder(String folderName, ProjectVersion projectVersion) {
+        FolderName folder = null;
+        List<ProjectVersionDependency> dependencies = context.getUiCache().findProjectDependencies(projectVersion.getId());
         for (ProjectVersionDependency dependency : dependencies) {
+            if (folder == null) {
+                folder = addVirtualFolder(folderName, projectVersion);
+            }
             this.treeTable.setChildrenAllowed(folder, true);
             this.treeTable.addItem(dependency);
             this.treeTable.setItemIcon(dependency, Icons.DEPENDENCY);
             this.treeTable.setParent(dependency, folder);
             this.treeTable.setChildrenAllowed(dependency, false);
         }
-
-        if (dependencies.size() == 0) {
-            this.treeTable.removeItem(folder);
-        }
-
     }
 
-    protected void addFlowsToFolder(FolderName folder, ProjectVersion projectVersion, boolean test) {
-        List<FlowName> flows = configurationService.findFlowsInProject(projectVersion.getId(), test);
-        AbstractObjectNameBasedSorter.sort(flows);
+    protected void addFlowsToFolder(String folderName, ProjectVersion projectVersion, boolean test) {
+        List<FlowName> flows = context.getUiCache().findFlowsInProject(projectVersion.getId());
+        FolderName folder = null;
         for (FlowName flow : flows) {
-            this.treeTable.setChildrenAllowed(folder, true);
-            this.treeTable.addItem(flow);
-            this.treeTable.setItemIcon(flow, flow.isWebService() ? Icons.WEB : Icons.FLOW);
-            this.treeTable.setParent(flow, folder);
-            this.treeTable.setChildrenAllowed(flow, false);
-        }
-
-        if (flows.size() == 0) {
-            this.treeTable.removeItem(folder);
+            if (test == flow.isTest()) {
+                if (folder == null) {
+                    folder = addVirtualFolder(folderName, projectVersion);
+                }
+                this.treeTable.setChildrenAllowed(folder, true);
+                this.treeTable.addItem(flow);
+                this.treeTable.setItemIcon(flow, flow.isWebService() ? Icons.WEB : Icons.FLOW);
+                this.treeTable.setParent(flow, folder);
+                this.treeTable.setChildrenAllowed(flow, false);
+            }
         }
 
     }
 
-    protected void addModelsToFolder(FolderName folder, ProjectVersion projectVersion) {
-        List<ModelName> models = configurationService.findModelsInProject(projectVersion.getId());
-        AbstractObjectNameBasedSorter.sort(models);
+    protected void addModelsToFolder(String folderName, ProjectVersion projectVersion) {
+        List<ModelName> models = context.getUiCache().findModelsInProject(projectVersion.getId());
+        FolderName folder = null;
         for (ModelName model : models) {
+            if (folder == null) {
+                folder = addVirtualFolder(folderName, projectVersion);
+            }
             this.treeTable.setChildrenAllowed(folder, true);
             this.treeTable.addItem(model);
             this.treeTable.setItemIcon(model, Icons.MODEL);
             this.treeTable.setParent(model, folder);
             this.treeTable.setChildrenAllowed(model, false);
         }
-
-        if (models.size() == 0) {
-            this.treeTable.removeItem(folder);
-        }
     }
 
     protected void selectAndExpand(Object value) {
+        if (value != null && !treeTable.containsId(value)) {
+            String projectVersionId = null;
+            if (value instanceof AbstractName) {
+                AbstractName named = (AbstractName) value;
+                projectVersionId = named.getProjectVersionId();
+            } else if (value instanceof ProjectVersion) {
+                projectVersionId = ((ProjectVersion) value).getId();
+            }
+
+            String projectId = null;
+            if (isNotBlank(projectVersionId)) {
+                ProjectVersion projectVersion = configurationService.findProjectVersion(projectVersionId);
+                projectId = projectVersion.getProjectId();
+            } else if (value instanceof Project) {
+                projectId = ((Project) value).getId();
+            }
+
+            if (isNotBlank(projectId)) {
+                Collection<?> items = treeTable.getItemIds();
+                for (Object object : items) {
+                    if (object instanceof Project && ((Project) object).getId().equals(projectId)) {
+                        addProjectVersions(((Project) object));
+                    }
+                }
+            }
+        }
         treeTable.setValue(value);
         if (value != null) {
             treeTable.setCollapsed(value, false);
@@ -513,7 +545,7 @@ public class DesignNavigator extends VerticalLayout {
             FlowName flow = (FlowName) item;
             long ts = System.currentTimeMillis();
             EditFlowPanel flowLayout = new EditFlowPanel(context, flow.getId(), this, tabs);
-            log.info("It took {}ms to create the edit flow panel", (System.currentTimeMillis()-ts));
+            log.info("It took {}ms to create the edit flow panel", (System.currentTimeMillis() - ts));
             tabs.addCloseableTab(flow.getId(), flow.getName(), Icons.FLOW, flowLayout);
         } else if (item instanceof ModelName) {
             ModelName model = (ModelName) item;
@@ -549,14 +581,13 @@ public class DesignNavigator extends VerticalLayout {
 
     public void doNewProjectBranch() {
         Object object = treeTable.getValue();
-        if (object instanceof ProjectVersion) {            
+        if (object instanceof ProjectVersion) {
             ProjectVersion original = (ProjectVersion) object;
-            configurationService.refresh(original.getProject());            
+            configurationService.refresh(original.getProject());
             List<ProjectVersion> versions = original.getProject().getProjectVersions();
             for (ProjectVersion version : versions) {
                 if (version.getVersionType().equalsIgnoreCase(ProjectVersion.VersionType.BRANCH.toString())) {
-                    CommonUiUtils.notify("Existing branch already exists for this project.  Cannot create a new one.",
-                            Type.WARNING_MESSAGE);
+                    CommonUiUtils.notify("Existing branch already exists for this project.  Cannot create a new one.", Type.WARNING_MESSAGE);
                     return;
                 }
             }
@@ -573,21 +604,21 @@ public class DesignNavigator extends VerticalLayout {
             refreshProjects();
         }
     }
-    
+
     public void doCut() {
         Object object = treeTable.getValue();
         cutCopyPasteManager.cut(object);
     }
-        
+
     public void doCopy() {
         Object object = treeTable.getValue();
         cutCopyPasteManager.copy(object);
     }
 
     public void doPaste() {
-        Object object = treeTable.getValue();   
+        Object object = treeTable.getValue();
 
-        String newProjectVersionId=null;
+        String newProjectVersionId = null;
         if (object instanceof FolderName) {
             FolderName folderName = (FolderName) object;
             newProjectVersionId = folderName.getProjectVersionId();
@@ -604,7 +635,7 @@ public class DesignNavigator extends VerticalLayout {
             ProjectVersion projectVersion = (ProjectVersion) object;
             newProjectVersionId = projectVersion.getId();
         }
-        
+
         if (newProjectVersionId != null) {
             if (context.getClipboard().containsKey(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE)) {
                 if (context.getClipboard().get(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE).equals(Model.class)) {
@@ -618,7 +649,7 @@ public class DesignNavigator extends VerticalLayout {
             }
         }
     }
-    
+
     public void doRemove() {
         Object object = treeTable.getValue();
         if (object instanceof FlowName) {
@@ -837,7 +868,7 @@ public class DesignNavigator extends VerticalLayout {
     public ApplicationContext getContext() {
         return this.context;
     }
-    
+
     class ImportConfigurationListener implements IImportListener {
 
         @Override
