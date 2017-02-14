@@ -226,6 +226,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
     public String exportFlows(String projectVersionId, List<String> flowIds, List<String> modelIds,
             List<String> resourceIds, String userId) {     
         
+        projectsExported.clear();
         ProjectVersion version = configurationService.findProjectVersion(projectVersionId);
         save(new AuditEvent(AuditEvent.EventType.EXPORT, String.format("%s, flows: %d, models %d, resources: %d", 
                 version.getName(), flowIds.size(), modelIds.size(), resourceIds.size()), userId));
