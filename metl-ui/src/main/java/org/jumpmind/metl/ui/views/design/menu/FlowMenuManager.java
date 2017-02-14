@@ -21,8 +21,12 @@ public class FlowMenuManager extends AbstractDesignSelectedValueMenuManager {
     
     @Override
     protected String[] getDisabledPaths(Object selected) {
-        return (String[])ArrayUtils.addAll(super.getDisabledPaths(selected), new String[] {
-        });
+        if (isReadOnly(selected)) {
+            return (String[])ArrayUtils.addAll(super.getDisabledPaths(selected), new String[] { "Edit|Remove"
+            });            
+        } else {
+            return super.getDisabledPaths(selected);
+        }
     }
     
     @Override

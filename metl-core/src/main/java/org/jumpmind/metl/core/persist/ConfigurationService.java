@@ -339,20 +339,10 @@ public class ConfigurationService extends AbstractService
         List<Project> list = persistenceManager.find(Project.class, new NameValue("deleted", 0),
                 null, null, tableName(Project.class));
         AbstractObjectNameBasedSorter.sort(list);
-
-        List<ProjectVersion> versions = persistenceManager.find(ProjectVersion.class,
-                new NameValue("deleted", 0), null, null, tableName(ProjectVersion.class));
-        AbstractObjectCreateTimeDescSorter.sort(versions);
-        for (ProjectVersion projectVersion : versions) {
-            for (Project project : list) {
-                if (project.getId().equals(projectVersion.getProjectId())) {
-                    projectVersion.setProject(project);
-                    project.getProjectVersions().add(projectVersion);
-                    break;
-                }
-            }
+        
+        for (Project project : list) {
+            project.setProjectVersions(findProjectVersionsByProject(project.getId()));    
         }
-
         return list;
     }
 
@@ -1296,15 +1286,16 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public List<ProjectVersion> findProjectVersionsByProject(String projectId) {
-        
+    public List<ProjectVersion> findProjectVersionsByProject(String projectId) {        
         Map<String, Object> params = new HashMap<>();
         params.put("deleted", 0);
         params.put("projectId", projectId);
         List<ProjectVersion> versions = persistenceManager.find(ProjectVersion.class, params, null,
-                null, tableName(ProjectVersion.class));       
+                null, tableName(ProjectVersion.class));
+        AbstractObjectCreateTimeDescSorter.sort(versions);
         return versions;
     }
+    
     @Override
     public void updateProjectVersionDependency(ProjectVersionDependency dependency, String newTargetProjectVersionId) {
         //TODO: audit events

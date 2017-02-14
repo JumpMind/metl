@@ -114,5 +114,67 @@
         <name>Send Control Message on EOF</name>
       </setting>
     </settings>
-  </component>  
+  </component>
+  <component category='WRITER'
+             id='Excel File Writer'
+             inputMessageType='entity'
+             inputOutputModelsMatch='false'
+             outputMessageType='text'
+             resourceCategory='streamable'>
+    <name>Excel File Writer</name>
+    <className>org.jumpmind.metl.core.runtime.component.ExcelFileWriter</className>
+    <keywords>excel,file,files</keywords>
+    <description></description>
+    <settings>
+      <setting id='excel.output.type'
+               required='true'
+               type='choice'>
+        <name>Excel Output Type</name>
+        <defaultValue>Microsoft Excel XML (.xlsx)</defaultValue>
+        <choices>
+          <choice>Microsoft Excel XML (.xlsx)</choice>
+          <choice>Microsoft Excel (.xls)</choice>
+        </choices>
+      </setting>
+      <setting id='must.exist' 
+               required='true' 
+               type='boolean'>
+        <name>Must Exist</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='empty.file' 
+               required='true' 
+               type='boolean'>
+        <name>Empty File On No Input</name>
+        <defaultValue>true</defaultValue>
+      </setting>
+      <setting id='relative.path' 
+               required='false' 
+               type='text'>
+        <name>Path and File</name>
+      </setting>
+      <setting id='sheet.name' 
+               required='false' 
+               type='text'>
+        <name>Sheet Name</name>
+      </setting>
+      <setting id='include.header' 
+               required='true' 
+               type='boolean'>
+        <name>Include Header Row</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='get.file.name.from.message'
+               required='false'
+               type='boolean'>
+        <name>Get File Name From Message</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='filename.property' 
+               required='false' 
+               type='text'>
+        <name>Param Name For Msg Based File Name</name>
+      </setting>
+    </settings>
+  </component> 
 </definitions>
