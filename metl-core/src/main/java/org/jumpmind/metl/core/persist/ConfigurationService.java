@@ -42,6 +42,7 @@ import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AbstractObjectCreateTimeDescSorter;
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.Agent;
+import org.jumpmind.metl.core.model.AuditEvent;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
@@ -71,6 +72,7 @@ import org.jumpmind.metl.core.model.ResourceSetting;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.Version;
 import org.jumpmind.metl.core.security.ISecurityService;
+import org.jumpmind.metl.core.util.AppConstants;
 import org.jumpmind.metl.core.util.NameValue;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.util.FormatUtils;
@@ -1342,7 +1344,9 @@ public class ConfigurationService extends AbstractService
     
     @Override
     public void updateProjectVersionDependency(ProjectVersionDependency dependency, String newTargetProjectVersionId) {
-        //TODO: audit events
+        save(new AuditEvent(AuditEvent.EventType.CHANGE_DEPENDENCY_VERSION, 
+                String.format("Project Dependency Changed on %s.  Old Dependency Version %s.  New Dependency Version %s",
+                dependency.getName(),dependency.getTargetProjectVersionId(), newTargetProjectVersionId),AppConstants.SYSTEM_USER));
         Map<String, String> oldToNewResourceIdMap = getOldToNewResourceIdMap(dependency, newTargetProjectVersionId);
         Map<String, String> oldToNewModelIdMap = getOldToNewModelIdMap(dependency, newTargetProjectVersionId);
         Map<String, String> oldToNewModelEntityIdMap = getOldToNewModelEntityIdMap(oldToNewModelIdMap);
@@ -1550,7 +1554,6 @@ public class ConfigurationService extends AbstractService
                 "   set cs.value='%2$s'\n" + 
                 "where \n" + 
                 "   cs.value='%3$s'\n" + 
-                "   and cs.name in ('source.resource','target.resource')\n" + 
                 "   and cs.component_id in \n" + 
                 "   (\n" + 
                 "      select \n" + 
@@ -1561,7 +1564,6 @@ public class ConfigurationService extends AbstractService
                 "         cs.component_id = c.id         \n" + 
                 "         and c.project_version_id='%4$s'\n" + 
                 "   )\n";
-//TODO same comment here as above - look for uuid and then compare against metl_resource              
         for (Map.Entry<String, String> entry : oldToNewResourceIdMap.entrySet()) {
             transaction.execute(String.format(UPDATE_RESOURCE_IN_COMPONENT_OLD_TO_NEW, tablePrefix, entry.getValue(), entry.getKey(), sourceProjectVersionId));    
             transaction.execute(String.format(UPDATE_RESOURCE_IN_COMPONENT_SETTING_OLD_TO_NEW, tablePrefix, entry.getValue(), entry.getKey(), sourceProjectVersionId));                
@@ -1613,22 +1615,38 @@ public class ConfigurationService extends AbstractService
     private void updateProjectVersionWithNewModelAttributeIds(
             Map<String, String> oldToNewModelAttributeIdMap, String sourceProjectVersionId, ISqlTransaction transaction) {
 
-        final String UPDATE_COMPONENT_ATTRIBUTE_SETTING_OLD_TO_NEW = 
-                "update %1$s_component_attribute_setting as ces\n" + 
-                "   set ces.attribute_id='%2$s'\n" + 
+        final String UPDATE_COMPONENT_ATTRIBUTE_SETTING_KEY_OLD_TO_NEW = 
+                "update %1$s_component_attribute_setting as cas\n" + 
+                "   set cas.attribute_id='%2$s'\n" + 
                 "where \n" + 
-                "   ces.attribute_id='%3$s'\n" + 
-                "   and ces.component_id in \n" + 
+                "   cas.attribute_id='%3$s'\n" + 
+                "   and cas.component_id in \n" + 
                 "   (\n" + 
                 "      select \n" + 
                 "         c.id\n" + 
                 "      from \n" + 
                 "         %1$s_component c\n" + 
                 "      where \n" + 
-                "         ces.component_id = c.id         \n" + 
+                "         cas.component_id = c.id         \n" + 
                 "         and c.project_version_id='%4$s'\n" + 
                 "   )\n";
 
+        final String UPDATE_COMPONENT_ATTRIBUTE_SETTING_VALUE_OLD_TO_NEW = 
+                "update %1$s_component_attribute_setting as cas\n" + 
+                "   set cas.value='%2$s'\n" + 
+                "where \n" + 
+                "   cas.value='%3$s'\n" + 
+                "   and cas.component_id in \n" + 
+                "   (\n" + 
+                "      select \n" + 
+                "         c.id\n" + 
+                "      from \n" + 
+                "         %1$s_component c\n" + 
+                "      where \n" + 
+                "         cas.component_id = c.id         \n" + 
+                "         and c.project_version_id='%4$s'\n" + 
+                "   )\n";        
+        
         final String UPDATE_MODEL_ATTRIBUTE_IN_COMPONENT_SETTING_OLD_TO_NEW = 
                 "update %1$s_component_setting as cs\n" + 
                 "   set cs.value='%2$s'\n" + 
@@ -1647,12 +1665,11 @@ public class ConfigurationService extends AbstractService
                 "   )\n";
               
         for (Map.Entry<String, String> entry : oldToNewModelAttributeIdMap.entrySet()) {        
-            int rowsUpdated = transaction.execute(String.format(UPDATE_COMPONENT_ATTRIBUTE_SETTING_OLD_TO_NEW, tablePrefix, 
+            transaction.execute(String.format(UPDATE_COMPONENT_ATTRIBUTE_SETTING_KEY_OLD_TO_NEW, tablePrefix, 
                     entry.getValue(), entry.getKey(), sourceProjectVersionId));
-            if (rowsUpdated > 0) {
-                System.out.println("here");
-            }
-            int rowsUpdated2 = transaction.execute(String.format(UPDATE_MODEL_ATTRIBUTE_IN_COMPONENT_SETTING_OLD_TO_NEW, tablePrefix, 
+            transaction.execute(String.format(UPDATE_COMPONENT_ATTRIBUTE_SETTING_VALUE_OLD_TO_NEW, tablePrefix, 
+                    entry.getValue(), entry.getKey(), sourceProjectVersionId));            
+            transaction.execute(String.format(UPDATE_MODEL_ATTRIBUTE_IN_COMPONENT_SETTING_OLD_TO_NEW, tablePrefix, 
                     entry.getValue(), entry.getKey(), sourceProjectVersionId));            
         }                
     }    
