@@ -8,6 +8,8 @@ import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.ResourceName;
 
 public interface IUICache {
+    
+    public void init();
 
     public List<ProjectVersionDependency> findProjectDependencies(String projectVersionId);
 

@@ -38,6 +38,9 @@ public class UICache implements IUICache {
 
     public UICache(IConfigurationService configurationService) {
         this.configurationService = configurationService;
+    }
+    
+    public void init() {
         refreshAll();
         this.configurationService.addConfigurationChangeListener(new ChangeListener());
     }
