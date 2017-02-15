@@ -73,6 +73,7 @@ import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.DragAndDropWrapper.WrapperTargetDetails;
 import com.vaadin.ui.DragAndDropWrapper.WrapperTransferable;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
@@ -111,13 +112,13 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
     Button parametersButton;
     
-    VerticalSplitPanel splitPanel;
+    HorizontalSplitPanel splitPanel;
 
     List<AbstractObject> selected = new ArrayList<AbstractObject>();
 
     IConfigurationService configurationService;
     
-    float lastPosition = 50;
+    float lastPosition = 70;
     
     final static float MAX_PANEL_POSITION = 99;
 
@@ -148,7 +149,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
         rightLayout.addComponent(buildButtonBar());
 
-        splitPanel = new VerticalSplitPanel();
+        splitPanel = new HorizontalSplitPanel();
         splitPanel.setSizeFull();
         splitPanel.setSplitPosition(MAX_PANEL_POSITION, Unit.PERCENTAGE);
 
