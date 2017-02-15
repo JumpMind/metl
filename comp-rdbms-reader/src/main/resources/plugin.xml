@@ -24,7 +24,7 @@
   <component category='READER'
              id='RDBMS Reader'
              inputMessageType='any'
-             inputOutputModelsMatch='false'
+             showInputModel='true'
              outputMessageType='entity'
              resourceCategory='datasource'>
     <name>RDBMS Reader</name>
