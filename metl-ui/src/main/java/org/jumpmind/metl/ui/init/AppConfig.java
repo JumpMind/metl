@@ -473,7 +473,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     IUICache uiCache() {
         if (uiCache == null) {
-            uiCache = new UICache(configurationService());
+            uiCache = new UICache(importExportService(), configurationService());
         }
         return uiCache;
     }

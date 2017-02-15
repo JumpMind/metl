@@ -19,6 +19,7 @@ import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.persist.IConfigurationChangedListener;
 import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.persist.IImportExportService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +28,8 @@ public class UICache implements IUICache {
     static final Logger log = LoggerFactory.getLogger(UICache.class);
 
     IConfigurationService configurationService;
+    
+    IImportExportService importExportService;
 
     Map<String, List<ProjectVersionDependency>> dependenciesByProjectVersion;
 
@@ -36,13 +39,16 @@ public class UICache implements IUICache {
 
     Map<String, List<ModelName>> modelsByProjectVersion;
 
-    public UICache(IConfigurationService configurationService) {
+    public UICache(IImportExportService importExportService, IConfigurationService configurationService) {
         this.configurationService = configurationService;
+        this.importExportService = importExportService;
     }
     
     public void init() {
         refreshAll();
-        this.configurationService.addConfigurationChangeListener(new ChangeListener());
+        ChangeListener listener = new ChangeListener();
+        this.configurationService.addConfigurationChangeListener(listener);
+        this.importExportService.addConfigurationChangeListener(listener);
     }
 
     public List<ProjectVersionDependency> findProjectDependencies(String projectVersionId) {
@@ -134,7 +140,7 @@ public class UICache implements IUICache {
         }
         dependenciesByProjectVersion = Collections.synchronizedMap(dependenciesByProjectVersionTemp);
 
-        log.info("It took {}ms to refresh the cache", (System.currentTimeMillis() - ts));
+        log.info("It took {}ms to refresh the ui cache", (System.currentTimeMillis() - ts));
 
     }
 
