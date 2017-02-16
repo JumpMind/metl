@@ -517,7 +517,9 @@ public class FlowRuntime {
                         message.setText(FormatUtils.replaceTokens(notification.getMessage(),
                                 flowParameters, true));
                         try {
-                            transport.sendMessage(message, message.getAllRecipients());
+                            if (message.getAllRecipients() != null) {
+                                transport.sendMessage(message, message.getAllRecipients());
+                            }
                         } catch (MessagingException e) {
                             log.error("Failure while sending notification", e);
                         }
