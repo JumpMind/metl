@@ -41,6 +41,7 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.NativeSelect;
@@ -209,10 +210,10 @@ public class MailServerPanel extends VerticalLayout implements IUiPanel {
                 mailSession.getTransport();                
                 CommonUiUtils.notify("SMTP Test", "Success!");
             } catch (AuthenticationFailedException e) {
-                CommonUiUtils.notify("SMTP Test", "Failed with authentication exception: " + e.getMessage());
+                CommonUiUtils.notify("SMTP Test", "Failed with authentication exception: " + e.getMessage(), Type.ERROR_MESSAGE);
                 log.warn("SMTP test failed authentication", e);
             } catch (MessagingException e) {
-                CommonUiUtils.notify("SMTP Test", "Failed with message exception: " + e.getMessage());
+                CommonUiUtils.notify("SMTP Test", "Failed with message exception: " + e.getMessage(), Type.ERROR_MESSAGE);
                 log.warn("SMTP test failed", e);
             } finally {
                 mailSession.closeTransport();

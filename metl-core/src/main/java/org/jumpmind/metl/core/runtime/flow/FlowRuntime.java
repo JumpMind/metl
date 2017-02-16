@@ -105,8 +105,6 @@ public class FlowRuntime {
 
     List<Notification> notifications;
 
-    MailSession mailSession;
-
     IConfigurationService configurationService;
 
     IExecutionService executionService;
@@ -154,7 +152,6 @@ public class FlowRuntime {
         this.threadService = threadService;
         this.configurationService = configurationService;
         this.executionService = executionService;
-        this.mailSession = new MailSession(globalSettings);
         this.deployedResources = deployedResources;
         this.globalSettings = globalSettings;
         
@@ -504,6 +501,7 @@ public class FlowRuntime {
             flowParameters.put("_date", DateFormatUtils.format(date, DATE_FORMAT));
             flowParameters.put("_time", DateFormatUtils.format(date, TIME_FORMAT));
 
+            MailSession mailSession = new MailSession(globalSettings);
             try {
                 for (Notification notification : notifications) {
                     if (notification.getEventType().equals(eventType.toString())) {

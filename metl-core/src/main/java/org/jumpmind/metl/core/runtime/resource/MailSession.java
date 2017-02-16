@@ -33,7 +33,7 @@ public class MailSession {
     
     public static final String SETTING_TRANSPORT = "mail.transport";
     
-    public static final String SETTING_PORT_NUMBER = "mail.port";
+    public static final String SETTING_PORT_NUMBER = "mail.smtp.port";
     
     public static final String SETTING_FROM = "mail.from";
     
@@ -78,7 +78,7 @@ public class MailSession {
     
     public void closeTransport() {
         try {
-            if (transport != null) {
+            if (transport.get() != null) {
                 transport.get().close();
                 transport.set(null);
             }
