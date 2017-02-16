@@ -35,7 +35,6 @@ import java.util.UUID;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.sql.ISqlRowMapper;
 import org.jumpmind.db.sql.ISqlTemplate;
-import org.jumpmind.db.sql.ISqlTransaction;
 import org.jumpmind.db.sql.Row;
 import org.jumpmind.db.sql.mapper.StringMapper;
 import org.jumpmind.metl.core.model.AbstractObject;
@@ -1352,18 +1351,11 @@ public class ConfigurationService extends AbstractService
         Map<String, String> oldToNewModelEntityIdMap = getOldToNewModelEntityIdMap(oldToNewModelIdMap);
         Map<String, String> oldToNewModelAttributeIdMap = getOldToNewModelAttributeIdMap(oldToNewModelEntityIdMap);
 
-        ISqlTransaction transaction = databasePlatform.getSqlTemplate().startSqlTransaction();
-        try {        
-            updateProjectVersionWithNewDependencyGUIDs(oldToNewResourceIdMap, oldToNewModelIdMap,
-                    oldToNewModelEntityIdMap, oldToNewModelAttributeIdMap, dependency.getProjectVersionId(),
-                    transaction);
-            updateProjectDependencyWithNewVersion(dependency, newTargetProjectVersionId);
-            transaction.commit();
-        } catch (Exception e) {
-            log.error(String.format("Error updating project version dependencies %s",e.getMessage()));
-            transaction.rollback();
-        }
+        updateProjectVersionWithNewDependencyGUIDs(oldToNewResourceIdMap, oldToNewModelIdMap,
+                oldToNewModelEntityIdMap, oldToNewModelAttributeIdMap, dependency.getProjectVersionId());
+        updateProjectDependencyWithNewVersion(dependency, newTargetProjectVersionId);
         
+        //TODO: is this still needed now that i've gone the non sql route?
         for (IConfigurationChangedListener l : configurationChangedListeners) {
             l.onMultiRowUpdate();
         }
@@ -1537,63 +1529,33 @@ public class ConfigurationService extends AbstractService
     
     private void updateProjectVersionWithNewDependencyGUIDs(Map<String,String> oldToNewResourceIdMap, Map<String,String> oldToNewModelIdMap,
                 Map<String,String> oldToNewModelEntityIdMap, Map<String,String> oldToNewModelAttributeIdMap,
-                String sourceProjectVersionId, ISqlTransaction transaction) {
+                String sourceProjectVersionId) {
 
-        updateProjectVersionWithNewResources(oldToNewResourceIdMap, sourceProjectVersionId, transaction);
-        updateProjectVersionWithNewModels(oldToNewModelIdMap, oldToNewModelEntityIdMap,
-                oldToNewModelAttributeIdMap, sourceProjectVersionId, transaction);
-    }
-    
-    private void updateProjectVersionWithNewResources(Map<String, String> oldToNewResourceIdMap, String sourceProjectVersionId,
-            ISqlTransaction transaction) {
-
-        final String UPDATE_RESOURCE_IN_COMPONENT_OLD_TO_NEW = 
-                "update %1$s_component set resource_id='%2$s' where resource_id='%3$s' and project_version_id='%4$s'";
-        final String UPDATE_RESOURCE_IN_COMPONENT_SETTING_OLD_TO_NEW = 
-                "update %1$s_component_setting as cs\n" + 
-                "   set cs.value='%2$s'\n" + 
-                "where \n" + 
-                "   cs.value='%3$s'\n" + 
-                "   and cs.component_id in \n" + 
-                "   (\n" + 
-                "      select \n" + 
-                "         c.id\n" + 
-                "      from \n" + 
-                "         %1$s_component c\n" + 
-                "      where \n" + 
-                "         cs.component_id = c.id         \n" + 
-                "         and c.project_version_id='%4$s'\n" + 
-                "   )\n";
-        for (Map.Entry<String, String> entry : oldToNewResourceIdMap.entrySet()) {
-            transaction.execute(String.format(UPDATE_RESOURCE_IN_COMPONENT_OLD_TO_NEW, tablePrefix, entry.getValue(), entry.getKey(), sourceProjectVersionId));    
-            transaction.execute(String.format(UPDATE_RESOURCE_IN_COMPONENT_SETTING_OLD_TO_NEW, tablePrefix, entry.getValue(), entry.getKey(), sourceProjectVersionId));                
-        }                
-    }
-    
-    private void updateProjectVersionWithNewModels(Map<String, String> oldToNewModelIdMap, 
-            Map<String, String> oldToNewModelEntityIdMap, Map<String, String> oldToNewModelAttributeIdMap,
-            String sourceProjectVersionId, ISqlTransaction transaction) {
-        
         for (FlowName flowName : findFlowsInProject(sourceProjectVersionId, false)) {
-            updateFlowWithNewModels(flowName.getId(), oldToNewModelIdMap, oldToNewModelEntityIdMap, oldToNewModelAttributeIdMap);
+            updateFlowWithNewGUIDs(flowName.getId(), oldToNewModelIdMap, oldToNewModelEntityIdMap, oldToNewModelAttributeIdMap,
+                    oldToNewResourceIdMap);
         }
         for (FlowName flowName : findFlowsInProject(sourceProjectVersionId, true)) {
-            updateFlowWithNewModels(flowName.getId(), oldToNewModelIdMap, oldToNewModelEntityIdMap, oldToNewModelAttributeIdMap);
+            updateFlowWithNewGUIDs(flowName.getId(), oldToNewModelIdMap, oldToNewModelEntityIdMap, oldToNewModelAttributeIdMap,
+                    oldToNewResourceIdMap);
         }
     }
     
-    private void updateFlowWithNewModels(String flowId,Map<String, String> oldToNewModelIdMap, 
-            Map<String, String> oldToNewModelEntityIdMap, Map<String, String> oldToNewModelAttributeIdMap) {
+    
+    private void updateFlowWithNewGUIDs(String flowId,Map<String, String> oldToNewModelIdMap, 
+            Map<String, String> oldToNewModelEntityIdMap, Map<String, String> oldToNewModelAttributeIdMap,
+            Map<String, String> oldToNewResourceIdMap) {
         Flow flow = findFlow(flowId);
         for (FlowStep flowStep : flow.getFlowSteps()) {
-            updateComponentWithNewModels(flowStep,oldToNewModelIdMap, oldToNewModelEntityIdMap,
-                    oldToNewModelAttributeIdMap);
+            updateComponentWithNewGUIDs(flowStep,oldToNewModelIdMap, oldToNewModelEntityIdMap,
+                    oldToNewModelAttributeIdMap, oldToNewResourceIdMap);
         }
         save(flow);
     }
     
-    private void updateComponentWithNewModels(FlowStep flowStep,Map<String, String> oldToNewModelIdMap, 
-            Map<String, String> oldToNewModelEntityIdMap, Map<String, String> oldToNewModelAttributeIdMap) {
+    private void updateComponentWithNewGUIDs(FlowStep flowStep,Map<String, String> oldToNewModelIdMap, 
+            Map<String, String> oldToNewModelEntityIdMap, Map<String, String> oldToNewModelAttributeIdMap,
+            Map<String, String> oldToNewResourceIdMap) {
         
         Component component = flowStep.getComponent();
         String newInputModelId = oldToNewModelIdMap.get(component.getInputModelId());
@@ -1604,8 +1566,30 @@ public class ConfigurationService extends AbstractService
         if (newOutputModelId != null) {
             component.setOutputModelId(newOutputModelId);
         }
+        String newResourceId = oldToNewResourceIdMap.get(component.getResourceId());
+        if (newResourceId != null) {
+            component.setResourceId(newResourceId);
+        }
+        
+        updateComponentSettingsWithNewGUIDs(component, oldToNewModelAttributeIdMap, oldToNewResourceIdMap);
         updateComponentEntitySettingsWithNewModels(component, oldToNewModelEntityIdMap);
         updateComponentAttributeSettingsWithNewModels(component, oldToNewModelAttributeIdMap);
+    }
+    
+    private void updateComponentSettingsWithNewGUIDs(Component component,
+            Map<String, String> oldToNewModelAttributeIdMap,
+            Map<String, String> oldToNewResourceIdMap) {
+        
+        for (Setting setting : component.getSettings()) {
+            String newAttributeId = oldToNewModelAttributeIdMap.get(setting.getValue());
+            if (newAttributeId != null) {
+                setting.setValue(newAttributeId);
+            }
+            String newResourceId = oldToNewResourceIdMap.get(setting.getValue());
+            if (newResourceId != null) {
+                setting.setValue(newResourceId);
+            }
+        }
     }
     
     private void updateComponentEntitySettingsWithNewModels(Component component,
