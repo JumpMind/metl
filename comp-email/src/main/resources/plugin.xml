@@ -63,6 +63,16 @@
                type='text'>
         <name>BCC:</name>
       </setting>
+      <setting id='body.charset'
+               required='false'
+               type='text'>
+        <name>Character Set:</name>
+      </setting>
+      <setting id='sub.type'
+               required='false'
+               type='text'>
+        <name>MIME Subtype:</name>
+      </setting>
       <setting id='source.step.email.addresses'
                required='false'
                type='source_step'>

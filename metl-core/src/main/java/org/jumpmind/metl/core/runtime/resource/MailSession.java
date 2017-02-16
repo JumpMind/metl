@@ -46,8 +46,7 @@ public class MailSession {
     public static final String SETTING_USE_AUTH = "mail.smtp.auth";
 
     Session session;
-    
-    Transport transport;
+    ThreadLocal<Transport> transport = new ThreadLocal<Transport>();
     
     Map<String, String> globalSettings;
     
@@ -65,23 +64,23 @@ public class MailSession {
     }
 
     public Transport getTransport() throws MessagingException {
-        if (transport == null || !transport.isConnected()) {
-            transport = session.getTransport(getGlobalSetting(SETTING_TRANSPORT, "smtp"));
+        if (transport.get() == null || !transport.get().isConnected()) {
+            transport.set(session.getTransport(getGlobalSetting(SETTING_TRANSPORT, "smtp")));
     
             if (Boolean.parseBoolean(getGlobalSetting(SETTING_USE_AUTH, "false"))) {
-                transport.connect(globalSettings.get(SETTING_USERNAME), globalSettings.get(SETTING_PASSWORD));
+                transport.get().connect(globalSettings.get(SETTING_USERNAME), globalSettings.get(SETTING_PASSWORD));
             } else {
-                transport.connect();
+                transport.get().connect();
             }
         }
-        return transport;
+        return transport.get();
     }
     
     public void closeTransport() {
         try {
             if (transport != null) {
-                transport.close();
-                transport = null;
+                transport.get().close();
+                transport.set(null);
             }
         } catch (MessagingException e) {
         }

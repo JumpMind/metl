@@ -34,6 +34,8 @@ public class EmailWriter extends AbstractComponentRuntime {
     final static String TO_LINE = "to.line";
     final static String CC_LINE = "cc.line";
     final static String BCC_LINE = "bcc.line";
+    final static String SUB_TYPE = "sub.type";
+    final static String BODY_CHARSET = "body.charset";
     final static String SOURCE_STEP_EMAIL_ADDRESS = "source.step.email.addresses";
     final static String SOURCE_STEP_EMAIL_ADDRESS_TYPE = "source.step.email.addresses.type";
     final static String ONE_EMAIL_PER_RECIPIENT = "one.email.per.recipient";
@@ -49,6 +51,10 @@ public class EmailWriter extends AbstractComponentRuntime {
     List<String> recipients = new ArrayList<>();
 
     MailSession mailSession;
+    
+    String subType;
+
+    String bodyCharSet;
 
     @Override
     public void start() {
@@ -199,6 +205,14 @@ public class EmailWriter extends AbstractComponentRuntime {
             String body, ISendMessageCallback callback) throws MessagingException {
         Transport transport = null;
         try {
+        	bodyCharSet = properties.get(BODY_CHARSET, "utf-8");
+        	if (bodyCharSet.isEmpty()) {
+        		bodyCharSet = "utf-8";
+        	}
+        	subType = properties.get(SUB_TYPE, "plain");
+        	if (subType.isEmpty()) {
+        		subType = "plain";
+        	}
             transport = mailSession.getTransport();
             MimeMessage mailMessage = new MimeMessage(mailSession.getSession());
             mailMessage.setSentDate(new Date());
@@ -207,7 +221,7 @@ public class EmailWriter extends AbstractComponentRuntime {
             mailMessage.setRecipients(RecipientType.TO, to);
             mailMessage.setFrom(new InternetAddress(from));
             mailMessage.setSubject(subject);
-            mailMessage.setText(body);
+            mailMessage.setText(body, bodyCharSet, subType);
             transport.sendMessage(mailMessage, mailMessage.getAllRecipients());
             
             Map<String,Serializable> header = new LinkedHashMap<>();
