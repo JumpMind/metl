@@ -1,4 +1,4 @@
-    package org.jumpmind.metl.ui.views.deploy;
+package org.jumpmind.metl.ui.views.deploy;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,7 +19,6 @@ import com.vaadin.server.Page;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -47,6 +46,8 @@ public class DeployDialog extends ResizableWindow {
     SelectFlowsPanel selectFlowsPanel;
     
     SelectPackagePanel selectPackagePanel;
+    
+    ValidateReleasePackageDeploymentPanel validateReleasePackageDeploymentPanel;
 
     public DeployDialog(ApplicationContext context, EditAgentPanel parentPanel) {
         super("Deploy");
@@ -130,8 +131,11 @@ public class DeployDialog extends ResizableWindow {
     }
     
     protected Component buildValidatePackageDeploymentAction() {
-        // TODO this could become ValidateReleasePackageDeploymentPanel
-        return new Label("Validate deployment action screen goes here");
+        if (validateReleasePackageDeploymentPanel == null) {
+            String introText = "Validate deployment actions";
+            validateReleasePackageDeploymentPanel = new ValidateReleasePackageDeploymentPanel(context, introText);
+        }
+        return validateReleasePackageDeploymentPanel;
     }
 
     protected void takeAction() {
