@@ -213,7 +213,16 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements TextCha
             TextArea textField = new TextArea();
             textField.setSizeFull();
             textField.setWordwrap(false);
-            textField.setValue(XsltProcessor.getTransformedXml(textArea.getValue(), editor.getValue(), XsltProcessor.PRETTY_FORMAT, false));
+            
+            Thread thread = Thread.currentThread();
+            ClassLoader previousLoader = thread.getContextClassLoader();
+            try {
+                thread.setContextClassLoader(getClass().getClassLoader());
+                textField.setValue(XsltProcessor.getTransformedXml(textArea.getValue(), editor.getValue(), XsltProcessor.PRETTY_FORMAT, false));
+            } finally {
+                thread.setContextClassLoader(previousLoader);
+
+            }            
             addComponent(textField);
             content.setExpandRatio(textField, 1.0f);
             
