@@ -49,6 +49,7 @@ import org.jumpmind.metl.ui.common.IFlowRunnable;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.UiUtils;
+import org.jumpmind.metl.ui.definition.XMLComponentUI;
 import org.jumpmind.metl.ui.diagram.Diagram;
 import org.jumpmind.metl.ui.diagram.LinkEvent;
 import org.jumpmind.metl.ui.diagram.LinkSelectedEvent;
@@ -76,7 +77,6 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
@@ -109,6 +109,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     Button copyButton;
 
     Button delButton;
+    
+    Button advancedEditButton;
 
     Button parametersButton;
     
@@ -138,9 +140,9 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             }
             refreshStepOnDiagram(steps);
         });
-        this.propertySheet.setCaption("Property Sheet");
+        propertySheet.setCaption("Property Sheet");
 
-        this.componentPalette = new EditFlowPalette(this, context, flow.getProjectVersionId());
+        componentPalette = new EditFlowPalette(this, context, flow.getProjectVersionId());
 
         addComponent(componentPalette);
 
@@ -189,12 +191,16 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
             copyButton = buttonBar.addButton("Copy", FontAwesome.COPY);
             copyButton.addClickListener((event)->copySelected());
+            copyButton.setEnabled(false);
 
             delButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
             delButton.addClickListener((event)->deleteSelected());
-            delButton.setEnabled(false);
+            delButton.setEnabled(false);;
 
         }
+        
+        advancedEditButton = buttonBar.addButton("Advanced Edit", FontAwesome.EDIT, e->openAdvancedEditor());
+        advancedEditButton.setEnabled(false);
 
         Button exportButton = buttonBar.addButtonRight("Capture", FontAwesome.CAMERA, (event)->export());
         exportButton.setId("exportButton");
@@ -437,52 +443,101 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         }
     }
     
+    protected boolean hasAdvancedEditor(List<AbstractObject> selected) {
+        if (selected.size() == 1) {
+        Iterator<AbstractObject> iter = selected.iterator();
+        while (iter.hasNext()) {
+            AbstractObject s = iter.next();
+            if (s instanceof FlowStep) {
+                FlowStep flowStep = (FlowStep) s;
+                if (flowStep != null) {
+                    Component component = flowStep.getComponent();
+                    String type = component.getType();
+                    XMLComponentUI definition = context.getUiFactory().getUiDefinition(component.getProjectVersionId(), type);
+                    return definition != null && definition.getClassName() != null;
+                }
+            }
+        }
+        }
+        return false;
+    }
+    
+    public void openAdvancedEditor() {
+        Iterator<AbstractObject> iter = selected.iterator();
+        while (iter.hasNext()) {
+            AbstractObject s = iter.next();
+            if (s instanceof FlowStep) {
+                FlowStep flowStep = (FlowStep)s;
+                if (flowStep != null) {
+                    Component component = flowStep.getComponent();
+                    String type = component.getType();
+                    IComponentEditPanel panel = context.getUiFactory().createUiPanel(component.getProjectVersionId(), type);
+                    if (panel != null) {
+                        if (panel instanceof IFlowStepAware) {
+                            Flow flow = context.getConfigurationService().findFlow(flowStep.getFlowId());
+                            ((IFlowStepAware) panel).makeAwareOf(flowStep, flow);
+                        }
+                        panel.init(readOnly, flowStep.getComponent(), context, propertySheet);
+                        tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
+                    }
+                }
+       
+            }
+        }
+    }
+    
     protected void setPropertiesMinimized(boolean minimize) {
         float position = splitPanel.getSplitPosition();
         if (minimize && position != MAX_PANEL_POSITION) {
             lastPosition = position;
             splitPanel.setSplitPosition(MAX_PANEL_POSITION, Unit.PERCENTAGE);
         } else if (!minimize && position == MAX_PANEL_POSITION) {
-            splitPanel.setSplitPosition(lastPosition, Unit.PERCENTAGE);
+            splitPanel.setSplitPosition(lastPosition, Unit.PERCENTAGE);            
         }
     }
     
     protected void setSelectedAll() {
-        setPropertiesMinimized(flow.getFlowSteps().size()==0);
-        selected = new ArrayList<>();
+        ArrayList<AbstractObject> selected = new ArrayList<>();
         for (FlowStep step : flow.getFlowSteps()) {
             selected.add(step);
         }
-        propertySheet.setSource(selected);
-        redrawFlow();
+        setSelectedNodes(selected);
     }
     
     protected void setSelectedNodes(List<AbstractObject> nodes) {
         setPropertiesMinimized(nodes.size()==0);
+        if (readOnly || nodes.size() == 0) {
+            delButton.setEnabled(false);
+            copyButton.setEnabled(false);            
+        } else {
+            delButton.setEnabled(true);
+            copyButton.setEnabled(true);
+        }
         selected = nodes;
         propertySheet.setSource(selected);
+        advancedEditButton.setEnabled(hasAdvancedEditor(nodes));
     }
     
     protected void setSelectedNodeIds(List<String> nodeIds) {
-        setPropertiesMinimized(nodeIds.size()==0);
-        selected = new ArrayList<AbstractObject>(nodeIds.size());
+        ArrayList<AbstractObject> selected = new ArrayList<AbstractObject>(nodeIds.size());
         for (String id : nodeIds) {
             FlowStep flowStep = flow.findFlowStepWithId(id);
             selected.add(flowStep);
         }
-        propertySheet.setSource(selected);
+        setSelectedNodes(selected);
     }
-    
+
     protected void setSelectedFlowStep(FlowStep flowStep) {
-        setPropertiesMinimized(flowStep==null);
-        selected = new ArrayList<AbstractObject>(1);
-        selected.add(flowStep);
-        propertySheet.setSource(selected);
+        ArrayList<AbstractObject> selected = new ArrayList<AbstractObject>(1);
+        if (flowStep != null) {
+            selected.add(flowStep);
+        }
+        setSelectedNodes(selected);
     }
-    
+
     protected void setSelectedEmpty() {
-        setPropertiesMinimized(true);
-        propertySheet.setSource(null);
+        ArrayList<AbstractObject> selected = new ArrayList<>(0);
+        setSelectedNodes(selected);
     }
 
     class DiagramChangedListener implements Listener {
@@ -494,13 +549,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                 
                 setSelectedNodeIds(event.getNodeIds());
                 
-                
-                if (!readOnly) {
-                    delButton.setEnabled(true);
-                    copyButton.setEnabled(true);
-                }
             } else if (e instanceof NodeDoubleClickedEvent) {
-                propertySheet.openAdvancedEditor();
+                openAdvancedEditor();
             } else if (e instanceof NodeMovedEvent) {
                 NodeMovedEvent event = (NodeMovedEvent) e;
                 Node node = event.getNode();
@@ -550,11 +600,6 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                         }
                     }
 
-                    if (!readOnly) {
-                        delButton.setEnabled(false);
-                        copyButton.setEnabled(false);
-                    }
-
                     configurationService.save(flow);
                 } else {
                     FlowStepLink link = flow.removeFlowStepLink(event.getSourceNodeId(), event.getTargetNodeId());
@@ -563,20 +608,11 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                             redrawFlow();
                         }
                     }
-
-                    if (!readOnly) {
-                        delButton.setEnabled(false);
-                        copyButton.setEnabled(false);
-                    }
                 }
             } else if (e instanceof LinkSelectedEvent) {
                 LinkSelectedEvent event = (LinkSelectedEvent) e;
                 selected = new ArrayList<AbstractObject>(1);
                 selected.add(flow.findFlowStepLink(event.getSourceNodeId(), event.getTargetNodeId()));
-                if (!readOnly) {
-                    delButton.setEnabled(true);
-                    copyButton.setEnabled(true);
-                }
             }
         }
 

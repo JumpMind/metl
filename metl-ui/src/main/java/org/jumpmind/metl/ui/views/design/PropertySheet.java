@@ -54,9 +54,7 @@ import org.jumpmind.metl.core.plugin.XMLSetting;
 import org.jumpmind.metl.core.plugin.XMLSetting.Type;
 import org.jumpmind.metl.core.runtime.flow.StepRuntime;
 import org.jumpmind.metl.ui.common.ApplicationContext;
-import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
-import org.jumpmind.metl.ui.definition.XMLComponentUI;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdatePasswordField;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextArea;
@@ -73,7 +71,6 @@ import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.ui.AbsoluteLayout;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Field;
@@ -98,8 +95,6 @@ public class PropertySheet extends AbsoluteLayout {
 
     Panel panel;
 
-    Button editButton;
-
     TabbedPanel tabs;
 
     boolean readOnly;
@@ -115,40 +110,6 @@ public class PropertySheet extends AbsoluteLayout {
         panel.setSizeFull();
         panel.addStyleName("noborder");
         addComponent(panel);
-
-        editButton = new Button("Component Editor");
-        editButton.addClickListener(event -> openAdvancedEditor());
-        addComponent(editButton, "right: 25px; top: 10px;");
-
-    }
-
-    protected boolean hasAdvancedEditor() {
-        FlowStep flowStep = getSingleFlowStep();
-        if (flowStep != null) {
-            Component component = flowStep.getComponent();
-            String type = component.getType();
-            XMLComponentUI definition = context.getUiFactory().getUiDefinition(component.getProjectVersionId(), type);
-            return definition != null && definition.getClassName() != null;
-        } else {
-            return false;
-        }
-    }
-
-    public void openAdvancedEditor() {
-        FlowStep flowStep = getSingleFlowStep();
-        if (flowStep != null) {
-            Component component = flowStep.getComponent();
-            String type = component.getType();
-            IComponentEditPanel panel = context.getUiFactory().createUiPanel(component.getProjectVersionId(), type);
-            if (panel != null) {
-                if (panel instanceof IFlowStepAware) {
-                    Flow flow = context.getConfigurationService().findFlow(flowStep.getFlowId());
-                    ((IFlowStepAware) panel).makeAwareOf(flowStep, flow);
-                }
-                panel.init(readOnly, flowStep.getComponent(), context, this);
-                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
-            }
-        }
     }
 
     public void setListener(IPropertySheetChangeListener listener) {
@@ -162,7 +123,6 @@ public class PropertySheet extends AbsoluteLayout {
     @SuppressWarnings("unchecked")
     public void setSource(Object obj) {
         value = obj;
-        editButton.setVisible(hasAdvancedEditor());
         FormLayout formLayout = new FormLayout();
         formLayout.setWidth(100, Unit.PERCENTAGE);
         formLayout.setMargin(false);
