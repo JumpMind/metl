@@ -112,7 +112,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     
     Button advancedEditButton;
 
-    Button parametersButton;
+    Button settingsButton;
     
     HorizontalSplitPanel splitPanel;
 
@@ -185,7 +185,12 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         if (!readOnly) {
             runButton = buttonBar.addButton("Run", Icons.RUN);
             runButton.addClickListener((event)->runFlow());
-            
+        }
+
+        settingsButton = buttonBar.addButton("Settings", FontAwesome.GEARS);
+        settingsButton.addClickListener((event) -> new EditFlowSettingsDialog(context, flow, readOnly).showAtSize(.75));        
+
+        if (!readOnly) {
             Button selectAllButton = buttonBar.addButton("Select All", FontAwesome.CROSSHAIRS);
             selectAllButton.addClickListener((event)->setSelectedAll());
 
@@ -204,9 +209,6 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
         Button exportButton = buttonBar.addButtonRight("Capture", FontAwesome.CAMERA, (event)->export());
         exportButton.setId("exportButton");
-
-        parametersButton = buttonBar.addButton("Settings", FontAwesome.GEARS);
-        parametersButton.addClickListener((event) -> new EditFlowSettingsDialog(context, flow, readOnly).showAtSize(.75));
 
         return buttonBar;
     }
@@ -502,6 +504,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             selected.add(step);
         }
         setSelectedNodes(selected);
+        redrawFlow();
     }
     
     protected void setSelectedNodes(List<AbstractObject> nodes) {
@@ -538,6 +541,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     protected void setSelectedEmpty() {
         ArrayList<AbstractObject> selected = new ArrayList<>(0);
         setSelectedNodes(selected);
+        redrawFlow();
     }
 
     class DiagramChangedListener implements Listener {
