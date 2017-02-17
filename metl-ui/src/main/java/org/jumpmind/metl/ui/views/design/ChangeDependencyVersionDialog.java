@@ -81,7 +81,7 @@ public class ChangeDependencyVersionDialog extends ResizableWindow  {
         optionGroup.setItemCaptionPropertyId("versionLabel");
         optionGroup.addStyleName("indent");
 
-        List<ProjectVersion> projectVersions = configService.findProjectVersionsByProject(targetProjectVersion.getProjectId());        
+        List<ProjectVersion> projectVersions = configService.findProjectVersionsByProject(targetProjectVersion.getProject());        
         container.addContainerProperty("versionLabel", String.class, null); 
         for (ProjectVersion version : projectVersions) {
             Item item = container.addItem(version.getId());

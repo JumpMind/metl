@@ -195,7 +195,7 @@ public interface IConfigurationService {
 
     Map<String, ProjectVersion> findProjectVersions();
     
-    public List<ProjectVersion> findProjectVersionsByProject(String projectId);
+    public List<ProjectVersion> findProjectVersionsByProject(Project project);
     
     public ReleasePackage findReleasePackage(String releasePackageId);
     

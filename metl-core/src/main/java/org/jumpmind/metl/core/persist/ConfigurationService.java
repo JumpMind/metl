@@ -386,7 +386,7 @@ public class ConfigurationService extends AbstractService
         AbstractObjectNameBasedSorter.sort(list);
         
         for (Project project : list) {
-            project.setProjectVersions(findProjectVersionsByProject(project.getId()));    
+            project.setProjectVersions(findProjectVersionsByProject(project));    
         }
         return list;
     }
@@ -1187,7 +1187,7 @@ public class ConfigurationService extends AbstractService
     @Override
     public List<String> findAllProjectVersionIds() {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
-        return template.query(String.format("select id from %1$s_project_version where deleted=0", tablePrefix), new StringMapper());
+        return template.query(String.format("select v.id from %1$s_project_version v join %1$s_project p on p.id=v.project_id where v.deleted=0 and p.deleted=0", tablePrefix), new StringMapper());
     }
 
     protected List<ModelAttribute> findAllAttributesForModel(String modelId) {
@@ -1331,12 +1331,15 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public List<ProjectVersion> findProjectVersionsByProject(String projectId) {        
+    public List<ProjectVersion> findProjectVersionsByProject(Project project) {        
         Map<String, Object> params = new HashMap<>();
         params.put("deleted", 0);
-        params.put("projectId", projectId);
+        params.put("projectId", project.getId());
         List<ProjectVersion> versions = persistenceManager.find(ProjectVersion.class, params, null,
                 null, tableName(ProjectVersion.class));
+        for (ProjectVersion projectVersion : versions) {
+            projectVersion.setProject(project);
+        }
         AbstractObjectCreateTimeDescSorter.sort(versions);
         return versions;
     }

@@ -377,7 +377,8 @@ public class DesignNavigator extends VerticalLayout {
                 if (isNotBlank(projectId)) {
                     Collection<?> items = treeTable.getItemIds();
                     for (Object object : items) {
-                        if (object instanceof Project && ((Project) object).getId().equals(projectId)) {
+                        if (object instanceof Project && ((Project) object).getId().equals(projectId)  && 
+                                !((Project) object).isDeleted()) {
                             addProjectVersions((Project)object);
                             selected = findChild(selectedId, object);
                             break;
@@ -516,7 +517,8 @@ public class DesignNavigator extends VerticalLayout {
             if (isNotBlank(projectId)) {
                 Collection<?> items = treeTable.getItemIds();
                 for (Object object : items) {
-                    if (object instanceof Project && ((Project) object).getId().equals(projectId)) {
+                    if (object instanceof Project && ((Project) object).getId().equals(projectId) 
+                            && !((Project) object).isDeleted()) {
                         addProjectVersions(((Project) object));
                     }
                 }
@@ -966,10 +968,8 @@ public class DesignNavigator extends VerticalLayout {
             toDelete.setDeleted(true);
             configurationService.save(toDelete);
             tabs.closeAll();
-            Object parent = treeTable.getParent(toDelete);
+            treeTable.setValue(null);
             refresh();
-            treeTable.setValue(parent);
-            treeTable.setCollapsed(parent, false);
             return true;
         }
     }

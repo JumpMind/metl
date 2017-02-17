@@ -118,7 +118,7 @@ public class ProjectVersion extends AbstractNamedObject {
     }
 
     public boolean isDeleted() {
-        return deleted;
+        return deleted || project.isDeleted();
     }
 
     public void setDescription(String description) {
