@@ -135,7 +135,6 @@ public class DefinitionFactory implements IDefinitionFactory {
         List<ProjectVersionDefinitionPlugin> pvcps = configurationService.findProjectVersionComponentPlugins(projectVersionId);
         GenericVersionScheme versionScheme = new GenericVersionScheme();        
         for (Plugin configuredPlugin : distinctPlugins) {
-            logger.info("configuring: {}:{}", configuredPlugin.toString(), projectVersionId);
             boolean matched = false;
             for (ProjectVersionDefinitionPlugin pvcp : pvcps) {
                 if (pvcp.matches(configuredPlugin)) {

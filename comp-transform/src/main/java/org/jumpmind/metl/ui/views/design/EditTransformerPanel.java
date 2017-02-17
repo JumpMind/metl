@@ -238,10 +238,10 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
     }
     
     protected void updateTable() {
-        String filter = (String)filterPopField.getValue();
-        if (filter.equals(SHOW_ALL)) {
+        String filter = null;
+        if (SHOW_ALL.equals(filterPopField.getValue())) {
             filter = filterField.getValue();
-        }
+        } 
         updateTable(filter);
     }
 
