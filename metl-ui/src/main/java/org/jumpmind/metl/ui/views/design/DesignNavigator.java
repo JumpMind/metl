@@ -377,9 +377,8 @@ public class DesignNavigator extends VerticalLayout {
                 if (isNotBlank(projectId)) {
                     Collection<?> items = treeTable.getItemIds();
                     for (Object object : items) {
-                        if (object instanceof Project && ((Project) object).getId().equals(projectId)  && 
-                                !((Project) object).isDeleted()) {
-                            addProjectVersions((Project)object);
+                        if (object instanceof Project && ((Project) object).getId().equals(projectId) && !((Project) object).isDeleted()) {
+                            addProjectVersions((Project) object);
                             selected = findChild(selectedId, object);
                             break;
                         }
@@ -517,8 +516,7 @@ public class DesignNavigator extends VerticalLayout {
             if (isNotBlank(projectId)) {
                 Collection<?> items = treeTable.getItemIds();
                 for (Object object : items) {
-                    if (object instanceof Project && ((Project) object).getId().equals(projectId) 
-                            && !((Project) object).isDeleted()) {
+                    if (object instanceof Project && ((Project) object).getId().equals(projectId) && !((Project) object).isDeleted()) {
                         addProjectVersions(((Project) object));
                     }
                 }
@@ -696,11 +694,13 @@ public class DesignNavigator extends VerticalLayout {
 
         if (value instanceof ProjectVersion) {
             Collection<?> children = treeTable.getChildren(value);
-            for (Object object : children) {
-                if (object instanceof FolderName) {
-                    FolderName folder = (FolderName) object;
-                    if (folder.getName().equals(name)) {
-                        return folder;
+            if (children != null) {
+                for (Object object : children) {
+                    if (object instanceof FolderName) {
+                        FolderName folder = (FolderName) object;
+                        if (folder.getName().equals(name)) {
+                            return folder;
+                        }
                     }
                 }
             }
