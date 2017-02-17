@@ -148,22 +148,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
                 return UiUtils.getName(filterField.getValue(), attribute.getName());
             }
         });
-//        table.addGeneratedColumn("attributeValue", new ColumnGenerator() {
-//
-//            @Override
-//            public Object generateCell(Table source, Object itemId, Object columnId) {
-//                ComponentAttributeSetting setting = (ComponentAttributeSetting) itemId;
-//                String value = setting.getValue();
-//                if (value != null) {
-//                    // Show first line only. Display ellipses in the case of an ommision.
-//                    String[] lines = value.split("\r\n|\r|\n", 2);
-//                    if (lines.length > 1) {
-//                        value = lines[0] + "...";
-//                    }
-//                }
-//                return value;
-//            }
-//        });
+
         table.addGeneratedColumn("editButton", new ColumnGenerator() {
 
             @Override
@@ -174,17 +159,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
                 button.addClickListener((event) -> new EditTransformWindow(setting).showAtSize(.75));
                 return button;
             }
-        });
-        
-//        // Edit by double clicking or clicking the edit button.
-//        table.addItemClickListener(new ItemClickEvent.ItemClickListener() {
-//            @Override
-//            public void itemClick(ItemClickEvent event) {
-//                if (event.isDoubleClick()) {
-//                    new EditTransformWindow((ComponentAttributeSetting)event.getItemId()).showAtSize(.75);
-//                }
-//            }
-//        });
+        });       
         
         table.setVisibleColumns(new Object[] { "entityName", "attributeName", "value", "editButton" });
         table.setColumnWidth("entityName", 250);
@@ -264,8 +239,8 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
     
     protected void updateTable() {
         String filter = (String)filterPopField.getValue();
-        if (filter.equals(SHOW_ALL) || filter.equals(SHOW_POPULATED_ATTRIBUTES) || filter.equals(SHOW_POPULATED_ENTITIES)) {
-            filter = null;
+        if (filter.equals(SHOW_ALL)) {
+            filter = filterField.getValue();
         }
         updateTable(filter);
     }
