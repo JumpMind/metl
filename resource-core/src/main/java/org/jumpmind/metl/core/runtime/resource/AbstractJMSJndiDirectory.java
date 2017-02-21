@@ -58,15 +58,17 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
                 Method method = toClose.getClass().getMethod("close");
                 if (method != null) { 
                     try {
+                        method.setAccessible(true);
                         method.invoke(toClose);
                     } catch (IllegalAccessException e) {
-                        log.error("", e);
+                        throw e;
                     }
                 } else {
-                    log.warn("Could not find a close method to call on the class: {}", toClose.getClass().getName());
+                    String msg = String.format("Could not find a close method to call on the class: %s", toClose.getClass().getName());
+                    throw new IllegalAccessException(msg);
                 }
             } catch (NoSuchMethodError e) {
-                log.warn("Could not find a close method to call on the class: {}", toClose.getClass().getName());
+                throw e;
             } catch (Exception ex) {
             }
         }
