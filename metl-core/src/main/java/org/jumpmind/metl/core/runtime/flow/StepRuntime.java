@@ -565,7 +565,7 @@ public class StepRuntime implements Runnable {
         if (!cancelled) {
             try {
                 componentRuntime.flowCompleted(cancelled);
-            } catch (Exception ex) {
+            } catch (Throwable ex) {
                 recordError(1, ex);
                 componentContext.getExecutionTracker().flowStepFailedOnComplete(componentContext, ex);
             }
@@ -580,7 +580,7 @@ public class StepRuntime implements Runnable {
         if (!cancelled) {
             try {
                 componentRuntime.flowCompletedWithErrors(myError);
-            } catch (Exception ex) {
+            } catch (Throwable ex) {
                 recordError(1, ex);
                 componentContext.getExecutionTracker().flowStepFailedOnComplete(componentContext, ex);
             }
