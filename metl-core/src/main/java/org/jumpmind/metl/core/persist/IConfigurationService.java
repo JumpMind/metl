@@ -208,4 +208,8 @@ public interface IConfigurationService {
     public void refresh(ReleasePackage releasePackage);
     
     public void updateProjectVersionDependency(ProjectVersionDependency dependency, String newTargetProjectVersionId);
+    
+//    public List<Flow> findFlowsInReleasePackage(String releasePackageId);
+    
+//    public List<Resource> findResourcesInReleasePackage(String releasePackageId);
 }

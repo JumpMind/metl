@@ -35,6 +35,10 @@ public class AgentDeploymentSummary extends AbstractNamedObject {
     
     String artifactId;
     
+    String rowId;
+    
+    String projectVersionLabel;
+    
     String type;
     
     String name;
@@ -75,6 +79,22 @@ public class AgentDeploymentSummary extends AbstractNamedObject {
     
     public String getArtifactId() {
         return artifactId;
+    }
+
+    public String getRowId() {
+        return rowId;
+    }
+
+    public void setRowId(String rowId) {
+        this.rowId = rowId;
+    }
+
+    public String getProjectVersionLabel() {
+        return projectVersionLabel;
+    }
+
+    public void setProjectVersionLabel(String projectVersionLabel) {
+        this.projectVersionLabel = projectVersionLabel;
     }
 
     public boolean isChanged(AgentDeploymentSummary o) {
@@ -148,4 +168,86 @@ public class AgentDeploymentSummary extends AbstractNamedObject {
         this.type = type;
     }
     
+    class DeploymentLine {
+        
+        String projectName;
+        String flowName;
+        String newDeployName;
+        String newDeployVersion;
+        String newDeployType;
+        String existingDeployName;
+        String existingDeployVersion;
+        String existingDeployType;
+        boolean undeploy;
+
+        public DeploymentLine(String projectName, String flowName, String newDeployName,
+                String newDeployVersion, String newDeployType, String existingDeployName,
+                String existingDeployVersion, String existingDeployType, boolean undeploy) {
+            
+            this.projectName = projectName;
+            this.flowName = flowName;
+            this.newDeployName = newDeployName;
+            this.newDeployVersion = newDeployVersion;
+            this.newDeployType = newDeployType;
+            this.existingDeployName = existingDeployName;
+            this.existingDeployVersion = existingDeployVersion;
+            this.existingDeployType = existingDeployType;
+            this.undeploy = undeploy;            
+        }
+
+        public String getProjectName() {
+            return projectName;
+        }
+        public void setProjectName(String projectName) {
+            this.projectName = projectName;
+        }
+        public String getFlowName() {
+            return flowName;
+        }
+        public void setFlowName(String flowName) {
+            this.flowName = flowName;
+        }
+        public String getNewDeployName() {
+            return newDeployName;
+        }
+        public void setNewDeployName(String newDeployName) {
+            this.newDeployName = newDeployName;
+        }
+        public String getNewDeployVersion() {
+            return newDeployVersion;
+        }
+        public void setNewDeployVersion(String newDeployVersion) {
+            this.newDeployVersion = newDeployVersion;
+        }
+        public String getNewDeployType() {
+            return newDeployType;
+        }
+        public void setNewDeployType(String newDeployType) {
+            this.newDeployType = newDeployType;
+        }
+        public String getExistingDeployName() {
+            return existingDeployName;
+        }
+        public void setExistingDeployName(String existingDeployName) {
+            this.existingDeployName = existingDeployName;
+        }
+        public String getExistingDeployVersion() {
+            return existingDeployVersion;
+        }
+        public void setExistingDeployVersion(String existingDeployVersion) {
+            this.existingDeployVersion = existingDeployVersion;
+        }
+        public String getExistingDeployType() {
+            return existingDeployType;
+        }
+        public void setExistingDeployType(String existingDeployType) {
+            this.existingDeployType = existingDeployType;
+        }
+        public boolean isUndeploy() {
+            return undeploy;
+        }
+        public void setUndeploy(boolean undeploy) {
+            this.undeploy = undeploy;
+        }        
+    }
 }

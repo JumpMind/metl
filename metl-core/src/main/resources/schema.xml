@@ -433,6 +433,23 @@
         </foreign-key>
     </table>
     
+    <table name="agent_flow_deployment_parameter" description="">
+        <column name="flow_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier referencing a flow parameter" />
+        <column name="agent_deployment_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="name" type="VARCHAR" size="255" required="true" primaryKey="true" description="" />
+        <column name="value" type="CLOB" description="" />
+        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
+        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
+        <foreign-key foreignTable="agent_deployment" name="fk_afdp_2_ad">
+            <reference local="agent_deployment_id" foreign="id" />
+        </foreign-key>
+        <foreign-key foreignTable="flow" name="fk_afdp_2_f">
+            <reference local="flow_id" foreign="id" />
+        </foreign-key>        
+    </table>    
+        
     <table name="agent_deployment_parameter" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="flow_parameter_id" type="CHAR" size="36" required="true" description="A unique identifier referencing a flow parameter" />

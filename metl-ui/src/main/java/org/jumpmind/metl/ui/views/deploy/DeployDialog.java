@@ -54,7 +54,7 @@ public class DeployDialog extends ResizableWindow {
         this.parentPanel = parentPanel;
         this.context = context;
 
-        final float DESIRED_WIDTH = 600;
+        final float DESIRED_WIDTH = 1000;
         float width = DESIRED_WIDTH;
         float maxWidth = (float) (Page.getCurrent().getBrowserWindowWidth() * .8);
         if (maxWidth < DESIRED_WIDTH) {
@@ -133,7 +133,9 @@ public class DeployDialog extends ResizableWindow {
     protected Component buildValidatePackageDeploymentAction() {
         if (validateReleasePackageDeploymentPanel == null) {
             String introText = "Validate deployment actions";
-            validateReleasePackageDeploymentPanel = new ValidateReleasePackageDeploymentPanel(context, introText);
+            validateReleasePackageDeploymentPanel = new ValidateReleasePackageDeploymentPanel(
+                    context, introText, selectPackagePanel.getSelectedPackages(),
+                    parentPanel.getAgent().getId());
         }
         return validateReleasePackageDeploymentPanel;
     }
@@ -149,7 +151,8 @@ public class DeployDialog extends ResizableWindow {
             selectDeploymentLayout.removeAllComponents();
             selectDeploymentLayout.addComponent(buildValidatePackageDeploymentAction());
         } else {
-            log.info("Do package deployment now!");
+            //TODO: big magic here...
+            
         }
     }
 
@@ -164,6 +167,7 @@ public class DeployDialog extends ResizableWindow {
     }
 
     protected void verfiyDeployFlows(Collection<FlowName> flowCollection) {
+        //TODO this should go away in lieu of similar thing as validatereleasepackagedeployment panel
         StringBuilder alreadyDeployedFlows = new StringBuilder();
         List<AgentDeploymentSummary> summaries = parentPanel.getAgentDeploymentSummary();
         for (FlowName flowName : flowCollection) {
@@ -191,6 +195,32 @@ public class DeployDialog extends ResizableWindow {
         }
     }
 
+    protected void deployFlow(Flow flow, String deployName, boolean upgrade, 
+            AgentDeployment existingDeployment) {
+        
+        AgentDeployment newDeploy = new AgentDeployment();
+        newDeploy.setAgentId(parentPanel.getAgent().getId());
+        newDeploy.setName(deployName);
+        newDeploy.setFlowId(flow.getId());
+        List<AgentDeploymentParameter> newDeployParams = newDeploy.getAgentDeploymentParameters();
+        if (upgrade) {
+            List<AgentDeploymentParameter> existingDeployParams = newDeploy.getAgentDeploymentParameters();  
+            for (AgentDeploymentParameter existingDeployParam : existingDeployParams) {
+                
+            }
+        } else {
+            for (FlowParameter flowParam : flow.getFlowParameters()) {
+                AgentDeploymentParameter deployParam = new AgentDeploymentParameter();
+                deployParam.setFlowParameterId(flowParam.getId());
+                deployParam.setAgentDeploymentId(newDeploy.getId());
+                deployParam.setName(flowParam.getName());
+                deployParam.setValue(flowParam.getDefaultValue());
+                newDeployParams.add(deployParam);
+            }            
+        }
+        context.getOperationsSerivce().save(newDeploy);
+    }
+    
     protected void deployFlows(Collection<FlowName> flowCollection) {
         for (FlowName flowName : flowCollection) {
             IConfigurationService configurationService = context.getConfigurationService();
@@ -212,7 +242,6 @@ public class DeployDialog extends ResizableWindow {
         }
         parentPanel.refresh();
         close();
-
     }
 
     protected String getName(String name) {
