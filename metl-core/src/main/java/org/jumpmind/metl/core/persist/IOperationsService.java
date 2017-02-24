@@ -9,6 +9,7 @@ import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.AgentDeploymentSummary;
 import org.jumpmind.metl.core.model.AgentName;
 import org.jumpmind.metl.core.model.AgentResource;
+import org.jumpmind.metl.core.model.AgentResourceSetting;
 import org.jumpmind.metl.core.model.AuditEvent;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.GlobalSetting;
@@ -92,4 +93,5 @@ public interface IOperationsService {
     
     public void save(AgentDeployment agentDeployment);
 
+    public List<AgentResourceSetting> findMostRecentDeployedResourceSettings(String agentId, String resourceId);
 }

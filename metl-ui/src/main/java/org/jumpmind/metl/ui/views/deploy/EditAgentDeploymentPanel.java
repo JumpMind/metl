@@ -26,7 +26,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.jumpmind.metl.core.model.AgentDeployment;
-import org.jumpmind.metl.core.model.AgentDeploymentParameter;
+import org.jumpmind.metl.core.model.AgentFlowDeploymentParameter;
 import org.jumpmind.metl.core.model.DeploymentStatus;
 import org.jumpmind.metl.core.model.StartType;
 import org.jumpmind.metl.core.runtime.LogLevel;
@@ -106,7 +106,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
 
         table = new Table();
         table.setSizeFull();
-        BeanItemContainer<AgentDeploymentParameter> container = new BeanItemContainer<AgentDeploymentParameter>(AgentDeploymentParameter.class);
+        BeanItemContainer<AgentFlowDeploymentParameter> container = new BeanItemContainer<AgentFlowDeploymentParameter>(AgentFlowDeploymentParameter.class);
         table.setContainerDataSource(container);
         table.setEditable(true);
         table.setSelectable(true);
@@ -346,7 +346,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         public Field<?> createField(final Container dataContainer, final Object itemId,
                 final Object propertyId, com.vaadin.ui.Component uiContext) {
             if (propertyId.equals("value")) {
-                final AgentDeploymentParameter parameter = (AgentDeploymentParameter) itemId;
+                final AgentFlowDeploymentParameter parameter = (AgentFlowDeploymentParameter) itemId;
                 final TextField textField = new ImmediateUpdateTextField(null) {
                     protected void save(String text) {
                         parameter.setValue(text);

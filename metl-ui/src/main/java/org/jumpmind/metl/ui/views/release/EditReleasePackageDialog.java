@@ -113,6 +113,9 @@ public class EditReleasePackageDialog extends ResizableWindow {
             //first allow the user to select or unselect a project
             CheckBox checkBox = new CheckBox(project.getName());
             checkBox.setData(project.getId());
+            if (releasePackage.isReleased()) {
+                checkBox.setEnabled(false);
+            }
             projectLayout.addComponent(checkBox);
             //now put the project version options for each project            
             OptionGroup optionGroup = new OptionGroup();   
@@ -120,19 +123,19 @@ public class EditReleasePackageDialog extends ResizableWindow {
             List<ReleasePackageProjectVersion> rppvs = configurationService.findReleasePackageProjectVersions(releasePackageId);
             Set<String> projectVersionsInReleasePackage = getListOfProjectVersionsInReleasePackages(rppvs);
             for (ProjectVersion projectVersion : project.getProjectVersions()) {
-                if (!ProjectVersion.VersionType.RELEASE.toString().equalsIgnoreCase(projectVersion.getVersionType())) {
-                    optionGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
-                    optionGroup.addItem(projectVersion.getId());
-                    optionGroup.setEnabled(false);
-                    optionGroup.setItemCaption(projectVersion.getId(),projectVersion.getName());
-                    if (projectVersionsInReleasePackage.contains(projectVersion.getId())) {
-                        checkBox.setValue(true);
-                        optionGroup.select(projectVersion.getId());
+                optionGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
+                optionGroup.addItem(projectVersion.getId());
+                optionGroup.setEnabled(false);
+                optionGroup.setItemCaption(projectVersion.getId(),projectVersion.getName());
+                if (projectVersionsInReleasePackage.contains(projectVersion.getId())) {
+                    checkBox.setValue(true);
+                    optionGroup.select(projectVersion.getId());
+                    if (!releasePackage.isReleased()) {
                         optionGroup.setEnabled(true);
                     }
-                    projectVersionOptionGroups.put(project.getId(), optionGroup);
-                    projectLayout.addComponent(optionGroup);
                 }
+                projectVersionOptionGroups.put(project.getId(), optionGroup);
+                projectLayout.addComponent(optionGroup);
             }
             projectCheckboxes.add(checkBox);
             checkBox.addValueChangeListener(e -> projectSelectionListener(e));

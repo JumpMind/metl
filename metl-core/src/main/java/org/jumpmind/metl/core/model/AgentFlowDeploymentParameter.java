@@ -20,24 +20,24 @@
  */
 package org.jumpmind.metl.core.model;
 
-public class AgentDeploymentParameter extends AbstractNamedObject {
+public class AgentFlowDeploymentParameter extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
 
     String name;
     String value;
-    String flowParameterId;
+    String flowId;
     String agentDeploymentId;
     
-    public AgentDeploymentParameter() {
+    public AgentFlowDeploymentParameter() {
     }
     
-    public AgentDeploymentParameter(String name, String value, 
-            String agentDeploymentId, String flowParameterId) {
+    public AgentFlowDeploymentParameter(String name, String value, 
+            String agentDeploymentId, String flowId) {
         this.name = name;
         this.value = value;
         this.agentDeploymentId = agentDeploymentId;
-        this.flowParameterId = flowParameterId;
+        this.flowId = flowId;
     }
     
     @Override
@@ -58,12 +58,12 @@ public class AgentDeploymentParameter extends AbstractNamedObject {
         return agentDeploymentId;
     }
     
-    public void setFlowParameterId(String flowParameterId) {
-        this.flowParameterId = flowParameterId;
+    public void setFlowId(String flowId) {
+        this.flowId = flowId;
     }
     
-    public String getFlowParameterId() {
-        return flowParameterId;
+    public String getFlowId() {
+        return flowId;
     }
     
     public void setValue(String value) {
@@ -73,5 +73,4 @@ public class AgentDeploymentParameter extends AbstractNamedObject {
     public String getValue() {
         return value;
     }
-
 }

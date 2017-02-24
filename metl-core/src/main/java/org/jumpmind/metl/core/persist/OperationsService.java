@@ -17,8 +17,8 @@ import org.jumpmind.metl.core.model.AbstractObjectCreateTimeDescSorter;
 import org.jumpmind.metl.core.model.AbstractObjectLastUpdateTimeDescSorter;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
-import org.jumpmind.metl.core.model.AgentDeploymentParameter;
 import org.jumpmind.metl.core.model.AgentDeploymentSummary;
+import org.jumpmind.metl.core.model.AgentFlowDeploymentParameter;
 import org.jumpmind.metl.core.model.AgentName;
 import org.jumpmind.metl.core.model.AgentParameter;
 import org.jumpmind.metl.core.model.AgentResource;
@@ -258,8 +258,8 @@ public class OperationsService extends AbstractService implements IOperationsSer
 
     @Override
     public void delete(AgentDeployment agentDeployment) {
-        List<AgentDeploymentParameter> params = agentDeployment.getAgentDeploymentParameters();
-        for (AgentDeploymentParameter agentDeploymentParameter : params) {
+        List<AgentFlowDeploymentParameter> params = agentDeployment.getAgentDeploymentParameters();
+        for (AgentFlowDeploymentParameter agentDeploymentParameter : params) {
             delete((AbstractObject) agentDeploymentParameter);
         }
         delete((AbstractObject) agentDeployment);
@@ -443,8 +443,8 @@ public class OperationsService extends AbstractService implements IOperationsSer
     @Override
     public void save(AgentDeployment agentDeployment) {
         save((AbstractObject) agentDeployment);
-        List<AgentDeploymentParameter> parameters = agentDeployment.getAgentDeploymentParameters();
-        for (AgentDeploymentParameter agentDeploymentParameter : parameters) {
+        List<AgentFlowDeploymentParameter> parameters = agentDeployment.getAgentDeploymentParameters();
+        for (AgentFlowDeploymentParameter agentDeploymentParameter : parameters) {
             save((AbstractObject) agentDeploymentParameter);
         }
     }    
@@ -502,6 +502,45 @@ public class OperationsService extends AbstractService implements IOperationsSer
                 }, agentId, agentId, agentId);
     }
 
+    @Override
+    public List<AgentResourceSetting> findMostRecentDeployedResourceSettings(String agentId, String resourceId) {
+        List<AgentResourceSetting> resourceSettings = new ArrayList<AgentResourceSetting>();
+        
+        final String MOST_RECENT_DEPLOYED_RESOURCE_SETTING_SQL = 
+                "select \n" + 
+                "   ars.resource_id\n" + 
+                "   , ars.name\n" + 
+                "   , ars.value\n" + 
+                "from\n" + 
+                "   %1$s_agent_resource_setting ars\n" + 
+                "   inner join %1$s_resource oldres\n" + 
+                "      on ars.resource_id = oldres.id\n" + 
+                "   inner join %1$s_resource newres\n" + 
+                "      on oldres.row_id = newres.row_id\n" + 
+//                "      and newres.id = ars.resource_id\n" + 
+                "where\n" + 
+                "   ars.agent_id='%2$s'\n" + 
+                "   and newres.id='%3$s'\n" + 
+                "   and ars.create_time =\n" + 
+                "   (\n" + 
+                "      select max(ars2.create_time)\n" + 
+                "      from %1$s_agent_resource_setting ars2\n" + 
+                "      where ars2.name = ars.name\n" + 
+                "   )";
+        
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(MOST_RECENT_DEPLOYED_RESOURCE_SETTING_SQL, tablePrefix, agentId, resourceId));
+        for (Row row : ids) {
+            AgentResourceSetting resourceSetting = new AgentResourceSetting();
+            resourceSetting.setAgentId(agentId);
+            resourceSetting.setResourceId(row.getString("resource_id"));
+            resourceSetting.setName(row.getString("name"));
+            resourceSetting.setValue(row.getString("value"));
+            resourceSettings.add(resourceSetting);
+        }
+        return resourceSettings;
+    }
+    
     protected void refreshAgentResourceSettings(Agent agent) {
         Map<String, Object> settingParams = new HashMap<String, Object>();
         settingParams.put("agentId", agent.getId());
@@ -529,10 +568,8 @@ public class OperationsService extends AbstractService implements IOperationsSer
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("agentDeploymentId", agentDeployment.getId());
             agentDeployment.setAgentDeploymentParameters(
-                    persistenceManager.find(AgentDeploymentParameter.class, params, null, null,
-                            tableName(AgentDeploymentParameter.class)));
+                    persistenceManager.find(AgentFlowDeploymentParameter.class, params, null, null,
+                            tableName(AgentFlowDeploymentParameter.class)));
         }
     }
-    
-    
 }

@@ -41,7 +41,7 @@ import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
-import org.jumpmind.metl.core.model.AgentDeploymentParameter;
+import org.jumpmind.metl.core.model.AgentFlowDeploymentParameter;
 import org.jumpmind.metl.core.model.AgentProjectVersionFlowDeployment;
 import org.jumpmind.metl.core.model.AgentResourceSetting;
 import org.jumpmind.metl.core.model.AgentStatus;
@@ -266,7 +266,7 @@ public class AgentRuntime {
                     value = parameters.get(flowParameter.getName());
                 }
                 deployment.getAgentDeploymentParameters()
-                        .add(new AgentDeploymentParameter(flowParameter.getName(), value, deployment.getId(), flowParameter.getId()));
+                        .add(new AgentFlowDeploymentParameter(flowParameter.getName(), value, deployment.getId(), flowParameter.getId()));
 
             }
 

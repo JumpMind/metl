@@ -53,6 +53,14 @@ public class ValidateReleasePackageDeploymentPanel extends VerticalLayout {
         this.agentId = agentId;
         buildPanel(introText);
     }
+    
+    public BeanItemContainer<DeploymentLine> getContainer() {
+        return container;
+    }
+
+    public void setContainer(BeanItemContainer<DeploymentLine> container) {
+        this.container = container;
+    }
 
     protected void buildPanel(String introText) {
         this.setSpacing(true);
@@ -126,20 +134,21 @@ public class ValidateReleasePackageDeploymentPanel extends VerticalLayout {
         List<AgentDeploymentSummary> deploymentsForFlow = deploymentsByFlow.get(flow.getRowId());
         DeploymentLine deploymentLine = new DeploymentLine(projectVersion.getProject().getName(),flow.getId(),
                 flow.getName(), projectVersion.getVersionLabel(),AgentDeploymentSummary.TYPE_FLOW,
-                null, null,null,null,false);
+                null, null, null,null,null,false);
         container.addItem(deploymentLine);
         int deploymentCount=0;
         while (deploymentsForFlow != null && deploymentCount < deploymentsForFlow.size()) {
             AgentDeploymentSummary deployment = deploymentsForFlow.get(deploymentCount);            
             if (deploymentCount == 0) {
+                deploymentLine.setExistingDeploymentId(deployment.getId());
+                deploymentLine.setExistingFlowId(deployment.getArtifactId());
                 deploymentLine.setExistingDeployName(deployment.getName());
                 deploymentLine.setExistingDeployType(deployment.getType());
                 deploymentLine.setExistingDeployVersion(deployment.getProjectVersionLabel());
-                deploymentLine.setExistingFlowId(deployment.getArtifactId());
                 deploymentLine.setUpgrade(true);
             } else {
                 deploymentLine = new DeploymentLine(deployment.getProjectName(), flow.getId(), null, null, null,
-                        deployment.getArtifactId(), deployment.getName(), deployment.getProjectVersionLabel(), deployment.getType(), true);
+                        deployment.getId(), deployment.getArtifactId(), deployment.getName(), deployment.getProjectVersionLabel(), deployment.getType(), true);
                 container.addItem(deploymentLine);
             }
             deploymentCount++;
@@ -175,6 +184,7 @@ public class ValidateReleasePackageDeploymentPanel extends VerticalLayout {
         String newDeployName;
         String newDeployVersion;
         String newDeployType;
+        String existingDeploymentId;
         String existingFlowId;
         String existingDeployName;
         String existingDeployVersion;
@@ -182,7 +192,7 @@ public class ValidateReleasePackageDeploymentPanel extends VerticalLayout {
         boolean upgrade;
 
         public DeploymentLine(String projectName, String newFlowId, String newDeployName,
-                String newDeployVersion, String newDeployType, String existingFlowId, 
+                String newDeployVersion, String newDeployType, String existingDeploymentId, String existingFlowId, 
                 String existingDeployName, String existingDeployVersion, String existingDeployType, 
                 boolean upgrade) {
             
@@ -191,6 +201,7 @@ public class ValidateReleasePackageDeploymentPanel extends VerticalLayout {
             this.newDeployName = newDeployName;
             this.newDeployVersion = newDeployVersion;
             this.newDeployType = newDeployType;
+            this.existingDeploymentId = existingDeploymentId;
             this.existingFlowId = existingFlowId;
             this.existingDeployName = existingDeployName;
             this.existingDeployVersion = existingDeployVersion;
@@ -228,13 +239,18 @@ public class ValidateReleasePackageDeploymentPanel extends VerticalLayout {
         public void setNewDeployType(String newDeployType) {
             this.newDeployType = newDeployType;
         }
+        public String getExistingDeploymentId() {
+            return existingDeploymentId;
+        }
+        public void setExistingDeploymentId(String existingDeploymentId) {
+            this.existingDeploymentId = existingDeploymentId;
+        }
         public String getExistingFlowId() {
             return existingFlowId;
         }
         public void setExistingFlowId(String existingFlowId) {
             this.existingFlowId = existingFlowId;
         }
-
         public String getExistingDeployName() {
             return existingDeployName;
         }

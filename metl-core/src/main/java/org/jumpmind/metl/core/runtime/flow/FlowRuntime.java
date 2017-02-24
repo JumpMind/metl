@@ -43,7 +43,7 @@ import javax.mail.internet.MimeMessage;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.model.AgentDeploymentParameter;
+import org.jumpmind.metl.core.model.AgentFlowDeploymentParameter;
 import org.jumpmind.metl.core.model.AgentParameter;
 import org.jumpmind.metl.core.model.AgentProjectVersionFlowDeployment;
 import org.jumpmind.metl.core.model.Flow;
@@ -356,7 +356,7 @@ public class FlowRuntime {
 
     public static Map<String, String> getFlowParameters(Map<String, String> params, Agent agent,
             AgentProjectVersionFlowDeployment agentDeployment) {
-        List<AgentDeploymentParameter> deployParameters = agentDeployment.getAgentDeployment()
+        List<AgentFlowDeploymentParameter> deployParameters = agentDeployment.getAgentDeployment()
                 .getAgentDeploymentParameters();
         List<AgentParameter> agentParameters = agent.getAgentParameters();
         Set<String> overridable = new HashSet<>();
@@ -370,7 +370,7 @@ public class FlowRuntime {
             }
         }
         if (deployParameters != null) {
-            for (AgentDeploymentParameter deployParameter : deployParameters) {
+            for (AgentFlowDeploymentParameter deployParameter : deployParameters) {
                 String name = deployParameter.getName();
                 if (!params.containsKey(name) || overridable.contains(name)) {
                     params.put(deployParameter.getName(), deployParameter.getValue());

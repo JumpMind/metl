@@ -274,8 +274,18 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     protected void rowSelected() {
         Collection<Object> packages = grid.getSelectedRows();
         enableDisableButtonsForSelectionSize(packages.size());
+        disableFinalizeIfPackageAlreadyReleased(packages);
     }
 
+    protected void disableFinalizeIfPackageAlreadyReleased(Collection<Object> packages) {
+        for (Object pkg : packages) {
+            ReleasePackage releasePackage = (ReleasePackage) pkg;
+            if (releasePackage.isReleased()) {
+                finalizeButton.setEnabled(false);
+            }
+        }
+    }
+    
     protected void enableDisableButtonsForSelectionSize(int nbrRowsSelected) {
 
         if (nbrRowsSelected > 0) {

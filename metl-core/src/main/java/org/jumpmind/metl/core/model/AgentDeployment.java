@@ -47,10 +47,10 @@ public class AgentDeployment extends AbstractNamedObject {
 
     String startExpression;
     
-    List<AgentDeploymentParameter> agentDeploymentParameters;
+    List<AgentFlowDeploymentParameter> agentDeploymentParameters;
 
     public AgentDeployment() {
-        agentDeploymentParameters = new ArrayList<AgentDeploymentParameter>();
+        agentDeploymentParameters = new ArrayList<AgentFlowDeploymentParameter>();
     }
 
     public String getAgentId() {
@@ -140,11 +140,11 @@ public class AgentDeployment extends AbstractNamedObject {
     }
     
     public void setAgentDeploymentParameters(
-            List<AgentDeploymentParameter> agentDeploymentParameters) {
+            List<AgentFlowDeploymentParameter> agentDeploymentParameters) {
         this.agentDeploymentParameters = agentDeploymentParameters;
     }
     
-    public List<AgentDeploymentParameter> getAgentDeploymentParameters() {
+    public List<AgentFlowDeploymentParameter> getAgentDeploymentParameters() {
         return agentDeploymentParameters;
     }
 

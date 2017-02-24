@@ -1,19 +1,28 @@
 package org.jumpmind.metl.ui.views.deploy;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jumpmind.metl.core.model.AgentDeployment;
-import org.jumpmind.metl.core.model.AgentDeploymentParameter;
 import org.jumpmind.metl.core.model.AgentDeploymentSummary;
+import org.jumpmind.metl.core.model.AgentFlowDeploymentParameter;
+import org.jumpmind.metl.core.model.AgentResourceSetting;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FlowParameter;
+import org.jumpmind.metl.core.model.ReleasePackage;
+import org.jumpmind.metl.core.model.ReleasePackageProjectVersion;
+import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.views.deploy.ValidateReleasePackageDeploymentPanel.DeploymentLine;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.MarginInfo;
@@ -32,6 +41,10 @@ public class DeployDialog extends ResizableWindow {
     private static final long serialVersionUID = 1L;
 
     ApplicationContext context;
+    
+    IConfigurationService configurationService;
+    
+    IOperationsService operationsService;
 
     EditAgentPanel parentPanel;
 
@@ -51,6 +64,9 @@ public class DeployDialog extends ResizableWindow {
 
     public DeployDialog(ApplicationContext context, EditAgentPanel parentPanel) {
         super("Deploy");
+        this.context = context;
+        this.configurationService = context.getConfigurationService();
+        this.operationsService = context.getOperationsSerivce();
         this.parentPanel = parentPanel;
         this.context = context;
 
@@ -151,11 +167,56 @@ public class DeployDialog extends ResizableWindow {
             selectDeploymentLayout.removeAllComponents();
             selectDeploymentLayout.addComponent(buildValidatePackageDeploymentAction());
         } else {
-            //TODO: big magic here...
-            
+            deployReleasePackage();
+            close();
         }
     }
 
+    protected void deployReleasePackage() {
+        BeanItemContainer<DeploymentLine> container = validateReleasePackageDeploymentPanel.getContainer();
+        for (int i=0; i<container.size();i++) {
+            DeploymentLine line = container.getIdByIndex(i);
+            Flow flow = configurationService.findFlow(line.getNewFlowId());
+            AgentDeployment existingDeployment = operationsService.findAgentDeployment(line.getExistingDeploymentId());                
+            deployFlow(flow, line.newDeployName, line.upgrade, existingDeployment);                
+        }   
+        deployResourceSettings(selectPackagePanel.getSelectedPackages());
+    }
+    
+    protected void deployResourceSettings(List<ReleasePackage> releasePackages) {        
+        for (ReleasePackage releasePackage : releasePackages) {
+            releasePackage = configurationService.findReleasePackage(releasePackage.getId());
+            processReleasePackageResources(releasePackage);
+        }
+    }
+    
+    protected void processReleasePackageResources(ReleasePackage releasePackage) {
+        for (ReleasePackageProjectVersion rppv : releasePackage.getProjectVersions()) {
+            processProjectVersionResources(rppv);
+        }
+    }
+    
+    protected void processProjectVersionResources(ReleasePackageProjectVersion rppv) {
+        List<ResourceName> newResources = configurationService.findResourcesInProject(rppv.getProjectVersionId());
+        Map<String, List<AgentResourceSetting>> agentResourceSettingsMap = buildAgentResourceSettingsMap(newResources);        
+        for (ResourceName newResource : newResources) {
+            List<AgentResourceSetting> agentResourceSettings = agentResourceSettingsMap.get(newResource.getRowId());
+            for (AgentResourceSetting agentResourceSetting : agentResourceSettings) {
+                agentResourceSetting.setResourceId(newResource.getId());
+                configurationService.save(agentResourceSetting);
+            }
+        }   
+    }
+    
+    protected Map<String, List<AgentResourceSetting>> buildAgentResourceSettingsMap(List<ResourceName> newResources) {
+        Map<String, List<AgentResourceSetting>> resourceSettingsMap = new HashMap<String, List<AgentResourceSetting>>();
+        for (ResourceName newResource : newResources) {
+            resourceSettingsMap.put(newResource.getRowId(), 
+                    operationsService.findMostRecentDeployedResourceSettings(parentPanel.getAgent().getId(), newResource.getId()));
+        }
+        return resourceSettingsMap;
+    }
+    
     protected void back() {
         if (deployByOptionGroup.isVisible()) {
             close();
@@ -202,43 +263,35 @@ public class DeployDialog extends ResizableWindow {
         newDeploy.setAgentId(parentPanel.getAgent().getId());
         newDeploy.setName(deployName);
         newDeploy.setFlowId(flow.getId());
-        List<AgentDeploymentParameter> newDeployParams = newDeploy.getAgentDeploymentParameters();
+        List<AgentFlowDeploymentParameter> newDeployParams = newDeploy.getAgentDeploymentParameters();
+        //initialize from the flow.  If upgrading replace with agent values
+        for (FlowParameter flowParam : flow.getFlowParameters()) {
+            AgentFlowDeploymentParameter deployParam = new AgentFlowDeploymentParameter();
+            deployParam.setFlowId(flowParam.getFlowId());
+            deployParam.setAgentDeploymentId(newDeploy.getId());
+            deployParam.setName(flowParam.getName());
+            deployParam.setValue(flowParam.getDefaultValue());
+            newDeployParams.add(deployParam);
+        }            
         if (upgrade) {
-            List<AgentDeploymentParameter> existingDeployParams = newDeploy.getAgentDeploymentParameters();  
-            for (AgentDeploymentParameter existingDeployParam : existingDeployParams) {
-                
+            List<AgentFlowDeploymentParameter> existingDeployParams = existingDeployment.getAgentDeploymentParameters();
+            Map<String, String> existingDeployParamsMap = new HashMap<String, String>();
+            for (AgentFlowDeploymentParameter existingDeployParam : existingDeployParams) {
+                existingDeployParamsMap.put(existingDeployParam.getName(), existingDeployParam.getValue());                
             }
-        } else {
-            for (FlowParameter flowParam : flow.getFlowParameters()) {
-                AgentDeploymentParameter deployParam = new AgentDeploymentParameter();
-                deployParam.setFlowParameterId(flowParam.getId());
-                deployParam.setAgentDeploymentId(newDeploy.getId());
-                deployParam.setName(flowParam.getName());
-                deployParam.setValue(flowParam.getDefaultValue());
-                newDeployParams.add(deployParam);
-            }            
+            for (AgentFlowDeploymentParameter newDeployParam : newDeployParams) {
+                newDeployParam.setValue(existingDeployParamsMap.get(newDeployParam.getName()));
+            }
+            operationsService.delete(existingDeployment);
         }
-        context.getOperationsSerivce().save(newDeploy);
+        operationsService.save(newDeploy);
     }
     
     protected void deployFlows(Collection<FlowName> flowCollection) {
         for (FlowName flowName : flowCollection) {
             IConfigurationService configurationService = context.getConfigurationService();
             Flow flow = configurationService.findFlow(flowName.getId());
-            AgentDeployment deployment = new AgentDeployment();
-            deployment.setAgentId(parentPanel.getAgent().getId());
-            deployment.setName(getName(flow.getName()));
-            deployment.setFlowId(flow.getId());
-            List<AgentDeploymentParameter> deployParams = deployment.getAgentDeploymentParameters();
-            for (FlowParameter flowParam : flow.getFlowParameters()) {
-                AgentDeploymentParameter deployParam = new AgentDeploymentParameter();
-                deployParam.setFlowParameterId(flowParam.getId());
-                deployParam.setAgentDeploymentId(deployment.getId());
-                deployParam.setName(flowParam.getName());
-                deployParam.setValue(flowParam.getDefaultValue());
-                deployParams.add(deployParam);
-            }
-            context.getOperationsSerivce().save(deployment);
+            deployFlow(flow, flow.getName(), false, null);
         }
         parentPanel.refresh();
         close();
