@@ -149,6 +149,7 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     }
 
     protected void refresh() {
+        grid.deselectAll();
         container.removeAllItems();
         List<ReleasePackage> releasePackages = configurationService.findReleasePackages();
         Collections.sort(releasePackages, Collections.reverseOrder(new Comparator<ReleasePackage>() {
@@ -165,6 +166,9 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
             }
         }));
         container.addAll(releasePackages);
+        Collection<Object> packages = grid.getSelectedRows();
+        enableDisableButtonsForSelectionSize(packages.size());
+        disableFinalizeIfPackageAlreadyReleased(packages);
     }
 
     protected void add() {
@@ -206,7 +210,6 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
 
     protected void export() {
         // TODO we should let people export an entire list of release packages
-        // vs one
         ReleasePackage releasePackage = getFirstSelectedReleasePackage();
         String export = importExportService.exportReleasePackage(releasePackage.getId(),
                 AppConstants.SYSTEM_USER);
@@ -264,8 +267,7 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
                         }
                     }                                            
                 }
-                
-
+                context.getDefinitionFactory().refresh();
                 refresh();
             }
         }

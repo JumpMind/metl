@@ -463,7 +463,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
                             }
                             ids.append(linkedCaseInsensitiveMap.get("TARGET_PROJECT_VERSION_ID"));
                         }
-                        throw new MessageException("Missing dependent project.  Please load projects with the following ids first: " + ids); 
+                        throw new MessageException(String.format("Missing dependent project.  Please load the following projects first: %s",ids)); 
                     } else {
                         throw e;
                     }
