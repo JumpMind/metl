@@ -445,9 +445,6 @@
         <foreign-key foreignTable="agent_deployment" name="fk_afdp_2_ad">
             <reference local="agent_deployment_id" foreign="id" />
         </foreign-key>
-        <foreign-key foreignTable="flow" name="fk_afdp_2_f">
-            <reference local="flow_id" foreign="id" />
-        </foreign-key>        
     </table>    
         
     <table name="agent_deployment_parameter" description="">
