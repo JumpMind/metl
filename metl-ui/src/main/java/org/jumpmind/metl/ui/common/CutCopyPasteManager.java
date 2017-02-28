@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.Flow;
@@ -96,6 +97,9 @@ public class CutCopyPasteManager {
                 && ((String) clipboard.get(CLIPBOARD_ACTION)).equalsIgnoreCase(CLIPBOARD_CUT))
                 && configurationService.findAffectedFlowsByFlow(flow.getId()).size() == 0) {
             configurationService.deleteFlow(flow);
+        } else {
+            newFlow.setRowId(UUID.randomUUID().toString());
+            configurationService.save(newFlow);
         }
     }
 
