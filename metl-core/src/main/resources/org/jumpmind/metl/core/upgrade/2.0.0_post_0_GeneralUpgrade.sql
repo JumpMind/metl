@@ -42,3 +42,4 @@ from
       inner join metl_flow f
          on f.id = fp.flow_id;
          
+delete from metl_agent_deployment_parameter;

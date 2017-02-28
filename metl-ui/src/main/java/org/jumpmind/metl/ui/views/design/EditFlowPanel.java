@@ -509,10 +509,10 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     
     protected void setSelectedNodes(List<AbstractObject> nodes) {
         setPropertiesMinimized(nodes.size()==0);
-        if (readOnly || nodes.size() == 0) {
+        if (nodes.size() == 0) {
             delButton.setEnabled(false);
             copyButton.setEnabled(false);            
-        } else {
+        } else if (!readOnly) {
             delButton.setEnabled(true);
             copyButton.setEnabled(true);
         }
