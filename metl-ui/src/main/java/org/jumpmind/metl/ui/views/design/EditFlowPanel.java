@@ -74,9 +74,9 @@ import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.DragAndDropWrapper.WrapperTargetDetails;
 import com.vaadin.ui.DragAndDropWrapper.WrapperTransferable;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
@@ -114,7 +114,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
     Button settingsButton;
     
-    HorizontalSplitPanel splitPanel;
+    VerticalSplitPanel splitPanel;
 
     List<AbstractObject> selected = new ArrayList<AbstractObject>();
 
@@ -151,7 +151,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
         rightLayout.addComponent(buildButtonBar());
 
-        splitPanel = new HorizontalSplitPanel();
+        splitPanel = new VerticalSplitPanel();
         splitPanel.setSizeFull();
         splitPanel.setSplitPosition(MAX_PANEL_POSITION, Unit.PERCENTAGE);
 
