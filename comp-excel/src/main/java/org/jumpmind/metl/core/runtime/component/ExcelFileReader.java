@@ -188,6 +188,15 @@ public class ExcelFileReader extends AbstractFileReader {
                                     		}
                                     	}
                                         break;
+                                    case Cell.CELL_TYPE_ERROR:
+                                    	if (ignoreError) {
+                                    		cellValue = null;
+                                		} else {
+                                            throw new UnsupportedOperationException(
+                                                    "Error in cell.  (RowIdx:ColIdx): " 
+                                                            + (cell.getRowIndex()+1) + ":" + (cell.getColumnIndex()+1));
+                                    	}
+                                    	break;
                                     default:
                                         throw new UnsupportedOperationException(
                                                 "Invalid cell type value.  Cell Type ==>"
@@ -199,8 +208,13 @@ public class ExcelFileReader extends AbstractFileReader {
                             } //end if worksheetColumnArray != null i.e. this cell is mapped
                         } // end for cells
                         getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                        outboundPayload.add(data);
-                        linesInMessage++;
+                        // only add the data record to the outbound payload if there is data existing
+                        // for some reason some Excel files are getting additional rows read that are empty and thus creating empty
+                        // entity records which cause the read to fail.
+                        if (!data.isEmpty()) {
+                            outboundPayload.add(data);
+                            linesInMessage++;
+                        }
                         if (linesInMessage == rowsPerMessage) {
                             callback.sendEntityDataMessage(headers, outboundPayload);
                             linesInMessage = 0;
