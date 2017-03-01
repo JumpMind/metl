@@ -337,6 +337,11 @@ public class ModelAttributeScriptHelper {
         return value;
     }
 
+    public String capitalize() {
+        String text = value != null ? value.toString() : "";
+        return StringUtils.capitalize(text);
+    }
+
     protected Object eval() {
         return value;
     }
