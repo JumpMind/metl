@@ -58,9 +58,16 @@ public class MessageFilter extends AbstractComponentRuntime {
         Bindings bindings = scriptEngine.createBindings();
         bindHeadersAndFlowParameters(bindings, inputMessage);
         try {
-            if (((MESSAGE_TYPE_TO_FILTER_CONTENT.equals(messageTypeToFilter) && inputMessage instanceof ContentMessage)
-                    || (MESSAGE_TYPE_TO_FILTER_CONTROL.equals(messageTypeToFilter) && inputMessage instanceof ControlMessage))
-                    && Boolean.TRUE.equals(scriptEngine.eval(expression, bindings))) {
+            if ((MESSAGE_TYPE_TO_FILTER_CONTENT.equals(messageTypeToFilter) && inputMessage instanceof ContentMessage)) {
+                if (Boolean.TRUE.equals(scriptEngine.eval(expression, bindings))) {
+                    callback.forward(inputMessage);
+                }
+            }
+            else if ((MESSAGE_TYPE_TO_FILTER_CONTROL.equals(messageTypeToFilter) && inputMessage instanceof ControlMessage)) {
+                if (Boolean.TRUE.equals(scriptEngine.eval(expression, bindings))) {
+                    callback.forward(inputMessage);
+                }                
+            } else {
                 callback.forward(inputMessage);
             }
         } catch (ScriptException e) {
