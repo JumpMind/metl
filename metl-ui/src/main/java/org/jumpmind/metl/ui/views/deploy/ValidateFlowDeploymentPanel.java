@@ -8,15 +8,12 @@ import java.util.Map;
 import org.jumpmind.metl.core.model.AgentDeploymentSummary;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.ProjectVersion;
-import org.jumpmind.metl.core.model.ReleasePackage;
-import org.jumpmind.metl.core.model.ReleasePackageProjectVersion;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 
 import com.vaadin.annotations.StyleSheet;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.ItemClickEvent;
 import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.HeaderCell;
@@ -25,7 +22,7 @@ import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.VerticalLayout;
 
 @StyleSheet({ "mapping-diagram.css" })
-public class ValidateReleasePackageDeploymentPanel extends VerticalLayout {
+public class ValidateFlowDeploymentPanel extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
 
@@ -39,17 +36,17 @@ public class ValidateReleasePackageDeploymentPanel extends VerticalLayout {
 
     BeanItemContainer<DeploymentLine> container;
     
-    List<ReleasePackage> releasePackages;
+    List<FlowName> flows;
     
     String agentId;
    
-    public ValidateReleasePackageDeploymentPanel (ApplicationContext context, 
-            String introText, List<ReleasePackage> selectedPackages,
+    public ValidateFlowDeploymentPanel (ApplicationContext context, 
+            String introText, List<FlowName> selectedFlows,
             String agentId) {
         this.context = context;
         this.configurationService = context.getConfigurationService();
         this.operationsService = context.getOperationsSerivce();
-        this.releasePackages = selectedPackages;
+        this.flows = selectedFlows;
         this.agentId = agentId;
         buildPanel(introText);
     }
@@ -93,8 +90,6 @@ public class ValidateReleasePackageDeploymentPanel extends VerticalLayout {
         
         grid.setSizeFull();
         grid.setSelectionMode(SelectionMode.SINGLE);
-        grid.addItemClickListener(e->rowClicked(e));
-        grid.addSelectionListener((e) -> rowSelected());
         grid.setColumns("projectName","newDeployName","newDeployVersion",
                 "newDeployType","existingDeployName","existingDeployVersion",
                 "existingDeployType","upgrade");        
@@ -106,32 +101,16 @@ public class ValidateReleasePackageDeploymentPanel extends VerticalLayout {
     
     protected void buildContainer() {
         Map<String,List<AgentDeploymentSummary>> deploymentsByFlow = buildExistingDeploymentsByFlow();
-        for (ReleasePackage releasePackage : releasePackages) {
-            buildContainerReleasePackage(deploymentsByFlow, releasePackage);
+        for (FlowName flow:flows) {
+            buildContainerFlows(deploymentsByFlow, flow);
         }
     }
     
-    protected void buildContainerReleasePackage(Map<String,List<AgentDeploymentSummary>> deploymentsByFlow,
-            ReleasePackage releasePackage) {
-        List<ReleasePackageProjectVersion> rppvs = configurationService.findReleasePackageProjectVersions(releasePackage.getId());
-        for (ReleasePackageProjectVersion rppv : rppvs) {
-            buildContainerReleasePackageProjectVersion(deploymentsByFlow, rppv);
-        }                    
-    }
-    
-    protected void buildContainerReleasePackageProjectVersion(Map<String,List<AgentDeploymentSummary>> deploymentsByFlow,
-            ReleasePackageProjectVersion rppv) {
-        ProjectVersion projectVersion = configurationService.findProjectVersion(rppv.getProjectVersionId());
-        List<FlowName> flows = configurationService.findFlowsInProject(rppv.getProjectVersionId(), false);
-        for (FlowName flow : flows) {
-            buildContainerFlows(deploymentsByFlow, projectVersion, flow);
-        }     
-    }
-    
     protected void buildContainerFlows(Map<String,List<AgentDeploymentSummary>> deploymentsByFlow,
-            ProjectVersion projectVersion, FlowName flow) {
+            FlowName flow) {
         
         List<AgentDeploymentSummary> deploymentsForFlow = deploymentsByFlow.get(flow.getRowId());
+        ProjectVersion projectVersion = configurationService.findProjectVersion(flow.getProjectVersionId());
         DeploymentLine deploymentLine = new DeploymentLine(projectVersion.getProject().getName(),flow.getId(),
                 flow.getName(), projectVersion.getVersionLabel(),AgentDeploymentSummary.TYPE_FLOW,
                 null, null, null,null,null,false);
@@ -167,14 +146,6 @@ public class ValidateReleasePackageDeploymentPanel extends VerticalLayout {
             deploymentsForFlow.add(deployment);
         }
         return deploymentsByFlowMap;
-    }
-    
-    protected void rowClicked(ItemClickEvent event) {
-        //TODO do something here
-    }
-
-    protected void rowSelected() {
-        //TODO do something here
     }
     
     public static class DeploymentLine {

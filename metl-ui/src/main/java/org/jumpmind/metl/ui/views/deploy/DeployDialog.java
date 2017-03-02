@@ -1,12 +1,12 @@
 package org.jumpmind.metl.ui.views.deploy;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.metl.core.model.AgentDeployment;
-import org.jumpmind.metl.core.model.AgentDeploymentSummary;
 import org.jumpmind.metl.core.model.AgentFlowDeploymentParameter;
 import org.jumpmind.metl.core.model.AgentResourceSetting;
 import org.jumpmind.metl.core.model.Flow;
@@ -18,8 +18,7 @@ import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
-import org.jumpmind.metl.ui.views.deploy.ValidateReleasePackageDeploymentPanel.DeploymentLine;
-import org.jumpmind.vaadin.ui.common.ConfirmDialog;
+import org.jumpmind.metl.ui.views.deploy.ValidateFlowDeploymentPanel.DeploymentLine;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 
 import com.vaadin.data.util.BeanItemContainer;
@@ -60,7 +59,7 @@ public class DeployDialog extends ResizableWindow {
     
     SelectPackagePanel selectPackagePanel;
     
-    ValidateReleasePackageDeploymentPanel validateReleasePackageDeploymentPanel;
+    ValidateFlowDeploymentPanel validateFlowDeploymentPanel;
 
     public DeployDialog(ApplicationContext context, EditAgentPanel parentPanel) {
         super("Deploy");
@@ -133,7 +132,7 @@ public class DeployDialog extends ResizableWindow {
             String introText = "Select one or more flows for deployment to this agent:";
             selectFlowsPanel = new SelectFlowsPanel(context, introText, parentPanel.getAgent().isAllowTestFlows());
         }
-        actionButton.setCaption("Deploy");
+        actionButton.setCaption("Next");
         return selectFlowsPanel;
     }
 
@@ -146,34 +145,56 @@ public class DeployDialog extends ResizableWindow {
         return selectPackagePanel;        
     }
     
-    protected Component buildValidatePackageDeploymentAction() {
-        if (validateReleasePackageDeploymentPanel == null) {
-            String introText = "Validate deployment actions";
-            validateReleasePackageDeploymentPanel = new ValidateReleasePackageDeploymentPanel(
-                    context, introText, selectPackagePanel.getSelectedPackages(),
-                    parentPanel.getAgent().getId());
-        }
-        return validateReleasePackageDeploymentPanel;
+    protected List<FlowName> getFlowsFromReleasePackages(List<ReleasePackage> releasePackages) {
+        List<FlowName> flows = new ArrayList<FlowName>();
+        
+        for (ReleasePackage releasePackage : releasePackages) {
+            List<ReleasePackageProjectVersion> rppvs = configurationService.findReleasePackageProjectVersions(releasePackage.getId());
+            for (ReleasePackageProjectVersion rppv : rppvs) {
+                flows.addAll(configurationService.findFlowsInProject(rppv.getProjectVersionId(), false));
+            }                    
+        }        
+        return flows;
     }
-
+    
     protected void takeAction() {
-        if (isDeployByFlow()) {
-            Collection<FlowName> flows = selectFlowsPanel.getSelectedFlows(parentPanel.getAgent().isAllowTestFlows());
-            verfiyDeployFlows(flows);
-        } else if (isDeployByPackage()) {
+        if (isDeployByFlow() || isDeployByPackage()) {
+            if (validateFlowDeploymentPanel == null) {
+                String introText = "Validate deployment actions";
+                if (isDeployByPackage()) {
+                    validateFlowDeploymentPanel = new ValidateFlowDeploymentPanel(
+                            context, introText, getFlowsFromReleasePackages(selectPackagePanel.getSelectedPackages()),
+                            parentPanel.getAgent().getId());
+                } else {
+                    List<FlowName> flows = new ArrayList<FlowName>(selectFlowsPanel.getSelectedFlows(parentPanel.getAgent().isAllowTestFlows()));
+                    validateFlowDeploymentPanel = new ValidateFlowDeploymentPanel(
+                            context, introText, flows,
+                            parentPanel.getAgent().getId());                    
+                }
+            }
             deployByOptionGroup.setVisible(false);
             backButton.setCaption("Previous");
             actionButton.setCaption("Deploy");
             selectDeploymentLayout.removeAllComponents();
-            selectDeploymentLayout.addComponent(buildValidatePackageDeploymentAction());
+            selectDeploymentLayout.addComponent(validateFlowDeploymentPanel);            
         } else {
             deployReleasePackage();
             close();
         }
     }
 
+    protected Component buildValidatePackageDeploymentAction() {
+        if (validateFlowDeploymentPanel == null) {
+            String introText = "Validate deployment actions";
+            validateFlowDeploymentPanel = new ValidateFlowDeploymentPanel(
+                    context, introText, getFlowsFromReleasePackages(selectPackagePanel.getSelectedPackages()),
+                    parentPanel.getAgent().getId());
+        }
+        return validateFlowDeploymentPanel;
+    }
+    
     protected void deployReleasePackage() {
-        BeanItemContainer<DeploymentLine> container = validateReleasePackageDeploymentPanel.getContainer();
+        BeanItemContainer<DeploymentLine> container = validateFlowDeploymentPanel.getContainer();
         for (int i=0; i<container.size();i++) {
             DeploymentLine line = container.getIdByIndex(i);
             Flow flow = configurationService.findFlow(line.getNewFlowId());
@@ -224,35 +245,6 @@ public class DeployDialog extends ResizableWindow {
             deployByOptionGroup.setVisible(true);
             backButton.setCaption("Cancel");
             deployByChanged();
-        }
-    }
-
-    protected void verfiyDeployFlows(Collection<FlowName> flowCollection) {
-        //TODO this should go away in lieu of similar thing as validatereleasepackagedeployment panel
-        StringBuilder alreadyDeployedFlows = new StringBuilder();
-        List<AgentDeploymentSummary> summaries = parentPanel.getAgentDeploymentSummary();
-        for (FlowName flowName : flowCollection) {
-            for (AgentDeploymentSummary agentDeploymentSummary : summaries) {
-                if (flowName.getId().equals(agentDeploymentSummary.getArtifactId())) {
-                    if (alreadyDeployedFlows.length() > 0) {
-                        alreadyDeployedFlows.append(", ");
-                    }
-                    alreadyDeployedFlows.append("'").append(flowName.getName()).append("'");
-                }
-            }
-        }
-
-        if (alreadyDeployedFlows.length() > 0) {
-            ConfirmDialog.show("Flows already deployed",
-                    String.format(
-                            "There are flows that have already been deployed.  Press OK to deploy another version. The following flows are already deployed: %s",
-                            alreadyDeployedFlows),
-                    () -> {
-                        deployFlows(flowCollection);
-                        return true;
-                    });
-        } else {
-            deployFlows(flowCollection);
         }
     }
 
