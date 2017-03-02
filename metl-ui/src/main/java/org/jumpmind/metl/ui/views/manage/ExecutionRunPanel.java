@@ -100,7 +100,7 @@ import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.renderers.DateRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBackgroundRefreshable {
+public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBackgroundRefreshable<Object> {
 
     private static final long serialVersionUID = 1L;
 
@@ -593,7 +593,6 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         context.getConfigurationService().save(setting);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Object onBackgroundDataRefresh() {
         if (!lastDataRefreshWasDone) {
@@ -608,6 +607,10 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         if (backgroundData != null) {
             refreshUI((ExecutionData) backgroundData);
         }
+    }
+    
+    public void onUIError(Throwable ex) {
+        CommonUiUtils.notify(ex);   
     }
 
     protected ExecutionData getExecutionData() {

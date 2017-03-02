@@ -83,7 +83,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgroundRefreshable, IAgentDeploymentChangeListener {
+public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgroundRefreshable<Object>, IAgentDeploymentChangeListener {
 
     private static final long serialVersionUID = 1L;
 
@@ -240,7 +240,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         addComponent(table);
         setExpandRatio(table, 1.0f);
         refresh();
-        setButtonsEnabled();
+        setButtonsEnabled();        
         backgroundRefresherService.register(this);
     }
     
@@ -294,7 +294,6 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Object onBackgroundDataRefresh() {
         return getRefreshData();
@@ -306,6 +305,11 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         updateItems((List<AgentDeploymentSummary>) backgroundData);
     }
 
+    @Override
+    public void onUIError(Throwable ex) {
+        CommonUiUtils.notify(ex);        
+    }
+    
     protected List<AgentDeploymentSummary> getRefreshData() {
         List<AgentDeploymentSummary> summaries = context.getOperationsSerivce().findAgentDeploymentSummary(agent.getId());
         String filterString = filterField.getValue();

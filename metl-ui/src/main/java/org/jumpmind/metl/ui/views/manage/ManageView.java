@@ -46,6 +46,7 @@ import org.jumpmind.metl.ui.common.MultiPropertyFilter;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.Table;
 import org.jumpmind.metl.ui.common.TopBarLink;
+import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +79,7 @@ import com.vaadin.ui.themes.ValoTheme;
 @UiComponent
 @Scope(value = "ui")
 @TopBarLink(category = Category.Manage, name = "Manage", id = "manage", icon = FontAwesome.GEARS, menuOrder = 25)
-public class ManageView extends HorizontalLayout implements View, IUiPanel, IBackgroundRefreshable {
+public class ManageView extends HorizontalLayout implements View, IUiPanel, IBackgroundRefreshable<Object> {
 
     private static final String ANY = "<Any>";
 
@@ -262,7 +263,6 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     public void deselected() {
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Object onBackgroundDataRefresh() {
         return getBackgroundData();
@@ -273,6 +273,11 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         refreshUI(backgroundData);
     }
 
+    @Override
+    public void onUIError(Throwable ex) {
+        CommonUiUtils.notify(ex);        
+    }
+    
     public Object getBackgroundData() {
         if (statusSelect.isReadOnly()) {
             statusSelect.setReadOnly(false);

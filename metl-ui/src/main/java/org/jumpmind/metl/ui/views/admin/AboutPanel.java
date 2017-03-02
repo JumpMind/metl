@@ -39,7 +39,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class AboutPanel extends VerticalLayout implements IUiPanel, IBackgroundRefreshable {
+public class AboutPanel extends VerticalLayout implements IUiPanel, IBackgroundRefreshable<Object> {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -90,15 +90,19 @@ public class AboutPanel extends VerticalLayout implements IUiPanel, IBackgroundR
         onBackgroundDataRefresh();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T> T onBackgroundDataRefresh() {
-        return (T) new Object();
+    public Object onBackgroundDataRefresh() {
+        return new Object();
     }
 
     @Override
-    public <T> void onBackgroundUIRefresh(T backgroundData) {
+    public void onBackgroundUIRefresh(Object backgroundData) {
         refresh();
+    }
+
+    @Override
+    public void onUIError(Throwable ex) {
+        CommonUiUtils.notify(ex);        
     }
 
     protected void refresh() {

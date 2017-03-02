@@ -49,7 +49,7 @@ public class BackgroundRefresherService implements Serializable {
 
     protected AppUI appUi;
 
-    protected Set<IBackgroundRefreshable> currentlyRefreshing = Collections.synchronizedSet(new HashSet<IBackgroundRefreshable>());
+    protected Set<IBackgroundRefreshable<Object>> currentlyRefreshing = Collections.synchronizedSet(new HashSet<IBackgroundRefreshable<Object>>());
 
     protected void init(AppUI ui) {
         this.appUi = ui;
@@ -77,32 +77,28 @@ public class BackgroundRefresherService implements Serializable {
         this.future = this.taskScheduler.scheduleWithFixedDelay(() -> refresh(), new Date(), interval);
     }
 
+    public void doWork(IBackgroundRefreshable<Object> work) {
+        taskScheduler.schedule(() -> run(work), new Date());
+    }
+    
     protected void refresh() {
         synchronized (currentlyRefreshing) {
             if (appUi.isAttached()) {
-                for (final IBackgroundRefreshable refreshing : currentlyRefreshing) {
-                    if (refreshing != null) {
-                        try {
-                            log.debug("refreshing background data " + refreshing.getClass().getSimpleName());
-                            final Object data = refreshing.onBackgroundDataRefresh();
-                            if (data != null) {
-                            	appUi.access(() -> refreshing.onBackgroundUIRefresh(data));
-                            }
-                        } catch (Exception e) {
-                            log.error(e.getMessage(), e);
-                        }
+                for (final IBackgroundRefreshable<Object> refreshing : currentlyRefreshing) {
+                    if (refreshing != null) {                        
+                        run(refreshing);
                     } 
                 }
             }
         }
     }
 
-    public void register(IBackgroundRefreshable refreshing) {
+    public void register(IBackgroundRefreshable<Object> refreshing) {
         log.debug("registered background refresher " + refreshing.getClass().getSimpleName());
         currentlyRefreshing.add(refreshing);
     }
 
-    public void unregister(IBackgroundRefreshable refreshing) {
+    public void unregister(IBackgroundRefreshable<Object> refreshing) {
         log.debug("unregistered background refresher " + refreshing.getClass().getSimpleName());
         currentlyRefreshing.remove(refreshing);
     }
@@ -118,7 +114,18 @@ public class BackgroundRefresherService implements Serializable {
             taskScheduler.shutdown();
             taskScheduler = null;
         }
-
     }
-
+    
+    protected void run(IBackgroundRefreshable<Object> refreshing) {
+        try {
+            log.debug("refreshing background data " + refreshing.getClass().getSimpleName());
+            final Object data = refreshing.onBackgroundDataRefresh();
+            if (data != null) {
+                appUi.access(() -> refreshing.onBackgroundUIRefresh(data));
+            }
+        } catch (Exception e) {
+            appUi.access(() -> refreshing.onUIError(e));                            
+            log.error(e.getMessage(), e);
+        }
+    }
 }

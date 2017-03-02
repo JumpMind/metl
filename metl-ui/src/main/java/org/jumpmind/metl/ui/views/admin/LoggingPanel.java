@@ -36,6 +36,7 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.init.BackgroundRefresherService;
+import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -61,7 +62,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class LoggingPanel extends VerticalLayout implements IUiPanel, IBackgroundRefreshable {
+public class LoggingPanel extends VerticalLayout implements IUiPanel, IBackgroundRefreshable<Object> {
 
     ApplicationContext context;
 
@@ -201,7 +202,6 @@ public class LoggingPanel extends VerticalLayout implements IUiPanel, IBackgroun
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Object onBackgroundDataRefresh() {
         StringBuilder builder = null;
         if (logFile != null && logFile.exists() && autoRefreshOn.getValue()) {
@@ -268,5 +268,9 @@ public class LoggingPanel extends VerticalLayout implements IUiPanel, IBackgroun
             logPanel.markAsDirty();
         }
     }
-
+    
+    @Override
+    public void onUIError(Throwable ex) {
+        CommonUiUtils.notify(ex);
+    }
 }
