@@ -43,7 +43,6 @@ import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.AgentFlowDeploymentParameter;
 import org.jumpmind.metl.core.model.AgentProjectVersionFlowDeployment;
-import org.jumpmind.metl.core.model.AgentResourceSetting;
 import org.jumpmind.metl.core.model.AgentStatus;
 import org.jumpmind.metl.core.model.DeploymentStatus;
 import org.jumpmind.metl.core.model.Flow;
@@ -356,22 +355,6 @@ public class AgentRuntime {
 
                 if (definition != null) {
                     IResourceRuntime alreadyDeployed = deployedResources.get(flowResource.getId());
-
-                    if (alreadyDeployed == null) {
-                        Resource previousResource = configurationService.findPreviousVersionResource(flowResource);
-                        if (previousResource != null) {
-                            log.info("Found a previous version of the '{}' resource.  Using it's agent settings during deployment",
-                                    flowResource.getName());
-                            TypedProperties previouslyOverriddenSettings = agent.toTypedProperties(definition, previousResource);
-                            for (Object key : previouslyOverriddenSettings.keySet()) {
-                                AgentResourceSetting setting = new AgentResourceSetting(flowResource.getId(), agent.getId());
-                                setting.setName((String) key);
-                                setting.setValue((String) previouslyOverriddenSettings.get(key));
-                                operationsService.save(setting);
-                                agent.getAgentResourceSettings().add(setting);
-                            }
-                        }
-                    }
 
                     TypedProperties combined = agent.toTypedProperties(definition, flowResource);
                     Set<Entry<Object, Object>> entries = combined.entrySet();

@@ -46,6 +46,7 @@ import org.jumpmind.metl.core.util.AppConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.Category;
+import org.jumpmind.metl.ui.common.InProgressDialog;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
@@ -70,6 +71,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
@@ -101,6 +103,8 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     IConfigurationService configurationService;
 
     IImportExportService importExportService;
+    
+    ProgressBar progressBar;
 
     public ReleasesView() {
         setSizeFull();
@@ -124,6 +128,7 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
         grid.sort("releaseDate", SortDirection.DESCENDING);
         addComponent(grid);
         setExpandRatio(grid, 1);
+        progressBar = new ProgressBar(0.0f);
     }
 
     @Override
@@ -223,7 +228,9 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     protected void finalize() {
         ConfirmDialog.show("Release the selected packages?",
                 "Are you sure you want to release the selected packages?", () -> {
-                    finalizeSelectedReleasePackages();
+                    InProgressDialog<Object> dialog = new InProgressDialog<Object>("Finalizing Release Package", 
+                            new ReleaseWorker(), context.getBackgroundRefresherService(), "Finalize of Release Package Failed");
+                    dialog.show();
                     return true;
                 });                
     }
@@ -337,5 +344,18 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
         final String KEY = "export";
         setResource(KEY, resource);
         Page.getCurrent().open(ResourceReference.create(resource, this, KEY).getURL(), null);
+    }
+    
+    class ReleaseWorker implements InProgressDialog.InProgressWorker<Object> {
+
+        @Override
+        public Object doWork() {
+            finalizeSelectedReleasePackages();
+            return true;
+        }
+        
+        @Override
+        public void doUI(Object data) {
+        }
     }
 }

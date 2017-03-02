@@ -21,9 +21,10 @@
 package org.jumpmind.metl.ui.common;
 
 
-public interface IBackgroundRefreshable {
+public interface IBackgroundRefreshable<T> {
     
-    public <T> T onBackgroundDataRefresh();
-    public <T> void onBackgroundUIRefresh(T backgroundData);
+    public T onBackgroundDataRefresh();
+    public void onBackgroundUIRefresh(T backgroundData);
+    public void onUIError(Throwable ex);
         
 }
