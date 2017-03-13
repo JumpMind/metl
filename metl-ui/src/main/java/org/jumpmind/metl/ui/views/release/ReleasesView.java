@@ -114,6 +114,8 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
         editButton = buttonBar.addButton("Edit", FontAwesome.EDIT, e -> edit());
         exportButton = buttonBar.addButton("Export", FontAwesome.DOWNLOAD, e -> export());
         archiveButton = buttonBar.addButton("Archive", FontAwesome.ARCHIVE, e -> archive());
+        // TODO add support for the archive button
+        archiveButton.setVisible(false);
         finalizeButton = buttonBar.addButton("Finalize", FontAwesome.CUBE, e -> finalize());
         addComponent(buttonBar);
         enableDisableButtonsForSelectionSize(0);
