@@ -287,22 +287,18 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         Object currentSelectionParent = manageNavigator.getCurrentSelectionParent();
         if (currentSelection != null) {
             Map<String, Object> params = new HashMap<String, Object>();
-            if (currentSelection.equals(ManageNavigator.CURRENTLY_RUNNING)) {
-                statusSelect.setValue(ExecutionStatus.RUNNING.name());
-                statusSelect.setReadOnly(true);
-            } else if (currentSelection.equals(ManageNavigator.IN_ERROR)) {
-                statusSelect.setValue(ExecutionStatus.ERROR.name());
-                statusSelect.setReadOnly(true);
-            } else if (currentSelection instanceof Agent) {
-                params.put("agentId", ((Agent) currentSelection).getId());
-            } else if (currentSelection instanceof AgentName) {
-                params.put("agentId", ((AgentName) currentSelection).getId());
-            } else if (currentSelection instanceof FlowName) {
-                params.put("flowId", ((FlowName) currentSelection).getId());
-            } else if (currentSelection instanceof AgentDeployment) {
-                params.put("deploymentId", ((AgentDeployment) currentSelection).getId());
-            } else if (currentSelection instanceof AgentDeploymentSummary) {
-                params.put("deploymentId", ((AgentDeploymentSummary) currentSelection).getId());
+            if (!currentSelection.equals(ManageNavigator.CURRENTLY_RUNNING) && !currentSelection.equals(ManageNavigator.IN_ERROR)) {
+                if (currentSelection instanceof Agent) {
+                    params.put("agentId", ((Agent) currentSelection).getId());
+                } else if (currentSelection instanceof AgentName) {
+                    params.put("agentId", ((AgentName) currentSelection).getId());
+                } else if (currentSelection instanceof FlowName) {
+                    params.put("flowId", ((FlowName) currentSelection).getId());
+                } else if (currentSelection instanceof AgentDeployment) {
+                    params.put("deploymentId", ((AgentDeployment) currentSelection).getId());
+                } else if (currentSelection instanceof AgentDeploymentSummary) {
+                    params.put("deploymentId", ((AgentDeploymentSummary) currentSelection).getId());
+                }
             }
 
             if (currentSelectionParent instanceof Agent) {
@@ -324,15 +320,25 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
     @SuppressWarnings("unchecked")
     protected void refreshUI(Object obj) {
+        Object currentSelection = manageNavigator.getCurrentSelection();
+        if (currentSelection != null) {
+            if (currentSelection.equals(ManageNavigator.CURRENTLY_RUNNING)) {
+                statusSelect.setValue(ExecutionStatus.RUNNING.name());
+                statusSelect.setReadOnly(true);
+            } else if (currentSelection.equals(ManageNavigator.IN_ERROR)) {
+                statusSelect.setValue(ExecutionStatus.ERROR.name());
+                statusSelect.setReadOnly(true);
+            }
+        }
         List<Execution> data = (List<Execution>) obj;
         if (needsUpdated(data)) {
-            Object currentSelection = table.getValue();
+            Object currentTableSelection = table.getValue();
             executionContainer.removeAllItems();
             table.setValue(null);
             if (data != null) {
                 executionContainer.addAll((List<Execution>) data);
                 table.sort();
-                table.setValue(currentSelection);
+                table.setValue(currentTableSelection);
             }
             viewButton.setEnabled(table.getValue() != null);
             tabs.mainTabToTop();
