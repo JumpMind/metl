@@ -280,8 +280,8 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
                 }
                 context.getDefinitionFactory().refresh();
                 refresh();
-            }
-        }
+            } //if release package not released
+        } //every release package
     }
 
     protected void rowSelected(SelectionEvent event) {

@@ -193,6 +193,9 @@ public class DesignNavigator extends VerticalLayout {
             }
         });
         treeTable.addExpandListener(e -> {
+            //deselect any selected rows when they expand or collapse?
+            AbstractObject object = (AbstractObject) treeTable.getValue();
+            treeTable.unselect(object);
             if (e.getItemId() instanceof FolderName) {
                 treeTable.setItemIcon(e.getItemId(), Icons.FOLDER_OPEN);
             } else if (e.getItemId() instanceof Project && !treeTable.hasChildren(e.getItemId())) {
@@ -333,9 +336,7 @@ public class DesignNavigator extends VerticalLayout {
             addComponent(treeTable);
             setExpandRatio(treeTable, 1);
         }
-
         treeTable.refreshRowCache();
-
     }
 
     protected void addProjectVersions(Project project) {
