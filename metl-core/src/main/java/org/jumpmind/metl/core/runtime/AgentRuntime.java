@@ -452,7 +452,6 @@ public class AgentRuntime {
         return new FlowRuntime(executionId, userId, findDeployed(deployment), agent, componentRuntimeFactory, definitionFactory,
                 flowStepsExecutionThreads, operationsService, configurationService, executionService, deployedResources, null, globalSettings,
                 runtimeParameters);
-
     }
 
     public Results execute(String userId, AgentDeployment deployment, Map<String, String> runtimeParameters) throws Exception {

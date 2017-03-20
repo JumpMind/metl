@@ -28,11 +28,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import javax.mail.Message.RecipientType;
@@ -155,11 +152,10 @@ public class FlowRuntime {
         this.deployedResources = deployedResources;
         this.globalSettings = globalSettings;
         
-        this.flowParameters = new LinkedHashMap<String, String>();         
+        this.flowParameters = getFlowParameters(agent, deployment);
         if (runtimeParameters != null) {
             this.flowParameters.putAll(runtimeParameters);
         }
-        getFlowParameters(this.flowParameters, agent, deployment);
         
         if (threadService != null && executionService != null) {
             this.executionTracker = new ExecutionTrackerRecorder(agent, deployment, threadService,
@@ -351,28 +347,20 @@ public class FlowRuntime {
         for (FlowParameter flowParameter : flowParameters) {
             params.put(flowParameter.getName(), flowParameter.getDefaultValue());
         }
-        return getFlowParameters(params, agent, agentDeployment);
-    }
-
-    public static Map<String, String> getFlowParameters(Map<String, String> params, Agent agent,
-            AgentProjectVersionFlowDeployment agentDeployment) {
+        
         List<AgentFlowDeploymentParameter> deployParameters = agentDeployment.getAgentDeployment()
                 .getAgentDeploymentParameters();
         List<AgentParameter> agentParameters = agent.getAgentParameters();
-        Set<String> overridable = new HashSet<>();
         if (agentParameters != null) {
             for (AgentParameter agentParameter : agentParameters) {
-                String name = agentParameter.getName();
-                if (!params.containsKey(name)) {
-                    params.put(name, agentParameter.getValue());
-                    overridable.add(name);
+                if (isNotBlank(agentParameter.getValue())) {
+                    params.put(agentParameter.getName(), agentParameter.getValue());
                 }
             }
         }
         if (deployParameters != null) {
             for (AgentFlowDeploymentParameter deployParameter : deployParameters) {
-                String name = deployParameter.getName();
-                if (!params.containsKey(name) || overridable.contains(name)) {
+                if (isNotBlank(deployParameter.getValue())) {
                     params.put(deployParameter.getName(), deployParameter.getValue());
                 }
             }

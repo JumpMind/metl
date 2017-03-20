@@ -1,5 +1,7 @@
 package org.jumpmind.metl.ui.views.release;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -89,12 +91,15 @@ public class EditReleasePackageDialog extends ResizableWindow {
         form.setMargin(true);
         nameField = new TextField("Name");
         nameField.setValue(releasePackage.getName() != null ? releasePackage.getName() : "");
+        nameField.setReadOnly(releasePackage.isReleased());
         form.addComponent(nameField);
         versionLabelField = new TextField("Version");
         versionLabelField.setValue(releasePackage.getVersionLabel() != null ? releasePackage.getVersionLabel() : "");
+        versionLabelField.setReadOnly(releasePackage.isReleased());
         form.addComponent(versionLabelField);
         releaseDateField = new DateField("Release Date");
         releaseDateField.setValue(releasePackage.getReleaseDate() != null ? releasePackage.getReleaseDate() : null);
+        releaseDateField.setReadOnly(releasePackage.isReleased());
         form.addComponent(releaseDateField);
         return form;
     }
@@ -178,24 +183,26 @@ public class EditReleasePackageDialog extends ResizableWindow {
     }
         
     protected void save() {
-        releasePackage.setName(nameField.getValue());
-        releasePackage.setVersionLabel(versionLabelField.getValue());
-        releasePackage.setReleaseDate(releaseDateField.getValue());
-        configurationService.save(releasePackage);
-        
-        configurationService.deleteReleasePackageProjectVersionsForReleasePackage(releasePackage.getId());
-        for (CheckBox projectCheckbox : projectCheckboxes) {
-            if (projectCheckbox.getValue() == true) {
-                String projectId = (String) projectCheckbox.getData();
-                OptionGroup optionGroup = projectVersionOptionGroups.get(projectId);
-                String projectVersionId = (String) optionGroup.getValue();
-                ReleasePackageProjectVersion rppv = new ReleasePackageProjectVersion(releasePackage.getId(), projectVersionId);
-                configurationService.save(rppv);
-            }            
+        if (isNotBlank(nameField.getValue()) && isNotBlank(versionLabelField.getValue())) {
+            releasePackage.setName(nameField.getValue());
+            releasePackage.setVersionLabel(versionLabelField.getValue());
+            releasePackage.setReleaseDate(releaseDateField.getValue());
+            configurationService.save(releasePackage);
+
+            configurationService.deleteReleasePackageProjectVersionsForReleasePackage(releasePackage.getId());
+            for (CheckBox projectCheckbox : projectCheckboxes) {
+                if (projectCheckbox.getValue() == true) {
+                    String projectId = (String) projectCheckbox.getData();
+                    OptionGroup optionGroup = projectVersionOptionGroups.get(projectId);
+                    String projectVersionId = (String) optionGroup.getValue();
+                    ReleasePackageProjectVersion rppv = new ReleasePackageProjectVersion(releasePackage.getId(), projectVersionId);
+                    configurationService.save(rppv);
+                }
+            }
+
+            listener.updated(releasePackage);
+            close();
         }
-        
-        listener.updated(releasePackage);
-        close();
     }
     
     protected void cancel() {
