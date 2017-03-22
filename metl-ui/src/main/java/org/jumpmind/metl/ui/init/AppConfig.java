@@ -273,7 +273,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
             properties.put(EXECUTION + DB_POOL_INIT_SQL, env.getProperty(DB_POOL_INIT_SQL));
             properties.put(DB_POOL_CONNECTION_PROPERTIES, env.getProperty(DB_POOL_CONNECTION_PROPERTIES));
             log.info(
-                    "About to initialize the configuration datasource using the following driver:"
+                    "About to initialize the execution datasource using the following driver:"
                             + " '{}' and the following url: '{}' and the following user: '{}'",
                     new Object[] { properties.get(DB_POOL_DRIVER), properties.get(DB_POOL_URL), properties.get(DB_POOL_USER) });
 
