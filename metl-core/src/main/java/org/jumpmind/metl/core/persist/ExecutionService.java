@@ -75,7 +75,7 @@ public class ExecutionService extends AbstractService implements IExecutionServi
         this.purgeScheduler.setDaemon(true);
         int periodInMs = Integer.parseInt(environment.getProperty("execution.purge.job.period.time.ms", Integer.toString(1000 * 60 * 60)));
         Date firstScheduledRunTime = DateUtils.addMilliseconds(new Date(), periodInMs);
-        log.info("Schedule the purge job to run every {}ms.  The first scheduled run time is at {}", periodInMs, firstScheduledRunTime);
+        log.info("Scheduling the purge job to run every {}ms.  The first scheduled run time is at {}", periodInMs, firstScheduledRunTime);
         this.purgeScheduler.scheduleWithFixedDelay(new PurgeExecutionHandler(), firstScheduledRunTime, periodInMs);
     }
 
