@@ -72,7 +72,7 @@ task publishMetl {
         ant.scp(
             trust: 'true',
             verbose: 'true',
-            localFile: '../metl-ui/build/libs/metl.war',
+            localFile: '../metl-war/build/libs/metl.war',
             remoteTofile: "${targetScpSite}/metl-${version}.war")
             
         println "Publishing metl doc documentation to jumpmind.com"
