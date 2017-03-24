@@ -1619,43 +1619,13 @@ public class ConfigurationService extends AbstractService
             }
         }
     }
-
-//    @Override
-//    public List<Flow> findFlowsInReleasePackage(String releasePackageId) {
-//        // TODO Implement this
-//        List<FlowName> flows = new ArrayList<FlowName>();
-//
-//        final String FIND_FLOWS_IN_RELEASE_PACKAGE =
-//                "select\n" + 
-//                "  pv.id as project_version_id, f.id as flow_id, f.name, f.test, f.web_service\n" + 
-//                "from \n" + 
-//                "   metl_release_package_project_version rppv\n" + 
-//                "   inner join metl_project_version pv\n" + 
-//                "      on rppv.project_version_id = pv.id\n" + 
-//                "   inner join metl_flow f\n" + 
-//                "      on f.project_version_id = pv.id\n" + 
-//                "where\n" + 
-//                "   rppv.release_package_id = 'c6877651-dd1b-44ec-9384-2f802619fb6f'\n";
-//
-//        ISqlTemplate template = databasePlatform.getSqlTemplate();
-//        List<Row> rows = template.query(String.format(FIND_FLOWS_IN_RELEASE_PACKAGE, tablePrefix, releasePackageId));
-//        for (Row row : rows) {
-//            FlowName flowName = new FlowName();
-//            flowName.setId(row.getString("project_version_id"));
-//            flowName.setName(row.getString("));
-//        }                    
-//
-//        
-//        
-//        return null;
-//    }
     
-//    @Override
-//    public List<Resource> findResourcesInReleasePackage(String releasePackageId) {
-//        // TODO Implement this
-//        List<Resource> resources = new ArrayList<Resource>();
-//        
-//        
-//        return null;
-//    }    
+    
+    @Override
+    public void backupDatabase(String filePath) {
+        log.info("Backing up the configuration database to {}", filePath);
+        databasePlatform.getSqlTemplate().update(String.format("BACKUP to '%s'", filePath));
+        log.info("Done backing up the configuration database to {}", filePath);
+    }
+    
 }

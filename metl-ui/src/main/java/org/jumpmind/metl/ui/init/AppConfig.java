@@ -42,10 +42,11 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.sql.DataSource;
+import javax.annotation.PostConstruct;
 
 import org.apache.activemq.Service;
 import org.apache.activemq.broker.BrokerService;
+import org.apache.commons.dbcp.BasicDataSource;
 import org.h2.Driver;
 import org.h2.tools.Server;
 import org.jumpmind.db.platform.IDatabasePlatform;
@@ -96,6 +97,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -147,9 +149,9 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 
     IDefinitionPlusUIFactory componentDefinitionPlusUIFactory;
 
-    DataSource configDataSource;
+    BasicDataSource configDataSource;
 
-    DataSource executionDataSource;
+    BasicDataSource executionDataSource;
 
     Service brokerService;
 
@@ -217,10 +219,39 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         }
         return mockDriver;
     }
+    
+    @PostConstruct
+    protected void  addShutdownHook() {        
+        Runtime.getRuntime().addShutdownHook(new Thread(()->{
+            log.info("The Metl shutdown hook is currently running");
+            // IAgentManager agentManger = ctx.getBean(IAgentManager.class);
+            // //agentManager.stop();
+            // IExecutionService service = ctx.getBean(IExecutionService.class);
+            // //service.stop();
+            log.info("Shutting down and compacting the config database");
+            new JdbcTemplate(configDataSource()).execute("SHUTDOWN COMPACT");
+            log.info("Done shutting down and compacting the config database");
+            try {
+                configDataSource().close();
+            } catch (SQLException e) {
+            }
+            log.info("Shutting down and compacting the execution database");
+            new JdbcTemplate(executionDataSource()).execute("SHUTDOWN COMPACT");
+            log.info("Done shutting down and compacting the execution database");
+            try {
+                executionDataSource().close();
+            } catch (SQLException e) {
+            }
+            
+            if (h2Server != null) {
+                h2Server.stop();
+            }
+        }, "shutdown-thread"));
+    }
 
     @Bean
     @Scope(value = "singleton")
-    DataSource configDataSource() {
+    BasicDataSource configDataSource() {
         if (configDataSource == null) {
             h2Server();
             TypedProperties properties = new TypedProperties();
@@ -252,7 +283,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 
     @Bean
     @Scope(value = "singleton")
-    DataSource executionDataSource() {
+    BasicDataSource executionDataSource() {
         if (executionDataSource == null) {
             TypedProperties properties = new TypedProperties();
             properties.put(DB_POOL_DRIVER,

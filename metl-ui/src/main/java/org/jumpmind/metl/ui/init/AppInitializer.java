@@ -184,11 +184,13 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         initBackgroundJobs(ctx);
     }
     
+    
+    
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         if (jobScheduler != null) {
             jobScheduler.destroy();
-        }
+        }        
     }
     
     protected void initUICache(WebApplicationContext ctx) {

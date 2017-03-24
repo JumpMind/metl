@@ -209,7 +209,6 @@ public interface IConfigurationService {
     
     public void updateProjectVersionDependency(ProjectVersionDependency dependency, String newTargetProjectVersionId);
     
-//    public List<Flow> findFlowsInReleasePackage(String releasePackageId);
+    public void backupDatabase(String filePath);
     
-//    public List<Resource> findResourcesInReleasePackage(String releasePackageId);
 }
