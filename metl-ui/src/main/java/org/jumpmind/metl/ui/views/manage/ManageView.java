@@ -134,7 +134,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         statusSelect.addValueChangeListener(new ValueChangeListener() {
             @Override
             public void valueChange(ValueChangeEvent event) {
-                refreshUI(getBackgroundData());
+                refreshUI(getBackgroundData(), true);
             }
         });
         header.addComponent(statusSelect);
@@ -156,7 +156,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
                     limit = Integer.parseInt(event.getText());
                 } catch (Exception e) {
                 }
-                refreshUI(getBackgroundData());
+                refreshUI(getBackgroundData(), true);
             }
         });
         limitLayout.addComponent(limitField);
@@ -231,7 +231,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         split.setSplitPosition(UIConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS, false);
 
         manageNavigator = new ManageNavigator(FolderType.AGENT, context);
-        manageNavigator.addValueChangeListener((event) -> refreshUI(getBackgroundData()));
+        manageNavigator.addValueChangeListener((event) -> refreshUI(getBackgroundData(), true));
         split.setFirstComponent(manageNavigator);
 
         VerticalLayout container = new VerticalLayout();
@@ -270,7 +270,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
     @Override
     public void onBackgroundUIRefresh(Object backgroundData) {
-        refreshUI(backgroundData);
+        refreshUI(backgroundData, false);
     }
 
     @Override
@@ -319,9 +319,9 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     }
 
     @SuppressWarnings("unchecked")
-    protected void refreshUI(Object obj) {
+    protected void refreshUI(Object obj, boolean tabToFront) {
         Object currentSelection = manageNavigator.getCurrentSelection();
-        if (currentSelection != null) {
+        if (currentSelection != null && tabToFront) {
             if (currentSelection.equals(ManageNavigator.CURRENTLY_RUNNING)) {
                 statusSelect.setValue(ExecutionStatus.RUNNING.name());
                 statusSelect.setReadOnly(true);
@@ -341,7 +341,9 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
                 table.setValue(currentTableSelection);
             }
             viewButton.setEnabled(table.getValue() != null);
-            tabs.mainTabToTop();
+            if (tabToFront) {
+                tabs.mainTabToTop();
+            }
         }
     }
 
