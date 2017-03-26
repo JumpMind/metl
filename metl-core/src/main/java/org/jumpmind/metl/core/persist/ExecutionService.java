@@ -73,7 +73,10 @@ public class ExecutionService extends AbstractService implements IExecutionServi
         this.purgeScheduler.setPoolSize(1);
         this.purgeScheduler.initialize();
         this.purgeScheduler.setDaemon(true);
-        this.purgeScheduler.scheduleWithFixedDelay(new PurgeExecutionHandler(), 60000 * 5);
+        int periodInMs = Integer.parseInt(environment.getProperty("execution.purge.job.period.time.ms", Integer.toString(1000 * 60 * 60)));
+        Date firstScheduledRunTime = DateUtils.addMilliseconds(new Date(), periodInMs);
+        log.info("Scheduling the purge job to run every {}ms.  The first scheduled run time is at {}", periodInMs, firstScheduledRunTime);
+        this.purgeScheduler.scheduleWithFixedDelay(new PurgeExecutionHandler(), firstScheduledRunTime, periodInMs);
     }
 
     public Execution findExecution(String id) {
@@ -187,23 +190,26 @@ public class ExecutionService extends AbstractService implements IExecutionServi
     }
 
     public void markAbandoned(String agentId) {
+        log.info("Marking executions as abadoned for the agent with the id: {}", agentId);
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         int count = template.update(
                 String.format(
-                        "update %1$s_execution_step set status=? where (status=? or status=?) and execution_id in (select execution_id from %1$s_execution where agent_id=?)",
-                        tablePrefix), ExecutionStatus.ABANDONED.name(), ExecutionStatus.RUNNING
-                        .name(), ExecutionStatus.READY.name(), agentId);
+                        "update %1$s_execution_step set status=? where execution_id in (select execution_id from %1$s_execution where agent_id=?) and (status=? or status=?) ",
+                        tablePrefix), ExecutionStatus.ABANDONED.name(), agentId, ExecutionStatus.RUNNING
+                        .name(), ExecutionStatus.READY.name());
         if (count > 0) {
             log.info("Updated {} execution step records that were abandoned", count);
         }
         count = template.update(
                 String.format(
-                        "update %1$s_execution set status=? where (status=? or status=?) and agent_id=?",
-                        tablePrefix), ExecutionStatus.ABANDONED.name(), ExecutionStatus.RUNNING
-                        .name(), ExecutionStatus.READY.name(), agentId);
+                        "update %1$s_execution set status=? where agent_id=? and (status=? or status=?)",
+                        tablePrefix), ExecutionStatus.ABANDONED.name(), agentId, ExecutionStatus.RUNNING
+                        .name(), ExecutionStatus.READY.name());
         if (count > 0) {
             log.info("Updated {} execution records that were abandoned", count);
         }
+        
+        log.info("Done marking executions as abandoned for agent with id: {}", agentId);
     }
     
     public List<String> findExecutedFlowIds () {
@@ -276,24 +282,37 @@ public class ExecutionService extends AbstractService implements IExecutionServi
                 log.debug("Purging executions with the status of {} before {}", status, purgeBefore);
                 ISqlTemplate template = databasePlatform.getSqlTemplate();
 
-                List<String> executionStepIds = template.query(
-                        String.format("select id from %1$s_execution_step where execution_id in "
-                                + "(select id from %1$s_execution where status=? and last_update_time <= ?)", tablePrefix),
-                        new StringMapper(), new Object[] { status, purgeBefore });
-                for (String executionStepId : executionStepIds) {
-                    File file = new File(LogUtils.getLogDir(), executionStepId + ".log");
-                    FileUtils.deleteQuietly(file);
+                long ts = System.currentTimeMillis();
+                
+                List<String> executionIds = template.query(
+                        String.format("select id from %1$s_execution where last_update_time <= ? and status=?", tablePrefix),
+                        new StringMapper(), new Object[] { purgeBefore, status });
+                
+                if (0 > executionIds.size()) {
+                   log.info("It took {}ms to find {} executions to purge with a status of {}", System.currentTimeMillis()-ts, executionIds.size(), status);
                 }
-
-                int count = template.update(
-                        String.format("delete from %1$s_execution_step where execution_id in "
-                                + "(select id from %1$s_execution where status=? and last_update_time <= ?)", tablePrefix),
-                        status, purgeBefore);
-                count += template.update(String.format("delete from %1$s_execution where status=? and last_update_time <= ?", tablePrefix),
-                        status, purgeBefore);
-                log.debug("Purged {} execution records with the status of {}", new Object[] { count, status });
-                if (!log.isDebugEnabled() && count > 0) {
-                    log.info("Purged {} execution records", new Object[] { count });
+                int countSteps = 0;
+                int countExecutions = 0;
+                for (String id : executionIds) {
+                    List<String> executionStepIds = template.query(
+                            String.format("select id from %1$s_execution_step where execution_id = ?", tablePrefix),
+                            new StringMapper(), new Object[] { id });                    
+                    for (String executionStepId : executionStepIds) {
+                        File file = new File(LogUtils.getLogDir(), executionStepId + ".log");
+                        FileUtils.deleteQuietly(file);
+                        countSteps += template.update(String.format("delete from %1$s_execution_step where id=?", tablePrefix), executionStepId);
+                    }
+                    countExecutions += template.update(String.format("delete from %1$s_execution where id=?", tablePrefix), id);
+                    
+                    if (System.currentTimeMillis() - ts > 60000) {
+                        log.info("Purged {} execution records and {} execution step records with the status of {} so far ...", new Object[] { countExecutions, countSteps, status });
+                        ts = System.currentTimeMillis();
+                    }
+                }
+                
+                log.debug("Purged {} execution records and {} execution step records with the status of {}", new Object[] { countExecutions, countSteps, status });
+                if (!log.isDebugEnabled() && (countSteps > 0 || countExecutions > 0)) {
+                    log.info("Finished purging {} execution records and {} execution step records with the status of {}", new Object[] { countExecutions, countSteps, status });
                 }
             } else {
                 log.info("Could not run execution purge for status '{}' because table had not been created yet", status);

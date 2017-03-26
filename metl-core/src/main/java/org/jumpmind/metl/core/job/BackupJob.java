@@ -58,11 +58,13 @@ public class BackupJob implements Runnable {
         File todaysDir = new File(backupDir,
                 new SimpleDateFormat("yyyyMMddhhmmss").format(new Date()));
         todaysDir.mkdirs();
+        configurationService.backupDatabase(new File(todaysDir, "backup.zip").getAbsolutePath());
+        
         Collection<ProjectVersion> versions = configurationService.findProjectVersions().values();
         for (ProjectVersion version : versions) {
             String json = importExportService.exportProjectVersion(version.getId(), AppConstants.SYSTEM_USER);
             FileUtils.write(new File(todaysDir,
-                    version.getName().toLowerCase().replaceAll(" - ", " ").replaceAll(" ", "-") + ".json"),
+                    (version.getProject().getName() + "-" + version.getName()).toLowerCase().replaceAll(" - ", " ").replaceAll(" ", "-") + ".json"),
                     json);
         }
     }

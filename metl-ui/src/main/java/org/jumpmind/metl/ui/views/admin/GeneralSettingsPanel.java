@@ -80,6 +80,10 @@ public class GeneralSettingsPanel extends VerticalLayout implements IUiPanel {
         section.addStyleName(ValoTheme.LABEL_COLORED);
         form.addComponent(section); 
         
+        Label instructions = new Label("A restart is required after changing these settings");
+        instructions.addStyleName(ValoTheme.LABEL_LIGHT);
+        form.addComponent(instructions);
+        
         addSetting("Enable Backup", GlobalSetting.CONFIG_BACKUP_ENABLED,
                 Boolean.toString(GlobalSetting.DEFAULT_CONFIG_BACKUP_ENABLED),
                 THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART, Boolean.class);

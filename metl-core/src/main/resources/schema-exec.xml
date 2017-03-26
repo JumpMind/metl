@@ -43,9 +43,11 @@
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />    
         <index name="idx_ex_sts_time">
-            <index-column name="status"/>
             <index-column name="last_update_time"/>
-        </index>           
+        </index>      
+        <index name="idx_ex_agt_id">
+            <index-column name="agent_id"/>
+        </index>               
     </table>    
 
      <table name="execution_step" description="">
@@ -65,6 +67,9 @@
         <column name="end_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="handle_duration" type="BIGINT" default="0" required="true" />
         <column name="queue_duration" type="BIGINT" default="0" required="true" />
+        <index name="idx_ex_stp_ex_id">
+            <index-column name="execution_id"/>
+        </index>         
     </table>   
 
 </database>
