@@ -238,6 +238,7 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     }
     
     protected void finalizeSelectedReleasePackages() {
+                
         Collection<Object> collection = grid.getSelectedRows();
         Iterator<Object> itr = collection.iterator();
         while (itr.hasNext()) {
