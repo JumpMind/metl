@@ -685,7 +685,9 @@ public class PropertySheet extends AbsoluteLayout {
         }
     }
 
-    protected AbstractSelect createResourceCombo(XMLSetting definition, AbstractObjectWithSettings obj, ResourceCategory category) {
+    protected AbstractSelect createResourceCombo(XMLSetting definition,
+            AbstractObjectWithSettings obj, ResourceCategory category) {
+        IConfigurationService configurationService = context.getConfigurationService();
         FlowStep step = getSingleFlowStep();
         String projectVersionId = step.getComponent().getProjectVersionId();
         final AbstractSelect combo = new ComboBox(definition.getName());
@@ -693,15 +695,23 @@ public class PropertySheet extends AbsoluteLayout {
         combo.setDescription(definition.getDescription());
         combo.setNullSelectionAllowed(false);
         combo.setRequired(definition.isRequired());
-        Set<XMLResourceDefinition> types = context.getDefinitionFactory().getResourceDefinitions(projectVersionId, category);
+        Set<XMLResourceDefinition> types = context.getDefinitionFactory()
+                .getResourceDefinitions(projectVersionId, category);
         if (types != null) {
             String[] typeStrings = new String[types.size()];
             int i = 0;
             for (XMLResourceDefinition type : types) {
                 typeStrings[i++] = type.getId();
             }
-            List<Resource> resources = context.getConfigurationService().findResourcesByTypes(projectVersionId,
+            List<Resource> resources = configurationService.findResourcesByTypes(projectVersionId,
                     typeStrings);
+            List<ProjectVersionDependency> dependencies = configurationService
+                    .findProjectDependencies(projectVersionId);
+            for (ProjectVersionDependency projectVersionDependency : dependencies) {
+                resources.addAll(configurationService.findResourcesByTypes(
+                        projectVersionDependency.getTargetProjectVersionId(), typeStrings));
+            }
+
             if (resources != null) {
                 for (Resource resource : resources) {
                     combo.addItem(resource.getId());
@@ -711,7 +721,8 @@ public class PropertySheet extends AbsoluteLayout {
                 combo.setValue(obj.get(definition.getId()));
             }
         }
-        combo.addValueChangeListener(event -> saveSetting(definition.getId(), (String) combo.getValue(), obj));
+        combo.addValueChangeListener(
+                event -> saveSetting(definition.getId(), (String) combo.getValue(), obj));
         combo.setReadOnly(readOnly);
         return combo;
     }
