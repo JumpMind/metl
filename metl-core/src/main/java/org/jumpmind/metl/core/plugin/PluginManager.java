@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.DefaultModelWriter;
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
@@ -41,7 +42,6 @@ import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
 import org.eclipse.aether.util.version.GenericVersionScheme;
 import org.eclipse.aether.version.Version;
-import org.h2.store.fs.FileUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
@@ -150,6 +150,7 @@ public class PluginManager implements IPluginManager {
     public List<String> getAvailableVersions(String artifactGroup, String artifactName, List<PluginRepository> remoteRepositories) {
         List<String> versions = new ArrayList<>();
         try {
+            // TODO figure out how to force remote check
             VersionRangeRequest rangeRequest = new VersionRangeRequest();
             rangeRequest.setArtifact(new DefaultArtifact(artifactGroup, artifactName, "jar", "[0,)"));
             if (remoteRepositories != null) {
@@ -158,13 +159,21 @@ public class PluginManager implements IPluginManager {
                             new RemoteRepository.Builder(pluginRepository.getName(), "default", pluginRepository.getUrl()).build());
                 }
             }
-            VersionRangeResult rangeResult = repositorySystem.resolveVersionRange(repositorySystemSession, rangeRequest);
+            DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
+            File tempDir = new File(System.getProperty("java.io.tmpdir"), "temp-local-repo");
+            tempDir.mkdirs();
+            LocalRepository localRepo = new LocalRepository(tempDir.getAbsolutePath());
+            session.setLocalRepositoryManager(repositorySystem.newLocalRepositoryManager(session, localRepo));
+            session.setTransferListener(new PluginTransferListener());
+            session.setRepositoryListener(new PluginRepositoryListener());
+            VersionRangeResult rangeResult = repositorySystem.resolveVersionRange(session, rangeRequest);
             if (rangeResult != null) {
                 List<Version> versionList = rangeResult.getVersions();
                 for (Version version : versionList) {
                     versions.add(version.toString());
                 }
             }
+            FileUtils.deleteQuietly(tempDir);
         } catch (VersionRangeResolutionException e) {
             logger.error("", e);
         }
@@ -231,7 +240,7 @@ public class PluginManager implements IPluginManager {
         File dir = file.getParentFile();
         if (dir.exists() && dir.isDirectory()) {
             logger.info("Attempting to delete {} at {}", pluginId, dir);
-            FileUtils.deleteRecursive(dir.getPath(), true);
+            FileUtils.deleteQuietly(dir);
         }
     }
 
@@ -260,7 +269,7 @@ public class PluginManager implements IPluginManager {
                 plugins.put(pluginId, classLoader);
             } catch (Exception e) {
                 logger.warn("Failed to get class loader for {}:{}:{}", artifactGroup, artifactName, artifactVersion);
-                logger.debug("", e);
+                logger.warn("", e);
             }
         }
         return classLoader;
@@ -364,10 +373,6 @@ public class PluginManager implements IPluginManager {
         session.setLocalRepositoryManager(repositorySystem.newLocalRepositoryManager(session, localRepo));
         session.setTransferListener(new PluginTransferListener());
         session.setRepositoryListener(new PluginRepositoryListener());
-
-        // uncomment to generate dirty trees
-        // session.setDependencyGraphTransformer( null );
-
         return session;
     }
 
