@@ -21,8 +21,10 @@
 package org.jumpmind.metl.ui.views.admin;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
+import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
@@ -160,7 +162,7 @@ public class UserPanel extends VerticalLayout implements IUiPanel {
     class RemoveClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
             for (User user : getSelectedItems()) {
-                context.getConfigurationService().delete(user);
+                context.getOperationsSerivce().delete(user);
                 container.removeItem(user);
             }
             table.setValue(null);
