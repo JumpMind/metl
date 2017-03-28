@@ -248,6 +248,9 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
     protected void updateTable(String filter) {
         boolean showPopulatedEntities = filterPopField.getValue().equals(SHOW_POPULATED_ENTITIES);
         boolean showPopulatedAttributes = filterPopField.getValue().equals(SHOW_POPULATED_ATTRIBUTES);
+        if (!showPopulatedEntities && !showPopulatedAttributes && !filterPopField.getValue().equals(SHOW_ALL)) {
+            filter = (String)filterPopField.getValue();
+        }
 
         if (componentAttributes != null) {
             Model model = component.getInputModel();

@@ -37,7 +37,6 @@ import org.jumpmind.metl.core.model.Execution;
 import org.jumpmind.metl.core.model.ExecutionStatus;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FolderType;
-import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
@@ -46,9 +45,12 @@ import org.jumpmind.metl.ui.common.MultiPropertyFilter;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.Table;
 import org.jumpmind.metl.ui.common.TopBarLink;
+import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.UiComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
@@ -80,6 +82,8 @@ import com.vaadin.ui.themes.ValoTheme;
 @Scope(value = "ui")
 @TopBarLink(category = Category.Manage, name = "Manage", id = "manage", icon = FontAwesome.GEARS, menuOrder = 25)
 public class ManageView extends HorizontalLayout implements View, IUiPanel, IBackgroundRefreshable<Object> {
+    
+    final Logger log = LoggerFactory.getLogger(getClass());
 
     private static final String ANY = "<Any>";
 
@@ -231,7 +235,23 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         split.setSplitPosition(UIConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS, false);
 
         manageNavigator = new ManageNavigator(FolderType.AGENT, context);
-        manageNavigator.addValueChangeListener((event) -> refreshUI(getBackgroundData(), true));
+        manageNavigator.addValueChangeListener((event) -> {
+            Object currentSelection = manageNavigator.getCurrentSelection();
+            if (currentSelection != null) {
+                if (statusSelect.isReadOnly()) {
+                    statusSelect.setReadOnly(false);
+                    statusSelect.setValue(ANY);
+                }
+                if (currentSelection.equals(ManageNavigator.CURRENTLY_RUNNING)) {
+                    statusSelect.setValue(ExecutionStatus.RUNNING.name());
+                    statusSelect.setReadOnly(true);
+                } else if (currentSelection.equals(ManageNavigator.IN_ERROR)) {
+                    statusSelect.setValue(ExecutionStatus.ERROR.name());
+                    statusSelect.setReadOnly(true);
+                }
+            }
+            refreshUI(getBackgroundData(), true);
+        });
         split.setFirstComponent(manageNavigator);
 
         VerticalLayout container = new VerticalLayout();
@@ -279,10 +299,6 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     }
     
     public Object getBackgroundData() {
-        if (statusSelect.isReadOnly()) {
-            statusSelect.setReadOnly(false);
-            statusSelect.setValue(ANY);
-        }
         Object currentSelection = manageNavigator.getCurrentSelection();
         Object currentSelectionParent = manageNavigator.getCurrentSelectionParent();
         if (currentSelection != null) {
@@ -320,25 +336,16 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
     @SuppressWarnings("unchecked")
     protected void refreshUI(Object obj, boolean tabToFront) {
-        Object currentSelection = manageNavigator.getCurrentSelection();
-        if (currentSelection != null && tabToFront) {
-            if (currentSelection.equals(ManageNavigator.CURRENTLY_RUNNING)) {
-                statusSelect.setValue(ExecutionStatus.RUNNING.name());
-                statusSelect.setReadOnly(true);
-            } else if (currentSelection.equals(ManageNavigator.IN_ERROR)) {
-                statusSelect.setValue(ExecutionStatus.ERROR.name());
-                statusSelect.setReadOnly(true);
-            }
-        }
         List<Execution> data = (List<Execution>) obj;
         if (needsUpdated(data)) {
             Object currentTableSelection = table.getValue();
-            executionContainer.removeAllItems();
             table.setValue(null);
+            table.removeAllItems();
             if (data != null) {
                 executionContainer.addAll((List<Execution>) data);
                 table.sort();
                 table.setValue(currentTableSelection);
+                table.refreshRowCache();
             }
             viewButton.setEnabled(table.getValue() != null);
             if (tabToFront) {
@@ -355,18 +362,14 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         Collection<Execution> tableValues = (Collection<Execution>) table.getItemIds();
 
         if (all.size() != tableValues.size()) {
+            log.debug("new execution count = " + all.size() + ", old execution count = " + tableValues.size());
             needsUpdated = true;
         }
 
         if (!needsUpdated) {
-            int index = 0;
-            for (Execution execution : tableValues) {
-                if (all.size() <= index || !all.get(index).equals(execution)) {
-                    needsUpdated = true;
-                    break;
-                }
-                index++;
-            }
+            all.removeAll(tableValues);
+            log.debug("different execution count = " + all.size());
+            needsUpdated = all.size() > 0;
         }
 
         return needsUpdated;
