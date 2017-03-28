@@ -1311,8 +1311,19 @@ public class ConfigurationService extends AbstractService
     public List<Flow> findAffectedFlowsByModel(String modelId) {
         List<Flow> flows = new ArrayList<Flow>();
 
-        final String AFFECTED_FLOWS_BY_MODEL_SQL = "select distinct flow_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id "
-                + "where c.input_model_id = '%2$s' or c.output_model_id = '%2$s'";
+        final String AFFECTED_FLOWS_BY_MODEL_SQL = 
+                "select "
+                + "  distinct flow_id "
+                + "from %1$s_flow f "
+                + "   inner join %1$s_flow_step fs "
+                + "      on f.id = fs.flow_id "
+                + "   inner join %1$s_component c "
+                + "      on fs.component_id = c.id "
+                + "where "
+                + "   f.deleted=0 and "
+                + "   c.deleted=0 and "
+                + "   (c.input_model_id = '%2$s' "
+                + "   or c.output_model_id = '%2$s')";
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         List<Row> ids = template.query(String.format(AFFECTED_FLOWS_BY_MODEL_SQL, tablePrefix, modelId));
         for (Row row : ids) {
