@@ -358,11 +358,25 @@ public class DesignNavigator extends VerticalLayout {
             addDependenciesToFolder(LABEL_DEPENDENCIES, projectVersion);
         }
     }
+    
+    protected void collapseAll(Object itemId) {
+        treeTable.setCollapsed(itemId, true);
+        Collection<?> itemIds = treeTable.getChildren(itemId);
+        if (itemIds != null) {
+            for (Object object : itemIds) {
+                treeTable.setCollapsed(object, true);
+            }
+        }
+    }
 
     protected void refreshProjects() {
         long ts = System.currentTimeMillis();
         Object selected = treeTable.getValue();
         List<Project> projects = configurationService.findProjects();
+        Collection<?> itemIds = treeTable.getItemIds();
+        for (Object itemId : itemIds) {
+            collapseAll(itemId);
+        }
         treeTable.removeAllItems();
         for (Project project : projects) {
             List<ProjectVersion> versions = project.getProjectVersions();
