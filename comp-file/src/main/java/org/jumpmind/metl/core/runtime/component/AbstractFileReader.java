@@ -78,8 +78,11 @@ public abstract class AbstractFileReader extends AbstractComponentRuntime {
         } else if (ACTION_DELETE.equals(actionOnError)) {
             deleteFiles();
         }
-        directory.close(false);
-        directory = null;
+        
+        if (directory != null) {
+            directory.close(false);
+            directory = null;
+        }
     }
 
     @Override
