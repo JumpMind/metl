@@ -200,46 +200,75 @@ public class ModelAttributeScriptHelper {
     }
 
     public String abbreviate(int maxwidth) {
-        String text = value != null ? value.toString() : "";
-        return StringUtils.abbreviate(text, maxwidth);
+        if (value != null) {
+            return StringUtils.abbreviate(value.toString(), maxwidth);
+        } else {
+            return null;
+        }
     }
 
     public String left(int length) {
-        return StringUtils.left(value != null ? value.toString() : "", length);
+        if (value != null) {
+            return StringUtils.left(value.toString(), length);
+        } else {
+            return null;
+        }
     }
 
     public String right(int length) {
-        return StringUtils.right(value != null ? value.toString() : "", length);
+        if (value != null) {
+            return StringUtils.right(value.toString(), length);
+        } else {
+            return null;
+        }
     }
 
     public String rpad(String padChar, int length) {
-        String text = value != null ? value.toString() : "";
-        return StringUtils.rightPad(text, length, padChar);
+        if (value != null) {
+            return StringUtils.rightPad(value.toString(), length, padChar);
+        } else {
+            return null;
+        }
     }
 
     public String lpad(String padChar, int length) {
-        String text = value != null ? value.toString() : "";
-        return StringUtils.leftPad(text, length, padChar);
+        if (value != null) {
+            return StringUtils.leftPad(value.toString(), length, padChar);
+        } else {
+            return null;
+        }
     }
 
     public String substr(int start, int end) {
-        String text = value != null ? value.toString() : "";
-        return StringUtils.substring(text, start, end);
+        if (value != null) {
+            return StringUtils.substring(value.toString(), start, end);
+        } else {
+            return null;
+        }
     }
 
     public String lower() {
-        String text = value != null ? value.toString() : "";
-        return StringUtils.lowerCase(text);
+        if (value != null) {
+            return StringUtils.lowerCase(value.toString());
+        } else {
+            return null;
+        }
     }
 
     public String upper() {
-        String text = value != null ? value.toString() : "";
-        return StringUtils.upperCase(text);
+        if (value != null) {
+            return StringUtils.upperCase(value.toString());
+        } else {
+            return null;
+        }
     }
 
     public String trim() {
-        String text = value != null ? value.toString() : "";
-        return StringUtils.trim(text);
+        if (value != null) {
+            return StringUtils.trim(value.toString());
+        } else {
+            return null;
+        }
     }
 
     public String format(String spec) {
@@ -338,8 +367,11 @@ public class ModelAttributeScriptHelper {
     }
 
     public String capitalize() {
-        String text = value != null ? value.toString() : "";
-        return StringUtils.capitalize(text);
+        if (value != null) {
+            return StringUtils.capitalize(value.toString());
+        } else {
+            return null;
+        }
     }
 
     protected Object eval() {
