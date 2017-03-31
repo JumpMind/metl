@@ -20,7 +20,6 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.FileNotFoundException;
@@ -96,9 +95,6 @@ public class FileUtil extends AbstractComponentRuntime {
         getFileNameFromMessage = typedProperties.is(SETTING_GET_FILE_FROM_MESSAGE, getFileNameFromMessage);
         if (!getFileNameFromMessage) {
             sourceRelativePath = typedProperties.get(SETTING_RELATIVE_PATH);
-            if (isBlank(sourceRelativePath)) {
-                throw new MisconfiguredException("The relative path to find the source file has not been set.  It is required.");
-            }
         }
         
         action = typedProperties.get(SETTING_ACTION);

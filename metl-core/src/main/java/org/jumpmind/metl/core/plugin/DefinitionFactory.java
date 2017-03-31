@@ -295,7 +295,8 @@ public class DefinitionFactory implements IDefinitionFactory {
             for (XMLAbstractDefinition definition : componentsById.values()) {
                 if (definition instanceof XMLResourceDefinition) {
                     XMLResourceDefinition resource = (XMLResourceDefinition) definition;
-                    if (resourceCategory == null || resourceCategory.equals(resource.getResourceCategory())) {
+                    if (resourceCategory == null || resourceCategory.equals(ResourceCategory.ANY) || 
+                            resourceCategory.equals(resource.getResourceCategory())) {
                         categories.add(resource);
                     }
                 }
@@ -342,7 +343,6 @@ public class DefinitionFactory implements IDefinitionFactory {
             Unmarshaller unmarshaller = xmlContext.createUnmarshaller();
             List<InputStream> componentXmls = new ArrayList<>();
             componentXmls.addAll(loadResources("plugin.xml", classLoader));
-            componentXmls.addAll(loadResources("component.xml", classLoader));
 
             try {
                 for (InputStream inputStream : componentXmls) {

@@ -257,7 +257,7 @@
     </resource>
 
     <resource id='Local File System' resourceCategory='streamable'>
-        <name>HTTP</name>
+        <name>Local File System</name>
         <className>org.jumpmind.metl.core.runtime.resource.LocalFile</className>
         <settings>
             <setting id='localfile.path' required='true' type='text'>
@@ -345,7 +345,7 @@
     </resource>
     
     <resource id='SMB' resourceCategory='streamable'>
-        <name>SFTP</name>
+        <name>SMB</name>
         <className>org.jumpmind.metl.core.runtime.resource.SMB</className>
         <settings>
             <setting id='smb.base.url' required='true' type='text'>

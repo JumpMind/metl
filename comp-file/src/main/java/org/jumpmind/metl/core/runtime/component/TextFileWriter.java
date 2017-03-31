@@ -113,11 +113,16 @@ public class TextFileWriter extends AbstractFileWriter {
                     if (payload instanceof ArrayList) {
                         ArrayList<?> recs = (ArrayList<?>) payload;
                         for (Object rec : recs) {
+                            initStreamAndWriter(inputMessage);
                             bufferedWriter.write(rec != null ? rec.toString() : "");
                             if (lineTerminator != null) {
                                 bufferedWriter.write(lineTerminator);
                             } else {
                                 bufferedWriter.newLine();
+                            }
+                            
+                            if (CLOSE_ON_ROW.equals(closeOn)) {
+                                closeFile();
                             }
                         }
 
@@ -127,11 +132,14 @@ public class TextFileWriter extends AbstractFileWriter {
                         bufferedWriter.write("");
                     }
 
-                    bufferedWriter.flush();
-                    if (CLOSE_ON_ROW.equals(closeOn)) {
-                        closeFile();
-                        initStreamAndWriter(inputMessage);
+                    if (bufferedWriter != null){
+                       bufferedWriter.flush();
                     }
+                    
+                    if (CLOSE_ON_MESSAGE.equals(closeOn)) {
+                        closeFile();
+                    }
+
                 } catch (IOException e) {
                     throw new IoException(e);
                 }

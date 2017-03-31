@@ -90,6 +90,8 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
     
     protected boolean interrupted = false;
     
+    private long paramFlowSequence = 0;
+    
     @Override
     public void interrupt() {
         interrupted = true;
@@ -192,9 +194,10 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
         }
     }
     
-    protected String resolveParamsAndHeaders(String text, Message inputMessage) {
+    protected String resolveParamsAndHeaders(String text, Message inputMessage) {        
         Map<String,String> parms = new HashMap<>(getComponentContext().getFlowParameters());
         parms.putAll(inputMessage.getHeader().getAsStrings());
+        parms.put("_sequence", Long.toString(paramFlowSequence++));
         return FormatUtils.replaceTokens(text, parms, true);
     }
     

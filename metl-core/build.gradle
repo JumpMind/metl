@@ -54,6 +54,7 @@ dependencies {
     compile "sshtools:j2ssh-ant:0.2.9"
     compile "com.googlecode.json-simple:json-simple:1.1.1"
     compile "kxml2:kxml2:$kxmlVersion"  
+    compile group: 'org.apache.commons', name: 'commons-pool2', version: '2.4.2'
     compile group: 'org.apache.maven', name: 'maven-aether-provider', version: '3.3.9'
     compile group: 'org.eclipse.aether', name: 'aether-transport-http', version: '1.1.0'
     compile group: 'org.eclipse.aether', name: 'aether-transport-file', version: '1.1.0'

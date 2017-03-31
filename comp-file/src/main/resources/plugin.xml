@@ -118,7 +118,7 @@
             <setting id='relative.path' required='false' type='text'>
                 <name>Source Relative Path</name>
             </setting>
-            <setting id='target.relative.path' required='true' type='text'>
+            <setting id='target.relative.path' required='false' type='text'>
                 <name>Target Relative Path</name>
             </setting>
             <setting id='new.name' required='false' type='text'>

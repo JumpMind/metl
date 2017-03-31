@@ -49,6 +49,7 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
+import org.jumpmind.metl.core.runtime.resource.FileInfo;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.util.ComponentUtils;
@@ -191,6 +192,27 @@ public class ScriptHelper {
         DataSource ds = resource.reference();
         return new JdbcTemplate(ds);
     }
+    
+    protected boolean doesFileExist(String relativePath) {
+        Object reference = resource.reference();
+        if (reference instanceof IDirectory) {
+            IDirectory directory = (IDirectory)reference;
+            FileInfo file = directory.listFile(relativePath, true);
+            return file != null;
+        } else {
+            return false;
+        }        
+    }
+    
+    protected int countFiles(String relativePath) {
+        Object reference = resource.reference();
+        if (reference instanceof IDirectory) {
+            IDirectory directory = (IDirectory)reference;
+            return directory.listFiles(true, relativePath).size();
+        } else {
+            return 0;
+        }        
+    }    
 
     /**
      * If the resource is a directory, this is the reference to the directory.
@@ -506,7 +528,7 @@ public class ScriptHelper {
      */
     protected void sendControlMessage() {
         callback.sendControlMessage();
-    }
+    }        
 
     protected void onInit() {
     }

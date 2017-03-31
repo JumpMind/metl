@@ -26,5 +26,10 @@ public class XMLResourceDefinition extends XMLAbstractDefinition {
     public ResourceCategory getResourceCategory() {
         return resourceCategory;
     }
+    
+    @Override
+    public String toString() {
+        return getName() + " of category " + getResourceCategory();
+    }
 
 }
