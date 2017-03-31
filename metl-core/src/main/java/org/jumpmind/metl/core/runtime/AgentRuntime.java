@@ -239,6 +239,8 @@ public class AgentRuntime {
                 log.info("Stopping the {} resource on the {} agent", resource.getResource().getName(), agent.getName());
                 resource.stop();
             }
+            
+            deployedResources.clear();
 
             log.info("Agent '{}' has been stopped", agent);
         }

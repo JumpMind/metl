@@ -135,7 +135,7 @@ public class AgentManager implements IAgentManager {
 
     @Override
     public AgentRuntime refresh(Agent agent) {
-        AgentRuntime engine = engines.get(agent);
+        AgentRuntime engine = engines.get(agent.getId());
         if (!agent.isDeleted()) {
             if (engine == null) {
                 engine = createAndStartRuntime(agent);
@@ -147,7 +147,7 @@ public class AgentManager implements IAgentManager {
         } else {
             if (engine != null) {
                 engine.stop();
-                engines.remove(agent);
+                engines.remove(agent.getId());
             }
         }
         return engine;
@@ -155,10 +155,10 @@ public class AgentManager implements IAgentManager {
 
     @Override
     public void remove(Agent agent) {
-        AgentRuntime runtime = engines.get(agent);
+        AgentRuntime runtime = engines.get(agent.getId());
         if (runtime != null) {
             runtime.stop();
-            engines.remove(agent);
+            engines.remove(agent.getId());
         }
     }
 
