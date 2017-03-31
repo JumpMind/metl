@@ -92,7 +92,7 @@
                required='false'
                type='integer'>
         <name>Rows/Msg</name>
-        <defaultValue>10</defaultValue>
+        <defaultValue>1000</defaultValue>
       </setting>
     </settings>
   </component>
@@ -177,7 +177,7 @@
                required='false'
                type='integer'>
         <name>Rows/Msg</name>
-        <defaultValue>10</defaultValue>
+        <defaultValue>1000</defaultValue>
       </setting>
     </settings>
   </component>
