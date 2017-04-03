@@ -529,6 +529,13 @@ public class ScriptHelper {
     protected void sendControlMessage() {
         callback.sendControlMessage();
     }        
+    
+    /**
+     * Helper method to send an entity data message.
+     */
+    protected void sendEntityDataMessage(ArrayList<EntityData> payload) {
+        callback.sendEntityDataMessage(null, payload);
+    }
 
     protected void onInit() {
     }

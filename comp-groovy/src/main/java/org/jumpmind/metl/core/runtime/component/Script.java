@@ -85,6 +85,7 @@ public class Script extends AbstractComponentRuntime {
             script.append(String.format("import %s.*;\n", Message.class.getPackage().getName()));
             script.append(String.format("import %s;\n", ScriptHelper.class.getName()));
             script.append(String.format("import %s;\n", EntityDataMessage.class.getName()));
+            script.append(String.format("import %s;\n", EntityData.class.getName()));
             script.append(String.format("import %s;\n", TextMessage.class.getName()));
             script.append(String.format("import %s;\n", ControlMessage.class.getName()));
             script.append(String.format("import %s;\n", BinaryMessage.class.getName()));
