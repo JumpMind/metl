@@ -130,7 +130,10 @@ public class ScriptHelper {
     
     private EntityNameLookup entityNameLookup;
 
-    public ScriptHelper(IComponentRuntime componentRuntime) {
+    public ScriptHelper() {
+    }
+    
+    protected void init(IComponentRuntime componentRuntime) {
         this.componentRuntime = componentRuntime;
         this.context = componentRuntime.getComponentContext();
         this.resource = context.getResourceRuntime();
