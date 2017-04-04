@@ -115,10 +115,7 @@ public class CutCopyPasteManager {
         HashSet<Resource> newResources = new HashSet<Resource>();
         for (Resource resource : origResources) {
             String existingResourceId = destinationHasResource(resource, newProjectVersionId);
-            // make another copy if same project version. If diff project
-            // version try and use existing
-            if (existingResourceId == null
-                    || resource.getProjectVersionId().equalsIgnoreCase(newProjectVersionId)) {
+            if (existingResourceId == null) {
                 // make a copy only if the resource is still in use by another
                 // flow
                 // resource alone can't be cut if they have dependent flows
@@ -276,7 +273,7 @@ public class CutCopyPasteManager {
         HashSet<Model> newModels = new HashSet<Model>();
         for (Model model : origModels) {
             String existingModelId = destinationHasModel(model, newProjectVersionId);
-            if (existingModelId == null || model.getProjectVersionId().equalsIgnoreCase(newProjectVersionId)) {
+            if (existingModelId == null) {
                 // make a copy only if the model is still in use by another flow
                 // model alone can't be cut if they have dependent flows
                 if ((clipboard.containsKey(CLIPBOARD_ACTION)

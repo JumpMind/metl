@@ -178,7 +178,7 @@ public interface IConfigurationService {
     public void save(Resource resource);
 
     public void save(Setting setting);
-
+    
     public ProjectVersion saveNewVersion(String newVersionLabel, ProjectVersion original, String projectVersionType);
 
     public Flow copy(Flow original);

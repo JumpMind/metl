@@ -816,8 +816,8 @@ public class ConfigurationService extends AbstractService
         for (ModelEntity modelEntity : model.getModelEntities()) {
             save(modelEntity);
         }
-    }
-
+    }    
+    
     @Override
     public void save(ModelEntity modelEntity) {
         save((AbstractObject) modelEntity);
