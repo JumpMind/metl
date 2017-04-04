@@ -65,7 +65,7 @@ task publishMetl {
         ant.scp(
             trust: 'true',
             verbose: 'true',
-            localFile: '../metl-ui/src/main/webapp/doc/html/user-guide.html',
+            localFile: '../metl-war/src/main/webapp/doc/html/user-guide.html',
             remoteTofile: "${targetScpSite}/user-guide-${version}.html")
  
         println "Publishing war distribution to source forge"

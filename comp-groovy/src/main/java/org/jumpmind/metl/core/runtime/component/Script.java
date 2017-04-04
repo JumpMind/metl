@@ -23,6 +23,9 @@ package org.jumpmind.metl.core.runtime.component;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.File;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -50,22 +53,26 @@ public class Script extends AbstractComponentRuntime {
     public final static String IMPORTS = "imports";
 
     public final static String METHODS = "methods";
-    
+
     public final static String INIT_SCRIPT = "init.script";
 
-    public final static String HANDLE_SCRIPT = "handle.msg.script";    
+    public final static String HANDLE_SCRIPT = "handle.msg.script";
 
     public final static String ON_FLOW_SUCCESS = "on.flow.success.script";
-    
+
     public final static String ON_FLOW_ERROR = "on.flow.error.script";
 
     public static String TRANSFORM_EXPRESSION = "transform.expression";
 
+    static Map<String, ConcurrentLinkedQueue<ScriptEngine>> enginesByScript = new ConcurrentHashMap<>();
+
     ScriptEngine engine;
+    
+    ConcurrentLinkedQueue<ScriptEngine> engineCache;
 
     @Override
     public void start() {
-        
+        long ts = System.currentTimeMillis();
         String importStatements = getComponent().get(IMPORTS);
         String initScript = getComponent().get(INIT_SCRIPT);
         String handleMessageScript = getComponent().get(HANDLE_SCRIPT);
@@ -73,82 +80,105 @@ public class Script extends AbstractComponentRuntime {
         String onSuccess = getComponent().get(ON_FLOW_SUCCESS);
         String onError = getComponent().get(ON_FLOW_ERROR);
 
-        engine = new GroovyScriptEngineImpl();
-        engine.put("component", this);        
         StringBuilder script = new StringBuilder();
-        try {
-            script.append(String.format("import %s;\n", ISendMessageCallback.class.getName()));
-            script.append(String.format("import %s;\n", File.class.getName()));
-            script.append(String.format("import %s;\n", FileUtils.class.getName()));
-            script.append(String.format("import static %s.*;\n", FileUtils.class.getName()));
-            script.append(String.format("import static %s.*;\n", StringUtils.class.getName()));
-            script.append(String.format("import %s.*;\n", Message.class.getPackage().getName()));
-            script.append(String.format("import %s;\n", ScriptHelper.class.getName()));
-            script.append(String.format("import %s;\n", EntityDataMessage.class.getName()));
-            script.append(String.format("import %s;\n", TextMessage.class.getName()));
-            script.append(String.format("import %s;\n", ControlMessage.class.getName()));
-            script.append(String.format("import %s;\n", BinaryMessage.class.getName()));
-            script.append(String.format("import %s;\n", MisconfiguredException.class.getName()));
-            script.append(String.format("import %s;\n", AssertException.class.getName()));
-            script.append(String.format("import %s.%s;\n", EntityData.class.getName(), ChangeType.class.getSimpleName()));
-            script.append("import org.jumpmind.db.sql.*;\n");
-            if (isNotBlank(importStatements)) {
-                script.append(importStatements);
-            }
-            script.append("\n");
-            script.append(String.format("helper = new %1$s(component) { \n",
-                    ScriptHelper.class.getSimpleName()));
-            
-            if (isNotBlank(methods)) {
-                script.append("\n");
-                script.append(String.format("%s\n", methods));
-            }
-            
-            if (isNotBlank(initScript)) {
-                script.append("\n");
-                script.append(String.format(" protected void onInit() { %s \n} \n", initScript));
-            }
-            if (isNotBlank(handleMessageScript)) {
-                script.append("\n");
-                script.append(String.format(" protected void onHandle() { %s \n} \n",
-                        handleMessageScript));
-            }
-            if (isNotBlank(onSuccess)) {
-                script.append("\n");
-                script.append(String
-                        .format(" protected void onSuccess() { %s \n} \n",
-                                onSuccess));
-            }
-            if (isNotBlank(onError)) {
-                script.append("\n");
-                script.append(String
-                        .format(" protected void onError(Throwable myError) { %s \n} \n",
-                                onError));
-            }
-            script.append("\n};\n");
+        script.append(String.format("import %s;\n", ISendMessageCallback.class.getName()));
+        script.append(String.format("import %s;\n", File.class.getName()));
+        script.append(String.format("import %s;\n", FileUtils.class.getName()));
+        script.append(String.format("import static %s.*;\n", FileUtils.class.getName()));
+        script.append(String.format("import static %s.*;\n", StringUtils.class.getName()));
+        script.append(String.format("import %s.*;\n", Message.class.getPackage().getName()));
+        script.append(String.format("import %s;\n", ScriptHelper.class.getName()));
+        script.append(String.format("import %s;\n", EntityDataMessage.class.getName()));
+        script.append(String.format("import %s;\n", EntityData.class.getName()));
+        script.append(String.format("import %s;\n", TextMessage.class.getName()));
+        script.append(String.format("import %s;\n", ControlMessage.class.getName()));
+        script.append(String.format("import %s;\n", BinaryMessage.class.getName()));
+        script.append(String.format("import %s;\n", MisconfiguredException.class.getName()));
+        script.append(String.format("import %s;\n", AssertException.class.getName()));
+        script.append(String.format("import %s.%s;\n", EntityData.class.getName(), ChangeType.class.getSimpleName()));
+        script.append("import org.jumpmind.db.sql.*;\n");
+        if (isNotBlank(importStatements)) {
+            script.append(importStatements);
+        }
+        script.append("\n");
+        script.append(String.format("helper = new %1$s() { \n", ScriptHelper.class.getSimpleName()));
 
-            log(LogLevel.DEBUG, script.toString());
-            script.append("helper.onInit();");
-            engine.eval(script.toString());
-        } catch (ScriptException e) {
-            Throwable rootCause = ExceptionUtils.getRootCause(e);
-            if (rootCause != null) {
-                if (rootCause instanceof RuntimeException) {
-                    throw (RuntimeException) rootCause;
-                } else {
-                    throw new RuntimeException(rootCause);
-                }
-            } else {
-                throw new RuntimeException(e);
+        if (isNotBlank(methods)) {
+            script.append("\n");
+            script.append(String.format("%s\n", methods));
+        }
+
+        if (isNotBlank(initScript)) {
+            script.append("\n");
+            script.append(String.format(" protected void onInit() { %s \n} \n", initScript));
+        }
+        if (isNotBlank(handleMessageScript)) {
+            script.append("\n");
+            script.append(String.format(" protected void onHandle() { %s \n} \n", handleMessageScript));
+        }
+        if (isNotBlank(onSuccess)) {
+            script.append("\n");
+            script.append(String.format(" protected void onSuccess() { %s \n} \n", onSuccess));
+        }
+        if (isNotBlank(onError)) {
+            script.append("\n");
+            script.append(String.format(" protected void onError(Throwable myError) { %s \n} \n", onError));
+        }
+        script.append("\n};\n");
+        String scriptString = script.toString();
+        log(LogLevel.DEBUG, scriptString);
+        engineCache = enginesByScript.get(scriptString);
+        if (engineCache == null) {
+            engineCache = new ConcurrentLinkedQueue<>();
+            enginesByScript.put(scriptString, engineCache);
+        }
+
+        engine = engineCache.poll();
+        if (engine == null) {
+            engine = new GroovyScriptEngineImpl();
+            try {
+                engine.eval(scriptString);
+            } catch (ScriptException e) {
+                handleScriptException(e);
             }
         }
+
+        try {
+            engine.put("component", this);
+            engine.eval("helper.init(component)");
+            engine.eval("helper.onInit()");
+        } catch (ScriptException e) {
+            handleScriptException(e);
+        }
+
+        log.info("It took {}ms to start the script component", (System.currentTimeMillis() - ts));
     }
     
+    @Override
+    public void stop() {
+        if (engineCache != null) {
+            engineCache.offer(engine);
+        }
+    }
+
+    private void handleScriptException(ScriptException e) {
+        Throwable rootCause = ExceptionUtils.getRootCause(e);
+        if (rootCause != null) {
+            if (rootCause instanceof RuntimeException) {
+                throw (RuntimeException) rootCause;
+            } else {
+                throw new RuntimeException(rootCause);
+            }
+        } else {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public boolean supportsStartupMessages() {
         return true;
     }
-    
+
     @Override
     public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkBoundaryReached) {
         invoke("setInputMessage", inputMessage);

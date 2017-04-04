@@ -126,6 +126,10 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         fitToColumn = properties.is(FIT_TO_COLUMN);
         tableSuffix = properties.get(TABLE_SUFFIX, "");
         autoCreateTable = properties.is(AUTO_CREATE_TABLE, false);
+        
+        if (batchMode && insertFallback) {
+            throw new MisconfiguredException("Insert fallback is not supported in batch mode");
+        }
 
         if (tableSuffix == null) {
             tableSuffix = "";
@@ -361,17 +365,19 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
             Object[] rowData = getValues(false, targetUpdateTable, inputRow);
             int count = executeSql(targetUpdateTable, transaction, rowData);
             stats.updateCount += count;
-            if (insertFallback && count == 0) {
-                log.debug("Falling back to insert");
-                rowData = getValues(false, targetInsertTable, inputRow);
-                count = executeSql(targetInsertTable, transaction, rowData);
-                stats.fallbackInsertCount += count;
-            } else if (count == 0 && !continueOnError) {
-                throw new SqlException(String.format("Failed to update row: \n%s\nWith values: \n%s\nWith types: \n%s\n",
-                        targetUpdateTable.getStatement().getSql(), Arrays.toString(rowData),
-                        Arrays.toString(targetUpdateTable.getStatement().getTypes())));
-            } else if (count == 0) {
-                stats.ignoredCount++;
+            if (!batchMode) {
+                if (insertFallback && count == 0) {
+                    log.debug("Falling back to insert");
+                    rowData = getValues(false, targetInsertTable, inputRow);
+                    count = executeSql(targetInsertTable, transaction, rowData);
+                    stats.fallbackInsertCount += count;
+                } else if (count == 0 && !continueOnError) {
+                    throw new SqlException(String.format("Failed to update row: \n%s\nWith values: \n%s\nWith types: \n%s\n",
+                            targetUpdateTable.getStatement().getSql(), Arrays.toString(rowData),
+                            Arrays.toString(targetUpdateTable.getStatement().getTypes())));
+                } else if (count == 0) {
+                    stats.ignoredCount++;
+                }
             }
         }
     }
@@ -401,7 +407,6 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     }
 
     private int executeSql(TargetTable targetTable, ISqlTransaction transaction, Object[] rowData) {
-
         int count = execute(transaction, targetTable.getStatement(), new Object(), rowData);
         if (count > 0) {
             results.add(new Result(targetTable.getStatement().getSql(), count));
@@ -485,7 +490,6 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     }
 
     private int execute(ISqlTransaction transaction, DmlStatement dmlStatement, Object marker, Object[] data) {
-
         String sql = dmlStatement.getSql();
         if (!sql.equals(lastPreparedDml)) {
             transaction.flush();

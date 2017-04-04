@@ -130,7 +130,10 @@ public class ScriptHelper {
     
     private EntityNameLookup entityNameLookup;
 
-    public ScriptHelper(IComponentRuntime componentRuntime) {
+    public ScriptHelper() {
+    }
+    
+    protected void init(IComponentRuntime componentRuntime) {
         this.componentRuntime = componentRuntime;
         this.context = componentRuntime.getComponentContext();
         this.resource = context.getResourceRuntime();
@@ -529,6 +532,13 @@ public class ScriptHelper {
     protected void sendControlMessage() {
         callback.sendControlMessage();
     }        
+    
+    /**
+     * Helper method to send an entity data message.
+     */
+    protected void sendEntityDataMessage(ArrayList<EntityData> payload) {
+        callback.sendEntityDataMessage(null, payload);
+    }
 
     protected void onInit() {
     }
