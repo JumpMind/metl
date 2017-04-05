@@ -73,6 +73,8 @@ public class JMS extends AbstractResourceRuntime {
     public static final String SETTING_MESSAGE_JMS_TYPE = "msg.jms.type";
     
     public static final String SETTING_ACK_TYPE = "ack.type";
+    
+    public static final String SETTING_WAIT_FOR_MESSAGE_TIMEOUT_MS = "wait.for.message.timeout.ms";
 
     @SuppressWarnings("unchecked")
     @Override

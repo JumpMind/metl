@@ -45,7 +45,7 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
     
     protected MessageProducer producer;
     
-    protected Message lastMessage;
+    protected Message lastMessage;    
     
     public AbstractJMSJndiDirectory(TypedProperties properties) throws JMSException, NamingException {
         this.properties = properties;
@@ -144,7 +144,7 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
             initConsumer();
             StringBuilder builder = new StringBuilder();
             try {
-                Message message = consumer.receive(500);
+                Message message = consumer.receive(properties.getInt(JMS.SETTING_WAIT_FOR_MESSAGE_TIMEOUT_MS, 5000));
                 if (message != null) {
                     lastMessage = message;
                     if (message instanceof TextMessage) {

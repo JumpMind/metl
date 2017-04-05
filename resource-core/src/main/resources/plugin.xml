@@ -253,6 +253,10 @@
             <setting id='msg.jms.type' required='false' type='text'>
                 <name>Message JMS Type</name>
             </setting>
+            <setting id='wait.for.message.timeout.ms' required='false' type='integer'>
+                <name>Wait for Message Timeout (ms)</name>
+                <defaultValue>5000</defaultValue>
+            </setting>            
         </settings>
     </resource>
 

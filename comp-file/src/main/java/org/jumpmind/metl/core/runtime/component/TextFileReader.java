@@ -134,6 +134,8 @@ public class TextFileReader extends AbstractFileReader {
                         } else {
                             if (isNotBlank(file)) {
                                 info("File %s didn't exist, but must exist setting was false.  Continuing", file);
+                            } else {
+                                info("There was no content to read");
                             }
                             readContent = false;
                         }
