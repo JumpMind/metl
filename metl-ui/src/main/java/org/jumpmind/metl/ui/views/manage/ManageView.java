@@ -365,6 +365,20 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
             log.debug("new execution count = " + all.size() + ", old execution count = " + tableValues.size());
             needsUpdated = true;
         }
+        
+        if (!needsUpdated) {
+            for (Execution execution : tableValues) {
+                if (execution.getExecutionStatus() == ExecutionStatus.RUNNING) {
+                    for (Execution newExecution : all) {
+                        if (newExecution.equals(execution) &&  
+                                newExecution.getExecutionStatus() != execution.getExecutionStatus()) {
+                            needsUpdated = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
 
         if (!needsUpdated) {
             all.removeAll(tableValues);
