@@ -123,10 +123,10 @@ public class CutCopyPasteManager {
         
         Resource newResource;
         for (Resource resource : origResources) {
-            String existingResourceId = destinationHasResource(resource, newProjectVersionId);
+            int nbrAffectedFlows = configurationService.findAffectedFlowsByResource(resource.getId()).size();
+            String existingResourceId = destinationHasResource(resource, newProjectVersionId, nbrAffectedFlows);
             boolean targetProjectHasResource = existingResourceId != null ? true : false;
             boolean targetProjectEqualsSourceProject = resource.getProjectVersionId().equalsIgnoreCase(newProjectVersionId) ? true : false;
-            int nbrAffectedFlows = configurationService.findAffectedFlowsByResource(resource.getId()).size();
 
             //make a duplicate copy of the resource if needed
             if (
@@ -230,8 +230,7 @@ public class CutCopyPasteManager {
         }
     }
 
-    private String destinationHasResource(Resource resource, String newProjectVersionId) {
-
+    private String destinationHasResource(Resource resource, String newProjectVersionId, int nbrDependentFlows) {
         List<String> projectVersionIds = new ArrayList<String>();
         projectVersionIds.add(newProjectVersionId);
         projectVersionIds.addAll(getDependentProjectVersionIds(newProjectVersionId));
@@ -243,7 +242,7 @@ public class CutCopyPasteManager {
                 // findByName doesn't do deep fetch
                 existingResource = configurationService.findResource(existingResource.getId());
                 if (resourcesMatchAcrossProjects(resource, existingResource) &&
-                        !resourceInCutBuffer(resource, newProjectVersionId)) {
+                        !resourceInCutBuffer(existingResource, nbrDependentFlows)) {
                     return existingResource.getId();
                 }
             }
@@ -251,13 +250,15 @@ public class CutCopyPasteManager {
         return null;
     }
 
-    private boolean resourceInCutBuffer(Resource resource, String newProjectVersionId) {
+    private boolean resourceInCutBuffer(Resource resource, int nbrDependentFlows) {
+        //TODO: THERE IS A DIFFERENCE BETWEEN BEING IN THE CUT BUFFER AND ACTUALLY BEING CUT...
         if (clipboard.containsKey(CLIPBOARD_ACTION)
                 && ((String) clipboard.get(CLIPBOARD_ACTION)).equalsIgnoreCase(CLIPBOARD_CUT)) {            
             HashSet<Resource> bufferResources = (HashSet<Resource>) clipboard.get(CLIPBOARD_RESOURCES);
             for (Resource bufferResource : bufferResources) {
                 if (resource.getId().equalsIgnoreCase(bufferResource.getId()) &&
-                        resource.getProjectVersionId().equalsIgnoreCase(newProjectVersionId)) {
+                        resource.getProjectVersionId().equalsIgnoreCase(bufferResource.getProjectVersionId()) &&
+                        nbrDependentFlows <=1) {
                     return true;
                 }
             }
