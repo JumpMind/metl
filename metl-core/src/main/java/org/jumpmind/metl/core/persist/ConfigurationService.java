@@ -1555,7 +1555,7 @@ public class ConfigurationService extends AbstractService
     }
     
     
-    private void updateFlowWithNewGUIDs(String flowId,Map<String, String> oldToNewModelIdMap, 
+    public void updateFlowWithNewGUIDs(String flowId,Map<String, String> oldToNewModelIdMap, 
             Map<String, String> oldToNewModelEntityIdMap, Map<String, String> oldToNewModelAttributeIdMap,
             Map<String, String> oldToNewResourceIdMap) {
         Flow flow = findFlow(flowId);

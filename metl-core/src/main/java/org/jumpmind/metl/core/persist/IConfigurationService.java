@@ -210,5 +210,9 @@ public interface IConfigurationService {
     public void updateProjectVersionDependency(ProjectVersionDependency dependency, String newTargetProjectVersionId);
     
     public void backupDatabase(String filePath);
-    
+
+    public void updateFlowWithNewGUIDs(String flowId,Map<String, String> oldToNewModelIdMap, 
+            Map<String, String> oldToNewModelEntityIdMap, Map<String, String> oldToNewModelAttributeIdMap,
+            Map<String, String> oldToNewResourceIdMap);
+
 }
