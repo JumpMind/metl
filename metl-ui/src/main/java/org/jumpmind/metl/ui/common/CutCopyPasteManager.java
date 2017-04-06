@@ -20,11 +20,8 @@ import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.persist.IConfigurationService;
-import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.vaadin.ui.Notification.Type;
 
 public class CutCopyPasteManager {
 
@@ -45,6 +42,8 @@ public class CutCopyPasteManager {
     public static final String CLIPBOARD_ORIGIN_FLOW = "flow";
     
     public static final String CLIPBOARD_ORIGIN_RESOURCE = "resource";
+    
+    public static final String CLIPBOARD_ORIGIN_MODEL = "model";
 
     final Logger log = LoggerFactory.getLogger(getClass());
     ApplicationContext context;
@@ -69,13 +68,7 @@ public class CutCopyPasteManager {
             saveToClipboard(flow);
         } else if (object instanceof ModelName) {
             Model model = configurationService.findModel(((ModelName) object).getId());
-            List<Flow> affectedFlows = configurationService.findAffectedFlowsByModel(model.getId());
-            if (affectedFlows.size() > 0) {
-                CommonUiUtils.notify("The model is currently in use.  It cannot be cut or moved.",
-                        Type.WARNING_MESSAGE);
-            } else {
-                saveToClipboard(model);
-            }
+            saveToClipboard(model);
         } else if (object instanceof ResourceName) {
             Resource resource = configurationService.findResource(((ResourceName) object).getId());
             saveToClipboard(resource);
@@ -160,12 +153,19 @@ public class CutCopyPasteManager {
                 restampAllSourceProjectFlows(existingResourceId, newResource);
             } else if (cutCopyOrigin.equalsIgnoreCase(CLIPBOARD_ORIGIN_FLOW) &&
                     !targetProjectEqualsSourceProject &&
-                    ((action.equalsIgnoreCase(CLIPBOARD_CUT) && nbrAffectedFlows>1) ||
+                    ((action.equalsIgnoreCase(CLIPBOARD_CUT) && nbrAffectedFlows>1 && !targetProjectHasResource) ||
+                            (action.equalsIgnoreCase(CLIPBOARD_CUT) && targetProjectHasResource) ||
                             (action.equalsIgnoreCase(CLIPBOARD_COPY) && targetProjectHasResource) ||
                             (action.equalsIgnoreCase(CLIPBOARD_COPY) && !targetProjectHasResource && nbrAffectedFlows > 1))) {
-                mapResourceOldToNewUUID(oldToNewUUIDMapping, resource, newResource);
-            }           
-            
+                Resource resourceToRestampTo;
+                if (existingResourceId != null) {
+                    resourceToRestampTo = configurationService.findResource(existingResourceId);
+                } else {
+                    resourceToRestampTo = newResource;
+                }
+                mapResourceOldToNewUUID(oldToNewUUIDMapping, resource, resourceToRestampTo);
+            }
+
             //add project dependencies if needed
             if (cutCopyOrigin.equalsIgnoreCase(CLIPBOARD_ORIGIN_RESOURCE) &&
                     action.equalsIgnoreCase(CLIPBOARD_CUT) &&
@@ -216,6 +216,19 @@ public class CutCopyPasteManager {
         }
     }
     
+    private void restampAllSourceProjectFlows(String existingModelId, Model newModel) {
+        Model existingModel = configurationService.findModel(existingModelId);
+        mapModelOldToNewUUID(oldToNewUUIDMapping, newModel, existingModel);
+        Map<String, String> oldToNewUUIDStringMapping = new HashMap<String, String>();
+        for (Map.Entry<String, AbstractObject> entry : oldToNewUUIDMapping.entrySet()) {
+            oldToNewUUIDStringMapping.put(entry.getKey(), entry.getValue().getId());
+        }
+        List<Flow> affectedFlows = configurationService.findAffectedFlowsByModel(existingModel.getId());
+        for (Flow flow : affectedFlows) {
+            configurationService.updateFlowWithNewGUIDs(flow.getId(), oldToNewUUIDStringMapping, null, null, null);
+        }
+    }
+
     private void mapResourceOldToNewUUID(Map<String, AbstractObject> oldToNewUUIDMapping,
             Resource oldResource, Resource newResource) {
         oldToNewUUIDMapping.put(oldResource.getId(), newResource);
@@ -250,8 +263,8 @@ public class CutCopyPasteManager {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     private boolean resourceInCutBuffer(Resource resource, int nbrDependentFlows) {
-        //TODO: THERE IS A DIFFERENCE BETWEEN BEING IN THE CUT BUFFER AND ACTUALLY BEING CUT...
         if (clipboard.containsKey(CLIPBOARD_ACTION)
                 && ((String) clipboard.get(CLIPBOARD_ACTION)).equalsIgnoreCase(CLIPBOARD_CUT)) {            
             HashSet<Resource> bufferResources = (HashSet<Resource>) clipboard.get(CLIPBOARD_RESOURCES);
@@ -360,31 +373,75 @@ public class CutCopyPasteManager {
     @SuppressWarnings("unchecked")
     protected void pasteModels(Map<String, AbstractObject> oldToNewUUIDMapping,
             String newProjectVersionId) {
+
         HashSet<Model> origModels = (HashSet<Model>) clipboard.get(CLIPBOARD_MODELS);
         HashSet<Model> newModels = new HashSet<Model>();
+            
+        String cutCopyOrigin;
+        if (clipboard.get(CLIPBOARD_FLOW) == null) {
+            cutCopyOrigin = CLIPBOARD_ORIGIN_MODEL;
+        } else {
+            cutCopyOrigin = CLIPBOARD_ORIGIN_FLOW;
+        }
+        String action = (String) clipboard.get(CLIPBOARD_ACTION);
+        
+        Model newModel;
         for (Model model : origModels) {
-            String existingModelId = destinationHasModel(model, newProjectVersionId);
-            if (existingModelId == null) {
-                // make a copy only if the model is still in use by another flow
-                // model alone can't be cut if they have dependent flows
-                if ((clipboard.containsKey(CLIPBOARD_ACTION)
-                        && ((String) clipboard.get(CLIPBOARD_ACTION))
-                                .equalsIgnoreCase(CLIPBOARD_COPY))
-                        || configurationService.findAffectedFlowsByModel(model.getId())
-                                .size() > 1) {
-                    Model newModel = configurationService.copy(oldToNewUUIDMapping, model);
-                    newModels.add(newModel);
-                } else {
-                    newModels.add(model);
-                }
+            int nbrAffectedFlows = configurationService.findAffectedFlowsByModel(model.getId()).size();
+            String existingModelId = destinationHasModel(model, newProjectVersionId, nbrAffectedFlows);
+            boolean targetProjectHasModel = existingModelId != null ? true : false;
+            boolean targetProjectEqualsSourceProject = model.getProjectVersionId().equalsIgnoreCase(newProjectVersionId) ? true : false;
+
+            //make a duplicate copy of the model if needed
+            if (
+                    // cut/copying a resource
+                    (cutCopyOrigin.equalsIgnoreCase(CLIPBOARD_ORIGIN_MODEL) &&
+                    action.equalsIgnoreCase(CLIPBOARD_COPY) &&
+                    (targetProjectEqualsSourceProject || (!targetProjectEqualsSourceProject || !targetProjectHasModel))) ||
+                    // cut/copying a flow
+                    (cutCopyOrigin.equalsIgnoreCase(CLIPBOARD_ORIGIN_FLOW) &&
+                    !targetProjectEqualsSourceProject &&
+                    nbrAffectedFlows > 1 &&
+                    !targetProjectHasModel)
+                    //
+                    ) {                    
+                    newModel = configurationService.copy(oldToNewUUIDMapping, model);
+                    newModel.setProjectVersionId(newProjectVersionId);
+                    newModel.setName(calculateModelName(newModel));
             } else {
-                Model existingModel = configurationService.findModel(existingModelId);
-                mapModelOldToNewUUID(oldToNewUUIDMapping, model, existingModel);
+                newModel = model;
+            }
+            
+            if (targetProjectEqualsSourceProject || !targetProjectHasModel) {
+                newModels.add(newModel);
+            }
+
+            //determine and restamp flows if needed
+            if (cutCopyOrigin.equalsIgnoreCase(CLIPBOARD_ORIGIN_MODEL) &&
+                    action.equalsIgnoreCase(CLIPBOARD_CUT) &&
+                    !targetProjectEqualsSourceProject &&
+                    targetProjectHasModel) {                
+                restampAllSourceProjectFlows(existingModelId, newModel);
+            } else if (cutCopyOrigin.equalsIgnoreCase(CLIPBOARD_ORIGIN_FLOW) &&
+                    !targetProjectEqualsSourceProject &&
+                    ((action.equalsIgnoreCase(CLIPBOARD_CUT) && nbrAffectedFlows>1) ||
+                            (action.equalsIgnoreCase(CLIPBOARD_COPY) && targetProjectHasModel) ||
+                            (action.equalsIgnoreCase(CLIPBOARD_COPY) && !targetProjectHasModel && nbrAffectedFlows > 1))) {
+                mapModelOldToNewUUID(oldToNewUUIDMapping, model, newModel);
+            }           
+            
+            //add project dependencies if needed
+            if (cutCopyOrigin.equalsIgnoreCase(CLIPBOARD_ORIGIN_MODEL) &&
+                    action.equalsIgnoreCase(CLIPBOARD_CUT) &&
+                    !targetProjectEqualsSourceProject &&
+                    nbrAffectedFlows >= 1 &&
+                    !dependencyExists(model.getProjectVersionId(), newProjectVersionId)) {
+                createNewProjectDependency(model.getProjectVersionId(), newProjectVersionId);
             }
         }
+        
         for (Model model : newModels) {
             model.setProjectVersionId(newProjectVersionId);
-            model.setName(calculateModelName(model));
             configurationService.save(model);
         }
     }
@@ -403,7 +460,7 @@ public class CutCopyPasteManager {
         }
     }
 
-    private String destinationHasModel(Model model, String newProjectVersionId) {
+    private String destinationHasModel(Model model, String newProjectVersionId, int nbrAffectedFlows) {
 
         List<String> projectVersionIds = new ArrayList<String>();
         projectVersionIds.add(newProjectVersionId);
