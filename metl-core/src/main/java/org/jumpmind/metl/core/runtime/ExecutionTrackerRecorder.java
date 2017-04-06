@@ -48,22 +48,23 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     Agent agent;
 
     Map<String, ExecutionStep> steps;
-    
+
     Map<ExecutionStep, Date> lastStatUpdate = new HashMap<ExecutionStep, Date>();
-    
+
     Date startTime;
-    
+
     String userId;
-    
+
     String parameters;
 
-    public ExecutionTrackerRecorder(Agent agent, AgentProjectVersionFlowDeployment agentDeployment,  ExecutorService threadService, IExecutionService executionService, String userId, String parameters) {
+    public ExecutionTrackerRecorder(Agent agent, AgentProjectVersionFlowDeployment agentDeployment, ExecutorService threadService,
+            IExecutionService executionService, String userId, String parameters) {
         super(agentDeployment);
         this.agent = agent;
         this.userId = userId;
         this.parameters = parameters;
         this.recorder = new AsyncRecorder(executionService);
-        threadService.execute(this.recorder);        
+        threadService.execute(this.recorder);
     }
 
     @Override
@@ -105,8 +106,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
                     status = ExecutionStatus.ERROR;
                 }
 
-                if (status != ExecutionStatus.ERROR && 
-                        ExecutionStatus.CANCELLED.name().equals(executionStep.getStatus())) {
+                if (status != ExecutionStatus.ERROR && ExecutionStatus.CANCELLED.name().equals(executionStep.getStatus())) {
                     status = ExecutionStatus.CANCELLED;
                 }
             }
@@ -120,7 +120,9 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     public void flowStepStarted(int threadNumber, ComponentContext context) {
         super.flowStepStarted(threadNumber, context);
         ExecutionStep step = getExecutionStep(threadNumber, context);
-        this.recorder.record(step);
+        if (!deployment.getAgentDeployment().getLogLevel().equals(LogLevel.OFF.toString())) {
+            this.recorder.record(step);
+        }
     }
 
     protected ExecutionStep getExecutionStep(int threadNumber, ComponentContext context) {
@@ -145,7 +147,8 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
 
         ExecutionStep step = getExecutionStep(threadNumber, context);
         Date lastUpdateTime = step.getLastUpdateTime();
-        if (step.getStatus().equals(ExecutionStatus.READY.name()) || lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
+        if (step.getStatus().equals(ExecutionStatus.READY.name()) || lastUpdateTime == null
+                || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
             if (step.getStartTime() == null) {
                 step.setStartTime(new Date());
             }
@@ -153,7 +156,9 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
                 step.setStatus(ExecutionStatus.RUNNING.name());
             }
             step.setLastUpdateTime(new Date());
-            this.recorder.record(step);
+            if (!deployment.getAgentDeployment().getLogLevel().equals(LogLevel.OFF.toString())) {
+                this.recorder.record(step);
+            }
         }
     }
 
@@ -171,11 +176,13 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
                 step.setPayloadProduced(stats.getNumberOutboundPayload(threadNumber));
                 step.setPayloadReceived(stats.getNumberInboundPayload(threadNumber));
                 step.setHandleDuration(stats.getTimeSpentInHandle(threadNumber));
-                step.setQueueDuration(stats.getTimeSpentWaiting(threadNumber));                
+                step.setQueueDuration(stats.getTimeSpentWaiting(threadNumber));
                 lastStatUpdate.put(step, new Date());
             }
             step.setLastUpdateTime(new Date());
-            this.recorder.record(step);
+            if (!deployment.getAgentDeployment().getLogLevel().equals(LogLevel.OFF.toString())) {
+               this.recorder.record(step);
+            }
         }
     }
 
@@ -184,7 +191,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         super.afterHandle(threadNumber, context, error);
         ExecutionStep step = getExecutionStep(threadNumber, context);
         Date lastUpdateTime = lastStatUpdate.get(step);
-          
+
         if (lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
             step.setStatus(error != null ? ExecutionStatus.ERROR.name() : ExecutionStatus.READY.name());
             ComponentStatistics stats = context.getComponentStatistics();
@@ -199,7 +206,9 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
                 lastStatUpdate.put(step, new Date());
             }
             step.setLastUpdateTime(new Date());
-            this.recorder.record(step);
+            if (!deployment.getAgentDeployment().getLogLevel().equals(LogLevel.OFF.toString())) {
+                this.recorder.record(step);
+            }
         }
     }
 
@@ -228,11 +237,14 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
             step.setPayloadProduced(stats.getNumberOutboundPayload(threadNumber));
             step.setPayloadReceived(stats.getNumberInboundPayload(threadNumber));
             step.setHandleDuration(stats.getTimeSpentInHandle(threadNumber));
-            step.setQueueDuration(stats.getTimeSpentWaiting(threadNumber));            
+            step.setQueueDuration(stats.getTimeSpentWaiting(threadNumber));
             lastStatUpdate.put(step, new Date());
         }
         step.setLastUpdateTime(new Date());
-        this.recorder.record(step);
+        if (!deployment.getAgentDeployment().getLogLevel().equals(LogLevel.OFF.toString()) || 
+                ExecutionStatus.ERROR.toString().equals(step.getStatus())) {
+           this.recorder.record(step);
+        }
     }
 
     @Override
@@ -253,6 +265,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     @Override
     public void log(int threadNumber, LogLevel level, ComponentContext context, String output, Object... args) {
         if (deployment.asLogLevel().log(level)) {
+            boolean isError = level.equals(LogLevel.ERROR);
             ExecutionStepLog log = new ExecutionStepLog();
             log.setExecutionStepId(getExecutionStep(threadNumber, context).getId());
             log.setLevel(level.name());
@@ -260,7 +273,9 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
                 output = String.format(output, args);
             }
             log.setLogText(output);
-            this.recorder.record(log);
+            if (!deployment.getAgentDeployment().getLogLevel().equals(LogLevel.OFF.toString()) || isError) {
+               this.recorder.record(log);
+            }
         }
     }
 

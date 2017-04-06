@@ -22,7 +22,7 @@ package org.jumpmind.metl.core.runtime;
 
 public enum LogLevel {
 
-    DEBUG(10), INFO(20), WARN(30), ERROR(40);
+    OFF(0), DEBUG(10), INFO(20), WARN(30), ERROR(40);
     
     int level;
     
