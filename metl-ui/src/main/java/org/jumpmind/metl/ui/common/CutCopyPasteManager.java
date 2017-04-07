@@ -278,7 +278,23 @@ public class CutCopyPasteManager {
         }
         return false;
     }
-    
+
+    @SuppressWarnings("unchecked")
+    private boolean modelInCutBuffer(Model model, int nbrDependentFlows) {
+        if (clipboard.containsKey(CLIPBOARD_ACTION)
+                && ((String) clipboard.get(CLIPBOARD_ACTION)).equalsIgnoreCase(CLIPBOARD_CUT)) {            
+            HashSet<Model> bufferModels = (HashSet<Model>) clipboard.get(CLIPBOARD_MODELS);
+            for (Model bufferModel : bufferModels) {
+                if (model.getId().equalsIgnoreCase(bufferModel.getId()) &&
+                        model.getProjectVersionId().equalsIgnoreCase(bufferModel.getProjectVersionId()) &&
+                        nbrDependentFlows <=1) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private List<String> getDependentProjectVersionIds(String projectVersionId) {
         List<String> dependentProjectVersionIds = new ArrayList<String>();
         List<ProjectVersionDependency> projectDependencies = configurationService
@@ -424,10 +440,17 @@ public class CutCopyPasteManager {
                 restampAllSourceProjectFlows(existingModelId, newModel);
             } else if (cutCopyOrigin.equalsIgnoreCase(CLIPBOARD_ORIGIN_FLOW) &&
                     !targetProjectEqualsSourceProject &&
-                    ((action.equalsIgnoreCase(CLIPBOARD_CUT) && nbrAffectedFlows>1) ||
+                    ((action.equalsIgnoreCase(CLIPBOARD_CUT) && nbrAffectedFlows>1 && !targetProjectHasModel) ||
+                            (action.equalsIgnoreCase(CLIPBOARD_CUT) && targetProjectHasModel) ||
                             (action.equalsIgnoreCase(CLIPBOARD_COPY) && targetProjectHasModel) ||
                             (action.equalsIgnoreCase(CLIPBOARD_COPY) && !targetProjectHasModel && nbrAffectedFlows > 1))) {
-                mapModelOldToNewUUID(oldToNewUUIDMapping, model, newModel);
+                Model modelToRestampTo;
+                if (existingModelId != null) {
+                    modelToRestampTo = configurationService.findModel(existingModelId);
+                } else {
+                    modelToRestampTo = newModel;
+                }                
+                mapModelOldToNewUUID(oldToNewUUIDMapping, model, modelToRestampTo);
             }           
             
             //add project dependencies if needed
@@ -472,7 +495,8 @@ public class CutCopyPasteManager {
             for (Model existingModel : existingModels) {
                 // findByName doesn't do deep fetch
                 existingModel = configurationService.findModel(existingModel.getId());
-                if (modelsMatchAcrossProjects(model, existingModel)) {
+                if (modelsMatchAcrossProjects(model, existingModel) &&
+                        !modelInCutBuffer(existingModel, nbrAffectedFlows)) {
                     return existingModel.getId();
                 }
             }
