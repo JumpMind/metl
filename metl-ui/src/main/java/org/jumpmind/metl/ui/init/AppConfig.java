@@ -517,6 +517,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
             try {
                 BrokerService broker = new BrokerService();
                 broker.setPersistent(false);
+                broker.getSystemUsage().getMemoryUsage().setLimit(10*1024*10);
                 broker.start();
                 brokerService = broker;
             } catch (Exception e) {
