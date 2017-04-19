@@ -446,7 +446,7 @@ public class ExecutionApi {
                                 execution = executionService.findExecution(executionId);
                                 done = execution != null && ExecutionStatus.isDone(execution.getExecutionStatus());
                                 if (!done) {
-                                    AppUtils.sleep(500);
+                                    AppUtils.sleep(50);
                                 }
                             } while (!done);
                             break;

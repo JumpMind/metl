@@ -65,7 +65,9 @@ public class XMLComponentDefinition extends XMLAbstractDefinition {
         @XmlEnumValue("mailsession")
         MAIL_SESSION,
         @XmlEnumValue("http")
-        HTTP,        
+        HTTP,
+        @XmlEnumValue("subscribe")
+        SUBSCRIBE,         
         @XmlEnumValue("none")
         NONE, 
         @XmlEnumValue("any")

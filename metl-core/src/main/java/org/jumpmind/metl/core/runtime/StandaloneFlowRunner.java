@@ -61,6 +61,7 @@ import org.jumpmind.metl.core.plugin.DefinitionFactory;
 import org.jumpmind.metl.core.plugin.PluginManager;
 import org.jumpmind.metl.core.runtime.component.ComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
+import org.jumpmind.metl.core.runtime.subscribe.SubscribeManager;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMappingRegistry;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.security.SecurityService;
@@ -190,7 +191,7 @@ public class StandaloneFlowRunner {
                 executionService = new ExecutionService(securityService, persistenceManager, databasePlatform, tablePrefix, new StandardEnvironment());
                 agentRuntime = new AgentRuntime(new Agent("test"), operationsService, configurationService, executionService,
                         new ComponentRuntimeFactory(componentDefinitionFactory), componentDefinitionFactory,
-                        new HttpRequestMappingRegistry());
+                        new HttpRequestMappingRegistry(), new SubscribeManager());
                 agentRuntime.start();
                 URL configSqlScriptURL = null;
                 File configSqlScriptFile = new File(configSqlScript);

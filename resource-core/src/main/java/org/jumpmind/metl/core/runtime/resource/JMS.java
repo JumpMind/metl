@@ -20,9 +20,13 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.jms.MessageListener;
 import javax.naming.Context;
 
-public class JMS extends AbstractResourceRuntime {
+public class JMS extends AbstractResourceRuntime implements ISubscribe {
 
     public static final String TYPE = "JMS";
 
@@ -97,4 +101,29 @@ public class JMS extends AbstractResourceRuntime {
         }        
         return (T) streamableResource;
     }
+    
+    Map<MessageListener, AbstractJMSJndiDirectory> listeners = new HashMap<>();
+    
+    @Override
+    public void start(MessageListener listener) {
+        AbstractJMSJndiDirectory directory = reference();
+        log.info("About to register JMS listener");
+        directory.register(listener);
+        listeners.put(listener, directory);
+    }
+    
+    @Override
+    public void stop(MessageListener listener) {
+        AbstractJMSJndiDirectory directory = listeners.remove(listener);
+        if (directory != null) {
+            log.info("About to shutdown JMS listener");
+            directory.close();            
+        }
+    }
+    
+    @Override
+    public void stop() {
+        log.error("Stop called!");
+    }
+    
 }

@@ -32,6 +32,8 @@ import org.jumpmind.properties.TypedProperties;
 public class Agent extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
+    
+    public static final String DESIGN_FOLDER_NAME = "<Design Time>";
 
     Folder folder;
 
@@ -183,6 +185,10 @@ public class Agent extends AbstractNamedObject {
 
     public boolean isAllowTestFlows() {
         return allowTestFlows;
+    }
+    
+    public boolean isDesignTimeAgent() {
+        return folder != null && DESIGN_FOLDER_NAME.equals(folder.getName());
     }
 
     public AgentDeployment getAgentDeploymentFor(Flow flow) {

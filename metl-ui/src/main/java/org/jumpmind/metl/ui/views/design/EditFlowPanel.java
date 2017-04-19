@@ -395,24 +395,24 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     }
 
     public void runFlow() {
-        final String DESIGN_FOLDER_NAME = "<Design Time>";
+        
         final String AGENT_NAME = String.format("<%s on %s>", context.getUser().getLoginId(), AppUtils.getHostName());
         IAgentManager agentManager = context.getAgentManager();
         Set<Agent> agents = agentManager.getAvailableAgents();
         Agent myDesignAgent = null;
         for (Agent agent : agents) {
-            if (agent.getFolder() != null && DESIGN_FOLDER_NAME.equals(agent.getFolder().getName()) && agent.getName().equals(AGENT_NAME)) {
+            if (agent.getFolder() != null && Agent.DESIGN_FOLDER_NAME.equals(agent.getFolder().getName()) && agent.getName().equals(AGENT_NAME)) {
                 myDesignAgent = agent;
                 break;
             }
         }
 
         if (myDesignAgent == null) {
-            Folder folder = configurationService.findFirstFolderWithName(DESIGN_FOLDER_NAME, FolderType.AGENT);
+            Folder folder = configurationService.findFirstFolderWithName(Agent.DESIGN_FOLDER_NAME, FolderType.AGENT);
             if (folder == null) {
                 folder = new Folder();
                 folder.setType(FolderType.AGENT.name());
-                folder.setName(DESIGN_FOLDER_NAME);
+                folder.setName(Agent.DESIGN_FOLDER_NAME);
                 configurationService.save(folder);
             }
 

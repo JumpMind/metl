@@ -415,8 +415,12 @@ public class PropertySheet extends AbsoluteLayout {
         } else if (obj instanceof Resource) {
             Resource resource = (Resource) obj;
             XMLResourceDefinition definition = context.getDefinitionFactory().getResourceDefintion(resource.getProjectVersionId(),
-                    resource.getType());
-            return definition.getSettings().getSetting();
+                    resource.getType());         
+            if (definition != null) {
+                return definition.getSettings() != null ? definition.getSettings().getSetting() : Collections.emptyList();
+            } else {
+                throw new IllegalStateException(String.format("Could not find a resource of type: %s", resource.getType()));
+            }
         } else {
             return Collections.emptyList();
         }

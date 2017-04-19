@@ -66,6 +66,8 @@ import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.Results;
 import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
+import org.jumpmind.metl.core.runtime.subscribe.ISubscribeManager;
+import org.jumpmind.metl.core.runtime.subscribe.ISubscribeManagerAware;
 import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.ThreadUtils;
@@ -114,12 +116,14 @@ public class AgentRuntime {
     IHttpRequestMappingRegistry httpRequestMappingRegistry;
 
     IOperationsService operationsService;
+    
+    ISubscribeManager subscribeManager;
 
     Map<AgentDeployment, List<FlowRuntime>> runningFlows = Collections.synchronizedMap(new HashMap<>());
 
     public AgentRuntime(Agent agent, IOperationsService operationsService, IConfigurationService configurationService,
             IExecutionService executionService, IComponentRuntimeFactory componentFactory, IDefinitionFactory definitionFactory,
-            IHttpRequestMappingRegistry httpRequestMappingRegistry) {
+            IHttpRequestMappingRegistry httpRequestMappingRegistry, ISubscribeManager subscribeManager) {
         this.operationsService = operationsService;
         this.agent = agent;
         this.definitionFactory = definitionFactory;
@@ -127,6 +131,7 @@ public class AgentRuntime {
         this.configurationService = configurationService;
         this.componentRuntimeFactory = componentFactory;
         this.httpRequestMappingRegistry = httpRequestMappingRegistry;
+        this.subscribeManager = subscribeManager;
     }
 
     public boolean cancel(String executionId) {
@@ -437,6 +442,9 @@ public class AgentRuntime {
                     if (listener instanceof IHttpRequestMappingRegistryAware) {
                         ((IHttpRequestMappingRegistryAware) listener).setHttpRequestMappingRegistry(httpRequestMappingRegistry);
                     }
+                    if (listener instanceof ISubscribeManagerAware) {
+                        ((ISubscribeManagerAware) listener).setSubscribeManager(subscribeManager);
+                    }
                     method.run(listener, flow, flowStep, componentDefintion);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -488,6 +496,13 @@ public class AgentRuntime {
                 }
             }
         }
+        
+        AgentProjectVersionFlowDeployment agentProjectVersionFlowDeployment = findDeployed(deployment);
+        if (agentProjectVersionFlowDeployment != null) {
+            doComponentDeploymentEvent(agentProjectVersionFlowDeployment,
+                    (l, f, s, c) -> l.onUndeploy(agent, agentProjectVersionFlowDeployment, s, c));
+        }
+
 
         if (nextStatus != null) {
             deployment.setStatus(nextStatus.name());
@@ -506,6 +521,10 @@ public class AgentRuntime {
             }
         }
     }
+    
+    public IResourceRuntime getDeployedResource(String id) {
+        return deployedResources.get(id);
+    }
 
     public Collection<IResourceRuntime> getDeployedResources() {
         return new HashSet<IResourceRuntime>(deployedResources.values());
@@ -523,8 +542,6 @@ public class AgentRuntime {
     public synchronized void undeploy(AgentDeployment deployment) {
         AgentProjectVersionFlowDeployment agentProjectVersionFlowDeployment = findDeployed(deployment);
         if (agentProjectVersionFlowDeployment != null) {
-            doComponentDeploymentEvent(agentProjectVersionFlowDeployment,
-                    (l, f, s, c) -> l.onUndeploy(agent, agentProjectVersionFlowDeployment, s, c));
             stop(deployment, null);
         }
         operationsService.delete(deployment);

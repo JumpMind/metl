@@ -44,6 +44,9 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
             } else if ("File|New|Resource|Directory|FTP".equals(menuSelected)) {
                 navigator.addNewFtpFileSystem();
                 return true;
+            } else if ("File|New|Resource|Subscribe|JMS".equals(menuSelected)) {
+                navigator.addNewJmsSubscribe();
+                return true;                
             } else if ("File|New|Resource|Directory|File System".equals(menuSelected)) {
                 navigator.addNewLocalFileSystem();
                 return true;
@@ -103,7 +106,7 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
             return new String[] { "File|New|Project Dependency", "File|New|Flow|Design", "File|New|Flow|Test", "File|New|Model",
                     "File|New|Resource|Database", "File|New|Resource|Directory|FTP", "File|New|Resource|Directory|File System",
                     "File|New|Resource|Directory|JMS", "File|New|Resource|Directory|SFTP", "File|New|Resource|Directory|SMB",
-                    "File|New|Resource|HTTP", "File|New|Resource|Mail Session", "Edit|Rename" };
+                    "File|New|Resource|HTTP", "File|New|Resource|Mail Session", "File|New|Resource|Subscribe|JMS", "Edit|Rename" };
         } else {
             return null;
         }

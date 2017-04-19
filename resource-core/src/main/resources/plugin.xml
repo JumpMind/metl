@@ -259,6 +259,88 @@
             </setting>            
         </settings>
     </resource>
+    
+    <resource id='JMS Subscribe' resourceCategory='subscribe'>
+        <name>JMS Subscribe</name>
+        <className>org.jumpmind.metl.core.runtime.resource.JMS</className>
+        <settings>
+            <setting id='create.mode' required='true' type='choice'>
+                <name>Create Mode</name>
+                <defaultValue>JNDI</defaultValue>
+                <choices>
+                    <choice>JNDI</choice>
+                </choices>
+            </setting>
+            <setting id='jms.type' required='true' type='choice'>
+                <name>JMS Type</name>
+                <defaultValue>Topic</defaultValue>
+                <choices>
+                    <choice>Queue</choice>
+                    <choice>Topic</choice>
+                </choices>
+            </setting>
+            <setting id='java.naming.factory.initial' required='false' type='text'>
+                <name>java.naming.factory.initial</name>
+                <defaultValue>org.apache.activemq.jndi.ActiveMQInitialContextFactory</defaultValue>
+            </setting>
+            <setting id='java.naming.provider.url' required='false' type='text'>
+                <name>java.naming.provider.url</name>
+                <defaultValue>vm://localhost?broker.persistent=false</defaultValue>
+            </setting>
+            <setting id='java.naming.security.principal' required='false' type='text'>
+                <name>java.naming.security.principal</name>
+            </setting>
+            <setting id='java.naming.security.credentials' required='false' type='password'>
+                <name>java.naming.security.credentials</name>
+            </setting>
+            <setting id='connection.factory.name' required='false' type='text'>
+                <name>Connection Factory Name</name>
+                <defaultValue>ConnectionFactory</defaultValue>
+            </setting>
+            <setting id='queue.name' required='false' type='text'>
+                <name>Queue Name</name>
+                <defaultValue>dynamicQueues/foo.bar</defaultValue>
+            </setting>
+            <setting id='topic.name' required='false' type='text'>
+                <name>Topic Name</name>
+                <defaultValue>dynamicTopics/foo.bar</defaultValue>
+            </setting>
+            <setting id='durable.subscription.name' required='false' type='text'>
+                <name>Durable Subscription Name</name>
+            </setting>
+            <setting id='client.id' required='false' type='text'>
+                <name>Client ID</name>
+            </setting>
+            <setting id='msg.type' required='true' type='choice'>
+                <name>Message Type</name>
+                <defaultValue>Text</defaultValue>
+                <choices>
+                    <choice>Text</choice>
+                    <choice>Object</choice>
+                    <choice>Map</choice>
+                    <choice>Byte</choice>
+                </choices>
+            </setting>
+            <setting id='ack.type' required='true' type='choice'>
+                <name>Acknowledge Type</name>
+                <defaultValue>Immediate</defaultValue>
+                <choices>
+                    <choice>Immediate</choice>
+                    <choice>On Flow Complete</choice>
+                </choices>
+            </setting>            
+            <setting id='map.msg.key' required='false' type='text'>
+                <name>Map Message Key</name>
+            </setting>
+            <setting id='msg.jms.type' required='false' type='text'>
+                <name>Message JMS Type</name>
+            </setting>
+            <setting id='wait.for.message.timeout.ms' required='false' type='integer'>
+                <name>Wait for Message Timeout (ms)</name>
+                <defaultValue>5000</defaultValue>
+            </setting>            
+        </settings>
+    </resource>    
 
     <resource id='Local File System' resourceCategory='streamable'>
         <name>Local File System</name>

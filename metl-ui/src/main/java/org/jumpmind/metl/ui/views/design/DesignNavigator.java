@@ -523,6 +523,8 @@ public class DesignNavigator extends VerticalLayout {
                 this.treeTable.setItemIcon(resource, Icons.WEB);
             } else if ("MailSession".equals(resource.getType())) {
                 this.treeTable.setItemIcon(resource, Icons.EMAIL);
+            } else if (resource.getType().contains("JMS")) {
+                this.treeTable.setItemIcon(resource, Icons.QUEUE);                
             } else {
                 this.treeTable.setItemIcon(resource, Icons.FILE_SYSTEM);
             }
@@ -881,6 +883,10 @@ public class DesignNavigator extends VerticalLayout {
     public void addNewFtpFileSystem() {
         addNewResource("Ftp", "FTP Directory", Icons.FILE_SYSTEM);
     }
+    
+    public void addNewJmsSubscribe() {
+        addNewResource("JMS Subscribe", "JMS Subscribe", Icons.QUEUE);
+    }    
 
     public void addNewLocalFileSystem() {
         addNewResource("Local File System", "Directory", Icons.FILE_SYSTEM);

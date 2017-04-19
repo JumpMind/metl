@@ -16,6 +16,7 @@ import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
@@ -30,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
-    
+
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
     protected TypedProperties properties;
@@ -40,13 +41,13 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
     protected Session session;
 
     protected Context context;
-    
+
     protected MessageConsumer consumer;
-    
+
     protected MessageProducer producer;
-    
-    protected Message lastMessage;    
-    
+
+    protected Message lastMessage;
+
     public AbstractJMSJndiDirectory(TypedProperties properties) throws JMSException, NamingException {
         this.properties = properties;
         initialize();
@@ -56,7 +57,7 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
         if (toClose != null) {
             try {
                 Method method = toClose.getClass().getMethod("close");
-                if (method != null) { 
+                if (method != null) {
                     try {
                         method.setAccessible(true);
                         method.invoke(toClose);
@@ -73,13 +74,13 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
             }
         }
     }
-    
+
     protected void initProducer() {
         if (producer == null) {
             producer = createProducer();
-        }        
+        }
     }
-    
+
     protected void initConsumer() {
         if (consumer == null) {
             consumer = createConsumer();
@@ -138,40 +139,46 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
         return getInputStream(relativePath, mustExist, false);
     }
 
+    public static String getPayload(Message message, String mapTypeKeyName) throws JMSException {
+        StringBuilder builder = new StringBuilder();
+        if (message instanceof TextMessage) {
+            TextMessage textMessage = (TextMessage) message;
+            String text = textMessage.getText();
+            if (isNotBlank(text)) {
+                builder.append(text);
+            }
+        } else if (message instanceof MapMessage) {
+            MapMessage mapMessage = (MapMessage) message;
+            String text = mapMessage.getString(mapTypeKeyName);
+            if (isNotBlank(text)) {
+                builder.append(text);
+            }
+        } else if (message instanceof ObjectMessage) {
+            ObjectMessage objMessage = (ObjectMessage) message;
+            Object obj = objMessage.getObject();
+            if (obj != null) {
+                builder.append(obj.toString());
+            }
+        } else if (message instanceof BytesMessage) {
+            BytesMessage bytesMessage = (BytesMessage) message;
+            long length = bytesMessage.getBodyLength();
+            byte[] bytes = new byte[(int) length];
+            bytesMessage.readBytes(bytes, (int) length);
+        }
+        return builder.toString();
+    }
+
     @Override
     public InputStream getInputStream(String relativePath, boolean mustExist, boolean closeSession) {
         try {
             initConsumer();
-            StringBuilder builder = new StringBuilder();
+            String payload = null;
             try {
                 Message message = consumer.receive(properties.getInt(JMS.SETTING_WAIT_FOR_MESSAGE_TIMEOUT_MS, 5000));
                 if (message != null) {
                     lastMessage = message;
-                    if (message instanceof TextMessage) {
-                        TextMessage textMessage = (TextMessage) message;
-                        String text = textMessage.getText();
-                        if (isNotBlank(text)) {
-                            builder.append(text);
-                        }
-                    } else if (message instanceof MapMessage) {
-                        MapMessage mapMessage = (MapMessage) message;
-                        String keyName = properties.get(JMS.SETTING_MESSAGE_TYPE_MAP_VALUE, "Payload");
-                        String text = mapMessage.getString(keyName);
-                        if (isNotBlank(text)) {
-                            builder.append(text);
-                        }
-                    } else if (message instanceof ObjectMessage) {
-                        ObjectMessage objMessage = (ObjectMessage) message;
-                        Object obj = objMessage.getObject();
-                        if (obj != null) {
-                            builder.append(obj.toString());
-                        }
-                    } else if (message instanceof BytesMessage) {
-                        BytesMessage bytesMessage = (BytesMessage) message;
-                        long length = bytesMessage.getBodyLength();
-                        byte[] bytes = new byte[(int) length];
-                        bytesMessage.readBytes(bytes, (int) length);
-                    }
+                    String keyName = properties.get(JMS.SETTING_MESSAGE_TYPE_MAP_VALUE, "Payload");
+                    payload = getPayload(message, keyName);
                 }
 
             } finally {
@@ -179,9 +186,9 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
                     AbstractJMSJndiDirectory.this.close();
                 }
             }
-            
-            if (builder.length() > 0) {
-                return new ByteArrayInputStream(builder.toString().getBytes());
+
+            if (payload != null && payload.length() > 0) {
+                return new ByteArrayInputStream(payload.getBytes());
             } else {
                 return null;
             }
@@ -205,10 +212,23 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
         return new CloseableOutputStream(relativePath, closeSession);
     }
 
+    public void register(MessageListener listener) {
+        try {
+            initialize();
+            initConsumer();
+            consumer.setMessageListener(listener);
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+
+        }
+    }
+
     @Override
     public void close(boolean success) {
-        if (success && 
-                properties.get(JMS.SETTING_ACK_TYPE, JMS.ACK_TYPE_IMMEDIATE).equals(JMS.ACK_TYPE_ON_FLOW_COMPLETE) && lastMessage != null) {
+        if (success && properties.get(JMS.SETTING_ACK_TYPE, JMS.ACK_TYPE_IMMEDIATE).equals(JMS.ACK_TYPE_ON_FLOW_COMPLETE)
+                && lastMessage != null) {
             try {
                 lastMessage.acknowledge();
             } catch (JMSException e) {

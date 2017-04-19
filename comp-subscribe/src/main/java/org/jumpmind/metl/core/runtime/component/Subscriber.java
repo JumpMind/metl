@@ -26,39 +26,10 @@ import static org.jumpmind.metl.core.runtime.FlowConstants.REQUEST_VALUE_PARAMET
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
-public class HttpRequest extends AbstractHttpRequestResponse implements IHasSecurity {
-
-    public static final String PATH = "path";
-
-    public static final String HTTP_METHOD = "http.method";
-
-    public static final String SECURITY_SCHEME = "security.scheme";
-
-    public static final String SECURE_USERNAME = "secure.username";
-
-    public static final String SECURE_PASSWORD = "secure.password";
-
-    public HttpRequest() {
-    }
+public class Subscriber extends AbstractComponentRuntime {
 
     @Override
-    public SecurityScheme getSecurityType() {
-        return SecurityScheme.valueOf(properties.get(SECURITY_SCHEME, SecurityScheme.NONE.name()));
-    }
-
-    @Override
-    public String getPassword() {
-        return properties.get(SECURE_PASSWORD);
-    }
-
-    @Override
-    public String getUsername() {
-        return properties.get(SECURE_USERNAME);
-    }
-
-    @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback,
-            boolean unitOfWorkBoundaryReached) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         String requestPayload = getComponentContext().getFlowParameters()
                 .get(REQUEST_VALUE_PARAMETER);
         if (isNotBlank(requestPayload)) {

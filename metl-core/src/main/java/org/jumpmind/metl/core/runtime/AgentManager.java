@@ -38,6 +38,7 @@ import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.core.plugin.IDefinitionFactory;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
+import org.jumpmind.metl.core.runtime.subscribe.ISubscribeManager;
 import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,18 +60,21 @@ public class AgentManager implements IAgentManager {
     IDefinitionFactory definitionFactory;
 
     IHttpRequestMappingRegistry httpRequestMappingRegistry;
+    
+    ISubscribeManager subscribeManager;
 
     Map<String, AgentRuntime> engines = new HashMap<String, AgentRuntime>();
 
     public AgentManager(IOperationsService operationsService, IConfigurationService configurationService, IExecutionService executionService,
             IComponentRuntimeFactory componentFactory, IDefinitionFactory componentDefinitionFactory,
-            IHttpRequestMappingRegistry httpRequestMappingRegistry) {
+            IHttpRequestMappingRegistry httpRequestMappingRegistry, ISubscribeManager subscribeManager) {
         this.operationsService = operationsService;
         this.executionService = executionService;
         this.configurationService = configurationService;
         this.componentRuntimeFactory = componentFactory;
         this.definitionFactory = componentDefinitionFactory;
         this.httpRequestMappingRegistry = httpRequestMappingRegistry;
+        this.subscribeManager = subscribeManager;
     }
 
     @Override
@@ -126,8 +130,8 @@ public class AgentManager implements IAgentManager {
     }
 
     protected AgentRuntime createAndStartRuntime(Agent agent) {
-        AgentRuntime engine = new AgentRuntime(agent, operationsService, configurationService, executionService, componentRuntimeFactory, 
-                definitionFactory, httpRequestMappingRegistry);
+        AgentRuntime engine = new AgentRuntime(agent, operationsService, configurationService, executionService, componentRuntimeFactory,
+                definitionFactory, httpRequestMappingRegistry, subscribeManager);
         engines.put(agent.getId(), engine);
         engine.start();
         return engine;

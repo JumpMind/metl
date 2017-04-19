@@ -71,6 +71,8 @@ import org.jumpmind.metl.core.runtime.AgentManager;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.component.ComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
+import org.jumpmind.metl.core.runtime.subscribe.ISubscribeManager;
+import org.jumpmind.metl.core.runtime.subscribe.SubscribeManager;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMappingRegistry;
 import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
 import org.jumpmind.metl.core.security.ISecurityService;
@@ -148,6 +150,8 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     IPluginManager pluginManager;
 
     IDefinitionPlusUIFactory componentDefinitionPlusUIFactory;
+    
+    ISubscribeManager subscribeManager;
 
     BasicDataSource configDataSource;
 
@@ -469,7 +473,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IAgentManager agentManager() {
         IAgentManager agentManager = new AgentManager(operationsService(), configurationService(), executionService(), componentRuntimeFactory(),
-                componentDefinitionPlusUIFactory(), httpRequestMappingRegistry());
+                componentDefinitionPlusUIFactory(), httpRequestMappingRegistry(), subscribeManager());
         return agentManager;
     }
 
@@ -525,6 +529,15 @@ public class AppConfig extends WebMvcConfigurerAdapter {
             }
         }
         return brokerService;
+    }
+    
+    @Bean
+    @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
+    public ISubscribeManager subscribeManager() {
+        if (subscribeManager == null) {
+            subscribeManager = new SubscribeManager();
+        }
+        return subscribeManager;
     }
 
     @Bean
