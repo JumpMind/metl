@@ -62,6 +62,10 @@ include::design/components/writers/sql-executor.asciidoc[]
 include::design/components/writers/text-file-writer.asciidoc[]
 include::design/components/writers/zip.asciidoc[]
 
+==== Services
+include::design/components/services/http-request.asciidoc[]
+include::design/components/services/http-response.asciidoc[]
+
 ==== Controls
 include::design/components/controls/gate.asciidoc[]
 include::design/components/controls/last-unit-of-work.asciidoc[]
