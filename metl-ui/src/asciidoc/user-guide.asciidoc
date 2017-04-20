@@ -65,6 +65,7 @@ include::design/components/writers/zip.asciidoc[]
 ==== Services
 include::design/components/services/http-request.asciidoc[]
 include::design/components/services/http-response.asciidoc[]
+include::design/components/services/subscriber.asciidoc[]
 
 ==== Controls
 include::design/components/controls/gate.asciidoc[]

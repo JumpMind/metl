@@ -22,6 +22,6 @@
 -->
 <ui>
     <component-ui id="JMS UI" componentId="39bef0fb-558e-4440-a02a-849281eb41ef">
-        <iconImage>org/jumpmind/metl/core/runtime/component/metl-jms-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-subscriber-48x48-color.png</iconImage>
     </component-ui>
 </ui>
