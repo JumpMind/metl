@@ -50,12 +50,15 @@ public class HttpRequestDeploymentListener implements IComponentDeploymentListen
     IHttpRequestMappingRegistry httpRequestMappingRegistry;
 
     @Override
-    public void onDeploy(Agent agent, AgentProjectVersionFlowDeployment agentProjectVersionFlowDeployment, FlowStep flowStep, XMLComponentDefinition componentDefinition) {
-        HttpRequestMapping requestMapping = buildMapping(agent, agentProjectVersionFlowDeployment, flowStep, componentDefinition);
-        if (!requestMapping.getPath().substring(0,1).equalsIgnoreCase("/")) {
-            requestMapping.setPath("/" + requestMapping.getPath());
+    public void onDeploy(Agent agent, AgentProjectVersionFlowDeployment agentProjectVersionFlowDeployment, FlowStep flowStep,
+            XMLComponentDefinition componentDefinition) {
+        if (flowStep.getComponent().getBoolean(ComponentSettingsConstants.ENABLED, true)) {
+            HttpRequestMapping requestMapping = buildMapping(agent, agentProjectVersionFlowDeployment, flowStep, componentDefinition);
+            if (!requestMapping.getPath().substring(0, 1).equalsIgnoreCase("/")) {
+                requestMapping.setPath("/" + requestMapping.getPath());
+            }
+            httpRequestMappingRegistry.register(requestMapping);
         }
-        httpRequestMappingRegistry.register(requestMapping);
     }
 
     @Override

@@ -446,6 +446,8 @@ public class AgentRuntime {
                         ((ISubscribeManagerAware) listener).setSubscribeManager(subscribeManager);
                     }
                     method.run(listener, flow, flowStep, componentDefintion);
+                } catch (RuntimeException e) {
+                    throw e;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

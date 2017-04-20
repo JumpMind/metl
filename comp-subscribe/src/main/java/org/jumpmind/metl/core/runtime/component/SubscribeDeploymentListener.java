@@ -40,7 +40,9 @@ public class SubscribeDeploymentListener implements IComponentDeploymentListener
     @Override
     public void onDeploy(Agent agent, AgentProjectVersionFlowDeployment agentProjectVersionFlowDeployment, FlowStep flowStep,
             XMLComponentDefinition componentDefinition) {
-        subscribeManager.deploy(agent, agentProjectVersionFlowDeployment, flowStep, componentDefinition);
+        if (flowStep.getComponent().getBoolean(ComponentSettingsConstants.ENABLED, true)) {
+            subscribeManager.deploy(agent, agentProjectVersionFlowDeployment, flowStep, componentDefinition);
+        }
     }
 
     @Override
