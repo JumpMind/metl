@@ -36,6 +36,8 @@ import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.FolderType;
 import org.jumpmind.metl.core.model.Privilege;
+import org.jumpmind.metl.core.model.Setting;
+import org.jumpmind.metl.core.model.UserSetting;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.plugin.IDefinitionFactory;
 import org.jumpmind.metl.core.plugin.XMLComponentDefinition;
@@ -69,11 +71,13 @@ import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
 import com.vaadin.ui.AbstractLayout;
+import com.vaadin.ui.AbstractSplitPanel;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.DragAndDropWrapper.WrapperTargetDetails;
 import com.vaadin.ui.DragAndDropWrapper.WrapperTransferable;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
@@ -113,14 +117,17 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     Button advancedEditButton;
 
     Button settingsButton;
-    
-    VerticalSplitPanel splitPanel;
 
     List<AbstractObject> selected = new ArrayList<AbstractObject>();
 
     IConfigurationService configurationService;
     
-    float lastPosition = 70;
+    VerticalLayout rightLayout;
+    AbstractSplitPanel vSplit;
+    AbstractSplitPanel hSplit;
+    Boolean isVerticalView = null;
+
+    float lastPos = 70;
     
     final static float MAX_PANEL_POSITION = 99;
 
@@ -146,15 +153,20 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
         addComponent(componentPalette);
 
-        VerticalLayout rightLayout = new VerticalLayout();
+        
+        rightLayout = new VerticalLayout();
         rightLayout.setSizeFull();
 
         rightLayout.addComponent(buildButtonBar());
 
-        splitPanel = new VerticalSplitPanel();
-        splitPanel.setSizeFull();
-        splitPanel.setSplitPosition(MAX_PANEL_POSITION, Unit.PERCENTAGE);
-
+        // Create two different layouts for the user to toggle between.
+        vSplit = new VerticalSplitPanel();
+        vSplit.setSizeFull();
+        vSplit.setSplitPosition(MAX_PANEL_POSITION, Unit.PERCENTAGE);
+        hSplit = new HorizontalSplitPanel();
+        hSplit.setSizeFull();
+        hSplit.setSplitPosition(MAX_PANEL_POSITION, Unit.PERCENTAGE);
+         
         diagramLayout = new VerticalLayout();
         diagramLayout.setWidth(10000, Unit.PIXELS);
         diagramLayout.setHeight(10000, Unit.PIXELS);
@@ -162,17 +174,22 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         DragAndDropWrapper wrapper = new DragAndDropWrapper(diagramLayout);
         wrapper.setSizeUndefined();
         wrapper.setDropHandler(new DropHandler());
-
         flowPanel = new Panel();
         flowPanel.setSizeFull();
         flowPanel.addStyleName(ValoTheme.PANEL_WELL);
         flowPanel.setContent(wrapper);
 
-        splitPanel.addComponent(flowPanel);
-        splitPanel.addComponent(propertySheet);
-
-        rightLayout.addComponent(splitPanel);
-        rightLayout.setExpandRatio(splitPanel, 1);
+        if (isVerticalView()) {
+            vSplit.addComponent(flowPanel);
+            vSplit.addComponent(propertySheet);
+            rightLayout.addComponent(vSplit);
+            rightLayout.setExpandRatio(vSplit, 1);
+        } else {
+            hSplit.addComponent(flowPanel);
+            hSplit.addComponent(propertySheet);
+            rightLayout.addComponent(hSplit);
+            rightLayout.setExpandRatio(hSplit, 1);
+        }
 
         addComponent(rightLayout);
         setExpandRatio(rightLayout, 1);
@@ -209,7 +226,9 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
         Button exportButton = buttonBar.addButtonRight("Capture", FontAwesome.CAMERA, (event)->export());
         exportButton.setId("exportButton");
-
+        
+        buttonBar.addButtonRight("Layout", FontAwesome.COLUMNS, (event)->toggleView());
+        
         return buttonBar;
     }
     
@@ -220,6 +239,22 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         flowPanel.setScrollLeft(0);
         flowPanel.setScrollTop(0);
         new ImagePreviewDialog(diagram).showAtSize(.75);
+    }
+    
+    private void toggleView() {
+        if (isVerticalView()) {
+            hSplit.addComponent(flowPanel);
+            hSplit.addComponent(propertySheet);
+            rightLayout.replaceComponent(vSplit, hSplit);
+            rightLayout.setExpandRatio(hSplit, 1);
+            setVerticalView(false);
+        } else {
+            vSplit.addComponent(flowPanel);
+            vSplit.addComponent(propertySheet);
+            rightLayout.replaceComponent(hSplit, vSplit);
+            rightLayout.setExpandRatio(vSplit, 1);
+            setVerticalView(true);
+        }
     }
 
     protected Button createToolButton(String name, Resource icon) {
@@ -489,12 +524,16 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     }
     
     protected void setPropertiesMinimized(boolean minimize) {
-        float position = splitPanel.getSplitPosition();
-        if (minimize && position != MAX_PANEL_POSITION) {
-            lastPosition = position;
-            splitPanel.setSplitPosition(MAX_PANEL_POSITION, Unit.PERCENTAGE);
-        } else if (!minimize && position == MAX_PANEL_POSITION) {
-            splitPanel.setSplitPosition(lastPosition, Unit.PERCENTAGE);            
+        AbstractSplitPanel activePanel = isVerticalView() ? vSplit : hSplit;
+        if (minimize 
+                && vSplit.getSplitPosition() != MAX_PANEL_POSITION 
+                && hSplit.getSplitPosition() != MAX_PANEL_POSITION) {
+            lastPos = activePanel.getSplitPosition();
+            vSplit.setSplitPosition(MAX_PANEL_POSITION, Unit.PERCENTAGE);
+            hSplit.setSplitPosition(MAX_PANEL_POSITION, Unit.PERCENTAGE);
+        } else if (!minimize && activePanel.getSplitPosition() == MAX_PANEL_POSITION) {
+            vSplit.setSplitPosition(lastPos, Unit.PERCENTAGE);    
+            hSplit.setSplitPosition(lastPos, Unit.PERCENTAGE);            
         }
     }
     
@@ -549,6 +588,22 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         ArrayList<AbstractObject> selected = new ArrayList<>(0);
         setSelectedNodes(selected);
         redrawFlow();
+    }
+    
+    protected boolean isVerticalView() {
+        if (isVerticalView != null) {
+            return isVerticalView;
+        } else {
+            return Boolean.TRUE.toString().equals(context.getUser().findSetting(UserSetting.SETTING_FLOW_PANEL_VIEW_VERTICAL)
+                    .getValue(Boolean.TRUE.toString()));
+        }
+    }
+    
+    protected void setVerticalView(Boolean isVerticalView) {
+        this.isVerticalView = isVerticalView;
+        Setting setting = context.getUser().findSetting(UserSetting.SETTING_FLOW_PANEL_VIEW_VERTICAL);
+        setting.setValue(isVerticalView.toString());
+        context.getConfigurationService().save(setting);
     }
 
     class DiagramChangedListener implements Listener {

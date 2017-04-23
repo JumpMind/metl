@@ -29,6 +29,7 @@ public class UserSetting extends Setting {
     public static final String SETTING_DESIGN_NAVIGATOR_SELECTION_ID = "design.navigator.selection.id";
     public static final String SETTING_DESIGN_NAVIGATOR_EXPANDED_IDS = "design.navigator.expanded.ids";
     public static final String SETTING_DESIGN_NAVIGATOR_SELECTED_PROJECT_ID = "design.navigator.selected.project.id";
+    public static final String SETTING_FLOW_PANEL_VIEW_VERTICAL = "flow.panel.view.vertical";
 
     String userId;
     

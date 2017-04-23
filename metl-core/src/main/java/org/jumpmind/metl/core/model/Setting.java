@@ -48,6 +48,11 @@ public class Setting extends AbstractObject {
         return value;
     }
     
+    public String getValue(String defaultValue) {
+        String value = getValue();
+        return value!=null ? value : defaultValue;
+    }
+    
     public void setValue(String value) {
         this.value = value;
     }
