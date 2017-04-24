@@ -259,7 +259,8 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         if (fromVersion != null && !fromVersion.equals(toVersion)) {
             dbUpgradeScripts.executePreInstallScripts(fromVersion, toVersion);
         }
-        ctx.getBean("configDatabaseUpgrader", ConfigDatabaseUpgrader.class).upgrade();        
+        ctx.getBean("configDatabaseUpgrader", ConfigDatabaseUpgrader.class).upgrade();
+        platform.resetCachedTableModel();
         ctx.getBean("executionDatabaseUpgrader", ConfigDatabaseUpgrader.class).upgrade();
         
         if (fromVersion != null && !fromVersion.equals(toVersion)) {
