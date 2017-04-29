@@ -256,19 +256,25 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
                 Map<String, String> projectVersionDependenciesMap = new HashMap<>();
                 for (ReleasePackageProjectVersion rppv : rppvs) {
                     ProjectVersion original = configurationService.findProjectVersion(rppv.getProjectVersionId());
-                    if (original.getVersionType().equalsIgnoreCase(ProjectVersion.VersionType.MASTER.toString())) {
-                        ProjectVersion newMaster = configurationService.saveNewVersion("master", original, "master");
-                        projectVersionDependenciesMap.put(original.getId(), newMaster.getId());
+                    if (original.getVersionType()
+                            .equalsIgnoreCase(ProjectVersion.VersionType.MASTER.toString())) {
+                        ProjectVersion newRelease = configurationService.saveNewVersion(
+                                releasePackage.getVersionLabel(), original,
+                                ProjectVersion.VersionType.RELEASE.toString());
+                        projectVersionDependenciesMap.put(original.getId(), newRelease.getId());
+                        newRelease.setReleaseDate(new Date());
+                        configurationService.save(newRelease);
+                    } else {
+                        original.setName(releasePackage.getVersionLabel());
+                        original.setVersionType(ProjectVersion.VersionType.RELEASE.toString());
+                        Date releaseDate = new Date();
+                        original.setReleaseDate(releaseDate);
+                        configurationService.save(original);
                     }
-                    original.setName(releasePackage.getVersionLabel());
-                    original.setVersionType(ProjectVersion.VersionType.RELEASE.toString());
-                    Date releaseDate = new Date();
-                    original.setReleaseDate(releaseDate);
-                    configurationService.save(original);
                 }
                 
-                for (String oldMasterProjectVersionId : projectVersionDependenciesMap.keySet()) {
-                    List<ProjectVersionDependency> needsUpdated = configurationService.findProjectDependenciesThatTarget(oldMasterProjectVersionId);
+                for (String releasedProjectVersionId : projectVersionDependenciesMap.keySet()) {
+                    List<ProjectVersionDependency> needsUpdated = configurationService.findProjectDependenciesThatTarget(releasedProjectVersionId);
                     for (ProjectVersionDependency projectVersionDependency : needsUpdated) {
                         boolean isInRelease = false;
                         for (ReleasePackageProjectVersion rppv2 : rppvs) {
@@ -277,7 +283,7 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
                             }
                         }
                         if (!isInRelease) {
-                            configurationService.updateProjectVersionDependency(projectVersionDependency, projectVersionDependenciesMap.get(oldMasterProjectVersionId));
+                            configurationService.updateProjectVersionDependency(projectVersionDependency, projectVersionDependenciesMap.get(releasedProjectVersionId));
                         }
                     }                                            
                 }
