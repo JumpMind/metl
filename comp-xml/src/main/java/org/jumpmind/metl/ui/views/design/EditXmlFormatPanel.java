@@ -39,6 +39,7 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Setting;
+import org.jumpmind.metl.core.runtime.component.XPathXmlParser;
 import org.jumpmind.metl.core.runtime.component.XmlFormatter;
 import org.jumpmind.metl.core.runtime.component.XmlParser;
 import org.jumpmind.metl.ui.common.ButtonBar;
@@ -135,8 +136,19 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
     }
 
     protected void refresh() {
-        Model model = component.getType().equals(XmlParser.TYPE) ? component.getOutputModel()
-                : component.getInputModel();
+        Model model = null;
+        // View is used by multiple components.
+        // What model does the component use?
+        if (component.getType().equals(XmlParser.TYPE)) {
+            model = component.getOutputModel();
+        } else if (component.getType().equals(XPathXmlParser.TYPE)) {
+            model = component.getOutputModel();
+        } else if (component.getType().equals(XmlFormatter.TYPE)){
+            model = component.getInputModel();
+        } else {
+            model = component.getInputModel();
+        }
+        
         if (model != null) {
             Collections.sort(model.getModelEntities(), new Comparator<ModelEntity>() {
                 public int compare(ModelEntity entity1, ModelEntity entity2) {

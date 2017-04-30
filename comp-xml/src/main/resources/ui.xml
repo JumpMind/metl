@@ -25,6 +25,10 @@
         <iconImage>org/jumpmind/metl/core/runtime/component/metl-xml-formatter-out-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditXmlFormatPanel</className>
     </component-ui>
+    <component-ui id="XPath XML Parser UI" componentId="XPath XML Parser">
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-xml-formatter-in-48x48-color.png</iconImage>
+        <className>org.jumpmind.metl.ui.views.design.EditXmlFormatPanel</className>
+    </component-ui>
     <component-ui id="Parse XML UI" componentId="Parse XML">
         <iconImage>org/jumpmind/metl/core/runtime/component/metl-xml-formatter-in-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditXmlFormatPanel</className>
