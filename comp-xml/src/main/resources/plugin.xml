@@ -105,6 +105,32 @@
     </settings>
   </component>
   <component category='PROCESSOR'
+             id='XPath XML Parser'
+             inputMessageType='text'
+             inputOutputModelsMatch='false'
+             outputMessageType='entity'
+             resourceCategory='none'
+             supportsMultipleThreads='true'>
+    <name>XPath XML Parser</name>
+    <className>org.jumpmind.metl.core.runtime.component.XPathXmlParser</className>
+    <keywords>parse,file,files,xml</keywords>
+    <description></description>
+    <settings>
+      <setting id='rows.per.message'
+               required='true'
+               type='integer'>
+        <name>Rows/Msg</name>
+        <defaultValue>1000</defaultValue>
+      </setting>
+      <setting id='xml.formatter.ignore.namespace'
+               required='false'
+               type='boolean'>
+        <name>Ignore namespaces for XPath matching</name>
+        <defaultValue>true</defaultValue>
+      </setting>
+    </settings>
+  </component>
+  <component category='PROCESSOR'
              id='XSLT Processor'
              inputMessageType='entity'
              inputOutputModelsMatch='false'
