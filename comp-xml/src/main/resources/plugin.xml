@@ -79,7 +79,7 @@
              outputMessageType='entity'
              resourceCategory='none'
              supportsMultipleThreads='true'>
-    <name>Parse XML</name>
+    <name>Simple XML Parser</name>
     <className>org.jumpmind.metl.core.runtime.component.XmlParser</className>
     <keywords>parse,file,files,xml</keywords>
     <description></description>
