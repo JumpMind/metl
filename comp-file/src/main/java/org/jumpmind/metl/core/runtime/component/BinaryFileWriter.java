@@ -16,6 +16,8 @@ public class BinaryFileWriter extends AbstractFileWriter {
 
     public static final String TYPE = "Binary File Writer";
 
+    IDirectory streamable;
+    
     @Override
     public void start() {
         init();
@@ -24,15 +26,15 @@ public class BinaryFileWriter extends AbstractFileWriter {
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
 
-        IDirectory streamable = (IDirectory) getResourceReference();
+        streamable = (IDirectory) getResourceReference();
         if (inputMessage instanceof BinaryMessage) {
             BinaryMessage message = (BinaryMessage) inputMessage;
             String fileName = getFileName(inputMessage);
             if (!append) {
-                streamable.delete(fileName);
+                streamable.delete(fileName, false);
             }
 
-            OutputStream fos = streamable.getOutputStream(fileName, mustExist);
+            OutputStream fos = streamable.getOutputStream(fileName, mustExist, false, false);
 
             try {
                 fos.write(message.getPayload());
@@ -53,6 +55,11 @@ public class BinaryFileWriter extends AbstractFileWriter {
     @Override
     public boolean supportsStartupMessages() {
         return false;
+    }
+    
+    @Override
+    public void stop() {
+        streamable.close();
     }
 
 }

@@ -203,8 +203,9 @@ public class SftpDirectory extends AbstractDirectory {
     
     @Override
     public void close() {
+        close(true);
     }
-    
+
     @Override
     public void close(boolean success) {
         Session session = threadSession.get();
@@ -220,12 +221,12 @@ public class SftpDirectory extends AbstractDirectory {
                 ChannelSftp channel = entry.getValue();
                 if (channel != null) {
                     channel.disconnect();
-                    channels.remove(entry.getKey());
                 }
             }
+            channels.clear();
             threadChannels.set(null);
         }
-    }
+    }    
     
     @Override
     public boolean requiresContentLength() {
@@ -283,6 +284,11 @@ public class SftpDirectory extends AbstractDirectory {
         Session session = openSession();
         ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
         channel.connect();
+        try {
+            channel.cd(basePath);
+        } catch (SftpException e) {
+            throw new IoException(e);
+        }
         return channel;
     }
     
@@ -306,6 +312,11 @@ public class SftpDirectory extends AbstractDirectory {
         }
         if (!channel.isConnected()) {
             channel.connect();
+            try {
+                channel.cd(basePath);
+            } catch (SftpException e) {
+                throw new IoException(e);
+            }
         }
         channels.put(channelId, channel);
         threadChannels.set(channels);
@@ -482,7 +493,6 @@ public class SftpDirectory extends AbstractDirectory {
         	session = openSession();
             // Get a reusable channel if the session is not auto closed.
             sftp = (closeSession) ? openConnectedChannel() : openConnectedChannel(CHANNEL_OUT);
-            sftp.cd(basePath);
             createRelativePathDirectoriesIfNecessary(sftp, relativePath, mustExist);
             return new CloseableOutputStream(sftp.put(relativePath, ChannelSftp.OVERWRITE), session, sftp, closeSession);
         } catch (Exception e) {            
