@@ -209,6 +209,18 @@ public class ApplicationContext implements Serializable {
     public IUICache getUiCache() {
         return uiCache;
     }
+    
+    public boolean userHasPrivilege(Privilege privilege) {
+        boolean hasPriv = false;
+        List<Group> groups = user.getGroups();
+        for (Group group : groups) {
+            if (group.hasPrivilege(privilege)) {
+                hasPriv = true;
+                break;
+            }
+        }
+        return hasPriv;
+    }
 
     public boolean isReadOnly(ProjectVersion projectVersion, Privilege privilege) {
         boolean readOnly = projectVersion.locked();

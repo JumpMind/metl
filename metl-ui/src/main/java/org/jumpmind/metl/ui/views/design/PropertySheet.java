@@ -42,6 +42,7 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelName;
+import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
@@ -54,9 +55,9 @@ import org.jumpmind.metl.core.plugin.XMLSetting;
 import org.jumpmind.metl.core.plugin.XMLSetting.Type;
 import org.jumpmind.metl.core.runtime.flow.StepRuntime;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.common.ImmediateUpdateTogglePasswordField;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
-import org.jumpmind.vaadin.ui.common.ImmediateUpdatePasswordField;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextArea;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 import org.slf4j.Logger;
@@ -488,19 +489,27 @@ public class PropertySheet extends AbsoluteLayout {
                     formLayout.addComponent(choice);
                     break;
                 case PASSWORD:
-                    ImmediateUpdatePasswordField passwordField = new ImmediateUpdatePasswordField(definition.getName()) {
-                        private static final long serialVersionUID = 1L;
-
+                    
+                    ImmediateUpdateTogglePasswordField passwordField = new ImmediateUpdateTogglePasswordField(definition.getName()) {
                         protected void save(String text) {
                             if (!DUMMY_PASSWORD.equals(text)) {
                                 saveSetting(definition.getId(), text, obj);
                             }
-                        };
+                        }
                     };
+                    
+                    boolean allowToggle = context.userHasPrivilege(Privilege.PASSWORD);
+                    passwordField.setToggleAllowed(allowToggle);
+                    
                     boolean isPasswordSet = isNotBlank(obj.get(definition.getId()));
                     if (isPasswordSet) {
-                        passwordField.setValue(DUMMY_PASSWORD);
+                        if (allowToggle) {
+                            passwordField.setValue(obj.get(definition.getId()));
+                        } else {
+                            passwordField.setValue(DUMMY_PASSWORD);
+                        }
                     }
+                    
                     passwordField.setRequired(required);
                     passwordField.setDescription(description);
                     passwordField.setReadOnly(readOnly);

@@ -252,5 +252,10 @@
         margin-right: 6px;
     }
     
-
+    .noborder {
+        border: none;
+    }
+    .noborder:focus {
+        box-shadow: none;
+    }
 }
