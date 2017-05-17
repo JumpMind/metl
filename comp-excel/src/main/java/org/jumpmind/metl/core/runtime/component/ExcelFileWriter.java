@@ -5,9 +5,11 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -18,6 +20,7 @@ import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
@@ -43,7 +46,9 @@ public class ExcelFileWriter extends AbstractFileWriter {
     public final static String SETTING_SHEET_NAME = "sheet.name";
 
     public final static String SETTING_INCLUDE_HEADER = "include.header";
-    
+
+    public final static String EXCEL_WRITER_ATTRIBUTE_ORDINAL = "excel.writer.attribute.ordinal";
+
     public final static String EXCEL_OUTPUT_FORMAT = "Microsoft Excel XML (.xlsx)";
     
     boolean emptyFile;
@@ -67,6 +72,8 @@ public class ExcelFileWriter extends AbstractFileWriter {
     int rowNbr = 0;  // ie: row 1
     
     int colNbr = 0;  // ie: column A
+    
+    List<AttributeFormat> attributes = new ArrayList<AttributeFormat>();
 
     @Override
     public void start() {
@@ -101,6 +108,7 @@ public class ExcelFileWriter extends AbstractFileWriter {
         // fix user entered sheet (tab) name if it does not meet the Excel requirements
         String safeName = WorkbookUtil.createSafeSheetName(excelSheetName);
         sheet = wb.createSheet(safeName);
+        convertAttributeSettingsToAttributeFormat();
     }
 
     @Override
@@ -113,6 +121,30 @@ public class ExcelFileWriter extends AbstractFileWriter {
         if (getResourceRuntime() == null) {
             throw new IllegalStateException("The resource has not been configured.  Please choose a resource.");
         }
+        if (attributes.size() == 0) {
+            log(LogLevel.INFO, "There is no attribute ordering configured.  Writing all entity fields to the output as defined in model");
+
+        	Model inputModel = this.getComponent().getInputModel();
+        	List<ModelEntity> entities = new ArrayList<>(inputModel.getModelEntities());
+            Map<String, AttributeFormat> formats = new HashMap<String, AttributeFormat>();
+            for (ModelEntity entity : entities) {
+            	for (ModelAttribute attribute : entity.getModelAttributes()) {
+            		AttributeFormat format = formats.get(attribute.getId());
+	                if (format == null) {
+                        format = new AttributeFormat(attribute.getId(), entity, attribute);
+                        format.setOrdinal(attribute.getAttributeOrder());
+                        formats.put(attribute.getId(), format);
+	                }
+            	}
+            }
+            
+            attributes.addAll(formats.values());
+            Collections.sort(attributes, new Comparator<AttributeFormat>() {
+                public int compare(AttributeFormat ordinal1, AttributeFormat ordinal2) {
+                    return ordinal1.getOrdinal() - ordinal2.getOrdinal();
+                }
+            });
+        }
 
         if ((unitOfWorkBoundaryReached && inputDataReceived == false && emptyFile == true) || (inputMessage instanceof EntityDataMessage)) {
             inputDataReceived = true;
@@ -120,16 +152,14 @@ public class ExcelFileWriter extends AbstractFileWriter {
             // if we need to include the header add it to the output and update the boolean to not output again
             if (includeHeader) {
             	Row row = sheet.createRow((short)rowNbr);
-            	Model inputModel = this.getComponent().getInputModel();
-            	List<ModelEntity> entities = new ArrayList<>(inputModel.getModelEntities());
-
-                for (ModelEntity entity : entities) {
-                	for (ModelAttribute attribute : entity.getModelAttributes()) {
+        		for (AttributeFormat attr : attributes) {
+                    if (attr.getAttribute() != null) {
                 		Cell cell = row.createCell(colNbr);
-                    	cell.setCellValue(attribute != null ? attribute.getName() : "");
+                    	cell.setCellValue(attr.getAttribute() != null ? attr.getAttribute().getName() : "");
                     	colNbr++;
-                	}
+                    }
                 }
+            	
                 rowNbr++;
                 colNbr = 0;
             	includeHeader = false;
@@ -138,17 +168,13 @@ public class ExcelFileWriter extends AbstractFileWriter {
             initStreamAndWriter(inputMessage);
 
             if (inputMessage instanceof EntityDataMessage) {
-            	ArrayList<EntityData> payload = ((EntityDataMessage)inputMessage).getPayload();
-            	for (int i = 0; i < payload.size(); i++) {
-            		EntityData record = payload.get(i);
-            		Set<String> attributeIds = new HashSet<String>();
-					attributeIds.addAll(record.keySet());
+                ArrayList<EntityData> inputRows = ((EntityDataMessage)inputMessage).getPayload();
+                for (EntityData inputRow : inputRows) {
                 	Row row = sheet.createRow((short)rowNbr);
-
-					for (String attributeId : attributeIds) {
-						Object value = record.get(attributeId);
+                	for (AttributeFormat attribute : attributes) {
+                        Object object = inputRow.get(attribute.getAttributeId());
                     	Cell cell = row.createCell(colNbr);
-                    	cell.setCellValue(value != null ? value.toString() : "");
+                    	cell.setCellValue(object != null ? object.toString() : "");
                     	colNbr++;
                     }
                 	rowNbr++;
@@ -218,4 +244,67 @@ public class ExcelFileWriter extends AbstractFileWriter {
         IOUtils.closeQuietly(fileOut);
         fileOut = null;
     }
+    
+    private void convertAttributeSettingsToAttributeFormat() {
+        List<ComponentAttributeSetting> attributeSettings = getComponent().getAttributeSettings();
+        Map<String, AttributeFormat> formats = new HashMap<String, AttributeFormat>();
+        for (ComponentAttributeSetting attributeSetting : attributeSettings) {
+            AttributeFormat format = formats.get(attributeSetting.getAttributeId());
+            if (format == null) {
+                Model inputModel = getComponent().getInputModel();
+                ModelAttribute attribute = inputModel.getAttributeById(attributeSetting.getAttributeId());
+                if (attribute != null) {
+                    ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
+                    format = new AttributeFormat(attributeSetting.getAttributeId(), entity, attribute);
+                    formats.put(attributeSetting.getAttributeId(), format);
+                }
+            }
+            if (format != null) {
+                if (attributeSetting.getName().equalsIgnoreCase(EXCEL_WRITER_ATTRIBUTE_ORDINAL)) {
+                    format.setOrdinal(Integer.parseInt(attributeSetting.getValue()));
+                }
+            }
+        }
+
+        attributes.addAll(formats.values());
+        Collections.sort(attributes, new Comparator<AttributeFormat>() {
+            public int compare(AttributeFormat ordinal1, AttributeFormat ordinal2) {
+                return ordinal1.getOrdinal() - ordinal2.getOrdinal();
+            }
+        });
+    }
+
+    private class AttributeFormat {
+
+        ModelEntity entity;
+        ModelAttribute attribute;
+        String attributeId;
+        int ordinal;
+
+        public AttributeFormat(String attributeId, ModelEntity entity, ModelAttribute attribute) {
+            this.attributeId = attributeId;
+            this.entity = entity;
+            this.attribute = attribute;
+        }
+
+        public String getAttributeId() {
+            return attributeId;
+        }
+
+        public int getOrdinal() {
+            return ordinal;
+        }
+
+        public void setOrdinal(int ordinal) {
+            this.ordinal = ordinal;
+        }
+
+        public ModelAttribute getAttribute() {
+            return attribute;
+        }
+
+        public ModelEntity getEntity() {
+            return entity;
+        }
+    }    
 }

@@ -27,5 +27,6 @@
     </component-ui>
     <component-ui id="Excel File Writer UI" componentId="Excel File Writer">
         <iconImage>org/jumpmind/metl/core/runtime/component/metl-excel-writer-48x48-color.png</iconImage>
+        <className>org.jumpmind.metl.ui.views.design.EditExcelWriterPanel</className>        
     </component-ui>    
 </ui>
