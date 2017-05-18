@@ -473,6 +473,9 @@ public class AgentRuntime {
 
     public String scheduleNow(String userId, AgentDeployment deployment, Map<String, String> runtimeParameters) {
         log.info("Scheduling '{}' on '{}' for now", new Object[] { deployment.getName(), agent.getName() });
+        if (agent.isAutoRefresh()) {
+            deployResources(deployment);
+        }
         String executionId = createExecutionId();
         this.flowExecutionScheduler.schedule(new FlowRunner(userId, findDeployed(deployment), runtimeParameters, executionId), new Date());
         return executionId;
@@ -646,8 +649,6 @@ public class AgentRuntime {
                             stop(deployment, DeploymentStatus.DISABLED);
                         } else if (status.equals(DeploymentStatus.REQUEST_REENABLE)) {
                             stop(deployment, DeploymentStatus.REQUEST_ENABLE);
-                        } else {
-                            deployResources(deployment);
                         }
                     }
                 }
