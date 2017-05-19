@@ -27,6 +27,8 @@ import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 
+import net.sf.saxon.value.DecimalValue;
+
 public class ExcelFileReader extends AbstractFileReader {
 
     public static final int MAX_COLUMNS_PER_WORKSHEET = 1000;
@@ -100,10 +102,15 @@ public class ExcelFileReader extends AbstractFileReader {
 
     private int calculateColumnIndex(String columnReference) {
         int columnIdx = 0;
-        for (int i = 0; i < columnReference.length(); i++) {
-            int decimalValue = (int) columnReference.charAt(i);
-            columnIdx = columnIdx + (decimalValue - 64) + i * 26 - 1;
+        int decimalValue = 0;
+        int counter = columnReference.length();
+
+        for (int i = 0 ; i < columnReference.length(); i++) {
+        	decimalValue = (int) columnReference.charAt(i) - 64;
+        	columnIdx = columnIdx + (int) Math.pow(26, (counter - 1)) * (decimalValue);
+            counter--;
         }
+        columnIdx--;        
         return columnIdx;
     }
 
