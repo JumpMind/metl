@@ -148,6 +148,11 @@ import java.util.Date
             downloadJavadoc = false
             plusConfigurations += [configurations.provided]
         }        
+        
+        project.file.whenMerged { project ->
+            project.natures.remove('org.springsource.ide.eclipse.gradle.core.nature')
+            project.natures.remove('org.eclipse.buildship.core.gradleprojectnature')            
+        }
     }   
     
     eclipse.project.file.withXml { provider ->
