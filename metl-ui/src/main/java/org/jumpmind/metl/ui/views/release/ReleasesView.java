@@ -262,6 +262,9 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
                                 releasePackage.getVersionLabel(), original,
                                 ProjectVersion.VersionType.RELEASE.toString());
                         projectVersionDependenciesMap.put(original.getId(), newRelease.getId());
+                        configurationService.delete(rppv);
+                        rppv.setProjectVersionId(newRelease.getId());
+                        configurationService.save(rppv);
                         newRelease.setReleaseDate(new Date());
                         configurationService.save(newRelease);
                     } else {
