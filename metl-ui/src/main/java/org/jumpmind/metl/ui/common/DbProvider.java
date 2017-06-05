@@ -64,6 +64,10 @@ public class DbProvider implements IDbProvider, Serializable {
     }
 
     public void refresh() {
+        refresh(false);
+    }
+    
+    public void refresh(boolean showAllResources) {
         for (IDb db : dbs) {
             if (db instanceof DbResource) {
                 ((DbResource) db).close();
@@ -80,7 +84,7 @@ public class DbProvider implements IDbProvider, Serializable {
                 XMLResourceDefinition defintion = context.getDefinitionFactory().getResourceDefintion(version.getId(), "Database");
                 List<Resource> resources = configurationService.findResourcesByTypes(version.getId(), "Database");
                 for (Resource resource : resources) {
-                    if (resource.getBoolean("show.on.explore.screen", false)) {
+                    if (resource.getBoolean("show.on.explore.screen", false) || showAllResources) {
                         DbResource db = new DbResource("Design > " + resource.getName(),
                                 resource.toTypedProperties(defintion.getSettings().getSetting()));
                         dbs.add(db);

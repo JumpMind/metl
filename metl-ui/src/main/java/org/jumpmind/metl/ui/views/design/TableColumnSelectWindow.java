@@ -100,7 +100,7 @@ public class TableColumnSelectWindow extends ResizableWindow {
     }
 
     protected void refresh() {
-        provider.refresh();
+        provider.refresh(true);
         dbTree.refresh();
     }
 
