@@ -50,7 +50,9 @@ import org.jumpmind.metl.core.model.Execution;
 import org.jumpmind.metl.core.model.ExecutionStatus;
 import org.jumpmind.metl.core.model.ExecutionStep;
 import org.jumpmind.metl.core.model.ExecutionStepLog;
+import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
+import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.runtime.AgentRuntime;
@@ -134,7 +136,19 @@ public class ExecutionApi {
     public final ExecutionResults invoke(@ApiParam(value = "The name of the agent to use") @PathVariable("agentName") String agentName,
             @ApiParam(value = "The name of the flow deployment to invoke") @PathVariable("deploymentName") String deploymentName,
             HttpServletRequest req) {
-        return callFlow(agentName, deploymentName, req);
+        return callFlow(agentName, deploymentName, null, req);
+    }
+
+    @ApiOperation(
+            value = "Invoke a flow that is deployed to an agent by name.  This is the way a non-webservice enabled flow is typically called by an external tool")
+    @RequestMapping(value = "/agents/{agentName}/deployments/{deploymentName}/versions/{versionName}/invoke", method = RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public final ExecutionResults invoke(@ApiParam(value = "The name of the agent to use") @PathVariable("agentName") String agentName,
+            @ApiParam(value = "The name of the flow deployment to invoke") @PathVariable("deploymentName") String deploymentName,
+            @ApiParam(value = "The version of the deployed flow to invoke") @PathVariable("versionName") String versionName,
+            HttpServletRequest req) {
+        return callFlow(agentName, deploymentName, versionName, req);
     }
 
     @ApiIgnore
@@ -424,7 +438,7 @@ public class ExecutionApi {
         return userId;
     }
 
-    protected final ExecutionResults callFlow(String agentName, String deploymentName, HttpServletRequest req) {
+    protected final ExecutionResults callFlow(String agentName, String deploymentName, String versionName, HttpServletRequest req) {
         agentName = decode(agentName);
         deploymentName = decode(deploymentName);
         Set<Agent> agents = agentManager.getAvailableAgents();
@@ -437,8 +451,16 @@ public class ExecutionApi {
                 List<AgentDeployment> deployments = agent.getAgentDeployments();
                 for (AgentDeployment agentDeployment : deployments) {
                     if (agentDeployment.getName().equals(deploymentName)) {
-                        foundDeployment = true;
-                        if (agentDeployment.getDeploymentStatus() == DeploymentStatus.ENABLED) {
+                        if (versionName != null) {
+                            Flow flow = configurationService.findFlow(agentDeployment.getFlowId());
+                            ProjectVersion projectVersion = configurationService.findProjectVersion(flow.getProjectVersionId());
+                            if (projectVersion.getVersionLabel().equalsIgnoreCase(versionName)) {
+                                foundDeployment = true;
+                            }
+                        } else {
+                            foundDeployment = true;
+                        }
+                        if (foundDeployment && agentDeployment.getDeploymentStatus() == DeploymentStatus.ENABLED) {
                             AgentRuntime agentRuntime = agentManager.getAgentRuntime(agent.getId());
                             String executionId = agentRuntime.scheduleNow(whoAreYou(req), agentDeployment, toMap(req));
                             boolean done = false;
