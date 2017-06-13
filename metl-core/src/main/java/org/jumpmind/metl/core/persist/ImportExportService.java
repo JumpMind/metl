@@ -267,6 +267,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
     
     @Override
     public void importConfiguration(String configDataString, String userId) {
+        projectsExported.clear();
         ConfigData configData = deserializeConfigurationData(configDataString);
         importConfiguration(configData, userId);
         for (IConfigurationChangedListener l : configurationChangedListeners) {
