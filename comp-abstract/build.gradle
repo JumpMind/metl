@@ -1,6 +1,6 @@
 apply from: '../metl-assemble/common.gradle'
 
-version = '2.0.5.' + pluginBuildNumber
+version = '2.0.6.' + pluginBuildNumber
 
 dependencies {
     compile project(':resource-core')
