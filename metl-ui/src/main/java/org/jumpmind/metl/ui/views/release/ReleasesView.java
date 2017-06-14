@@ -285,7 +285,7 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
                                 isInRelease = true;
                             }
                         }
-                        if (!isInRelease) {
+                        if (isInRelease) {
                             configurationService.updateProjectVersionDependency(projectVersionDependency, projectVersionDependenciesMap.get(releasedProjectVersionId));
                         }
                     }                                            
