@@ -79,7 +79,7 @@ task publishMetl {
         ant.scp(
             trust: 'true',
             verbose: 'true',
-            localFile: '../metl-ui/src/main/webapp/doc/html/user-guide.html',
+            localFile: '../metl-war/src/main/webapp/doc/html/user-guide.html',
             remoteTofile: "$jumpmindUser:$jumpmindPassword@jumpmind.com:~/www/downloads/metl/doc/user-guide-${majorMinorVersion}.html")      
     }
     
