@@ -46,7 +46,6 @@ import org.jumpmind.metl.core.runtime.resource.IOutputStreamWithResponse;
 //import org.jumpmind.metl.core.runtime.resource.HttpDirectory;
 //import org.jumpmind.metl.core.runtime.resource.HttpOutputStream;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 
 public class Web extends AbstractComponentRuntime {
@@ -92,6 +91,7 @@ public class Web extends AbstractComponentRuntime {
         bodyText = component.get(BODY_TEXT);
         runWhen = getComponent().get(RUN_WHEN, PER_MESSAGE);
         parameterReplacement = component.getBoolean(PARAMETER_REPLACEMENT, false);
+        
     }
     
     @Override
@@ -162,7 +162,9 @@ public class Web extends AbstractComponentRuntime {
 					throw new IoException(String.format("Error writing to %s ", streamable), e);
 				}
 			}
-		}
+		} else if (context.getManipulatedFlow().findStartSteps().contains(context.getFlowStep()) && !PER_UNIT_OF_WORK.equals(runWhen)) {
+            warn("This component is configured as a start step but the run when is set to %s.  You might want to switch the run when to %s", runWhen, PER_UNIT_OF_WORK);            
+        }
 	}
 	
     private Map<String, String> getHttpHeaderConfigEntries(Message inputMessage) {
