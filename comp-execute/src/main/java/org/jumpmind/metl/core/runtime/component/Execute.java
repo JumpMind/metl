@@ -35,7 +35,6 @@ import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.symmetric.csv.CsvReader;
-import org.jumpmind.util.FormatUtils;
 
 public class Execute extends AbstractComponentRuntime {
 
@@ -47,27 +46,27 @@ public class Execute extends AbstractComponentRuntime {
 
     public final static String SUCCESS_CODE = "success.code";
     
+    public static final String PARAMETER_REPLACEMENT = "parameter.replacement";
+    
     String runWhen = PER_UNIT_OF_WORK;
 
-    String[] commands;
-
     boolean continueOnError = false;
+    
+    boolean parameterReplacement;
 
     int successCode = 0;
 
     @Override
     public void start() {
-        String line = FormatUtils.replaceTokens(getComponent().get(COMMAND, null), context.getFlowParameters(), true);
+        String line = getComponent().get(COMMAND, null);
         continueOnError = getComponent().getBoolean(CONTINUE_ON_ERROR, continueOnError);
         successCode = getComponent().getInt(SUCCESS_CODE, successCode);
         runWhen = getComponent().get(RUN_WHEN, PER_UNIT_OF_WORK);
 
         if (isBlank(line)) {
             throw new IllegalStateException("A command is required by this component");
-        }
-        
-        this.commands = parseCommand(line);
-
+        }        
+        parameterReplacement = getComponent().getBoolean(PARAMETER_REPLACEMENT, false);
     }    
     
     @Override
@@ -75,7 +74,7 @@ public class Execute extends AbstractComponentRuntime {
         return true;
     }
     
-    protected String[] parseCommand(String commandLine) {
+    protected String[] parseCommand(String commandLine, Message inputMessage) {
         try {
             String[] commands = null;
             CsvReader csvReader = new CsvReader(new ByteArrayInputStream(commandLine.getBytes()), Charset.forName("utf-8"));
@@ -85,6 +84,14 @@ public class Execute extends AbstractComponentRuntime {
             csvReader.setEscapeMode(CsvReader.ESCAPE_MODE_BACKSLASH);
             if (csvReader.readRecord()) {
                 commands = csvReader.getValues();
+            }
+            
+            if (commands != null) {
+                if (parameterReplacement) {
+                    for(int i = 0; i < commands.length; i++) {
+                        commands[i] = resolveParamsAndHeaders(commands[i], inputMessage);
+                    }
+                }
             }
             return commands;
         } catch (Exception e) {
@@ -101,6 +108,7 @@ public class Execute extends AbstractComponentRuntime {
 				ByteArrayOutputStream os = getByteArrayOutputStream();
 				PumpStreamHandler outputHandler = new PumpStreamHandler(os);
 				org.apache.tools.ant.taskdefs.Execute antTask = getAntTask(outputHandler);
+				String[] commands = parseCommand(getComponent().get(COMMAND), inputMessage);
 				antTask.setCommandline(commands);
 				info("About to execute: %s", ArrayUtils.toString(commands));
 				int code = antTask.execute();				

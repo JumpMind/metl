@@ -59,6 +59,12 @@
         <name>Success Code</name>
         <defaultValue>0</defaultValue>
       </setting>
+      <setting id='parameter.replacement'
+               required='false'
+               type='boolean'>
+        <name>Parameter replacement</name>
+        <defaultValue>false</defaultValue>
+      </setting>      
     </settings>
   </component>
 </definitions>
