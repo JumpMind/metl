@@ -193,12 +193,17 @@ public class SftpDirectory extends AbstractDirectory {
     }    
 
     private boolean fileExists(ChannelSftp sftp, String filePath) throws SftpException {
-        SftpATTRS attributes = sftp.stat(filePath);
-        if (attributes != null) {
-            return true;
-        } else {
-            return false;
+        boolean found = false;
+        SftpATTRS attributes = null;
+        try {
+            attributes = sftp.stat(filePath);
+        } catch (Exception e) {
+            found = false;
         }
+        if (attributes != null) {
+            found = true;
+        }
+        return found;
     }
     
     @Override
@@ -462,11 +467,11 @@ public class SftpDirectory extends AbstractDirectory {
             sftp = (closeSession) ? openConnectedChannel() : openConnectedChannel(CHANNEL_IN);
             sftp.cd(basePath);
             if (mustExist && !fileExists(sftp, relativePath)) {
-                throw new IoException("Could not find endpoint %s that was configured as MUST EXIST",relativePath);
+                throw new IoException("Could not find endpoint '%s' that was configured as MUST EXIST",relativePath);
             }
             return new CloseableInputStream(sftp.get(relativePath), session, sftp, closeSession);
         } catch (Exception e) {
-            if (e instanceof IOException || 
+            if (e instanceof IoException || 
                     (e instanceof SftpException && ((SftpException) e).id != 2)) {
                 throw new IoException("Error getting the input stream for sftp endpoint.  Error %s", e.getMessage());
             } else {
