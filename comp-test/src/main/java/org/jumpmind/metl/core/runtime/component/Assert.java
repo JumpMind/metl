@@ -117,10 +117,20 @@ public class Assert extends AbstractComponentRuntime {
             boolean unitOfWorkBoundaryReached) {
         if (inputMessage instanceof ControlMessage) {
             controlMessageCount++;
+            if (controlMessageCount > expectedControlMessageCount) {
+                throw new AssertException("\nFlow Step: '" + this.context.getFlowStep().getName() + 
+                        String.format("'\nThe expected %d control message count has been exceeded.",
+                                expectedControlMessageCount));
+            }
         } else if (inputMessage instanceof EntityDataMessage) {
             ArrayList<EntityData> payload = ((EntityDataMessage) inputMessage).getPayload();
             entityCountPerMessage = payload.size();
             entityMessageCount++;
+            if (entityMessageCount > expectedEntityMessageCount) {
+                throw new AssertException("\nFlow Step: '" + this.context.getFlowStep().getName() + 
+                        String.format("'\nThe expected %d entity message count has been exceeded.",
+                                expectedEntityMessageCount));
+            }
             Model inputModel = getInputModel();
             if (inputModel != null) {
                 for (EntityData entityData : payload) {
@@ -137,11 +147,26 @@ public class Assert extends AbstractComponentRuntime {
             for (String string : payload) {
                 textPayload.append(string).append("\n");
             }
-            textMessageCount++;            
+            textMessageCount++;   
+            if (textMessageCount > expectedTextMessageCount) {
+                throw new AssertException("\nFlow Step: '" + this.context.getFlowStep().getName() + 
+                        String.format("'\nThe expected %d text message count has been exceeded.",
+                                expectedTextMessageCount));
+            }      
         } else if (inputMessage instanceof BinaryMessage) {
             binaryMessageCount++;
+            if (binaryMessageCount > expectedBinaryMessageCount) {
+                throw new AssertException("\nFlow Step: '" + this.context.getFlowStep().getName() + 
+                        String.format("'\nThe expected %d binary message count has been exceeded.",
+                                expectedBinaryMessageCount));
+            }  
         } else {
             emptyPayloadMessageCount++;
+            if (emptyPayloadMessageCount > expectedEmptyPayloadMessageCount) {
+                throw new AssertException("\nFlow Step: '" + this.context.getFlowStep().getName() + 
+                        String.format("'\nThe expected %d empty payload message count has been exceeded.",
+                                expectedEmptyPayloadMessageCount));
+            }  
         }
         
         if (!(inputMessage instanceof ControlMessage)) {
