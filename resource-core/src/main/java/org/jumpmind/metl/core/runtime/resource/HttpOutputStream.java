@@ -95,7 +95,7 @@ public class HttpOutputStream extends OutputStream implements IOutputStreamWithR
         } finally {
             IOUtils.closeQuietly(in);
         }
-        if (responseCode != 200) {
+        if (responseCode > 299) {
             throw new IoException(String.format(
                     "Received an unexpected response code of %d with error content of: %s",
                     responseCode, response.toString()));
