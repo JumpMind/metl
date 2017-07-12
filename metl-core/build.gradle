@@ -87,11 +87,11 @@ task xsdgen () {
   doLast {
     ant.taskdef(name: 'schemagen', classname: 'com.sun.tools.jxc.SchemaGenTask', classpath: configurations.jaxbConfig.asPath)
     ant.schemagen(
-      srcdir: 'src/main/java/org/jumpmind/metl/core/runtime/component/definition',
+      srcdir: 'src/main/java/org/jumpmind/metl/core/plugin',
       destdir: 'src/main/resources',
       includeAntRuntime: 'false'
     ) {
-      schema(file: "components.xsd", namespace: "")
+      schema(file: "plugins.xsd", namespace: "")
     }
   }
 }
