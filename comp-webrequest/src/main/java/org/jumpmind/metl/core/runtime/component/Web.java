@@ -99,6 +99,13 @@ public class Web extends AbstractComponentRuntime {
         return true;
     }
 
+    private void resolveHttpHeaderVars(Map<String, String> httpHeaders, Message inputMessage) {
+        for (Map.Entry<String, String> hdr : httpHeaders.entrySet()) {
+            String newValue = resolveParamsAndHeaders(hdr.getValue(), inputMessage);
+            httpHeaders.put(hdr.getKey(), newValue);
+        }
+    }
+    
 	@Override
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {	    
 		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
@@ -121,6 +128,7 @@ public class Web extends AbstractComponentRuntime {
 					for (String requestContent : inputPayload) {
 						getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
 						if (parameterReplacement) {
+						    resolveHttpHeaderVars(httpHeaders, inputMessage);
 							requestContent = resolveParamsAndHeaders(requestContent, inputMessage);
 						}
 						
