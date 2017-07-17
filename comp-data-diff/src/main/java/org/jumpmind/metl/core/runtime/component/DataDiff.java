@@ -149,9 +149,10 @@ public class DataDiff extends AbstractComponentRuntime {
     /*
      * Column names must be quoted in order to handle names with spaces.
      * Note: Quoting the name also makes the name case sensitive in H2.
+     * Make the name upper case to match the table create statement.
      */
-    protected String getQuotedName(AbstractNamedObject o) {
-        return "\"" + o.getName() + "\"";
+    protected String getFormattedName(AbstractNamedObject o) {
+        return "\"" + o.getName().toUpperCase() + "\"";
     }
 
     protected void calculateDiff(ISendMessageCallback callback) {
@@ -181,12 +182,12 @@ public class DataDiff extends AbstractComponentRuntime {
                         delSql.append(" and ");
                         chgSql.append(" and ");
                     }
-                    addSql.append("curr.").append(getQuotedName(attribute)).append("=").append("orig.")
-                            .append(getQuotedName(attribute));
-                    delSql.append("curr.").append(getQuotedName(attribute)).append("=").append("orig.")
-                            .append(getQuotedName(attribute));
-                    chgSql.append("curr.").append(getQuotedName(attribute)).append("=").append("orig.")
-                            .append(getQuotedName(attribute));
+                    addSql.append("curr.").append(getFormattedName(attribute)).append("=").append("orig.")
+                            .append(getFormattedName(attribute));
+                    delSql.append("curr.").append(getFormattedName(attribute)).append("=").append("orig.")
+                            .append(getFormattedName(attribute));
+                    chgSql.append("curr.").append(getFormattedName(attribute)).append("=").append("orig.")
+                            .append(getFormattedName(attribute));
                     secondPk = true;
                 }
             }
@@ -202,8 +203,8 @@ public class DataDiff extends AbstractComponentRuntime {
                         addSql.append(" or ");
                         delSql.append(" or ");
                     }
-                    addSql.append("orig.").append(getQuotedName(attribute)).append(" is null");
-                    delSql.append("curr.").append(getQuotedName(attribute)).append(" is null");
+                    addSql.append("orig.").append(getFormattedName(attribute)).append(" is null");
+                    delSql.append("curr.").append(getFormattedName(attribute)).append(" is null");
                     secondPk = true;
                 } else {
                     ComponentAttributeSetting matchColumnSetting = component
@@ -215,16 +216,16 @@ public class DataDiff extends AbstractComponentRuntime {
                         if (secondCol) {
                             chgSql.append(" or ");
                         }
-                        chgSql.append("curr.").append(getQuotedName(attribute)).append(" != ")
-                                .append("orig.").append(getQuotedName(attribute));
+                        chgSql.append("curr.").append(getFormattedName(attribute)).append(" != ")
+                                .append("orig.").append(getFormattedName(attribute));
                         chgSql.append(" or ");
-                        chgSql.append("curr.").append(getQuotedName(attribute)).append(" is null and ")
-                                .append("orig.").append(getQuotedName(attribute))
+                        chgSql.append("curr.").append(getFormattedName(attribute)).append(" is null and ")
+                                .append("orig.").append(getFormattedName(attribute))
                                 .append(" is not null ");
                         chgSql.append(" or ");
-                        chgSql.append("curr.").append(getQuotedName(attribute))
+                        chgSql.append("curr.").append(getFormattedName(attribute))
                                 .append(" is not null and ").append("orig.")
-                                .append(getQuotedName(attribute)).append(" is null ");
+                                .append(getFormattedName(attribute)).append(" is null ");
                         secondCol = true;
                     }
                 }
@@ -327,7 +328,7 @@ public class DataDiff extends AbstractComponentRuntime {
             boolean matchColumn = matchColumnSetting != null
                     ? Boolean.parseBoolean(matchColumnSetting.getValue()) : true;
             if (matchColumn) {
-                sql.append(prefix).append(getQuotedName(attribute)).append(" /* ")
+                sql.append(prefix).append(getFormattedName(attribute)).append(" /* ")
                         .append(entity.getName()).append(".").append(attribute.getName())
                         .append(" */").append(",");
             }
