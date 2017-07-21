@@ -188,7 +188,7 @@ public class Web extends AbstractComponentRuntime {
     private Map<String, String> parseDelimitedMultiLineParamsToMap(String parametersText, Message inputMessage) {
         Map<String, String> parsedMap = new HashMap<>();
         if (parametersText != null) {
-            String[] parameters = parametersText.split(System.getProperty("line.separator"));
+            String[] parameters = parametersText.split("\\r?\\n");
             for (String parameter : parameters) {
                 String[] pair = parameter.split(":");
                 if (pair != null && pair.length > 1) {
