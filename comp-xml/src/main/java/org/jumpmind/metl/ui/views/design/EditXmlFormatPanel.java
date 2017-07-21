@@ -345,7 +345,7 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
         ImportXmlTemplateWindow importWindow;
 
         public void buttonClick(ClickEvent event) {
-            importWindow = new ImportXmlTemplateWindow(this);
+            importWindow = new ImportXmlTemplateWindow(this, component, context);
             UI.getCurrent().addWindow(importWindow);
         }
 

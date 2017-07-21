@@ -32,6 +32,7 @@ import java.io.StringWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -45,6 +46,13 @@ import org.apache.xerces.xs.XSNamedMap;
 import org.jdom2.Document;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaders;
+import org.jumpmind.metl.core.model.Component;
+import org.jumpmind.metl.core.model.Resource;
+import org.jumpmind.metl.core.model.Setting;
+import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.plugin.XMLComponentDefinition.ResourceCategory;
+import org.jumpmind.metl.core.plugin.XMLResourceDefinition;
+import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.views.design.ChooseWsdlServiceOperationWindow.ServiceChosenListener;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.reficio.ws.builder.SoapBuilder;
@@ -59,6 +67,7 @@ import com.vaadin.server.Page;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.OptionGroup;
@@ -78,11 +87,15 @@ import jlibs.xml.xsd.XSParser;
 @SuppressWarnings("serial")
 public class ImportXmlTemplateWindow extends ResizableWindow implements ValueChangeListener, ClickListener, Receiver, SucceededListener {
 
-    private static String OPTION_TEXT = "Text";
+    private static final String OPTION_TEXT = "Text";
 
-    private static String OPTION_FILE = "File";
+    private static final String OPTION_FILE = "File";
 
-    private static String OPTION_URL = "URL";
+    private static final String OPTION_URL = "URL";
+
+    private static final String OPTION_RESOURCE = "Resource";
+    
+    private static final String URL_SETTING = "url";
 
     VerticalLayout optionLayout;
 
@@ -93,13 +106,21 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
     Upload upload;
 
     TextField urlTextField;
+    
+    ComboBox resourceComboBox;
 
     ByteArrayOutputStream uploadedData;
 
     ImportXmlListener listener;
+    
+    Component component;
+    
+    ApplicationContext context;
 
-    public ImportXmlTemplateWindow(ImportXmlListener listener) {
+    public ImportXmlTemplateWindow(ImportXmlListener listener, Component component, ApplicationContext context) {
         this.listener = listener;
+        this.component = component;
+        this.context = context;
         setCaption("Import XML Template");
         setWidth(600.0f, Unit.PIXELS);
         setHeight(500.0f, Unit.PIXELS);
@@ -115,6 +136,7 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
         optionGroup.addItem(OPTION_TEXT);
         optionGroup.addItem(OPTION_FILE);
         optionGroup.addItem(OPTION_URL);
+        optionGroup.addItem(OPTION_RESOURCE);
         optionGroup.setNullSelectionAllowed(false);
         optionGroup.setImmediate(true);
         optionGroup.select(OPTION_TEXT);
@@ -139,6 +161,9 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
         upload.setButtonCaption(null);
         urlTextField = new TextField("Enter the URL:");
         urlTextField.setWidth(100.0f, Unit.PERCENTAGE);
+        
+        resourceComboBox = createResourceCB();
+        
         layout.addComponent(optionLayout);
         layout.setExpandRatio(optionLayout, 1.0f);
         rebuildOptionLayout();
@@ -146,6 +171,30 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
         addComponent(layout, 1);
         addComponent(buildButtonFooter(importButton, buildCloseButton()));
 
+    }
+    
+    protected ComboBox createResourceCB() {
+        ComboBox cb = new ComboBox("HTTP Resource");
+        
+        String projectVersionId = component.getProjectVersionId();
+        IConfigurationService configurationService = context.getConfigurationService();
+    
+        Set<XMLResourceDefinition> types = context.getDefinitionFactory()
+                .getResourceDefinitions(projectVersionId, ResourceCategory.HTTP);
+        String[] typeStrings = new String[types.size()];
+        int i = 0;
+        for (XMLResourceDefinition type : types) {
+            typeStrings[i++] = type.getId();
+        }
+        List<Resource> resources = new ArrayList<>(configurationService.findResourcesByTypes(projectVersionId, true, typeStrings));
+        if (resources != null) {
+            for (Resource resource : resources) {
+                cb.addItem(resource);
+            }
+        }
+
+        cb.setWidth(50.0f, Unit.PERCENTAGE);
+        return cb;
     }
 
     protected void rebuildOptionLayout() {
@@ -159,6 +208,9 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
         } else if (optionGroup.getValue().equals(OPTION_URL)) {
             optionLayout.addComponent(urlTextField);
             urlTextField.focus();
+        } else if (optionGroup.getValue().equals(OPTION_RESOURCE)) {
+            optionLayout.addComponent(resourceComboBox);
+            resourceComboBox.focus();
         }
     }
 
@@ -188,6 +240,20 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
             String text = null;
             try {
                 in = new URL(urlTextField.getValue()).openStream();
+                text = IOUtils.toString(in);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            } finally {
+                IOUtils.closeQuietly(in);
+            }
+            importXml(text);
+        } else if (optionGroup.getValue().equals(OPTION_RESOURCE)) {
+            InputStream in = null;
+            String text = null;
+            try {
+                Resource resource = (Resource) resourceComboBox.getValue();
+                String resourceUrl = resource.findSetting(URL_SETTING).getValue();
+                in = new URL(resourceUrl).openStream();
                 text = IOUtils.toString(in);
             } catch (Exception e) {
                 throw new RuntimeException(e);

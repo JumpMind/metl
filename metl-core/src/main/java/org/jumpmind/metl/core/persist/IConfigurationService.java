@@ -137,7 +137,7 @@ public interface IConfigurationService {
 
     public List<Model> findModelsByName(String projectVersionId, String modelName);
 
-    public List<Resource> findResourcesByTypes(String projectVersionId, String... types);
+    public List<Resource> findResourcesByTypes(String projectVersionId, boolean includeDependencies, String... types);
 
     public Resource findPreviousVersionResource(Resource currentResource);
 

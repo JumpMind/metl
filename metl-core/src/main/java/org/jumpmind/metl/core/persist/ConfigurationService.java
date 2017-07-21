@@ -318,7 +318,7 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public List<Resource> findResourcesByTypes(String projectVersionId, String... types) {
+    public List<Resource> findResourcesByTypes(String projectVersionId, boolean includeDependencies, String... types) {
         List<Resource> list = new ArrayList<Resource>();
         if (types != null) {
             for (String type : types) {
@@ -328,6 +328,13 @@ public class ConfigurationService extends AbstractService
                 params.put("projectVersionId", projectVersionId);
                 List<Resource> datas = find(Resource.class, params);
                 list.addAll(buildResource(datas));
+            }
+        }
+        // Return resources found in dependent projects.
+        if (includeDependencies) {
+            List<ProjectVersionDependency> dependencies = findProjectDependencies(projectVersionId);
+            for (ProjectVersionDependency projectVersionDependency : dependencies) {
+                list.addAll(findResourcesByTypes(projectVersionDependency.getTargetProjectVersionId(), true, types));
             }
         }
         return list;
