@@ -378,12 +378,7 @@ public class PropertySheet extends AbsoluteLayout {
                     for (XMLResourceDefinition type : types) {
                         typeStrings[i++] = type.getId();
                     }
-                    List<Resource> resources = new ArrayList<>(configurationService.findResourcesByTypes(projectVersionId, typeStrings));
-                    List<ProjectVersionDependency> dependencies = configurationService.findProjectDependencies(projectVersionId);
-                    for (ProjectVersionDependency projectVersionDependency : dependencies) {
-                        resources.addAll(
-                                configurationService.findResourcesByTypes(projectVersionDependency.getTargetProjectVersionId(), typeStrings));
-                    }
+                    List<Resource> resources = new ArrayList<>(configurationService.findResourcesByTypes(projectVersionId, true, typeStrings));
                     if (resources != null) {
                         for (Resource resource : resources) {
                             resourcesCombo.addItem(resource);
@@ -716,14 +711,8 @@ public class PropertySheet extends AbsoluteLayout {
             for (XMLResourceDefinition type : types) {
                 typeStrings[i++] = type.getId();
             }
-            List<Resource> resources = configurationService.findResourcesByTypes(projectVersionId,
-                    typeStrings);
-            List<ProjectVersionDependency> dependencies = configurationService
-                    .findProjectDependencies(projectVersionId);
-            for (ProjectVersionDependency projectVersionDependency : dependencies) {
-                resources.addAll(configurationService.findResourcesByTypes(
-                        projectVersionDependency.getTargetProjectVersionId(), typeStrings));
-            }
+            List<Resource> resources = 
+                    configurationService.findResourcesByTypes(projectVersionId, true, typeStrings);
 
             if (resources != null) {
                 for (Resource resource : resources) {

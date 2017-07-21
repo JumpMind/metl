@@ -20,10 +20,11 @@ public class RdbmsReaderTest {
 
     @Test
     public void testGetSqlColumnEntityHints() throws Exception {
-        String sql = "select\r\n ISNULL(a,ISNULL(z,'')) /*COLA*/, 'lastName, firstName'/*COLB*/, c/*  COLC */ from test;";
+        String sql = "select\r\n ISNULL(a,ISNULL(z,'')) /*COLA*/, 'lastName, firstName'/*COLB*/, c/*  COLC */, d /*  \"COL D\" */ from test;";
         Map<Integer, String> hints = RdbmsReader.getSqlColumnEntityHints(sql);
         assertEquals(hints.get(1), "COLA");
         assertEquals(hints.get(2), "COLB");
         assertEquals(hints.get(3), "COLC");
+        assertEquals(hints.get(4), "\"COL D\"");
     }
 }

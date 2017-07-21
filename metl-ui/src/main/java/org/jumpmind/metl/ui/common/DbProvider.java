@@ -82,7 +82,7 @@ public class DbProvider implements IDbProvider, Serializable {
             ProjectVersion version = project.getMasterVersion();
             if (version != null) {
                 XMLResourceDefinition defintion = context.getDefinitionFactory().getResourceDefintion(version.getId(), "Database");
-                List<Resource> resources = configurationService.findResourcesByTypes(version.getId(), "Database");
+                List<Resource> resources = configurationService.findResourcesByTypes(version.getId(), false, "Database");
                 for (Resource resource : resources) {
                     if (resource.getBoolean("show.on.explore.screen", false) || showAllResources) {
                         DbResource db = new DbResource("Design > " + resource.getName(),
