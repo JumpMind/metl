@@ -25,7 +25,7 @@ cd metl-assemble
 
 ### Run
 ~~~~~
-cd ../metl-ui/build/libs
+cd ../metl-war/build/libs
 java -jar metl.war
 ~~~~~
 
@@ -33,7 +33,7 @@ java -jar metl.war
 
 To Tomcat:
 ~~~~~
-cp ../metl-ui/build/libs/metl.war /opt/apache-tomcat-8.0.14/webapps/.
+cp ../metl-war/build/libs/metl.war /opt/apache-tomcat-8.0.14/webapps/.
 /opt/apache-tomcat-8.0.14/bin/catalina restart
 ~~~~~
 
