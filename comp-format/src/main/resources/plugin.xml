@@ -50,6 +50,12 @@
         <name>Header line</name>
         <defaultValue>false</defaultValue>
       </setting>
+      <setting id='delimited.formatter.attribute.trim.columns'
+               required='true'
+               type='boolean'>
+        <name>Trim Columns</name>
+        <defaultValue>true</defaultValue>
+      </setting>
     </settings>
   </component>
   <component category='PROCESSOR'

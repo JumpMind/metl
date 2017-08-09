@@ -32,6 +32,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
@@ -61,12 +62,16 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
     public final static String DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION = "delimited.formatter.attribute.format.function";
 
     public final static String DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL = "delimited.formatter.attribute.ordinal";
+    
+    public final static String DELIMITED_FORMATTER_ATTRIBUTE_TRIM_COLUMNS = "delimited.formatter.attribute.trim.columns";
 
     String delimiter = ",";
 
     String quoteCharacter = "\"";
 
     boolean useHeader;
+    
+    boolean trimColumns = true;
 
     List<AttributeFormat> attributes = new ArrayList<AttributeFormat>();
 
@@ -76,6 +81,7 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
         delimiter = StringEscapeUtils.unescapeJava(getComponent().get(DELIMITED_FORMATTER_DELIMITER, delimiter));
         quoteCharacter = properties.get(DELIMITED_FORMATTER_QUOTE_CHARACTER);
         useHeader = properties.is(DELIMITED_FORMATTER_WRITE_HEADER);
+        trimColumns = properties.is(DELIMITED_FORMATTER_ATTRIBUTE_TRIM_COLUMNS, true);
         convertAttributeSettingsToAttributeFormat();
     }
 
@@ -101,7 +107,7 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
                 try {
                     for (AttributeFormat attr : attributes) {
                         if (attr.getAttribute() != null) {
-                            csvWriter.write(attr.getAttribute().getName());
+                            csvWriter.write(attr.getAttribute().getName(), !trimColumns);
                         }
                     }
                 } catch (IOException e) {
@@ -133,12 +139,12 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
                                 attribute.getEntity(), inputRow, attribute.getFormatFunction());
                     }
 
-                    csvWriter.write(object != null ? object.toString() : null);
+                    csvWriter.write(Objects.toString(object),!trimColumns);
                 }
             } else {
                 Collection<Object> values = inputRow.values();
                 for (Object object : values) {
-                    csvWriter.write(object != null ? object.toString() : null);
+                    csvWriter.write(Objects.toString(object), !trimColumns);
                 }
 
             }
@@ -156,6 +162,14 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
             csvWriter.setForceQualifier(true);
         }
         return csvWriter;
+    }
+
+    public void setTrimColumns(boolean trimColumns) {
+        this.trimColumns = trimColumns;
+    }
+    
+    public boolean isTrimColumns() {
+        return trimColumns;
     }
 
     private void convertAttributeSettingsToAttributeFormat() {
@@ -230,6 +244,8 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
         public ModelEntity getEntity() {
             return entity;
         }
+        
+       
     }
 
 }
