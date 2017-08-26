@@ -488,7 +488,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
                             if (ids.length() > 0) {
                                 ids.append(",");
                             }
-                            ids.append(linkedCaseInsensitiveMap.get("TARGET_PROJECT_VERSION_ID"));
+                            ids.append(linkedCaseInsensitiveMap.get("target_project_version_id"));
                         }
                         throw new MessageException(String.format("Missing dependent project.  Please load the following projects first: %s",ids)); 
                     } else {
@@ -583,11 +583,11 @@ public class ImportExportService extends AbstractService implements IImportExpor
         }
         
         for (LinkedCaseInsensitiveMap<Object> row : importData.getTableData().values()) {
-            if (isPassword((String)row.get("NAME"))) {
-                String value = (String)row.get("VALUE");
+            if (isPassword((String)row.get("name"))) {
+                String value = (String)row.get("value");
                 if (isNotBlank(value)) {
                     if (!value.startsWith(SecurityConstants.PREFIX_ENC)) {
-                        row.put("VALUE",
+                        row.put("value",
                                 SecurityConstants.PREFIX_ENC + securityService.encrypt(value));
                     }
                 }
@@ -645,7 +645,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
     private void useDefaultsForMissingRequiredColumns(Table table,LinkedCaseInsensitiveMap<Object> row) {        
         for (Column column : table.getColumnsAsList()) {
             if (!row.containsKey(column.getName())) {
-                row.put(column.getName(), column.getDefaultValue());
+                row.put(column.getName().toLowerCase(), column.getDefaultValue());
             }
         }
     }
