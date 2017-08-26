@@ -323,7 +323,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     public IDatabasePlatform configDatabasePlatform() {
         if (configDatabasePlatform == null) {
             configDatabasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(configDataSource(), new SqlTemplateSettings(),
-                    true, false);
+                    false, false);
         }
         return configDatabasePlatform;
     }
@@ -333,7 +333,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     public IDatabasePlatform executionDatabasePlatform() {
         if (executionDatabasePlatform == null) {
             executionDatabasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(executionDataSource(),
-                    new SqlTemplateSettings(), true, false);
+                    new SqlTemplateSettings(), false, false);
         }
         return executionDatabasePlatform;
     }

@@ -72,45 +72,45 @@ public class ImportExportService extends AbstractService implements IImportExpor
     final static Integer LAST_UPDATE_BY_IDX = new Integer(3);
 
     final String[][] RELEASE_PACKAGE_SQL = {
-            {"_RELEASE_PACKAGE","SELECT * FROM %1$s_RELEASE_PACKAGE WHERE ID='%2$s' ORDER BY ID", "ID"},
-            {"_RELEASE_PACKAGE_PROJECT_VERSION","SELECT * FROM %1$s_RELEASE_PACKAGE_PROJECT_VERSION WHERE " +
-                    "RELEASE_PACKAGE_ID='%2$s' ORDER BY RELEASE_PACKAGE_ID", "RELEASE_PACKAGE_ID,PROJECT_VERSION_ID"}
+            {"_release_package","select * from %1$s_release_package where id='%2$s' order by id", "id"},
+            {"_release_package_project_version","select * from %1$s_release_package_project_version where " +
+                    "release_package_id='%2$s' order by release_package_id", "release_package_id,project_version_id"}
     };
 
     final String[][] PROJECT_SQL = {
-            {"_PROJECT","SELECT * FROM %1$s_PROJECT WHERE ID IN (SELECT PROJECT_ID FROM %1$s_PROJECT_VERSION WHERE ID='%2$s') UNION SELECT * FROM %1$s_PROJECT WHERE ID='%3$s' ORDER BY ID","ID"},
-            {"_PROJECT_VERSION","SELECT * FROM %1$s_PROJECT_VERSION WHERE ID='%2$s' ORDER BY ID","ID"},
-            {"_PROJECT_VERSION_DEFINITION_PLUGIN","SELECT * FROM %1$s_PROJECT_VERSION_DEFINITION_PLUGIN WHERE PROJECT_VERSION_ID='%2$s' ORDER BY PROJECT_VERSION_ID","PROJECT_VERSION_ID,COMPONENT_TYPE_ID"},           
-            {"_PROJECT_VERSION_DEPENDENCY","SELECT * FROM %1$s_PROJECT_VERSION_DEPENDENCY WHERE PROJECT_VERSION_ID='%2$s' ORDER BY ID","ID"}
+            {"_project","select * from %1$s_project where id in (select project_id from %1$s_project_version where id='%2$s') union select * from %1$s_project where id='%3$s' order by id","id"},
+            {"_project_version","select * from %1$s_project_version where id='%2$s' order by id","id"},
+            {"_project_version_definition_plugin","select * from %1$s_project_version_definition_plugin where project_version_id='%2$s' order by project_version_id","project_version_id,component_type_id"},           
+            {"_project_version_dependency","select * from %1$s_project_version_dependency where project_version_id='%2$s' order by id","id"}
     };
     
     final String[][] MODEL_SQL = {
-            {"_MODEL","SELECT * FROM %1$s_MODEL WHERE PROJECT_VERSION_ID='%2$s' AND ID='%3$s' ORDER BY ID","ID"},
-            {"_MODEL_ENTITY","SELECT * FROM %1$s_MODEL_ENTITY WHERE MODEL_ID='%3$s' ORDER BY ID","ID"},
-            {"_MODEL_ATTRIBUTE","SELECT * FROM %1$s_MODEL_ATTRIBUTE WHERE ENTITY_ID IN "
-            + "(SELECT ID FROM %1$s_MODEL_ENTITY WHERE MODEL_ID IN "
-            + "(SELECT ID FROM %1$s_MODEL WHERE PROJECT_VERSION_ID='%2$s' AND ID='%3$s')) ORDER BY ID","ID"}
+            {"_model","select * from %1$s_model where project_version_id='%2$s' and id='%3$s' order by id","id"},
+            {"_model_entity","select * from %1$s_model_entity where model_id='%3$s' order by id","id"},
+            {"_model_attribute","select * from %1$s_model_attribute where entity_id in "
+            + "(select id from %1$s_model_entity where model_id in "
+            + "(select id from %1$s_model where project_version_id='%2$s' and id='%3$s')) order by id","id"}
     };    
     
     final String[][] RESOURCE_SQL = {
-            {"_RESOURCE","SELECT * FROM %1$s_RESOURCE WHERE PROJECT_VERSION_ID = '%2$s' AND ID='%3$s' ORDER BY ID","ID"},
-            {"_RESOURCE_SETTING","SELECT * FROM %1$s_RESOURCE_SETTING WHERE RESOURCE_ID='%3$s' ORDER BY RESOURCE_ID, NAME","RESOURCE_ID,NAME"}
+            {"_resource","select * from %1$s_resource where project_version_id = '%2$s' and id='%3$s' order by id","id"},
+            {"_resource_setting","select * from %1$s_resource_setting where resource_id='%3$s' order by resource_id, name","resource_id,name"}
     };
     
     final String[][] FLOW_SQL = {
-            {"_COMPONENT","SELECT * FROM %1$s_COMPONENT WHERE PROJECT_VERSION_ID='%2$s' AND ID IN "
-                    + "(SELECT DISTINCT COMPONENT_ID FROM %1$s_FLOW_STEP WHERE FLOW_ID='%3$s') ORDER BY ID", "ID"},
-            {"_COMPONENT_SETTING","SELECT * FROM %1$s_COMPONENT_SETTING WHERE COMPONENT_ID IN "
-                    + "(SELECT DISTINCT COMPONENT_ID FROM %1$s_FLOW_STEP WHERE FLOW_ID='%3$s') ORDER BY ID", "ID"},
-            {"_COMPONENT_ENTITY_SETTING","SELECT * FROM %1$s_COMPONENT_ENTITY_SETTING WHERE COMPONENT_ID IN "
-                    + "(SELECT DISTINCT COMPONENT_ID FROM %1$s_FLOW_STEP WHERE FLOW_ID='%3$s') ORDER BY ID", "ID"},
-            {"_COMPONENT_ATTRIBUTE_SETTING","SELECT * FROM %1$s_COMPONENT_ATTRIBUTE_SETTING WHERE COMPONENT_ID IN "
-                    + "(SELECT DISTINCT COMPONENT_ID FROM %1$s_FLOW_STEP WHERE FLOW_ID='%3$s') ORDER BY ID", "ID"},
-            {"_FLOW","SELECT * FROM %1$s_FLOW WHERE PROJECT_VERSION_ID='%2$s' AND ID='%3$s' ORDER BY ID", "ID"},
-            {"_FLOW_PARAMETER","SELECT * FROM %1$s_FLOW_PARAMETER WHERE FLOW_ID='%3$s' ORDER BY ID", "ID"},
-            {"_FLOW_STEP","SELECT * FROM %1$s_FLOW_STEP WHERE FLOW_ID='%3$s' ORDER BY ID", "ID"},
-            {"_FLOW_STEP_LINK","SELECT * FROM %1$s_FLOW_STEP_LINK WHERE SOURCE_STEP_ID IN "
-                    + "(SELECT DISTINCT ID FROM %1$s_FLOW_STEP WHERE FLOW_ID='%3$s') ORDER BY SOURCE_STEP_ID, TARGET_STEP_ID", "SOURCE_STEP_ID,TARGET_STEP_ID"}            
+            {"_component","select * from %1$s_component where project_version_id='%2$s' and id in "
+                    + "(select distinct component_id from %1$s_flow_step where flow_id='%3$s') order by id", "id"},
+            {"_component_setting","select * from %1$s_component_setting where component_id in "
+                    + "(select distinct component_id from %1$s_flow_step where flow_id='%3$s') order by id", "id"},
+            {"_component_entity_setting","select * from %1$s_component_entity_setting where component_id in "
+                    + "(select distinct component_id from %1$s_flow_step where flow_id='%3$s') order by id", "id"},
+            {"_component_attribute_setting","select * from %1$s_component_attribute_setting where component_id in "
+                    + "(select distinct component_id from %1$s_flow_step where flow_id='%3$s') order by id", "id"},
+            {"_flow","select * from %1$s_flow where project_version_id='%2$s' and id='%3$s' order by id", "id"},
+            {"_flow_parameter","select * from %1$s_flow_parameter where flow_id='%3$s' order by id", "id"},
+            {"_flow_step","select * from %1$s_flow_step where flow_id='%3$s' order by id", "id"},
+            {"_flow_step_link","select * from %1$s_flow_step_link where source_step_id in "
+                    + "(select distinct id from %1$s_flow_step where flow_id='%3$s') order by source_step_id, target_step_id", "source_step_id,target_step_id"}            
     };
     
     private IDatabasePlatform databasePlatform;
@@ -143,10 +143,10 @@ public class ImportExportService extends AbstractService implements IImportExpor
 
     private void setColumnsToExclude() {
         columnsToExclude = new String[4];
-        columnsToExclude[CREATE_TIME_IDX] = "CREATE_TIME";
-        columnsToExclude[LAST_UPDATE_TIME_IDX] = "LAST_UPDATE_TIME";
-        columnsToExclude[CREATE_BY_IDX] = "CREATE_BY";
-        columnsToExclude[LAST_UPDATE_BY_IDX] = "LAST_UPDATE_BY";
+        columnsToExclude[CREATE_TIME_IDX] = "creqte_time";
+        columnsToExclude[LAST_UPDATE_TIME_IDX] = "last_update_time";
+        columnsToExclude[CREATE_BY_IDX] = "create_by";
+        columnsToExclude[LAST_UPDATE_BY_IDX] = "last_update_by";
     }
     
     @Override
@@ -295,7 +295,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
             String projectVersionId, String keyValue) {        
         ProjectVersion version = configurationService.findProjectVersion(projectVersionId);
         for (int i = 0; i <= sqlElements.length - 1; i++) {
-            if (!sqlElements[0][0].equalsIgnoreCase("_PROJECT") ||
+            if (!sqlElements[0][0].equalsIgnoreCase("_project") ||
                     version == null || !projectsExported.contains(version.getProjectId()) ) {                
                 String[] entry = sqlElements[i];
                 List<Row> rows = getConfigTableData(String.format(entry[SQL], 
@@ -377,32 +377,32 @@ public class ImportExportService extends AbstractService implements IImportExpor
     }
 
     private void processDeletes(ImportConfigData importData, ISqlTransaction transaction) {
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_FLOW_STEP_LINK"),
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_flow_step_link"),
                 transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_FLOW_STEP"),
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_flow_step"),
                 transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_FLOW_PARAMETER"),
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_flow_parameter"),
                 transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_FLOW"), transaction);
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_flow"), transaction);
         processTableDeletes(
-                importData.deletesToProcess.get(tablePrefix + "_COMPONENT_ATTRIBUTE_SETTING"),
+                importData.deletesToProcess.get(tablePrefix + "_component_attribute_setting"),
                 transaction);
         processTableDeletes(
-                importData.deletesToProcess.get(tablePrefix + "_COMPONENT_ENTITY_SETTING"),
+                importData.deletesToProcess.get(tablePrefix + "_component_entity_setting"),
                 transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_COMPONENT_SETTING"),
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_component_setting"),
                 transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_COMPONENT"),
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_component"),
                 transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_RESOURCE_SETTING"),
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_resource_setting"),
                 transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_RESOURCE"),
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_resource"),
                 transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_MODEL_ATTRIBUTE"),
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_model_attribute"),
                 transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_MODEL_ENTITY"),
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_model_entity"),
                 transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_MODEL"), transaction);
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_model"), transaction);
     }
 
     private void importReleasePackageConfiguration(ImportConfigData importData,
@@ -585,16 +585,16 @@ public class ImportExportService extends AbstractService implements IImportExpor
             DmlStatement stmt = databasePlatform.createDmlStatement(DmlType.INSERT,
                     table.getCatalog(), table.getSchema(), table.getName(),
                     table.getPrimaryKeyColumns(), table.getColumns(), null, null, true);
-            
+
             Iterator<String> itr = inserts.getTableData().keySet().iterator();
             while (itr.hasNext()) {
                 String key = itr.next();
                 LinkedCaseInsensitiveMap<Object> row = inserts.getTableData().get(key);
                 Date createTime = new Date();
-                row.put("CREATE_TIME", createTime);
-                row.put("LAST_UPDATE_TIME", createTime);
+                row.put("create_time", createTime);
+                row.put("last_update_time", createTime);
                 useDefaultsForMissingRequiredColumns(table, row);                
-                transaction.prepareAndExecute(stmt.getSql(), row);
+                transaction.prepareAndExecute(stmt.getSql().toLowerCase(), row);
             }
 
     }
@@ -610,9 +610,9 @@ public class ImportExportService extends AbstractService implements IImportExpor
             while (itr.hasNext()) {
                 String key = itr.next();
                 LinkedCaseInsensitiveMap<Object> row = updates.getTableData().get(key);
-                row.put("LAST_UPDATE_TIME", new Date());
+                row.put("last_update_time", new Date());
                 useDefaultsForMissingRequiredColumns(table, row);                
-                transaction.prepareAndExecute(stmt.getSql(), row);
+                transaction.prepareAndExecute(stmt.getSql().toLowerCase(), row);
             }
     }
 
@@ -636,7 +636,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
             while (itr.hasNext()) {
                 String key = itr.next();
                 LinkedCaseInsensitiveMap<Object> row = deletes.getTableData().get(key);
-                transaction.prepareAndExecute(stmt.getSql(), row);
+                transaction.prepareAndExecute(stmt.getSql().toLowerCase(), row);
             }            
         }
     }
@@ -796,11 +796,11 @@ public class ImportExportService extends AbstractService implements IImportExpor
 
             /* @formatter:off */
             String[][] CONFIG = {
-                    {"AGENT", "WHERE ID='%2$s' AND DELETED=0"," ORDER BY ID",                                                                                                                                                                              },
-                    {"AGENT_DEPLOYMENT", "WHERE AGENT_ID='%2$s'"," ORDER BY ID",                                                                                                                                                                                                                                },
-                    {"AGENT_FLOW_DEPLOYMENT_PARAMETER", "WHERE AGENT_DEPLOYMENT_ID in (SELECT ID FROM %1$s_AGENT_DEPLOYMENT WHERE AGENT_ID='%2$s')"," ORDER BY AGENT_DEPLOYMENT_ID, FLOW_ID",                                                                                                                                                                                                                         },
-                    {"AGENT_PARAMETER", "WHERE AGENT_ID='%2$s'"," ORDER BY ID",                                                                                                                                                                                                            },
-                    {"AGENT_RESOURCE_SETTING", "WHERE AGENT_ID='%2$s'"," ORDER BY RESOURCE_ID, NAME",                                                                                                                                                       },
+                    {"agent", "where id='%2$s' and deleted=0"," order by id",                                                                                                                                                                              },
+                    {"agent_deployment", "where agent_id='%2$s'"," order by id",                                                                                                                                                                                                                                },
+                    {"agent_flow_deployment_parameter", "where agent_deployment_id in (select id from %1$s_agent_deployment where agent_id='%2$s')"," order by agent_deployment_id, flow_id",                                                                                                                                                                                                                         },
+                    {"agent_parameter", "where agent_id='%2$s'"," order by id",                                                                                                                                                                                                            },
+                    {"agent_resource_setting", "where agent_id='%2$s'"," order by resource_id, name",                                                                                                                                                       },
             };
             /* @formatter:on */
 

@@ -55,10 +55,29 @@ public class PluginService extends AbstractService implements IPluginService {
     @Override
     public List<Plugin> findActivePlugins() {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
-        return template.query(String.format("select distinct artifact_group, artifact_name, load_order from ("
-                + "select v.artifact_group, v.artifact_name, p.load_order from %1$s_project_version_definition_plugin v left join "
-                + " %1$s_plugin p on v.artifact_name=p.artifact_name and v.artifact_group=p.artifact_group where v.enabled=1) "
-                + " order by load_order, artifact_group, artifact_name", tablePrefix), new ISqlRowMapper<Plugin>() {
+        String sql = "select distinct \n" + 
+                "   dt.artifact_group\n" + 
+                "   , dt.artifact_name\n" + 
+                "   , dt.load_order \n" + 
+                "from \n" + 
+                "   (\n" + 
+                "      select \n" + 
+                "         v.artifact_group\n" + 
+                "         , v.artifact_name\n" + 
+                "         , p.load_order \n" + 
+                "      from \n" + 
+                "         metl_project_version_definition_plugin v \n" + 
+                "         left join  metl_plugin p \n" + 
+                "            on v.artifact_name=p.artifact_name \n" + 
+                "            and v.artifact_group=p.artifact_group \n" + 
+                "      where \n" + 
+                "         v.enabled=1\n" + 
+                "   ) dt  \n" + 
+                "order by \n" + 
+                "   dt.load_order\n" + 
+                "   , dt.artifact_group\n" + 
+                "   , dt.artifact_name";
+        return template.query(String.format(sql, tablePrefix), new ISqlRowMapper<Plugin>() {
                     public Plugin mapRow(Row row) {
                         return new Plugin(row.getString("artifact_group"), row.getString("artifact_name"), row.getInt("load_order"));
                     }

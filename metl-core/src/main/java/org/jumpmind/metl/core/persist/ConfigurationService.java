@@ -1261,9 +1261,9 @@ public class ConfigurationService extends AbstractService
     @Override
     public List<Model> findDependentModels(String flowId) {
         List<Model> models = new ArrayList<Model>();
-        final String MODELS_BY_FLOW_SQL = "select distinct model_id from  "
+        final String MODELS_BY_FLOW_SQL = "select distinct dt.model_id from  "
                 + "(select distinct output_model_id as model_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s' and output_model_id is not null union "
-                + " select distinct input_model_id as model_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s' and input_model_id is not null)";
+                + " select distinct input_model_id as model_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s' and input_model_id is not null) dt";
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         List<Row> ids = template.query(String.format(MODELS_BY_FLOW_SQL, tablePrefix, flowId));
         for (Row row : ids) {
