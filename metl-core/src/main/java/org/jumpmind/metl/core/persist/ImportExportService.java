@@ -269,12 +269,38 @@ public class ImportExportService extends AbstractService implements IImportExpor
     public void importConfiguration(String configDataString, String userId) {
         projectsExported.clear();
         ConfigData configData = deserializeConfigurationData(configDataString);
+        convertConfigDataTablesColumnsToLowerCase(configData);
         importConfiguration(configData, userId);
         for (IConfigurationChangedListener l : configurationChangedListeners) {
             l.onMultiRowUpdate();
         }
     }
 
+    private void convertConfigDataTablesColumnsToLowerCase(ConfigData configData) {
+        convertTableDataToLowerCase(configData.getReleasePackageData());
+        for (ProjectVersionData projectVersionData : configData.getProjectVersionData()) {
+            convertTableDataToLowerCase(projectVersionData.getProjectData());
+            convertTableDataToLowerCase(projectVersionData.getResourceData());
+            convertTableDataToLowerCase(projectVersionData.getModelData());
+            convertTableDataToLowerCase(projectVersionData.getFlowData());
+        }
+    }
+    
+    private void convertTableDataToLowerCase(List<TableData> tableDatas) {
+        for (TableData tableData : tableDatas) {
+            tableData.setTableName(tableData.getTableName().toLowerCase());
+            Map<String, LinkedCaseInsensitiveMap<Object>> newRows = new HashMap<String, LinkedCaseInsensitiveMap<Object>>();
+            tableData.getTableData().forEach((rowId,row)->{
+                LinkedCaseInsensitiveMap<Object> newRow = new LinkedCaseInsensitiveMap<Object>();
+                row.forEach((colId,value)->{
+                    newRow.put(colId.toLowerCase(), value);
+                });
+                newRows.put(rowId, newRow);
+            });
+            tableData.setTableData(newRows);
+        }
+    }
+    
     private String serializeExportToJson(ConfigData exportData) {
         ObjectMapper mapper = new ObjectMapper();        
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
