@@ -1,25 +1,24 @@
 update metl_project_version set version_type='MASTER', version_label='master'
 where id in
 (
-   select
-      mpv.id
-   from
-      metl_project_version mpv
+   select 
+      pv.id
+   from 
+      metl_project_version pv
       inner join 
-      (   
-         select 
-            project_id, max(create_time) max_create_time
-         from 
-            metl_project_version
-         where
-            deleted=0
-         group by
-            project_id
-      ) mct
-         on mpv.project_id = mct.project_id
-         and mpv.create_time = mct.max_create_time
-   where 
-      mpv.deleted=0
+      (
+         select
+            p.id as project_id
+            , max(pv.last_update_time) as max_pv_last_update_time
+         from
+            metl_project p
+            inner join metl_project_version pv
+               on p.id = pv.project_id
+         group by 
+            p.id
+      ) pvx
+         on pv.project_id = pvx.project_id
+         and pv.last_update_time = pvx.max_pv_last_update_time
 );
 
 update metl_project_version set version_type='RELEASE', release_date='2017-01-01'
