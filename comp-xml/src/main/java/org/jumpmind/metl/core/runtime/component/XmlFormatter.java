@@ -191,19 +191,20 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
             while (!parentStack.isEmpty() && parentStack.peek().level >= entityDocElement.level) {
                 parentStack.pop();
             }
-
-            // TODO: this guys parent entity might be the last entity, not
-            // static
-            // data. What i have below works assuming the entities line up
-            // parent to child
-            // still needs work
+            Element entityElementToAdd = entityDocElement.xmlElement.clone();            
             if (parentStack.isEmpty() || parentStack.peek().level < entityDocElement.level - 1) {
-                fillStackWithStaticParentElements(parentStack, entityDocElement, generatedXml);
+                //if the entity level isn't the root
+                if (!entityElementToAdd.getName().equalsIgnoreCase(templateDoc.getRootElement().getName())) {
+                    fillStackWithStaticParentElements(parentStack, entityDocElement, generatedXml);
+                }
             }
-
-            Element entityElementToAdd = entityDocElement.xmlElement.clone();
-            DocElement parentToAttach = parentStack.peek();
-            parentToAttach.xmlElement.addContent(0,entityElementToAdd);
+            //if the entity level is the root
+            if (entityElementToAdd.getName().equalsIgnoreCase(templateDoc.getRootElement().getName())) {
+                generatedXml.setRootElement(entityElementToAdd);
+            } else {            
+                DocElement parentToAttach = parentStack.peek();
+                parentToAttach.xmlElement.addContent(0,entityElementToAdd);
+            }
             parentStack.push(new DocElement(entityDocElement.level, entityElementToAdd, null,
                     entityDocElement.xpath));
         }
@@ -225,7 +226,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
             XPathExpression<Element> expression = XPathFactory.instance()
                     .compile(firstDocElement.xpath, Filters.element());
             List<Element> matches = expression.evaluate(generatedXml.getRootElement());
-            if (matches.size() != 0) {
+            if (matches.size() != 0 && matches.get(0).getParentElement() != null) {
                 elementToPutOnStack = matches.get(0).getParentElement();
             } else {
                 elementToPutOnStack = generatedXml.getRootElement();
