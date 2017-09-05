@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.runtime.component;
 
 import java.io.File;
@@ -7,6 +27,8 @@ import java.nio.file.Paths;
 import java.sql.Types;
 import java.util.List;
 import java.util.UUID;
+
+import javax.sql.DataSource;
 
 import org.apache.commons.io.FileUtils;
 import org.h2.Driver;
@@ -29,6 +51,9 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
+import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 public class TempRdbms extends AbstractRdbmsComponentRuntime  {
 
@@ -37,6 +62,8 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
     public static String CONTINUE_ON_ERROR = "continue.on.error";
     
     public static String BATCH_MODE = "batch.mode";
+    
+    public static String DDL = "ddl";
 
     int rowsPerMessage = 1000;
 
@@ -52,6 +79,8 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
     
     List<String> sqls;
     
+    List<String> ddls;
+    
     int rowReadDuringHandle;
     
     boolean continueOnError = false;
@@ -62,6 +91,7 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
     public void start() {
         TypedProperties properties = getTypedProperties();
         sqls = getSqlStatements(true);
+        ddls = getDdlStatements(false);
 
         this.inMemoryDb = properties.is(IN_MEMORY_DB);
         this.rowsPerMessage = properties.getInt(ROWS_PER_MESSAGE);
@@ -187,9 +217,29 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
                 
                 databasePlatform.createTables(false, false, table);
             }
+            
+            runDdls();
 
             log(LogLevel.INFO, "Creating databasePlatform with the following url: %s", ds.getUrl());
         }
+    }
+    
+    protected void runDdls() {
+    	if(ddls != null) {
+    		JdbcOperations jdbcTemplate = getJdbcTemplate().getJdbcOperations();
+    		for(String ddl : ddls) {
+    			log(LogLevel.INFO, "Executing ddl %s", ddl);
+    			jdbcTemplate.execute(ddl);
+    		}
+    	}
+    }
+    
+    @Override
+    protected NamedParameterJdbcTemplate getJdbcTemplate() {
+    	DataSource dataSource = databasePlatform.getDataSource();
+        JdbcTemplate template = new JdbcTemplate(dataSource);
+        template.setQueryTimeout(queryTimeout);
+        return new NamedParameterJdbcTemplate(template);
     }
     
     private void alterCaseToMatchLogicalCase(Table table) {

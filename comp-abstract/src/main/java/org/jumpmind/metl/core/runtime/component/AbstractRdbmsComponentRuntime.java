@@ -55,6 +55,8 @@ abstract public class AbstractRdbmsComponentRuntime extends AbstractComponentRun
 
     public final static String SQL = "sql";
     
+    public final static String DDL = "ddl";
+    
     public final static String QUERY_TIMEOUT = "query.timeout.seconds";
 
     protected List<Result> results = new ArrayList<Result>();
@@ -79,6 +81,16 @@ abstract public class AbstractRdbmsComponentRuntime extends AbstractComponentRun
     protected List<String> getSqlStatements(boolean required) {
         TypedProperties properties = getTypedProperties();
         String script = properties.get(SQL);
+        return getStatements(script, required);
+    }
+    
+    protected List<String> getDdlStatements(boolean required) {
+    	TypedProperties properties = getTypedProperties();
+        String script = properties.get(DDL);
+        return getStatements(script, required);
+    }
+    
+    private List<String> getStatements(String script, boolean required) {
         if (isNotBlank(script)) {
             List<String> sqlStatements = new ArrayList<String>();
             SqlScriptReader scriptReader = new SqlScriptReader(new StringReader(script));

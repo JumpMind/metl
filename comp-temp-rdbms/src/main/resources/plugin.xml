@@ -42,8 +42,15 @@
       </setting>
       <setting id='sql'
                required='true'
-               type='multiline_text'>
+               type='multiline_text'
+               visible='true'>
         <name>Sql</name>
+      </setting>
+      <setting id='ddl'
+               required='false'
+               type='multiline_text'
+               visible='true'>
+        <name>Ddl</name>
       </setting>
       <setting id='rows.per.message'
                required='false'
