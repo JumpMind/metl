@@ -232,7 +232,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                 elementToPutOnStack = generatedXml.getRootElement();
             }
             elementToPutOnStack.removeContent();
-            removeAllAttributes(elementToPutOnStack);
+            removeAllEmptyAttributes(elementToPutOnStack);
             parentStack.push(
                     new DocElement(firstDocElement.level - 1, elementToPutOnStack, null, null));
             restoreNamespaces(generatedXml, namespaces);
@@ -251,7 +251,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                 // throw some exception here
             }
             elementToPutOnStack.removeContent();
-            removeAllAttributes(elementToPutOnStack);
+            removeAllEmptyAttributes(elementToPutOnStack);
             parentStack.push(
                     new DocElement(firstDocElement.level - 1, elementToPutOnStack, null, null));
             restoreNamespaces(templateDoc, namespaces);
@@ -286,7 +286,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                 // we have to add an element
                 newElement = templateDocElement.xmlElement.clone();
                 newElement.removeContent();
-                removeAllAttributes(newElement);
+                removeAllEmptyAttributes(newElement);
 
                 if (StringUtils.isEmpty(value)) {
                     if (nullHandling.equalsIgnoreCase(NULL_HANDLING_XML_NIL)) {
@@ -341,7 +341,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                     if (matches.size() == 0) {
                         Element elementToAdd = templateParentElement.clone();
                         elementToAdd.removeContent();
-                        removeAllAttributes(elementToAdd);
+                        removeAllEmptyAttributes(elementToAdd);
                         parentsToAdd.push(elementToAdd);
                         templateParentElement = templateParentElement.getParentElement();
                     } else {
@@ -399,11 +399,13 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
         return Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
     }
 
-    private void removeAllAttributes(Element element) {
+    private void removeAllEmptyAttributes(Element element) {
         List<Attribute> attributes = new ArrayList<Attribute>();
         attributes.addAll(element.getAttributes());
         for (Attribute attribute : attributes) {
-            element.removeAttribute(attribute);
+            if (StringUtils.isEmpty(attribute.getValue())) {
+                element.removeAttribute(attribute);
+            }
         }
     }
 
