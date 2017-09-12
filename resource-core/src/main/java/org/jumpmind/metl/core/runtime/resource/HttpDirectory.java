@@ -180,9 +180,10 @@ public class HttpDirectory implements IDirectory {
             HttpURLConnection httpConnection = buildHttpUrlConnection(relativePath, headers,
                     parameters);
             int responseCode = httpConnection.getResponseCode();
+            
             if (responseCode == 200) {
                 String type = httpConnection.getContentEncoding();
-                InputStream in = httpConnection.getInputStream();
+               InputStream in = new HttpInputStream(httpConnection);
                 if (!isBlank(type) && type.equals("gzip")) {
                     in = new GZIPInputStream(in);
                 }
