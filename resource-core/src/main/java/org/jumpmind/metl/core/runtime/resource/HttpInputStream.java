@@ -36,4 +36,9 @@ public class HttpInputStream extends InputStream implements IInputStreamWithConn
     public int read() throws IOException {
         return this.is.read();
     }
+
+    @Override
+    public InputStream getInputStream() {
+        return is;
+    }
 }

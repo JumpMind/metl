@@ -41,8 +41,8 @@ import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
-import org.jumpmind.metl.core.runtime.resource.HttpDirectory;
-import org.jumpmind.metl.core.runtime.resource.HttpInputStream;
+import org.jumpmind.metl.core.runtime.resource.IDirectory;
+import org.jumpmind.metl.core.runtime.resource.IInputStreamWithConnection;
 import org.jumpmind.metl.core.runtime.resource.IOutputStreamWithResponse;
 //import org.jumpmind.metl.core.runtime.resource.Http;
 //import org.jumpmind.metl.core.runtime.resource.HttpDirectory;
@@ -112,7 +112,7 @@ public class Web extends AbstractComponentRuntime {
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {	    
 		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
 				|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
-			HttpDirectory streamable = getResourceReference();
+			IDirectory streamable = getResourceReference();
 	        Map<String, Serializable> outputMessageHeaders = new HashMap<String, Serializable>();
 			httpHeaders = getHttpHeaderConfigEntries(inputMessage);
 			httpParameters = getHttpParameterConfigEntries(inputMessage);
@@ -154,16 +154,16 @@ public class Web extends AbstractComponentRuntime {
                             }
                         } else {
                             info("getting content from %s", path);
-                            HttpInputStream is = (HttpInputStream) streamable.getInputStream(path, false, false, httpHeaders, httpParameters);
-                            Map<String, List<String>> responseHdrs = is.getHttpConnection().getHeaderFields();
+                            IInputStreamWithConnection isc = (IInputStreamWithConnection) streamable.getInputStream(path, false, false, httpHeaders, httpParameters);
+                            Map<String, List<String>> responseHdrs = isc.getHttpConnection().getHeaderFields();
                             outputMessageHeaders.putAll(convertResponseHdrsToMsgHeaders(responseHdrs));
                             try {
-                                String response = IOUtils.toString(is);                                
+                                String response = IOUtils.toString(isc.getInputStream());                                
                                 if (response != null) {
                                     outputPayload.add(response);
                                 }
                             } finally {
-                                IOUtils.closeQuietly(is);
+                                IOUtils.closeQuietly(isc.getInputStream());
                             }
                         }
 					}
