@@ -198,7 +198,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton")
     Server h2Server() {
         String configDbUrl = env.getProperty(DB_POOL_URL, "jdbc:h2:mem:config");
-        String execDbUrl = env.getProperty(EXECUTION + DB_POOL_DRIVER, env.getProperty(DB_POOL_DRIVER, Driver.class.getName()));
+        String execDbUrl = env.getProperty(EXECUTION + DB_POOL_URL, configDbUrl);
         if (h2Server == null && (configDbUrl.contains("h2:tcp") || execDbUrl.contains("h2:tcp"))) {
             try {
                 h2Server = Server.createTcpServer("-tcpPort", env.getProperty("h2.port", "9092"));
@@ -290,30 +290,35 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     BasicDataSource executionDataSource() {
         if (executionDataSource == null) {
             TypedProperties properties = new TypedProperties();
+            String executionUrl = env.getProperty(EXECUTION + DB_POOL_URL);
+            String appendToProperties = EXECUTION;
+            if (executionUrl == null) {
+                appendToProperties = "";
+                executionUrl = env.getProperty(DB_POOL_URL, "jdbc:h2:mem:exec");
+            }            
+            properties.put(DB_POOL_URL, executionUrl);
             properties.put(DB_POOL_DRIVER,
-                    env.getProperty(EXECUTION + DB_POOL_DRIVER, env.getProperty(DB_POOL_DRIVER, Driver.class.getName())));
-            properties.put(DB_POOL_URL, env.getProperty(EXECUTION + DB_POOL_URL, env.getProperty(DB_POOL_URL, "jdbc:h2:mem:exec")));
-            properties.put(DB_POOL_USER, env.getProperty(EXECUTION + DB_POOL_USER, env.getProperty(DB_POOL_USER)));
-            properties.put(DB_POOL_PASSWORD, env.getProperty(EXECUTION + DB_POOL_PASSWORD, env.getProperty(DB_POOL_PASSWORD)));
-            properties.put(DB_POOL_INITIAL_SIZE, env.getProperty(DB_POOL_INITIAL_SIZE, "100"));
-            properties.put(DB_POOL_MAX_ACTIVE, env.getProperty(DB_POOL_MAX_ACTIVE, "100"));
-            properties.put(DB_POOL_MAX_IDLE, env.getProperty(DB_POOL_MAX_IDLE, "100"));
-            properties.put(DB_POOL_MIN_IDLE, env.getProperty(DB_POOL_MIN_IDLE, "100"));
-            properties.put(DB_POOL_MAX_WAIT, env.getProperty(DB_POOL_MAX_WAIT, "30000"));
-            properties.put(DB_POOL_MIN_EVICTABLE_IDLE_TIME_MILLIS, env.getProperty(DB_POOL_MIN_EVICTABLE_IDLE_TIME_MILLIS, "120000"));
-            properties.put(DB_POOL_VALIDATION_QUERY, env.getProperty(DB_POOL_VALIDATION_QUERY));
-            properties.put(DB_POOL_TEST_ON_BORROW, env.getProperty(DB_POOL_TEST_ON_BORROW, "false"));
-            properties.put(DB_POOL_TEST_ON_RETURN, env.getProperty(DB_POOL_TEST_ON_RETURN, "false"));
-            properties.put(DB_POOL_TEST_WHILE_IDLE, env.getProperty(DB_POOL_TEST_WHILE_IDLE, "true"));
-            properties.put(EXECUTION + DB_POOL_INIT_SQL, env.getProperty(DB_POOL_INIT_SQL));
-            properties.put(DB_POOL_CONNECTION_PROPERTIES, env.getProperty(DB_POOL_CONNECTION_PROPERTIES));
+                    env.getProperty(appendToProperties + DB_POOL_DRIVER, env.getProperty(DB_POOL_DRIVER, Driver.class.getName())));
+            properties.put(DB_POOL_USER, env.getProperty(appendToProperties + DB_POOL_USER, env.getProperty(DB_POOL_USER)));
+            properties.put(DB_POOL_PASSWORD, env.getProperty(appendToProperties + DB_POOL_PASSWORD, env.getProperty(DB_POOL_PASSWORD)));
+            properties.put(DB_POOL_INITIAL_SIZE, env.getProperty(appendToProperties + DB_POOL_INITIAL_SIZE, "100"));
+            properties.put(DB_POOL_MAX_ACTIVE, env.getProperty(appendToProperties + DB_POOL_MAX_ACTIVE, "100"));
+            properties.put(DB_POOL_MAX_IDLE, env.getProperty(appendToProperties + DB_POOL_MAX_IDLE, "100"));
+            properties.put(DB_POOL_MIN_IDLE, env.getProperty(appendToProperties + DB_POOL_MIN_IDLE, "100"));
+            properties.put(DB_POOL_MAX_WAIT, env.getProperty(appendToProperties + DB_POOL_MAX_WAIT, "30000"));
+            properties.put(DB_POOL_MIN_EVICTABLE_IDLE_TIME_MILLIS, env.getProperty( appendToProperties + DB_POOL_MIN_EVICTABLE_IDLE_TIME_MILLIS, "120000"));
+            properties.put(DB_POOL_VALIDATION_QUERY, env.getProperty(appendToProperties + DB_POOL_VALIDATION_QUERY));
+            properties.put(DB_POOL_TEST_ON_BORROW, env.getProperty(appendToProperties + DB_POOL_TEST_ON_BORROW, "false"));
+            properties.put(DB_POOL_TEST_ON_RETURN, env.getProperty(appendToProperties + DB_POOL_TEST_ON_RETURN, "false"));
+            properties.put(DB_POOL_TEST_WHILE_IDLE, env.getProperty(appendToProperties + DB_POOL_TEST_WHILE_IDLE, "true"));
+            properties.put(EXECUTION + DB_POOL_INIT_SQL, env.getProperty(appendToProperties + DB_POOL_INIT_SQL));
+            properties.put(DB_POOL_CONNECTION_PROPERTIES, env.getProperty(appendToProperties + DB_POOL_CONNECTION_PROPERTIES));
             log.info(
                     "About to initialize the execution datasource using the following driver:"
                             + " '{}' and the following url: '{}' and the following user: '{}'",
-                    new Object[] { properties.get(DB_POOL_DRIVER), properties.get(DB_POOL_URL), properties.get(DB_POOL_USER) });
+                    new Object[] { properties.get(DB_POOL_DRIVER), executionUrl, properties.get(DB_POOL_USER) });
 
             executionDataSource = BasicDataSourceFactory.create(properties, SecurityServiceFactory.create());
-
         }
         return executionDataSource;
     }

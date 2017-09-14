@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import org.jumpmind.db.platform.DatabaseNamesConstants;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.sql.ISqlRowMapper;
 import org.jumpmind.db.sql.ISqlTemplate;
@@ -1641,9 +1642,10 @@ public class ConfigurationService extends AbstractService
     
     @Override
     public void backupDatabase(String filePath) {
-        log.info("Backing up the configuration database to {}", filePath);
-        databasePlatform.getSqlTemplate().update(String.format("BACKUP to '%s'", filePath));
-        log.info("Done backing up the configuration database to {}", filePath);
+        if (DatabaseNamesConstants.H2.equalsIgnoreCase(databasePlatform.getName())) {
+            log.info("Backing up the configuration database to {}", filePath);
+            databasePlatform.getSqlTemplate().update(String.format("BACKUP to '%s'", filePath));
+            log.info("Done backing up the configuration database to {}", filePath);
+        }
     }
-    
 }

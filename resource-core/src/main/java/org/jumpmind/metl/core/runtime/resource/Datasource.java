@@ -103,7 +103,4 @@ public class Datasource extends AbstractResourceRuntime implements IDatasourceRu
         String key = Table.getFullyQualifiedTableName(catalogName, schemaName, tableName);
         return tableCache.get(key);
     }
-
-    
-
 }
