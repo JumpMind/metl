@@ -32,7 +32,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
@@ -139,12 +138,12 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
                                 attribute.getEntity(), inputRow, attribute.getFormatFunction());
                     }
 
-                    csvWriter.write(Objects.toString(object),!trimColumns);
+                    csvWriter.write(object != null ? object.toString() : null,!trimColumns);
                 }
             } else {
                 Collection<Object> values = inputRow.values();
                 for (Object object : values) {
-                    csvWriter.write(Objects.toString(object), !trimColumns);
+                    csvWriter.write(object != null ? object.toString() : null, !trimColumns);
                 }
 
             }

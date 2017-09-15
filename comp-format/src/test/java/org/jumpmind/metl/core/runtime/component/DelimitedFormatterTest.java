@@ -69,7 +69,7 @@ public class DelimitedFormatterTest {
         assertEquals(1, msgTarget.getPayloadList().size());
         ArrayList<EntityData> payload = msgTarget.getPayloadList().get(0);
         assertEquals(1,payload.size());
-        assertEquals("tt1col2_value|tt1col1_value|tt2col2_value|tt2col3_value|tt1col3_value|tt2col1_value", payload.get(0));
+        assertEquals("tt1col2_value|tt1col1_value|tt2col2_value||tt1col3_value|tt2col1_value", payload.get(0));
     }
 
     private static Message createInboundMessage() {
@@ -82,7 +82,8 @@ public class DelimitedFormatterTest {
         entityData.put("tt1col3", "tt1col3_value");
         entityData.put("tt2col1", "tt2col1_value");
         entityData.put("tt2col2", "tt2col2_value");
-        entityData.put("tt2col3", "tt2col3_value");
+//        entityData.put("tt2col3", "tt2col3_value");
+        entityData.put("tt2col3", null);
         
         inboundPayload.add(entityData);
         message.setPayload(inboundPayload);
