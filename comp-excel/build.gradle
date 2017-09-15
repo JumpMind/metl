@@ -1,6 +1,6 @@
 apply from: '../metl-assemble/common.gradle'
 
-version = '2.0.10.' + pluginBuildNumber
+version = '2.0.11.' + pluginBuildNumber
 
 dependencies {
     provided project(':metl-ui')   
