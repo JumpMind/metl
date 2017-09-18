@@ -552,7 +552,7 @@
     
     <table name="notification" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
-        <column name="level" type="VARCHAR" size="64" required="true" description="" />
+        <column name="notification_level" type="VARCHAR" size="64" required="true" description="" />
         <column name="link_id" type="CHAR" size="36" required="false" description="A unique identifier" />
         <column name="name" type="VARCHAR" size="255" required="true" description="" />
         <column name="notify_type" type="VARCHAR" size="64" required="true" description="" />

@@ -170,16 +170,16 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
         });
         form.addComponent(enableField);
         
-        if (notification.getLevel() == null) {
+        if (notification.getNotificationLevel() == null) {
             isInit = true;
             levelField.setValue(Notification.Level.GLOBAL.toString());
-            notification.setLevel(Notification.Level.GLOBAL.toString());
+            notification.setNotificationLevel(Notification.Level.GLOBAL.toString());
             notification.setNotifyType(Notification.NotifyType.MAIL.toString());
             updateLinks();
             updateEventTypes();
             updateName();
         } else {
-            levelField.setValue(notification.getLevel());
+            levelField.setValue(notification.getNotificationLevel());
             updateLinks();
             updateEventTypes();
             linkField.setValue(notification.getLinkId());
@@ -195,7 +195,7 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
     @Override
     public boolean closing() {
         if (isChanged) {
-            String level = notification.getLevel();
+            String level = notification.getNotificationLevel();
             if (level.equals(Notification.Level.GLOBAL.toString())) {
                 for (Agent agent : context.getOperationsSerivce().findAgents()) {
                     refreshAgent(agent);
@@ -299,7 +299,7 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
         public void valueChange(ValueChangeEvent event) {
             boolean oldAutoSave = autoSave;
             autoSave = false;
-            notification.setLevel((String) levelField.getValue());
+            notification.setNotificationLevel((String) levelField.getValue());
             updateEventTypes();
             updateLinks();
             autoSave = oldAutoSave;

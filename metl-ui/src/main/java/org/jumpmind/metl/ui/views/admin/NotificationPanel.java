@@ -95,7 +95,7 @@ public class NotificationPanel extends VerticalLayout implements IUiPanel, TextC
         table.setMultiSelect(true);
 
         table.setContainerDataSource(container);
-        table.setVisibleColumns("level", "name", "notifyType", "eventType", "enabled");
+        table.setVisibleColumns("notificationLevel", "name", "notifyType", "eventType", "enabled");
         table.setColumnHeaders("Level", "Name", "Notify Type", "Event Type", "Enabled");
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());
@@ -133,7 +133,7 @@ public class NotificationPanel extends VerticalLayout implements IUiPanel, TextC
         } else {
             String filter = filterField.getValue().toUpperCase();
             for (Notification notification : context.getOperationsSerivce().findNotifications()) {
-                if (notification.getLevel().indexOf(filter) != -1 || notification.getName().indexOf(filter) != -1 ||
+                if (notification.getNotificationLevel().indexOf(filter) != -1 || notification.getName().indexOf(filter) != -1 ||
                     notification.getEventType().indexOf(filter) != -1) {
                     container.addItem(notification);
                 }

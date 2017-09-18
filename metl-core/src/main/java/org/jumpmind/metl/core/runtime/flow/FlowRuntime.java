@@ -494,7 +494,7 @@ public class FlowRuntime {
                 for (Notification notification : notifications) {
                     if (notification.getEventType().equals(eventType.toString())) {
                         log.info("Sending notification '" + notification.getName() + "' of level '"
-                                + notification.getLevel() + "' and type '"
+                                + notification.getNotificationLevel() + "' and type '"
                                 + notification.getNotifyType() + "'");
                         transport = mailSession.getTransport();
                         MimeMessage message = new MimeMessage(mailSession.getSession());

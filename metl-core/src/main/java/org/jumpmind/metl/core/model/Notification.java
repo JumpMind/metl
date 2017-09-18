@@ -42,7 +42,7 @@ public class Notification extends AbstractNamedObject {
 
     static final EventType[] GLOBAL_EVENT_TYPES = { EventType.FLOW_START, EventType.FLOW_END, EventType.FLOW_ERROR };
     
-    String level;
+    String notificationLevel;
     
     String linkId;
 
@@ -82,12 +82,12 @@ public class Notification extends AbstractNamedObject {
         return name;
     }
 
-    public String getLevel() {
-        return level;
+    public String getNotificationLevel() {
+        return notificationLevel;
     }
 
-    public void setLevel(String level) {
-        this.level = level;
+    public void setNotificationLevel(String level) {
+        this.notificationLevel = level;
     }
 
     public String getNotifyType() {
