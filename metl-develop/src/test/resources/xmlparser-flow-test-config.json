@@ -4,7 +4,7 @@
     "tableName" : "METL_RELEASE_PACKAGE",
     "tableData" : { }
   }, {
-    "tableName" : "METL_RELEASE_PACKAGE_PROJECT_VERSION",
+    "tableName" : "METL_RPPV",
     "tableData" : { }
   } ],
   "projectVersionData" : [ {
@@ -87,7 +87,7 @@
 	      }
 	    }
 	  }, {
-	    "tableName" : "METL_MODEL_ATTRIBUTE",
+	    "tableName" : "METL_MODEL_ATTRIB",
 	    "tableData" : {
 	      "42a60007-552a-4500-b102-06125afd4fbc" : {
 	        "ID" : "42a60007-552a-4500-b102-06125afd4fbc",
@@ -505,7 +505,7 @@
 	      }
 	    }
 	  }, {
-	    "tableName" : "METL_COMPONENT_ATTRIBUTE_SETTING",
+	    "tableName" : "METL_COMPONENT_ATTRIB_SETTING",
 	    "tableData" : {
 	      "d109bc1e-5a21-43e1-b442-ae8bf571694e" : {
 	        "ID" : "d109bc1e-5a21-43e1-b442-ae8bf571694e",

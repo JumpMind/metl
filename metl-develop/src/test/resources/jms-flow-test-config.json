@@ -4,7 +4,7 @@
     "tableName" : "METL_RELEASE_PACKAGE",
     "tableData" : { }
   }, {
-    "tableName" : "METL_RELEASE_PACKAGE_PROJECT_VERSION",
+    "tableName" : "METL_RPPV",
     "tableData" : { }
   } ],
   "projectVersionData" : [ {
@@ -35,7 +35,7 @@
 	      }
 	    }
 	  }, {
-	    "tableName" : "METL_PROJECT_VERSION_DEFINITION_PLUGIN",
+	    "tableName" : "METL_PROJECT_VERSION_PLUGIN",
 	    "tableData" : {
 	      "ae4ae3cd-165a-4134-9b5e-797ca72ffcb7null" : {
 	        "PROJECT_VERSION_ID" : "ae4ae3cd-165a-4134-9b5e-797ca72ffcb7",
@@ -51,7 +51,7 @@
 	      }
 	    }
 	  }, {
-	    "tableName" : "METL_PROJECT_VERSION_DEPENDENCY",
+	    "tableName" : "METL_PROJECT_VERSION_DEPENDS",
 	    "tableData" : { }
 	  } ],
 	  "resourceData" : [ {
@@ -260,7 +260,7 @@
 	    "tableName" : "METL_MODEL_ENTITY",
 	    "tableData" : { }
 	  }, {
-	    "tableName" : "METL_MODEL_ATTRIBUTE",
+	    "tableName" : "METL_MODEL_ATTRIB",
 	    "tableData" : { }
 	  } ],
 	  "flowData" : [ {
@@ -614,7 +614,7 @@
 	    "tableName" : "METL_COMPONENT_ENTITY_SETTING",
 	    "tableData" : { }
 	  }, {
-	    "tableName" : "METL_COMPONENT_ATTRIBUTE_SETTING",
+	    "tableName" : "METL_COMPONENT_ATTRIB_SETTING",
 	    "tableData" : { }
 	  }, {
 	    "tableName" : "METL_FLOW",
