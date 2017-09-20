@@ -40,7 +40,7 @@ public class EntityRow implements Serializable {
     public EntityData toEntityData(Model model) {
         EntityData entityData = null;
         for (ModelEntity entity : model.getModelEntities()) {
-            for (ModelAttribute attribute : entity.getModelAttributes()) {
+            for (ModelAttrib attribute : entity.getModelAttributes()) {
                 if (name.equals(entity.getName())  && data.containsKey(attribute.getName())) {
                     if (entityData == null) {
                         entityData = new EntityData();

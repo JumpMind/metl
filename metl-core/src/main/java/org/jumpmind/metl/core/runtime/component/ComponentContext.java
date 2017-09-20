@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentDeploy;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.runtime.IExecutionTracker;
@@ -33,7 +33,7 @@ import org.jumpmind.util.LinkedCaseInsensitiveMap;
 
 public class ComponentContext {
 
-    AgentDeployment deployment;
+    AgentDeploy deployment;
 
     FlowStep flowStep;
 
@@ -57,7 +57,7 @@ public class ComponentContext {
     
     static public final ThreadLocal<String> projectVersionId = new ThreadLocal<>();
 
-    public ComponentContext(AgentDeployment deployment, FlowStep flowStep, Flow manipulatedFlow, IExecutionTracker executionTracker,
+    public ComponentContext(AgentDeploy deployment, FlowStep flowStep, Flow manipulatedFlow, IExecutionTracker executionTracker,
             Map<String, IResourceRuntime> deployedResources, Map<String, String> flowParameters, Map<String, String> globalSettings) {
         this.deployment = deployment;
         this.flowStep = flowStep;
@@ -77,7 +77,7 @@ public class ComponentContext {
         this.context = context;
     }
     
-    public AgentDeployment getDeployment() {
+    public AgentDeploy getDeployment() {
         return deployment;
     }
 

@@ -44,7 +44,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
 import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentDeploy;
 import org.jumpmind.metl.core.model.DeploymentStatus;
 import org.jumpmind.metl.core.model.Execution;
 import org.jumpmind.metl.core.model.ExecutionStatus;
@@ -226,8 +226,8 @@ public class ExecutionApi {
             }
             swagger.addTag(tag);            
 
-            List<AgentDeployment> deployments = agent.getAgentDeployments();
-            for (AgentDeployment agentDeployment : deployments) {
+            List<AgentDeploy> deployments = agent.getAgentDeployments();
+            for (AgentDeploy agentDeployment : deployments) {
                 FlowName flow = configurationService.findFlowName(agentDeployment.getFlowId());
                 if (flow.isWebService()) {
                     List<HttpRequestMapping> mappings = requestRegistry.getHttpRequestMappingsFor(agentDeployment);
@@ -343,7 +343,7 @@ public class ExecutionApi {
                 String headerName = headerNames.nextElement();
                 params.put(headerName, request.getHeader(headerName));
             }
-            AgentDeployment deployment = mapping.getDeployment();
+            AgentDeploy deployment = mapping.getDeployment();
             AgentRuntime agentRuntime = agentManager.getAgentRuntime(deployment.getAgentId());
             FlowRuntime flowRuntime = agentRuntime.createFlowRuntime(whoAreYou(request), deployment, params);
             IHasSecurity security = flowRuntime.getHasSecurity();
@@ -448,8 +448,8 @@ public class ExecutionApi {
         for (Agent agent : agents) {
             if (agent.getName().equals(agentName)) {
                 foundAgent = true;
-                List<AgentDeployment> deployments = agent.getAgentDeployments();
-                for (AgentDeployment agentDeployment : deployments) {
+                List<AgentDeploy> deployments = agent.getAgentDeployments();
+                for (AgentDeploy agentDeployment : deployments) {
                     if (agentDeployment.getName().equals(deploymentName)) {
                         if (versionName != null) {
                             Flow flow = configurationService.findFlow(agentDeployment.getFlowId());

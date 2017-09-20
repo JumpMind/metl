@@ -42,7 +42,7 @@ import org.jdom2.output.XMLOutputter;
 import org.jdom2.xpath.XPathExpression;
 import org.jdom2.xpath.XPathFactory;
 import org.jdom2.xpath.XPathHelper;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.runtime.ControlMessage;
@@ -421,7 +421,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
 
         Map<String, DocElement> attributeLevels = new HashMap<String, DocElement>();
         Map<Element, Namespace> namespaces = removeNamespaces(templateDoc);
-        for (ComponentAttributeSetting compAttributeSetting : getComponent()
+        for (ComponentAttribSetting compAttributeSetting : getComponent()
                 .getAttributeSettings()) {
             if (compAttributeSetting.getName().equals(XML_FORMATTER_XPATH)) {
                 XPathExpression<Object> expression = XPathFactory.instance()

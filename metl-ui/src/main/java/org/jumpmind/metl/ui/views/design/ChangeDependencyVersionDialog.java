@@ -3,7 +3,7 @@ package org.jumpmind.metl.ui.views.design;
 import java.util.List;
 
 import org.jumpmind.metl.core.model.ProjectVersion;
-import org.jumpmind.metl.core.model.ProjectVersionDependency;
+import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
@@ -30,7 +30,7 @@ public class ChangeDependencyVersionDialog extends ResizableWindow  {
     private static final long serialVersionUID = 1L;
     IConfigurationService configService;
     OptionGroup optionGroup;
-    ProjectVersionDependency dependency;
+    ProjectVersionDepends dependency;
     DesignNavigator designNavigator;
 
     public ChangeDependencyVersionDialog(ApplicationContext context, Object selectedElement, DesignNavigator designNavigator) {
@@ -46,7 +46,7 @@ public class ChangeDependencyVersionDialog extends ResizableWindow  {
     }
 
     private void initWindow(Object selectedItem) {
-        dependency = (ProjectVersionDependency) selectedItem;
+        dependency = (ProjectVersionDepends) selectedItem;
         
         setWidth(400.0f, Unit.PIXELS);
         setHeight(600.0f, Unit.PIXELS);

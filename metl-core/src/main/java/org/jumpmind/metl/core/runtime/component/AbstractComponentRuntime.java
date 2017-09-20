@@ -36,7 +36,7 @@ import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.plugin.XMLComponentDefinition;
@@ -279,8 +279,8 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
                 HashMap<String, Object> boundEntity = new HashMap<String, Object>(0);
                 bindings.put(modelEntity.getName(), boundEntity);
                 
-                List<ModelAttribute> attributes = modelEntity.getModelAttributes();
-                for (ModelAttribute modelAttribute : attributes) {
+                List<ModelAttrib> attributes = modelEntity.getModelAttributes();
+                for (ModelAttrib modelAttribute : attributes) {
                     boundEntity.put(modelAttribute.getName(), null);
                 }
             }
@@ -298,7 +298,7 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
         bindings.put("ENTITY_NAMES", entityNameLookup.getEntityNames(entityData));                
         Set<String> attributeIds = entityData.keySet();
         for (String attributeId : attributeIds) {
-            ModelAttribute attribute = model.getAttributeById(attributeId);
+            ModelAttrib attribute = model.getAttributeById(attributeId);
             if (attribute != null) {
                 ModelEntity entity = model.getEntityById(attribute.getEntityId());
                 Object value = entityData.get(attributeId);

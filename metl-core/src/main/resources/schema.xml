@@ -56,7 +56,7 @@
         </foreign-key>
     </table>
     
-    <table name="project_version_dependency" description="">
+    <table name="project_version_depends" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="row_id" type="CHAR" size="36" required="true" description="A unique identifier for this row across different versions" />
         <column name="project_version_id" type="CHAR" size="36" description="A unique identifier for the version this row belongs to" />
@@ -76,7 +76,7 @@
         </index>         
     </table>       
     
-    <table name="project_version_definition_plugin" description="">
+    <table name="project_version_plugin" description="">
         <column name="project_version_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier for the version this row belongs to" />
         <column name="definition_type" type="VARCHAR" size="50" required="true" primaryKey="true" default="COMPONENT" description="" />        
         <column name="definition_type_id" type="VARCHAR" size="50" required="true" primaryKey="true" description="" />        
@@ -151,7 +151,7 @@
         </foreign-key>
     </table>
 
-    <table name="model_attribute" description="">
+    <table name="model_attrib" description="">
         <column name="id" primaryKey="true" required="true" type="CHAR" size="36" />
         <column name="entity_id" type="CHAR" size="36" required="true"  />
         <column name="attribute_order" type="INTEGER" default="0" required="true" />        
@@ -274,7 +274,7 @@
         </foreign-key>
     </table>
 
-    <table name="component_attribute_setting" description="">
+    <table name="component_attrib_setting" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="component_id" type="CHAR" size="36" required="true" description="A unique identifier" />
         <column name="attribute_id" type="CHAR" size="36" required="true" description="A unique identifier" />
@@ -287,7 +287,7 @@
         <foreign-key foreignTable="component" name="fk_cvas_2_cv">
             <reference local="component_id" foreign="id" />
         </foreign-key>
-        <foreign-key foreignTable="model_attribute" name="fk_fvas_2_ma">
+        <foreign-key foreignTable="model_attrib" name="fk_fvas_2_ma">
             <reference local="attribute_id" foreign="id" />
         </foreign-key>
     </table>
@@ -414,7 +414,7 @@
         </foreign-key>
     </table>
 
-    <table name="agent_deployment" description="">
+    <table name="agent_deploy" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
 		<column name="name" type="VARCHAR" size="255" required="true" description="" />
         <column name="agent_id" type="CHAR" size="36" required="true" description="A unique identifier" />
@@ -433,7 +433,7 @@
         </foreign-key>
     </table>
     
-    <table name="agent_flow_deployment_parameter" description="">
+    <table name="agent_flow_deploy_parm" description="">
         <column name="flow_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier referencing a flow parameter" />
         <column name="agent_deployment_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="name" type="VARCHAR" size="255" required="true" primaryKey="true" description="" />
@@ -442,12 +442,12 @@
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
-        <foreign-key foreignTable="agent_deployment" name="fk_afdp_2_ad">
+        <foreign-key foreignTable="agent_deploy" name="fk_afdp_2_ad">
             <reference local="agent_deployment_id" foreign="id" />
         </foreign-key>
     </table>    
         
-    <table name="agent_deployment_parameter" description="">
+    <table name="agent_deploy_parm" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="flow_parameter_id" type="CHAR" size="36" required="true" description="A unique identifier referencing a flow parameter" />
         <column name="agent_deployment_id" type="CHAR" size="36" required="true" description="A unique identifier" />
@@ -457,7 +457,7 @@
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
-        <foreign-key foreignTable="agent_deployment" name="fk_adp_2_ad">
+        <foreign-key foreignTable="agent_deploy" name="fk_adp_2_ad">
             <reference local="agent_deployment_id" foreign="id" />
         </foreign-key>
     </table>    
@@ -622,7 +622,7 @@
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />                
     </table>
     
-	<table name="release_package_project_version" description="">
+	<table name="rppv" description="">
         <column name="release_package_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="project_version_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />

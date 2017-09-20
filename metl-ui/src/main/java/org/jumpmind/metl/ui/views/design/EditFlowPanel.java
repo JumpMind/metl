@@ -27,7 +27,7 @@ import java.util.Set;
 
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentDeploy;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
@@ -458,7 +458,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             agentManager.refresh(myDesignAgent);
         }
 
-        AgentDeployment deployment = myDesignAgent.getAgentDeploymentFor(flow);
+        AgentDeploy deployment = myDesignAgent.getAgentDeploymentFor(flow);
         AgentRuntime runtime = agentManager.getAgentRuntime(myDesignAgent.getId());
         if (deployment != null) {
             runtime.undeploy(deployment);

@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import org.apache.commons.lang.StringUtils;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.ExcelFileReader;
 
@@ -107,9 +107,9 @@ public class EditExcelReaderPanel extends AbstractComponentEditPanel {
     }
 
     protected void saveAttributeSetting(String attributeId, String name, String value) {
-        ComponentAttributeSetting setting = component.getSingleAttributeSetting(attributeId, name);
+        ComponentAttribSetting setting = component.getSingleAttributeSetting(attributeId, name);
         if (setting == null && value != null) {
-            setting = new ComponentAttributeSetting(attributeId, name, value);
+            setting = new ComponentAttribSetting(attributeId, name, value);
             setting.setComponentId(component.getId());
             component.addAttributeSetting(setting);
             context.getConfigurationService().save(setting);
@@ -130,15 +130,15 @@ public class EditExcelReaderPanel extends AbstractComponentEditPanel {
 
         ModelEntity modelEntity;
 
-        ModelAttribute modelAttribute;
+        ModelAttrib modelAttribute;
 
         String excelMapping = "";
 
-        public Record(ModelEntity modelEntity, ModelAttribute modelAttribute) {
+        public Record(ModelEntity modelEntity, ModelAttrib modelAttribute) {
             this.modelEntity = modelEntity;
             this.modelAttribute = modelAttribute;
             if (modelAttribute != null) {
-                ComponentAttributeSetting setting = component.getSingleAttributeSetting(
+                ComponentAttribSetting setting = component.getSingleAttributeSetting(
                         modelAttribute.getId(), ExcelFileReader.SETTING_EXCEL_MAPPING);
                 if (setting != null) {
                     excelMapping = setting.getValue();
@@ -189,7 +189,7 @@ public class EditExcelReaderPanel extends AbstractComponentEditPanel {
             });
 
             for (ModelEntity entity : model.getModelEntities()) {
-                for (ModelAttribute attr : entity.getModelAttributes()) {
+                for (ModelAttrib attr : entity.getModelAttributes()) {
                     container.addItem(new Record(entity, attr));
                 }
             }

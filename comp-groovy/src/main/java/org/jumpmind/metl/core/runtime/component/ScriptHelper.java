@@ -39,7 +39,7 @@ import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -397,20 +397,20 @@ public class ScriptHelper {
     }
 
     /**
-     * Helper method to set an {@link ModelAttribute} in the {@link EntityData}
+     * Helper method to set an {@link ModelAttrib} in the {@link EntityData}
      * object.
      * 
      * @param entityName
      *            The name of the {@link ModelEntity}
      * @param attributeName
-     *            The name of the {@link ModelAttribute}
+     *            The name of the {@link ModelAttrib}
      * @param data
      *            The data object on which to set the attribute
      * @param value
      *            The value of the attribute
      */
     protected void putAttributeValue(String entityName, String attributeName, EntityData data, Object value) {
-        ModelAttribute attribute = flowStep.getComponent().getInputModel().getAttributeByName(entityName, attributeName);
+        ModelAttrib attribute = flowStep.getComponent().getInputModel().getAttributeByName(entityName, attributeName);
         data.put(attribute.getId(), value);
     }
 
@@ -420,7 +420,7 @@ public class ScriptHelper {
      * @param entityName
      *            The name of the {@link ModelEntity}
      * @param attributeName
-     *            The name of the {@link ModelAttribute}
+     *            The name of the {@link ModelAttrib}
      * @param data
      *            The data object on which to set the attribute
      * @return The value of the attribute
@@ -437,7 +437,7 @@ public class ScriptHelper {
      * @param entityName
      *            The name of the {@link ModelEntity}
      * @param attributeName
-     *            The name of the {@link ModelAttribute}
+     *            The name of the {@link ModelAttrib}
      * @return The value of the attribute
      */
     protected Object getAttributeValue(String entityName, String attributeName) {
@@ -451,7 +451,7 @@ public class ScriptHelper {
      * name only.
      * 
      * @param attributeName
-     *            The name of the {@link ModelAttribute}
+     *            The name of the {@link ModelAttrib}
      * @param data
      *            The data object on which to set the attribute
      * @return The value of the attribute
@@ -468,7 +468,7 @@ public class ScriptHelper {
      * @param entityName
      *            The name of the {@link ModelEntity}
      * @param attributeName
-     *            The name of the {@link ModelAttribute}
+     *            The name of the {@link ModelAttrib}
      * @return A list of attribute values
      */
     protected List<Object> getAttributeValues(String entityName, String attributeName) {

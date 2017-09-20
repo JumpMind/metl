@@ -34,10 +34,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.Sorter;
 import org.jumpmind.metl.ui.common.ButtonBar;
@@ -144,7 +144,7 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
 
             for (ModelEntity entity : model.getModelEntities()) {
                 if (isBlank(filter) || entity.getName().toLowerCase().contains(filter)) {
-	                for (ModelAttribute attr : entity.getModelAttributes()) {
+	                for (ModelAttrib attr : entity.getModelAttributes()) {
 	                    RecordFormat recFormat = new RecordFormat(entity, attr);
 	                    if (recFormat.getSortSetting()) {
 	                    	checkedAttributes.add(recFormat);
@@ -251,9 +251,9 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
     }
 
     protected void saveSetting(String attributeId, String name, String value) {
-        ComponentAttributeSetting setting = component.getSingleAttributeSetting(attributeId, name);
+        ComponentAttribSetting setting = component.getSingleAttributeSetting(attributeId, name);
         if (setting == null) {
-            setting = new ComponentAttributeSetting(attributeId, name, value);
+            setting = new ComponentAttribSetting(attributeId, name, value);
             setting.setComponentId(component.getId());
             component.addAttributeSetting(setting);
             context.getConfigurationService().save(setting);
@@ -522,11 +522,11 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
                 private static final long serialVersionUID = 1L;
                 @Override
                 public void valueChange(ValueChangeEvent event) {
-                    ComponentAttributeSetting setting = component.getSingleAttributeSetting(record.getAttributeId(), key);
+                    ComponentAttribSetting setting = component.getSingleAttributeSetting(record.getAttributeId(), key);
 
                     String oldValue = setting == null ? Boolean.FALSE.toString() : setting.getValue();
                     if (setting == null) {
-                        setting = new ComponentAttributeSetting(record.getAttributeId(), component.getId(), key, Boolean.FALSE.toString());
+                        setting = new ComponentAttribSetting(record.getAttributeId(), component.getId(), key, Boolean.FALSE.toString());
                         component.addAttributeSetting(setting);
                     }
                     setting.setValue(checkBox.getValue().toString());
@@ -571,7 +571,7 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
     public class RecordFormat {
         ModelEntity modelEntity;
 
-        ModelAttribute modelAttribute;
+        ModelAttrib modelAttribute;
 
         Map<Object, Field<?>> fields = new HashMap<Object, Field<?>>();
 
@@ -581,12 +581,12 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
 
         int ordinalSetting;
         
-        public RecordFormat(ModelEntity modelEntity, ModelAttribute modelAttribute) {
+        public RecordFormat(ModelEntity modelEntity, ModelAttrib modelAttribute) {
             this.modelEntity = modelEntity;
             this.modelAttribute = modelAttribute;
             
             if (modelAttribute != null) {
-            	ComponentAttributeSetting setting = component.getSingleAttributeSetting(modelAttribute.getId(),
+            	ComponentAttribSetting setting = component.getSingleAttributeSetting(modelAttribute.getId(),
             		Sorter.SORTER_ATTRIBUTE_ORDINAL);
 	            if (setting != null) {
 	                this.ordinalSetting = Integer.parseInt(setting.getValue());

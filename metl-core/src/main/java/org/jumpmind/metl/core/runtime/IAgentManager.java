@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentDeploy;
 import org.jumpmind.metl.core.model.Flow;
 
 public interface IAgentManager {
@@ -37,9 +37,9 @@ public interface IAgentManager {
     
     public AgentRuntime getAgentRuntime(String agentId);
     
-    public void undeploy(AgentDeployment deployment);
+    public void undeploy(AgentDeploy deployment);
     
-    public AgentDeployment deploy(String agentId, Flow flow, Map<String, String> parameters);
+    public AgentDeploy deploy(String agentId, Flow flow, Map<String, String> parameters);
     
     public void start();
     

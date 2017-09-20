@@ -31,7 +31,7 @@ import java.util.Set;
 import javax.annotation.PreDestroy;
 
 import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentDeploy;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
@@ -102,7 +102,7 @@ public class AgentManager implements IAgentManager {
     }
 
     @Override
-    public void undeploy(AgentDeployment agentDeployment) {
+    public void undeploy(AgentDeploy agentDeployment) {
         AgentRuntime engine = getAgentRuntime(agentDeployment.getAgentId());
         if (engine != null) {
             engine.undeploy(agentDeployment);
@@ -110,8 +110,8 @@ public class AgentManager implements IAgentManager {
     }
 
     @Override
-    public AgentDeployment deploy(String agentId, Flow flow, Map<String, String> parameters) {
-        AgentDeployment deployment = null;
+    public AgentDeploy deploy(String agentId, Flow flow, Map<String, String> parameters) {
+        AgentDeploy deployment = null;
         AgentRuntime engine = getAgentRuntime(agentId);
         if (engine != null) {
             deployment = engine.deploy(flow, parameters);

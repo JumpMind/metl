@@ -44,7 +44,7 @@ import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AuditEvent;
 import org.jumpmind.metl.core.model.Component;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.ComponentName;
 import org.jumpmind.metl.core.model.ComponentSetting;
@@ -57,15 +57,15 @@ import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.FolderName;
 import org.jumpmind.metl.core.model.FolderType;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
-import org.jumpmind.metl.core.model.ProjectVersionDefinitionPlugin;
-import org.jumpmind.metl.core.model.ProjectVersionDependency;
+import org.jumpmind.metl.core.model.ProjectVersionPlugin;
+import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.model.ReleasePackage;
-import org.jumpmind.metl.core.model.ReleasePackageProjectVersion;
+import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.ResourceSetting;
@@ -115,12 +115,12 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public List<ProjectVersionDependency> findProjectDependencies(String projectVersionId) {
+    public List<ProjectVersionDepends> findProjectDependencies(String projectVersionId) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("projectVersionId", projectVersionId);
-        List<ProjectVersionDependency> list = find(ProjectVersionDependency.class, params,
-                ProjectVersionDependency.class);
-        for (ProjectVersionDependency projectVersionDependency : list) {
+        List<ProjectVersionDepends> list = find(ProjectVersionDepends.class, params,
+                ProjectVersionDepends.class);
+        for (ProjectVersionDepends projectVersionDependency : list) {
             projectVersionDependency.setTargetProjectVersion(
                     findProjectVersion(projectVersionDependency.getTargetProjectVersionId()));
         }
@@ -128,12 +128,12 @@ public class ConfigurationService extends AbstractService
     }
     
     @Override
-    public List<ProjectVersionDependency> findProjectDependenciesThatTarget(String projectVersionId) {
+    public List<ProjectVersionDepends> findProjectDependenciesThatTarget(String projectVersionId) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("targetProjectVersionId", projectVersionId);
-        List<ProjectVersionDependency> list = find(ProjectVersionDependency.class, params,
-                ProjectVersionDependency.class);
-        for (ProjectVersionDependency projectVersionDependency : list) {
+        List<ProjectVersionDepends> list = find(ProjectVersionDepends.class, params,
+                ProjectVersionDepends.class);
+        for (ProjectVersionDepends projectVersionDependency : list) {
             projectVersionDependency.setTargetProjectVersion(
                     findProjectVersion(projectVersionDependency.getTargetProjectVersionId()));
         }
@@ -269,10 +269,10 @@ public class ConfigurationService extends AbstractService
     }
     
     @Override
-    public List<ProjectVersionDependency> findProjectVersionDependencies() {
-        List<ProjectVersionDependency> objects = find(ProjectVersionDependency.class, new HashMap<>(0));
+    public List<ProjectVersionDepends> findProjectVersionDependencies() {
+        List<ProjectVersionDepends> objects = find(ProjectVersionDepends.class, new HashMap<>(0));
         AbstractObjectNameBasedSorter.sort(objects);
-        for (ProjectVersionDependency projectVersionDependency : objects) {
+        for (ProjectVersionDepends projectVersionDependency : objects) {
             projectVersionDependency.setTargetProjectVersion(
                     findProjectVersion(projectVersionDependency.getTargetProjectVersionId()));
         }
@@ -333,8 +333,8 @@ public class ConfigurationService extends AbstractService
         }
         // Return resources found in dependent projects.
         if (includeDependencies) {
-            List<ProjectVersionDependency> dependencies = findProjectDependencies(projectVersionId);
-            for (ProjectVersionDependency projectVersionDependency : dependencies) {
+            List<ProjectVersionDepends> dependencies = findProjectDependencies(projectVersionId);
+            for (ProjectVersionDepends projectVersionDependency : dependencies) {
                 list.addAll(findResourcesByTypes(projectVersionDependency.getTargetProjectVersionId(), true, types));
             }
         }
@@ -353,11 +353,11 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public List<ProjectVersionDefinitionPlugin> findProjectVersionComponentPlugins(
+    public List<ProjectVersionPlugin> findProjectVersionComponentPlugins(
             String projectVersionId) {
         Map<String, Object> params = new HashMap<>();
         params.put("projectVersionId", projectVersionId);
-        return find(ProjectVersionDefinitionPlugin.class, params);
+        return find(ProjectVersionPlugin.class, params);
     }
 
     @Override
@@ -464,8 +464,8 @@ public class ConfigurationService extends AbstractService
         component.setEntitySettings(entitySettings);
 
         @SuppressWarnings("unchecked")
-        List<ComponentAttributeSetting> attributeSettings = (List<ComponentAttributeSetting>) findSettings(
-                ComponentAttributeSetting.class, new NameValue("componentId", component.getId()));
+        List<ComponentAttribSetting> attributeSettings = (List<ComponentAttribSetting>) findSettings(
+                ComponentAttribSetting.class, new NameValue("componentId", component.getId()));
         component.setAttributeSettings(attributeSettings);
 
         if (readRelations) {
@@ -487,14 +487,14 @@ public class ConfigurationService extends AbstractService
         params.put("modelId", model.getId());
         List<ModelEntity> entities = persistenceManager.find(ModelEntity.class, params, null, null,
                 tableName(ModelEntity.class));
-        List<ModelAttribute> attributes = findAllAttributesForModel(model.getId());
+        List<ModelAttrib> attributes = findAllAttributesForModel(model.getId());
         Map<String, ModelEntity> byModelEntityId = new HashMap<String, ModelEntity>();
         for (ModelEntity entity : entities) {
             byModelEntityId.put(entity.getId(), entity);
             model.getModelEntities().add(entity);
         }
 
-        for (ModelAttribute modelAttribute : attributes) {
+        for (ModelAttrib modelAttribute : attributes) {
             byModelEntityId.get(modelAttribute.getEntityId()).getModelAttributes()
                     .add(modelAttribute);
         }
@@ -690,9 +690,9 @@ public class ConfigurationService extends AbstractService
     public void save(Component component) {
         save((AbstractObject) component);
 
-        List<ComponentAttributeSetting> aSettings = component.getAttributeSettings();
+        List<ComponentAttribSetting> aSettings = component.getAttributeSettings();
         if (aSettings != null) {
-            for (ComponentAttributeSetting componentAttributeSetting : aSettings) {
+            for (ComponentAttribSetting componentAttributeSetting : aSettings) {
                 save(componentAttributeSetting);
             }
         }
@@ -767,7 +767,7 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public void save(ProjectVersionDefinitionPlugin projectVersionComponentPlugin) {
+    public void save(ProjectVersionPlugin projectVersionComponentPlugin) {
         projectVersionComponentPlugin.setLastUpdateTime(new Date());
         persistenceManager.save(projectVersionComponentPlugin, null, null,
                 tableName(projectVersionComponentPlugin.getClass()));
@@ -788,7 +788,7 @@ public class ConfigurationService extends AbstractService
             delete(setting);
         }
 
-        for (ModelAttribute modelAttribute : modelEntity.getModelAttributes()) {
+        for (ModelAttrib modelAttribute : modelEntity.getModelAttributes()) {
             delete(modelAttribute);
         }
 
@@ -796,15 +796,15 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public void delete(ModelAttribute modelAttribute) {
-        List<ComponentAttributeSetting> attributeSettings = persistenceManager.find(
-                ComponentAttributeSetting.class,
+    public void delete(ModelAttrib modelAttribute) {
+        List<ComponentAttribSetting> attributeSettings = persistenceManager.find(
+                ComponentAttribSetting.class,
                 new NameValue("attributeId", modelAttribute.getId()), null, null,
-                tableName(ComponentAttributeSetting.class));
-        for (ComponentAttributeSetting setting : attributeSettings) {
+                tableName(ComponentAttribSetting.class));
+        for (ComponentAttribSetting setting : attributeSettings) {
             delete(setting);
         }
-        persistenceManager.delete(modelAttribute, null, null, tableName(ModelAttribute.class));
+        persistenceManager.delete(modelAttribute, null, null, tableName(ModelAttrib.class));
     }
 
     @Override
@@ -829,7 +829,7 @@ public class ConfigurationService extends AbstractService
     @Override
     public void save(ModelEntity modelEntity) {
         save((AbstractObject) modelEntity);
-        for (ModelAttribute modelAttribute : modelEntity.getModelAttributes()) {
+        for (ModelAttrib modelAttribute : modelEntity.getModelAttributes()) {
             save(modelAttribute);
         }
     }
@@ -858,9 +858,9 @@ public class ConfigurationService extends AbstractService
         newVersion.setOrigVersionId(original.getId());
         save(newVersion);
 
-        List<ProjectVersionDependency> dependencies = findProjectDependencies(original.getId());
-        for (ProjectVersionDependency origProjectVersionDependency : dependencies) {
-            ProjectVersionDependency newDependency = copyWithNewUUID(oldToNewUUIDMapping,
+        List<ProjectVersionDepends> dependencies = findProjectDependencies(original.getId());
+        for (ProjectVersionDepends origProjectVersionDependency : dependencies) {
+            ProjectVersionDepends newDependency = copyWithNewUUID(oldToNewUUIDMapping,
                     origProjectVersionDependency);
             newDependency.setProjectVersionId(newVersion.getId());
             save(newDependency);
@@ -894,9 +894,9 @@ public class ConfigurationService extends AbstractService
             save(newFlow);
         }
 
-        List<ProjectVersionDefinitionPlugin> projectVersionComponentPlugins = findProjectVersionComponentPlugins(
+        List<ProjectVersionPlugin> projectVersionComponentPlugins = findProjectVersionComponentPlugins(
                 original.getId());
-        for (ProjectVersionDefinitionPlugin projectVersionComponentPlugin : projectVersionComponentPlugins) {
+        for (ProjectVersionPlugin projectVersionComponentPlugin : projectVersionComponentPlugins) {
             projectVersionComponentPlugin.setProjectVersionId(newVersion.getId());
             save(projectVersionComponentPlugin);
         }
@@ -952,7 +952,7 @@ public class ConfigurationService extends AbstractService
              * project version because the model attributes will have been
              * copied as well
              */
-            for (ComponentAttributeSetting setting : flowStep.getComponent()
+            for (ComponentAttribSetting setting : flowStep.getComponent()
                     .getAttributeSettings()) {
                 AbstractObject obj = oldToNewUUIDMapping.get(setting.getAttributeId());
                 if (obj != null) {
@@ -1016,8 +1016,8 @@ public class ConfigurationService extends AbstractService
             oldToNewUUIDMapping.put(originalModelEntity.getId(), newModelEntity);
             newModelEntity.setModelId(newModel.getId());
             newModelEntity.setModelAttributes(new ArrayList<>());
-            for (ModelAttribute originalAttribute : originalModelEntity.getModelAttributes()) {
-                ModelAttribute newAttribute = copyWithNewUUID(oldToNewUUIDMapping,
+            for (ModelAttrib originalAttribute : originalModelEntity.getModelAttributes()) {
+                ModelAttrib newAttribute = copyWithNewUUID(oldToNewUUIDMapping,
                         originalAttribute);
                 newAttribute.setEntityId(newModelEntity.getId());
                 newModelEntity.addModelAttribute(newAttribute);
@@ -1026,8 +1026,8 @@ public class ConfigurationService extends AbstractService
         }
 
         for (ModelEntity modelEntity : newModel.getModelEntities()) {
-            List<ModelAttribute> attributes = modelEntity.getModelAttributes();
-            for (ModelAttribute modelAttribute : attributes) {
+            List<ModelAttrib> attributes = modelEntity.getModelAttributes();
+            for (ModelAttrib modelAttribute : attributes) {
                 AbstractObject obj = oldToNewUUIDMapping.get(modelAttribute.getTypeEntityId());
                 if (obj != null) {
                     modelAttribute.setTypeEntityId(obj.getId());
@@ -1089,7 +1089,7 @@ public class ConfigurationService extends AbstractService
         }
 
         component.setEntitySettings(new ArrayList<ComponentEntitySetting>());
-        component.setAttributeSettings(new ArrayList<ComponentAttributeSetting>());
+        component.setAttributeSettings(new ArrayList<ComponentAttribSetting>());
         component.setSettings(new ArrayList<Setting>());
 
         for (Setting setting : original.getSettings()) {
@@ -1099,8 +1099,8 @@ public class ConfigurationService extends AbstractService
             component.getSettings().add(cSetting);
         }
 
-        for (ComponentAttributeSetting setting : original.getAttributeSettings()) {
-            setting = (ComponentAttributeSetting) copyWithNewUUID(oldToNewUUIDMapping, setting);
+        for (ComponentAttribSetting setting : original.getAttributeSettings()) {
+            setting = (ComponentAttribSetting) copyWithNewUUID(oldToNewUUIDMapping, setting);
             setting.setComponentId(component.getId());
             component.getAttributeSettings().add(setting);
         }
@@ -1158,13 +1158,13 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public List<ReleasePackageProjectVersion> findReleasePackageProjectVersions(
+    public List<Rppv> findReleasePackageProjectVersions(
             String releasePackageId) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("releasePackageId", releasePackageId);
-        List<ReleasePackageProjectVersion> rppvs = persistenceManager.find(
-                ReleasePackageProjectVersion.class, params, null, null,
-                tableName(ReleasePackageProjectVersion.class));
+        List<Rppv> rppvs = persistenceManager.find(
+                Rppv.class, params, null, null,
+                tableName(Rppv.class));
         return rppvs;
     }
 
@@ -1187,7 +1187,7 @@ public class ConfigurationService extends AbstractService
     @Override
     public boolean isDeployed(Flow flow) {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
-        return template.queryForInt(String.format("select count(*) from %1$s_agent_deployment where flow_id = ? ", tablePrefix),
+        return template.queryForInt(String.format("select count(*) from %1$s_agent_deploy where flow_id = ? ", tablePrefix),
                 flow.getId()) > 0;
     }
 
@@ -1197,14 +1197,14 @@ public class ConfigurationService extends AbstractService
         return template.query(String.format("select v.id from %1$s_project_version v join %1$s_project p on p.id=v.project_id where v.deleted=0 and p.deleted=0", tablePrefix), new StringMapper());
     }
 
-    protected List<ModelAttribute> findAllAttributesForModel(String modelId) {
+    protected List<ModelAttrib> findAllAttributesForModel(String modelId) {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         String sql = String.format(
-                "select * from %1$s_model_attribute where entity_id in (select id from %1$s_model_entity where model_id=?)", tablePrefix);
-        return template.query(sql, new ISqlRowMapper<ModelAttribute>() {
+                "select * from %1$s_model_attrib where entity_id in (select id from %1$s_model_entity where model_id=?)", tablePrefix);
+        return template.query(sql, new ISqlRowMapper<ModelAttrib>() {
             @Override
-            public ModelAttribute mapRow(Row row) {
-                return persistenceManager.map(row, ModelAttribute.class, null, null, tableName(ModelAttribute.class));
+            public ModelAttrib mapRow(Row row) {
+                return persistenceManager.map(row, ModelAttrib.class, null, null, tableName(ModelAttrib.class));
             }
         }, new Object[] { modelId });
     }
@@ -1342,7 +1342,7 @@ public class ConfigurationService extends AbstractService
 
     @Override
     public void deleteReleasePackageProjectVersionsForReleasePackage(String releasePackageId) {
-        final String DELETE_RELEASE_PACKAGE_VERSIONS_FOR_RELEASE_PACKAGE = "delete from %1$s_release_package_project_version " +
+        final String DELETE_RELEASE_PACKAGE_VERSIONS_FOR_RELEASE_PACKAGE = "delete from %1$s_rppv " +
                 "where release_package_id = '%2$s'";
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         template.update(String.format(DELETE_RELEASE_PACKAGE_VERSIONS_FOR_RELEASE_PACKAGE, tablePrefix, releasePackageId));                
@@ -1363,7 +1363,7 @@ public class ConfigurationService extends AbstractService
     }
     
     @Override
-    public void updateProjectVersionDependency(ProjectVersionDependency dependency, String newTargetProjectVersionId) {
+    public void updateProjectVersionDependency(ProjectVersionDepends dependency, String newTargetProjectVersionId) {
         save(new AuditEvent(AuditEvent.EventType.CHANGE_DEPENDENCY_VERSION, 
                 String.format("Project Dependency Changed on %s.  Old Dependency Version %s.  New Dependency Version %s",
                 dependency.getName(),dependency.getTargetProjectVersionId(), newTargetProjectVersionId),AppConstants.SYSTEM_USER));
@@ -1382,12 +1382,12 @@ public class ConfigurationService extends AbstractService
         }
     }
     
-    private void updateProjectDependencyWithNewVersion(ProjectVersionDependency dependency, String newTargetProjectVersionId) {        
+    private void updateProjectDependencyWithNewVersion(ProjectVersionDepends dependency, String newTargetProjectVersionId) {        
         dependency.setTargetProjectVersionId(newTargetProjectVersionId);
         save(dependency);
     }
     
-    private Map<String, String> getOldToNewResourceIdMap(ProjectVersionDependency dependency, String newTargetProjectVersionId) {
+    private Map<String, String> getOldToNewResourceIdMap(ProjectVersionDepends dependency, String newTargetProjectVersionId) {
         Map<String, String> oldToNewResourceIdMap = new HashMap<String, String>();
         final String RESOURCES_USED_FROM_DEPENDENT_PROJECTS = 
                 "select \n" + 
@@ -1400,7 +1400,7 @@ public class ConfigurationService extends AbstractService
                 "   left outer join %1$s_resource cr\n" + 
                 "      on cr.id = c.resource_id\n" + 
                 "      and cr.project_version_id = pv.id\n" + 
-                "   inner join %1$s_project_version_dependency pvd\n" + 
+                "   inner join %1$s_project_version_depends pvd\n" + 
                 "      on pvd.project_version_id = pv.id\n" + 
                 "   inner join %1$s_resource dr\n" + 
                 "      on dr.project_version_id = pvd.target_project_version_id\n" + 
@@ -1424,7 +1424,7 @@ public class ConfigurationService extends AbstractService
                 "   left outer join %1$s_resource r\n" + 
                 "      on r.id = c.resource_id\n" + 
                 "      and r.project_version_id = pv.id\n" + 
-                "   inner join %1$s_project_version_dependency pvd\n" + 
+                "   inner join %1$s_project_version_depends pvd\n" + 
                 "      on pvd.project_version_id = pv.id\n" + 
                 "   inner join %1$s_resource dr\n" + 
                 "      on dr.project_version_id = pvd.target_project_version_id\n" + 
@@ -1446,7 +1446,7 @@ public class ConfigurationService extends AbstractService
         return oldToNewResourceIdMap;
     }
 
-    private Map<String, String> getOldToNewModelIdMap(ProjectVersionDependency dependency, String newTargetProjectVersionId) {
+    private Map<String, String> getOldToNewModelIdMap(ProjectVersionDepends dependency, String newTargetProjectVersionId) {
         Map<String, String> oldToNewModelIdMap = new HashMap<String, String>();
         final String MODELS_USED_FROM_DEPENDENT_PROJECTS =
                 "select \n" + 
@@ -1459,7 +1459,7 @@ public class ConfigurationService extends AbstractService
                 "   left outer join %1$s_model cm\n" + 
                 "      on cm.id = c.input_model_id\n" + 
                 "      and cm.project_version_id = pv.id\n" + 
-                "   inner join %1$s_project_version_dependency pvd\n" + 
+                "   inner join %1$s_project_version_depends pvd\n" + 
                 "      on pvd.project_version_id = pv.id\n" + 
                 "   inner join %1$s_model dm\n" + 
                 "      on dm.project_version_id = pvd.target_project_version_id\n" + 
@@ -1481,7 +1481,7 @@ public class ConfigurationService extends AbstractService
                 "   left outer join %1$s_model cm\n" + 
                 "      on cm.id = c.output_model_id\n" + 
                 "      and cm.project_version_id = pv.id\n" + 
-                "   inner join %1$s_project_version_dependency pvd\n" + 
+                "   inner join %1$s_project_version_depends pvd\n" + 
                 "      on pvd.project_version_id = pv.id\n" + 
                 "   inner join %1$s_model dm\n" + 
                 "      on dm.project_version_id = pvd.target_project_version_id\n" + 
@@ -1531,8 +1531,8 @@ public class ConfigurationService extends AbstractService
                 "   oma.id as id\n" + 
                 "   ,nma.id as id_1\n" + 
                 "from\n" +
-                "   %1$s_model_attribute oma\n" + 
-                "   left outer join %1$s_model_attribute nma\n" + 
+                "   %1$s_model_attrib oma\n" + 
+                "   left outer join %1$s_model_attrib nma\n" + 
                 "      on oma.name = nma.name\n" + 
                 "where\n" + 
                 "   oma.entity_id = '%2$s'\n" + 
@@ -1627,7 +1627,7 @@ public class ConfigurationService extends AbstractService
     private void updateComponentAttributeSettingsWithNewModels(Component component,
             Map<String, String> oldToNewModelAttributeIdMap) {
 
-        for (ComponentAttributeSetting setting : component.getAttributeSettings()) {
+        for (ComponentAttribSetting setting : component.getAttributeSettings()) {
             String newAttributeId = oldToNewModelAttributeIdMap.get(setting.getAttributeId());
             if (newAttributeId != null) {
                 setting.setAttributeId(newAttributeId);

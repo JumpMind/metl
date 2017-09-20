@@ -20,9 +20,9 @@ import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jumpmind.exception.IoException;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.ContentMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
@@ -128,7 +128,7 @@ public class ExcelFileWriter extends AbstractFileWriter {
         	List<ModelEntity> entities = new ArrayList<>(inputModel.getModelEntities());
             Map<String, AttributeFormat> formats = new HashMap<String, AttributeFormat>();
             for (ModelEntity entity : entities) {
-            	for (ModelAttribute attribute : entity.getModelAttributes()) {
+            	for (ModelAttrib attribute : entity.getModelAttributes()) {
             		AttributeFormat format = formats.get(attribute.getId());
 	                if (format == null) {
                         format = new AttributeFormat(attribute.getId(), entity, attribute);
@@ -246,13 +246,13 @@ public class ExcelFileWriter extends AbstractFileWriter {
     }
     
     private void convertAttributeSettingsToAttributeFormat() {
-        List<ComponentAttributeSetting> attributeSettings = getComponent().getAttributeSettings();
+        List<ComponentAttribSetting> attributeSettings = getComponent().getAttributeSettings();
         Map<String, AttributeFormat> formats = new HashMap<String, AttributeFormat>();
-        for (ComponentAttributeSetting attributeSetting : attributeSettings) {
+        for (ComponentAttribSetting attributeSetting : attributeSettings) {
             AttributeFormat format = formats.get(attributeSetting.getAttributeId());
             if (format == null) {
                 Model inputModel = getComponent().getInputModel();
-                ModelAttribute attribute = inputModel.getAttributeById(attributeSetting.getAttributeId());
+                ModelAttrib attribute = inputModel.getAttributeById(attributeSetting.getAttributeId());
                 if (attribute != null) {
                     ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
                     format = new AttributeFormat(attributeSetting.getAttributeId(), entity, attribute);
@@ -277,11 +277,11 @@ public class ExcelFileWriter extends AbstractFileWriter {
     private class AttributeFormat {
 
         ModelEntity entity;
-        ModelAttribute attribute;
+        ModelAttrib attribute;
         String attributeId;
         int ordinal;
 
-        public AttributeFormat(String attributeId, ModelEntity entity, ModelAttribute attribute) {
+        public AttributeFormat(String attributeId, ModelEntity entity, ModelAttrib attribute) {
             this.attributeId = attributeId;
             this.entity = entity;
             this.attribute = attribute;
@@ -299,7 +299,7 @@ public class ExcelFileWriter extends AbstractFileWriter {
             this.ordinal = ordinal;
         }
 
-        public ModelAttribute getAttribute() {
+        public ModelAttrib getAttribute() {
             return attribute;
         }
 

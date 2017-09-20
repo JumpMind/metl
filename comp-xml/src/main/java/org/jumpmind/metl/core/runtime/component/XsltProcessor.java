@@ -40,7 +40,7 @@ import org.jdom2.output.XMLOutputter;
 import org.jdom2.transform.XSLTransformer;
 import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -134,7 +134,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
             root.addContent(entityElement);
 
             for (EntityData entityData : inputRows) {
-                List<ModelAttribute> attributes = null;
+                List<ModelAttrib> attributes = null;
                 if (outputAllAttributes) {
                     attributes = entity.getModelAttributes();
                 } else {
@@ -146,7 +146,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
                     entityElement.addContent(recordElement);
                 }
 
-                for (ModelAttribute attribute : attributes) {
+                for (ModelAttrib attribute : attributes) {
                     if (attribute != null && attribute.getEntityId().equals(entity.getId())) {
                         Element attributeElement = new Element("attribute");
                         attributeElement.setAttribute("name", attribute.getName());                       
@@ -184,7 +184,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
         Set<ModelEntity> entities = new LinkedHashSet<ModelEntity>();
         for (EntityData entityData : inputRows) {
             for (String attributeId : entityData.keySet()) {
-                ModelAttribute attribute = model.getAttributeById(attributeId);
+                ModelAttrib attribute = model.getAttributeById(attributeId);
                 if (attribute != null) {
                     ModelEntity entity = model.getEntityById(attribute.getEntityId());
                     if (entity != null) {
@@ -196,10 +196,10 @@ public class XsltProcessor extends AbstractComponentRuntime {
         return new ArrayList<ModelEntity>(entities);
     }
 
-    protected static List<ModelAttribute> getModelAttributes(Model model, String entityId, Set<String> attributeIds) {
-        List<ModelAttribute> attributes = new ArrayList<ModelAttribute>();
+    protected static List<ModelAttrib> getModelAttributes(Model model, String entityId, Set<String> attributeIds) {
+        List<ModelAttrib> attributes = new ArrayList<ModelAttrib>();
         for (String attributeId : attributeIds) {
-            ModelAttribute attribute = model.getAttributeById(attributeId);
+            ModelAttrib attribute = model.getAttributeById(attributeId);
             if (attribute != null && attribute.getEntityId().equals(entityId)) {
                 attributes.add(attribute);
             }

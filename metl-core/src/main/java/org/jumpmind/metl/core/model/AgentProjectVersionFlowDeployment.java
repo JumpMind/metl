@@ -7,11 +7,11 @@ import org.jumpmind.metl.core.runtime.LogLevel;
 public class AgentProjectVersionFlowDeployment implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    protected AgentDeployment agentDeployment;
+    protected AgentDeploy agentDeployment;
     protected Flow flow;
     protected ProjectVersion projectVersion;
     
-    public void setAgentDeployment(AgentDeployment agentDeployment) {
+    public void setAgentDeployment(AgentDeploy agentDeployment) {
         this.agentDeployment = agentDeployment;
     }
 
@@ -23,7 +23,7 @@ public class AgentProjectVersionFlowDeployment implements Serializable {
         this.projectVersion = projectVersion;
     }
 
-    public AgentProjectVersionFlowDeployment(AgentDeployment agentDeployment, Flow flow, ProjectVersion projectVersion) {
+    public AgentProjectVersionFlowDeployment(AgentDeploy agentDeployment, Flow flow, ProjectVersion projectVersion) {
         this.agentDeployment = agentDeployment;
         this.flow = flow;
         this.projectVersion = projectVersion;
@@ -32,7 +32,7 @@ public class AgentProjectVersionFlowDeployment implements Serializable {
     public AgentProjectVersionFlowDeployment() {
     }
 
-    public AgentDeployment getAgentDeployment() {
+    public AgentDeploy getAgentDeployment() {
         return agentDeployment;
     }
 

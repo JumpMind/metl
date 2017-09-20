@@ -14,7 +14,7 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
-import org.jumpmind.metl.core.model.ProjectVersionDependency;
+import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.persist.IConfigurationChangedListener;
@@ -31,7 +31,7 @@ public class UICache implements IUICache {
     
     IImportExportService importExportService;
 
-    Map<String, List<ProjectVersionDependency>> dependenciesByProjectVersion;
+    Map<String, List<ProjectVersionDepends>> dependenciesByProjectVersion;
 
     Map<String, String> projectVersionsById;
 
@@ -53,8 +53,8 @@ public class UICache implements IUICache {
         this.importExportService.addConfigurationChangeListener(listener);
     }
 
-    public List<ProjectVersionDependency> findProjectDependencies(String projectVersionId) {
-        List<ProjectVersionDependency> list = dependenciesByProjectVersion.get(projectVersionId);
+    public List<ProjectVersionDepends> findProjectDependencies(String projectVersionId) {
+        List<ProjectVersionDepends> list = dependenciesByProjectVersion.get(projectVersionId);
         if (list == null) {
             list = Collections.synchronizedList(new ArrayList<>());
             dependenciesByProjectVersion.put(projectVersionId, list);
@@ -134,10 +134,10 @@ public class UICache implements IUICache {
         }
         modelsByProjectVersion = Collections.synchronizedMap(modelsByProjectVersionTemp);
 
-        List<ProjectVersionDependency> dependencies = configurationService.findProjectVersionDependencies();
-        Map<String, List<ProjectVersionDependency>> dependenciesByProjectVersionTemp = new HashMap<>();
-        for (ProjectVersionDependency obj : dependencies) {
-            List<ProjectVersionDependency> names = dependenciesByProjectVersionTemp.get(obj.getProjectVersionId());
+        List<ProjectVersionDepends> dependencies = configurationService.findProjectVersionDependencies();
+        Map<String, List<ProjectVersionDepends>> dependenciesByProjectVersionTemp = new HashMap<>();
+        for (ProjectVersionDepends obj : dependencies) {
+            List<ProjectVersionDepends> names = dependenciesByProjectVersionTemp.get(obj.getProjectVersionId());
             if (names == null) {
                 names = Collections.synchronizedList(new ArrayList<>());
                 dependenciesByProjectVersionTemp.put(obj.getProjectVersionId(), names);
@@ -191,9 +191,9 @@ public class UICache implements IUICache {
                 if (names != null) {
                     names.remove(named);
                 }
-            } else if (object instanceof ProjectVersionDependency) {
-                ProjectVersionDependency named = (ProjectVersionDependency) object;
-                List<ProjectVersionDependency> names = dependenciesByProjectVersion.get(named.getProjectVersionId());
+            } else if (object instanceof ProjectVersionDepends) {
+                ProjectVersionDepends named = (ProjectVersionDepends) object;
+                List<ProjectVersionDepends> names = dependenciesByProjectVersion.get(named.getProjectVersionId());
                 if (names != null) {
                     names.remove(named);
                 }
@@ -248,9 +248,9 @@ public class UICache implements IUICache {
                         AbstractObjectNameBasedSorter.sort(names);
                     }
                 }
-            } else if (object instanceof ProjectVersionDependency) {
-                ProjectVersionDependency named = (ProjectVersionDependency) object;
-                List<ProjectVersionDependency> names = dependenciesByProjectVersion.get(named.getProjectVersionId());
+            } else if (object instanceof ProjectVersionDepends) {
+                ProjectVersionDepends named = (ProjectVersionDepends) object;
+                List<ProjectVersionDepends> names = dependenciesByProjectVersion.get(named.getProjectVersionId());
                 if (names != null) {
                     names.remove(named);
                     names.add(named);

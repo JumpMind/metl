@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 
@@ -44,7 +44,7 @@ final public class ComponentUtils {
     public static Object getAttributeValue(Model model, EntityData data, String entityName, String attributeName) {
         ModelEntity modelEntity = model.getEntityByName(entityName);
         if (modelEntity != null) {
-            ModelAttribute attribute = modelEntity.getModelAttributeByName(attributeName);
+            ModelAttrib attribute = modelEntity.getModelAttributeByName(attributeName);
             if (attribute != null) {
                return data.get(attribute.getId());
             }
@@ -55,7 +55,7 @@ final public class ComponentUtils {
     public static void setAttributeValue(Model model, EntityData data, String entityName, String attributeName, Object value) {
         ModelEntity modelEntity = model.getEntityByName(entityName);
         if (modelEntity != null) {
-            ModelAttribute attribute = modelEntity.getModelAttributeByName(attributeName);
+            ModelAttrib attribute = modelEntity.getModelAttributeByName(attributeName);
             if (attribute != null) {
                 data.put(attribute.getId(), value);
             }
@@ -65,8 +65,8 @@ final public class ComponentUtils {
     public static boolean containsEntity(Model model, EntityData data, String entityName) {
         ModelEntity modelEntity = model.getEntityByName(entityName);
         if (modelEntity != null) {
-            List<ModelAttribute> attributes = modelEntity.getModelAttributes();
-            for (ModelAttribute modelAttribute : attributes) {
+            List<ModelAttrib> attributes = modelEntity.getModelAttributes();
+            for (ModelAttrib modelAttribute : attributes) {
                 if (data.containsKey(modelAttribute.getId())) {
                     return true;
                 }
@@ -78,7 +78,7 @@ final public class ComponentUtils {
     public static Object getAttributeValue(Model model, EntityData data, String attributeName) {
         List<ModelEntity> entites = model.getModelEntities();
         for (ModelEntity modelEntity : entites) {
-            ModelAttribute attribute = modelEntity.getModelAttributeByName(attributeName);
+            ModelAttrib attribute = modelEntity.getModelAttributeByName(attributeName);
             if (attribute != null) {
                return data.get(attribute.getId());
             }
@@ -89,7 +89,7 @@ final public class ComponentUtils {
     public static List<Object> getAttributeValues(Model model, List<EntityData> rows, String entityName, String attributeName) {
         List<Object> values = new ArrayList<Object>();
         if (model != null && rows != null) {
-            ModelAttribute attribute = model.getAttributeByName(entityName, attributeName);
+            ModelAttrib attribute = model.getAttributeByName(entityName, attributeName);
             if (attribute != null) {
                 for (EntityData data : rows) {
                     if (data.containsKey(attribute.getId())) {

@@ -2,7 +2,7 @@ package org.jumpmind.metl.core.runtime.web;
 
 import java.io.Serializable;
 
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentDeploy;
 import org.jumpmind.metl.core.runtime.component.SecurityScheme;
 
 public class HttpRequestMapping implements Serializable, Comparable<HttpRequestMapping> {
@@ -13,7 +13,7 @@ public class HttpRequestMapping implements Serializable, Comparable<HttpRequestM
 
     HttpMethod method;
 
-    AgentDeployment deployment;
+    AgentDeploy deployment;
 
     int priority;
     
@@ -45,11 +45,11 @@ public class HttpRequestMapping implements Serializable, Comparable<HttpRequestM
         this.path = path;
     }
 
-    public void setDeployment(AgentDeployment deployment) {
+    public void setDeployment(AgentDeploy deployment) {
         this.deployment = deployment;
     }
 
-    public AgentDeployment getDeployment() {
+    public AgentDeploy getDeployment() {
         return deployment;
     }
 

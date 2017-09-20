@@ -40,7 +40,7 @@ import javax.mail.internet.MimeMessage;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.model.AgentFlowDeploymentParameter;
+import org.jumpmind.metl.core.model.AgentFlowDeployParm;
 import org.jumpmind.metl.core.model.AgentParameter;
 import org.jumpmind.metl.core.model.AgentProjectVersionFlowDeployment;
 import org.jumpmind.metl.core.model.Flow;
@@ -348,8 +348,8 @@ public class FlowRuntime {
             params.put(flowParameter.getName(), flowParameter.getDefaultValue());
         }
         
-        List<AgentFlowDeploymentParameter> deployParameters = agentDeployment.getAgentDeployment()
-                .getAgentDeploymentParameters();
+        List<AgentFlowDeployParm> deployParameters = agentDeployment.getAgentDeployment()
+                .getAgentDeploymentParms();
         List<AgentParameter> agentParameters = agent.getAgentParameters();
         if (agentParameters != null) {
             for (AgentParameter agentParameter : agentParameters) {
@@ -359,7 +359,7 @@ public class FlowRuntime {
             }
         }
         if (deployParameters != null) {
-            for (AgentFlowDeploymentParameter deployParameter : deployParameters) {
+            for (AgentFlowDeployParm deployParameter : deployParameters) {
                 if (isNotBlank(deployParameter.getValue())) {
                     params.put(deployParameter.getName(), deployParameter.getValue());
                 }

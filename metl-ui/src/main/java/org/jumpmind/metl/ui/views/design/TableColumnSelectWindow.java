@@ -32,7 +32,7 @@ import org.jumpmind.db.model.Table;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.DbProvider;
@@ -125,7 +125,7 @@ public class TableColumnSelectWindow extends ResizableWindow {
 
             Column[] columns = table.getColumns();
             for (Column column : columns) {
-                ModelAttribute attribute = new ModelAttribute();
+                ModelAttrib attribute = new ModelAttrib();
                 attribute.setName(column.getName());
                 attribute.setPk(column.isPrimaryKey());
                 try {

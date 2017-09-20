@@ -25,8 +25,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.jumpmind.metl.core.model.Component;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntitySorter;
 import org.jumpmind.metl.core.runtime.component.Mapping;
 import org.jumpmind.metl.ui.common.ApplicationContext;
@@ -87,12 +87,12 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
 	
 	protected void cleanupAttributes(Component c) {
 	    // Look for any broken links.
-	    Iterator<ComponentAttributeSetting> iter = c.getAttributeSettings().iterator();
+	    Iterator<ComponentAttribSetting> iter = c.getAttributeSettings().iterator();
 	    while (iter.hasNext()) {
-	        ComponentAttributeSetting setting = iter.next();
+	        ComponentAttribSetting setting = iter.next();
             if (Mapping.ATTRIBUTE_MAPS_TO.equals(setting.getName())) {
-                ModelAttribute srcAttribute = c.getInputModel().getAttributeById(setting.getAttributeId());
-                ModelAttribute dstAttribute = c.getOutputModel().getAttributeById(setting.getValue());
+                ModelAttrib srcAttribute = c.getInputModel().getAttributeById(setting.getAttributeId());
+                ModelAttrib dstAttribute = c.getOutputModel().getAttributeById(setting.getValue());
                 if (srcAttribute == null || dstAttribute == null) {
                     // Remove link setting if source or target can't be found.
                     iter.remove();
@@ -122,8 +122,8 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
     }
 
     protected void removeConnection(String sourceId, String targetId) {
-    	List<ComponentAttributeSetting> settings = component.getAttributeSetting(sourceId, Mapping.ATTRIBUTE_MAPS_TO);
-    	for (ComponentAttributeSetting setting : settings) {
+    	List<ComponentAttribSetting> settings = component.getAttributeSetting(sourceId, Mapping.ATTRIBUTE_MAPS_TO);
+    	for (ComponentAttribSetting setting : settings) {
     		if (setting.getValue().equals(targetId)) {
         		component.getAttributeSettings().remove(setting);
         		context.getConfigurationService().delete(setting);
@@ -159,7 +159,7 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
                 if (removed) {
                 	removeConnection(sourceId, targetId);
                 } else {
-                	ComponentAttributeSetting setting = new ComponentAttributeSetting();
+                	ComponentAttribSetting setting = new ComponentAttribSetting();
                 	setting.setAttributeId(sourceId);
                 	setting.setComponentId(component.getId());
             		setting.setName(Mapping.ATTRIBUTE_MAPS_TO);

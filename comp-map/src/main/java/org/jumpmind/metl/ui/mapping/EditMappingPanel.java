@@ -22,8 +22,8 @@ package org.jumpmind.metl.ui.mapping;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.Mapping;
 import org.jumpmind.metl.ui.common.ButtonBar;
@@ -161,16 +161,16 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
 
     protected void autoMap(boolean fuzzy) {
         for (ModelEntity entity1 : component.getInputModel().getModelEntities()) {
-            for (ModelAttribute attr : entity1.getModelAttributes()) {
+            for (ModelAttrib attr : entity1.getModelAttributes()) {
                 /* look for exact match first */
                 for (ModelEntity entity2 : component.getOutputModel().getModelEntities()) {
                     boolean foundExactMatch = false;
-                    for (ModelAttribute attr2 : entity2.getModelAttributes()) {
+                    for (ModelAttrib attr2 : entity2.getModelAttributes()) {
                         foundExactMatch |= autoMap(entity1, entity2, attr, attr2, fuzzy, true);
                     }
 
                     if (!foundExactMatch) {
-                        for (ModelAttribute attr2 : entity2.getModelAttributes()) {
+                        for (ModelAttrib attr2 : entity2.getModelAttributes()) {
                             autoMap(entity1, entity2, attr, attr2, fuzzy, false);
                         }
                     }
@@ -181,11 +181,11 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
         }
     }
 
-    protected boolean autoMap(ModelEntity entity1, ModelEntity entity2, ModelAttribute attr, ModelAttribute attr2, boolean fuzzy,
+    protected boolean autoMap(ModelEntity entity1, ModelEntity entity2, ModelAttrib attr, ModelAttrib attr2, boolean fuzzy,
             boolean exact) {
         boolean isMapped = false;
         boolean exactMatch = exact && attr.getName().equalsIgnoreCase(attr2.getName()) && entity1.getName().equals(entity2.getName());
-        for (ComponentAttributeSetting setting : component.getAttributeSettings()) {
+        for (ComponentAttribSetting setting : component.getAttributeSettings()) {
             if (setting.getName().equals(Mapping.ATTRIBUTE_MAPS_TO) && setting.getValue().equals(attr2.getId())) {
                 isMapped = true;
                 break;
@@ -193,7 +193,7 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
         }
         if (!isMapped && ((fuzzy && fuzzyMatches(attr.getName(), attr2.getName()))
                 || ((!exact && attr.getName().equalsIgnoreCase(attr2.getName())) || exactMatch))) {
-            ComponentAttributeSetting setting = new ComponentAttributeSetting();
+            ComponentAttribSetting setting = new ComponentAttribSetting();
             setting.setAttributeId(attr.getId());
             setting.setComponentId(component.getId());
             setting.setName(Mapping.ATTRIBUTE_MAPS_TO);
@@ -243,11 +243,11 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
         table.addContainerProperty("Destination Attribute",  String.class, null);
         
         int itemId = 0;
-        for (ComponentAttributeSetting setting : component.getAttributeSettings()) {
+        for (ComponentAttribSetting setting : component.getAttributeSettings()) {
             if (Mapping.ATTRIBUTE_MAPS_TO.equals(setting.getName())) {
-                ModelAttribute srcAttribute = component.getInputModel().getAttributeById(setting.getAttributeId());
+                ModelAttrib srcAttribute = component.getInputModel().getAttributeById(setting.getAttributeId());
                 ModelEntity srcEntity = component.getInputModel().getEntityById(srcAttribute.getEntityId());
-                ModelAttribute dstAttribute = component.getOutputModel().getAttributeById(setting.getValue());
+                ModelAttrib dstAttribute = component.getOutputModel().getAttributeById(setting.getValue());
                 ModelEntity dstEntity = component.getOutputModel().getEntityById(dstAttribute.getEntityId());
                 
                 table.addItem(new Object[]{srcEntity.getName(), srcAttribute.getName(), dstEntity.getName(), dstAttribute.getName()}, itemId++);

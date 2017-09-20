@@ -25,8 +25,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.jumpmind.metl.core.model.AgentDeployment;
-import org.jumpmind.metl.core.model.AgentFlowDeploymentParameter;
+import org.jumpmind.metl.core.model.AgentDeploy;
+import org.jumpmind.metl.core.model.AgentFlowDeployParm;
 import org.jumpmind.metl.core.model.DeploymentStatus;
 import org.jumpmind.metl.core.model.StartType;
 import org.jumpmind.metl.core.runtime.LogLevel;
@@ -56,7 +56,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
 
     ApplicationContext context;
     
-    AgentDeployment agentDeployment;
+    AgentDeploy agentDeployment;
 
     Table table;
 
@@ -70,7 +70,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
     
     TabbedPanel tabbedPanel;
         
-    public EditAgentDeploymentPanel(ApplicationContext context, AgentDeployment agentDeployment, IAgentDeploymentChangeListener listener, 
+    public EditAgentDeploymentPanel(ApplicationContext context, AgentDeploy agentDeployment, IAgentDeploymentChangeListener listener, 
             TabbedPanel tabbedPanel) {
         this.context = context;
         this.agentDeployment = agentDeployment;
@@ -106,7 +106,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
 
         table = new Table();
         table.setSizeFull();
-        BeanItemContainer<AgentFlowDeploymentParameter> container = new BeanItemContainer<AgentFlowDeploymentParameter>(AgentFlowDeploymentParameter.class);
+        BeanItemContainer<AgentFlowDeployParm> container = new BeanItemContainer<AgentFlowDeployParm>(AgentFlowDeployParm.class);
         table.setContainerDataSource(container);
         table.setEditable(true);
         table.setSelectable(true);
@@ -114,7 +114,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         table.setVisibleColumns("name", "value");
         table.setColumnHeaders("Parameter Name", "Value");
 
-        container.addAll(agentDeployment.getAgentDeploymentParameters());
+        container.addAll(agentDeployment.getAgentDeploymentParms());
 
         setSplitPosition(60f);
         setFirstComponent(vlay);
@@ -125,7 +125,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
     
     @Override
     public boolean closing() {
-        AgentDeployment deployment = context.getOperationsSerivce().findAgentDeployment(agentDeployment.getId());
+        AgentDeploy deployment = context.getOperationsSerivce().findAgentDeployment(agentDeployment.getId());
         if (deployment.getStatus().equals(DeploymentStatus.ENABLED.name())) {
             deployment.setStatus(DeploymentStatus.REQUEST_REENABLE.name());
             context.getConfigurationService().save(deployment);
@@ -141,7 +141,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
     public void selected() {
     }
 
-    protected void saveAgentDeployment(AgentDeployment agentDeployment) {
+    protected void saveAgentDeployment(AgentDeploy agentDeployment) {
         context.getConfigurationService().save(agentDeployment);
         listener.changed(agentDeployment);
     }
@@ -346,7 +346,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         public Field<?> createField(final Container dataContainer, final Object itemId,
                 final Object propertyId, com.vaadin.ui.Component uiContext) {
             if (propertyId.equals("value")) {
-                final AgentFlowDeploymentParameter parameter = (AgentFlowDeploymentParameter) itemId;
+                final AgentFlowDeployParm parameter = (AgentFlowDeployParm) itemId;
                 final TextField textField = new ImmediateUpdateTextField(null) {
                     protected void save(String text) {
                         parameter.setValue(text);

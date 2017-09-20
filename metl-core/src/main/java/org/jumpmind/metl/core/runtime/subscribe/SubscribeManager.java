@@ -36,7 +36,7 @@ import javax.jms.ObjectMessage;
 import javax.jms.TextMessage;
 
 import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentDeploy;
 import org.jumpmind.metl.core.model.AgentProjectVersionFlowDeployment;
 import org.jumpmind.metl.core.model.Execution;
 import org.jumpmind.metl.core.model.ExecutionStatus;
@@ -55,7 +55,7 @@ public class SubscribeManager implements ISubscribeManager {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
-    Map<AgentDeployment, Subscription> mappingsByAgentDeployment = new HashMap<>();
+    Map<AgentDeploy, Subscription> mappingsByAgentDeployment = new HashMap<>();
 
     @Resource
     IAgentManager agentManager;
@@ -159,7 +159,7 @@ public class SubscribeManager implements ISubscribeManager {
             try {
                 log.info("Received a message: " + ((TextMessage) message).getText());
                 AgentRuntime agentRuntime = agentManager.getAgentRuntime(agent.getId());
-                AgentDeployment agentDeployment = agentProjectVersionFlowDeployment.getAgentDeployment();
+                AgentDeploy agentDeployment = agentProjectVersionFlowDeployment.getAgentDeployment();
                 Map<String, String> params = new HashMap<>();
                 params.put(REQUEST_VALUE_PARAMETER, getPayload(message, null));
                 String executionId = agentRuntime.scheduleNow(agentDeployment.getId(), agentDeployment, params);

@@ -25,7 +25,7 @@ import java.util.List;
 
 import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.model.ProjectVersion;
-import org.jumpmind.metl.core.model.ProjectVersionDefinitionPlugin;
+import org.jumpmind.metl.core.model.ProjectVersionPlugin;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
@@ -71,7 +71,7 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
 
     Grid componentPluginsGrid;
 
-    BeanItemContainer<ProjectVersionDefinitionPlugin> componentPluginsGridContainer;
+    BeanItemContainer<ProjectVersionPlugin> componentPluginsGridContainer;
     
     Button updateButton;
     
@@ -132,7 +132,7 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
                 .setEditable(false).setRenderer(new HtmlRenderer());
         componentPluginsGrid.addSelectionListener((event) -> setButtonsEnabled());
         
-        componentPluginsGridContainer = new BeanItemContainer<>(ProjectVersionDefinitionPlugin.class);
+        componentPluginsGridContainer = new BeanItemContainer<>(ProjectVersionPlugin.class);
         GeneratedPropertyContainer gpcontainer =
                 new GeneratedPropertyContainer(componentPluginsGridContainer);
         gpcontainer.addGeneratedProperty("pluginId",
@@ -142,7 +142,7 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
                 @Override
                 public String getValue(Item item, Object itemId,
                                         Object propertyId) {
-                    ProjectVersionDefinitionPlugin plugin = (ProjectVersionDefinitionPlugin)itemId;
+                    ProjectVersionPlugin plugin = (ProjectVersionPlugin)itemId;
                     return String.format("%s:%s", plugin.getArtifactGroup(), plugin.getArtifactName());
                 }
 
@@ -158,7 +158,7 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
                 @Override
                 public String getValue(Item item, Object itemId,
                                         Object propertyId) {
-                    ProjectVersionDefinitionPlugin plugin = (ProjectVersionDefinitionPlugin)itemId;
+                    ProjectVersionPlugin plugin = (ProjectVersionPlugin)itemId;
                     return !plugin.getArtifactVersion().equals(plugin.getLatestArtifactVersion()) ? "<span class='warn' title='Updates Available'>" + FontAwesome.WARNING.getHtml() + "</span>" : "";
                 }
 
@@ -170,7 +170,7 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
         componentPluginsGrid.setContainerDataSource(gpcontainer);
         
         componentPluginsGrid.getEditorFieldGroup().addCommitHandler(new PostCommitHandler(() -> {
-            ProjectVersionDefinitionPlugin item = (ProjectVersionDefinitionPlugin) componentPluginsGrid.getEditedItemId();
+            ProjectVersionPlugin item = (ProjectVersionPlugin) componentPluginsGrid.getEditedItemId();
             IConfigurationService configurationService = context.getConfigurationService();
             configurationService.save(item);
             componentPluginsGrid.markAsDirty();
@@ -211,7 +211,7 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
         Collection<Object> selectedRows = componentPluginsGrid.getSelectedRows();
         boolean updatesAvailable = false;
         for (Object object : selectedRows) {
-            ProjectVersionDefinitionPlugin plugin = (ProjectVersionDefinitionPlugin)object;
+            ProjectVersionPlugin plugin = (ProjectVersionPlugin)object;
             updatesAvailable |= plugin.isUpdateAvailable();
         }
         boolean selected = selectedRows.size() > 0 && !readOnly;
@@ -227,7 +227,7 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
     protected void update() {
         Collection<Object> selectedRows = componentPluginsGrid.getSelectedRows();
         for (Object object : selectedRows) {
-            ProjectVersionDefinitionPlugin plugin = (ProjectVersionDefinitionPlugin)object;
+            ProjectVersionPlugin plugin = (ProjectVersionPlugin)object;
             if (plugin.isUpdateAvailable()) {
                 plugin.setArtifactVersion(plugin.getLatestArtifactVersion());
                 context.getConfigurationService().save(plugin);
@@ -241,7 +241,7 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
     protected void pin(boolean value) {
         Collection<Object> selectedRows = componentPluginsGrid.getSelectedRows();
         for (Object object : selectedRows) {
-            ProjectVersionDefinitionPlugin plugin = (ProjectVersionDefinitionPlugin)object;
+            ProjectVersionPlugin plugin = (ProjectVersionPlugin)object;
             plugin.setPinVersion(value);
             context.getConfigurationService().save(plugin);
         }        
@@ -250,7 +250,7 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
     
     protected void populateContainer() {
         IConfigurationService configurationService = context.getConfigurationService();
-        List<ProjectVersionDefinitionPlugin> plugins = configurationService.findProjectVersionComponentPlugins(projectVersion.getId());
+        List<ProjectVersionPlugin> plugins = configurationService.findProjectVersionComponentPlugins(projectVersion.getId());
         componentPluginsGridContainer.removeAllItems();
         componentPluginsGridContainer.addAll(plugins);
         componentPluginsGrid.setHeightByRows(componentPluginsGridContainer.size() > 0 ? componentPluginsGridContainer.size() : 1);

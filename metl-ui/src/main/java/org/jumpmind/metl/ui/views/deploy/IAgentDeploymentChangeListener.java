@@ -20,10 +20,10 @@
  */
 package org.jumpmind.metl.ui.views.deploy;
 
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentDeploy;
 
 public interface IAgentDeploymentChangeListener {
 
-    public void changed(AgentDeployment agentDeployment);
+    public void changed(AgentDeploy agentDeployment);
 
 }

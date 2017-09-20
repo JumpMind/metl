@@ -33,10 +33,10 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaders;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.component.XPathXmlParser;
@@ -160,7 +160,7 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
             for (ModelEntity entity : model.getModelEntities()) {
                 boolean firstAttribute = true;
                 Record entityRecord = new Record(entity, null);
-                for (ModelAttribute attr : entity.getModelAttributes()) {
+                for (ModelAttrib attr : entity.getModelAttributes()) {
                     if (firstAttribute) {
                         firstAttribute = false;
                         container.addItem(entityRecord);
@@ -222,9 +222,9 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
     }
 
     protected void saveAttributeSetting(String attributeId, String name, String value) {
-        ComponentAttributeSetting setting = component.getSingleAttributeSetting(attributeId, name);
+        ComponentAttribSetting setting = component.getSingleAttributeSetting(attributeId, name);
         if (setting == null && value != null) {
-            setting = new ComponentAttributeSetting(attributeId, name, value);
+            setting = new ComponentAttribSetting(attributeId, name, value);
             setting.setComponentId(component.getId());
             component.addAttributeSetting(setting);
             context.getConfigurationService().save(setting);
@@ -365,15 +365,15 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
 
         ModelEntity modelEntity;
 
-        ModelAttribute modelAttribute;
+        ModelAttrib modelAttribute;
 
         String xpath = "";
 
-        public Record(ModelEntity modelEntity, ModelAttribute modelAttribute) {
+        public Record(ModelEntity modelEntity, ModelAttrib modelAttribute) {
             this.modelEntity = modelEntity;
             this.modelAttribute = modelAttribute;
             if (modelAttribute != null) {
-                ComponentAttributeSetting setting = component.getSingleAttributeSetting(
+                ComponentAttribSetting setting = component.getSingleAttributeSetting(
                         modelAttribute.getId(), XmlFormatter.XML_FORMATTER_XPATH);
                 if (setting != null) {
                     xpath = setting.getValue();

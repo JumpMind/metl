@@ -61,7 +61,7 @@ import org.eclipse.aether.version.Version;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
-import org.jumpmind.metl.core.model.ProjectVersionDefinitionPlugin;
+import org.jumpmind.metl.core.model.ProjectVersionPlugin;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IPluginService;
 import org.jumpmind.metl.core.plugin.XMLComponentDefinition.ResourceCategory;
@@ -132,11 +132,11 @@ public class DefinitionFactory implements IDefinitionFactory {
         loadComponentsForClassloader(projectVersionId, "org.jumpmind.metl:metl-core:" + VersionUtils.getCurrentVersion(),
                 getClass().getClassLoader());
         List<PluginRepository> remoteRepostiories = pluginService.findPluginRepositories();
-        List<ProjectVersionDefinitionPlugin> pvcps = configurationService.findProjectVersionComponentPlugins(projectVersionId);
+        List<ProjectVersionPlugin> pvcps = configurationService.findProjectVersionComponentPlugins(projectVersionId);
         GenericVersionScheme versionScheme = new GenericVersionScheme();        
         for (Plugin configuredPlugin : distinctPlugins) {
             boolean matched = false;
-            for (ProjectVersionDefinitionPlugin pvcp : pvcps) {
+            for (ProjectVersionPlugin pvcp : pvcps) {
                 if (pvcp.matches(configuredPlugin)) {
                     try {
                         matched = true;
@@ -194,7 +194,7 @@ public class DefinitionFactory implements IDefinitionFactory {
                     if (definitions != null) {
                         definitions = new ArrayList<>(definitionsByPluginId.get(pluginId));
                         for (XMLAbstractDefinition definition : definitions) {
-                            ProjectVersionDefinitionPlugin plugin = new ProjectVersionDefinitionPlugin();
+                            ProjectVersionPlugin plugin = new ProjectVersionPlugin();
                             plugin.setProjectVersionId(projectVersionId);
                             plugin.setDefinitionTypeId(definition.getId());
                             plugin.setDefinitionName(definition.getName());

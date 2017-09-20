@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.core.model;
 
-public class AgentFlowDeploymentParameter extends AbstractNamedObject {
+public class AgentFlowDeployParm extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
 
@@ -29,10 +29,10 @@ public class AgentFlowDeploymentParameter extends AbstractNamedObject {
     String flowId;
     String agentDeploymentId;
     
-    public AgentFlowDeploymentParameter() {
+    public AgentFlowDeployParm() {
     }
     
-    public AgentFlowDeploymentParameter(String name, String value, 
+    public AgentFlowDeployParm(String name, String value, 
             String agentDeploymentId, String flowId) {
         this.name = name;
         this.value = value;

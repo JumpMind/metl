@@ -20,10 +20,10 @@
  */
 package org.jumpmind.metl.core.runtime.component.helpers;
 
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 
 public class ModelAttributeBuilder {
-	ModelAttribute attribute = new ModelAttribute();
+	ModelAttrib attribute = new ModelAttrib();
 	
 	public ModelAttributeBuilder() {
 		
@@ -53,7 +53,7 @@ public class ModelAttributeBuilder {
 		return this;
 	}
 	
-	public ModelAttribute build() {
+	public ModelAttrib build() {
 		return attribute;
 	}
 }

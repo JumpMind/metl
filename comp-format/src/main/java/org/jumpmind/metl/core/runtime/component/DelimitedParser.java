@@ -33,9 +33,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.exception.IoException;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
@@ -153,8 +153,8 @@ public class DelimitedParser extends AbstractComponentRuntime {
                 List<ModelEntity> entities = model.getModelEntities();
                 int index = 0;
                 for (ModelEntity modelEntity : entities) {
-                    List<ModelAttribute> attributes = modelEntity.getModelAttributes();
-                    for (ModelAttribute modelAttribute : attributes) {
+                    List<ModelAttrib> attributes = modelEntity.getModelAttributes();
+                    for (ModelAttrib modelAttribute : attributes) {
                         data.put(modelAttribute.getId(), csvReader.get(index));
                         index++;
                     }
@@ -168,13 +168,13 @@ public class DelimitedParser extends AbstractComponentRuntime {
     }
 
     private void convertAttributeSettingsToAttributeFormat() {
-        List<ComponentAttributeSetting> attributeSettings = getComponent().getAttributeSettings();
+        List<ComponentAttribSetting> attributeSettings = getComponent().getAttributeSettings();
         Map<String, AttributeFormat> formats = new HashMap<String, DelimitedParser.AttributeFormat>();
-        for (ComponentAttributeSetting attributeSetting : attributeSettings) {
+        for (ComponentAttribSetting attributeSetting : attributeSettings) {
             AttributeFormat format = formats.get(attributeSetting.getAttributeId());
             if (format == null) {
                 Model inputModel = getComponent().getOutputModel();
-                ModelAttribute attribute = inputModel.getAttributeById(attributeSetting.getAttributeId());
+                ModelAttrib attribute = inputModel.getAttributeById(attributeSetting.getAttributeId());
                 if (attribute != null) {
                     ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
                     format = new AttributeFormat(attributeSetting.getAttributeId(), entity, attribute);
@@ -203,7 +203,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
 
     protected class AttributeFormat {
 
-        public AttributeFormat(String attributeId, ModelEntity entity, ModelAttribute attribute) {
+        public AttributeFormat(String attributeId, ModelEntity entity, ModelAttrib attribute) {
             this.attributeId = attributeId;
             this.entity = entity;
             this.attribute = attribute;
@@ -211,7 +211,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
 
         ModelEntity entity;
 
-        ModelAttribute attribute;
+        ModelAttrib attribute;
 
         String attributeId;
 
@@ -239,7 +239,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
             this.formatFunction = formatFunction;
         }
 
-        public ModelAttribute getAttribute() {
+        public ModelAttrib getAttribute() {
             return attribute;
         }
 

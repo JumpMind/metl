@@ -30,9 +30,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.h2.util.StringUtils;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
@@ -140,11 +140,11 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
 
         Map<String, AttributeFormat> attributesMap = new HashMap<String, AttributeFormat>();
 
-        List<ComponentAttributeSetting> attributeSettings = getComponent().getAttributeSettings();
-        for (ComponentAttributeSetting attributeSetting : attributeSettings) {
+        List<ComponentAttribSetting> attributeSettings = getComponent().getAttributeSettings();
+        for (ComponentAttribSetting attributeSetting : attributeSettings) {
             if (!attributesMap.containsKey(attributeSetting.getAttributeId())) {
                 Model inputModel = getComponent().getInputModel();
-                ModelAttribute attribute = inputModel.getAttributeById(attributeSetting.getAttributeId());
+                ModelAttrib attribute = inputModel.getAttributeById(attributeSetting.getAttributeId());
                 ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
                 attributesMap.put(attributeSetting.getAttributeId(), new AttributeFormat(attribute, entity));
             }
@@ -169,13 +169,13 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
 
     private class AttributeFormat {
 
-        ModelAttribute attribute;
+        ModelAttrib attribute;
         ModelEntity entity;
         int ordinal;
         int length;
         String formatFunction;
 
-        public AttributeFormat(ModelAttribute attribute, ModelEntity entity) {
+        public AttributeFormat(ModelAttrib attribute, ModelEntity entity) {
             this.attribute = attribute;
             this.entity = entity;
         }
@@ -208,7 +208,7 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
             return formatFunction;
         }
 
-        public ModelAttribute getAttribute() {
+        public ModelAttrib getAttribute() {
             return attribute;
         }
 

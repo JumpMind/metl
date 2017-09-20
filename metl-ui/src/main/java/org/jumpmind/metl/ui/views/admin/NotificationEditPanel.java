@@ -26,7 +26,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentDeploy;
 import org.jumpmind.metl.core.model.AgentStatus;
 import org.jumpmind.metl.core.model.Notification;
 import org.jumpmind.metl.ui.common.ApplicationContext;
@@ -90,7 +90,7 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
         form.setSpacing(true);
 
         levelField = new NativeSelect("Level");
-        for (Notification.Level level : Notification.Level.values()) {
+        for (Notification.NotificationLevel level : Notification.NotificationLevel.values()) {
             levelField.addItem(level.toString());
         }
         levelField.setNullSelectionAllowed(false);
@@ -172,8 +172,8 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
         
         if (notification.getNotificationLevel() == null) {
             isInit = true;
-            levelField.setValue(Notification.Level.GLOBAL.toString());
-            notification.setNotificationLevel(Notification.Level.GLOBAL.toString());
+            levelField.setValue(Notification.NotificationLevel.GLOBAL.toString());
+            notification.setNotificationLevel(Notification.NotificationLevel.GLOBAL.toString());
             notification.setNotifyType(Notification.NotifyType.MAIL.toString());
             updateLinks();
             updateEventTypes();
@@ -196,14 +196,14 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
     public boolean closing() {
         if (isChanged) {
             String level = notification.getNotificationLevel();
-            if (level.equals(Notification.Level.GLOBAL.toString())) {
+            if (level.equals(Notification.NotificationLevel.GLOBAL.toString())) {
                 for (Agent agent : context.getOperationsSerivce().findAgents()) {
                     refreshAgent(agent);
                 }
-            } else if (level.equals(Notification.Level.AGENT.toString()) && notification.getLinkId() != null) {
+            } else if (level.equals(Notification.NotificationLevel.AGENT.toString()) && notification.getLinkId() != null) {
                 refreshAgent(context.getOperationsSerivce().findAgent(notification.getLinkId(), false));
-            } else if (level.equals(Notification.Level.DEPLOYMENT.toString()) && notification.getLinkId() != null) {
-                AgentDeployment deployment = context.getOperationsSerivce().findAgentDeployment(notification.getLinkId());
+            } else if (level.equals(Notification.NotificationLevel.DEPLOYMENT.toString()) && notification.getLinkId() != null) {
+                AgentDeploy deployment = context.getOperationsSerivce().findAgentDeployment(notification.getLinkId());
                 if (deployment != null) {
                     refreshAgent(context.getOperationsSerivce().findAgent(deployment.getAgentId(), false));
                 }
@@ -237,9 +237,9 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
     private void updateLinks() {
         String level = (String) levelField.getValue();
         linkField.removeAllItems();
-        if (level.equals(Notification.Level.GLOBAL.toString())) {
+        if (level.equals(Notification.NotificationLevel.GLOBAL.toString())) {
             linkField.setEnabled(false);
-        } else if (level.equals(Notification.Level.AGENT.toString())) {
+        } else if (level.equals(Notification.NotificationLevel.AGENT.toString())) {
             linkField.setEnabled(true);
             for (Agent agent : context.getOperationsSerivce().findAgents()) {
                 if (agent.isDeleted()) {
@@ -247,13 +247,13 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
                     linkField.setItemCaption(agent.getId(), agent.getName());
                 }
             }
-        } else if (level.equals(Notification.Level.DEPLOYMENT.toString())) {
+        } else if (level.equals(Notification.NotificationLevel.DEPLOYMENT.toString())) {
             linkField.setEnabled(true);
             List<Agent> agents = context.getOperationsSerivce().findAgents();
             for (Agent agent : agents) {
                 if (!agent.isDeleted()) {
                     agent = context.getOperationsSerivce().findAgent(agent.getId(), true);
-                    for (AgentDeployment deployment : agent.getAgentDeployments()) {
+                    for (AgentDeploy deployment : agent.getAgentDeployments()) {
                         linkField.addItem(deployment.getId());
                         linkField.setItemCaption(deployment.getId(), agent.getName() + "/" + deployment.getName());                        
                     }
@@ -278,7 +278,7 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
     private void updateName() {
         if (isInit) {
             String name = "";
-            if (levelField.getValue().equals(Notification.Level.GLOBAL.toString())) {
+            if (levelField.getValue().equals(Notification.NotificationLevel.GLOBAL.toString())) {
                 name = "GLOBAL " + eventField.getValue();
             } else {
                 if (linkField.getValue() != null) {

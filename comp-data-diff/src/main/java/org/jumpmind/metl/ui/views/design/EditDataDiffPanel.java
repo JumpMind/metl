@@ -32,10 +32,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.DataDiff;
 import org.jumpmind.metl.ui.common.ButtonBar;
@@ -435,7 +435,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
                 public Object generateCell(Table source, Object itemId, Object columnId) {
                     AttributeSettings setting = (AttributeSettings) itemId;
                     Model model = component.getInputModel();
-                    ModelAttribute attribute = model.getAttributeById(setting.getAttributeId());
+                    ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
                     return UiUtils.getName(entityFilterField.getValue(), attribute.getName());
                 }
             });
@@ -453,9 +453,9 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
     private void refreshAttributeContainer(EntitySettings selectedRow) {
         attributeSettings.clear();
         ModelEntity entity = component.getInputModel().getEntityById(selectedRow.getEntityId());
-        for (ModelAttribute attribute : entity.getModelAttributes()) {
+        for (ModelAttrib attribute : entity.getModelAttributes()) {
 
-            ComponentAttributeSetting compare = component.getSingleAttributeSetting(attribute.getId(), DataDiff.ATTRIBUTE_COMPARE_ENABLED);
+            ComponentAttribSetting compare = component.getSingleAttributeSetting(attribute.getId(), DataDiff.ATTRIBUTE_COMPARE_ENABLED);
             boolean compareEnabled = compare != null ? Boolean.parseBoolean(compare.getValue()) : true;
             attributeSettings.add(new AttributeSettings(attribute.getId(), compareEnabled, attribute.isPk() == true ? true : false));
         }
@@ -493,11 +493,11 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
 
             @Override
             public void valueChange(ValueChangeEvent event) {
-                ComponentAttributeSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(), key);
+                ComponentAttribSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(), key);
 
                 String oldValue = setting == null ? Boolean.TRUE.toString() : setting.getValue();
                 if (setting == null) {
-                    setting = new ComponentAttributeSetting(settings.getAttributeId(), component.getId(), key, Boolean.TRUE.toString());
+                    setting = new ComponentAttribSetting(settings.getAttributeId(), component.getId(), key, Boolean.TRUE.toString());
                     component.addAttributeSetting(setting);
                 }
                 setting.setValue(checkBox.getValue().toString());

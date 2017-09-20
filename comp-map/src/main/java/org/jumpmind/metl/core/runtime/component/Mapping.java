@@ -30,9 +30,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
@@ -65,8 +65,8 @@ public class Mapping extends AbstractComponentRuntime {
                 false);
         entityPerRecord = getComponent().getBoolean(ENTITY_PER_ROW, false);
         attrToAttrMap = new HashMap<String, Set<String>>();
-        List<ComponentAttributeSetting> attributeSettings = getComponent().getAttributeSettings();
-        for (ComponentAttributeSetting attributeSetting : attributeSettings) {
+        List<ComponentAttribSetting> attributeSettings = getComponent().getAttributeSettings();
+        for (ComponentAttribSetting attributeSetting : attributeSettings) {
             if (attributeSetting.getName().equalsIgnoreCase(ATTRIBUTE_MAPS_TO)) {
                 Set<String> targets = attrToAttrMap.get(attributeSetting.getAttributeId());
                 if (targets == null) {
@@ -150,7 +150,7 @@ public class Mapping extends AbstractComponentRuntime {
 
         if (setUnmappedAttributesToNull) {
             for (ModelEntity entity : outputModel.getModelEntities()) {
-                for (ModelAttribute attr : entity.getModelAttributes()) {
+                for (ModelAttrib attr : entity.getModelAttributes()) {
                     entityName = outputModel
                             .getEntityById(attr.getEntityId())
                             .getName();                    
@@ -193,7 +193,7 @@ public class Mapping extends AbstractComponentRuntime {
 
         if (setUnmappedAttributesToNull) {
             for (ModelEntity entity : getComponent().getOutputModel().getModelEntities()) {
-                for (ModelAttribute attr : entity.getModelAttributes()) {
+                for (ModelAttrib attr : entity.getModelAttributes()) {
                     if (!outputRow.containsKey(attr.getId())) {
                         outputRow.put(attr.getId(), null);
                     }

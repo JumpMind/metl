@@ -36,7 +36,7 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ReleasePackage;
-import org.jumpmind.metl.core.model.ReleasePackageProjectVersion;
+import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.security.ISecurityService;
@@ -73,21 +73,21 @@ public class ImportExportService extends AbstractService implements IImportExpor
 
     final String[][] RELEASE_PACKAGE_SQL = {
             {"_release_package","select * from %1$s_release_package where id='%2$s' order by id", "id"},
-            {"_release_package_project_version","select * from %1$s_release_package_project_version where " +
+            {"_rppv","select * from %1$s_rppv where " +
                     "release_package_id='%2$s' order by release_package_id", "release_package_id,project_version_id"}
     };
 
     final String[][] PROJECT_SQL = {
-            {"_project","select * from %1$s_project where id in (select project_id from %1$s_project_version where id='%2$s') union select * from %1$s_project where id='%3$s' order by id","id"},
+            {"_project","select * from %1$s_project where id in (select project_id from %1$s_project_version where id='%2$s') union select * from %1$s_project where id='%3$s' order by 1","id"},
             {"_project_version","select * from %1$s_project_version where id='%2$s' order by id","id"},
-            {"_project_version_definition_plugin","select * from %1$s_project_version_definition_plugin where project_version_id='%2$s' order by project_version_id","project_version_id,component_type_id"},           
-            {"_project_version_dependency","select * from %1$s_project_version_dependency where project_version_id='%2$s' order by id","id"}
+            {"_project_version_plugin","select * from %1$s_project_version_plugin where project_version_id='%2$s' order by project_version_id","project_version_id,component_type_id"},           
+            {"_project_version_depends","select * from %1$s_project_version_depends where project_version_id='%2$s' order by id","id"}
     };
     
     final String[][] MODEL_SQL = {
             {"_model","select * from %1$s_model where project_version_id='%2$s' and id='%3$s' order by id","id"},
             {"_model_entity","select * from %1$s_model_entity where model_id='%3$s' order by id","id"},
-            {"_model_attribute","select * from %1$s_model_attribute where entity_id in "
+            {"_model_attrib","select * from %1$s_model_attrib where entity_id in "
             + "(select id from %1$s_model_entity where model_id in "
             + "(select id from %1$s_model where project_version_id='%2$s' and id='%3$s')) order by id","id"}
     };    
@@ -104,7 +104,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
                     + "(select distinct component_id from %1$s_flow_step where flow_id='%3$s') order by id", "id"},
             {"_component_entity_setting","select * from %1$s_component_entity_setting where component_id in "
                     + "(select distinct component_id from %1$s_flow_step where flow_id='%3$s') order by id", "id"},
-            {"_component_attribute_setting","select * from %1$s_component_attribute_setting where component_id in "
+            {"_component_attrib_setting","select * from %1$s_component_attrib_setting where component_id in "
                     + "(select distinct component_id from %1$s_flow_step where flow_id='%3$s') order by id", "id"},
             {"_flow","select * from %1$s_flow where project_version_id='%2$s' and id='%3$s' order by id", "id"},
             {"_flow_parameter","select * from %1$s_flow_parameter where flow_id='%3$s' order by id", "id"},
@@ -181,8 +181,8 @@ public class ImportExportService extends AbstractService implements IImportExpor
         ConfigData exportData = initExport();
         ReleasePackage releasePackage = configurationService.findReleasePackage(releasePackageId);
         
-        List<ReleasePackageProjectVersion> versions = new ReleasePackageProjectVersionSorter(configurationService).sort(releasePackage);
-        for (ReleasePackageProjectVersion releasePackageProjectVersion : versions) {
+        List<Rppv> versions = new ReleasePackageProjectVersionSorter(configurationService).sort(releasePackage);
+        for (Rppv releasePackageProjectVersion : versions) {
             String projectVersionId = releasePackageProjectVersion.getProjectVersionId();
             initProjectVersionExport(exportData, projectVersionId);            
             Set<String> flowIds = new HashSet<String>();
@@ -411,7 +411,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
                 transaction);
         processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_flow"), transaction);
         processTableDeletes(
-                importData.deletesToProcess.get(tablePrefix + "_component_attribute_setting"),
+                importData.deletesToProcess.get(tablePrefix + "_component_attrib_setting"),
                 transaction);
         processTableDeletes(
                 importData.deletesToProcess.get(tablePrefix + "_component_entity_setting"),
@@ -424,7 +424,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
                 transaction);
         processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_resource"),
                 transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_model_attribute"),
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_model_attrib"),
                 transaction);
         processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_model_entity"),
                 transaction);
@@ -481,7 +481,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
                     processConfigTableData(importData, existingProjectData.get(i), importProjectData,
                             PROJECT_SQL[i][KEY_COLUMNS], transaction, userId);
                 } catch (RuntimeException e) {
-                    if (importProjectData.getTableName().toLowerCase().endsWith("project_version_dependency")) {
+                    if (importProjectData.getTableName().toLowerCase().endsWith("project_version_depends")) {
                         Collection<LinkedCaseInsensitiveMap<Object>> maps = importProjectData.getTableData().values();
                         StringBuilder ids = new StringBuilder();
                         for (LinkedCaseInsensitiveMap<Object> linkedCaseInsensitiveMap : maps) {
@@ -823,8 +823,8 @@ public class ImportExportService extends AbstractService implements IImportExpor
             /* @formatter:off */
             String[][] CONFIG = {
                     {"agent", "where id='%2$s' and deleted=0"," order by id",                                                                                                                                                                              },
-                    {"agent_deployment", "where agent_id='%2$s'"," order by id",                                                                                                                                                                                                                                },
-                    {"agent_flow_deployment_parameter", "where agent_deployment_id in (select id from %1$s_agent_deployment where agent_id='%2$s')"," order by agent_deployment_id, flow_id",                                                                                                                                                                                                                         },
+                    {"agent_deploy", "where agent_id='%2$s'"," order by id",                                                                                                                                                                                                                                },
+                    {"agent_flow_deploy_parm", "where agent_deployment_id in (select id from %1$s_agent_deploy where agent_id='%2$s')"," order by agent_deployment_id, flow_id",                                                                                                                                                                                                                         },
                     {"agent_parameter", "where agent_id='%2$s'"," order by id",                                                                                                                                                                                                            },
                     {"agent_resource_setting", "where agent_id='%2$s'"," order by resource_id, name",                                                                                                                                                       },
             };

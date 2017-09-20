@@ -27,7 +27,7 @@ import java.util.List;
 
 import org.jumpmind.metl.core.runtime.LogLevel;
 
-public class AgentDeployment extends AbstractNamedObject {
+public class AgentDeploy extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
 
@@ -47,10 +47,10 @@ public class AgentDeployment extends AbstractNamedObject {
 
     String startExpression;
     
-    List<AgentFlowDeploymentParameter> agentDeploymentParameters;
+    List<AgentFlowDeployParm> agentDeploymentParms;
 
-    public AgentDeployment() {
-        agentDeploymentParameters = new ArrayList<AgentFlowDeploymentParameter>();
+    public AgentDeploy() {
+        agentDeploymentParms = new ArrayList<AgentFlowDeployParm>();
     }
 
     public String getAgentId() {
@@ -139,13 +139,13 @@ public class AgentDeployment extends AbstractNamedObject {
         this.logLevel = logLevel;
     }
     
-    public void setAgentDeploymentParameters(
-            List<AgentFlowDeploymentParameter> agentDeploymentParameters) {
-        this.agentDeploymentParameters = agentDeploymentParameters;
+    public void setAgentDeploymentParms(
+            List<AgentFlowDeployParm> agentDeploymentParms) {
+        this.agentDeploymentParms = agentDeploymentParms;
     }
     
-    public List<AgentFlowDeploymentParameter> getAgentDeploymentParameters() {
-        return agentDeploymentParameters;
+    public List<AgentFlowDeployParm> getAgentDeploymentParms() {
+        return agentDeploymentParms;
     }
 
     @Override

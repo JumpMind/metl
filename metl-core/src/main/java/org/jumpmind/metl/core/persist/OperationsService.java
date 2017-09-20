@@ -16,9 +16,9 @@ import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AbstractObjectCreateTimeDescSorter;
 import org.jumpmind.metl.core.model.AbstractObjectLastUpdateTimeDescSorter;
 import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentDeploy;
 import org.jumpmind.metl.core.model.AgentDeploymentSummary;
-import org.jumpmind.metl.core.model.AgentFlowDeploymentParameter;
+import org.jumpmind.metl.core.model.AgentFlowDeployParm;
 import org.jumpmind.metl.core.model.AgentName;
 import org.jumpmind.metl.core.model.AgentParameter;
 import org.jumpmind.metl.core.model.AgentResource;
@@ -133,8 +133,8 @@ public class OperationsService extends AbstractService implements IOperationsSer
 
 
     @Override
-    public AgentDeployment findAgentDeployment(String id) {
-        AgentDeployment agentDeployment = findOne(AgentDeployment.class, new NameValue("id", id));
+    public AgentDeploy findAgentDeployment(String id) {
+        AgentDeploy agentDeployment = findOne(AgentDeploy.class, new NameValue("id", id));
         refreshAgentDeploymentRelations(agentDeployment);
         return agentDeployment;
     }
@@ -257,9 +257,9 @@ public class OperationsService extends AbstractService implements IOperationsSer
     }
 
     @Override
-    public void delete(AgentDeployment agentDeployment) {
-        List<AgentFlowDeploymentParameter> params = agentDeployment.getAgentDeploymentParameters();
-        for (AgentFlowDeploymentParameter agentDeploymentParameter : params) {
+    public void delete(AgentDeploy agentDeployment) {
+        List<AgentFlowDeployParm> params = agentDeployment.getAgentDeploymentParms();
+        for (AgentFlowDeployParm agentDeploymentParameter : params) {
             delete((AbstractObject) agentDeploymentParameter);
         }
         delete((AbstractObject) agentDeployment);
@@ -308,14 +308,14 @@ public class OperationsService extends AbstractService implements IOperationsSer
     @Override
     public List<Notification> findNotificationsForAgent(String agentId) {
         Map<String, Object> param = new HashMap<String, Object>();
-        param.put("level", Notification.Level.AGENT.toString());
+        param.put("notificationLevel", Notification.NotificationLevel.AGENT.toString());
         param.put("linkId", agentId);
         param.put("enabled", 1);
         List<Notification> agentNotifications = persistenceManager.find(Notification.class, param,
                 null, null, tableName(Notification.class));
 
         param = new HashMap<String, Object>();
-        param.put("level", Notification.Level.GLOBAL.toString());
+        param.put("notificationLevel", Notification.NotificationLevel.GLOBAL.toString());
         param.put("enabled", 1);
         List<Notification> notifications = persistenceManager.find(Notification.class, param, null,
                 null, tableName(Notification.class));
@@ -324,10 +324,10 @@ public class OperationsService extends AbstractService implements IOperationsSer
     }
 
     @Override
-    public List<Notification> findNotificationsForDeployment(AgentDeployment deployment) {
+    public List<Notification> findNotificationsForDeployment(AgentDeploy deployment) {
         List<Notification> notifications = findNotificationsForAgent(deployment.getAgentId());
         Map<String, Object> param = new HashMap<String, Object>();
-        param.put("level", Notification.Level.DEPLOYMENT.toString());
+        param.put("notificationLevel", Notification.NotificationLevel.DEPLOYMENT.toString());
         param.put("linkId", deployment.getId());
         param.put("enabled", 1);
         List<Notification> agentNotifications = persistenceManager.find(Notification.class, param,
@@ -441,10 +441,10 @@ public class OperationsService extends AbstractService implements IOperationsSer
     
 
     @Override
-    public void save(AgentDeployment agentDeployment) {
+    public void save(AgentDeploy agentDeployment) {
         save((AbstractObject) agentDeployment);
-        List<AgentFlowDeploymentParameter> parameters = agentDeployment.getAgentDeploymentParameters();
-        for (AgentFlowDeploymentParameter agentDeploymentParameter : parameters) {
+        List<AgentFlowDeployParm> parameters = agentDeployment.getAgentDeploymentParms();
+        for (AgentFlowDeployParm agentDeploymentParameter : parameters) {
             save((AbstractObject) agentDeploymentParameter);
         }
     }    
@@ -456,7 +456,7 @@ public class OperationsService extends AbstractService implements IOperationsSer
                 "select p.name as project_name, v.version_label, '%2$s' as type, " +
                 "d.id, d.name, d.start_type, d.log_level, d.start_expression, d.status, f.id as flow_id, " +
                 "f.row_id " +
-                "from %1$s_agent_deployment d " +
+                "from %1$s_agent_deploy d " +
                 "inner join %1$s_flow f on f.id = d.flow_id " +
                 "inner join %1$s_project_version v on v.id = f.project_version_id " +
                 "inner join %1$s_project p on p.id = v.project_id " +
@@ -465,7 +465,7 @@ public class OperationsService extends AbstractService implements IOperationsSer
                 "select distinct p.name, v.version_label, '%3$s', " +
                 "r.id, r.name, null, null, null, null, null as flow_id, " +
                 "r.row_id " +
-                "from %1$s_agent_deployment d " +
+                "from %1$s_agent_deploy d " +
                 "inner join %1$s_flow f on f.id = d.flow_id " +
                 "inner join %1$s_project_version v on v.id = f.project_version_id " +
                 "inner join %1$s_project p on p.id = v.project_id " +
@@ -475,9 +475,9 @@ public class OperationsService extends AbstractService implements IOperationsSer
                 "select distinct p.name, v.version_label, '%3$s', " +
                 "r.id, r.name, null, null, null, null, null as flow_id, " +
                 "r.row_id " +
-                "from %1$s_agent_deployment d " +
+                "from %1$s_agent_deploy d " +
                 "inner join %1$s_flow f on f.id = d.flow_id " +
-                "inner join %1$s_project_version_dependency dp on dp.project_version_id = f.project_version_id " +
+                "inner join %1$s_project_version_depends dp on dp.project_version_id = f.project_version_id " +
                 "inner join %1$s_project_version v on v.id = dp.target_project_version_id " +
                 "inner join %1$s_project p on p.id = v.project_id " +
                 "inner join %1$s_resource r on r.project_version_id = v.id " +
@@ -553,23 +553,23 @@ public class OperationsService extends AbstractService implements IOperationsSer
     protected void refreshAgentDeployments(Agent agent) {
         Map<String, Object> settingParams = new HashMap<String, Object>();
         settingParams.put("agentId", agent.getId());
-        List<AgentDeployment> deployments = persistenceManager.find(AgentDeployment.class,
-                settingParams, null, null, tableName(AgentDeployment.class));
-        List<AgentDeployment> list = new ArrayList<>(deployments.size());
-        for (AgentDeployment agentDeployment : deployments) {
+        List<AgentDeploy> deployments = persistenceManager.find(AgentDeploy.class,
+                settingParams, null, null, tableName(AgentDeploy.class));
+        List<AgentDeploy> list = new ArrayList<>(deployments.size());
+        for (AgentDeploy agentDeployment : deployments) {
             refreshAgentDeploymentRelations(agentDeployment);
             list.add(agentDeployment);
         }
         agent.setAgentDeployments(list);
     }
 
-    protected void refreshAgentDeploymentRelations(AgentDeployment agentDeployment) {
+    protected void refreshAgentDeploymentRelations(AgentDeploy agentDeployment) {
         if (agentDeployment != null) {
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("agentDeploymentId", agentDeployment.getId());
-            agentDeployment.setAgentDeploymentParameters(
-                    persistenceManager.find(AgentFlowDeploymentParameter.class, params, null, null,
-                            tableName(AgentFlowDeploymentParameter.class)));
+            agentDeployment.setAgentDeploymentParms(
+                    persistenceManager.find(AgentFlowDeployParm.class, params, null, null,
+                            tableName(AgentFlowDeployParm.class)));
         }
     }
 }

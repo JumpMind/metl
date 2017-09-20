@@ -116,9 +116,9 @@ public class Model extends AbstractNamedObject implements IAuditable {
         return null;
     }
 
-    public ModelAttribute getAttributeById(String attributeId) {
+    public ModelAttrib getAttributeById(String attributeId) {
         for (ModelEntity entity : modelEntities) {
-            for (ModelAttribute modelAttribute : entity.getModelAttributes()) {
+            for (ModelAttrib modelAttribute : entity.getModelAttributes()) {
                 if (modelAttribute.getId().equalsIgnoreCase(attributeId)) {
                     return modelAttribute;
                 }
@@ -127,10 +127,10 @@ public class Model extends AbstractNamedObject implements IAuditable {
         return null;
     }
 
-    public ModelAttribute getAttributeByName(String entityName, String attributeName) {
+    public ModelAttrib getAttributeByName(String entityName, String attributeName) {
         ModelEntity entity = getEntityByName(entityName);
         if (entity != null) {
-            for (ModelAttribute modelAttribute : entity.getModelAttributes()) {
+            for (ModelAttrib modelAttribute : entity.getModelAttributes()) {
                 if (modelAttribute.getName().equalsIgnoreCase(attributeName)) {
                     return modelAttribute;
                 }
@@ -139,10 +139,10 @@ public class Model extends AbstractNamedObject implements IAuditable {
         return null;
     }
 
-    public List<ModelAttribute> getAttributesByName(String attributeName) {
-        List<ModelAttribute> attributes = new ArrayList<ModelAttribute>();
+    public List<ModelAttrib> getAttributesByName(String attributeName) {
+        List<ModelAttrib> attributes = new ArrayList<ModelAttrib>();
         for (ModelEntity entity : modelEntities) {
-            for (ModelAttribute modelAttribute : entity.getModelAttributes()) {
+            for (ModelAttrib modelAttribute : entity.getModelAttributes()) {
                 if (modelAttribute.getName().equalsIgnoreCase(attributeName)) {
                     attributes.add(modelAttribute);
                 }
@@ -205,7 +205,7 @@ public class Model extends AbstractNamedObject implements IAuditable {
         };
         Set<String> attributeIds = data.keySet();
         for (String attributeId : attributeIds) {
-            ModelAttribute attribute = getAttributeById(attributeId);
+            ModelAttrib attribute = getAttributeById(attributeId);
             if (attribute != null) {
                 ModelEntity entity = getEntityById(attribute.getEntityId());
                 if (qualifyWithEntityName) {
@@ -222,7 +222,7 @@ public class Model extends AbstractNamedObject implements IAuditable {
         Map<String,String> row = new HashMap<>(data.size());
         Set<String> attributeIds = data.keySet();
         for (String attributeId : attributeIds) {
-            ModelAttribute attribute = getAttributeById(attributeId);
+            ModelAttrib attribute = getAttributeById(attributeId);
             if (attribute != null) {
                 ModelEntity entity = getEntityById(attribute.getEntityId());
                 Object value = data.get(attributeId);

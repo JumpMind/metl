@@ -38,7 +38,7 @@ import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
-import org.jumpmind.metl.core.model.ProjectVersionDependency;
+import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
@@ -455,8 +455,8 @@ public class DesignNavigator extends VerticalLayout {
                     } else if (type.equals(ProjectVersion.class.getSimpleName())) {
                         object = new ProjectVersion();
                         object.setId(id);
-                    } else if (type.equals(ProjectVersionDependency.class.getSimpleName())) {
-                        object = new ProjectVersionDependency();
+                    } else if (type.equals(ProjectVersionDepends.class.getSimpleName())) {
+                        object = new ProjectVersionDepends();
                         object.setId(id);
                     }
                     
@@ -536,8 +536,8 @@ public class DesignNavigator extends VerticalLayout {
 
     protected void addDependenciesToFolder(String folderName, ProjectVersion projectVersion) {
         FolderName folder = null;
-        List<ProjectVersionDependency> dependencies = context.getUiCache().findProjectDependencies(projectVersion.getId());
-        for (ProjectVersionDependency dependency : dependencies) {
+        List<ProjectVersionDepends> dependencies = context.getUiCache().findProjectDependencies(projectVersion.getId());
+        for (ProjectVersionDepends dependency : dependencies) {
             if (folder == null) {
                 folder = addVirtualFolder(folderName, projectVersion);
             }
@@ -766,8 +766,8 @@ public class DesignNavigator extends VerticalLayout {
             ProjectVersion namedObject = (ProjectVersion) object;
             ConfirmDialog.show("Delete Project Version?", "Are you sure you want to delete the '" + namedObject.getName() + "' version?",
                     new DeleteProjectVersionConfirmationListener(namedObject));
-        } else if (object instanceof ProjectVersionDependency) {
-            configurationService.delete((ProjectVersionDependency) object);
+        } else if (object instanceof ProjectVersionDepends) {
+            configurationService.delete((ProjectVersionDepends) object);
             treeTable.removeItem(object);
         }
     }
@@ -818,16 +818,16 @@ public class DesignNavigator extends VerticalLayout {
 
     public void addNewDependency(ProjectVersion targetVersion) {
         ProjectVersion projectVersion = findProjectVersion();
-        List<ProjectVersionDependency> dependencies = configurationService.findProjectDependencies(projectVersion.getId());
+        List<ProjectVersionDepends> dependencies = configurationService.findProjectDependencies(projectVersion.getId());
         boolean add = true;
-        for (ProjectVersionDependency projectVersionDependency : dependencies) {
+        for (ProjectVersionDepends projectVersionDependency : dependencies) {
             if (projectVersionDependency.getTargetProjectVersionId().equals(targetVersion.getId())) {
                 add = false;
             }
         }
 
         if (add) {
-            ProjectVersionDependency dependency = new ProjectVersionDependency();
+            ProjectVersionDepends dependency = new ProjectVersionDepends();
             dependency.setProjectVersionId(projectVersion.getId());
             dependency.setTargetProjectVersion(targetVersion);
             configurationService.save(dependency);

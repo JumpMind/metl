@@ -15,7 +15,7 @@ import java.util.UUID;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ReleasePackage;
-import org.jumpmind.metl.core.model.ReleasePackageProjectVersion;
+import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
@@ -125,7 +125,7 @@ public class EditReleasePackageDialog extends ResizableWindow {
             //now put the project version options for each project            
             OptionGroup optionGroup = new OptionGroup();   
             optionGroup.addStyleName("indent");
-            List<ReleasePackageProjectVersion> rppvs = configurationService.findReleasePackageProjectVersions(releasePackageId);
+            List<Rppv> rppvs = configurationService.findReleasePackageProjectVersions(releasePackageId);
             Set<String> projectVersionsInReleasePackage = getListOfProjectVersionsInReleasePackages(rppvs);
             for (ProjectVersion projectVersion : project.getProjectVersions()) {
                 optionGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
@@ -150,9 +150,9 @@ public class EditReleasePackageDialog extends ResizableWindow {
         return projectsAndVersionsPanel;
     }
     
-    protected Set<String> getListOfProjectVersionsInReleasePackages(List<ReleasePackageProjectVersion> rppvs) {
+    protected Set<String> getListOfProjectVersionsInReleasePackages(List<Rppv> rppvs) {
         Set<String> projectVersionsInRelease = new HashSet<String>();
-        for (ReleasePackageProjectVersion rppv : rppvs) {
+        for (Rppv rppv : rppvs) {
             projectVersionsInRelease.add(rppv.getProjectVersionId());
         }
         return projectVersionsInRelease;
@@ -195,7 +195,7 @@ public class EditReleasePackageDialog extends ResizableWindow {
                     String projectId = (String) projectCheckbox.getData();
                     OptionGroup optionGroup = projectVersionOptionGroups.get(projectId);
                     String projectVersionId = (String) optionGroup.getValue();
-                    ReleasePackageProjectVersion rppv = new ReleasePackageProjectVersion(releasePackage.getId(), projectVersionId);
+                    Rppv rppv = new Rppv(releasePackage.getId(), projectVersionId);
                     configurationService.save(rppv);
                 }
             }

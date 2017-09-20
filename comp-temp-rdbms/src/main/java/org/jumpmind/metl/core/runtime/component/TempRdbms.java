@@ -43,7 +43,7 @@ import org.jumpmind.db.util.ResettableBasicDataSource;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
@@ -189,8 +189,8 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
             for (ModelEntity entity : entities) {
                 Table table = new Table();
                 table.setName(entity.getName());
-                List<ModelAttribute> attributes = entity.getModelAttributes();
-                for (ModelAttribute attribute : attributes) {
+                List<ModelAttrib> attributes = entity.getModelAttributes();
+                for (ModelAttrib attribute : attributes) {
                     DataType dataType = attribute.getDataType();
                     Column column = new Column(attribute.getName());
                     if (dataType.isNumeric()) {

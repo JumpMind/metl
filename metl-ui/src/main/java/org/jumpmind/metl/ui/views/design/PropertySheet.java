@@ -39,11 +39,11 @@ import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Privilege;
-import org.jumpmind.metl.core.model.ProjectVersionDependency;
+import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.persist.IConfigurationService;
@@ -256,8 +256,8 @@ public class PropertySheet extends AbsoluteLayout {
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
                 List<ModelName> models = new ArrayList<>(configurationService.findModelsInProject(projectVersionId));
-                List<ProjectVersionDependency> dependencies = configurationService.findProjectDependencies(projectVersionId);
-                for (ProjectVersionDependency projectVersionDependency : dependencies) {
+                List<ProjectVersionDepends> dependencies = configurationService.findProjectDependencies(projectVersionId);
+                for (ProjectVersionDepends projectVersionDependency : dependencies) {
                     models.addAll(configurationService.findModelsInProject(projectVersionDependency.getTargetProjectVersionId()));
                 }
 
@@ -322,8 +322,8 @@ public class PropertySheet extends AbsoluteLayout {
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
                 List<ModelName> models = new ArrayList<>(configurationService.findModelsInProject(projectVersionId));
-                List<ProjectVersionDependency> dependencies = configurationService.findProjectDependencies(projectVersionId);
-                for (ProjectVersionDependency projectVersionDependency : dependencies) {
+                List<ProjectVersionDepends> dependencies = configurationService.findProjectDependencies(projectVersionId);
+                for (ProjectVersionDepends projectVersionDependency : dependencies) {
                     models.addAll(configurationService.findModelsInProject(projectVersionDependency.getTargetProjectVersionId()));
                 }
 
@@ -624,7 +624,7 @@ public class PropertySheet extends AbsoluteLayout {
                         entityColumnCombo.setImmediate(true);
 
                         for (ModelEntity modelEntity : entities) {
-                            for (ModelAttribute attribute : modelEntity.getModelAttributes()) {
+                            for (ModelAttrib attribute : modelEntity.getModelAttributes()) {
                                 entityColumnCombo.addItem(attribute.getId());
                                 entityColumnCombo.setItemCaption(attribute.getId(), modelEntity.getName() + "." + attribute.getName());
                             }

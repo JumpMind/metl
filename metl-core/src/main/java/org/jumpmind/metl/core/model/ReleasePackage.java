@@ -16,10 +16,10 @@ public class ReleasePackage extends AbstractNamedObject {
     
     protected String versionLabel;
     
-    protected List<ReleasePackageProjectVersion> projectVersions;
+    protected List<Rppv> projectVersions;
 
     public ReleasePackage() {
-        this.projectVersions = new ArrayList<ReleasePackageProjectVersion>();
+        this.projectVersions = new ArrayList<Rppv>();
     }
 
     @Override
@@ -61,11 +61,11 @@ public class ReleasePackage extends AbstractNamedObject {
         return versionLabel;
     }
     
-    public List<ReleasePackageProjectVersion> getProjectVersions() {
+    public List<Rppv> getProjectVersions() {
         return projectVersions;
     }
 
-    public void setProjectVersions(List<ReleasePackageProjectVersion> projectVersions) {
+    public void setProjectVersions(List<Rppv> projectVersions) {
         this.projectVersions = projectVersions;
     }
 }

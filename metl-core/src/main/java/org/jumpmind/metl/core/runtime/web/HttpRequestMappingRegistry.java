@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentDeploy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.AntPathMatcher;
@@ -21,7 +21,7 @@ public class HttpRequestMappingRegistry implements IHttpRequestMappingRegistry {
     
     Map<HttpMethod, Set<HttpRequestMapping>> mappingsByHttpMethod = new HashMap<>();
     
-    Map<AgentDeployment, Set<HttpRequestMapping>> mappingsByAgentDeployment = new HashMap<>();
+    Map<AgentDeploy, Set<HttpRequestMapping>> mappingsByAgentDeployment = new HashMap<>();
     
     @Override
     public HttpRequestMapping findBestMatch(HttpMethod method, String path) {
@@ -38,7 +38,7 @@ public class HttpRequestMappingRegistry implements IHttpRequestMappingRegistry {
     }
     
     @Override
-    public List<HttpRequestMapping> getHttpRequestMappingsFor(AgentDeployment deployment) {
+    public List<HttpRequestMapping> getHttpRequestMappingsFor(AgentDeploy deployment) {
         Set<HttpRequestMapping> mappings = mappingsByAgentDeployment.get(deployment);
         if (mappings != null) {
             return new ArrayList<>(mappings);

@@ -28,10 +28,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.Deduper;
 import org.jumpmind.metl.ui.common.ButtonBar;
@@ -284,7 +284,7 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
                 public Object generateCell(Table source, Object itemId, Object columnId) {
              	   AttributeSettings setting = (AttributeSettings) itemId;
                     Model model = component.getInputModel();
-                    ModelAttribute attribute = model.getAttributeById(setting.getAttributeId());
+                    ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
                     return UiUtils.getName(entityFilterField.getValue(), attribute.getName());
                 }
             });
@@ -302,9 +302,9 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
     private void refreshAttributeContainer(EntitySettings selectedRow) {
   	   attributeSettings.clear();
   	   ModelEntity entity = component.getInputModel().getEntityById(selectedRow.getEntityId());
-  	   for (ModelAttribute attribute : entity.getModelAttributes()) {
+  	   for (ModelAttrib attribute : entity.getModelAttributes()) {
   		   
-            ComponentAttributeSetting compare = component.getSingleAttributeSetting(attribute.getId(), Deduper.ATTRIBUTE_DEDUPE_ENABLED);
+            ComponentAttribSetting compare = component.getSingleAttributeSetting(attribute.getId(), Deduper.ATTRIBUTE_DEDUPE_ENABLED);
             boolean dedupeEnabled = compare != null ? Boolean.parseBoolean(compare.getValue()) : false;
             attributeSettings.add(new AttributeSettings(attribute.getId(), dedupeEnabled, attribute.isPk() == true?true:false));     		        		   
   	   }
@@ -337,11 +337,11 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
             private static final long serialVersionUID = 1L;
             @Override
             public void valueChange(ValueChangeEvent event) {
-                ComponentAttributeSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(), key);
+                ComponentAttribSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(), key);
 
                 String oldValue = setting == null ? Boolean.FALSE.toString() : setting.getValue();
                 if (setting == null) {
-                    setting = new ComponentAttributeSetting(settings.getAttributeId(), component.getId(), key, Boolean.TRUE.toString());
+                    setting = new ComponentAttribSetting(settings.getAttributeId(), component.getId(), key, Boolean.TRUE.toString());
                     component.addAttributeSetting(setting);
                 }
                 setting.setValue(checkBox.getValue().toString());

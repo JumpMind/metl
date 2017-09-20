@@ -22,7 +22,7 @@ package org.jumpmind.metl.core.runtime.component.helpers;
 
 import java.util.ArrayList;
 
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 
 public class ModelEntityBuilder {
@@ -30,7 +30,7 @@ public class ModelEntityBuilder {
 	
 	public ModelEntityBuilder() {
 		entity = new ModelEntity();
-		entity.setModelAttributes(new ArrayList<ModelAttribute>());
+		entity.setModelAttributes(new ArrayList<ModelAttrib>());
 	}
 	
 	public ModelEntityBuilder withId(String id) {
@@ -48,7 +48,7 @@ public class ModelEntityBuilder {
 		return this;
 	}
 	
-	public ModelEntityBuilder withAttribute(ModelAttribute attr) {
+	public ModelEntityBuilder withAttribute(ModelAttrib attr) {
 		entity.addModelAttribute(attr);
 		return this;
 	}

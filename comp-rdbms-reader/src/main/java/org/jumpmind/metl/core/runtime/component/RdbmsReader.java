@@ -38,7 +38,7 @@ import java.util.Set;
 
 import org.jumpmind.db.sql.SqlException;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.ContentMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
@@ -272,11 +272,11 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     private List<String> getAttributeIds(String columnName) {
         List<String> attributeIds = new ArrayList<String>();
         if (getOutputModel() != null) {
-            List<ModelAttribute> attributes = getOutputModel().getAttributesByName(columnName);
+            List<ModelAttrib> attributes = getOutputModel().getAttributesByName(columnName);
             if (attributes.size() == 0) {
                 throw new SqlException("Column not found in output model and not specified via hint.  Column Name = " + columnName);
             } else {
-                for (ModelAttribute modelAttribute : attributes) {
+                for (ModelAttrib modelAttribute : attributes) {
                     attributeIds.add(modelAttribute.getId());
                 }
             }
@@ -288,7 +288,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
     private String getAttributeId(String tableName, String columnName) {
         if (getOutputModel() != null) {
-            ModelAttribute modelAttribute = getOutputModel().getAttributeByName(tableName, columnName);
+            ModelAttrib modelAttribute = getOutputModel().getAttributeByName(tableName, columnName);
             if (modelAttribute != null) {
                 return modelAttribute.getId();
             } else {
@@ -368,7 +368,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             }
             sb.append("   \"").append(entity.getName()).append("\" { ");
             boolean firstAttribute = true;
-            for (ModelAttribute attribute : entity.getModelAttributes()) {
+            for (ModelAttrib attribute : entity.getModelAttributes()) {
                 if (rowData.containsKey(attribute.getId())) {
                     if (firstAttribute) {
                         firstAttribute = false;
@@ -389,7 +389,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         Set<ModelEntity> entities = new LinkedHashSet<ModelEntity>();
         Model model = getOutputModel();
         for (String attributeId : rowData.keySet()) {
-            ModelAttribute attribute = model.getAttributeById(attributeId);
+            ModelAttrib attribute = model.getAttributeById(attributeId);
             if (attribute != null) {
                 ModelEntity entity = model.getEntityById(attribute.getEntityId());
                 if (entity != null) {

@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jumpmind.metl.core.model.ProjectVersionDependency;
+import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.model.ReleasePackage;
-import org.jumpmind.metl.core.model.ReleasePackageProjectVersion;
+import org.jumpmind.metl.core.model.Rppv;
 
 public class ReleasePackageProjectVersionSorter {
     
@@ -18,23 +18,23 @@ public class ReleasePackageProjectVersionSorter {
         this.configurationService = configurationService;
     }
     
-    public List<ReleasePackageProjectVersion> sort(ReleasePackage releasePackage) {
+    public List<Rppv> sort(ReleasePackage releasePackage) {
         DirectedAcyclicGraph<String, DefaultEdge> dag = new DirectedAcyclicGraph<String, DefaultEdge>(DefaultEdge.class);
-        for (ReleasePackageProjectVersion rppv : releasePackage.getProjectVersions()) {
+        for (Rppv rppv : releasePackage.getProjectVersions()) {
             dag.addVertex(rppv.getProjectVersionId());
-            List<ProjectVersionDependency> dependencies = configurationService.findProjectDependencies(rppv.getProjectVersionId());
-            for (ProjectVersionDependency dependency: dependencies) {
+            List<ProjectVersionDepends> dependencies = configurationService.findProjectDependencies(rppv.getProjectVersionId());
+            for (ProjectVersionDepends dependency: dependencies) {
                 dag.addVertex(dependency.getTargetProjectVersionId());
                 dag.addEdge(dependency.getTargetProjectVersionId(), rppv.getProjectVersionId());
             }
         }      
         
         List<String> added = new ArrayList<>(releasePackage.getProjectVersions().size());
-        List<ReleasePackageProjectVersion> list = new ArrayList<>(releasePackage.getProjectVersions().size());
+        List<Rppv> list = new ArrayList<>(releasePackage.getProjectVersions().size());
         Iterator<String> itr = dag.iterator();
         while (itr.hasNext()) {                        
             String projectVersionId = itr.next();
-            for (ReleasePackageProjectVersion rppv : releasePackage.getProjectVersions()) {
+            for (Rppv rppv : releasePackage.getProjectVersions()) {
                 if (rppv.getProjectVersionId().equals(projectVersionId) && !added.contains(rppv.getProjectVersionId())) {
                     list.add(rppv);
                     break;

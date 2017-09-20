@@ -40,7 +40,7 @@ import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityData.ChangeType;
@@ -55,7 +55,7 @@ public class ModelAttributeScriptHelper {
 
     protected EntityData data;
 
-    protected ModelAttribute attribute;
+    protected ModelAttrib attribute;
 
     protected ModelEntity entity;
 
@@ -69,7 +69,7 @@ public class ModelAttributeScriptHelper {
 
     static private ThreadLocal<ScriptEngine> scriptEngine = new ThreadLocal<ScriptEngine>();
 
-    public ModelAttributeScriptHelper(Message message, ComponentContext context, ModelAttribute attribute, ModelEntity entity, Model model,
+    public ModelAttributeScriptHelper(Message message, ComponentContext context, ModelAttrib attribute, ModelEntity entity, Model model,
             EntityData data, Object value) {
         this(context, attribute, entity, model);
         this.value = value;
@@ -77,7 +77,7 @@ public class ModelAttributeScriptHelper {
         this.message = message;
     }
 
-    public ModelAttributeScriptHelper(ComponentContext context, ModelAttribute attribute, ModelEntity entity, Model model) {
+    public ModelAttributeScriptHelper(ComponentContext context, ModelAttrib attribute, ModelEntity entity, Model model) {
         this.context = context;
         this.attribute = attribute;
         this.entity = entity;
@@ -387,8 +387,8 @@ public class ModelAttributeScriptHelper {
         List<EntityData> datas = dataMessage.getPayload();
         for (EntityData entityData : datas) {
             for (String attributeName : attributeNamesToLookAt) {
-                List<ModelAttribute> attributes = model.getAttributesByName(attributeName);
-                for (ModelAttribute attribute : attributes) {
+                List<ModelAttrib> attributes = model.getAttributesByName(attributeName);
+                for (ModelAttrib attribute : attributes) {
                     long currentValue = 0;
                     Object obj = entityData.get(attribute.getId());
                     if (obj instanceof Number) {
@@ -412,7 +412,7 @@ public class ModelAttributeScriptHelper {
     }
 
     public Long sequence(long seed_value, int incrementValue, String breakAttributeName) {
-        ModelAttribute breakAttribute = entity.getModelAttributeByName(breakAttributeName);
+        ModelAttrib breakAttribute = entity.getModelAttributeByName(breakAttributeName);
         if (breakAttribute == null) {
             throw new RuntimeException("Break attribute not found.  Specify the name of the attribute (no entity qualifier)");
         }
@@ -463,7 +463,7 @@ public class ModelAttributeScriptHelper {
         return signatures.toArray(new String[signatures.size()]);
     }
 
-    public static Object eval(Message message, ComponentContext context, ModelAttribute attribute, Object value, Model model, ModelEntity entity,
+    public static Object eval(Message message, ComponentContext context, ModelAttrib attribute, Object value, Model model, ModelEntity entity,
             EntityData data, String expression) {
         ScriptEngine engine = scriptEngine.get();
         if (engine == null) {

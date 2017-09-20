@@ -2,7 +2,7 @@ package org.jumpmind.metl.core.model;
 
 import java.util.UUID;
 
-public class ProjectVersionDependency extends AbstractNamedObject {
+public class ProjectVersionDepends extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
 

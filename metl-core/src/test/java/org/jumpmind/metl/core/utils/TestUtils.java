@@ -31,9 +31,9 @@ import org.apache.commons.io.FileUtils;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentDeploy;
 import org.jumpmind.metl.core.model.Component;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
@@ -140,7 +140,7 @@ public class TestUtils {
     public static Component createComponent(String type, boolean shared, Resource resource,
             Model inputModelVersion, Model outputModelVersion,
             List<ComponentEntitySetting> entitySettings,
-            List<ComponentAttributeSetting> attributeSettings, Setting... settings) {
+            List<ComponentAttribSetting> attributeSettings, Setting... settings) {
         Component component = new Component(resource,
                 inputModelVersion, outputModelVersion, entitySettings, attributeSettings, settings);
         component.setType(type);

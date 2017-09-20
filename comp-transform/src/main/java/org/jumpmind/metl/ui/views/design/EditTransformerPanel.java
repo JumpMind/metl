@@ -29,9 +29,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.ModelAttributeScriptHelper;
 import org.jumpmind.metl.core.runtime.component.Transformer;
@@ -74,10 +74,10 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
 
     AbstractSelect filterPopField;
 
-    List<ComponentAttributeSetting> componentAttributes;
+    List<ComponentAttribSetting> componentAttributes;
 
-    BeanItemContainer<ComponentAttributeSetting> container = new BeanItemContainer<ComponentAttributeSetting>(
-            ComponentAttributeSetting.class);
+    BeanItemContainer<ComponentAttribSetting> container = new BeanItemContainer<ComponentAttribSetting>(
+            ComponentAttribSetting.class);
     BeanItemContainer<Record> exportContainer = new BeanItemContainer<Record>(Record.class);
 
     static final String SHOW_ALL = "Show All";
@@ -131,9 +131,9 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
 
             @Override
             public Object generateCell(Table source, Object itemId, Object columnId) {
-                ComponentAttributeSetting setting = (ComponentAttributeSetting) itemId;
+                ComponentAttribSetting setting = (ComponentAttribSetting) itemId;
                 Model model = component.getInputModel();
-                ModelAttribute attribute = model.getAttributeById(setting.getAttributeId());
+                ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
                 ModelEntity entity = model.getEntityById(attribute.getEntityId());
                 return UiUtils.getName(filterField.getValue(), entity.getName());
             }
@@ -142,9 +142,9 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
 
             @Override
             public Object generateCell(Table source, Object itemId, Object columnId) {
-                ComponentAttributeSetting setting = (ComponentAttributeSetting) itemId;
+                ComponentAttribSetting setting = (ComponentAttribSetting) itemId;
                 Model model = component.getInputModel();
-                ModelAttribute attribute = model.getAttributeById(setting.getAttributeId());
+                ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
                 return UiUtils.getName(filterField.getValue(), attribute.getName());
             }
         });
@@ -153,7 +153,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
 
             @Override
             public Object generateCell(Table source, Object itemId, Object columnId) {
-                ComponentAttributeSetting setting = (ComponentAttributeSetting) itemId;
+                ComponentAttribSetting setting = (ComponentAttribSetting) itemId;
                 Button button = new Button();
                 button.setIcon(FontAwesome.GEAR);
                 button.addClickListener((event) -> new EditTransformWindow(setting).showAtSize(.75));
@@ -176,10 +176,10 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
 
             componentAttributes = component.getAttributeSettings();
 
-            List<ComponentAttributeSetting> toRemove = new ArrayList<ComponentAttributeSetting>();
-            for (ComponentAttributeSetting componentAttribute : componentAttributes) {
+            List<ComponentAttribSetting> toRemove = new ArrayList<ComponentAttribSetting>();
+            for (ComponentAttribSetting componentAttribute : componentAttributes) {
                 Model model = component.getInputModel();
-                ModelAttribute attribute1 = model.getAttributeById(componentAttribute.getAttributeId());
+                ModelAttrib attribute1 = model.getAttributeById(componentAttribute.getAttributeId());
                 if (attribute1 == null) {
                     /*
                      * invalid attribute. model must have changed. lets remove
@@ -189,15 +189,15 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
                 }
             }
 
-            for (ComponentAttributeSetting componentAttributeSetting : toRemove) {
+            for (ComponentAttribSetting componentAttributeSetting : toRemove) {
                 componentAttributes.remove(componentAttributeSetting);
                 context.getConfigurationService().delete(componentAttributeSetting);
             }
 
             for (ModelEntity entity : component.getInputModel().getModelEntities()) {
-                for (ModelAttribute attr : entity.getModelAttributes()) {
+                for (ModelAttrib attr : entity.getModelAttributes()) {
                     boolean found = false;
-                    for (ComponentAttributeSetting componentAttribute : componentAttributes) {
+                    for (ComponentAttribSetting componentAttribute : componentAttributes) {
                         if (componentAttribute.getAttributeId().equals(attr.getId())
                                 && componentAttribute.getName().equals(Transformer.TRANSFORM_EXPRESSION)) {
                             found = true;
@@ -206,19 +206,19 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
                     }
                     if (!found) {
                         componentAttributes
-                                .add(new ComponentAttributeSetting(attr.getId(), component.getId(), Transformer.TRANSFORM_EXPRESSION, null));
+                                .add(new ComponentAttribSetting(attr.getId(), component.getId(), Transformer.TRANSFORM_EXPRESSION, null));
                     }
                 }
             }
 
-            Collections.sort(componentAttributes, new Comparator<ComponentAttributeSetting>() {
+            Collections.sort(componentAttributes, new Comparator<ComponentAttribSetting>() {
                 @Override
-                public int compare(ComponentAttributeSetting o1, ComponentAttributeSetting o2) {
+                public int compare(ComponentAttribSetting o1, ComponentAttribSetting o2) {
                     Model model = component.getInputModel();
-                    ModelAttribute attribute1 = model.getAttributeById(o1.getAttributeId());
+                    ModelAttrib attribute1 = model.getAttributeById(o1.getAttributeId());
                     ModelEntity entity1 = model.getEntityById(attribute1.getEntityId());
 
-                    ModelAttribute attribute2 = model.getAttributeById(o2.getAttributeId());
+                    ModelAttrib attribute2 = model.getAttributeById(o2.getAttributeId());
                     ModelEntity entity2 = model.getEntityById(attribute2.getEntityId());
 
                     int compare = entity1.getName().compareTo(entity2.getName());
@@ -261,16 +261,16 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
                 table.removeAllItems();
                 // loop through the attributes with transforms to get a list of
                 // entities
-                for (ComponentAttributeSetting componentAttribute : componentAttributes) {
-                    ModelAttribute attribute = model.getAttributeById(componentAttribute.getAttributeId());
+                for (ComponentAttribSetting componentAttribute : componentAttributes) {
+                    ModelAttrib attribute = model.getAttributeById(componentAttribute.getAttributeId());
                     ModelEntity entity = model.getEntityById(attribute.getEntityId());
                     if (isNotBlank(componentAttribute.getValue()) && !entityNames.contains(entity.getName())) {
                         entityNames.add(entity.getName());
                     }
                 }
 
-                for (ComponentAttributeSetting componentAttribute : componentAttributes) {
-                    ModelAttribute attribute = model.getAttributeById(componentAttribute.getAttributeId());
+                for (ComponentAttribSetting componentAttribute : componentAttributes) {
+                    ModelAttrib attribute = model.getAttributeById(componentAttribute.getAttributeId());
                     ModelEntity entity = model.getEntityById(attribute.getEntityId());
 
                     boolean populated = (showPopulatedEntities && entityNames.contains(entity.getName()))
@@ -308,16 +308,16 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
                 exportTable.removeAllItems();
                 // loop through the attributes with transforms to get a list of
                 // entities
-                for (ComponentAttributeSetting componentAttribute : componentAttributes) {
-                    ModelAttribute attribute = model.getAttributeById(componentAttribute.getAttributeId());
+                for (ComponentAttribSetting componentAttribute : componentAttributes) {
+                    ModelAttrib attribute = model.getAttributeById(componentAttribute.getAttributeId());
                     ModelEntity entity = model.getEntityById(attribute.getEntityId());
                     if (isNotBlank(componentAttribute.getValue()) && !entityNames.contains(entity.getName())) {
                         entityNames.add(entity.getName());
                     }
                 }
 
-                for (ComponentAttributeSetting componentAttribute : componentAttributes) {
-                    ModelAttribute attribute = model.getAttributeById(componentAttribute.getAttributeId());
+                for (ComponentAttribSetting componentAttribute : componentAttributes) {
+                    ModelAttrib attribute = model.getAttributeById(componentAttribute.getAttributeId());
                     ModelEntity entity = model.getEntityById(attribute.getEntityId());
 
                     boolean populated = (showPopulatedEntities && entityNames.contains(entity.getName()))
@@ -337,7 +337,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
     public class Record {
         ModelEntity modelEntity;
 
-        ModelAttribute modelAttribute;
+        ModelAttrib modelAttribute;
 
         String entityName = "";
 
@@ -345,7 +345,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
 
         String value = "";
 
-        public Record(ModelEntity modelEntity, ModelAttribute modelAttribute) {
+        public Record(ModelEntity modelEntity, ModelAttrib modelAttribute) {
             this.modelEntity = modelEntity;
             this.modelAttribute = modelAttribute;
 
@@ -355,7 +355,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
 
             if (modelAttribute != null) {
                 this.attributeName = modelAttribute.getName();
-                ComponentAttributeSetting setting = component.getSingleAttributeSetting(modelAttribute.getId(),
+                ComponentAttribSetting setting = component.getSingleAttributeSetting(modelAttribute.getId(),
                         Transformer.TRANSFORM_EXPRESSION);
                 if (setting != null) {
                     this.value = setting.getValue();
@@ -387,7 +387,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
     class EditFieldFactory implements TableFieldFactory {
         public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId,
                 com.vaadin.ui.Component uiContext) {
-            final ComponentAttributeSetting setting = (ComponentAttributeSetting) itemId;
+            final ComponentAttribSetting setting = (ComponentAttribSetting) itemId;
             Field<?> field = null;
 
             if (propertyId.equals("value") && (setting.getValue() == null || !setting.getValue().contains("\n"))) {
@@ -420,7 +420,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         
         AceEditor editor;
 
-        public EditTransformWindow(ComponentAttributeSetting setting) {
+        public EditTransformWindow(ComponentAttribSetting setting) {
             super("Transform");
             setWidth(800f, Unit.PIXELS);
             setHeight(600f, Unit.PIXELS);

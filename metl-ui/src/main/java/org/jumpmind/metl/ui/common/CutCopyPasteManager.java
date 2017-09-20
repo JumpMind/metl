@@ -11,11 +11,11 @@ import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.ProjectVersion;
-import org.jumpmind.metl.core.model.ProjectVersionDependency;
+import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
@@ -183,8 +183,8 @@ public class CutCopyPasteManager {
     }
 
     private boolean dependencyExists(String oldProjectVersionId, String newProjectVersionId) {
-        List<ProjectVersionDependency> existingDependencies = configurationService.findProjectDependencies(oldProjectVersionId);
-        for (ProjectVersionDependency dependency : existingDependencies) {
+        List<ProjectVersionDepends> existingDependencies = configurationService.findProjectDependencies(oldProjectVersionId);
+        for (ProjectVersionDepends dependency : existingDependencies) {
             if (dependency.getTargetProjectVersionId().equalsIgnoreCase(newProjectVersionId)) {
                 return true;
             }
@@ -194,7 +194,7 @@ public class CutCopyPasteManager {
     
     private void createNewProjectDependency(String oldProjectVersionId, String newProjectVersionId) {
         ProjectVersion newPvn = configurationService.findProjectVersion(newProjectVersionId);
-        ProjectVersionDependency pvd = new ProjectVersionDependency();
+        ProjectVersionDepends pvd = new ProjectVersionDepends();
         pvd.setProjectVersionId(oldProjectVersionId);
         pvd.setTargetProjectVersionId(newProjectVersionId);
         pvd.setRowId(UUID.randomUUID().toString());
@@ -297,9 +297,9 @@ public class CutCopyPasteManager {
 
     private List<String> getDependentProjectVersionIds(String projectVersionId) {
         List<String> dependentProjectVersionIds = new ArrayList<String>();
-        List<ProjectVersionDependency> projectDependencies = configurationService
+        List<ProjectVersionDepends> projectDependencies = configurationService
                 .findProjectDependencies(projectVersionId);
-        for (ProjectVersionDependency projectDependency : projectDependencies) {
+        for (ProjectVersionDepends projectDependency : projectDependencies) {
             dependentProjectVersionIds.add(projectDependency.getTargetProjectVersionId());
         }
         return dependentProjectVersionIds;
@@ -475,8 +475,8 @@ public class CutCopyPasteManager {
         for (ModelEntity oldEntity : oldModel.getModelEntities()) {
             ModelEntity newEntity = newModel.getEntityByName(oldEntity.getName());
             oldToNewUUIDMapping.put(oldEntity.getId(), newEntity);
-            for (ModelAttribute oldAttribute : oldEntity.getModelAttributes()) {
-                ModelAttribute newAttribute = newModel.getAttributeByName(oldEntity.getName(),
+            for (ModelAttrib oldAttribute : oldEntity.getModelAttributes()) {
+                ModelAttrib newAttribute = newModel.getAttributeByName(oldEntity.getName(),
                         oldAttribute.getName());
                 oldToNewUUIDMapping.put(oldAttribute.getId(), newAttribute);
             }
@@ -528,11 +528,11 @@ public class CutCopyPasteManager {
 
     private boolean modelAttributesMatchAcrossEntities(ModelEntity entity1, ModelEntity entity2) {
         boolean matches = true;
-        List<ModelAttribute> attributes1 = entity1.getModelAttributes();
-        List<ModelAttribute> attributes2 = entity2.getModelAttributes();
-        for (ModelAttribute attribute1 : attributes1) {
+        List<ModelAttrib> attributes1 = entity1.getModelAttributes();
+        List<ModelAttrib> attributes2 = entity2.getModelAttributes();
+        for (ModelAttrib attribute1 : attributes1) {
             boolean foundMatch = false;
-            for (ModelAttribute attribute2 : attributes2) {
+            for (ModelAttrib attribute2 : attributes2) {
                 if (attribute1.getName().equalsIgnoreCase(attribute2.getName())) {
                     foundMatch = true;
                     break;

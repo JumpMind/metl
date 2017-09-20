@@ -24,7 +24,7 @@ public class Notification extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
 
-    public enum Level { 
+    public enum NotificationLevel { 
         GLOBAL, AGENT, DEPLOYMENT 
     }
     
@@ -60,13 +60,13 @@ public class Notification extends AbstractNamedObject {
     
     boolean enabled;
 
-    public static EventType[] getEventTypesForLevel(String level) {
+    public static EventType[] getEventTypesForLevel(String notificationLevel) {
         EventType[] eventTypes = null;
-        if (level.equals(Level.GLOBAL.toString())) {
+        if (notificationLevel.equals(NotificationLevel.GLOBAL.toString())) {
             eventTypes = GLOBAL_EVENT_TYPES;
-        } else if (level.equals(Level.AGENT.toString())) {
+        } else if (notificationLevel.equals(NotificationLevel.AGENT.toString())) {
             eventTypes = AGENT_EVENT_TYPES;
-        } else if (level.equals(Level.DEPLOYMENT.toString())) {
+        } else if (notificationLevel.equals(NotificationLevel.DEPLOYMENT.toString())) {
             eventTypes = Notification.DEPLOYMENT_EVENT_TYPES;
         }
         return eventTypes;
@@ -86,8 +86,8 @@ public class Notification extends AbstractNamedObject {
         return notificationLevel;
     }
 
-    public void setNotificationLevel(String level) {
-        this.notificationLevel = level;
+    public void setNotificationLevel(String notificationLevel) {
+        this.notificationLevel = notificationLevel;
     }
 
     public String getNotifyType() {

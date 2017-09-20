@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentDeploy;
 import org.jumpmind.metl.core.model.AgentDeploymentSummary;
 import org.jumpmind.metl.core.model.AgentName;
 import org.jumpmind.metl.core.model.AgentResource;
@@ -29,11 +29,11 @@ public interface IOperationsService {
 
     public void delete(Agent agent);
 
-    public void delete(AgentDeployment agentDeployment);
+    public void delete(AgentDeploy agentDeployment);
 
     public Agent findAgent(String agentId, boolean includeDeployments);
 
-    public AgentDeployment findAgentDeployment(String id);
+    public AgentDeploy findAgentDeployment(String id);
 
     public List<AgentDeploymentSummary> findAgentDeploymentSummary(String agentId);
 
@@ -47,7 +47,7 @@ public interface IOperationsService {
 
     public List<Notification> findNotificationsForAgent(String agentId);
 
-    public List<Notification> findNotificationsForDeployment(AgentDeployment deployment);
+    public List<Notification> findNotificationsForDeployment(AgentDeploy deployment);
 
     public List<AuditEvent> findAuditEvents(int limit);
     
@@ -91,7 +91,7 @@ public interface IOperationsService {
 
     public void delete(Group group);
     
-    public void save(AgentDeployment agentDeployment);
+    public void save(AgentDeploy agentDeployment);
 
     public List<AgentResourceSetting> findMostRecentDeployedResourceSettings(String agentId, String resourceId);
 }

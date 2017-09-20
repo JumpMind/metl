@@ -39,7 +39,7 @@ import org.jdom2.input.sax.XMLReaders;
 import org.jdom2.xpath.XPathExpression;
 import org.jdom2.xpath.XPathFactory;
 import org.jumpmind.metl.core.model.Component;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -94,9 +94,9 @@ public class XmlParser extends AbstractXMLComponentRuntime {
                 entitySettingsForPath.add(entitySetting);
                 entitySettings.add(entitySetting);
                 
-                List<ComponentAttributeSetting> attributeSettings = component
+                List<ComponentAttribSetting> attributeSettings = component
                         .getAttributeSettingsFor(entitySetting.getSetting().getEntityId());
-                for (ComponentAttributeSetting componentAttributeSetting : attributeSettings) {
+                for (ComponentAttribSetting componentAttributeSetting : attributeSettings) {
                     if (componentAttributeSetting.getName().equals(XML_FORMATTER_XPATH)) {
                         String attributeXPath = componentAttributeSetting.getValue();
                         if (!optimizeForSpeed && attributeXPath.startsWith(entityXPath) && attributeXPath.length() > entityXPath.length()) {
@@ -324,16 +324,16 @@ public class XmlParser extends AbstractXMLComponentRuntime {
 
     class XmlFormatterAttributeSetting {
 
-        ComponentAttributeSetting setting;
+        ComponentAttribSetting setting;
 
         XPathExpression<?> expression;
 
-        XmlFormatterAttributeSetting(ComponentAttributeSetting setting, XPathExpression<?> expression) {
+        XmlFormatterAttributeSetting(ComponentAttribSetting setting, XPathExpression<?> expression) {
             this.setting = setting;
             this.expression = expression;
         }
 
-        public ComponentAttributeSetting getSetting() {
+        public ComponentAttribSetting getSetting() {
             return setting;
         }
 

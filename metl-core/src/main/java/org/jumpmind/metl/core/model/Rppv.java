@@ -21,7 +21,7 @@
 package org.jumpmind.metl.core.model;
 
 
-public class ReleasePackageProjectVersion extends AbstractObject {
+public class Rppv extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
     
@@ -29,10 +29,10 @@ public class ReleasePackageProjectVersion extends AbstractObject {
     
     String projectVersionId;
 
-    public ReleasePackageProjectVersion() {
+    public Rppv() {
     }
     
-    public ReleasePackageProjectVersion(String releasePackageId, String projectVersionId) {
+    public Rppv(String releasePackageId, String projectVersionId) {
         this.releasePackageId = releasePackageId;
         this.projectVersionId = projectVersionId;
     }

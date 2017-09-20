@@ -43,10 +43,10 @@ import org.jumpmind.db.sql.ISqlTransaction;
 import org.jumpmind.db.sql.SqlException;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.sql.UniqueKeyException;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityData.ChangeType;
@@ -244,8 +244,8 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     protected Table createTableFromEntity(ModelEntity entity, String tableName) {
         Table table = new Table();
         table.setName(tableName);
-        List<ModelAttribute> attributes = entity.getModelAttributes();
-        for (ModelAttribute attribute : attributes) {
+        List<ModelAttrib> attributes = entity.getModelAttributes();
+        for (ModelAttrib attribute : attributes) {
             DataType dataType = attribute.getDataType();
             Column column = new Column(attribute.getName());
             if (dataType.isNumeric()) {
@@ -315,7 +315,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
             if (!processedRow) {
                 Model inputModel = getInputModel();
                 for (ModelEntity entity : inputModel.getModelEntities()) {
-                    for (ModelAttribute attribute : entity.getModelAttributes()) {
+                    for (ModelAttrib attribute : entity.getModelAttributes()) {
                         if (inputRow.containsKey(attribute.getId())) {
                             entityNameToBeProcessed = entity.getName();
                         }
@@ -654,7 +654,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 
         public TargetTable(DmlType dmlType, ModelEntity entity, Table table) {
             this.table = table;
-            List<ModelAttribute> attributes = entity.getModelAttributes();
+            List<ModelAttrib> attributes = entity.getModelAttributes();
             String[] columnNames = table.getColumnNames();
             /*
              * 
@@ -663,7 +663,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
              */
             for (String columnName : columnNames) {
                 boolean foundIt = false;
-                for (ModelAttribute attribute : attributes) {
+                for (ModelAttrib attribute : attributes) {
                     if (columnName.equalsIgnoreCase(attribute.getName())) {
                         foundIt = true;
                         break;
@@ -679,8 +679,8 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                  * Remove columns that are not enabled for this dml type
                  * 
                  */
-                for (ModelAttribute attribute : attributes) {
-                    ComponentAttributeSetting setting = getComponent().getSingleAttributeSetting(attribute.getId(),
+                for (ModelAttrib attribute : attributes) {
+                    ComponentAttribSetting setting = getComponent().getSingleAttributeSetting(attribute.getId(),
                             dmlType == DmlType.INSERT ? ATTRIBUTE_INSERT_ENABLED : ATTRIBUTE_UPDATE_ENABLED);
                     if (setting != null && !Boolean.parseBoolean(setting.getValue())) {
                         table.removeColumn(table.findColumn(attribute.getName()));
@@ -689,7 +689,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
             }
             statement = databasePlatform.createDmlStatement(dmlType, table, null);
             for (Column column : table.getColumns()) {
-                ModelAttribute attr = entity.getModelAttributeByName(column.getName());
+                ModelAttrib attr = entity.getModelAttributeByName(column.getName());
                 if (attr != null) {
                     if (column.isPrimaryKey()) {
                         keyTargetColumns.add(new TargetColumn(attr, column));
@@ -734,21 +734,21 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     }
 
     class TargetColumn {
-        ModelAttribute modelAttribute;
+        ModelAttrib modelAttribute;
         Column column;
         boolean insertEnabled = true;
         boolean updateEnabled = true;
 
-        TargetColumn(ModelAttribute modelAttribute, Column column) {
+        TargetColumn(ModelAttrib modelAttribute, Column column) {
             this.modelAttribute = modelAttribute;
             this.column = column;
-            ComponentAttributeSetting insertAttr = getComponent().getSingleAttributeSetting(modelAttribute.getId(), ATTRIBUTE_INSERT_ENABLED);
+            ComponentAttribSetting insertAttr = getComponent().getSingleAttributeSetting(modelAttribute.getId(), ATTRIBUTE_INSERT_ENABLED);
             insertEnabled = insertAttr != null ? Boolean.parseBoolean(insertAttr.getValue()) : true;
-            ComponentAttributeSetting updateAttr = getComponent().getSingleAttributeSetting(modelAttribute.getId(), ATTRIBUTE_UPDATE_ENABLED);
+            ComponentAttribSetting updateAttr = getComponent().getSingleAttributeSetting(modelAttribute.getId(), ATTRIBUTE_UPDATE_ENABLED);
             updateEnabled = updateAttr != null ? Boolean.parseBoolean(updateAttr.getValue()) : true;
         }
 
-        public ModelAttribute getModelAttribute() {
+        public ModelAttrib getModelAttribute() {
             return modelAttribute;
         }
 

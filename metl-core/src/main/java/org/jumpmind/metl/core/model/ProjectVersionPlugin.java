@@ -6,7 +6,7 @@ import org.eclipse.aether.util.version.GenericVersionScheme;
 import org.eclipse.aether.version.InvalidVersionSpecificationException;
 import org.eclipse.aether.version.Version;
 
-public class ProjectVersionDefinitionPlugin extends Plugin implements Serializable {
+public class ProjectVersionPlugin extends Plugin implements Serializable {
 
     private static final long serialVersionUID = 1L;
     
@@ -20,7 +20,7 @@ public class ProjectVersionDefinitionPlugin extends Plugin implements Serializab
     boolean enabled = true;
     boolean pinVersion = false;
 
-    public ProjectVersionDefinitionPlugin() {
+    public ProjectVersionPlugin() {
     }
     
     public void setDefinitionName(String definitionName) {
@@ -136,7 +136,7 @@ public class ProjectVersionDefinitionPlugin extends Plugin implements Serializab
             return false;
         if (getClass() != obj.getClass())
             return false;
-        ProjectVersionDefinitionPlugin other = (ProjectVersionDefinitionPlugin) obj;
+        ProjectVersionPlugin other = (ProjectVersionPlugin) obj;
         if (definitionType == null) {
             if (other.definitionType != null)
                 return false;

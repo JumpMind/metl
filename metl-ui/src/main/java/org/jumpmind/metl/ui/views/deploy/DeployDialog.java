@@ -6,14 +6,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jumpmind.metl.core.model.AgentDeployment;
-import org.jumpmind.metl.core.model.AgentFlowDeploymentParameter;
+import org.jumpmind.metl.core.model.AgentDeploy;
+import org.jumpmind.metl.core.model.AgentFlowDeployParm;
 import org.jumpmind.metl.core.model.AgentResourceSetting;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FlowParameter;
 import org.jumpmind.metl.core.model.ReleasePackage;
-import org.jumpmind.metl.core.model.ReleasePackageProjectVersion;
+import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IOperationsService;
@@ -149,8 +149,8 @@ public class DeployDialog extends ResizableWindow {
         List<FlowName> flows = new ArrayList<FlowName>();
         
         for (ReleasePackage releasePackage : releasePackages) {
-            List<ReleasePackageProjectVersion> rppvs = configurationService.findReleasePackageProjectVersions(releasePackage.getId());
-            for (ReleasePackageProjectVersion rppv : rppvs) {
+            List<Rppv> rppvs = configurationService.findReleasePackageProjectVersions(releasePackage.getId());
+            for (Rppv rppv : rppvs) {
                 flows.addAll(configurationService.findFlowsInProject(rppv.getProjectVersionId(), false));
             }                    
         }        
@@ -198,7 +198,7 @@ public class DeployDialog extends ResizableWindow {
         for (int i=0; i<container.size();i++) {
             DeploymentLine line = container.getIdByIndex(i);
             Flow flow = configurationService.findFlow(line.getNewFlowId());
-            AgentDeployment existingDeployment = operationsService.findAgentDeployment(line.getExistingDeploymentId());                
+            AgentDeploy existingDeployment = operationsService.findAgentDeployment(line.getExistingDeploymentId());                
             deployFlow(flow, line.newDeployName, line.upgrade, existingDeployment);                
         }   
         deployResourceSettings(selectPackagePanel.getSelectedPackages());
@@ -212,12 +212,12 @@ public class DeployDialog extends ResizableWindow {
     }
     
     protected void processReleasePackageResources(ReleasePackage releasePackage) {
-        for (ReleasePackageProjectVersion rppv : releasePackage.getProjectVersions()) {
+        for (Rppv rppv : releasePackage.getProjectVersions()) {
             processProjectVersionResources(rppv);
         }
     }
     
-    protected void processProjectVersionResources(ReleasePackageProjectVersion rppv) {
+    protected void processProjectVersionResources(Rppv rppv) {
         List<ResourceName> newResources = configurationService.findResourcesInProject(rppv.getProjectVersionId());
         Map<String, List<AgentResourceSetting>> agentResourceSettingsMap = buildAgentResourceSettingsMap(newResources);        
         for (ResourceName newResource : newResources) {
@@ -249,16 +249,16 @@ public class DeployDialog extends ResizableWindow {
     }
 
     protected void deployFlow(Flow flow, String deployName, boolean upgrade, 
-            AgentDeployment existingDeployment) {
+            AgentDeploy existingDeployment) {
         
-        AgentDeployment newDeploy = new AgentDeployment();
+        AgentDeploy newDeploy = new AgentDeploy();
         newDeploy.setAgentId(parentPanel.getAgent().getId());
         newDeploy.setName(deployName);
         newDeploy.setFlowId(flow.getId());
-        List<AgentFlowDeploymentParameter> newDeployParams = newDeploy.getAgentDeploymentParameters();
+        List<AgentFlowDeployParm> newDeployParams = newDeploy.getAgentDeploymentParms();
         //initialize from the flow.  If upgrading replace with agent values
         for (FlowParameter flowParam : flow.getFlowParameters()) {
-            AgentFlowDeploymentParameter deployParam = new AgentFlowDeploymentParameter();
+            AgentFlowDeployParm deployParam = new AgentFlowDeployParm();
             deployParam.setFlowId(flowParam.getFlowId());
             deployParam.setAgentDeploymentId(newDeploy.getId());
             deployParam.setName(flowParam.getName());
@@ -266,12 +266,12 @@ public class DeployDialog extends ResizableWindow {
             newDeployParams.add(deployParam);
         }            
         if (upgrade) {
-            List<AgentFlowDeploymentParameter> existingDeployParams = existingDeployment.getAgentDeploymentParameters();
+            List<AgentFlowDeployParm> existingDeployParams = existingDeployment.getAgentDeploymentParms();
             Map<String, String> existingDeployParamsMap = new HashMap<String, String>();
-            for (AgentFlowDeploymentParameter existingDeployParam : existingDeployParams) {
+            for (AgentFlowDeployParm existingDeployParam : existingDeployParams) {
                 existingDeployParamsMap.put(existingDeployParam.getName(), existingDeployParam.getValue());                
             }
-            for (AgentFlowDeploymentParameter newDeployParam : newDeployParams) {
+            for (AgentFlowDeployParm newDeployParam : newDeployParams) {
                 newDeployParam.setValue(existingDeployParamsMap.get(newDeployParam.getName()));
             }
             operationsService.delete(existingDeployment);
@@ -291,8 +291,8 @@ public class DeployDialog extends ResizableWindow {
 
     protected String getName(String name) {
         for (Object deployment : parentPanel.getAgentDeploymentSummary()) {
-            if (deployment instanceof AgentDeployment) {
-                AgentDeployment agentDeployment = (AgentDeployment) deployment;
+            if (deployment instanceof AgentDeploy) {
+                AgentDeploy agentDeployment = (AgentDeploy) deployment;
                 if (name.equals(agentDeployment.getName())) {
                     if (name.matches(".*\\([0-9]+\\)$")) {
                         String num = name.substring(name.lastIndexOf("(") + 1, name.lastIndexOf(")"));

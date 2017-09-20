@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
-import org.jumpmind.metl.core.model.ProjectVersionDefinitionPlugin;
+import org.jumpmind.metl.core.model.ProjectVersionPlugin;
 
 public interface IPluginService {
 
@@ -24,6 +24,6 @@ public interface IPluginService {
 
     public void delete(Plugin plugin);
     
-    public void delete(ProjectVersionDefinitionPlugin plugin);
+    public void delete(ProjectVersionPlugin plugin);
 
 }

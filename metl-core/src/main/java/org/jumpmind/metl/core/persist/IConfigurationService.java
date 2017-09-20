@@ -34,22 +34,22 @@ import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.FolderName;
 import org.jumpmind.metl.core.model.FolderType;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
-import org.jumpmind.metl.core.model.ProjectVersionDefinitionPlugin;
-import org.jumpmind.metl.core.model.ProjectVersionDependency;
+import org.jumpmind.metl.core.model.ProjectVersionPlugin;
+import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.model.ReleasePackage;
-import org.jumpmind.metl.core.model.ReleasePackageProjectVersion;
+import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
 
 public interface IConfigurationService {
 
-    public List<ProjectVersionDefinitionPlugin> findProjectVersionComponentPlugins(String projectVersionId);
+    public List<ProjectVersionPlugin> findProjectVersionComponentPlugins(String projectVersionId);
 
     public void doInBackground();
     
@@ -73,11 +73,11 @@ public interface IConfigurationService {
 
     public List<Flow> findAffectedFlowsByResource(String resourceId);
     
-    public List<ProjectVersionDependency> findProjectDependenciesThatTarget(String projectVersionId);
+    public List<ProjectVersionDepends> findProjectDependenciesThatTarget(String projectVersionId);
 
     public List<ComponentName> findComponentsInProject(String projectVersionId);
 
-    public void save(ProjectVersionDefinitionPlugin projectVersionComponentPlugin);
+    public void save(ProjectVersionPlugin projectVersionComponentPlugin);
 
     public void delete(AbstractObject obj);
 
@@ -85,7 +85,7 @@ public interface IConfigurationService {
 
     public void delete(ModelEntity modelEntity);
 
-    public void delete(ModelAttribute modelAttribute);
+    public void delete(ModelAttrib modelAttribute);
 
     public List<String> findAllProjectVersionIds();
 
@@ -109,7 +109,7 @@ public interface IConfigurationService {
     
     public List<ModelName> findModels();
     
-    public List<ProjectVersionDependency> findProjectVersionDependencies();
+    public List<ProjectVersionDepends> findProjectVersionDependencies();
 
     public List<Folder> findFolders(String projectVersionId, FolderType type);
 
@@ -117,7 +117,7 @@ public interface IConfigurationService {
 
     public Model findModel(String id);
     
-    public List<ProjectVersionDependency> findProjectDependencies(String projectVersionId);
+    public List<ProjectVersionDepends> findProjectDependencies(String projectVersionId);
     
     public List<FlowName> findFlowsInProject(String projectVersionId, boolean testFlows);
 
@@ -203,11 +203,11 @@ public interface IConfigurationService {
     
     public void deleteReleasePackageProjectVersionsForReleasePackage(String releasePackageId);
 
-    public List<ReleasePackageProjectVersion> findReleasePackageProjectVersions(String releasePackageId);
+    public List<Rppv> findReleasePackageProjectVersions(String releasePackageId);
     
     public void refresh(ReleasePackage releasePackage);
     
-    public void updateProjectVersionDependency(ProjectVersionDependency dependency, String newTargetProjectVersionId);
+    public void updateProjectVersionDependency(ProjectVersionDepends dependency, String newTargetProjectVersionId);
     
     public void backupDatabase(String filePath);
 

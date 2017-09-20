@@ -33,9 +33,9 @@ import javax.script.ScriptException;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -64,8 +64,8 @@ public class Transformer extends AbstractComponentRuntime {
     public void start() {
         transformsByAttributeId.clear();
         
-        List<ComponentAttributeSetting> settings = getComponent().getAttributeSettings();
-        for (ComponentAttributeSetting setting : settings) {
+        List<ComponentAttribSetting> settings = getComponent().getAttributeSettings();
+        for (ComponentAttribSetting setting : settings) {
             if (setting.getName().equals(TRANSFORM_EXPRESSION)) {
                 if (isNotBlank(setting.getValue())) {
                     transformsByAttributeId.put(setting.getAttributeId(), setting.getValue());
@@ -84,11 +84,11 @@ public class Transformer extends AbstractComponentRuntime {
         Model inputModel = getComponent().getInputModel();
         Set<String> attributeIds = data.keySet();
         for (String attributeId : attributeIds) {
-            ModelAttribute attribute = inputModel.getAttributeById(attributeId);
+            ModelAttrib attribute = inputModel.getAttributeById(attributeId);
             if (attribute != null) {
                 ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
-                List<ModelAttribute> attributes = entity.getModelAttributes();
-                for (ModelAttribute modelAttribute : attributes) {
+                List<ModelAttrib> attributes = entity.getModelAttributes();
+                for (ModelAttrib modelAttribute : attributes) {
                     allAttributesForIncludedEntities.add(modelAttribute.getId());
                 }
             } else {
@@ -124,7 +124,7 @@ public class Transformer extends AbstractComponentRuntime {
 						String transform = transformsByAttributeId.get(attributeId);
 						Object value = inData.get(attributeId);
 						if (isNotBlank(transform)) {
-							ModelAttribute attribute = inputModel.getAttributeById(attributeId);
+							ModelAttrib attribute = inputModel.getAttributeById(attributeId);
 							ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
 							
 

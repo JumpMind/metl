@@ -36,9 +36,9 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.jumpmind.metl.core.model.ProjectVersion;
-import org.jumpmind.metl.core.model.ProjectVersionDependency;
+import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.model.ReleasePackage;
-import org.jumpmind.metl.core.model.ReleasePackageProjectVersion;
+import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IImportExportService;
 import org.jumpmind.metl.core.persist.ReleasePackageProjectVersionSorter;
@@ -205,7 +205,7 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
         while (itr.hasNext()) {
             ReleasePackage releasePackage = (ReleasePackage) itr.next();
             if (releasePackage.getReleaseDate() != null) {
-                for (ReleasePackageProjectVersion rppv : releasePackage.getProjectVersions()) {
+                for (Rppv rppv : releasePackage.getProjectVersions()) {
                     ProjectVersion projectVersion = configurationService
                             .findProjectVersion(rppv.getProjectVersionId());
                     projectVersion.setArchived(true);
@@ -252,9 +252,9 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
                 releasePackage.setReleaseDate(new Date());
                 releasePackage.setReleased(true);
                 configurationService.save(releasePackage);
-                List<ReleasePackageProjectVersion> rppvs = new ReleasePackageProjectVersionSorter(configurationService).sort(releasePackage);
+                List<Rppv> rppvs = new ReleasePackageProjectVersionSorter(configurationService).sort(releasePackage);
                 Map<String, String> projectVersionDependenciesMap = new HashMap<>();
-                for (ReleasePackageProjectVersion rppv : rppvs) {
+                for (Rppv rppv : rppvs) {
                     ProjectVersion original = configurationService.findProjectVersion(rppv.getProjectVersionId());
                     if (original.getVersionType()
                             .equalsIgnoreCase(ProjectVersion.VersionType.MASTER.toString())) {
@@ -277,10 +277,10 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
                 }
                 
                 for (String releasedProjectVersionId : projectVersionDependenciesMap.keySet()) {
-                    List<ProjectVersionDependency> needsUpdated = configurationService.findProjectDependenciesThatTarget(releasedProjectVersionId);
-                    for (ProjectVersionDependency projectVersionDependency : needsUpdated) {
+                    List<ProjectVersionDepends> needsUpdated = configurationService.findProjectDependenciesThatTarget(releasedProjectVersionId);
+                    for (ProjectVersionDepends projectVersionDependency : needsUpdated) {
                         boolean isInRelease = false;
-                        for (ReleasePackageProjectVersion rppv2 : rppvs) {
+                        for (Rppv rppv2 : rppvs) {
                             if (rppv2.getProjectVersionId().equals(projectVersionDependency.getProjectVersionId())) {
                                 isInRelease = true;
                             }

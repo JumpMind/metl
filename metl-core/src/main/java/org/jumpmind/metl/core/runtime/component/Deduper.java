@@ -25,9 +25,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.jumpmind.metl.core.model.Component;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
@@ -79,8 +79,8 @@ public class Deduper extends AbstractComponentRuntime {
         if (DEDUPE_ATTRIBUTE.equals(dedupeType)) {
         	List<ModelEntity> entities = new ArrayList<>(inputModel.getModelEntities());
             for (ModelEntity entity : entities) {
-                for (ModelAttribute attribute : entity.getModelAttributes()) {
-                	ComponentAttributeSetting matchColumnSetting = component.getSingleAttributeSetting(attribute.getId(),
+                for (ModelAttrib attribute : entity.getModelAttributes()) {
+                	ComponentAttribSetting matchColumnSetting = component.getSingleAttributeSetting(attribute.getId(),
                             Deduper.ATTRIBUTE_DEDUPE_ENABLED);
                     boolean matchColumn = matchColumnSetting != null
                             ? Boolean.parseBoolean(matchColumnSetting.getValue()) : false;

@@ -34,7 +34,7 @@ import java.util.Map;
 import org.jumpmind.metl.core.model.EntityRow;
 import org.jumpmind.metl.core.model.EntityTable;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
@@ -89,7 +89,7 @@ public class Serializer extends AbstractSerializer {
             for (EntityData entityData : payload) {
                 for (ModelEntity entity : inputModel.getModelEntities()) {
                     EntityRow row = null;
-                    for (ModelAttribute attribute : entity.getModelAttributes()) {
+                    for (ModelAttrib attribute : entity.getModelAttributes()) {
                         if (entityData.containsKey(attribute.getId())) {
                             if (row == null) {
                                 row = new EntityRow(entity.getName(),

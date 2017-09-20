@@ -47,11 +47,11 @@ import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.ResettableBasicDataSource;
 import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.Component;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData.ChangeType;
@@ -175,7 +175,7 @@ public class DataDiff extends AbstractComponentRuntime {
             chgSql.append(" from " + entity.getName() + "_1 orig join " + entity.getName()
                     + "_2 curr on ");
             boolean secondPk = false;
-            for (ModelAttribute attribute : entity.getModelAttributes()) {
+            for (ModelAttrib attribute : entity.getModelAttributes()) {
                 if (attribute.isPk()) {
                     if (secondPk) {
                         addSql.append(" and ");
@@ -197,7 +197,7 @@ public class DataDiff extends AbstractComponentRuntime {
             chgSql.append(" where ");
             secondPk = false;
             boolean secondCol = false;
-            for (ModelAttribute attribute : entity.getModelAttributes()) {
+            for (ModelAttrib attribute : entity.getModelAttributes()) {
                 if (attribute.isPk()) {
                     if (secondPk) {
                         addSql.append(" or ");
@@ -207,7 +207,7 @@ public class DataDiff extends AbstractComponentRuntime {
                     delSql.append("curr.").append(getFormattedName(attribute)).append(" is null");
                     secondPk = true;
                 } else {
-                    ComponentAttributeSetting matchColumnSetting = component
+                    ComponentAttribSetting matchColumnSetting = component
                             .getSingleAttributeSetting(attribute.getId(),
                                     DataDiff.ATTRIBUTE_COMPARE_ENABLED);
                     boolean matchColumn = matchColumnSetting != null
@@ -320,10 +320,10 @@ public class DataDiff extends AbstractComponentRuntime {
     }
 
     protected void appendColumns(StringBuilder sql, String prefix, ModelEntity entity) {
-        for (ModelAttribute attribute : entity.getModelAttributes()) {
+        for (ModelAttrib attribute : entity.getModelAttributes()) {
 
             Component component = context.getFlowStep().getComponent();
-            ComponentAttributeSetting matchColumnSetting = component.getSingleAttributeSetting(
+            ComponentAttribSetting matchColumnSetting = component.getSingleAttributeSetting(
                     attribute.getId(), DataDiff.ATTRIBUTE_COMPARE_ENABLED);
             boolean matchColumn = matchColumnSetting != null
                     ? Boolean.parseBoolean(matchColumnSetting.getValue()) : true;
@@ -386,8 +386,8 @@ public class DataDiff extends AbstractComponentRuntime {
             for (ModelEntity entity : entities) {
                 Table table = new Table();
                 table.setName(entity.getName() + "_1");
-                List<ModelAttribute> attributes = entity.getModelAttributes();
-                for (ModelAttribute attribute : attributes) {
+                List<ModelAttrib> attributes = entity.getModelAttributes();
+                for (ModelAttrib attribute : attributes) {
                     DataType dataType = attribute.getDataType();
                     Column column = new Column(attribute.getName());
                     if (dataType.isNumeric()) {

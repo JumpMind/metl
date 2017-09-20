@@ -33,7 +33,7 @@ import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -126,14 +126,14 @@ public class ContentRouterTest {
 
     private static Model createInputModel() {
         ModelEntity tt1 = new ModelEntity("tt1", "TEST_TABLE_1");
-        tt1.addModelAttribute(new ModelAttribute("tt1col1", tt1.getId(), "COL1"));
-        tt1.addModelAttribute(new ModelAttribute("tt1col2", tt1.getId(), "COL2"));
-        tt1.addModelAttribute(new ModelAttribute("tt1col3", tt1.getId(), "COL3"));
+        tt1.addModelAttribute(new ModelAttrib("tt1col1", tt1.getId(), "COL1"));
+        tt1.addModelAttribute(new ModelAttrib("tt1col2", tt1.getId(), "COL2"));
+        tt1.addModelAttribute(new ModelAttrib("tt1col3", tt1.getId(), "COL3"));
 
         ModelEntity tt2 = new ModelEntity("tt2", "TEST_TABLE_2");
-        tt2.addModelAttribute(new ModelAttribute("tt2colx", tt2.getId(), "COLX"));
-        tt2.addModelAttribute(new ModelAttribute("tt2coly", tt2.getId(), "COLY"));
-        tt2.addModelAttribute(new ModelAttribute("tt2colz", tt2.getId(), "COLZ"));
+        tt2.addModelAttribute(new ModelAttrib("tt2colx", tt2.getId(), "COLX"));
+        tt2.addModelAttribute(new ModelAttrib("tt2coly", tt2.getId(), "COLY"));
+        tt2.addModelAttribute(new ModelAttrib("tt2colz", tt2.getId(), "COLZ"));
 
         Model modelVersion = new Model();
         modelVersion.getModelEntities().add(tt1);

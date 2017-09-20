@@ -18,7 +18,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jumpmind.exception.IoException;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -79,8 +79,8 @@ public class ExcelFileReader extends AbstractFileReader {
     private void convertAttributeSettingsToMaps() {
         worksheetColumnListMap = new HashMap<String, String[]>();
         worsheetsToRead = new HashSet<String>();
-        List<ComponentAttributeSetting> attributeSettings = getComponent().getAttributeSettings();
-        for (ComponentAttributeSetting attributeSetting : attributeSettings) {
+        List<ComponentAttribSetting> attributeSettings = getComponent().getAttributeSettings();
+        for (ComponentAttribSetting attributeSetting : attributeSettings) {
             String[] attributeValues = attributeSetting.getValue().split(":");
             if (attributeValues.length != 2) {
                 throw new MisconfiguredException(

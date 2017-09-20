@@ -12,7 +12,7 @@ import java.util.Properties;
 import org.jumpmind.db.sql.LogSqlBuilder;
 import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.persist.IConfigurationService;
@@ -103,8 +103,8 @@ public class MockJdbcDriver extends com.mockrunner.mock.jdbc.MockDriver {
                         List<ModelEntity> entities = model.getModelEntities();
                         for (ModelEntity modelEntity : entities) {
                             if (modelEntity.getName().equals(tableNamePattern)) {
-                                List<ModelAttribute> attributes = modelEntity.getModelAttributes();
-                                for (ModelAttribute attribute : attributes) {
+                                List<ModelAttrib> attributes = modelEntity.getModelAttributes();
+                                for (ModelAttrib attribute : attributes) {
                                     DataType type = attribute.getDataType();
                                     int typeNumber = Types.VARCHAR;
                                     if (type.isBinary()) {
@@ -141,8 +141,8 @@ public class MockJdbcDriver extends com.mockrunner.mock.jdbc.MockDriver {
                         List<ModelEntity> entities = model.getModelEntities();
                         for (ModelEntity modelEntity : entities) {
                             if (modelEntity.getName().equals(table)) {
-                                List<ModelAttribute> attributes = modelEntity.getModelAttributes();
-                                for (ModelAttribute attribute : attributes) {
+                                List<ModelAttrib> attributes = modelEntity.getModelAttributes();
+                                for (ModelAttrib attribute : attributes) {
                                     columns.addRow(new Object[] { table, attribute.getName(), attribute.isPk() });
                                 }
                                 break;

@@ -10,7 +10,7 @@ import org.jumpmind.db.sql.ISqlTemplate;
 import org.jumpmind.db.sql.Row;
 import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
-import org.jumpmind.metl.core.model.ProjectVersionDefinitionPlugin;
+import org.jumpmind.metl.core.model.ProjectVersionPlugin;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.persist.IPersistenceManager;
 
@@ -66,7 +66,7 @@ public class PluginService extends AbstractService implements IPluginService {
                 "         , v.artifact_name\n" + 
                 "         , p.load_order \n" + 
                 "      from \n" + 
-                "         metl_project_version_definition_plugin v \n" + 
+                "         metl_project_version_plugin v \n" + 
                 "         left join  metl_plugin p \n" + 
                 "            on v.artifact_name=p.artifact_name \n" + 
                 "            and v.artifact_group=p.artifact_group \n" + 
@@ -89,7 +89,7 @@ public class PluginService extends AbstractService implements IPluginService {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         return template.query(String.format(
                 "select artifact_group, artifact_name, artifact_version from %1$s_plugin p where not exists "
-                        + "(select 1 from %1$s_project_version_definition_plugin v where "
+                        + "(select 1 from %1$s_project_version_plugin v where "
                         + "v.artifact_name=p.artifact_name and v.artifact_group=p.artifact_group and v.artifact_version=p.artifact_version) ",
                 tablePrefix), new ISqlRowMapper<Plugin>() {
                     public Plugin mapRow(Row row) {
@@ -111,8 +111,8 @@ public class PluginService extends AbstractService implements IPluginService {
     }
     
     @Override
-    public void delete(ProjectVersionDefinitionPlugin projectVersionDefinitionPlugin) {
-        persistenceManager.delete(projectVersionDefinitionPlugin, null, null, tableName(ProjectVersionDefinitionPlugin.class));
+    public void delete(ProjectVersionPlugin projectVersionDefinitionPlugin) {
+        persistenceManager.delete(projectVersionDefinitionPlugin, null, null, tableName(ProjectVersionPlugin.class));
     }
 
 

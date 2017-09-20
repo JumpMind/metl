@@ -23,7 +23,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentDeploy;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.persist.IConfigurationService;
@@ -71,7 +71,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
 
     ApplicationContext context;
 
-    AgentDeployment deployment;
+    AgentDeploy deployment;
 
     ReqRespTabSheet requestTabs;
 
@@ -97,7 +97,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
 
     PasswordField passwordField;
 
-    public CallWebServicePanel(AgentDeployment deployment, ApplicationContext context,
+    public CallWebServicePanel(AgentDeploy deployment, ApplicationContext context,
             TabbedPanel tabs) {
         this.deployment = deployment;
         this.context = context;

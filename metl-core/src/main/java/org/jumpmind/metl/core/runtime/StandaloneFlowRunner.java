@@ -41,7 +41,7 @@ import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.BasicDataSourcePropertyConstants;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
 import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentDeploy;
 import org.jumpmind.metl.core.model.Execution;
 import org.jumpmind.metl.core.model.ExecutionStatus;
 import org.jumpmind.metl.core.model.ExecutionStep;
@@ -138,7 +138,7 @@ public class StandaloneFlowRunner {
         broker.setPersistent(false);
         try {
             broker.start();
-            AgentDeployment deployment = agentRuntime.deploy(configurationService.findFlow(flow.getId()), new HashMap<>());
+            AgentDeploy deployment = agentRuntime.deploy(configurationService.findFlow(flow.getId()), new HashMap<>());
             FlowRuntime runtime = agentRuntime.createFlowRuntime("standalone", deployment, new HashMap<>());
             runtime.execute();
             return runtime.getExecutionId();

@@ -40,8 +40,8 @@ import java.util.concurrent.ScheduledFuture;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.model.AgentDeployment;
-import org.jumpmind.metl.core.model.AgentFlowDeploymentParameter;
+import org.jumpmind.metl.core.model.AgentDeploy;
+import org.jumpmind.metl.core.model.AgentFlowDeployParm;
 import org.jumpmind.metl.core.model.AgentProjectVersionFlowDeployment;
 import org.jumpmind.metl.core.model.AgentStatus;
 import org.jumpmind.metl.core.model.DeploymentStatus;
@@ -51,7 +51,7 @@ import org.jumpmind.metl.core.model.FlowParameter;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Notification;
 import org.jumpmind.metl.core.model.ProjectVersion;
-import org.jumpmind.metl.core.model.ProjectVersionDependency;
+import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.StartType;
@@ -91,7 +91,7 @@ public class AgentRuntime {
 
     boolean stopping = false;
 
-    Map<AgentDeployment, ScheduledFuture<?>> scheduledDeployments = Collections.synchronizedMap(new HashMap<>());
+    Map<AgentDeploy, ScheduledFuture<?>> scheduledDeployments = Collections.synchronizedMap(new HashMap<>());
 
     Map<String, IResourceRuntime> deployedResources = Collections.synchronizedMap(new HashMap<>());
 
@@ -119,7 +119,7 @@ public class AgentRuntime {
     
     ISubscribeManager subscribeManager;
 
-    Map<AgentDeployment, List<FlowRuntime>> runningFlows = Collections.synchronizedMap(new HashMap<>());
+    Map<AgentDeploy, List<FlowRuntime>> runningFlows = Collections.synchronizedMap(new HashMap<>());
 
     public AgentRuntime(Agent agent, IOperationsService operationsService, IConfigurationService configurationService,
             IExecutionService executionService, IComponentRuntimeFactory componentFactory, IDefinitionFactory definitionFactory,
@@ -190,8 +190,8 @@ public class AgentRuntime {
 
             this.globalSettings = operationsService.findGlobalSettingsAsMap();
 
-            List<AgentDeployment> deployments = new ArrayList<AgentDeployment>(agent.getAgentDeployments());
-            for (AgentDeployment deployment : deployments) {
+            List<AgentDeploy> deployments = new ArrayList<AgentDeploy>(agent.getAgentDeployments());
+            for (AgentDeploy deployment : deployments) {
                 deploy(deployment);
             }
 
@@ -206,7 +206,7 @@ public class AgentRuntime {
         }
     }
 
-    protected AgentProjectVersionFlowDeployment createAgentProjectVersionFlowDeployment(AgentDeployment deployment) {
+    protected AgentProjectVersionFlowDeployment createAgentProjectVersionFlowDeployment(AgentDeploy deployment) {
         Flow flow = configurationService.findFlow(deployment.getFlowId());
         ProjectVersion projectVersion = configurationService.findProjectVersion(flow.getProjectVersionId());
         return new AgentProjectVersionFlowDeployment(deployment, flow, projectVersion);
@@ -218,8 +218,8 @@ public class AgentRuntime {
 
             agentRequestHandler.cancel(true);
 
-            List<AgentDeployment> deployments = new ArrayList<AgentDeployment>(agent.getAgentDeployments());
-            for (AgentDeployment deployment : deployments) {
+            List<AgentDeploy> deployments = new ArrayList<AgentDeploy>(agent.getAgentDeployments());
+            for (AgentDeploy deployment : deployments) {
                 stop(deployment, null);
             }
 
@@ -255,11 +255,11 @@ public class AgentRuntime {
         return started;
     }
 
-    public synchronized AgentDeployment deploy(Flow flow, Map<String, String> parameters) {
-        AgentDeployment deployment = agent.getAgentDeploymentFor(flow);
+    public synchronized AgentDeploy deploy(Flow flow, Map<String, String> parameters) {
+        AgentDeploy deployment = agent.getAgentDeploymentFor(flow);
         if (deployment == null) {
             ProjectVersion projectVersion = configurationService.findProjectVersion(flow.getProjectVersionId());
-            deployment = new AgentDeployment();
+            deployment = new AgentDeploy();
             deployment.setFlowId(flow.getId());
             deployment.setName(flow.getName());
             deployment.setStatus(DeploymentStatus.REQUEST_ENABLE.name());
@@ -271,8 +271,8 @@ public class AgentRuntime {
                 if (parameters != null && parameters.containsKey(flowParameter.getName())) {
                     value = parameters.get(flowParameter.getName());
                 }
-                deployment.getAgentDeploymentParameters()
-                        .add(new AgentFlowDeploymentParameter(flowParameter.getName(), value, deployment.getId(), flowParameter.getId()));
+                deployment.getAgentDeploymentParms()
+                        .add(new AgentFlowDeployParm(flowParameter.getName(), value, deployment.getId(), flowParameter.getId()));
 
             }
 
@@ -280,7 +280,7 @@ public class AgentRuntime {
             agent.getAgentDeployments().add(deployment);
             operationsService.save(deployment);
 
-            List<AgentDeployment> deployments = agent.getAgentDeployments();
+            List<AgentDeploy> deployments = agent.getAgentDeployments();
             deployments.remove(deployment);
             deployments.add(deployment);
 
@@ -292,7 +292,7 @@ public class AgentRuntime {
         return deployment;
     }
 
-    protected void deploy(AgentDeployment deployment) {
+    protected void deploy(AgentDeploy deployment) {
         Flow flow = configurationService.findFlow(deployment.getFlowId());
         ProjectVersion projectVersion = configurationService.findProjectVersion(flow.getProjectVersionId());
         if (!projectVersion.isDeleted()) {
@@ -303,7 +303,7 @@ public class AgentRuntime {
         }
     }
 
-    private void deploy(AgentDeployment deployment, Flow flow, ProjectVersion projectVersion) {
+    private void deploy(AgentDeploy deployment, Flow flow, ProjectVersion projectVersion) {
         DeploymentStatus status = deployment.getDeploymentStatus();
         if (!status.equals(DeploymentStatus.DISABLED) && !status.equals(DeploymentStatus.REQUEST_DISABLE)
                 && !status.equals(DeploymentStatus.REQUEST_REMOVE)) {
@@ -341,7 +341,7 @@ public class AgentRuntime {
         }
     }
 
-    protected void deployResources(AgentDeployment deployment) {
+    protected void deployResources(AgentDeploy deployment) {
         Flow flow = configurationService.findFlow(deployment.getFlowId());
         deployResources(flow);
     }
@@ -349,8 +349,8 @@ public class AgentRuntime {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void deployResources(Flow flow) {
         List<ResourceName> flowResourceNames = new ArrayList<>(configurationService.findResourcesInProject(flow.getProjectVersionId()));
-        List<ProjectVersionDependency> dependencies = configurationService.findProjectDependencies(flow.getProjectVersionId());
-        for (ProjectVersionDependency projectVersionDependency : dependencies) {
+        List<ProjectVersionDepends> dependencies = configurationService.findProjectDependencies(flow.getProjectVersionId());
+        for (ProjectVersionDepends projectVersionDependency : dependencies) {
             flowResourceNames.addAll(configurationService.findResourcesInProject(projectVersionDependency.getTargetProjectVersionId()));
         }
 
@@ -455,23 +455,23 @@ public class AgentRuntime {
         }
     }
 
-    public String scheduleNow(String userId, AgentDeployment deployment) {
+    public String scheduleNow(String userId, AgentDeploy deployment) {
         return scheduleNow(userId, deployment, null);
     }
 
-    public FlowRuntime createFlowRuntime(String userId, AgentDeployment deployment, Map<String, String> runtimeParameters) throws Exception {
+    public FlowRuntime createFlowRuntime(String userId, AgentDeploy deployment, Map<String, String> runtimeParameters) throws Exception {
         String executionId = createExecutionId();
         return new FlowRuntime(executionId, userId, findDeployed(deployment), agent, componentRuntimeFactory, definitionFactory,
                 flowStepsExecutionThreads, operationsService, configurationService, executionService, deployedResources, null, globalSettings,
                 runtimeParameters);
     }
 
-    public Results execute(String userId, AgentDeployment deployment, Map<String, String> runtimeParameters) throws Exception {
+    public Results execute(String userId, AgentDeploy deployment, Map<String, String> runtimeParameters) throws Exception {
         log.info("Executing '{}' on '{}' for now", new Object[] { deployment.getName(), agent.getName() });
         return createFlowRuntime(userId, deployment, runtimeParameters).execute();
     }
 
-    public String scheduleNow(String userId, AgentDeployment deployment, Map<String, String> runtimeParameters) {
+    public String scheduleNow(String userId, AgentDeploy deployment, Map<String, String> runtimeParameters) {
         log.info("Scheduling '{}' on '{}' for now", new Object[] { deployment.getName(), agent.getName() });
         if (agent.isAutoRefresh()) {
             deployResources(deployment);
@@ -481,7 +481,7 @@ public class AgentRuntime {
         return executionId;
     }
 
-    protected void stop(AgentDeployment deployment, DeploymentStatus nextStatus) {
+    protected void stop(AgentDeploy deployment, DeploymentStatus nextStatus) {
         ScheduledFuture<?> future = scheduledDeployments.get(deployment);
         if (future != null) {
             future.cancel(true);
@@ -516,7 +516,7 @@ public class AgentRuntime {
 
     }
 
-    private final void logWithFlowName(LogLevel level, String msg, AgentDeployment deployment, Exception e) {
+    private final void logWithFlowName(LogLevel level, String msg, AgentDeploy deployment, Exception e) {
         AgentProjectVersionFlowDeployment agentProjectVersionFlowDeployment = findDeployed(deployment);
         if (agentProjectVersionFlowDeployment != null) {
             if (LogLevel.INFO == level) {
@@ -535,7 +535,7 @@ public class AgentRuntime {
         return new HashSet<IResourceRuntime>(deployedResources.values());
     }
 
-    protected AgentProjectVersionFlowDeployment findDeployed(AgentDeployment deployment) {
+    protected AgentProjectVersionFlowDeployment findDeployed(AgentDeploy deployment) {
         for (AgentProjectVersionFlowDeployment agentProjectVersionFlowDeployment : deployed) {
             if (agentProjectVersionFlowDeployment.getAgentDeployment().equals(deployment)) {
                 return agentProjectVersionFlowDeployment;
@@ -544,7 +544,7 @@ public class AgentRuntime {
         return null;
     }
 
-    public synchronized void undeploy(AgentDeployment deployment) {
+    public synchronized void undeploy(AgentDeploy deployment) {
         AgentProjectVersionFlowDeployment agentProjectVersionFlowDeployment = findDeployed(deployment);
         if (agentProjectVersionFlowDeployment != null) {
             stop(deployment, null);
@@ -553,14 +553,14 @@ public class AgentRuntime {
         agent.getAgentDeployments().remove(deployment);
     }
 
-    private void removeFromRunning(AgentDeployment deployment, FlowRuntime flowRuntime) {
+    private void removeFromRunning(AgentDeploy deployment, FlowRuntime flowRuntime) {
         List<FlowRuntime> flows = runningFlows.get(deployment);
         if (flows != null) {
             flows.remove(flowRuntime);
         }
     }
 
-    private void addToRunning(AgentDeployment deployment, FlowRuntime flowRuntime) {
+    private void addToRunning(AgentDeploy deployment, FlowRuntime flowRuntime) {
         List<FlowRuntime> flows = runningFlows.get(deployment);
         if (flows == null) {
             synchronized (runningFlows) {
@@ -636,7 +636,7 @@ public class AgentRuntime {
         public void run() {
             synchronized (AgentRuntime.this) {
                 agent = operationsService.findAgent(agent.getId(), true);
-                for (AgentDeployment deployment : new HashSet<AgentDeployment>(agent.getAgentDeployments())) {
+                for (AgentDeploy deployment : new HashSet<AgentDeploy>(agent.getAgentDeployments())) {
                     FlowName flow = configurationService.findFlowName(deployment.getFlowId());
                     ProjectVersion projectVersion = configurationService.findProjectVersion(flow.getProjectVersionId());
                     if (!projectVersion.isDeleted()) {

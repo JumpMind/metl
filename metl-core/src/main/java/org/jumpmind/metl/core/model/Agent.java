@@ -49,7 +49,7 @@ public class Agent extends AbstractNamedObject {
 
     boolean autoRefresh = true;
 
-    List<AgentDeployment> agentDeployments;
+    List<AgentDeploy> agentDeployments;
 
     List<AgentResourceSetting> agentResourceSettings;
 
@@ -146,11 +146,11 @@ public class Agent extends AbstractNamedObject {
         this.heartbeatTime = heartbeatTime;
     }
 
-    public List<AgentDeployment> getAgentDeployments() {
+    public List<AgentDeploy> getAgentDeployments() {
         return agentDeployments;
     }
 
-    public void setAgentDeployments(List<AgentDeployment> agentDeployments) {
+    public void setAgentDeployments(List<AgentDeploy> agentDeployments) {
         this.agentDeployments = agentDeployments;
     }
 
@@ -191,8 +191,8 @@ public class Agent extends AbstractNamedObject {
         return folder != null && DESIGN_FOLDER_NAME.equals(folder.getName());
     }
 
-    public AgentDeployment getAgentDeploymentFor(Flow flow) {
-        for (AgentDeployment agentDeployment : agentDeployments) {
+    public AgentDeploy getAgentDeploymentFor(Flow flow) {
+        for (AgentDeploy agentDeployment : agentDeployments) {
             if (isNotBlank(agentDeployment.getFlowId()) && agentDeployment.getFlowId().equals(flow.getId())) {
                 return agentDeployment;
             }

@@ -27,7 +27,7 @@ public class ModelEntity extends AbstractNamedObject implements IAuditable {
 
     private static final long serialVersionUID = 1L;
 
-    List<ModelAttribute> modelAttributes;
+    List<ModelAttrib> modelAttributes;
 
     String modelId;
 
@@ -36,7 +36,7 @@ public class ModelEntity extends AbstractNamedObject implements IAuditable {
     String description;
 
     public ModelEntity() {
-        modelAttributes = new ArrayList<ModelAttribute>();
+        modelAttributes = new ArrayList<ModelAttrib>();
     }
 
     public ModelEntity(String id, String name) {
@@ -45,25 +45,25 @@ public class ModelEntity extends AbstractNamedObject implements IAuditable {
         this.name = name;
     }
 
-    public List<ModelAttribute> getModelAttributes() {
+    public List<ModelAttrib> getModelAttributes() {
         return modelAttributes;
     }
 
-    public void setModelAttributes(List<ModelAttribute> modelAttributes) {
+    public void setModelAttributes(List<ModelAttrib> modelAttributes) {
         this.modelAttributes = modelAttributes;
     }
 
-    public void addModelAttribute(ModelAttribute modelAttribute) {
+    public void addModelAttribute(ModelAttrib modelAttribute) {
         modelAttribute.setAttributeOrder(modelAttributes.size());
         this.modelAttributes.add(modelAttribute);
     }
 
-    public void removeModelAttribute(ModelAttribute modelAttribute) {
+    public void removeModelAttribute(ModelAttrib modelAttribute) {
         this.modelAttributes.remove(modelAttribute);
     }
 
-    public ModelAttribute getModelAttributeByName(String name) {
-        for (ModelAttribute modelAttribute : modelAttributes) {
+    public ModelAttrib getModelAttributeByName(String name) {
+        for (ModelAttrib modelAttribute : modelAttributes) {
             if (modelAttribute.getName().equalsIgnoreCase(name)) {
                 return modelAttribute;
             }
@@ -97,7 +97,7 @@ public class ModelEntity extends AbstractNamedObject implements IAuditable {
 
     public boolean hasOnlyPrimaryKeys() {
         boolean pksOnly = true;
-        for (ModelAttribute modelAttribute : modelAttributes) {
+        for (ModelAttrib modelAttribute : modelAttributes) {
             pksOnly &= modelAttribute.isPk();
         }
         return pksOnly;

@@ -7,12 +7,12 @@ import java.util.Date;
 import java.util.List;
 
 import org.jumpmind.metl.core.model.Component;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -98,26 +98,26 @@ public class FixedLengthFormatterTest {
     }
     
     
-    private static List<ComponentAttributeSetting> createAttributeSettings() { 
+    private static List<ComponentAttribSetting> createAttributeSettings() { 
         
-        List<ComponentAttributeSetting> attributeSettings = new ArrayList<ComponentAttributeSetting>();
-        attributeSettings.add(new ComponentAttributeSetting("tt1col1", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL, "20"));
-        attributeSettings.add(new ComponentAttributeSetting("tt1col1", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH, "10"));
+        List<ComponentAttribSetting> attributeSettings = new ArrayList<ComponentAttribSetting>();
+        attributeSettings.add(new ComponentAttribSetting("tt1col1", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL, "20"));
+        attributeSettings.add(new ComponentAttribSetting("tt1col1", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH, "10"));
         
-        attributeSettings.add(new ComponentAttributeSetting("tt1col2", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL, "10"));
-        attributeSettings.add(new ComponentAttributeSetting("tt1col2", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH, "10"));
+        attributeSettings.add(new ComponentAttribSetting("tt1col2", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL, "10"));
+        attributeSettings.add(new ComponentAttribSetting("tt1col2", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH, "10"));
         
-        attributeSettings.add(new ComponentAttributeSetting("tt1col3", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL, "100"));
-        attributeSettings.add(new ComponentAttributeSetting("tt1col3", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH, "10"));
+        attributeSettings.add(new ComponentAttribSetting("tt1col3", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL, "100"));
+        attributeSettings.add(new ComponentAttribSetting("tt1col3", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH, "10"));
         
-        attributeSettings.add(new ComponentAttributeSetting("tt2col1", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL, "120"));
-        attributeSettings.add(new ComponentAttributeSetting("tt2col1", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH, "10"));
+        attributeSettings.add(new ComponentAttribSetting("tt2col1", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL, "120"));
+        attributeSettings.add(new ComponentAttribSetting("tt2col1", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH, "10"));
         
-        attributeSettings.add(new ComponentAttributeSetting("tt2col2", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL, "30"));
-        attributeSettings.add(new ComponentAttributeSetting("tt2col2", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH, "10"));
+        attributeSettings.add(new ComponentAttribSetting("tt2col2", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL, "30"));
+        attributeSettings.add(new ComponentAttribSetting("tt2col2", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH, "10"));
         
-        attributeSettings.add(new ComponentAttributeSetting("tt2col3", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL, "50"));
-        attributeSettings.add(new ComponentAttributeSetting("tt2col3", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH, "10"));
+        attributeSettings.add(new ComponentAttribSetting("tt2col3", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL, "50"));
+        attributeSettings.add(new ComponentAttribSetting("tt2col3", FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH, "10"));
                 
         return attributeSettings;
         
@@ -126,14 +126,14 @@ public class FixedLengthFormatterTest {
     private static Model createInputModel() {
 
         ModelEntity tt1 = new ModelEntity("tt1", "TEST_TABLE_1");
-        tt1.addModelAttribute(new ModelAttribute("tt1col1", tt1.getId(), "COL1"));
-        tt1.addModelAttribute(new ModelAttribute("tt1col2", tt1.getId(), "COL2"));
-        tt1.addModelAttribute(new ModelAttribute("tt1col3", tt1.getId(), "COL3"));
+        tt1.addModelAttribute(new ModelAttrib("tt1col1", tt1.getId(), "COL1"));
+        tt1.addModelAttribute(new ModelAttrib("tt1col2", tt1.getId(), "COL2"));
+        tt1.addModelAttribute(new ModelAttrib("tt1col3", tt1.getId(), "COL3"));
 
         ModelEntity tt2 = new ModelEntity("tt2", "TEST_TABLE_2");
-        tt2.addModelAttribute(new ModelAttribute("tt2col1", tt1.getId(), "COLX"));
-        tt2.addModelAttribute(new ModelAttribute("tt2col2", tt1.getId(), "COLY"));
-        tt2.addModelAttribute(new ModelAttribute("tt2col3", tt1.getId(), "COLZ"));
+        tt2.addModelAttribute(new ModelAttrib("tt2col1", tt1.getId(), "COLX"));
+        tt2.addModelAttribute(new ModelAttrib("tt2col2", tt1.getId(), "COLY"));
+        tt2.addModelAttribute(new ModelAttrib("tt2col3", tt1.getId(), "COLZ"));
 
         Model model = new Model();
         model.getModelEntities().add(tt1);

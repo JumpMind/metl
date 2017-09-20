@@ -27,9 +27,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.Merger;
 import org.jumpmind.metl.ui.common.ButtonBar;
@@ -88,7 +88,7 @@ public class EditMergerPanel extends AbstractComponentEditPanel {
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 AttributeSettings setting = (AttributeSettings) itemId;
                 Model model = component.getInputModel();
-                ModelAttribute attribute = model.getAttributeById(setting.getAttributeId());
+                ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
                 ModelEntity entity = model.getEntityById(attribute.getEntityId());
                 return UiUtils.getName(filterField.getValue(), entity.getName());
             }
@@ -99,7 +99,7 @@ public class EditMergerPanel extends AbstractComponentEditPanel {
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 AttributeSettings setting = (AttributeSettings) itemId;
                 Model model = component.getInputModel();
-                ModelAttribute attribute = model.getAttributeById(setting.getAttributeId());
+                ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
                 return UiUtils.getName(filterField.getValue(), attribute.getName());
             }
         });
@@ -115,8 +115,8 @@ public class EditMergerPanel extends AbstractComponentEditPanel {
         if (component.getInputModel() != null) {
 
             for (ModelEntity entity : component.getInputModel().getModelEntities()) {
-                for (ModelAttribute attr : entity.getModelAttributes()) {
-                    ComponentAttributeSetting joinOn = component.getSingleAttributeSetting(attr.getId(), Merger.MERGE_ATTRIBUTE);
+                for (ModelAttrib attr : entity.getModelAttributes()) {
+                    ComponentAttribSetting joinOn = component.getSingleAttributeSetting(attr.getId(), Merger.MERGE_ATTRIBUTE);
 
                     boolean join = joinOn != null ? Boolean.parseBoolean(joinOn.getValue()) : false;
                     attributeSettings.add(new AttributeSettings(attr.getId(), join));
@@ -127,10 +127,10 @@ public class EditMergerPanel extends AbstractComponentEditPanel {
                 @Override
                 public int compare(AttributeSettings o1, AttributeSettings o2) {
                     Model model = component.getInputModel();
-                    ModelAttribute attribute1 = model.getAttributeById(o1.getAttributeId());
+                    ModelAttrib attribute1 = model.getAttributeById(o1.getAttributeId());
                     ModelEntity entity1 = model.getEntityById(attribute1.getEntityId());
 
-                    ModelAttribute attribute2 = model.getAttributeById(o2.getAttributeId());
+                    ModelAttrib attribute2 = model.getAttributeById(o2.getAttributeId());
                     ModelEntity entity2 = model.getEntityById(attribute2.getEntityId());
 
                     int compare = entity1.getName().compareTo(entity2.getName());
@@ -151,7 +151,7 @@ public class EditMergerPanel extends AbstractComponentEditPanel {
         table.removeAllItems();
         for (AttributeSettings attributeSetting : attributeSettings) {
             Model model = component.getInputModel();
-            ModelAttribute attribute = model.getAttributeById(attributeSetting.getAttributeId());
+            ModelAttrib attribute = model.getAttributeById(attributeSetting.getAttributeId());
             ModelEntity entity = model.getEntityById(attribute.getEntityId());
             if (isBlank(filter) || entity.getName().toLowerCase().contains(filter) || attribute.getName().toLowerCase().contains(filter)) {
                 table.addItem(attributeSetting);
@@ -179,11 +179,11 @@ public class EditMergerPanel extends AbstractComponentEditPanel {
 
             @Override
             public void valueChange(ValueChangeEvent event) {
-                ComponentAttributeSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(), key);
+                ComponentAttribSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(), key);
 
                 String oldValue = setting == null ? Boolean.FALSE.toString() : setting.getValue();
                 if (setting == null) {
-                    setting = new ComponentAttributeSetting(settings.getAttributeId(), component.getId(), key, Boolean.TRUE.toString());
+                    setting = new ComponentAttribSetting(settings.getAttributeId(), component.getId(), key, Boolean.TRUE.toString());
                     component.addAttributeSetting(setting);
                 }
                 setting.setValue(checkBox.getValue().toString());

@@ -32,7 +32,7 @@ import java.util.UUID;
 import org.apache.commons.lang.ObjectUtils;
 import org.h2.Driver;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -50,7 +50,7 @@ import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.ResettableBasicDataSource;
 import org.jumpmind.metl.core.model.Component;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.DataType;
 
 public class Sorter extends AbstractComponentRuntime {
@@ -71,7 +71,7 @@ public class Sorter extends AbstractComponentRuntime {
     
     String sortAttributeId;
 
-    ArrayList<ComponentAttributeSetting> sortKeyAttributeIdList = new ArrayList<>();
+    ArrayList<ComponentAttribSetting> sortKeyAttributeIdList = new ArrayList<>();
     
     List<EntityData> sortedRecords = new ArrayList<EntityData>();
     
@@ -97,8 +97,8 @@ public class Sorter extends AbstractComponentRuntime {
         if (sortAttribute == null || sortAttribute.isEmpty()) {
         	entitySort = false;
             for (ModelEntity entity : entities) {
-                for (ModelAttribute attribute : entity.getModelAttributes()) {
-                	ComponentAttributeSetting matchColumnSetting = component.getSingleAttributeSetting(attribute.getId(),
+                for (ModelAttrib attribute : entity.getModelAttributes()) {
+                	ComponentAttribSetting matchColumnSetting = component.getSingleAttributeSetting(attribute.getId(),
                             Sorter.SORTER_ATTRIBUTE_ORDINAL);
                     int matchColumn = matchColumnSetting != null
                             ? Integer.parseInt(matchColumnSetting.getValue()) : 0;
@@ -116,12 +116,12 @@ public class Sorter extends AbstractComponentRuntime {
 	        }
 	        sortAttributeId = inputModel.getAttributeByName(joinAttributeElements[0],
 	                joinAttributeElements[1]).getId();
-	        ComponentAttributeSetting attributeComponent = new ComponentAttributeSetting(sortAttributeId, Sorter.SORTER_ATTRIBUTE_ORDINAL, "1");
+	        ComponentAttribSetting attributeComponent = new ComponentAttribSetting(sortAttributeId, Sorter.SORTER_ATTRIBUTE_ORDINAL, "1");
 	    	sortKeyAttributeIdList.add(attributeComponent);
 	    }
 
-        Collections.sort(sortKeyAttributeIdList, new Comparator<ComponentAttributeSetting>() {
-            public int compare(ComponentAttributeSetting o1, ComponentAttributeSetting o2) {
+        Collections.sort(sortKeyAttributeIdList, new Comparator<ComponentAttribSetting>() {
+            public int compare(ComponentAttribSetting o1, ComponentAttribSetting o2) {
                 return new Integer(Integer.parseInt(o1.getValue())==0?999999:Integer.parseInt(o1.getValue())).compareTo
                 		(new Integer(Integer.parseInt(o2.getValue())==0?999999:Integer.parseInt(o2.getValue())));
             }
@@ -210,8 +210,8 @@ public class Sorter extends AbstractComponentRuntime {
 			sql.append(" from " + entity.getName() + "_1 ");
 			
 			// check to see if any one attribute of the entity is flagged to sort by before adding the 'order by' clause 
-			for (ComponentAttributeSetting componentAttribute : sortKeyAttributeIdList) {
-				for (ModelAttribute attribute : entity.getModelAttributes()) {
+			for (ComponentAttribSetting componentAttribute : sortKeyAttributeIdList) {
+				for (ModelAttrib attribute : entity.getModelAttributes()) {
 					if (componentAttribute.getAttributeId().equals(attribute.getId())) {
 						addOrderBy = true;
 						break;
@@ -256,7 +256,7 @@ public class Sorter extends AbstractComponentRuntime {
 
 	
 	protected void appendColumns(StringBuilder sql, ModelEntity entity) {
-		for (ModelAttribute attribute : entity.getModelAttributes()) {
+		for (ModelAttrib attribute : entity.getModelAttributes()) {
 			sql.append(attribute.getName()).append(" /* ")
 				.append(entity.getName()).append(".").append(attribute.getName())
 				.append(" */").append(",");
@@ -266,8 +266,8 @@ public class Sorter extends AbstractComponentRuntime {
 
 
 	protected void appendSortColumns(StringBuilder sql, ModelEntity entity) {
-		for (ComponentAttributeSetting componentAttribute : sortKeyAttributeIdList) {
-			for (ModelAttribute attribute : entity.getModelAttributes()) {
+		for (ComponentAttribSetting componentAttribute : sortKeyAttributeIdList) {
+			for (ModelAttrib attribute : entity.getModelAttributes()) {
 				if (componentAttribute.getAttributeId().equals(attribute.getId())) {
 					sql.append(attribute.getName()).append(",");
 					break;
@@ -317,8 +317,8 @@ public class Sorter extends AbstractComponentRuntime {
 			for (ModelEntity entity : entities) {
 				Table table = new Table();
 				table.setName(entity.getName() + "_1");
-				List<ModelAttribute> attributes = entity.getModelAttributes();
-				for (ModelAttribute attribute : attributes) {
+				List<ModelAttrib> attributes = entity.getModelAttributes();
+				for (ModelAttrib attribute : attributes) {
 					DataType dataType = attribute.getDataType();
 					Column column = new Column(attribute.getName());
 					if (dataType.isNumeric()) {

@@ -30,7 +30,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentDeploy;
 import org.jumpmind.metl.core.model.AgentDeploymentSummary;
 import org.jumpmind.metl.core.model.AgentName;
 import org.jumpmind.metl.core.model.Execution;
@@ -310,8 +310,8 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
                     params.put("agentId", ((AgentName) currentSelection).getId());
                 } else if (currentSelection instanceof FlowName) {
                     params.put("flowId", ((FlowName) currentSelection).getId());
-                } else if (currentSelection instanceof AgentDeployment) {
-                    params.put("deploymentId", ((AgentDeployment) currentSelection).getId());
+                } else if (currentSelection instanceof AgentDeploy) {
+                    params.put("deploymentId", ((AgentDeploy) currentSelection).getId());
                 } else if (currentSelection instanceof AgentDeploymentSummary) {
                     params.put("deploymentId", ((AgentDeploymentSummary) currentSelection).getId());
                 }

@@ -20,23 +20,23 @@
  */
 package org.jumpmind.metl.core.model;
 
-public class ComponentAttributeSetting extends Setting implements IAuditable {
+public class ComponentAttribSetting extends Setting implements IAuditable {
 
     private static final long serialVersionUID = 1L;
 
     String componentId;
     String attributeId;
 
-    public ComponentAttributeSetting() {
+    public ComponentAttribSetting() {
     }
     
-    public ComponentAttributeSetting(String attributeId, String componentId, String name, String value) {
+    public ComponentAttribSetting(String attributeId, String componentId, String name, String value) {
         super(name, value);
         this.componentId = componentId;
         this.attributeId = attributeId;
     }
 
-    public ComponentAttributeSetting(String attributeId, String name, String value) {
+    public ComponentAttribSetting(String attributeId, String name, String value) {
         super(name, value);
         this.attributeId = attributeId;
     }

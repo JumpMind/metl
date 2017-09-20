@@ -2,7 +2,7 @@ package org.jumpmind.metl.core.runtime.web;
 
 import java.util.List;
 
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentDeploy;
 
 public interface IHttpRequestMappingRegistry {
     
@@ -12,6 +12,6 @@ public interface IHttpRequestMappingRegistry {
     
     public void unregister(HttpRequestMapping request);
     
-    public List<HttpRequestMapping> getHttpRequestMappingsFor(AgentDeployment deployment);
+    public List<HttpRequestMapping> getHttpRequestMappingsFor(AgentDeploy deployment);
 
 }

@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 
@@ -30,7 +30,7 @@ public class EntityNameLookup {
             for (String attributeId : attributeIds) {
                 String name = cache.get(attributeId);
                 if (isBlank(name)) {
-                    ModelAttribute attribute = model.getAttributeById(attributeId);
+                    ModelAttrib attribute = model.getAttributeById(attributeId);
                     if (attribute != null) {
                         ModelEntity entity = model.getEntityById(attribute.getEntityId());
                         name = entity.getName();

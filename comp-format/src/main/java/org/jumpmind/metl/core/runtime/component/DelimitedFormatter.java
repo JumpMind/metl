@@ -36,9 +36,9 @@ import java.util.Map;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.exception.IoException;
-import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
@@ -172,13 +172,13 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
     }
 
     private void convertAttributeSettingsToAttributeFormat() {
-        List<ComponentAttributeSetting> attributeSettings = getComponent().getAttributeSettings();
+        List<ComponentAttribSetting> attributeSettings = getComponent().getAttributeSettings();
         Map<String, AttributeFormat> formats = new HashMap<String, AttributeFormat>();
-        for (ComponentAttributeSetting attributeSetting : attributeSettings) {
+        for (ComponentAttribSetting attributeSetting : attributeSettings) {
             AttributeFormat format = formats.get(attributeSetting.getAttributeId());
             if (format == null) {
                 Model inputModel = getComponent().getInputModel();
-                ModelAttribute attribute = inputModel.getAttributeById(attributeSetting.getAttributeId());
+                ModelAttrib attribute = inputModel.getAttributeById(attributeSetting.getAttributeId());
                 if (attribute != null) {
                     ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
                     format = new AttributeFormat(attributeSetting.getAttributeId(), entity, attribute);
@@ -205,12 +205,12 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
     private class AttributeFormat {
 
         ModelEntity entity;
-        ModelAttribute attribute;
+        ModelAttrib attribute;
         String attributeId;
         int ordinal;
         String formatFunction;
 
-        public AttributeFormat(String attributeId, ModelEntity entity, ModelAttribute attribute) {
+        public AttributeFormat(String attributeId, ModelEntity entity, ModelAttrib attribute) {
             this.attributeId = attributeId;
             this.entity = entity;
             this.attribute = attribute;
@@ -236,7 +236,7 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
             this.formatFunction = formatFunction;
         }
 
-        public ModelAttribute getAttribute() {
+        public ModelAttrib getAttribute() {
             return attribute;
         }
 

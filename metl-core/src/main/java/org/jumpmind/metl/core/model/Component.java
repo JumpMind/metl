@@ -54,7 +54,7 @@ public class Component extends AbstractObjectWithSettings implements IAuditable 
     
     List<ComponentEntitySetting> entitySettings;
 
-    List<ComponentAttributeSetting> attributeSettings;
+    List<ComponentAttribSetting> attributeSettings;
 
     public Component() {
     }
@@ -66,7 +66,7 @@ public class Component extends AbstractObjectWithSettings implements IAuditable 
 
     public Component(Resource resource, Model inputModel, Model outputModel,
             List<ComponentEntitySetting> entitySettings,
-            List<ComponentAttributeSetting> attributeSettings, Setting... settings) {
+            List<ComponentAttribSetting> attributeSettings, Setting... settings) {
         super(settings);
         this.resource = resource;
         this.inputModel = inputModel;
@@ -192,23 +192,23 @@ public class Component extends AbstractObjectWithSettings implements IAuditable 
         return list;
     }
 
-    public List<ComponentAttributeSetting> getAttributeSettings() {
+    public List<ComponentAttribSetting> getAttributeSettings() {
         return attributeSettings;
     }
 
-    public List<ComponentAttributeSetting> getAttributeSettingsFor(String entityId) {
-        List<ComponentAttributeSetting> settings = new ArrayList<ComponentAttributeSetting>();
-        for (ComponentAttributeSetting setting : attributeSettings) {
+    public List<ComponentAttribSetting> getAttributeSettingsFor(String entityId) {
+        List<ComponentAttribSetting> settings = new ArrayList<ComponentAttribSetting>();
+        for (ComponentAttribSetting setting : attributeSettings) {
             String attributeId = setting.getAttributeId();
             if (inputModel != null) {
-                ModelAttribute attribute = inputModel.getAttributeById(attributeId);
+                ModelAttrib attribute = inputModel.getAttributeById(attributeId);
                 if (attribute != null && attribute.getEntityId().equals(entityId)) {
                     settings.add(setting);
                 }
             }
 
             if (outputModel != null) {
-                ModelAttribute attribute = outputModel.getAttributeById(attributeId);
+                ModelAttrib attribute = outputModel.getAttributeById(attributeId);
                 if (attribute != null && attribute.getEntityId().equals(entityId)
                         && !settings.contains(setting)) {
                     settings.add(setting);
@@ -218,28 +218,28 @@ public class Component extends AbstractObjectWithSettings implements IAuditable 
         return settings;
     }
 
-    public void setAttributeSettings(List<ComponentAttributeSetting> attributeSettings) {
+    public void setAttributeSettings(List<ComponentAttribSetting> attributeSettings) {
         this.attributeSettings = attributeSettings;
     }
 
-    public void addAttributeSetting(ComponentAttributeSetting attributeSetting) {
+    public void addAttributeSetting(ComponentAttribSetting attributeSetting) {
         if (attributeSettings == null) {
-            attributeSettings = new ArrayList<ComponentAttributeSetting>();
+            attributeSettings = new ArrayList<ComponentAttribSetting>();
         }
         attributeSettings.add(attributeSetting);
     }
 
-    public ComponentAttributeSetting getSingleAttributeSetting(String attributeId, String name) {
-        List<ComponentAttributeSetting> list = getAttributeSetting(attributeId, name);
+    public ComponentAttribSetting getSingleAttributeSetting(String attributeId, String name) {
+        List<ComponentAttribSetting> list = getAttributeSetting(attributeId, name);
         if (list.size() > 0) {
             return list.get(0);
         }
         return null;
     }
 
-    public List<ComponentAttributeSetting> getAttributeSetting(String attributeId, String name) {
-        List<ComponentAttributeSetting> list = new ArrayList<ComponentAttributeSetting>();
-        for (ComponentAttributeSetting setting : attributeSettings) {
+    public List<ComponentAttribSetting> getAttributeSetting(String attributeId, String name) {
+        List<ComponentAttribSetting> list = new ArrayList<ComponentAttribSetting>();
+        for (ComponentAttribSetting setting : attributeSettings) {
             if (setting.getAttributeId().equals(attributeId)
                     && setting.getName().equalsIgnoreCase(name)) {
                 list.add(setting);

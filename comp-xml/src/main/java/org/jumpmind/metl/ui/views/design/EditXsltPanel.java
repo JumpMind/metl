@@ -29,7 +29,7 @@ import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -144,7 +144,7 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements TextCha
             for (ModelEntity entity : getMatchingEntities(filterField.getValue())) {
                 EntityData data = new EntityData();
                 inputRows.add(data);
-                for (ModelAttribute attr : entity.getModelAttributes()) {
+                for (ModelAttrib attr : entity.getModelAttributes()) {
                     DataType type = attr.getDataType();
                     Object value = null;
                     if (type.isString()) {
@@ -176,7 +176,7 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements TextCha
                         entities.add(entity);
                         continue;
                     }
-                    for (ModelAttribute attr : entity.getModelAttributes()) {
+                    for (ModelAttrib attr : entity.getModelAttributes()) {
                         if (attr.getName().toUpperCase().indexOf(filterText) != -1) {
                             entities.add(entity);
                             break;

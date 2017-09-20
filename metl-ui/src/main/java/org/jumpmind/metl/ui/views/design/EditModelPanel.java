@@ -33,7 +33,7 @@ import java.util.Set;
 import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelEntitySorter;
 import org.jumpmind.metl.ui.common.ApplicationContext;
@@ -180,9 +180,9 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                                         unique = false;
                                     }
                                 }
-                            } else if (obj instanceof ModelAttribute) {
-                                List<ModelAttribute> attributes = model.getEntityById(((ModelAttribute)obj).getEntityId()).getModelAttributes();
-                                for (ModelAttribute attribute : attributes) {
+                            } else if (obj instanceof ModelAttrib) {
+                                List<ModelAttrib> attributes = model.getEntityById(((ModelAttrib)obj).getEntityId()).getModelAttributes();
+                                for (ModelAttrib attribute : attributes) {
                                     if (!attribute.equals(obj) && attribute.getName().equals(newName)) {
                                         unique = false;
                                     }
@@ -210,8 +210,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
         treeTable.addGeneratedColumn("description", new ColumnGenerator() {
             public Object generateCell(Table source, Object itemId, Object columnId) {
-                if (itemId instanceof ModelAttribute) {
-                    final ModelAttribute obj = (ModelAttribute) itemId;
+                if (itemId instanceof ModelAttrib) {
+                    final ModelAttrib obj = (ModelAttrib) itemId;
                     if (lastEditItemIds.contains(itemId) && !readOnly) {
                         ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
                             protected void save(String text) {
@@ -249,8 +249,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
         treeTable.addGeneratedColumn("type", new ColumnGenerator() {
             public Object generateCell(Table source, Object itemId, Object columnId) {
-                if (itemId instanceof ModelAttribute) {
-                    final ModelAttribute obj = (ModelAttribute) itemId;
+                if (itemId instanceof ModelAttrib) {
+                    final ModelAttrib obj = (ModelAttrib) itemId;
                     if (lastEditItemIds.contains(itemId) && !readOnly) {
                         final ComboBox cbox = new ComboBox();
                         cbox.setNullSelectionAllowed(false);
@@ -293,8 +293,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
         treeTable.addGeneratedColumn("pk", new ColumnGenerator() {
             public Object generateCell(Table source, Object itemId, Object columnId) {
-                if (itemId instanceof ModelAttribute) {
-                    final ModelAttribute obj = (ModelAttribute) itemId;
+                if (itemId instanceof ModelAttrib) {
+                    final ModelAttrib obj = (ModelAttrib) itemId;
                     if (lastEditItemIds.contains(itemId) && !readOnly) {
                         final CheckBox cbox = new CheckBox();
                         cbox.setValue(obj.isPk());
@@ -370,10 +370,10 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
     }
 
     protected void move(boolean down, boolean toEnd) {
-        ModelAttribute selected = (ModelAttribute) getSelected();
+        ModelAttrib selected = (ModelAttrib) getSelected();
         if (selected != null) {
             ModelEntity entity = (ModelEntity) treeTable.getParent(selected);
-            List<ModelAttribute> attributes = entity.getModelAttributes();
+            List<ModelAttrib> attributes = entity.getModelAttributes();
             int index = attributes.indexOf(selected);
             if (down && index < attributes.size() - 1 && !toEnd) {
                 attributes.remove(selected);
@@ -391,7 +391,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
             }
 
             index = 0;
-            for (ModelAttribute modelAttribute : attributes) {
+            for (ModelAttrib modelAttribute : attributes) {
                 modelAttribute.setAttributeOrder(index++);
                 context.getConfigurationService().save(modelAttribute);
             }
@@ -401,7 +401,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                 treeTable.removeItem(object);
             }
 
-            for (ModelAttribute modelAttribute : attributes) {
+            for (ModelAttrib modelAttribute : attributes) {
                 addModelAttribute(entity, modelAttribute);
             }
             treeTable.select(selected);
@@ -445,7 +445,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         UI.getCurrent().addWindow(dialog);
     }
 
-    protected void togglePk(ModelAttribute a) {
+    protected void togglePk(ModelAttrib a) {
         a.setPk(!a.isPk());
         context.getConfigurationService().save(a);
     }
@@ -458,7 +458,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
             editButton.setEnabled(selected.size() > 0);
 
             boolean enableMove = selected.size() == 1
-                    && selected.iterator().next() instanceof ModelAttribute;
+                    && selected.iterator().next() instanceof ModelAttrib;
             moveBottomButton.setEnabled(enableMove);
             moveTopButton.setEnabled(enableMove);
             moveUpButton.setEnabled(enableMove);
@@ -513,7 +513,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
     protected void add(ModelEntity modelEntity) {
         addModelEntity(modelEntity);
-        for (ModelAttribute modelAttribute : modelEntity.getModelAttributes()) {
+        for (ModelAttrib modelAttribute : modelEntity.getModelAttributes()) {
             treeTable.setChildrenAllowed(modelEntity, true);
             modelAttribute.setEntityId(modelEntity.getId());
             addModelAttribute(modelEntity, modelAttribute);
@@ -527,7 +527,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         for (ModelEntity modelEntity : modelEntityList) {
             boolean add = UiUtils.filterMatches(filter, modelEntity.getName());
             if (!add) {
-                for (ModelAttribute modelAttribute : modelEntity.getModelAttributes()) {
+                for (ModelAttrib modelAttribute : modelEntity.getModelAttributes()) {
                     add |= UiUtils.filterMatches(filter, modelAttribute.getName());
                 }
             }
@@ -548,7 +548,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         for (ModelEntity modelEntity : modelEntityList) {
             boolean add = UiUtils.filterMatches(filter, modelEntity.getName());
             if (!add) {
-                for (ModelAttribute modelAttribute : modelEntity.getModelAttributes()) {
+                for (ModelAttrib modelAttribute : modelEntity.getModelAttributes()) {
                     add |= UiUtils.filterMatches(filter, modelAttribute.getName());
                 }
             }
@@ -559,7 +559,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
         Collections.sort(filteredModelEntityList, new ModelEntitySorter());
         for (ModelEntity modelEntity : filteredModelEntityList) {
-            for (ModelAttribute modelAttribute : modelEntity.getModelAttributes()) {
+            for (ModelAttrib modelAttribute : modelEntity.getModelAttributes()) {
                 table.addItem(new Record(modelEntity, modelAttribute));
             }
         }
@@ -571,7 +571,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         treeTable.setChildrenAllowed(modelEntity, false);
     }
 
-    protected void addModelAttribute(ModelEntity entity, ModelAttribute modelAttribute) {
+    protected void addModelAttribute(ModelEntity entity, ModelAttrib modelAttribute) {
         treeTable.addItem(modelAttribute);
         treeTable.setItemIcon(modelAttribute, FontAwesome.COLUMNS);
         treeTable.setChildrenAllowed(entity, true);
@@ -602,14 +602,14 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         public void buttonClick(ClickEvent event) {
             Set<Object> itemIds = getSelectedItems();
             if (itemIds.size() > 0) {
-                ModelAttribute a = new ModelAttribute();
+                ModelAttrib a = new ModelAttrib();
                 a.setName("New Attribute");
                 a.setDataType(DataType.VARCHAR);
                 Object itemId = itemIds.iterator().next();
                 ModelEntity entity = null;
                 if (itemId instanceof ModelEntity) {
                     entity = (ModelEntity) itemId;
-                } else if (itemId instanceof ModelAttribute) {
+                } else if (itemId instanceof ModelAttrib) {
                     entity = (ModelEntity) treeTable.getParent(itemId);
                 }
 
@@ -652,9 +652,9 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                         }
 
                         for (Object itemId : itemIds) {
-                            if (itemId instanceof ModelAttribute) {
-                                ModelAttribute a = (ModelAttribute) itemId;
-                                context.getConfigurationService().delete((ModelAttribute) itemId);
+                            if (itemId instanceof ModelAttrib) {
+                                ModelAttrib a = (ModelAttrib) itemId;
+                                context.getConfigurationService().delete((ModelAttrib) itemId);
                                 ModelEntity entity = (ModelEntity) treeTable.getParent(itemId);
                                 entity.removeModelAttribute(a);
                                 treeTable.removeItem(itemId);
@@ -699,7 +699,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                     add(e);
                     model.getModelEntities().add(e);
                 } else {
-                    for (ModelAttribute a : e.getModelAttributes()) {
+                    for (ModelAttrib a : e.getModelAttributes()) {
                         if (modelEntity.getModelAttributeByName(a.getName()) == null) {
                             a.setEntityId(modelEntity.getId());
                             context.getConfigurationService().save(a);
@@ -737,7 +737,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
     public class Record {
         ModelEntity modelEntity;
 
-        ModelAttribute modelAttribute;
+        ModelAttrib modelAttribute;
 
         String entityName = "";
 
@@ -749,7 +749,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
         String pk = "";
 
-        public Record(ModelEntity modelEntity, ModelAttribute modelAttribute) {
+        public Record(ModelEntity modelEntity, ModelAttrib modelAttribute) {
             this.modelEntity = modelEntity;
             this.modelAttribute = modelAttribute;
 
