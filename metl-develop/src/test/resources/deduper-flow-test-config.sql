@@ -74,9 +74,9 @@ if (!(inputMessage instanceof ControlMessage)) {
 
     if (inputModel != null) {
         ModelEntity deduperEntity = inputModel.getEntityByName("Deduper_Entity");
-        ModelAttribute deduperIdAttribute = deduperEntity.getModelAttributeByName("deduper_id");
-        ModelAttribute deduperCdeAttribute = deduperEntity.getModelAttributeByName("deduper_cde");
-        ModelAttribute deduperValueAttribute = deduperEntity.getModelAttributeByName("deduper_value");
+        ModelAttrib deduperIdAttribute = deduperEntity.getModelAttributeByName("deduper_id");
+        ModelAttrib deduperCdeAttribute = deduperEntity.getModelAttributeByName("deduper_cde");
+        ModelAttrib deduperValueAttribute = deduperEntity.getModelAttributeByName("deduper_value");
         
         entityDataIterator = list.iterator();
 
@@ -182,9 +182,9 @@ if (!(inputMessage instanceof ControlMessage)) {
 
     if (inputModel != null) {
         ModelEntity deduperEntity = inputModel.getEntityByName("Deduper_Entity");
-        ModelAttribute deduperIdAttribute = deduperEntity.getModelAttributeByName("deduper_id");
-        ModelAttribute deduperCdeAttribute = deduperEntity.getModelAttributeByName("deduper_cde");
-        ModelAttribute deduperValueAttribute = deduperEntity.getModelAttributeByName("deduper_value");
+        ModelAttrib deduperIdAttribute = deduperEntity.getModelAttributeByName("deduper_id");
+        ModelAttrib deduperCdeAttribute = deduperEntity.getModelAttributeByName("deduper_cde");
+        ModelAttrib deduperValueAttribute = deduperEntity.getModelAttributeByName("deduper_value");
         
         entityDataIterator = list.iterator();
 
