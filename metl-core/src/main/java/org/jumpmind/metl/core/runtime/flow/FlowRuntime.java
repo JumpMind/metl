@@ -498,6 +498,7 @@ public class FlowRuntime {
                                 + notification.getNotifyType() + "'");
                         transport = mailSession.getTransport();
                         MimeMessage message = new MimeMessage(mailSession.getSession());
+                        message.setFrom(new InternetAddress(mailSession.getSession().getProperty("mail.from")));
                         message.setSentDate(new Date());
                         message.setRecipients(RecipientType.BCC, notification.getRecipients());
                         message.setSubject(FormatUtils.replaceTokens(notification.getSubject(),
