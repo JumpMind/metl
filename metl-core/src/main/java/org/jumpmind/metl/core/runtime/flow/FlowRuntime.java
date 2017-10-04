@@ -35,6 +35,7 @@ import java.util.concurrent.ExecutorService;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -498,7 +499,7 @@ public class FlowRuntime {
                                 + notification.getNotifyType() + "'");
                         transport = mailSession.getTransport();
                         MimeMessage message = new MimeMessage(mailSession.getSession());
-                        message.setFrom(new InternetAddress(mailSession.getSession().getProperty("mail.from")));
+                        message.setFrom(new InternetAddress(mailSession.getSession().getProperty(MailSession.SETTING_FROM)));
                         message.setSentDate(new Date());
                         message.setRecipients(RecipientType.BCC, notification.getRecipients());
                         message.setSubject(FormatUtils.replaceTokens(notification.getSubject(),
