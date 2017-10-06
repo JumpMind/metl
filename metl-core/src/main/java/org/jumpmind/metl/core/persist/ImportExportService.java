@@ -3,6 +3,7 @@ package org.jumpmind.metl.core.persist;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.IOException;
+import java.sql.JDBCType;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -616,6 +617,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
             while (itr.hasNext()) {
                 String key = itr.next();
                 LinkedCaseInsensitiveMap<Object> row = inserts.getTableData().get(key);
+                convertTimestampColumns(table, row);
                 Date createTime = new Date();
                 row.put("create_time", createTime);
                 row.put("last_update_time", createTime);
@@ -625,6 +627,24 @@ public class ImportExportService extends AbstractService implements IImportExpor
 
     }
 
+    private void convertTimestampColumns(Table table, LinkedCaseInsensitiveMap<Object> row) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        for (Column column:table.getColumns()) {
+            if (column.getMappedType().equalsIgnoreCase(JDBCType.TIMESTAMP.getName()) &&
+                    row.get(column.getName()) != null &&
+                    ((String)row.get(column.getName())).length()==10) {
+                try {
+                    Date newDate = format.parse((String) row.get(column.getName()));
+                    if (row.get(column.getName()) != null) {
+                        row.put(column.getName().toLowerCase(), newDate);   
+                    }
+                } catch (Exception e) {
+                    log.error(String.format("Error converting %s to a valid date", row.get(column.getName())));
+                }
+            }
+        }
+    }
+    
     private void processTableUpdates(TableData updates, ISqlTransaction transaction) {
             Table table = databasePlatform.getTableFromCache(null, null, updates.getTableName(), false);
             excludeUpdateColumns(table);
@@ -636,6 +656,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
             while (itr.hasNext()) {
                 String key = itr.next();
                 LinkedCaseInsensitiveMap<Object> row = updates.getTableData().get(key);
+                convertTimestampColumns(table, row);
                 row.put("last_update_time", new Date());
                 useDefaultsForMissingRequiredColumns(table, row);                
                 transaction.prepareAndExecute(stmt.getSql().toLowerCase(), row);
