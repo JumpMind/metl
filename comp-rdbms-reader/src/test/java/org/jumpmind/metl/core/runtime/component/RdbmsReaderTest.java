@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Map;
 
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.junit.Test;
 
 public class RdbmsReaderTest {
@@ -26,5 +27,39 @@ public class RdbmsReaderTest {
         assertEquals(hints.get(2), "COLB");
         assertEquals(hints.get(3), "COLC");
         assertEquals(hints.get(4), "\"COL D\"");
+        
+        
+        // Do not allow duplicate entity attribute combinations.
+        String dupeAtribSQL = 
+                "select" + 
+                "    a   /* test.a */" + 
+                "    , b /* test.b */" + 
+                "    , c /* test.a */" + 
+                "from test;";
+        boolean errorFound = false;
+        try {
+            RdbmsReader.getSqlColumnEntityHints(dupeAtribSQL);
+        } catch(MisconfiguredException e) {
+            errorFound = true;
+        }
+        assertEquals(errorFound,true);
+        
+        
+        // Allow duplicate entity names
+        String dupeEntitySQL = 
+                "select" + 
+                "    a   /* test */" + 
+                "    , b /* test */" + 
+                "    , c /* test */" + 
+                "from test;";
+        errorFound = false;
+        try {
+            RdbmsReader.getSqlColumnEntityHints(dupeEntitySQL);
+        } catch(MisconfiguredException e) {
+            errorFound = true;
+        }
+        assertEquals(errorFound,false);
     }
+    
+
 }

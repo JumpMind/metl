@@ -308,12 +308,17 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             commentIdx = columns.indexOf("/*", commentIdx) + 2;
             int columnIdx = countColumnSeparatingCommas(columns.substring(0, commentIdx)) + 1;
             String entity = StringUtils.trimWhitespace(columns.substring(commentIdx, columns.indexOf("*/", commentIdx)));
-            if (!used.contains(entity)) {
-                columnEntityHints.put(columnIdx, entity);
-                used.add(entity);
-            } else {
-                throw new MisconfiguredException("The same hint was used twice.  Only one column can map to an entity attribute.  The hint that was repeated was for " + entity);
+            // Only check for dupes if the entity and attributes are provided.
+            if (entity.contains(".")) {
+                if (!used.contains(entity)) {
+                    used.add(entity);
+                } else {
+                    throw new MisconfiguredException("The same hint was used twice.  "
+                            + "Only one column can map to an entity attribute.  "
+                            + "The hint that was repeated was for " + entity);
+                }
             }
+            columnEntityHints.put(columnIdx, entity);
         }
         return columnEntityHints;
     }
