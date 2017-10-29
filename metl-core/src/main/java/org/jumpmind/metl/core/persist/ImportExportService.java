@@ -37,9 +37,9 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ReleasePackage;
-import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
+import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.security.SecurityConstants;
 import org.jumpmind.metl.core.util.MessageException;
@@ -319,13 +319,16 @@ public class ImportExportService extends AbstractService implements IImportExpor
     }
 
     private void addConfigData(List<TableData> tableData, String[][] sqlElements,
-            String projectVersionId, String keyValue) {        
+            String projectVersionId, String keyValue) {
+        
+        // Get existing ProjectVersion
         ProjectVersion version = configurationService.findProjectVersion(projectVersionId);
-        for (int i = 0; i <= sqlElements.length - 1; i++) {
+        for (int i = 0; i < sqlElements.length; i++) {
             if (!sqlElements[0][0].equalsIgnoreCase("_project") ||
-                    version == null || !projectsExported.contains(version.getProjectId()) ) {                
+                    version == null || !projectsExported.contains(version.getProjectId()) ) {
                 String[] entry = sqlElements[i];
-                List<Row> rows = getConfigTableData(String.format(entry[SQL], 
+                // Query existing data matching the config data.
+                List<Row> rows = getConfigTableData(String.format(entry[SQL],
                         tablePrefix, projectVersionId, keyValue));
                 for (Row row : rows) {
                     if (isPassword(row.getString("NAME", false))) {
@@ -367,9 +370,13 @@ public class ImportExportService extends AbstractService implements IImportExpor
     }
 
     private void importConfiguration(ConfigData configData, String userId) {
+        // Copy config data into importData object.
         ImportConfigData importData = new ImportConfigData(configData);
+        
+        // Get transaction to roll back the import in case of failure.
         ISqlTransaction transaction = databasePlatform.getSqlTemplate().startSqlTransaction();
         try {
+            // Load one of many project versions from the imported config.
             for (ProjectVersionData data : importData.getProjectVersionData()) {
                 String projectVersionId = data.getProjectVersionId();
                 if (data.getProjectData().size() > 0
@@ -388,6 +395,8 @@ public class ImportExportService extends AbstractService implements IImportExpor
                         && data.getFlowData().get(FLOW_IDX).rows.size() > 0) {
                     importFlowConfiguration(projectVersionId, importData, transaction, userId);
                 }
+                
+                // Delete all local records once the project version has been loaded.
                 processDeletes(importData, transaction);                
             }
             importReleasePackageConfiguration(importData, transaction, userId);
@@ -475,7 +484,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
                     (String) row.get(PROJECT_SQL[PROJECT_IDX][KEY_COLUMNS]));
         }
         
-        for (int i = 0; i <= PROJECT_SQL.length - 1; i++) {
+        for (int i = 0; i < PROJECT_SQL.length; i++) {
             if (data.projectData.size() > i) {
                 TableData importProjectData = data.projectData.get(i);
                 try {
@@ -683,8 +692,13 @@ public class ImportExportService extends AbstractService implements IImportExpor
             while (itr.hasNext()) {
                 String key = itr.next();
                 LinkedCaseInsensitiveMap<Object> row = deletes.getTableData().get(key);
-                transaction.prepareAndExecute(stmt.getSql().toLowerCase(), row);
-            }            
+                // Move all keys to lower since Spring's named parameter function makes the map case sensitive.
+                Map<String, Object> rowLower = new HashMap<String, Object>();
+                for (String k : row.keySet()) {
+                    rowLower.put(k.toLowerCase(), row.get(k));
+                }
+                transaction.prepareAndExecute(stmt.getSql().toLowerCase(), rowLower);
+            }
         }
     }
 
@@ -1047,7 +1061,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
             this.versionNumber = configData.getVersionNumber();
             this.releasePackageData = configData.releasePackageData;
             this.projectVersionData = configData.projectVersionData;
-            this.deletesToProcess = new HashMap<String, TableData>();
+            this.deletesToProcess = new LinkedCaseInsensitiveMap<TableData>();
         }
         Map<String, TableData> deletesToProcess;
     }
