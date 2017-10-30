@@ -27,7 +27,6 @@ import org.jumpmind.db.sql.DmlStatement.DmlType;
 import org.jumpmind.db.sql.ISqlTemplate;
 import org.jumpmind.db.sql.ISqlTransaction;
 import org.jumpmind.db.sql.Row;
-import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AuditEvent;
@@ -37,9 +36,9 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ReleasePackage;
-import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
+import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.security.SecurityConstants;
 import org.jumpmind.metl.core.util.MessageException;
@@ -66,6 +65,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
     final static Integer RESOURCE_IDX = new Integer(0);
     final static Integer FLOW_IDX = new Integer(4);
     final static Integer RELEASE_PACKAGE_IDX = new Integer(0);
+    final static Integer AGENT_IDX = new Integer(0);
     
     final static Integer CREATE_TIME_IDX = new Integer(0);
     final static Integer LAST_UPDATE_TIME_IDX = new Integer(1);
@@ -114,8 +114,17 @@ public class ImportExportService extends AbstractService implements IImportExpor
                     + "(select distinct id from %1$s_flow_step where flow_id='%3$s') order by source_step_id, target_step_id", "source_step_id,target_step_id"}            
     };
     
+    final String[][] AGENT_SQL = {
+            {"_agent", "select * from %1$s_agent where id='%2$s' and deleted=0 order by id","id"},
+            {"_agent_deploy", "select * from %1$s_agent_deploy where agent_id='%2$s' order by id","id"},
+            {"_agent_flow_deploy_parm", "select * from %1$s_agent_flow_deploy_parm where agent_deployment_id in (select id from %1$s_agent_deploy where agent_id='%2$s') order by agent_deployment_id, flow_id","agent_deployment_id, flow_id, name"},            
+            {"_agent_resource_setting", "select * from %1$s_agent_resource_setting where agent_id='%2$s' order by resource_id, name","agent_id, resource_id, name"},
+            {"_agent_parameter", "select * from %1$s_agent_parameter where agent_id='%2$s' order by id","id"},
+    };
+    
     private IDatabasePlatform databasePlatform;
     private IConfigurationService configurationService;
+    private IOperationsService operationsService;
     private String tablePrefix;
     private String[] columnsToExclude;
     private Set<String> importsToAudit = new HashSet<>();
@@ -124,10 +133,12 @@ public class ImportExportService extends AbstractService implements IImportExpor
 
     public ImportExportService(IDatabasePlatform databasePlatform,
             IPersistenceManager persistenceManager, String tablePrefix,
-            IConfigurationService configurationService, ISecurityService securityService) {
+            IConfigurationService configurationService, IOperationsService operationsService,
+            ISecurityService securityService) {
         super(securityService, persistenceManager, tablePrefix);
         this.databasePlatform = databasePlatform;
         this.configurationService = configurationService;
+        this.operationsService = operationsService;
         this.tablePrefix = tablePrefix;
         importsToAudit.add(tableName(Project.class).toUpperCase());
         importsToAudit.add(tableName(ProjectVersion.class).toUpperCase());
@@ -180,6 +191,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
     public String exportReleasePackage(String releasePackageId, String userId) {        
         projectsExported.clear();
         ConfigData exportData = initExport();
+        initConfigData(exportData.getReleasePackageData(), RELEASE_PACKAGE_SQL);
         ReleasePackage releasePackage = configurationService.findReleasePackage(releasePackageId);
         
         List<Rppv> versions = new ReleasePackageProjectVersionSorter(configurationService).sort(releasePackage);
@@ -239,6 +251,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         save(new AuditEvent(AuditEvent.EventType.EXPORT, String.format("%s, flows: %d, models %d, resources: %d", 
                 version.getName(), flowIds.size(), modelIds.size(), resourceIds.size()), userId));
         ConfigData exportData = initExport();
+        initConfigData(exportData.getReleasePackageData(), RELEASE_PACKAGE_SQL);
         initProjectVersionExport(exportData, projectVersionId);
         addProjectVersionToConfigData(projectVersionId, exportData, new HashSet<String>(flowIds), new HashSet<String>(modelIds), new HashSet<String>(resourceIds));
         
@@ -249,7 +262,6 @@ public class ImportExportService extends AbstractService implements IImportExpor
         ConfigData exportData = new ConfigData();
         exportData.setHostName(AppUtils.getHostName());
         exportData.setVersionNumber(VersionUtils.getCurrentVersion());
-        initConfigData(exportData.getReleasePackageData(), RELEASE_PACKAGE_SQL);
 
         return exportData;        
     }
@@ -285,6 +297,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
             convertTableDataToLowerCase(projectVersionData.getModelData());
             convertTableDataToLowerCase(projectVersionData.getFlowData());
         }
+        convertTableDataToLowerCase(configData.getAgentData());
     }
     
     private void convertTableDataToLowerCase(List<TableData> tableDatas) {
@@ -350,6 +363,28 @@ public class ImportExportService extends AbstractService implements IImportExpor
         }
     }
 
+    private void addAgentConfigData(List<TableData> tableData, String[][] sqlElements,
+            String agentId) {
+        for (int i = 0; i <= sqlElements.length - 1; i++) {
+            String[] entry = sqlElements[i];
+            List<Row> rows = getConfigTableData(String.format(entry[SQL], tablePrefix, agentId));
+            for (Row row : rows) {
+                if (isPassword(row.getString("NAME", false))) {
+                    String value = row.getString("VALUE", false);
+                    if (isNotBlank(value)) {
+                        if (value.startsWith(SecurityConstants.PREFIX_ENC)) {
+                            try {
+                                row.put("VALUE", securityService.decrypt(value.substring(SecurityConstants.PREFIX_ENC.length() - 1)));
+                            } catch (Exception e) {
+                            }
+                        }
+                    }
+                }
+                tableData.get(i).rows.put(getPkDataAsString(row, entry[KEY_COLUMNS]), row);
+            }
+        }
+    }    
+    
     private List<Row> getConfigTableData(String sql) {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         List<Row> rows = template.query(sql);
@@ -390,7 +425,12 @@ public class ImportExportService extends AbstractService implements IImportExpor
                 }
                 processDeletes(importData, transaction);                
             }
-            importReleasePackageConfiguration(importData, transaction, userId);
+            if (importData.getReleasePackageData().size() != 0) {
+                importReleasePackageConfiguration(importData, transaction, userId);
+            }
+            if (importData.getAgentData().size() != 0) {
+                importAgentConfiguration(importData, transaction, userId);
+            }
             transaction.commit();
 
         } catch (Exception e) {
@@ -459,7 +499,36 @@ public class ImportExportService extends AbstractService implements IImportExpor
             }
         }   
     }
-     
+
+    private void importAgentConfiguration(ImportConfigData importData,
+            ISqlTransaction transaction, String userId) {
+
+        List<TableData> existingAgentData = new ArrayList<TableData>();
+        initConfigData(existingAgentData, AGENT_SQL);        
+        
+        Iterator<String> itr = importData.getAgentData().get(AGENT_IDX)
+                .getTableData().keySet().iterator();
+        while (itr.hasNext()) {
+            String key = itr.next();
+            LinkedCaseInsensitiveMap<Object> row = importData.getAgentData().get(AGENT_IDX).getTableData().get(key);
+            addConfigData(existingAgentData, AGENT_SQL, (String) row.get(AGENT_SQL[AGENT_IDX][KEY_COLUMNS]),
+                    (String) row.get(AGENT_SQL[AGENT_IDX][KEY_COLUMNS]));
+        }
+        
+        for (int i = 0; i <= AGENT_SQL.length - 1; i++) {
+            if (importData.agentData.size() > i) {
+                TableData importAgentData = importData.agentData.get(i);
+                try {
+                    processConfigTableData(importData, existingAgentData.get(i), importAgentData,
+                            AGENT_SQL[i][KEY_COLUMNS], transaction, userId);
+                } catch (RuntimeException e) {
+                    throw e;
+                }
+            }
+        }   
+    }
+    
+    
     private void importProjectConfiguration(String projectVersionId, ImportConfigData importData,
             ISqlTransaction transaction, String userId) {        
         List<TableData> existingProjectData = new ArrayList<TableData>();
@@ -837,35 +906,14 @@ public class ImportExportService extends AbstractService implements IImportExpor
     }
     
     @Override
-    public String export(Agent agent) {
-        try {
-            StringBuilder out = new StringBuilder();
-
-            /* @formatter:off */
-            String[][] CONFIG = {
-                    {"agent", "where id='%2$s' and deleted=0"," order by id",                                                                                                                                                                              },
-                    {"agent_deploy", "where agent_id='%2$s'"," order by id",                                                                                                                                                                                                                                },
-                    {"agent_flow_deploy_parm", "where agent_deployment_id in (select id from %1$s_agent_deploy where agent_id='%2$s')"," order by agent_deployment_id, flow_id",                                                                                                                                                                                                                         },
-                    {"agent_parameter", "where agent_id='%2$s'"," order by id",                                                                                                                                                                                                            },
-                    {"agent_resource_setting", "where agent_id='%2$s'"," order by resource_id, name",                                                                                                                                                       },
-            };
-            /* @formatter:on */
-
-            for (int i = CONFIG.length - 1; i >= 0; i--) {
-                String[] entry = CONFIG[i];
-                out.append(String.format("DELETE FROM %s_%s %s;\n", tablePrefix, entry[0],
-                        String.format(entry[1], tablePrefix, agent.getId()).replace("AND DELETED=0", "")));
-            }
-
-            for (int i = 0; i < CONFIG.length; i++) {
-                String[] entry = CONFIG[i];
-                out.append(export(entry[0], entry[1], entry[2], agent));
-            }
-
-            return out.toString();
-        } catch (IOException e) {
-            throw new IoException(e);
-        }
+    public String exportAgent(String agentId, String userId) {
+        Agent agent = operationsService.findAgent(agentId, false);
+        save(new AuditEvent(AuditEvent.EventType.EXPORT, String.format("%s", agent.getName()), userId));
+        ConfigData exportData = initExport();
+        initConfigData(exportData.getAgentData(), AGENT_SQL);
+        addAgentConfigData(exportData.getAgentData(), AGENT_SQL, agentId);
+        
+        return serializeExportToJson(exportData);        
     }
     
     protected String export(String table, String where, String orderBy, Agent agent) throws IOException {
@@ -935,10 +983,12 @@ public class ImportExportService extends AbstractService implements IImportExpor
         String hostName;
         List<TableData> releasePackageData;
         List<ProjectVersionData> projectVersionData;
+        List<TableData> agentData;
 
         public ConfigData() {
             releasePackageData = new ArrayList<TableData>();
             projectVersionData = new ArrayList<ProjectVersionData>();
+            agentData = new ArrayList<TableData>();
         }
         
         public List<TableData> getReleasePackageData() {
@@ -954,6 +1004,14 @@ public class ImportExportService extends AbstractService implements IImportExpor
             return null;
         }
         
+        public List<TableData> getAgentData() {
+            return agentData;
+        }
+
+        public void setAgentData(List<TableData> agentData) {
+            this.agentData = agentData;
+        }
+
         public void setReleasePackageData(List<TableData> releasePackageData) {
             this.releasePackageData = releasePackageData;
         }
@@ -1040,6 +1098,52 @@ public class ImportExportService extends AbstractService implements IImportExpor
         
     }
 
+    static class AgentData {
+
+        String agentId;
+        List<TableData> agentDeployData;
+        List<TableData> agentResourceSettingData;
+        List<TableData> agentParameterData;
+
+        public AgentData() {
+            agentDeployData = new ArrayList<TableData>();
+            agentResourceSettingData = new ArrayList<TableData>();
+            agentParameterData = new ArrayList<TableData>();
+        }
+
+        public String getAgentId() {
+            return agentId;
+        }
+
+        public void setAgentId(String agentId) {
+            this.agentId = agentId;
+        }
+
+        public List<TableData> getAgentDeployData() {
+            return agentDeployData;
+        }
+
+        public void setAgentDeployData(List<TableData> agentDeployData) {
+            this.agentDeployData = agentDeployData;
+        }
+
+        public List<TableData> getAgentResourceSettingData() {
+            return agentResourceSettingData;
+        }
+
+        public void setAgentResourceSettingData(List<TableData> agentResourceSettingData) {
+            this.agentResourceSettingData = agentResourceSettingData;
+        }
+
+        public List<TableData> getAgentParameterData() {
+            return agentParameterData;
+        }
+
+        public void setAgentParameterData(List<TableData> agentParameterData) {
+            this.agentParameterData = agentParameterData;
+        }        
+    }    
+    
     static class ImportConfigData extends ConfigData {
 
         public ImportConfigData(ConfigData configData) {
@@ -1047,6 +1151,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
             this.versionNumber = configData.getVersionNumber();
             this.releasePackageData = configData.releasePackageData;
             this.projectVersionData = configData.projectVersionData;
+            this.agentData = configData.agentData;
             this.deletesToProcess = new HashMap<String, TableData>();
         }
         Map<String, TableData> deletesToProcess;

@@ -41,6 +41,7 @@ import org.jumpmind.metl.core.model.DeploymentStatus;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.runtime.IAgentManager;
+import org.jumpmind.metl.core.util.AppConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
@@ -249,7 +250,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
     }
 
     protected void exportConfiguration() {
-        final String export = context.getImportExportService().export(agent);
+        final String export = context.getImportExportService().exportAgent(agent.getId(), AppConstants.SYSTEM_USER);
         StreamSource ss = new StreamSource() {
             private static final long serialVersionUID = 1L;
 
@@ -266,7 +267,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         };
         String datetime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
         StreamResource resource = new StreamResource(ss,
-                String.format("%s-config-%s.sql", agent.getName().toLowerCase().replaceAll(" ", "-"), datetime));
+                String.format("%s-config-%s.json", agent.getName().toLowerCase().replaceAll(" ", "-"), datetime));
         final String KEY = "export";
         setResource(KEY, resource);
         Page.getCurrent().open(ResourceReference.create(resource, this, KEY).getURL(), null);

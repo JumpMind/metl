@@ -186,7 +186,7 @@ public class StandaloneFlowRunner {
                 DefinitionFactory componentDefinitionFactory = new DefinitionFactory(pluginService, configurationService, pluginManager);
 
                 IImportExportService importService = new ImportExportService(databasePlatform, persistenceManager, tablePrefix,
-                        configurationService, new SecurityService());
+                        configurationService, operationsService, new SecurityService());
 
                 executionService = new ExecutionService(securityService, persistenceManager, databasePlatform, tablePrefix, new StandardEnvironment());
                 agentRuntime = new AgentRuntime(new Agent("test"), operationsService, configurationService, executionService,

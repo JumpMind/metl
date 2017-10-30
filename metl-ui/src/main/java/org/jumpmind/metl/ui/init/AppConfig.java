@@ -431,7 +431,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     public IImportExportService importExportService() {
         if (importExportService == null) {
             importExportService = new ImportExportService(configDatabasePlatform(), persistenceManager(), tablePrefix(),
-                    configurationService(), securityService());
+                    configurationService(), operationsService(), securityService());
         }
         return importExportService;
     }

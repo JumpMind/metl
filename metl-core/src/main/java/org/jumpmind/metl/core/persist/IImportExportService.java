@@ -2,8 +2,6 @@ package org.jumpmind.metl.core.persist;
 
 import java.util.List;
 
-import org.jumpmind.metl.core.model.Agent;
-
 public interface IImportExportService {
     
     public void addConfigurationChangeListener(IConfigurationChangedListener listener);
@@ -16,6 +14,6 @@ public interface IImportExportService {
     
     public String exportReleasePackage(String releasePackageId, String userId);
     
-    public String export(Agent agent);
+    public String exportAgent(String agentId, String userId);
 
 }
