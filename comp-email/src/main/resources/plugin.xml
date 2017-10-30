@@ -95,6 +95,17 @@
         <name>One Email per Recipient</name>
         <defaultValue>false</defaultValue>
       </setting>          
+      <setting id='include.attachment'
+               required='false'
+               type='boolean'>
+        <name>Include Attachment</name>
+        <defaultValue>false</defaultValue>
+      </setting>          
+      <setting id='attachment.file.path'
+               required='false'
+               type='text'>
+        <name>Attachment File Full Path</name>
+      </setting>
       <setting id='run.when'
                required='false'
                type='choice'>
