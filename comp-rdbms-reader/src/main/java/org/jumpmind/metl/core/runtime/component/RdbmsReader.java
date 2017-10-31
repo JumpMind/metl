@@ -201,7 +201,11 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             }
 
             if (matchOnColumnNameOnly) {
+                int attributeIdsCount = attributeIds.size();
                 attributeIds.addAll(getAttributeIds(columnName));
+                if (attributeIdsCount < attributeIds.size()) {
+                    attributeFound = true;
+                }
             } else {
                 if (StringUtils.isEmpty(tableName)) {
                     throw new MisconfiguredException("Table name could not be determined from metadata or hints.  Please check column and hint.  "
