@@ -1249,7 +1249,7 @@ public class ConfigurationService extends AbstractService
 
         List<Resource> resources = new ArrayList<Resource>();
         final String RESOURCES_BY_FLOW_SQL = "select distinct c.resource_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s' and resource_id is not null " +
-                "union select distinct cs.value from metl_flow_step fs inner join metl_component c on fs.component_id = c.id inner join metl_component_setting cs on cs.component_id = c.id where fs.flow_id = '%2$s' " +
+                "union select distinct cast(cs.value as varchar(36)) from metl_flow_step fs inner join metl_component c on fs.component_id = c.id inner join metl_component_setting cs on cs.component_id = c.id where fs.flow_id = '%2$s' " +
                 "and cs.name in ('source.resource','target.resource')";
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         List<Row> ids = template.query(String.format(RESOURCES_BY_FLOW_SQL, tablePrefix, flowId));
@@ -1290,7 +1290,7 @@ public class ConfigurationService extends AbstractService
         List<Flow> flows = new ArrayList<Flow>();
 
         final String AFFECTED_FLOWS_BY_FLOW_SQL = "select distinct flow_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id "
-                + "inner join %1$s_component_setting cs on cs.component_id = c.id " + "where cs.name='flow.id' and cs.value = '%2$s'";
+                + "inner join %1$s_component_setting cs on cs.component_id = c.id " + "where cs.name='flow.id' and cast(cs.value as varchar(36)) = '%2$s'";
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         List<Row> ids = template.query(String.format(AFFECTED_FLOWS_BY_FLOW_SQL, tablePrefix, flowId));
         for (Row row : ids) {
@@ -1413,7 +1413,7 @@ public class ConfigurationService extends AbstractService
                 "   and pv.id = '%3$s'" + 
                 "union\n" + 
                 "select\n" + 
-                "   distinct cs.value\n" + 
+                "   distinct cast(cs.value as varchar(36))\n" + 
                 "   , nr.id\n" + 
                 "from\n" + 
                 "   %1$s_component_setting cs\n" + 
@@ -1428,7 +1428,7 @@ public class ConfigurationService extends AbstractService
                 "      on pvd.project_version_id = pv.id\n" + 
                 "   inner join %1$s_resource dr\n" + 
                 "      on dr.project_version_id = pvd.target_project_version_id\n" + 
-                "      and dr.id = cs.value\n" + 
+                "      and dr.id = cast(cs.value as varchar(36))\n" + 
                 "   inner join %1$s_resource nr\n" + 
                 "      on nr.project_version_id = '%2$s'" + 
                 "      and dr.row_id = nr.row_id\n" + 
