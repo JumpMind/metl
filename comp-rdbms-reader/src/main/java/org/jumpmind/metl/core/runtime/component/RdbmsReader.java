@@ -190,7 +190,16 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                     tableName = hint;
                 }
             }
-
+            
+            /* if column alias in the form of "entity.attribute" is used
+             *this will be returned as the columnname in the resultset.
+             *If this is the case it can be used the same way as a hint
+             */
+            if (columnName.indexOf(".") != -1) {
+                    tableName = columnName.substring(0, columnName.indexOf("."));
+                    columnName = columnName.substring(columnName.indexOf(".") + 1);
+            }
+            
             if (isBlank(tableName)) {
                 /*
                  * Some database driver do not support returning the table name
