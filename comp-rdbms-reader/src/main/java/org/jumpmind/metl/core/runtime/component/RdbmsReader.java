@@ -210,13 +210,14 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             }
 
             if (matchOnColumnNameOnly) {
-                int attributeIdsCount = attributeIds.size();
-                attributeIds.addAll(getAttributeIds(columnName));
-                if (attributeIdsCount == (attributeIds.size() - 1)) {
+                List<String> foundIds = getAttributeIds(columnName);
+                if (foundIds.size() == 1) {
+                    attributeIds.addAll(foundIds);
                     attributeFound = true;
-                }
-                if (attributeIdsCount < (attributeIds.size() - 1)) {
-                    throw new MisconfiguredException(String.format("Ambiguous attribute name in model. Cannot match column name to unique attribute. Column: '%s')",columnName));
+                } 
+                if (foundIds.size() > 1) {
+                    throw new MisconfiguredException(String.format("Ambiguous attribute name in model. "
+                            + "Cannot match column name to unique attribute. Column: '%s')",columnName));
                 }
             } else {
                 if (StringUtils.isEmpty(tableName)) {
