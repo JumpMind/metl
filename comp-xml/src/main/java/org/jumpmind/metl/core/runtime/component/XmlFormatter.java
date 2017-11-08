@@ -385,6 +385,11 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                     parent.removeContent(element);
                 } else if (nullHandling.equalsIgnoreCase(NULL_HANDLING_XML_NIL)) {
                     element.setAttribute("nil", "true", getXmlNamespace());
+                    // Remove template example content
+                    element.removeContent();
+                } else if (nullHandling.equalsIgnoreCase(NULL_HANDLING_EMPTY)) {
+                    // Remove template example content
+                    element.removeContent();
                 }
             }
         } else if (object instanceof Attribute) {
