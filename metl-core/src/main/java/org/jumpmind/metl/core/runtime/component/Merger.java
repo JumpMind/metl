@@ -32,6 +32,7 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class Merger extends AbstractComponentRuntime {
@@ -49,9 +50,9 @@ public class Merger extends AbstractComponentRuntime {
         Component component = getComponent();
         Model inputModel = component.getInputModel();
         if (inputModel == null) {
-            throw new IllegalStateException("The input model is required and has not yet been set");
+            throw new MisconfiguredException("The input model is required and has not yet been set");
         }
-
+        
         List<ComponentAttribSetting> settings = component.getAttributeSettings();
         if (settings != null) {
             for (ComponentAttribSetting componentAttributeSetting : settings) {
@@ -60,6 +61,10 @@ public class Merger extends AbstractComponentRuntime {
                     attributesToMergeOn.add(componentAttributeSetting.getAttributeId());
                 }
             }
+        }
+
+        if (attributesToMergeOn.size() == 0) {
+            throw new MisconfiguredException("At least one attribute must be selected for joining.");
         }
     }
 
