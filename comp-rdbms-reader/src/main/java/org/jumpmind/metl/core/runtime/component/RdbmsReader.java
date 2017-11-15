@@ -179,8 +179,19 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         ArrayList<String> attributeIds = new ArrayList<String>();
         boolean attributeFound = false;
         for (int i = 1; i <= meta.getColumnCount(); i++) {
-            String columnName = meta.getColumnName(i);
+            String columnName = "";
+            String columnLabel = meta.getColumnLabel(i);
             String tableName = meta.getTableName(i);
+
+            /* permits the use of column aliases in lieu of 'hints' to provide */
+            /* [entity.]attribute mapping of columns in select stmt            */
+            if (columnLabel.indexOf(".") != -1) {
+                    tableName  = columnLabel.substring(0, columnLabel.indexOf("."));
+                    columnName = columnLabel.substring(columnLabel.indexOf(".") + 1);
+            } else {
+                    columnName = columnLabel;
+            }
+
             if (sqlEntityHints.containsKey(i)) {
                 String hint = sqlEntityHints.get(i);
                 if (hint.indexOf(".") != -1) {
@@ -190,7 +201,8 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                     tableName = hint;
                 }
             }
-
+            
+            
             if (isBlank(tableName)) {
                 /*
                  * Some database driver do not support returning the table name
@@ -200,15 +212,16 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                 tableName = getTableNameFromSql(sql);
             }
 
-           if (matchOnColumnNameOnly) {
+            if (matchOnColumnNameOnly) {
                 List<String> foundIds = getAttributeIds(columnName);
                 if (foundIds.size() == 1) {
                     attributeIds.addAll(foundIds);
                     attributeFound = true;
-                } 
-                if (foundIds.size() > 1) {
-                    throw new MisconfiguredException(String.format("Ambiguous attribute name in model. "
-                            + "Cannot match column name to unique attribute. Column: '%s')",columnName));
+                } else {
+                    if (foundIds.size() > 1) {
+                        throw new MisconfiguredException(String.format("Ambiguous attribute name in model. "
+                                    + "Cannot match column name to unique attribute. Column: '%s')",columnName));
+                    }
                 }
             } else {
                 if (StringUtils.isEmpty(tableName)) {
@@ -317,16 +330,18 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             int columnIdx = countColumnSeparatingCommas(columns.substring(0, commentIdx)) + 1;
             String entity = StringUtils.trimWhitespace(columns.substring(commentIdx, columns.indexOf("*/", commentIdx)));
             // Only check for dupes if the entity and attributes are provided.
-            if (entity.contains(".")) {
-                if (!used.contains(entity)) {
-                    used.add(entity);
-                } else {
-                    throw new MisconfiguredException("The same hint was used twice.  "
-                            + "Only one column can map to an entity attribute.  "
-                            + "The hint that was repeated was for " + entity);
+            if (!entity.contains("+")) {
+                if (entity.contains(".")) {
+                    if (!used.contains(entity)) {
+                        used.add(entity);
+                        } else {
+                        throw new MisconfiguredException("The same hint was used twice.  "
+                                + "Only one column can map to an entity attribute.  "
+                                + "The hint that was repeated was for " + entity);
+                    }
                 }
-            }
             columnEntityHints.put(columnIdx, entity);
+            }
         }
         return columnEntityHints;
     }
