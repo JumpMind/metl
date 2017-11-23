@@ -1,23 +1,23 @@
 /**
- * Licensed to JumpMind Inc under one or more contributor
- * license agreements.  See the NOTICE file distributed
- * with this work for additional information regarding
- * copyright ownership.  JumpMind Inc licenses this file
- * to you under the GNU General Public License, version 3.0 (GPLv3)
- * (the "License"); you may not use this file except in compliance
- * with the License.
- *
- * You should have received a copy of the GNU General Public License,
- * version 3.0 (GPLv3) along with this library; if not, see
- * <http://www.gnu.org/licenses/>.
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
+* Licensed to JumpMind Inc under one or more contributor
+* license agreements.  See the NOTICE file distributed
+* with this work for additional information regarding
+* copyright ownership.  JumpMind Inc licenses this file
+* to you under the GNU General Public License, version 3.0 (GPLv3)
+* (the "License"); you may not use this file except in compliance
+* with the License.
+*
+* You should have received a copy of the GNU General Public License,
+* version 3.0 (GPLv3) along with this library; if not, see
+* <http://www.gnu.org/licenses/>.
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -132,13 +132,13 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         }
 
         /*
-         * A reader can be started by a startup message (if it has no input
-         * links) or it can be started by another component that sends messages
-         * to it. If the reader is started by another component, then loop for
-         * all records in the input message
-         */
+        * A reader can be started by a startup message (if it has no input
+        * links) or it can be started by another component that sends messages
+        * to it. If the reader is started by another component, then loop for
+        * all records in the input message
+        */
         ArrayList<EntityData> outboundPayload = new ArrayList<EntityData>(); // =
-                                                                             // null;
+                                                                            // null;
         for (int i = 0; i < inboundRecordCount; i++) {
             Object entity = inboundPayload != null && inboundPayload.hasNext() ? inboundPayload.next() : null;
             ResultSetToEntityDataConverter resultSetToEntityDataConverter = new ResultSetToEntityDataConverter(inputMessage, callback,
@@ -183,8 +183,10 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             String columnLabel = meta.getColumnLabel(i);
             String tableName = meta.getTableName(i);
 
-            /* permits the use of column aliases in lieu of 'hints' to provide */
-            /* [entity.]attribute mapping of columns in select stmt            */
+            /* 
+            * permits the use of column aliases in lieu of 'hints' to provide
+            * [entity.]attribute mapping of columns in select stmt            
+            */
             if (columnLabel.indexOf(".") != -1) {
                     tableName  = columnLabel.substring(0, columnLabel.indexOf("."));
                     columnName = columnLabel.substring(columnLabel.indexOf(".") + 1);
@@ -201,16 +203,6 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                     tableName = hint;
                 }
             }
-            
-            
-            if (isBlank(tableName)) {
-                /*
-                 * Some database driver do not support returning the table name
-                 * from the metadata. This code attempts to parse the entity
-                 * name from the sql
-                 */
-                tableName = getTableNameFromSql(sql);
-            }
 
             if (matchOnColumnNameOnly) {
                 List<String> foundIds = getAttributeIds(columnName);
@@ -224,6 +216,14 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                     }
                 }
             } else {
+                if (isBlank(tableName)) {
+                    /*
+                    * Some database driver do not support returning the table name
+                    * from the metadata. This code attempts to parse the entity
+                    * name from the sql
+                    */
+                    tableName = getTableNameFromSql(sql);
+                }
                 if (StringUtils.isEmpty(tableName)) {
                     throw new MisconfiguredException("Table name could not be determined from metadata or hints.  Please check column and hint.  "
                             + "(Note to SQL-Server users: metadata may not be returned unless you append 'FOR BROWSE' to the end of your query "
@@ -329,8 +329,9 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             commentIdx = columns.indexOf("/*", commentIdx) + 2;
             int columnIdx = countColumnSeparatingCommas(columns.substring(0, commentIdx)) + 1;
             String entity = StringUtils.trimWhitespace(columns.substring(commentIdx, columns.indexOf("*/", commentIdx)));
-            // Only check for dupes if the entity and attributes are provided.
+            // Ignore Oracle optimizer hints
             if (!entity.contains("+")) {
+                // Only check for dupes if the entity and attributes are provided.
                 if (entity.contains(".")) {
                     if (!used.contains(entity)) {
                         used.add(entity);
