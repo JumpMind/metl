@@ -154,6 +154,7 @@ public class FlowRuntime {
         this.globalSettings = globalSettings;
         
         this.flowParameters = getFlowParameters(agent, deployment);
+        this.flowParameters.put("_executionId", executionId);
         if (runtimeParameters != null) {
             this.flowParameters.putAll(runtimeParameters);
         }
