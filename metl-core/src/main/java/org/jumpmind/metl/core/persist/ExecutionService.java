@@ -52,6 +52,7 @@ import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.symmetric.csv.CsvReader;
+import org.jumpmind.util.AppUtils;
 import org.jumpmind.util.FormatUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -190,20 +191,23 @@ public class ExecutionService extends AbstractService implements IExecutionServi
     }
 
     public void markAbandoned(String agentId) {
-        log.info("Marking executions as abadoned for the agent with the id: {}", agentId);
+        log.info("Marking executions as abandoned for the agent with the id: {}", agentId);
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         int count = template.update(
                 String.format(
-                        "update %1$s_execution_step set status=? where execution_id in (select execution_id from %1$s_execution where agent_id=?) and (status=? or status=?) ",
-                        tablePrefix), ExecutionStatus.ABANDONED.name(), agentId, ExecutionStatus.RUNNING
+                        "update %1$s_execution_step set status=? where execution_id in (select execution_id from %1$s_execution where agent_id=? "
+                        // only update executions abandoned on this host, agent may be active on other hosts
+                        + "and host_name=?) and (status=? or status=?) ",
+                        tablePrefix), ExecutionStatus.ABANDONED.name(), agentId, AppUtils.getHostName(), ExecutionStatus.RUNNING
                         .name(), ExecutionStatus.READY.name());
         if (count > 0) {
             log.info("Updated {} execution step records that were abandoned", count);
         }
         count = template.update(
                 String.format(
-                        "update %1$s_execution set status=? where agent_id=? and (status=? or status=?)",
-                        tablePrefix), ExecutionStatus.ABANDONED.name(), agentId, ExecutionStatus.RUNNING
+                        // only update executions abandoned on this host, agent may be active on other hosts
+                        "update %1$s_execution set status=? where agent_id=? and host_name=? and (status=? or status=?)",
+                        tablePrefix), ExecutionStatus.ABANDONED.name(), agentId, AppUtils.getHostName(), ExecutionStatus.RUNNING
                         .name(), ExecutionStatus.READY.name());
         if (count > 0) {
             log.info("Updated {} execution records that were abandoned", count);
