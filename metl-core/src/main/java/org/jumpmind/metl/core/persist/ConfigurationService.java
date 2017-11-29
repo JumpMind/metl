@@ -60,15 +60,17 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelName;
+import org.jumpmind.metl.core.model.ModelRelation;
+import org.jumpmind.metl.core.model.ModelRelationMapping;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
-import org.jumpmind.metl.core.model.ProjectVersionPlugin;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
+import org.jumpmind.metl.core.model.ProjectVersionPlugin;
 import org.jumpmind.metl.core.model.ReleasePackage;
-import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.ResourceSetting;
+import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.Version;
 import org.jumpmind.metl.core.security.ISecurityService;
@@ -399,9 +401,6 @@ public class ConfigurationService extends AbstractService
         return list;
     }
 
-
-
-
     @Override
     public Resource findResource(String id) {
         Resource resource = findOne(Resource.class, new NameValue("id", id));
@@ -488,25 +487,45 @@ public class ConfigurationService extends AbstractService
         List<ModelEntity> entities = persistenceManager.find(ModelEntity.class, params, null, null,
                 tableName(ModelEntity.class));
         List<ModelAttrib> attributes = findAllAttributesForModel(model.getId());
+        List<ModelRelation> relations = persistenceManager.find(ModelRelation.class, params, null, null,
+                tableName(ModelRelation.class));
+        List<ModelRelationMapping> relationMappings = findAllRelationMappingsForModel(model.getId());
         Map<String, ModelEntity> byModelEntityId = new HashMap<String, ModelEntity>();
+        Map<String, ModelRelation> byModelRelationId = new HashMap<String, ModelRelation>();
         for (ModelEntity entity : entities) {
             byModelEntityId.put(entity.getId(), entity);
             model.getModelEntities().add(entity);
         }
-
         for (ModelAttrib modelAttribute : attributes) {
             byModelEntityId.get(modelAttribute.getEntityId()).getModelAttributes()
                     .add(modelAttribute);
         }
-
         for (ModelEntity entity : entities) {
             Collections.sort(entity.getModelAttributes());
         }
-
+        for (ModelRelation relation : relations) {
+            byModelRelationId.put(relation.getId(), relation);
+        		model.getModelRelations().add(relation);
+        }
+        for (ModelRelationMapping relationMapping : relationMappings) {
+        		refresh(relationMapping);
+        		byModelRelationId.get(relationMapping.getModelRelationId()).getModelRelationMappings().add(relationMapping);
+        		
+        }
         AbstractObjectNameBasedSorter.sort(entities);
         return model;
     }
-
+    
+    protected void refresh(ModelRelationMapping relationMapping) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("id", relationMapping.getSourceAttribId());    	
+    		relationMapping.setSourceAttribute(this.find(ModelAttrib.class, params).get(0));
+    		params.clear();
+    		params.put("id", relationMapping.getTargetAttribId());    	
+        relationMapping.setTargetAttribute(this.find(ModelAttrib.class, params).get(0));
+    		
+    }
+    
     protected List<Resource> buildResource(List<Resource> datas) {
         return buildResource(datas.toArray(new Resource[datas.size()]));
     }
@@ -1209,6 +1228,18 @@ public class ConfigurationService extends AbstractService
         }, new Object[] { modelId });
     }
 
+    protected List<ModelRelationMapping> findAllRelationMappingsForModel(String modelId) {
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        String sql = String.format(
+                "select * from %1$s_model_relation_mapping where model_relation_id in (select id from %1$s_model_relation where model_id=?)", tablePrefix);
+        return template.query(sql, new ISqlRowMapper<ModelRelationMapping>() {
+            @Override
+            public ModelRelationMapping mapRow(Row row) {
+                return persistenceManager.map(row, ModelRelationMapping.class, null, null, tableName(ModelRelationMapping.class));
+            }
+        }, new Object[] { modelId });
+    }
+
     protected String getComponentIds(Flow flow) {
         StringBuilder componentIds = new StringBuilder();
         ISqlTemplate template = databasePlatform.getSqlTemplate();
@@ -1648,4 +1679,30 @@ public class ConfigurationService extends AbstractService
             log.info("Done backing up the configuration database to {}", filePath);
         }
     }
+
+	@Override
+	public List<ModelRelation> findRelationshipsBetweenEntities(String sourceEntityId, String targetEntityId) {
+		List<ModelRelation> modelRelations = new ArrayList<ModelRelation>();
+        final String RELATIONSHIPS_BTWN_ENTITIES_SQL = 
+                "select "
+                + "  distinct model_relation_id "
+                + "from %1$s_model_relation_mapping mrm "
+                + "   inner join %1$s_model_attribute sma "
+                + "      on sma.id = mrm.source_entity_id "
+                + "   inner join %1$s_model_attribute ma "
+                + "      on tma.id = mrm.target_entity_id "
+                + "where "
+                + "   sma.entity_id = '%2$s' and "
+                + "   tma.entity_id = '%3$s' ";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> modelRelationIds = template.query(String.format(RELATIONSHIPS_BTWN_ENTITIES_SQL, 
+        		tablePrefix, sourceEntityId, targetEntityId));
+        for (Row row : modelRelationIds) {
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("id", row.getString("model_relation_id"));        		
+        		modelRelations.addAll(this.find(ModelRelation.class, params));
+        }
+        return modelRelations;
+	}
+
 }

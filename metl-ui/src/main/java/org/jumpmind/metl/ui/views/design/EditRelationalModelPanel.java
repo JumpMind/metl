@@ -75,7 +75,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class EditModelPanel extends VerticalLayout implements IUiPanel {
+public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel {
 
     ApplicationContext context;
 
@@ -115,7 +115,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
     BeanItemContainer<Record> container = new BeanItemContainer<Record>(Record.class);
 
-    public EditModelPanel(ApplicationContext context, String modelId, boolean readOnly) {
+    public EditRelationalModelPanel(ApplicationContext context, String modelId, boolean readOnly) {
         this.context = context;
         this.model = new Model(modelId);
         this.readOnly = readOnly;
@@ -155,7 +155,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
             public void textChange(TextChangeEvent event) {
                 filterField.setValue(event.getText());
                 treeTable.removeAllItems();
-                addAll(event.getText(), EditModelPanel.this.model.getModelEntities());
+                addAll(event.getText(), EditRelationalModelPanel.this.model.getModelEntities());
             }
         });
 
@@ -190,7 +190,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                             }
                             if (unique) {
                                 obj.setName(newName);
-                                EditModelPanel.this.context.getConfigurationService().save(obj);
+                                EditRelationalModelPanel.this.context.getConfigurationService().save(obj);
                             } else {
                                 NotifyDialog.show("Name needs to be unique", "Name needs to be unique", null, Type.WARNING_MESSAGE);
                             }
@@ -216,7 +216,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                         ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
                             protected void save(String text) {
                                 obj.setDescription(trim(text));
-                                EditModelPanel.this.context.getConfigurationService().save(obj);
+                                EditRelationalModelPanel.this.context.getConfigurationService().save(obj);
                             };
                         };
                         t.setWidth(100, Unit.PERCENTAGE);
@@ -232,7 +232,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                         ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
                             protected void save(String text) {                                
                                 obj.setDescription(trim(text));
-                                EditModelPanel.this.context.getConfigurationService().save(obj);
+                                EditRelationalModelPanel.this.context.getConfigurationService().save(obj);
                             };
                         };
                         t.setWidth(100, Unit.PERCENTAGE);
@@ -261,7 +261,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                         cbox.addValueChangeListener(new ValueChangeListener() {
                             public void valueChange(ValueChangeEvent event) {
                                 obj.setType((String) cbox.getValue());
-                                EditModelPanel.this.context.getConfigurationService().save(obj);
+                                EditRelationalModelPanel.this.context.getConfigurationService().save(obj);
                             }
                         });
                         cbox.addBlurListener(new BlurListener() {

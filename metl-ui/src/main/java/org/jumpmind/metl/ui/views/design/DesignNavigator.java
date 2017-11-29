@@ -636,10 +636,16 @@ public class DesignNavigator extends VerticalLayout {
             log.debug("It took {}ms to create the edit flow panel", (System.currentTimeMillis() - ts));
             tabs.addCloseableTab(flow.getId(), flow.getName(), Icons.FLOW, flowLayout);
         } else if (item instanceof ModelName) {
-            ModelName model = (ModelName) item;
-            ProjectVersion projectVersion = findProjectVersion(model);
-            EditModelPanel editModel = new EditModelPanel(context, model.getId(), context.isReadOnly(projectVersion, Privilege.DESIGN));
-            tabs.addCloseableTab(model.getId(), model.getName(), Icons.MODEL, editModel);
+            ModelName modelName = (ModelName) item;
+            ProjectVersion projectVersion = findProjectVersion(modelName);
+            Model model = configurationService.findModel(modelName.getId());
+            if (model.getType().equalsIgnoreCase(Model.TYPE_RELATIONAL)) {
+	            EditRelationalModelPanel editModel = new EditRelationalModelPanel(context, modelName.getId(), context.isReadOnly(projectVersion, Privilege.DESIGN));
+	            tabs.addCloseableTab(modelName.getId(), modelName.getName(), Icons.MODEL, editModel);
+            } else {
+            		EditHierarchicalModelPanel editModel = new EditHierarchicalModelPanel(context, modelName.getId(), context.isReadOnly(projectVersion, Privilege.DESIGN));
+	            tabs.addCloseableTab(modelName.getId(), modelName.getName(), Icons.MODEL, editModel);
+            }
         } else if (item instanceof ResourceName) {
             ResourceName resource = (ResourceName) item;
             ProjectVersion projectVersion = findProjectVersion(resource);
@@ -936,7 +942,7 @@ public class DesignNavigator extends VerticalLayout {
         startEditingItem(resource);
     }
 
-    public void addNewModel() {
+    public void addNewModel(String type) {
         ProjectVersion projectVersion = findProjectVersion();
         FolderName folder = findFolderWithName(LABEL_MODELS);
         if (folder == null) {
@@ -947,6 +953,8 @@ public class DesignNavigator extends VerticalLayout {
         ModelName model = new ModelName();
         model.setName("New Model");
         model.setProjectVersionId(projectVersion.getId());
+        model.setType(type);
+        
         configurationService.save(model);
 
         treeTable.addItem(model);

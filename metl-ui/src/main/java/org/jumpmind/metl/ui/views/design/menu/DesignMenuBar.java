@@ -34,7 +34,8 @@ public class DesignMenuBar extends AbstractMenuBar {
         add("File|New|Project Dependency");
         add("File|New|Flow|Design");
         add("File|New|Flow|Test");
-        add("File|New|Model");
+        add("File|New|Model|Hierarchical");
+        add("File|New|Model|Relational");
         add("File|New|Resource|Database");
         add("File|New|Resource|Directory|FTP");
         add("File|New|Resource|Directory|File System");

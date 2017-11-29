@@ -1,6 +1,7 @@
 package org.jumpmind.metl.ui.views.design.menu;
 
 import org.jumpmind.metl.core.model.AbstractNamedObject;
+import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.ui.common.AbstractSelectedValueMenuManager;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
@@ -35,8 +36,11 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
             } else if ("File|New|Flow|Test".equals(menuSelected)) {
                 navigator.addNewFlow(true);
                 return true;
-            } else if ("File|New|Model".equals(menuSelected)) {
-                navigator.addNewModel();
+            } else if ("File|New|Model|Hierarchical".equals(menuSelected)) {
+                navigator.addNewModel(Model.TYPE_HIERARCHICAL);
+                return true;
+            } else if ("File|New|Model|Relational".equals(menuSelected)) {
+                navigator.addNewModel(Model.TYPE_RELATIONAL);
                 return true;
             } else if ("File|New|Resource|Database".equals(menuSelected)) {
                 navigator.addNewDatabase();
@@ -103,7 +107,8 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
     
     protected String[] getDisabledPaths(Object selected) {
         if (isReadOnly(selected)) {
-            return new String[] { "File|New|Project Dependency", "File|New|Flow|Design", "File|New|Flow|Test", "File|New|Model",
+            return new String[] { "File|New|Project Dependency", "File|New|Flow|Design", "File|New|Flow|Test", 
+                    "File|New|Model|Hierarchical", "File|New|Model|Relational",
                     "File|New|Resource|Database", "File|New|Resource|Directory|FTP", "File|New|Resource|Directory|File System",
                     "File|New|Resource|Directory|JMS", "File|New|Resource|Directory|SFTP", "File|New|Resource|Directory|SMB",
                     "File|New|Resource|HTTP", "File|New|Resource|Mail Session", "File|New|Resource|Subscribe|JMS", "Edit|Rename" };
