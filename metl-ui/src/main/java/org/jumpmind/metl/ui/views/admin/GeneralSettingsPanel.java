@@ -32,11 +32,12 @@ import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class GeneralSettingsPanel extends VerticalLayout implements IUiPanel {
+public class GeneralSettingsPanel extends Panel implements IUiPanel {
 
     private static final String THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART = "This will take effect on the next server restart";
 
@@ -121,8 +122,10 @@ public class GeneralSettingsPanel extends VerticalLayout implements IUiPanel {
         addSetting("Require Mixed Case", GlobalSetting.PASSWORD_REQUIRE_MIXED_CASE, "true", "",
                 Boolean.class);
 
-        addComponent(form);
-        setMargin(true);
+        VerticalLayout paddedLayout = new VerticalLayout();
+        paddedLayout.setMargin(true);
+        paddedLayout.addComponent(form);
+        setContent(paddedLayout);
     }
 
     protected AbstractField<?> addSetting(String text, String globalSetting, String defaultValue,

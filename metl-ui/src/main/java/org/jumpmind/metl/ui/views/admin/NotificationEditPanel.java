@@ -36,14 +36,16 @@ import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.NativeSelect;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
+public class NotificationEditPanel extends Panel implements IUiPanel {
 
     ApplicationContext context;
 
@@ -187,9 +189,12 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
             isInit = true;
         }
 
-        addComponent(form);
-        setMargin(true);
         autoSave = true;
+        
+        VerticalLayout paddedLayout = new VerticalLayout();
+        paddedLayout.setMargin(true);
+        paddedLayout.addComponent(form);
+        setContent(paddedLayout);
     }
 
     @Override
