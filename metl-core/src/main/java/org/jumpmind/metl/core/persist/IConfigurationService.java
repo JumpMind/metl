@@ -37,14 +37,15 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelName;
+import org.jumpmind.metl.core.model.ModelRelation;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
-import org.jumpmind.metl.core.model.ProjectVersionPlugin;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
+import org.jumpmind.metl.core.model.ProjectVersionPlugin;
 import org.jumpmind.metl.core.model.ReleasePackage;
-import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
+import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.model.Setting;
 
 public interface IConfigurationService {
@@ -214,5 +215,7 @@ public interface IConfigurationService {
     public void updateFlowWithNewGUIDs(String flowId,Map<String, String> oldToNewModelIdMap, 
             Map<String, String> oldToNewModelEntityIdMap, Map<String, String> oldToNewModelAttributeIdMap,
             Map<String, String> oldToNewResourceIdMap);
+    
+    public List<ModelRelation> findRelationshipsBetweenEntities(String entity1Id, String entity2Id);
 
 }

@@ -46,4 +46,33 @@
       </setting>
     </settings>
   </component>
+  <component category='PROCESSOR'
+             id='83433db0-9ac5-4257-a9c3-1ba75106bf65'
+             inputMessageType='entity'
+             inputOutputModelsMatch='false'
+             outputMessageType='entity'
+             resourceCategory='none'>
+    <name>Rel/Hier Map</name>
+    <className>org.jumpmind.metl.core.runtime.component.RelationalHierarchicalMapping</className>
+    <keywords>map</keywords>
+    <description></description>
+    <settings>
+      <setting id='set.unmapped.attributes.to.null'
+               required='false'
+               type='boolean'>
+        <name>Set Unmapped Attributes To Null</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='hierarchical.query.method'
+               required='false'
+               type='choice'>
+        <name>Hierarchical Query Method</name>
+        <defaultValue>BY JOIN</defaultValue>
+        <choices>
+          <choice>BY JOIN</choice>
+          <choice>BY TABLE</choice>
+        </choices>
+      </setting>      
+    </settings>
+  </component>  
 </definitions>

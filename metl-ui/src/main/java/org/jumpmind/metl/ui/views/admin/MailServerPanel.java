@@ -38,17 +38,19 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.NativeSelect;
+import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class MailServerPanel extends VerticalLayout implements IUiPanel {
+public class MailServerPanel extends Panel implements IUiPanel {
 
     final Logger log = LoggerFactory.getLogger(getClass());
     
@@ -161,9 +163,11 @@ public class MailServerPanel extends VerticalLayout implements IUiPanel {
         Button testButton = new Button("Test Connection");
         testButton.addClickListener(new TestClickListener());
         form.addComponent(testButton);
-
-        addComponent(form);
-        setMargin(true);
+        
+        VerticalLayout paddedLayout = new VerticalLayout();
+        paddedLayout.setMargin(true);
+        paddedLayout.addComponent(form);
+        setContent(paddedLayout);
     }
 
     private void saveSetting(GlobalSetting setting, String value) {

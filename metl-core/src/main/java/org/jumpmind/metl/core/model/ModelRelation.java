@@ -20,34 +20,44 @@
  */
 package org.jumpmind.metl.core.model;
 
-public class ModelName extends AbstractName {
+import java.util.ArrayList;
+import java.util.List;
 
-    private static final long serialVersionUID = 1L;
-    
-    private String type;
+public class ModelRelation extends AbstractNamedObject implements IAuditable {
 
-    public ModelName() {
-    }
-
-    public ModelName(Model obj) {
-        this.name = obj.getName();
-        this.setId(obj.getId());
-        this.rowId = obj.getRowId();
-        this.createTime = obj.getCreateTime();
-        this.createBy = obj.getCreateBy();
-        this.lastUpdateBy = obj.getLastUpdateBy();
-        this.lastUpdateTime = obj.getLastUpdateTime();
-        this.projectVersionId = obj.getProjectVersionId();
-        this.type = obj.getType();
-        this.deleted = obj.isDeleted();
-    }
-
-	public String getType() {
-		return type;
+	private static final long serialVersionUID = 1L;
+	
+	String modelId;
+	
+	String name;
+	
+	List<ModelRelationMapping> modelRelationMappings;
+	
+	@Override
+	public void setName(String name) {
+		this.name = name;
+		this.modelRelationMappings = new ArrayList<ModelRelationMapping>();
 	}
 
-	public void setType(String type) {
-		this.type = type;
+	@Override
+	public String getName() {
+		return this.name;
+	}
+	
+	public String getModelId() {
+		return modelId;
+	}
+
+	public void setModelId(String modelId) {
+		this.modelId = modelId;
+	}
+
+	public List<ModelRelationMapping> getModelRelationMappings() {
+		return modelRelationMappings;
+	}
+
+	public void setModelRelationMappings(List<ModelRelationMapping> modelRelationMappings) {
+		this.modelRelationMappings = modelRelationMappings;
 	}
 
 }

@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import org.jumpmind.db.sql.Row;
@@ -35,6 +36,10 @@ public class Model extends AbstractNamedObject implements IAuditable {
 
     private static final long serialVersionUID = 1L;
 
+    public static final String TYPE_RELATIONAL = "RELATIONAL";
+
+    public static final String TYPE_HIERARCHICAL = "HIERARCHICAL";
+
     Folder folder;
 
     String name;
@@ -42,10 +47,14 @@ public class Model extends AbstractNamedObject implements IAuditable {
     String folderId;
 
     String projectVersionId;
+    
+    String type;
 
     String rowId = UUID.randomUUID().toString();
 
     List<ModelEntity> modelEntities;
+    
+    List<ModelRelation> modelRelations;
 
     boolean shared;
 
@@ -53,6 +62,7 @@ public class Model extends AbstractNamedObject implements IAuditable {
 
     public Model() {
         this.modelEntities = new ArrayList<ModelEntity>();
+        this.modelRelations = new ArrayList<ModelRelation>();
     }
 
     public Model(String id) {
@@ -98,7 +108,15 @@ public class Model extends AbstractNamedObject implements IAuditable {
         this.shared = shared;
     }
 
-    public ModelEntity getEntityById(String entityId) {
+    public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public ModelEntity getEntityById(String entityId) {
         for (ModelEntity entity : modelEntities) {
             if (entity.getId().equalsIgnoreCase(entityId)) {
                 return entity;
@@ -158,8 +176,16 @@ public class Model extends AbstractNamedObject implements IAuditable {
     public void setModelEntities(List<ModelEntity> modelEntities) {
         this.modelEntities = modelEntities;
     }
+    
+    public List<ModelRelation> getModelRelations() {
+		return modelRelations;
+	}
 
-    public void setProjectVersionId(String projectVersionId) {
+	public void setModelRelations(List<ModelRelation> modelRelations) {
+		this.modelRelations = modelRelations;
+	}
+
+	public void setProjectVersionId(String projectVersionId) {
         this.projectVersionId = projectVersionId;
     }
 
@@ -234,6 +260,20 @@ public class Model extends AbstractNamedObject implements IAuditable {
             }
         }
         return row;
+    }
+    
+    public ModelEntity getRootElement() {
+    	
+    		if (this.type.equalsIgnoreCase(TYPE_HIERARCHICAL) && getModelEntities().size()>0) {
+    			return getEntityTree().first();
+    		}
+    		else {
+    			return null;    			
+    		}
+    }
+    
+    public TreeSet<ModelEntity> getEntityTree() {
+		return new TreeSet<ModelEntity>(this.getModelEntities());
     }
 
 }

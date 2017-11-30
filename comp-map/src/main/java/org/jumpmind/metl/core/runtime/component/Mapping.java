@@ -24,13 +24,10 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
@@ -40,7 +37,7 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
-public class Mapping extends AbstractComponentRuntime {
+public class Mapping extends AbstractMapping {
 
     public static final String TYPE = "Mapping";
 
@@ -50,32 +47,19 @@ public class Mapping extends AbstractComponentRuntime {
 
     public final static String ENTITY_PER_ROW = "entity.per.record";
 
-    Map<String, Set<String>> attrToAttrMap;
-
     boolean setUnmappedAttributesToNull;
+    
+    Map<String, Set<String>> attrToAttrMap;
 
     boolean entityPerRecord;
 
     @Override
     public void start() {
-
         validate();
-
         setUnmappedAttributesToNull = getComponent().getBoolean(SET_UNMAPPED_ATTRIBUTES_TO_NULL,
                 false);
         entityPerRecord = getComponent().getBoolean(ENTITY_PER_ROW, false);
-        attrToAttrMap = new HashMap<String, Set<String>>();
-        List<ComponentAttribSetting> attributeSettings = getComponent().getAttributeSettings();
-        for (ComponentAttribSetting attributeSetting : attributeSettings) {
-            if (attributeSetting.getName().equalsIgnoreCase(ATTRIBUTE_MAPS_TO)) {
-                Set<String> targets = attrToAttrMap.get(attributeSetting.getAttributeId());
-                if (targets == null) {
-                    targets = new HashSet<String>(2);
-                    attrToAttrMap.put(attributeSetting.getAttributeId(), targets);
-                }
-                targets.add(attributeSetting.getValue());
-            }
-        }
+        attrToAttrMap = getAttribToAttribMap();
     }
 
     @Override

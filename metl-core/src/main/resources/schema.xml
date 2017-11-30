@@ -120,6 +120,7 @@
         <column name="deleted" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this row has been deleted."/>                        
         <column name="name" type="VARCHAR" size="255" description="" />
         <column name="shared" type="BOOLEANINT" size="1" default="0" description="Indicator as to whether this is a shared model." />
+        <column name="type" type="VARCHAR" size="50" required="true" default="RELATIONAL" description="RELATIONAL or HIERARCHICAL" />
         <column name="folder_id" type="CHAR" size="36"/>
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
@@ -171,6 +172,39 @@
             <reference local="type_entity_id" foreign="id" />
         </foreign-key>
     </table>
+
+    <table name="model_relation" description="">
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="model_id" type="CHAR" size="36" required="true" description="The model to which this relationship belongs" />
+        <column name="name" type="VARCHAR" size="255" description="" />
+        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
+        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
+        <foreign-key foreignTable="model" name="fk_mr_2_m">
+            <reference local="model_id" foreign="id" />
+        </foreign-key>
+    </table>
+
+    <table name="model_relation_mapping" description="">
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="model_relation_id" type="CHAR" size="36" required="true" description="The model relationship to which this relationship belongs" />
+        <column name="source_attrib_id" type="CHAR" size="36" required="true"  />
+        <column name="target_attrib_id" type="CHAR" size="36" required="true"  />        
+        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
+        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
+        <foreign-key foreignTable="model_relation" name="fk_mrm_2_mr">
+            <reference local="model_relation_id" foreign="id" />
+        </foreign-key>
+        <foreign-key foreignTable="model_attrib" name="fk_mrms_2_ma">
+            <reference local="source_attrib_id" foreign="id" />
+        </foreign-key>
+        <foreign-key foreignTable="model_attrib" name="fk_mrmt_2_ma">
+            <reference local="target_attrib_id" foreign="id" />
+        </foreign-key>        
+    </table>	
 
     <table name="resource" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />

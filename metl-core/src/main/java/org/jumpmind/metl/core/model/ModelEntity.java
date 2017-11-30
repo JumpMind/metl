@@ -23,7 +23,7 @@ package org.jumpmind.metl.core.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ModelEntity extends AbstractNamedObject implements IAuditable {
+public class ModelEntity extends AbstractNamedObject implements IAuditable, Comparable<ModelEntity> {
 
     private static final long serialVersionUID = 1L;
 
@@ -71,6 +71,15 @@ public class ModelEntity extends AbstractNamedObject implements IAuditable {
         return null;
     }
 
+    public ModelAttrib getModelAttributeByTypeEntityId(String typeEntityId) {
+        for (ModelAttrib modelAttribute : modelAttributes) {
+            if (modelAttribute.getTypeEntityId() != null && modelAttribute.getTypeEntityId().equalsIgnoreCase(typeEntityId)) {
+                return modelAttribute;
+            }
+        }
+        return null;
+    }
+
     public String getModelId() {
         return modelId;
     }
@@ -103,17 +112,14 @@ public class ModelEntity extends AbstractNamedObject implements IAuditable {
         return pksOnly;
     }
 
-//    @Override
-//    public AbstractObject copy() {
-//        ModelEntity entity = (ModelEntity) super.copy();
-//        entity.setModelAttributes(new ArrayList<ModelAttribute>());
-//        for (ModelAttribute modelAttribute : modelAttributes) {
-//            modelAttribute = (ModelAttribute) modelAttribute.copy();
-//            modelAttribute.setEntityId(entity.getId());
-//            entity.getModelAttributes().add(modelAttribute);
-//        }
-//
-//        return entity;
-//    }
-
+	@Override
+	public int compareTo(ModelEntity o) {
+		for (ModelAttrib attrib:this.getModelAttributes()) {
+			if (attrib.getTypeEntityId() != null && 
+					attrib.getTypeEntityId().equalsIgnoreCase(o.getId())) {
+				return 0;
+			}
+		}
+		return 1;
+	}
 }
