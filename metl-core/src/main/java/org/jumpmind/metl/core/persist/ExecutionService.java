@@ -234,7 +234,7 @@ public class ExecutionService extends AbstractService implements IExecutionServi
                 "select id, agent_id, flow_id, deployment_id, deployment_name, agent_name, "
                 + "host_name, flow_name, status, start_time, end_time, create_by, last_update_by, parameters "
                         + "from %1$s_execution " + "where " + whereClause
-                        + "order by create_time desc limit " + limit, tablePrefix),
+                        + "order by create_time desc", tablePrefix), limit,
                 new ISqlRowMapper<Execution>() {
                     public Execution mapRow(Row row) {
                         Execution e = new Execution();
