@@ -42,6 +42,11 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.util.FormatUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 public class Serializer extends AbstractSerializer {
 
     List<EntityData> payload;
@@ -62,16 +67,23 @@ public class Serializer extends AbstractSerializer {
             }
 
             if (unitOfWorkBoundaryReached) {
-                ArrayList<?> response = null;
-                if (STRUCTURE_BY_TABLE.equals(structure)) {
-                    response = createByTablePayload(payload);
-                } else {
-                    response = createByInboundRowPayload(payload);
-                }
                 Map<String,Serializable> header = new HashMap<>(inputMessage.getHeader());
                 header.put(FORMAT, getDetectedFormat());
-                callback.sendTextMessage(header,
-                        getObjectMapper().writeValueAsString(response));
+                ObjectMapper mapper = getObjectMapper();                
+            	
+                if (getInputModel().getType().equalsIgnoreCase(Model.TYPE_RELATIONAL)) {
+                    ArrayList<?> response = null;
+	                if (STRUCTURE_BY_TABLE.equals(structure)) {
+	                    response = createByTablePayload(payload);
+	                } else {
+	                    response = createByInboundRowPayload(payload);
+	                }
+	                callback.sendTextMessage(header,
+	                        mapper.writeValueAsString(response));
+                } else {
+	                callback.sendTextMessage(header,
+	                         createHierarchicalPayload(mapper));
+                }
                 payload = new ArrayList<>();
             }
 
@@ -82,6 +94,66 @@ public class Serializer extends AbstractSerializer {
         }
     }
 
+    private String createHierarchicalPayload(ObjectMapper mapper) throws JsonProcessingException {
+    		Iterator<EntityData> itr = payload.iterator();
+    		Object root;
+    		if (payload.size() > 1) {
+    			root = mapper.createArrayNode();
+    			ArrayNode arrayRoot = (ArrayNode)root;
+    			while (itr.hasNext()) {
+    				EntityData entity = itr.next();
+    				ObjectNode node = mapper.createObjectNode();
+    				processHierarchicalEntity(mapper, node, entity);
+    				arrayRoot.add(node);    				
+    			}
+    		} else {
+    			root = mapper.createObjectNode();
+    			ObjectNode objRoot = (ObjectNode)root;
+        		processHierarchicalEntity(mapper, objRoot, itr.next());
+    		}
+    		return mapper.writeValueAsString(root);
+    }
+    
+    @SuppressWarnings("unchecked")
+	private void processHierarchicalEntity(ObjectMapper mapper, ObjectNode parentNode, EntityData entity) {
+    		ObjectNode childNode=null;
+    		String entityDesc=null;
+    		boolean root=false;
+    		for (Map.Entry<String, Object> entry : entity.entrySet()) {
+    			if (childNode == null) {
+        			entityDesc = getInputModel().getEntityById(getInputModel().getAttributeById(entry.getKey()).getEntityId()).getName();    				
+	    			if (parentNode.size() == 0) {
+	    				root=true;
+	    				childNode = parentNode.putObject(entityDesc);
+	    			} else {
+	    				childNode = mapper.createObjectNode();
+	    			}
+    			}
+    			if (entry.getValue() instanceof EntityData) {
+    				processHierarchicalEntity(mapper, childNode, (EntityData)entry.getValue());
+    			} else if (entry.getValue() instanceof ArrayList) {
+    				childNode.set(getInputModel().getAttributeById(entry.getKey()).getName(), 
+    						processHierarchicalEntityArray(mapper, parentNode, (List<EntityData>)entry.getValue()));
+    			}
+    			else {
+	    			childNode.put(getInputModel().getAttributeById(entry.getKey()).getName(), (String)entry.getValue());
+    			}
+ 		}
+    		if (!root) {
+    			parentNode.set(entityDesc, childNode);
+    		}
+    }
+    
+    private ArrayNode processHierarchicalEntityArray(ObjectMapper mapper, ObjectNode parentNode, List<EntityData> entityDatas) {
+    		ArrayNode arrayNode = mapper.createArrayNode();
+    		for (EntityData entityData : entityDatas) {
+    			ObjectNode node = mapper.createObjectNode();
+    			processHierarchicalEntity(mapper, node, entityData);
+    			arrayNode.add(node);
+    		}    		
+    		return arrayNode;
+    }
+    
     private ArrayList<EntityRow> createByInboundRowPayload(List<EntityData> payload) {
         ArrayList<EntityRow> entityResponse = new ArrayList<>();
         if (payload != null) {
