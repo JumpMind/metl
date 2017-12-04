@@ -192,12 +192,16 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
     			entityArray.add(processEntity(inputRows, childEntity, currentInputRow));
     			currentInputRow++;
     			int indx=0;
-    			for (String cntrlBreakAttrib:cntrlBreakAttributes) {
-    				if (!inputRows.get(currentInputRow).get(cntrlBreakAttrib).equals(cntrlBreakValues.get(indx))) {
-    					loop=false;
-    					currentInputRow--;
-    				}
-    			}    			
+    			if (currentInputRow < inputRows.size()) {
+	    			for (String cntrlBreakAttrib:cntrlBreakAttributes) {
+	    				if (!inputRows.get(currentInputRow).get(cntrlBreakAttrib).equals(cntrlBreakValues.get(indx))) {
+	    					loop=false;
+	    					currentInputRow--;
+	    				}
+	    			}
+    			} else {
+    				loop=false;
+    			}
     		} while (loop);
     		return entityArray;
     }
