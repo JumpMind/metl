@@ -77,6 +77,7 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
         state.outputModel = component.getOutputModel();
         if (state.outputModel != null) {          
             context.getConfigurationService().refresh(state.outputModel);
+            state.outputRootNode = state.outputModel.getRootElement();
             Collections.sort(state.outputModel.getModelEntities(), new ModelEntitySorter());
             state.outputModel.sortAttributes();
         }

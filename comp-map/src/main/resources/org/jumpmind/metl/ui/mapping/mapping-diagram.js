@@ -181,11 +181,19 @@ window.org_jumpmind_metl_ui_mapping_MappingDiagram = function() {
 }
 
 function rebuildAll() {
+	var xycoord = {left:0,top:0};
     removeConnections();
     removeNodes();
     appendNodes(mappingDiv, state.inputModel.modelEntities, "src", 10, 10, inputModelFilter, inputFilterPopulated, true);
-    appendNodes(mappingDiv, state.outputModel.modelEntities, "dst", (mappingDiv.clientWidth / 2) + 12, 10,
-            outputModelFilter, outputFilterPopulated, false);
+    if (state.outputModel.type == "RELATIONAL") {
+	    appendNodes(mappingDiv, state.outputModel.modelEntities, "dst", (mappingDiv.clientWidth / 2) + 12, 10,
+	            outputModelFilter, outputFilterPopulated, false);
+    } else {
+    		xycoord.left = (mappingDiv.clientWidth / 2) + 12;
+    		xycoord.top = 10;
+    		appendHierarchicalNodes(mappingDiv, state.outputModel.modelEntities, state.outputRootNode, "dst", xycoord,
+    				outputModelFilter, outputFilterPopulated, false);
+    }
 
     var srcNodes = jsPlumb.getSelector(".mapping-diagram .src");
     if (srcNodes.length > 0) {
@@ -209,6 +217,43 @@ function removeNodes() {
             instance.remove(mappingDiv.childNodes[0]);
         }
     }
+}
+
+function appendHierarchicalNodes(parentDiv, entities, outputRootNode, prefix, xycoord, filterText, filterMapped, src) {
+	var rootNode=outputRootNode;
+	addEntity(parentDiv, entities, rootNode, prefix, xycoord);
+}
+
+function addEntity(parentDiv, entities, parentEntity, prefix, xycoord) {
+    var lineHeight = 23;
+    var key = "";
+    var column = "";
+    var table = "";
+
+	createNode(parentDiv, prefix + parentEntity.id, parentEntity.name, "entity", xycoord.left, xycoord.top, table);
+    xycoord.top += lineHeight
+    xycoord.left += 10;
+	var attrs = parentEntity.modelAttributes;
+	for (var i=0; i< attrs.length; i++) {
+		var attr = attrs[i];
+		if (attr.type == "REF" || attr.type == "ARRAY") {
+			childNode = getEntityById(entities, attr.typeEntityId);
+			addEntity(parentDiv, entities, childNode, prefix, xycoord);
+		} else {
+            createNode(parentDiv, prefix + attr.id, attr.name, "entity " + prefix, xycoord.left, xycoord.top, column);
+			xycoord.top += lineHeight;
+		}
+	}
+	xycoord.left -= 10;
+}
+
+function getEntityById(entities, entityId) {
+	for (var i=0;i<entities.length;i++) {
+		if (entities[i].id == entityId) {
+			return entities[i];
+		}
+	}
+	return null;
 }
 
 function appendNodes(parentDiv, entities, prefix, left, top, filterText, filterMapped, src) {

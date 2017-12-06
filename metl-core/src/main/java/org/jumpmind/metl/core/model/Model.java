@@ -55,7 +55,7 @@ public class Model extends AbstractNamedObject implements IAuditable {
     List<ModelEntity> modelEntities;
     
     List<ModelRelation> modelRelations;
-
+    
     boolean shared;
 
     boolean deleted = false;
