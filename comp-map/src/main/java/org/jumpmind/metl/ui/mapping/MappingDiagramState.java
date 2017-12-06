@@ -32,6 +32,8 @@ public class MappingDiagramState extends JavaScriptComponentState {
     private static final long serialVersionUID = 1L;
     
     public String mapsToAttrName = Mapping.ATTRIBUTE_MAPS_TO;
+    
+    public String mapsToEntityName = Mapping.ENTITY_MAPS_TO;
 
     public Component component;
     

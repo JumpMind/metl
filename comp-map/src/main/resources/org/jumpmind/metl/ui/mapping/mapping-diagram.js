@@ -134,6 +134,11 @@ window.org_jumpmind_metl_ui_mapping_MappingDiagram = function() {
     }
 
     addConnections = function() {
+    		addAttribConnections();
+    		addEntityConnections();
+    }
+    
+    addAttribConnections = function() {
         var settings = state.component.attributeSettings;
         for (var i = 0; i < settings.length; i++) {
             var setting = settings[i];
@@ -144,8 +149,22 @@ window.org_jumpmind_metl_ui_mapping_MappingDiagram = function() {
                     fireEvent : false
                 });
             }
-        }
+        }    	
     }
+    
+    addEntityConnections = function() {
+        var settings = state.component.entitySettings;
+        for (var i = 0; i < settings.length; i++) {
+            var setting = settings[i];
+            if (setting.name == state.mapsToEntityName) {
+                instance.connect({
+                    source : "src" + setting.entityId,
+                    target : "dst" + setting.value,
+                    fireEvent : false
+                });
+            }
+        }    	
+    }    
 
     removeConnections = function() {
         var connections = instance.getAllConnections();
@@ -155,6 +174,8 @@ window.org_jumpmind_metl_ui_mapping_MappingDiagram = function() {
             });
         }
     }
+    
+    //TODO: create remove entity and attrib connections
 
     this.onStateChange = function() {
         instance.batch(function() {
@@ -230,7 +251,7 @@ function addEntity(parentDiv, entities, parentEntity, prefix, xycoord) {
     var column = "";
     var table = "";
 
-	createNode(parentDiv, prefix + parentEntity.id, parentEntity.name, "entity", xycoord.left, xycoord.top, table);
+	createNode(parentDiv, prefix + parentEntity.id, parentEntity.name, "entity " + prefix, xycoord.left, xycoord.top, table);
     xycoord.top += lineHeight
     xycoord.left += 10;
 	var attrs = parentEntity.modelAttributes;
@@ -287,7 +308,11 @@ function appendNodes(parentDiv, entities, prefix, left, top, filterText, filterM
     for (var i = 0; i < filteredEntities.length; i++, top += lineHeight) {
         var entity = filteredEntities[i];
         var attrs = entity.modelAttributes;
-        createNode(parentDiv, prefix + entity.id, entity.name, "entity", left, top, table);
+        if (state.outputModel.type == "RELATIONAL") {
+        		createNode(parentDiv, prefix + entity.id, entity.name, "entity", left, top, table);
+        } else {
+    			createNode(parentDiv, prefix + entity.id, entity.name, "entity " + prefix, left, top, table);        	
+        }
         for (j = 0, top += lineHeight; j < attrs.length; j++, top += lineHeight) {
             var attr = attrs[j];
             var icon = column;
