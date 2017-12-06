@@ -31,6 +31,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.ContentMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
@@ -115,7 +116,7 @@ public class TextFileWriter extends AbstractFileWriter {
                         for (Object rec : recs) {
                             initStreamAndWriter(inputMessage);
                             bufferedWriter.write(rec != null ? rec.toString() : "");
-                            if (lineTerminator != null) {
+                            if (StringUtils.isNotBlank(lineTerminator)) {
                                 bufferedWriter.write(lineTerminator);
                             } else {
                                 bufferedWriter.newLine();
