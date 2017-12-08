@@ -58,6 +58,8 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
     Map<String, String> attrToAttrMap;
     
     Map<String, String> entityToEntityMap;
+    
+    int currentInputRow;
 
     @Override
     public void start() {
@@ -121,18 +123,21 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
     private ArrayList<EntityData> processByJoinData(ArrayList<EntityData> inputRows) {
     		ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
     		
-    		int currentInputRow=0;    		
+    		currentInputRow=0;    		
 		Model outModel = getOutputModel();
 		ModelEntity rootEntity = outModel.getRootElement();
 		//TODO: this could also be an array of entities from a json perspective 
 		//      need to address model issues with this as well unless we want
 		//		to force all models to have a root...
-		outputPayload.add(processEntity(inputRows, rootEntity, currentInputRow));
+		do {
+			outputPayload.add(processEntity(inputRows, rootEntity));
+    			currentInputRow = currentInputRow+1;
+		} while (inputRows.size() > currentInputRow);
 		
     		return outputPayload;
     }
     
-    private EntityData processEntity(ArrayList<EntityData> inputRows, ModelEntity entity, int currentInputRow) {
+    private EntityData processEntity(ArrayList<EntityData> inputRows, ModelEntity entity) {
 		EntityData entityData = new EntityData();
 
 		for (ModelAttrib attrib:entity.getModelAttributes()) {
@@ -141,12 +146,11 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
     				entityData.put(attrib.getId(), processEntityArray(inputRows, entity, childEntity, currentInputRow));    				
     			} else if (attrib.getDataType().equals(DataType.REF)) {
     				ModelEntity childEntity = getOutputModel().getEntityById(attrib.getTypeEntityId());
-    				entityData.put(attrib.getId(), processEntity(inputRows, childEntity, currentInputRow));
+    				entityData.put(attrib.getId(), processEntity(inputRows, childEntity));
     			} else {
     				entityData.put(attrib.getId(),mapValueFromInputToOutput(attrib.getId(), inputRows.get(currentInputRow)));
     			}
 		}		
-    		currentInputRow++;
     		return entityData;
     }
 
@@ -189,7 +193,7 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
     		//in join scenario, the first element should always be processed
 		boolean loop=true;
     		do {    			
-    			entityArray.add(processEntity(inputRows, childEntity, currentInputRow));
+    			entityArray.add(processEntity(inputRows, childEntity));
     			currentInputRow++;
     			int indx=0;
     			if (currentInputRow < inputRows.size()) {
