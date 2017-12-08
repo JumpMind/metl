@@ -26,7 +26,7 @@ public class ProjectVersionMenuManager extends AbstractDesignSelectedValueMenuMa
                 "File|New|Project Dependency",
                 "File|New|Flow|Design",
                 "File|New|Flow|Test",
-                "File|New|Model|Hierarhical",
+                "File|New|Model|Hierarchical",
                 "File|New|Model|Relational",
                 "File|New|Resource|Database",
                 "File|New|Resource|Directory|FTP",

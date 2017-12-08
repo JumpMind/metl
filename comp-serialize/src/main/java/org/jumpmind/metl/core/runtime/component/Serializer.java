@@ -136,7 +136,15 @@ public class Serializer extends AbstractSerializer {
     						processHierarchicalEntityArray(mapper, parentNode, (List<EntityData>)entry.getValue()));
     			}
     			else {
-	    			childNode.put(getInputModel().getAttributeById(entry.getKey()).getName(), (String)entry.getValue());
+                String stringValue = null;
+                Object value = entry.getValue();
+                if (value instanceof Date) {
+                    stringValue = FormatUtils.TIMESTAMP_FORMATTER.format((Date) value);
+                }
+                if (value != null) {
+                    stringValue = value.toString();
+                }    				
+	    			childNode.put(getInputModel().getAttributeById(entry.getKey()).getName(), stringValue);
     			}
  		}
     		if (!root) {
