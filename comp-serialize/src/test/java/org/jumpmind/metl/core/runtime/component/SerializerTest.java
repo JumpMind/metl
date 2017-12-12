@@ -27,8 +27,10 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 public class SerializerTest {
 
@@ -44,6 +46,29 @@ public class SerializerTest {
     		assertEquals("{\"Store\":{\"ID\":\"001\",\"Name\":\"MyName\"}}", 
     				mapper.writeValueAsString(root));    		
     }
+
+    @Test
+    public void testBuildObjectTreeNoRoot() throws JsonProcessingException {  //if the root is an object
+    		ObjectMapper mapper = new ObjectMapper();	
+    		ObjectNode root = mapper.createObjectNode();
+    		
+    		root.put("ID", "001");   //attributes
+    		root.put("Name", "MyName");
+    		System.out.println(mapper.writeValueAsString(root));
+    		assertEquals("{\"ID\":\"001\",\"Name\":\"MyName\"}", 
+    				mapper.writeValueAsString(root));    		
+    }    
+
+    @Test
+    public void testBuildXmlObjectTreeNoRoot() throws JsonProcessingException {  //if the root is an object
+    		XmlMapper mapper = new XmlMapper();   		
+    		ObjectNode root = mapper.createObjectNode();    		
+    		root.put("ID", "001");   //attributes
+    		root.put("Name", "MyName");    		
+    		ObjectWriter writer = mapper.writer();
+    		System.out.println(writer.withRootName("Person").writeValueAsString(root));
+    }    
+    
     
     @Test
     public void testBuildArrayTree() throws JsonProcessingException {  // if the root is an array
@@ -66,6 +91,8 @@ public class SerializerTest {
     		
     		root.add(store1);
     		root.add(store2);
+   
+    		System.out.println(mapper.writeValueAsString(root));
     		
     		assertEquals("[{\"Store\":{\"id\":\"001\",\"name\":\"Store 001\"}},{\"Store\":{\"id\":\"002\",\"name\":\"Store 002\"}}]", 
     				mapper.writeValueAsString(root));    		
