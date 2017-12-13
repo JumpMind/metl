@@ -44,8 +44,10 @@ import org.jumpmind.util.FormatUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 public class Serializer extends AbstractSerializer {
 
@@ -97,6 +99,7 @@ public class Serializer extends AbstractSerializer {
     private String createHierarchicalPayload(ObjectMapper mapper) throws JsonProcessingException {
     		Iterator<EntityData> itr = payload.iterator();
     		Object root;
+    		String rootName=null;
     		if (payload.size() > 1) {
     			root = mapper.createArrayNode();
     			ArrayNode arrayRoot = (ArrayNode)root;
@@ -109,13 +112,18 @@ public class Serializer extends AbstractSerializer {
     		} else {
     			root = mapper.createObjectNode();
     			ObjectNode objRoot = (ObjectNode)root;
-        		processHierarchicalEntity(mapper, objRoot, itr.next());
+        		rootName = processHierarchicalEntity(mapper, objRoot, itr.next());
     		}
-    		return mapper.writeValueAsString(root);
+    		ObjectWriter writer = mapper.writer();
+    		if (mapper instanceof XmlMapper) {
+        		return writer.withRootName(rootName).writeValueAsString(root);
+    		} else {
+    			return mapper.writeValueAsString(root);
+    		}
     }
     
     @SuppressWarnings("unchecked")
-	private void processHierarchicalEntity(ObjectMapper mapper, ObjectNode parentNode, EntityData entity) {
+	private String processHierarchicalEntity(ObjectMapper mapper, ObjectNode parentNode, EntityData entity) {
     		ObjectNode childNode=null;
     		String entityDesc=null;
     		boolean root=false;
@@ -124,7 +132,8 @@ public class Serializer extends AbstractSerializer {
         			entityDesc = getInputModel().getEntityById(getInputModel().getAttributeById(entry.getKey()).getEntityId()).getName();    				
 	    			if (parentNode.size() == 0) {
 	    				root=true;
-	    				childNode = parentNode.putObject(entityDesc);
+	    				//childNode = parentNode.putObject(entityDesc);
+	    				childNode = parentNode;
 	    			} else {
 	    				childNode = mapper.createObjectNode();
 	    			}
@@ -150,6 +159,7 @@ public class Serializer extends AbstractSerializer {
     		if (!root) {
     			parentNode.set(entityDesc, childNode);
     		}
+    		return entityDesc;
     }
     
     private ArrayNode processHierarchicalEntityArray(ObjectMapper mapper, ObjectNode parentNode, List<EntityData> entityDatas) {
