@@ -39,6 +39,7 @@ import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.util.FormatUtils;
 
@@ -56,9 +57,16 @@ public class Serializer extends AbstractSerializer {
     @Override
     public void start() {
         super.start();
+        validate();
         payload = new ArrayList<>();
     }
 
+	protected void validate() {
+		if (getComponent().getInputModel() == null) {
+			throw new MisconfiguredException("Input model must be specified");
+		}
+	}
+    
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback,
             boolean unitOfWorkBoundaryReached) {
@@ -112,7 +120,9 @@ public class Serializer extends AbstractSerializer {
     		} else {
     			root = mapper.createObjectNode();
     			ObjectNode objRoot = (ObjectNode)root;
-        		rootName = processHierarchicalEntity(mapper, objRoot, itr.next());
+    			if (itr.hasNext()) {
+    				rootName = processHierarchicalEntity(mapper, objRoot, itr.next());
+    			}
     		}
     		ObjectWriter writer = mapper.writer();
     		if (mapper instanceof XmlMapper) {
