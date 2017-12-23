@@ -126,9 +126,7 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
     		currentInputRow=0;    		
 		Model outModel = getOutputModel();
 		ModelEntity rootEntity = outModel.getRootElement();
-		//TODO: this could also be an array of entities from a json perspective 
-		//      need to address model issues with this as well unless we want
-		//		to force all models to have a root...
+
 		do {
 			outputPayload.add(processEntity(inputRows, rootEntity));
     			currentInputRow = currentInputRow+1;
