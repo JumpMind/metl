@@ -30,6 +30,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
+import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
@@ -175,24 +176,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         if (component.getInputModel() != null) {
 
             componentAttributes = component.getAttributeSettings();
-
-            List<ComponentAttribSetting> toRemove = new ArrayList<ComponentAttribSetting>();
-            for (ComponentAttribSetting componentAttribute : componentAttributes) {
-                Model model = component.getInputModel();
-                ModelAttrib attribute1 = model.getAttributeById(componentAttribute.getAttributeId());
-                if (attribute1 == null) {
-                    /*
-                     * invalid attribute. model must have changed. lets remove
-                     * it
-                     */
-                    toRemove.add(componentAttribute);
-                }
-            }
-
-            for (ComponentAttribSetting componentAttributeSetting : toRemove) {
-                componentAttributes.remove(componentAttributeSetting);
-                context.getConfigurationService().delete(componentAttributeSetting);
-            }
+            removeDeadAttributeSettings();
 
             for (ModelEntity entity : component.getInputModel().getModelEntities()) {
                 for (ModelAttrib attr : entity.getModelAttributes()) {
@@ -204,7 +188,8 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
                             break;
                         }
                     }
-                    if (!found) {
+                    if (!found && !attr.getDataType().equals(DataType.REF)
+                    		& !attr.getDataType().equals(DataType.ARRAY)) {
                         componentAttributes
                                 .add(new ComponentAttribSetting(attr.getId(), component.getId(), Transformer.TRANSFORM_EXPRESSION, null));
                     }
@@ -235,6 +220,26 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         exportTable.setContainerDataSource(exportContainer);
         exportTable.setVisibleColumns(new Object[] { "entityName", "attributeName", "value" });
         exportTable.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Transform" });
+    }
+    
+    protected void removeDeadAttributeSettings() {
+        List<ComponentAttribSetting> toRemove = new ArrayList<ComponentAttribSetting>();
+        for (ComponentAttribSetting componentAttribute : componentAttributes) {
+            Model model = component.getInputModel();
+            ModelAttrib attribute1 = model.getAttributeById(componentAttribute.getAttributeId());
+            if (attribute1 == null) {
+                /*
+                 * invalid attribute. model must have changed. lets remove
+                 * it
+                 */
+                toRemove.add(componentAttribute);
+            }
+        }
+
+        for (ComponentAttribSetting componentAttributeSetting : toRemove) {
+            componentAttributes.remove(componentAttributeSetting);
+            context.getConfigurationService().delete(componentAttributeSetting);
+        }
     }
     
     protected void updateTable() {

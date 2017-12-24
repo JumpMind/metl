@@ -34,6 +34,7 @@ import javax.script.ScriptException;
 import org.apache.commons.collections.CollectionUtils;
 import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
+import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
@@ -98,7 +99,6 @@ public class Transformer extends AbstractComponentRuntime {
         return allAttributesForIncludedEntities;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (scriptEngine == null) {
@@ -112,64 +112,7 @@ public class Transformer extends AbstractComponentRuntime {
 
 			if (inDatas != null) {
 				for (EntityData inData : inDatas) {
-					EntityData outData = new EntityData();
-					outData.setChangeType(inData.getChangeType());
-					outDatas.add(outData);
-
-					Set<String> attributeIds = new HashSet<String>();
-					attributeIds.addAll(inData.keySet());					
-					attributeIds.addAll(CollectionUtils.intersection(getAllAttributesForIncludedEntities(inData), transformsByAttributeId.keySet()));
-					
-					for (String attributeId : attributeIds) {
-						String transform = transformsByAttributeId.get(attributeId);
-						Object value = inData.get(attributeId);
-						if (isNotBlank(transform)) {
-							ModelAttrib attribute = inputModel.getAttributeById(attributeId);
-							ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
-							
-
-							ModelAttributeScriptHelper helper = helpers.get(attribute.getId());
-							if (helper == null) {
-							    
-							    long ts = System.currentTimeMillis();
-						        scriptEngine.put("entity", entity);
-						        scriptEngine.put("attribute", attribute);
-						        scriptEngine.put("context", context);      
-						        scriptEngine.put("model", getInputModel());
-						        try {
-						            String importString = "import org.jumpmind.metl.core.runtime.component.ModelAttributeScriptHelper;\n";
-						            String code = String.format(
-						                    "return new ModelAttributeScriptHelper(context, attribute, entity, model) { public Object eval() { %s \n } }",
-						                    transform);
-						            helper = (ModelAttributeScriptHelper)scriptEngine.eval(importString + code);
-						            helpers.put(attribute.getId(), helper);
-						        } catch (ScriptException e) {
-						            throw new RuntimeException("Unable to evaluate groovy script.  Attribute ==> " + attribute.getName() + ".  Value ==> "
-						                    + (value==null ? "null" : value.toString()) + "." + e.getCause().getMessage(), e);
-						        }
-						        
-						        log.debug("It took " + (System.currentTimeMillis()-ts) + "ms to create class");
-							}
-							
-							helper.setData(inData);
-							helper.setValue(value);
-							helper.setMessage(inputMessage);
-							long ts = System.currentTimeMillis();
-							try {
-							    value = helper.eval();
-							} catch (Exception e) {
-							    throw new RuntimeException("Groovy script evaluation resulted in an exception.  Attribute ==> " 
-							            + attribute.getName() + ".  Value ==> " + (value==null ? "null" : value.toString()) 
-							            + ".  Payload ==>\n" + getComponent().toRow(inData, false, false), e);
-							}
-							totalTime += (System.currentTimeMillis()-ts);
-							totalCalls ++;   
-						}
-						if (value != ModelAttributeScriptHelper.REMOVE_ATTRIBUTE) {
-							outData.put(attributeId, value);
-						}
-					}
-					getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+					processEntity(inData, inputMessage, inputModel, outDatas, true);
 				}
 			}
 			callback.sendEntityDataMessage(null, outDatas);
@@ -181,5 +124,76 @@ public class Transformer extends AbstractComponentRuntime {
 		} else if (inputMessage instanceof ControlMessage && properties.is(PASS_ALONG_CONTROL_MESSAGES, false)) {
 		        callback.sendControlMessage();
 		}
+	}
+    
+    @SuppressWarnings("unchecked")
+    protected EntityData processEntity(EntityData inData, Message inputMessage, Model inputModel,
+    		ArrayList<EntityData> outDatas, boolean isRoot) {
+
+    		EntityData outData = new EntityData();
+		outData.setChangeType(inData.getChangeType());
+		if (isRoot) {
+			outDatas.add(outData);			
+		}
+		Set<String> attributeIds = new HashSet<String>();
+		attributeIds.addAll(inData.keySet());					
+		attributeIds.addAll(CollectionUtils.intersection(getAllAttributesForIncludedEntities(inData), transformsByAttributeId.keySet()));		
+		for (String attributeId : attributeIds) {
+			processAttribute(attributeId, inData, outData, inputMessage, inputModel, outDatas);
+		}
+		getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+
+		return outData;
+    }
+    
+    protected void processAttribute(String attributeId, EntityData inData, EntityData outData,
+    		Message inputMessage, Model inputModel, ArrayList<EntityData> outDatas) {
+		String transform = transformsByAttributeId.get(attributeId);
+		Object value = inData.get(attributeId);
+		ModelAttrib attribute = inputModel.getAttributeById(attributeId);
+		if (attribute.getDataType().equals(DataType.ARRAY) ||
+				attribute.getDataType().equals(DataType.REF)) {
+			outData.put(attributeId, processEntity((EntityData)value, inputMessage, inputModel, outDatas, false));
+		} else {
+			if (isNotBlank(transform)) {
+				ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
+				ModelAttributeScriptHelper helper = helpers.get(attribute.getId());
+				if (helper == null) {
+				    long ts = System.currentTimeMillis();
+			        scriptEngine.put("entity", entity);
+			        scriptEngine.put("attribute", attribute);
+			        scriptEngine.put("context", context);      
+			        scriptEngine.put("model", getInputModel());
+			        try {
+			            String importString = "import org.jumpmind.metl.core.runtime.component.ModelAttributeScriptHelper;\n";
+			            String code = String.format(
+			                    "return new ModelAttributeScriptHelper(context, attribute, entity, model) { public Object eval() { %s \n } }",
+			                    transform);
+			            helper = (ModelAttributeScriptHelper)scriptEngine.eval(importString + code);
+			            helpers.put(attribute.getId(), helper);
+			        } catch (ScriptException e) {
+			            throw new RuntimeException("Unable to evaluate groovy script.  Attribute ==> " + attribute.getName() + ".  Value ==> "
+			                    + (value==null ? "null" : value.toString()) + "." + e.getCause().getMessage(), e);
+			        }      
+			        log.debug("It took " + (System.currentTimeMillis()-ts) + "ms to create class");
+				}
+				helper.setData(inData);
+				helper.setValue(value);
+				helper.setMessage(inputMessage);
+				long ts = System.currentTimeMillis();
+				try {
+				    value = helper.eval();
+				} catch (Exception e) {
+				    throw new RuntimeException("Groovy script evaluation resulted in an exception.  Attribute ==> " 
+				            + attribute.getName() + ".  Value ==> " + (value==null ? "null" : value.toString()) 
+				            + ".  Payload ==>\n" + getComponent().toRow(inData, false, false), e);
+				}
+				totalTime += (System.currentTimeMillis()-ts);
+				totalCalls ++;   
+			}
+			if (value != ModelAttributeScriptHelper.REMOVE_ATTRIBUTE) {
+				outData.put(attributeId, value);
+			}
+	    } 
 	}
 }
