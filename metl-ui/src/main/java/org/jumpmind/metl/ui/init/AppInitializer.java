@@ -98,7 +98,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
     public void onStartup(ServletContext servletContext) throws ServletException {
         System.out.println("Version: " + VersionUtils.getCurrentVersion());
         properties = loadProperties();
-        LogUtils.initLogging(getConfigDir(false), properties);
+        LogUtils.initLogging(getConfigDir(false), (TypedProperties) properties);
         AnnotationConfigWebApplicationContext applicationContext = new AnnotationConfigWebApplicationContext();
         applicationContext.scan("org.jumpmind.metl");
         MutablePropertySources sources = applicationContext.getEnvironment().getPropertySources();

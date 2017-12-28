@@ -38,4 +38,10 @@ public final class EnvConstants {
     
     public final static String CONFIG_DIR = "config.dir";
     
+    public static final String LOG_FILE_RETENTION_IN_DAYS = "log.file.retention.days";
+    
+    public static final String LOG_FILE_MAX_SIZE = "log.file.max.size";
+    
+    public static final String LOG_FILE_PATTERN_LAYOUT = "log.file.pattern.layout";
+    
 }

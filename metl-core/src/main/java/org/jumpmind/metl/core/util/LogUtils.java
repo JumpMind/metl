@@ -26,11 +26,11 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import java.io.File;
 import java.util.Iterator;
 import java.util.Map.Entry;
-import java.util.Properties;
 
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.RollingFileAppender;
 import org.jumpmind.db.sql.Row;
+import org.jumpmind.properties.TypedProperties;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 public final class LogUtils {
@@ -106,7 +106,7 @@ public final class LogUtils {
         }
     }
 
-    public static void initLogging(String configDir, Properties properties) {
+    public static void initLogging(String configDir, TypedProperties properties) {
                 
         /* Optionally remove existing handlers attached to j.u.l root logger */
         SLF4JBridgeHandler.removeHandlersForRootLogger();
@@ -134,13 +134,16 @@ public final class LogUtils {
             } else {
                 logDir = new File(logFilePath).getParentFile();
             }
+            int logFileRetentionInDays = properties.getInt(EnvConstants.LOG_FILE_RETENTION_IN_DAYS,10);  
+            String logFileMaxSize = properties.get(EnvConstants.LOG_FILE_MAX_SIZE, "40MB");
+            String logFilePatternLayout = properties.get(EnvConstants.LOG_FILE_PATTERN_LAYOUT,"%d %-5p [%c{1}] [%t] %m%n");
             try {
                 RollingFileAppender logFileAppender = new RollingFileAppender();
                 logFileAppender.setFile(logFilePath);
-                logFileAppender.setMaxBackupIndex(10);
-                logFileAppender.setMaxFileSize("40MB");
+                logFileAppender.setMaxBackupIndex(logFileRetentionInDays);
+                logFileAppender.setMaxFileSize(logFileMaxSize);
                 logFileAppender.setAppend(true);
-                logFileAppender.setLayout(new PatternLayout("%d %-5p [%c{1}] [%t] %m%n"));
+                logFileAppender.setLayout(new PatternLayout(logFilePatternLayout));
                 org.apache.log4j.Logger.getRootLogger().addAppender(logFileAppender);
                 logFileAppender.activateOptions();
             } catch (Exception ex) {
