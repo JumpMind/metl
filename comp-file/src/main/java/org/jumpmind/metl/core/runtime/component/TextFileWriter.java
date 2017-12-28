@@ -182,17 +182,17 @@ public class TextFileWriter extends AbstractFileWriter {
 
     private void initStreamAndWriter(Message inputMessage) {
         if (bufferedWriter == null) {
-            String fileName = getFileName(inputMessage);
             if (directory == null) {
                 directory = (IDirectory) getResourceReference();
             }
-            if (!append) {
-                directory.delete(fileName);
-            }
+            String fileName = getFileName(inputMessage);
             if (isNotBlank(fileName)) {
                 log(LogLevel.INFO, String.format("Writing text to resource: %s with name: %s", directory.toString(), fileName));
             } else {
-                log(LogLevel.INFO, String.format("Writing text to resource: %s", directory.toString()));
+                throw new RuntimeException("The file name could not be determined. Verify that a filename has been provided.");
+            }
+            if (!append) {
+                directory.delete(fileName);
             }
             bufferedWriter = initializeWriter(directory.getOutputStream(fileName, mustExist, false, append));
         }
