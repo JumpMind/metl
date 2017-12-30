@@ -39,6 +39,8 @@ import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
+import org.jumpmind.metl.core.runtime.resource.JMSJndiQueueDirectory;
+import org.jumpmind.metl.core.runtime.resource.JMSJndiTopicDirectory;
 import org.jumpmind.properties.TypedProperties;
 
 public class TextFileWriter extends AbstractFileWriter {
@@ -182,17 +184,20 @@ public class TextFileWriter extends AbstractFileWriter {
 
     private void initStreamAndWriter(Message inputMessage) {
         if (bufferedWriter == null) {
-            String fileName = getFileName(inputMessage);
             if (directory == null) {
                 directory = (IDirectory) getResourceReference();
             }
+            String fileName = getFileName(inputMessage);
+            if (!(directory instanceof JMSJndiQueueDirectory) &&
+    				!(directory instanceof JMSJndiTopicDirectory)) {
+	            if (isNotBlank(fileName)) {
+	                log(LogLevel.INFO, String.format("Writing text to resource: %s with name: %s", directory.toString(), fileName));
+	            } else {
+	            		throw new RuntimeException("The file name could not be determined. Verify that a filename has been provided.");
+	            }
+            }
             if (!append) {
                 directory.delete(fileName);
-            }
-            if (isNotBlank(fileName)) {
-                log(LogLevel.INFO, String.format("Writing text to resource: %s with name: %s", directory.toString(), fileName));
-            } else {
-                log(LogLevel.INFO, String.format("Writing text to resource: %s", directory.toString()));
             }
             bufferedWriter = initializeWriter(directory.getOutputStream(fileName, mustExist, false, append));
         }
