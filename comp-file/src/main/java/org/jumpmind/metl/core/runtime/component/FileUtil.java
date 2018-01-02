@@ -35,6 +35,7 @@ import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.FileInfo;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.properties.TypedProperties;
+import org.jumpmind.util.FormatUtils;
 
 public class FileUtil extends AbstractComponentRuntime {
 
@@ -102,7 +103,7 @@ public class FileUtil extends AbstractComponentRuntime {
         appendToName = typedProperties.get(SETTING_APPEND_TO_NAME);
         overwrite = typedProperties.is(SETTING_OVERWRITE, overwrite);
         runWhen = typedProperties.get(RUN_WHEN, PER_UNIT_OF_WORK);
-        newName = typedProperties.get(SETTING_TARGET_NAME);
+        newName = FormatUtils.replaceTokens(typedProperties.get(SETTING_TARGET_NAME), context.getFlowParameters(),true);
     }
     
     @Override
