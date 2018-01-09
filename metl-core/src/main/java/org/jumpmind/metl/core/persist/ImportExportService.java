@@ -82,7 +82,12 @@ public class ImportExportService extends AbstractService implements IImportExpor
             {"_project","select * from %1$s_project where id in (select project_id from %1$s_project_version where id='%2$s') union select * from %1$s_project where id='%3$s' order by 1","id"},
             {"_project_version","select * from %1$s_project_version where id='%2$s' order by id","id"},
             {"_project_version_plugin","select * from %1$s_project_version_plugin where project_version_id='%2$s' order by project_version_id","project_version_id,component_type_id"},           
-            {"_project_version_depends","select * from %1$s_project_version_depends where project_version_id='%2$s' order by id","id"}
+            {"_project_version_depends","select pvd.*, pv.VERSION_LABEL as TARGET_VERSION_LABEL, p.NAME as TARGET_PROJECT_NAME from %1$s_project_version_depends pvd\n" + 
+                    "    left join %1$s_project_version pv\n" + 
+                    "        on pvd.TARGET_PROJECT_VERSION_ID = pv.ID\n" + 
+                    "    left join %1$s_project p\n" + 
+                    "        on pv.PROJECT_ID = p.ID\n" + 
+                    "where project_version_id='%2$s' order by id","id"}
     };
     
     final String[][] MODEL_SQL = {
@@ -91,7 +96,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
             {"_model_attrib","select * from %1$s_model_attrib where entity_id in "
             + "(select id from %1$s_model_entity where model_id in "
             + "(select id from %1$s_model where project_version_id='%2$s' and id='%3$s')) order by id","id"}
-    };    
+    };
     
     final String[][] RESOURCE_SQL = {
             {"_resource","select * from %1$s_resource where project_version_id = '%2$s' and id='%3$s' order by id","id"},
@@ -567,9 +572,9 @@ public class ImportExportService extends AbstractService implements IImportExpor
                             if (ids.length() > 0) {
                                 ids.append(",");
                             }
-                            ids.append(linkedCaseInsensitiveMap.get("target_project_version_id"));
+                            ids.append(linkedCaseInsensitiveMap.get("target_project_name") + "[" + linkedCaseInsensitiveMap.get("target_version_label") + "]");
                         }
-                        throw new MessageException(String.format("Missing dependent project.  Please load the following projects first: %s",ids)); 
+                        throw new MessageException(String.format("Missing dependent project.  Please load the following project(s) first: %s",ids)); 
                     } else {
                         throw e;
                     }
