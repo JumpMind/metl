@@ -169,7 +169,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
 
     private void setColumnsToExclude() {
         columnsToExclude = new String[4];
-        columnsToExclude[CREATE_TIME_IDX] = "creqte_time";
+        columnsToExclude[CREATE_TIME_IDX] = "create_time";
         columnsToExclude[LAST_UPDATE_TIME_IDX] = "last_update_time";
         columnsToExclude[CREATE_BY_IDX] = "create_by";
         columnsToExclude[LAST_UPDATE_BY_IDX] = "last_update_by";
