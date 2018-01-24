@@ -48,6 +48,7 @@ import org.jumpmind.symmetric.io.data.DbExport;
 import org.jumpmind.symmetric.io.data.DbExport.Format;
 import org.jumpmind.util.AppUtils;
 import org.jumpmind.util.LinkedCaseInsensitiveMap;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -82,7 +83,12 @@ public class ImportExportService extends AbstractService implements IImportExpor
             {"_project","select * from %1$s_project where id in (select project_id from %1$s_project_version where id='%2$s') union select * from %1$s_project where id='%3$s' order by 1","id"},
             {"_project_version","select * from %1$s_project_version where id='%2$s' order by id","id"},
             {"_project_version_plugin","select * from %1$s_project_version_plugin where project_version_id='%2$s' order by project_version_id","project_version_id,component_type_id"},           
-            {"_project_version_depends","select * from %1$s_project_version_depends where project_version_id='%2$s' order by id","id"}
+            {"_project_version_depends","select pvd.*, pv.VERSION_LABEL as TARGET_VERSION_LABEL, p.NAME as TARGET_PROJECT_NAME from %1$s_project_version_depends pvd\n" + 
+                    "    left join %1$s_project_version pv\n" + 
+                    "        on pvd.TARGET_PROJECT_VERSION_ID = pv.ID\n" + 
+                    "    left join %1$s_project p\n" + 
+                    "        on pv.PROJECT_ID = p.ID\n" + 
+                    "where project_version_id='%2$s' order by id","id"}
     };
     
     final String[][] MODEL_SQL = {
@@ -91,7 +97,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
             {"_model_attrib","select * from %1$s_model_attrib where entity_id in "
             + "(select id from %1$s_model_entity where model_id in "
             + "(select id from %1$s_model where project_version_id='%2$s' and id='%3$s')) order by id","id"}
-    };    
+    };
     
     final String[][] RESOURCE_SQL = {
             {"_resource","select * from %1$s_resource where project_version_id = '%2$s' and id='%3$s' order by id","id"},
@@ -99,8 +105,16 @@ public class ImportExportService extends AbstractService implements IImportExpor
     };
     
     final String[][] FLOW_SQL = {
-            {"_component","select * from %1$s_component where project_version_id='%2$s' and id in "
-                    + "(select distinct component_id from %1$s_flow_step where flow_id='%3$s') order by id", "id"},
+            {"_component","select c.*, r.name as RESOURCE_NAME, p.name as RESOURCE_PROJECT_NAME, pv.version_label as RESOURCE_PROJECT_VERSION \n" + 
+                    "from %1$s_component c \n" + 
+                    "    left join %1$s_resource r\n" + 
+                    "        on c.resource_id = r.id\n" + 
+                    "    left join %1$s_project_version pv\n" + 
+                    "        on r.project_version_id = pv.id\n" + 
+                    "    left join %1$s_project p\n" + 
+                    "        on pv.project_id = p.id\n" + 
+                    "where c.project_version_id='%2$s' and c.id in \n" + 
+                    "    (select distinct component_id from %1$s_flow_step where flow_id='%3$s') order by c.id", "id"},
             {"_component_setting","select * from %1$s_component_setting where component_id in "
                     + "(select distinct component_id from %1$s_flow_step where flow_id='%3$s') order by id", "id"},
             {"_component_entity_setting","select * from %1$s_component_entity_setting where component_id in "
@@ -155,7 +169,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
 
     private void setColumnsToExclude() {
         columnsToExclude = new String[4];
-        columnsToExclude[CREATE_TIME_IDX] = "creqte_time";
+        columnsToExclude[CREATE_TIME_IDX] = "create_time";
         columnsToExclude[LAST_UPDATE_TIME_IDX] = "last_update_time";
         columnsToExclude[CREATE_BY_IDX] = "create_by";
         columnsToExclude[LAST_UPDATE_BY_IDX] = "last_update_by";
@@ -567,9 +581,9 @@ public class ImportExportService extends AbstractService implements IImportExpor
                             if (ids.length() > 0) {
                                 ids.append(",");
                             }
-                            ids.append(linkedCaseInsensitiveMap.get("target_project_version_id"));
+                            ids.append(linkedCaseInsensitiveMap.get("target_project_name") + "[" + linkedCaseInsensitiveMap.get("target_version_label") + "]");
                         }
-                        throw new MessageException(String.format("Missing dependent project.  Please load the following projects first: %s",ids)); 
+                        throw new MessageException(String.format("Missing dependent project.  Please load the following project(s) first: %s",ids)); 
                     } else {
                         throw e;
                     }
@@ -736,8 +750,19 @@ public class ImportExportService extends AbstractService implements IImportExpor
                 LinkedCaseInsensitiveMap<Object> row = updates.getTableData().get(key);
                 convertTimestampColumns(table, row);
                 row.put("last_update_time", new Date());
-                useDefaultsForMissingRequiredColumns(table, row);                
-                transaction.prepareAndExecute(stmt.getSql().toLowerCase(), row);
+                useDefaultsForMissingRequiredColumns(table, row);
+                try {
+                    transaction.prepareAndExecute(stmt.getSql().toLowerCase(), row);
+                } catch (DataIntegrityViolationException e) {
+                    if (updates.getTableName().toLowerCase().endsWith("_component")) {
+                        String resourceLocation = "'" + row.get("resource_name")+ "' located in project '" + row.get("resource_project_name") + "' version '" + 
+                                row.get("resource_project_version") + "'.";
+                        throw new MessageException(String.format("Missing dependent resource.  "
+                                + "Please load the following project resource first: %s",resourceLocation)); 
+                    } else {
+                        throw e;
+                    }
+                }
             }
     }
 

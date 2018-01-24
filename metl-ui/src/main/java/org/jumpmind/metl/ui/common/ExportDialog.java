@@ -210,6 +210,8 @@ public class ExportDialog extends ResizableWindow {
     private void addDependentModels(String flowId) {
         List<Model> models = context.getConfigurationService().findDependentModels(flowId);
         for (Model model : models) {
+            exportModelGroup.addItem(model.getId());
+            exportModelGroup.setItemCaption(model.getId(), model.getName());
             exportModelGroup.select(model.getId());
         }
     }
@@ -217,6 +219,8 @@ public class ExportDialog extends ResizableWindow {
     private void addDependentResources(String flowId) {
         List<Resource> resources = context.getConfigurationService().findDependentResources(flowId);
         for (Resource resource : resources) {
+            exportResourceGroup.addItem(resource.getId());
+            exportResourceGroup.setItemCaption(resource.getId(), resource.getName());
             exportResourceGroup.select(resource.getId());
         }
     }
