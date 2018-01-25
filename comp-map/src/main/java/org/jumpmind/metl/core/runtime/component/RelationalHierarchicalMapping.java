@@ -293,10 +293,11 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
     	    Model outModel = getOutputModel();
 		ModelEntity rootEntity = outModel.getRootElement();
         String sourceStepId = determineSourceStepForOutputEntity(rootEntity);
-        ArrayList<EntityData> rootDatas = byQueryRowData.get(sourceStepId);		
-        do {
+        ArrayList<EntityData> rootDatas = byQueryRowData.get(sourceStepId);
+        
+        while (rootDatas != null && rootDatas.size() > currentInputRowMap.get(sourceStepId)) {
             outputPayload.add(processByQueryEntity(null, rootEntity));
-        } while (rootDatas.size() > currentInputRowMap.get(sourceStepId));
+        } 
         
         callback.sendEntityDataMessage(null, outputPayload);
         currentInputRowMap.clear();
