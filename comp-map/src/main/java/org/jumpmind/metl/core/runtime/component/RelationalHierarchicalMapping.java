@@ -295,32 +295,34 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
         String sourceStepId = determineSourceStepForOutputEntity(rootEntity);
         ArrayList<EntityData> rootDatas = byQueryRowData.get(sourceStepId);		
         do {
-            outputPayload.add(processByQueryEntity(rootEntity));
+            outputPayload.add(processByQueryEntity(null, rootEntity));
         } while (rootDatas.size() > currentInputRowMap.get(sourceStepId));
         
         callback.sendEntityDataMessage(null, outputPayload);
         currentInputRowMap.clear();
     }
     
-    protected EntityData processByQueryEntity(ModelEntity parentEntity) {
+    protected EntityData processByQueryEntity(ModelEntity parent, ModelEntity entity) {
     		
-        String sourceStepId = determineSourceStepForOutputEntity(parentEntity);
+        String sourceStepId = determineSourceStepForOutputEntity(entity);
         ArrayList<EntityData> inputRows = byQueryRowData.get(sourceStepId);
         if (inputRows != null && inputRows.size() > 0) {
             EntityData inboundRow = byQueryRowData.get(sourceStepId).get(currentInputRowMap.get(sourceStepId));
     		    EntityData entityData = new EntityData();
-            for (ModelAttrib attrib:parentEntity.getModelAttributes()) {
+            for (ModelAttrib attrib:entity.getModelAttributes()) {
                 if (attrib.getDataType().equals(DataType.ARRAY)) {
                     ModelEntity childEntity = getOutputModel().getEntityById(attrib.getTypeEntityId());
-                    entityData.put(attrib.getId(), processByQueryEntityArray(parentEntity, childEntity));
+                    entityData.put(attrib.getId(), processByQueryEntityArray(entity, childEntity));
                 } else if (attrib.getDataType().equals(DataType.REF)) {
                     ModelEntity childEntity = getOutputModel().getEntityById(attrib.getTypeEntityId());
-                    entityData.put(attrib.getId(), processByQueryEntity(childEntity));
+                    entityData.put(attrib.getId(), processByQueryEntity(entity, childEntity));
                 } else {
                     entityData.put(attrib.getId(),mapValueFromInputToOutput(attrib.getId(), inboundRow));
                 }
     		    }
-            currentInputRowMap.put(sourceStepId, currentInputRowMap.get(sourceStepId).intValue()+1);
+            if (parent == null || !sourceStepId.equalsIgnoreCase(determineSourceStepForOutputEntity(parent))) {
+                currentInputRowMap.put(sourceStepId, currentInputRowMap.get(sourceStepId).intValue()+1);
+            }
         		return entityData;
         }
         return null;
@@ -346,9 +348,10 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
             //the first element should always be processed
             boolean loop=true;
             do {                
-                entityArray.add(processByQueryEntity(childEntity));
+                entityArray.add(processByQueryEntity(parentEntity, childEntity));
                 int indx=0;
-                if (currentInputRowMap.get(childSourceStepId) < childRows.size()) {
+                if (currentInputRowMap.get(childSourceStepId) < childRows.size() &&
+                        !childSourceStepId.equalsIgnoreCase(parentSourceStepId)) {
                     for (String cntrlBreakAttrib:cntrlBreakAttributes) {
                         if (!childRows.get(currentInputRowMap.get(childSourceStepId)).get(cntrlBreakAttrib).equals(cntrlBreakValues.get(indx))) {
                             loop=false;
