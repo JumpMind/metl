@@ -70,7 +70,7 @@
         <defaultValue>BY JOIN</defaultValue>
         <choices>
           <choice>BY JOIN</choice>
-          <choice>BY TABLE</choice>
+          <choice>BY QUERY</choice>
         </choices>
       </setting>      
     </settings>

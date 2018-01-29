@@ -117,7 +117,7 @@ public class ModelEntity extends AbstractNamedObject implements IAuditable, Comp
 		for (ModelAttrib attrib:this.getModelAttributes()) {
 			if (attrib.getTypeEntityId() != null && 
 					attrib.getTypeEntityId().equalsIgnoreCase(o.getId())) {
-				return 0;
+				return -1;
 			}
 		}
 		return 1;
