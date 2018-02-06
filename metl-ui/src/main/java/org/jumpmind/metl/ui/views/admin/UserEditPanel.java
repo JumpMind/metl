@@ -101,6 +101,13 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
         PasswordField passwordField = new PasswordField("Password", NOCHANGE);
         passwordField.addValueChangeListener(new PasswordChangeListener());
         form.addComponent(passwordField);
+        if (User.AUTH_METHOD_INTERNAL.equals(authField.getValue())) {
+            passwordField.setVisible(true);
+            passwordField.setRequired(true);
+        } else {
+            passwordField.setVisible(false);
+            passwordField.setRequired(false);
+        }
         
         // Only display and require a password if the user is authenticated internally. 
         authField.addListener(new Property.ValueChangeListener() {
