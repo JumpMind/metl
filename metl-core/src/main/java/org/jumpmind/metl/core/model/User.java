@@ -24,11 +24,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.jumpmind.metl.core.security.SecurityConstants;
-
 public class User extends AbstractObjectWithSettings {
 
     private static final long serialVersionUID = 1L;
+    
+    public final static String AUTH_METHOD_INTERNAL = "INTERNAL";
+    public final static String AUTH_METHOD_LDAP = "LDAP";
     
     String loginId;
 
@@ -36,7 +37,7 @@ public class User extends AbstractObjectWithSettings {
 
     String password;
     
-    String authMethod = SecurityConstants.PASSWORD_AUTH_METHOD_SHASH;
+    String authMethod = AUTH_METHOD_INTERNAL;
     
     String salt;
     

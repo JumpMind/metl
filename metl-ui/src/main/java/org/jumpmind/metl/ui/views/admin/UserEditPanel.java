@@ -34,15 +34,21 @@ import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.model.UserGroup;
 import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
+import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.VerticalLayout;
+
+import net.sourceforge.jtds.jdbc.Messages;
 
 @SuppressWarnings("serial")
 
@@ -58,12 +64,30 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
 
     Set<String> lastGroups;
 
+    @SuppressWarnings("deprecation")
     public UserEditPanel(ApplicationContext context, User user) {
         this.context = context;
         this.user = user;
 
         FormLayout form = new FormLayout();
         form.setSpacing(true);
+        
+        NativeSelect authField = new NativeSelect("Authenticantion Method");
+        authField.setWidth(16, Unit.EM);
+        authField.setHeight(2.15f, Unit.EM);
+        authField.setNullSelectionAllowed(false);
+        authField.setValidationVisible(false);
+        authField.setInvalidAllowed(false);
+        authField.addItem(User.AUTH_METHOD_INTERNAL);
+        authField.addItem(User.AUTH_METHOD_LDAP);
+        if (StringUtils.isNotBlank(user.getAuthMethod())) {
+            authField.addItem(user.getAuthMethod());
+            authField.setValue(user.getAuthMethod());
+        }
+        authField.setImmediate(true);
+        authField.setRequired(true);
+        authField.setRequiredError("Field Authentication Method is required");
+        form.addComponent(authField);
 
         TextField loginField = new TextField("Login ID", StringUtils.trimToEmpty(user.getLoginId()));
         form.addComponent(loginField);
@@ -77,6 +101,26 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
         PasswordField passwordField = new PasswordField("Password", NOCHANGE);
         passwordField.addValueChangeListener(new PasswordChangeListener());
         form.addComponent(passwordField);
+        if (User.AUTH_METHOD_INTERNAL.equals(authField.getValue())) {
+            passwordField.setVisible(true);
+            passwordField.setRequired(true);
+        } else {
+            passwordField.setVisible(false);
+            passwordField.setRequired(false);
+        }
+        
+        // Only display and require a password if the user is authenticated internally. 
+        authField.addListener(new Property.ValueChangeListener() {
+            private static final long serialVersionUID = 1L;
+            
+            public void valueChange(ValueChangeEvent event) {
+                boolean requirePassword = event.getProperty().getValue().equals(User.AUTH_METHOD_INTERNAL);
+                passwordField.setVisible(requirePassword);
+                passwordField.setRequired(requirePassword);
+                user.setAuthMethod((String) event.getProperty().getValue());
+                save(user);
+            }
+        });
 
         List<Group> groups = context.getOperationsSerivce().findGroups();
         groupsById = new HashMap<String, Group>();

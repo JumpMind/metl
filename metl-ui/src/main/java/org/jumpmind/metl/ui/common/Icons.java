@@ -93,4 +93,6 @@ final public class Icons {
     
     public static final FontAwesome LIST = FontAwesome.LIST;
     
+    public static final FontAwesome BOOK = FontAwesome.BOOK;
+    
 }
