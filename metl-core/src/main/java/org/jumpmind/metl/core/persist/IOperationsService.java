@@ -88,8 +88,10 @@ public interface IOperationsService {
     public void refresh(User user);
 
     public void refreshAgentParameters(Agent agent);
-    
+
     public GlobalSetting findGlobalSetting(String name);
+	
+    public GlobalSetting findGlobalSetting(String name, String defaultValue);
 
     public List<GlobalSetting> findGlobalSettings();
 

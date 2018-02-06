@@ -381,6 +381,17 @@ public class OperationsService extends AbstractService implements IOperationsSer
     }
 
     @Override
+    public GlobalSetting findGlobalSetting(String name, String defaultValue) {
+        GlobalSetting setting = findGlobalSetting(name);
+        if (setting == null) {
+            setting = new GlobalSetting();
+            setting.setName(name);
+            setting.setValue(defaultValue);
+        }
+        return setting;
+    }
+
+    @Override
     public TypedProperties findGlobalSetttingsAsProperties() {
         TypedProperties properties = new TypedProperties();
         for (GlobalSetting setting : findGlobalSettings()) {

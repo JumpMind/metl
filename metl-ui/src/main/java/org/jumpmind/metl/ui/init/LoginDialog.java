@@ -1,5 +1,5 @@
 /**
- * Licensed to JumpMind Inc under one or more contributor
+f * Licensed to JumpMind Inc under one or more contributor
  * license agreements.  See the NOTICE file distributed
  * with this work for additional information regarding
  * copyright ownership.  JumpMind Inc licenses this file
@@ -28,7 +28,6 @@ import static org.jumpmind.metl.core.model.GlobalSetting.PASSWORD_REQUIRE_MIXED_
 import static org.jumpmind.metl.core.model.GlobalSetting.PASSWORD_REQUIRE_SYMBOL;
 
 import java.io.ByteArrayOutputStream;
-import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,7 +35,12 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.time.DateUtils;
+import org.jumpmind.metl.core.authentication.ConsoleAuthenticationConnectionException;
+import org.jumpmind.metl.core.authentication.ConsoleAuthenticationCredentialException;
+import org.jumpmind.metl.core.authentication.IConsoleUserAuthentication;
+import org.jumpmind.metl.core.authentication.IConsoleUserAuthentication.AuthenticationStatus;
+import org.jumpmind.metl.core.authentication.UserAuthenticationInternal;
+import org.jumpmind.metl.core.authentication.UserAuthenticationLDAP;
 import org.jumpmind.metl.core.model.GlobalSetting;
 import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.model.UserHist;
@@ -44,6 +48,7 @@ import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.properties.TypedProperties;
+import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +59,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.LoginForm;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -137,7 +143,7 @@ public class LoginDialog extends Window {
             }
 
         };
-        loginForm.addLoginListener((e) -> login());
+        loginForm.addLoginListener((e) -> login((String) userNameField.getValue(), (String) passwordField.getValue()));
         loginForm.setWidth(300, Unit.PIXELS);
 
         setContent(loginForm);
@@ -147,6 +153,8 @@ public class LoginDialog extends Window {
         return PASSWORD_EXPIRED.equals(getCaption());
     }
 
+    // TODO: This should probably be moved to the authentication method object and should return
+    // a status vs displaying notifications itself. 
     protected static boolean testPassword(PasswordField passwordField,
             PasswordField validatePasswordField, ApplicationContext context) {
         boolean passedTest = true;
@@ -228,7 +236,7 @@ public class LoginDialog extends Window {
 
         return passedTest;
     }
-
+    
     protected static boolean containsCommonWords(String password) {
         ZipInputStream zip = null;
         try {
@@ -293,48 +301,58 @@ public class LoginDialog extends Window {
         return m.find();
     }
 
-    protected void login() {
-        boolean login = false;
-        ISecurityService securityService = context.getSecurityService();
+    protected void login(String username, String password) {
         IOperationsService operationsService = context.getOperationsSerivce();
-        User user = operationsService.findUserByLoginId(userNameField.getValue());
+        User user = operationsService.findUserByLoginId(username);
         if (user != null) {
-            String password = securityService.hash(user.getSalt(), passwordField.getValue());            
+            // TODO: Create an authentication service that can lookup the necessary authentication method.
+            IConsoleUserAuthentication authenticationMethod = null;
+            if (UserAuthenticationLDAP.AUTHENTICATION_METHOD.equals(user.getAuthMethod())) {
+                authenticationMethod = new UserAuthenticationLDAP();
+            } else {
+                // Legacy systems have an auth method of SHASH which should be handled as INTERNAL.
+                authenticationMethod = new UserAuthenticationInternal();
+            }
+            
             if (isNewPasswordMode()) {
                 if (testPassword(passwordField, validatePasswordField, context)) {
                     operationsService.savePassword(user, passwordField.getValue());
-                    login = true;
+                    UI.getCurrent().removeWindow(this);
+                    loginListener.login(user);
                 }
-            } else if (user.getPassword() != null
-                    && user.getPassword().equals(password)) {
-                Date expireTime = DateUtils.addDays(new Date(), -passwordExpiresInDays);
-                if (passwordExpiresInDays > 0 
-                        && (user.getLastPasswordTime() == null
-                        || user.getLastPasswordTime().before(expireTime))) {
-                    userNameField.setVisible(false);
-                    passwordField.setValue(null);
-                    setCaption(PASSWORD_EXPIRED);
-                    passwordField.setCaption("New Password");
-                    loginButton.setCaption("Change Password");
-                    validatePasswordField.setVisible(true);
-                } else {
-                    login = true;
+            } else {
+                try {
+                    AuthenticationStatus status = authenticationMethod.authenticate(username, password, context);
+                    if (status.equals(AuthenticationStatus.VALID)) {
+                        UI.getCurrent().removeWindow(this);
+                        loginListener.login(user);
+                    } else if (status.equals(AuthenticationStatus.LOCKED)) {
+                        CommonUiUtils.notify(String.format("User '%s' is locked.  Please contact an admin to reset your password."
+                                , user.getLoginId()), Type.WARNING_MESSAGE);
+                    } else if (status.equals(AuthenticationStatus.EXPIRED)) {
+                        userNameField.setVisible(false);
+                        passwordField.setValue(null);
+                        setCaption(PASSWORD_EXPIRED);
+                        passwordField.setCaption("New Password");
+                        loginButton.setCaption("Change Password");
+                        validatePasswordField.setVisible(true);
+                    } else {
+                        CommonUiUtils.notify("Invalid user id or password");
+                    }
+                } catch(ConsoleAuthenticationConnectionException ex) {
+                    CommonUiUtils.notify("Unable to connect to network resource.", Type.WARNING_MESSAGE);
+                } catch(ConsoleAuthenticationCredentialException ex) {
+                    CommonUiUtils.notify("Invalid user id or password", Type.WARNING_MESSAGE);
+                } catch(Throwable t) {
+                    log.error("", t);
+                    CommonUiUtils.notify(t);
                 }
-            } 
+            }
+            
+        } else {
+            CommonUiUtils.notify("Invalid user id or password", Type.WARNING_MESSAGE);
         }
-
-        if (login) {
-            UI.getCurrent().removeWindow(LoginDialog.this);
-            user.setLastLoginTime(new Date());
-            context.getConfigurationService().save(user);
-            loginListener.login(user);
-        } else if (!isNewPasswordMode()) {
-            String address = Page.getCurrent().getWebBrowser().getAddress();
-            log.warn("Invalid login attempt for user " + userNameField.getValue() + " from address "
-                    + address);
-            notify("Invalid Login", "You specified an invalid login or password");
-            userNameField.selectAll();
-        }
+        
     }
 
     protected static void notify(String caption, String message) {

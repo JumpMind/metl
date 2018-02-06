@@ -102,10 +102,11 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         addItem("Plugin Repositories", Icons.DATABASE);
         addItem("Plugins", Icons.COMPONENT);
         addItem("Mail Server", Icons.EMAIL);
+        addItem("LDAP",Icons.BOOK);
         addItem("Notifications", Icons.NOTIFICATION);
         addItem("Active Users", FontAwesome.USERS);
         addItem("Audit Events", FontAwesome.BARS);
-        addItem("Logging", Icons.LOGGING);        
+        addItem("Logging", Icons.LOGGING);
         addItem("About", FontAwesome.QUESTION);
         
         VerticalLayout navigator = new VerticalLayout();
@@ -150,6 +151,8 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
                     panel = new GeneralSettingsPanel(context, tabbedPanel);
                 } else if (id.equals("Mail Server")) {
                     panel = new MailServerPanel(context, tabbedPanel);
+                } else if (id.equals("LDAP")) {
+                    panel = new LdapPanel(context, tabbedPanel);
                 } else if (id.equals("Notifications")) {
                     panel = new NotificationPanel(context, tabbedPanel);
                 } else if (id.equals("Logging")) {
