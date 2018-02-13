@@ -33,7 +33,7 @@ dependencies {
     compile "jaxen:jaxen:$jaxenVersion"
     compile "javax.mail:mail:$javaMailVersion"
     compile "org.jdom:jdom2:$jdomVersion"
-    compile "javax.el:javax.el-api:3.0.1"
+    compile "javax.el:javax.el-api:3.1.0"
     compile "com.h2database:h2:$h2Version"
     compile "jdbc.postgresql:postgresql:$postgresqlVersion"
     compile "net.sourceforge.jtds:jtds:$jtdsVersion"
