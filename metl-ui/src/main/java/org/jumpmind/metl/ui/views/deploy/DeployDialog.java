@@ -85,7 +85,7 @@ public class DeployDialog extends ResizableWindow {
         super("Deploy");
         this.context = context;
         this.configurationService = context.getConfigurationService();
-        this.operationsService = context.getOperationsSerivce();
+        this.operationsService = context.getOperationsService();
         this.parentPanel = parentPanel;
         this.context = context;
 

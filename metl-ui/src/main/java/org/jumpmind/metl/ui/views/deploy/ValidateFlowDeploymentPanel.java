@@ -65,7 +65,7 @@ public class ValidateFlowDeploymentPanel extends VerticalLayout {
             String agentId) {
         this.context = context;
         this.configurationService = context.getConfigurationService();
-        this.operationsService = context.getOperationsSerivce();
+        this.operationsService = context.getOperationsService();
         this.flows = selectedFlows;
         this.agentId = agentId;
         buildPanel(introText);

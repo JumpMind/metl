@@ -127,7 +127,7 @@ public class LdapPanel extends Panel implements IUiPanel {
     @Override
     public boolean closing() {
         if (isChanged) {
-            for (Agent agent : context.getOperationsSerivce().findAgents()) {
+            for (Agent agent : context.getOperationsService().findAgents()) {
                 if (!agent.isDeleted() && agent.getStatus().equals(AgentStatus.RUNNING.name())) {
                     agent.setStatus(AgentStatus.REQUEST_REFRESH.name());
                     context.getConfigurationService().save(agent);
@@ -146,7 +146,7 @@ public class LdapPanel extends Panel implements IUiPanel {
     }
 
     private GlobalSetting getGlobalSetting(String name, String defaultValue) {
-        GlobalSetting setting = context.getOperationsSerivce().findGlobalSetting(name);
+        GlobalSetting setting = context.getOperationsService().findGlobalSetting(name);
         if (setting == null) {
             setting = new GlobalSetting();
             setting.setName(name);

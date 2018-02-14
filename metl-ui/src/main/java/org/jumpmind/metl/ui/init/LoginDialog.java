@@ -97,7 +97,7 @@ public class LoginDialog extends Window {
         this.loginListener = loginListener;
 
         settings = new TypedProperties();
-        settings.putAll(context.getOperationsSerivce().findGlobalSettingsAsMap());
+        settings.putAll(context.getOperationsService().findGlobalSettingsAsMap());
         passwordExpiresInDays = settings.getInt(GlobalSetting.PASSWORD_EXPIRE_DAYS, 60);
 
         setWidth(300, Unit.PIXELS);
@@ -164,7 +164,7 @@ public class LoginDialog extends Window {
             passedTest = false;
         } else {
             TypedProperties settings = new TypedProperties();
-            settings.putAll(context.getOperationsSerivce().findGlobalSettingsAsMap());
+            settings.putAll(context.getOperationsService().findGlobalSettingsAsMap());
             ISecurityService securityService = context.getSecurityService();
 
             int minPasswordLength = settings.getInt(PASSWORD_MIN_LENGTH, 6);
@@ -177,7 +177,7 @@ public class LoginDialog extends Window {
 
             int prohibitNPreviousPasswords = settings.getInt(PASSWORD_PROHIBIT_PREVIOUS, 5);
             if (passedTest && prohibitNPreviousPasswords != 0) {
-                List<UserHist> histories = context.getOperationsSerivce()
+                List<UserHist> histories = context.getOperationsService()
                         .findUserHist(context.getUser().getId());
                 if (prohibitNPreviousPasswords < 0) {
                     prohibitNPreviousPasswords = histories.size();
@@ -302,7 +302,7 @@ public class LoginDialog extends Window {
     }
 
     protected void login(String username, String password) {
-        IOperationsService operationsService = context.getOperationsSerivce();
+        IOperationsService operationsService = context.getOperationsService();
         User user = operationsService.findUserByLoginId(username);
         if (user != null) {
             // TODO: Create an authentication service that can lookup the necessary authentication method.

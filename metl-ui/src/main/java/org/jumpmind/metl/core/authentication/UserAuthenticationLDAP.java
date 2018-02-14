@@ -23,7 +23,7 @@ public class UserAuthenticationLDAP implements IConsoleUserAuthentication {
     public final static String AUTHENTICATION_METHOD = "LDAP";
 
     public AuthenticationStatus authenticate(String user, String password, ApplicationContext context) throws ConsoleAuthenticationException {
-        IOperationsService operationsService = context.getOperationsSerivce();
+        IOperationsService operationsService = context.getOperationsService();
         String hostName = operationsService.findGlobalSetting(GlobalSetting.LDAP_HOST).getValue();
         String baseDN = operationsService.findGlobalSetting(GlobalSetting.LDAP_BASE_DN).getValue();
         String searchAtr = operationsService.findGlobalSetting(GlobalSetting.LDAP_SEARCH_ATR).getValue();

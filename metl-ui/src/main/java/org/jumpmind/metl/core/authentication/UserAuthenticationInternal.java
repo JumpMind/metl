@@ -15,13 +15,13 @@ public class UserAuthenticationInternal implements IConsoleUserAuthentication {
     
     public AuthenticationStatus authenticate(String userName, String password, ApplicationContext context) {
         ISecurityService securityService = context.getSecurityService();
-        IOperationsService operationsService = context.getOperationsSerivce();
+        IOperationsService operationsService = context.getOperationsService();
         User user = operationsService.findUserByLoginId(userName);
         String passwordHash = securityService.hash(user.getSalt(), password);
         
         if (user.getPassword() != null && user.getPassword().equals(passwordHash)) {
             
-            GlobalSetting expireSetting = context.getOperationsSerivce().findGlobalSetting(GlobalSetting.PASSWORD_EXPIRE_DAYS, 
+            GlobalSetting expireSetting = context.getOperationsService().findGlobalSetting(GlobalSetting.PASSWORD_EXPIRE_DAYS, 
                     Integer.toString(GlobalSetting.PASSWORD_EXPIRE_DAYS_DEFAULT));
             int passwordExpiresInDays = Integer.parseInt(expireSetting.getValue());
             
