@@ -122,7 +122,7 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
             }
         });
 
-        List<Group> groups = context.getOperationsSerivce().findGroups();
+        List<Group> groups = context.getOperationsService().findGroups();
         groupsById = new HashMap<String, Group>();
         TwinColSelect groupSelect = new TwinColSelect();
         for (Group group : groups) {
@@ -184,7 +184,7 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
     class PasswordChangeListener implements ValueChangeListener {
         public void valueChange(ValueChangeEvent event) {
             if (isNotBlank(user.getLoginId())) {                
-                context.getOperationsSerivce().savePassword(user, (String) event.getProperty().getValue());
+                context.getOperationsService().savePassword(user, (String) event.getProperty().getValue());
             }
         }
     }
@@ -193,7 +193,7 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
         @SuppressWarnings("unchecked")
         public void valueChange(ValueChangeEvent event) {
             Set<String> groups = (Set<String>) event.getProperty().getValue();
-            IOperationsService operationsSerivce = context.getOperationsSerivce();
+            IOperationsService operationsSerivce = context.getOperationsService();
             for (String id : groups) {
                 if (!lastGroups.contains(id)) {
                     UserGroup userGroup = new UserGroup(user.getId(), id);

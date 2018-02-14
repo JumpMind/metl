@@ -125,7 +125,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
     
     @Override
     public boolean closing() {
-        AgentDeploy deployment = context.getOperationsSerivce().findAgentDeployment(agentDeployment.getId());
+        AgentDeploy deployment = context.getOperationsService().findAgentDeployment(agentDeployment.getId());
         if (deployment.getStatus().equals(DeploymentStatus.ENABLED.name())) {
             deployment.setStatus(DeploymentStatus.REQUEST_REENABLE.name());
             context.getConfigurationService().save(deployment);
