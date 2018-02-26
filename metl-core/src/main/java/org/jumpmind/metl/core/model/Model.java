@@ -275,5 +275,16 @@ public class Model extends AbstractNamedObject implements IAuditable {
     public TreeSet<ModelEntity> getEntityTree() {
 		return new TreeSet<ModelEntity>(this.getModelEntities());
     }
-
+    
+    public ModelAttrib getModelAttribByTypeEntityId(String typeEntityId) {
+        for (ModelEntity entity:this.getModelEntities()) {
+            for (ModelAttrib attrib : entity.getModelAttributes()) {
+                if (typeEntityId.equalsIgnoreCase(attrib.getTypeEntityId())) {
+                    return attrib;
+                }
+            }
+        }
+        return null;
+    }
+    
 }

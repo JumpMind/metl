@@ -242,16 +242,20 @@ function removeNodes() {
 
 function appendHierarchicalNodes(parentDiv, entities, outputRootNode, prefix, xycoord, filterText, filterMapped, src) {
 	var rootNode=outputRootNode;
-	addEntity(parentDiv, entities, rootNode, prefix, xycoord);
+	addEntity(parentDiv, entities, rootNode, prefix, xycoord, null);
 }
 
-function addEntity(parentDiv, entities, parentEntity, prefix, xycoord) {
+function addEntity(parentDiv, entities, parentEntity, prefix, xycoord, attrRef) {
     var lineHeight = 23;
     var key = "";
     var column = "";
     var table = "";
 
-	createNode(parentDiv, prefix + parentEntity.id, parentEntity.name, "entity " + prefix, xycoord.left, xycoord.top, table);
+    if (attrRef != null) {
+		createNode(parentDiv, prefix + parentEntity.id, attrRef.name, "entity " + prefix, xycoord.left, xycoord.top, table);
+    } else {
+		createNode(parentDiv, prefix + parentEntity.id, parentEntity.name, "entity " + prefix, xycoord.left, xycoord.top, table);    	
+    }
     xycoord.top += lineHeight
     xycoord.left += 10;
 	var attrs = parentEntity.modelAttributes;
@@ -259,7 +263,7 @@ function addEntity(parentDiv, entities, parentEntity, prefix, xycoord) {
 		var attr = attrs[i];
 		if (attr.type == "REF" || attr.type == "ARRAY") {
 			childNode = getEntityById(entities, attr.typeEntityId);
-			addEntity(parentDiv, entities, childNode, prefix, xycoord);
+			addEntity(parentDiv, entities, childNode, prefix, xycoord, attr);
 		} else {
             createNode(parentDiv, prefix + attr.id, attr.name, "entity " + prefix, xycoord.left, xycoord.top, column);
 			xycoord.top += lineHeight;

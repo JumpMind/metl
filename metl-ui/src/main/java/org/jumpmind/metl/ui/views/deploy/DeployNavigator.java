@@ -20,9 +20,13 @@
  */
 package org.jumpmind.metl.ui.views.deploy;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -33,10 +37,13 @@ import org.jumpmind.metl.core.model.AgentName;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.FolderType;
 import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.util.AppConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.EnableFocusTextField;
 import org.jumpmind.metl.ui.common.Icons;
+import org.jumpmind.metl.ui.common.ImportDialog;
 import org.jumpmind.metl.ui.common.TabbedPanel;
+import org.jumpmind.metl.ui.common.ImportDialog.IImportListener;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog.IConfirmListener;
@@ -56,6 +63,10 @@ import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
+import com.vaadin.server.ResourceReference;
+import com.vaadin.server.StreamResource;
+import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DefaultFieldFactory;
@@ -91,6 +102,10 @@ public class DeployNavigator extends VerticalLayout {
 
     MenuItem newAgent;
 
+    MenuItem miImport;
+    
+    MenuItem export;    
+    
     ApplicationContext context;
 
     TreeTable treeTable;
@@ -148,7 +163,7 @@ public class DeployNavigator extends VerticalLayout {
             addChildren(folder);
         }
         
-        List<AgentName> agents = context.getOperationsSerivce().findAgentsInFolder(null);
+        List<AgentName> agents = context.getOperationsService().findAgentsInFolder(null);
         for (AgentName agent : agents) {
             addAgent(null, agent);
         }
@@ -177,7 +192,23 @@ public class DeployNavigator extends VerticalLayout {
         leftMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
         leftMenuBar.setWidth(100, Unit.PERCENTAGE);
 
-        MenuItem newMenu = leftMenuBar.addItem("New", null);
+        MenuItem fileMenu = leftMenuBar.addItem("File", null);
+        
+        MenuItem newMenu = fileMenu.addItem("New", null);
+        
+        miImport = fileMenu.addItem("Import",new Command() {
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                importAgentData();
+            }
+        });
+        
+        export = fileMenu.addItem("Export", new Command() {
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                exportAgentData();
+            }
+        });
 
         newFolder = newMenu.addItem("Folder", new Command() {
 
@@ -413,7 +444,7 @@ public class DeployNavigator extends VerticalLayout {
     protected void openItem(Object item) {
         if (item instanceof AgentName) {
             AgentName agentName = (AgentName) item;
-            Agent agent = context.getOperationsSerivce().findAgent(agentName.getId(), true);
+            Agent agent = context.getOperationsService().findAgent(agentName.getId(), true);
             tabbedPanel.addCloseableTab(agent.getId(), agent.getName(), Icons.AGENT,
                     new EditAgentPanel(context, tabbedPanel, agent));
         }
@@ -488,6 +519,45 @@ public class DeployNavigator extends VerticalLayout {
         }
     }
 
+    protected void importAgentData() {
+        ImportDialog.show("Import Config", "Click the upload button to import your config", new ImportConfigurationListener());
+    }
+    
+    class ImportConfigurationListener implements IImportListener {
+        @Override
+        public void onFinished(String dataToImport) {
+            context.getImportExportService().importConfiguration(dataToImport, context.getUser().getLoginId());
+            context.getDefinitionFactory().refresh();
+            refresh();
+        }
+    }
+
+    protected void exportAgentData() {
+        AgentName agent = (AgentName) treeTable.getValue();
+        final String export = context.getImportExportService().exportAgent(agent.getId(), AppConstants.SYSTEM_USER);
+        StreamSource ss = new StreamSource() {
+            private static final long serialVersionUID = 1L;
+
+            public InputStream getStream() {
+                try {
+                    return new ByteArrayInputStream(export.getBytes());
+                } catch (Exception e) {
+                    log.error("Failed to export configuration", e);
+                    CommonUiUtils.notify("Failed to export configuration.", Type.ERROR_MESSAGE);
+                    return null;
+                }
+
+            }
+        };
+        String datetime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        StreamResource resource = new StreamResource(ss,
+                String.format("%s-config-%s.json", agent.getName().toLowerCase().replaceAll(" ", "-"), datetime));
+        final String KEY = "export";
+        setResource(KEY, resource);
+        Page.getCurrent().open(ResourceReference.create(resource, this, KEY).getURL(), null);
+        
+    }
+    
     protected void addFolder() {
         Folder parentFolder = getSelectedFolder();
 
@@ -544,7 +614,7 @@ public class DeployNavigator extends VerticalLayout {
             addChildren(child);
         }
 
-        List<AgentName> agents = context.getOperationsSerivce().findAgentsInFolder(folder);
+        List<AgentName> agents = context.getOperationsService().findAgentsInFolder(folder);
         for (AgentName agent : agents) {
             addAgent(folder, agent);
         }
@@ -557,7 +627,7 @@ public class DeployNavigator extends VerticalLayout {
             ConfirmDialog.show("Delete Agent?",
                     "Are you sure you want to delete the '" + agentName.getName() + "' agent?",
                     () -> {
-                        Agent agent = context.getOperationsSerivce().findAgent(agentName.getId(),
+                        Agent agent = context.getOperationsService().findAgent(agentName.getId(),
                                 false);
                         context.getConfigurationService().delete(agent);
                         context.getAgentManager().refresh(agent);

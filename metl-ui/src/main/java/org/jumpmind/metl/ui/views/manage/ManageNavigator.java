@@ -246,7 +246,7 @@ public class ManageNavigator extends Panel {
     }
 
     protected void addAgentsToFolder(Folder folder) {
-        IOperationsService operationsService = context.getOperationsSerivce();
+        IOperationsService operationsService = context.getOperationsService();
         List<AgentName> agents = operationsService.findAgentsInFolder(folder);
         for (AgentName agent : agents) {
 

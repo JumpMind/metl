@@ -195,7 +195,7 @@ public class AppUI extends UI implements LoginListener {
 
         Responsive.makeResponsive(this);
         ApplicationContext appCtx = ctx.getBean(ApplicationContext.class);
-        IOperationsService operationsService = appCtx.getOperationsSerivce();
+        IOperationsService operationsService = appCtx.getOperationsService();
         if (operationsService.isUserLoginEnabled()) {
             LoginDialog login = new LoginDialog(appCtx, this);
             UI.getCurrent().addWindow(login);

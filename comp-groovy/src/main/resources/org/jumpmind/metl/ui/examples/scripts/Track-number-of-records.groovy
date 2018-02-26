@@ -10,4 +10,4 @@ if (inputMessage instanceof ContentMessage) {
 
 // onSuccess()
 // do something with results like update a job status table
- // end
+// end

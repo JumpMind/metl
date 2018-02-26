@@ -179,7 +179,7 @@ public class MailServerPanel extends Panel implements IUiPanel {
     @Override
     public boolean closing() {
         if (isChanged) {
-            for (Agent agent : context.getOperationsSerivce().findAgents()) {
+            for (Agent agent : context.getOperationsService().findAgents()) {
                 if (!agent.isDeleted() && agent.getStatus().equals(AgentStatus.RUNNING.name())) {
                     agent.setStatus(AgentStatus.REQUEST_REFRESH.name());
                     context.getConfigurationService().save(agent);
@@ -198,7 +198,7 @@ public class MailServerPanel extends Panel implements IUiPanel {
     }
 
     private GlobalSetting getGlobalSetting(String name, String defaultValue) {
-        GlobalSetting setting = context.getOperationsSerivce().findGlobalSetting(name);
+        GlobalSetting setting = context.getOperationsService().findGlobalSetting(name);
         if (setting == null) {
             setting = new GlobalSetting();
             setting.setName(name);
@@ -209,7 +209,7 @@ public class MailServerPanel extends Panel implements IUiPanel {
 
     class TestClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            MailSession mailSession = new MailSession(context.getOperationsSerivce().findGlobalSettingsAsMap());
+            MailSession mailSession = new MailSession(context.getOperationsService().findGlobalSettingsAsMap());
             try {                
                 mailSession.getTransport();                
                 CommonUiUtils.notify("SMTP Test", "Success!");

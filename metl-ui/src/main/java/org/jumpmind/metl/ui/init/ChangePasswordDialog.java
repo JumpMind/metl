@@ -122,7 +122,7 @@ public class ChangePasswordDialog extends Window {
 
     protected void changePassword() {
         ISecurityService securityService = context.getSecurityService();
-        IOperationsService operationsService = context.getOperationsSerivce();
+        IOperationsService operationsService = context.getOperationsService();
         User user = context.getUser();
         String password = securityService.hash(user.getSalt(), currentPasswordField.getValue());
         if (user != null && user.getPassword() != null && user.getPassword().equals(password)) {

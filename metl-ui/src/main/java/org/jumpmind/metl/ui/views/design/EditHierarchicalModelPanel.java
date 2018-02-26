@@ -220,8 +220,13 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
                     if (lastEditItemIds.contains(itemId) && !readOnly) {
                         final ComboBox cbox = new ComboBox();
                         cbox.setNullSelectionAllowed(false);
-                        for (DataType dataType : DataType.values()) {
-                            cbox.addItem(dataType.name());
+                        if (obj.getTypeEntityId() == null) {
+                            for (DataType dataType : DataType.values()) {
+                                cbox.addItem(dataType.name());
+                            }
+                        } else {
+                            cbox.addItem(DataType.ARRAY.name());
+                            cbox.addItem(DataType.REF.name());                            
                         }
                         cbox.setValue(obj.getType());
                         cbox.addValueChangeListener(new ValueChangeListener() {
@@ -377,41 +382,45 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
     protected void addAll(Model model) {
 		ModelEntity rootEntity = model.getRootElement();
 		if (rootEntity != null) {
-			addEntity(rootEntity, null, false);
+			addEntity(rootEntity, null, null);
 		}
     }
 
-    protected void addEntity(ModelEntity entity, ModelEntity parentEntity, boolean list) {
-		treeTable.addItem(entity);
-		treeTable.setChildrenAllowed(entity, true);
-		if (list == true) {
-			treeTable.setItemIcon(entity, FontAwesome.LIST);
-		} else {
-			treeTable.setItemIcon(entity, FontAwesome.TABLE);			
-		}
-        if (parentEntity != null) {
-        		treeTable.setParent(entity, parentEntity);        		
-        }
-
+    protected void addEntity(ModelEntity entity, ModelEntity parentEntity, ModelAttrib refAttribute) {
+        if (parentEntity == null) {
+            treeTable.addItem(entity);
+            treeTable.setChildrenAllowed(entity, true);
+            treeTable.setItemIcon(entity, FontAwesome.TABLE);                       
+        }                
         for (ModelAttrib attrib:entity.getModelAttributes()) {
+            if (refAttribute != null) {
+                addAttribute(refAttribute, attrib); 
+            } else {
+                addAttribute(entity,attrib);
+            }
         		if (attrib.getTypeEntityId() != null) {
         			if (attrib.getDataType().equals(DataType.ARRAY)) {
-        				addEntity(model.getEntityById(attrib.getTypeEntityId()), entity, true);
+        				addEntity(model.getEntityById(attrib.getTypeEntityId()), entity, attrib);
         			} else {
-        				addEntity(model.getEntityById(attrib.getTypeEntityId()), entity, false);        				
+        				addEntity(model.getEntityById(attrib.getTypeEntityId()), entity, attrib);        				
         			}
-        		} else {
-        			addAttribute(entity, attrib);
         		}
         }
     }
 
-    protected void addAttribute(ModelEntity entity, ModelAttrib attribute) {
+    protected void addAttribute(Object parent, ModelAttrib attribute) {
         treeTable.addItem(attribute);
-        treeTable.setItemIcon(attribute, FontAwesome.COLUMNS);
-        treeTable.setChildrenAllowed(entity, true);
-        treeTable.setParent(attribute, entity);
-        treeTable.setChildrenAllowed(attribute, false);
+        if (attribute.getDataType().equals(DataType.ARRAY)) {
+            treeTable.setItemIcon(attribute, FontAwesome.LIST);
+            treeTable.setChildrenAllowed(attribute, true);
+        } else if (attribute.getDataType().equals(DataType.REF)) {
+            treeTable.setItemIcon(attribute, FontAwesome.TABLE);
+            treeTable.setChildrenAllowed(attribute, true);
+        } else {
+            treeTable.setItemIcon(attribute, FontAwesome.COLUMNS);
+            treeTable.setChildrenAllowed(attribute, false);
+        }
+        treeTable.setParent(attribute, parent);
     }
         
     protected void updateExportTable(String filter, Collection<ModelEntity> modelEntityList) {
@@ -460,9 +469,20 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
             			Object itemId = selectedIds.iterator().next();
                     if (itemId instanceof ModelEntity) {
                         parentEntity = (ModelEntity) itemId;
-                    } else if (itemId instanceof ModelAttrib) {
-                        parentEntity = (ModelEntity) treeTable.getParent(itemId);
-                    }            			
+                    } else {
+                        ModelAttrib selectedAttrib = (ModelAttrib) itemId;
+                        if (selectedAttrib.getTypeEntityId() != null) {
+                            parentEntity = model.getEntityById(selectedAttrib.getTypeEntityId());
+                        } else {
+                            Object parent = treeTable.getParent(itemId);
+                            if (parent instanceof ModelEntity) {
+                                parentEntity = (ModelEntity) parent;
+                            } else {
+                                ModelAttrib parentAttrib = (ModelAttrib) parent;
+                                parentEntity = model.getEntityById(parentAttrib.getTypeEntityId());
+                            }
+                        }
+                    }        			
             		}            		
             		//add the entity
             		ModelEntity childEntity = new ModelEntity();
@@ -471,21 +491,30 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
             		childEntity.setId(UUID.randomUUID().toString());
             		model.getModelEntities().add(childEntity);
             		context.getConfigurationService().save(childEntity);
-            		addEntity(childEntity, parentEntity, false);
             		//add the attribute that references the entity
+            		ModelAttrib attrib=null;
             		if (parentEntity != null) {
-	            		ModelAttrib attrib = new ModelAttrib();
+	            		attrib = new ModelAttrib();
 	            		attrib.setEntityId(parentEntity.getId());
 	            		attrib.setDataType(DataType.REF);
 	            		attrib.setTypeEntityId(childEntity.getId());
 	            		attrib.setName("entity ref");
 	            		parentEntity.getModelAttributes().add(attrib);
-	            		context.getConfigurationService().save(attrib);   
+	            		context.getConfigurationService().save(attrib);
+                    treeTable.setCollapsed(parentEntity, false);
+                    if (model.getRootElement().getId().equalsIgnoreCase(parentEntity.getId())) {
+                        addAttribute(parentEntity, attrib);                        
+                    } else {
+                        addAttribute(model.getModelAttribByTypeEntityId(parentEntity.getId()),attrib);
+                    }
+            		} else {
+            		    addEntity(childEntity, parentEntity, attrib);
             		}
-            		if (parentEntity != null) {
-            			treeTable.setCollapsed(parentEntity, false);
+            		if (attrib != null) {
+            		    selectOnly(attrib);
+            		} else {
+            		    selectOnly(childEntity);
             		}
-            		selectOnly(childEntity);
             		editSelectedItem();
             }
         }
@@ -500,17 +529,29 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
                 a.setDataType(DataType.VARCHAR);
                 Object itemId = itemIds.iterator().next();
                 ModelEntity entity = null;
-                if (itemId instanceof ModelEntity) {
+                ModelAttrib selectedAttrib=null;
+                if (itemId instanceof ModelAttrib) {
+                    selectedAttrib = (ModelAttrib) itemId;
+                    if (selectedAttrib.getTypeEntityId() != null) {
+                        //an attribute referencing an entity
+                        entity = model.getEntityById(selectedAttrib.getTypeEntityId());
+                    } else {
+                        //an attribute that has some parent
+                        entity = model.getEntityById(selectedAttrib.getEntityId());
+                        itemId = model.getModelAttribByTypeEntityId(entity.getId());
+                        if (itemId == null) {
+                            itemId = entity;
+                        }
+                    }
+                } else {
                     entity = (ModelEntity) itemId;
-                } else if (itemId instanceof ModelAttrib) {
-                    entity = (ModelEntity) treeTable.getParent(itemId);
                 }
                 if (entity != null) {
                     a.setEntityId(entity.getId());
                     entity.addModelAttribute(a);
                     context.getConfigurationService().save(a);
-                    addAttribute(entity, a);
-                    treeTable.setCollapsed(entity, false);
+                    addAttribute(itemId, a);
+                    treeTable.setCollapsed(itemId, false);
                     selectOnly(a);
                     editSelectedItem();
                 }

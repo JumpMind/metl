@@ -183,7 +183,7 @@ public class GeneralSettingsPanel extends Panel implements IUiPanel {
     }
 
     private GlobalSetting getGlobalSetting(String name, String defaultValue) {
-        GlobalSetting setting = context.getOperationsSerivce().findGlobalSetting(name);
+        GlobalSetting setting = context.getOperationsService().findGlobalSetting(name);
         if (setting == null) {
             setting = new GlobalSetting();
             setting.setName(name);
