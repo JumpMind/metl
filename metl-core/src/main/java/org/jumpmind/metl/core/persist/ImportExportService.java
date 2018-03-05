@@ -108,7 +108,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
                     "        on pvd.TARGET_PROJECT_VERSION_ID = pv.ID\n" + 
                     "    left join %1$s_project p\n" + 
                     "        on pv.PROJECT_ID = p.ID\n" + 
-                    "where project_version_id='%2$s' order by id","id"}
+                    "where project_version_id='%2$s' order by pv.id","id"}
     };
     
     final String[][] MODEL_SQL = {
