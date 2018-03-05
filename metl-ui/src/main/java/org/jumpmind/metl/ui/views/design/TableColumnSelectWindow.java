@@ -25,9 +25,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,9 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jdom2.Document;
-import org.jdom2.input.SAXBuilder;
-import org.jdom2.input.sax.XMLReaders;
 import org.jumpmind.db.model.Column;
 import org.jumpmind.db.model.Table;
 import org.jumpmind.db.platform.IDatabasePlatform;
@@ -47,7 +42,6 @@ import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
-import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.DbProvider;
 import org.jumpmind.symmetric.csv.CsvReader;
@@ -57,19 +51,19 @@ import org.jumpmind.vaadin.ui.sqlexplorer.DefaultSettingsProvider;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.server.Page;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.themes.ValoTheme;
+
+import groovy.json.StringEscapeUtils;
 
 public class TableColumnSelectWindow extends ResizableWindow implements ValueChangeListener, Receiver, SucceededListener {
 
@@ -78,6 +72,8 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
     private static final String OPTION_DB = "Database";
 
     private static final String OPTION_REL_FILE = "Relational CSV File";
+    
+    private static final String OPTION_FILE_HEADER_ROW = "Source File Header Row";
 
     ApplicationContext context;
 
@@ -97,7 +93,13 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
     
     Panel scrollable;
 
-    Upload upload;
+    Upload relCsvUpload;
+    
+    Upload fileHeaderUpload;
+    
+    TextField fileHeaderEntity;
+    
+    TextField fileHeaderDelimiter;
 
     ByteArrayOutputStream uploadedData;
 
@@ -108,7 +110,7 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
     String encoding = "UTF-8";
 
     public TableColumnSelectWindow(ApplicationContext context, Model model) {
-        super("Import from Database into Model");
+        super("Import Model Entity and Attributes");
         this.context = context;
         this.model = model;
 
@@ -119,11 +121,12 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
         layout.setSpacing(true);
         layout.setMargin(true);
         layout.setSizeFull();
-        layout.addComponent(new Label("Import tables and columns from either a database or csv file into the model."));
+        layout.addComponent(new Label("Import Entity and Attributes from a database, csv file or source file header row into the model."));
 
         optionGroup = new OptionGroup("Select the location of the model.");
         optionGroup.addItem(OPTION_DB);
         optionGroup.addItem(OPTION_REL_FILE);
+        optionGroup.addItem(OPTION_FILE_HEADER_ROW);
         optionGroup.setNullSelectionAllowed(false);
         optionGroup.setImmediate(true);
         optionGroup.select(OPTION_DB);
@@ -142,9 +145,23 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
         dbTree = new DbTree(provider, new DefaultSettingsProvider(context.getConfigDir()));
         scrollable.setContent(dbTree);
 
-        upload = new Upload("Comma separated file with 5 columns:  ENTITY, ATTRIBUTE, DESCRIPTION, DATA_TYPE, PK", this);
-        upload.addSucceededListener(this);
-        upload.setButtonCaption(null);
+        relCsvUpload = new Upload("Comma separated file with 5 columns:  ENTITY, ATTRIBUTE, DESCRIPTION, DATA_TYPE, PK", this);
+        relCsvUpload.addSucceededListener(this);
+        relCsvUpload.setButtonCaption(null);
+
+        fileHeaderEntity = new TextField("Entity Name");
+        fileHeaderEntity.setColumns(25);
+        fileHeaderEntity.setNullRepresentation("");
+        fileHeaderEntity.setRequired(true);
+
+        fileHeaderDelimiter = new TextField("Header Row Delimiter", ",");
+        fileHeaderDelimiter.setColumns(5);
+        fileHeaderDelimiter.setNullRepresentation("");
+        fileHeaderDelimiter.setRequired(true);
+        
+        fileHeaderUpload = new Upload("Source file containing a header row to use as attributes (will be created as VARCHAR type, no PK)", this);
+        fileHeaderUpload.addSucceededListener(this);
+        fileHeaderUpload.setButtonCaption(null);
 
         layout.addComponent(optionLayout);
         layout.setExpandRatio(optionLayout, 1.0f);
@@ -167,8 +184,16 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
             optionLayout.addComponent(scrollable);
             scrollable.focus();
         } else if (optionGroup.getValue().equals(OPTION_REL_FILE)) {
-        	optionLayout.addComponent(upload);
-            upload.focus();
+        	optionLayout.addComponent(relCsvUpload);
+            relCsvUpload.focus();
+        } else if (optionGroup.getValue().equals(OPTION_FILE_HEADER_ROW)) {
+        	optionLayout.addComponent(fileHeaderEntity);
+        	optionLayout.setExpandRatio(fileHeaderEntity, 0.2f);
+        	optionLayout.addComponent(fileHeaderDelimiter);
+        	optionLayout.setExpandRatio(fileHeaderDelimiter, 0.2f);
+        	optionLayout.addComponent(fileHeaderUpload);
+        	optionLayout.setExpandRatio(fileHeaderUpload, 0.8f);
+        	fileHeaderEntity.focus();
         }
     }
 
@@ -180,7 +205,11 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
     @Override
     public void uploadSucceeded(SucceededEvent event) {
         try {
-        	listener.selected(importRelationalCsvModel(new String(uploadedData.toByteArray())));
+        	if (optionGroup.getValue().equals(OPTION_REL_FILE)) {
+        		listener.selected(importRelationalCsvModel(new String(uploadedData.toByteArray())));
+            } else if (optionGroup.getValue().equals(OPTION_FILE_HEADER_ROW)) {
+            	listener.selected(importFileHeaderModel(new String(uploadedData.toByteArray())));
+            }
 		} catch (IOException e) {
 			throw new IoException(e);
 		}
@@ -209,7 +238,9 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
         	listener.selected(getModelEntityCollection());
             close();
         } else if (optionGroup.getValue().equals(OPTION_REL_FILE)) {
-            upload.submitUpload();
+            relCsvUpload.submitUpload();
+        } else if (optionGroup.getValue().equals(OPTION_FILE_HEADER_ROW)) {
+            fileHeaderUpload.submitUpload();
         }
     }
 
@@ -310,5 +341,53 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
         close();
         return entities;
     }
+    
+    protected Collection<ModelEntity> importFileHeaderModel(String text) throws IOException  {
+        List<ModelEntity> entities = new ArrayList<>();
+        if (isNotBlank(text)) {
+        	String fileDelimiter = fileHeaderDelimiter.getValue();
+        	if (!isNotBlank(fileDelimiter) && !" ".equals(fileDelimiter)) {
+        		throw new IllegalStateException("Must provide the delimiter of your file.");
+        	}
 
+        	String entityName = fileHeaderEntity.getValue();
+        	if (!isNotBlank(entityName)) {
+        		throw new IllegalStateException("Please provide an Entity Name.");
+        	}
+
+        	CsvReader csvReader = new CsvReader(new ByteArrayInputStream(text.getBytes(Charset.forName(encoding))), Charset.forName(encoding));
+        	if ("\\t".equals(fileDelimiter)) {
+        		csvReader.setDelimiter('\t');
+        	} else {            
+        		csvReader.setDelimiter(fileDelimiter.charAt(0));
+        	}
+            csvReader.setTextQualifier(quoteCharacter.charAt(0));
+            csvReader.setUseTextQualifier(true);
+
+            ModelEntity entity = null;
+            while (csvReader.readRecord()) {
+                entity = new ModelEntity();
+                entity.setModelId(model.getId());
+                entity.setName(entityName);
+                
+                for (int i = 0; i < csvReader.getColumnCount(); i++) {
+                    ModelAttrib attribute = new ModelAttrib();
+                    attribute.setName(csvReader.get(i).toString());
+                    attribute.setDescription("");
+                    attribute.setPk(false);
+                    attribute.setDataType(DataType.VARCHAR);
+                    attribute.setEntityId(entity.getId());
+                    entity.addModelAttribute(attribute);
+                    entities.add(entity);
+                }
+                // only read first line
+                break;
+            }
+
+        } else {
+        	throw new IllegalStateException("Please select a valid source file.");
+        }
+        close();
+        return entities;
+    }
 }
