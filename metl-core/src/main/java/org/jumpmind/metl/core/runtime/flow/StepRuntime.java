@@ -538,8 +538,8 @@ public class StepRuntime implements Runnable {
             }
         } else {
             shutdownThreads(true);
+            this.cancelled = true;
             if (!finished) {
-                this.cancelled = true;
                 recordFlowStepFinished();
             }
         }
