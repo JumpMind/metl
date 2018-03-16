@@ -48,6 +48,8 @@ public class FixedLengthParser extends AbstractComponentRuntime {
 
     public final static String SETTING_FOOTER_LINES_TO_SKIP = "footer.lines.to.skip";
 
+    public final static String SETTING_TRIM_PARSED_COLUMN = "trim.parsed.column";
+
     int numberOfFooterLinesToSkip = 0;
 
     int numberOfHeaderLinesToSkip = 0;
@@ -107,7 +109,13 @@ public class FixedLengthParser extends AbstractComponentRuntime {
             EntityData data = new EntityData();
             for (AttributeFormat attribute : attributesList) {
                 int length = attribute.getLength() > inputRow.length() ? inputRow.length() : attribute.getLength();
-                Object value = inputRow.substring(0, length).trim();
+                Object value = null;
+                if (properties.is(SETTING_TRIM_PARSED_COLUMN, true)) {
+                	value = inputRow.substring(0, length).trim();
+                } else {
+                	value = inputRow.substring(0, length);
+                }
+
                 inputRow = inputRow.substring(length);
                 if (isNotBlank(attribute.getFormatFunction())) {
                     value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), value, getOutputModel(), attribute.getEntity(), data,

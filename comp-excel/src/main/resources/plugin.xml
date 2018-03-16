@@ -74,7 +74,7 @@
       <setting id='action.on.success'
                required='false'
                type='choice'>
-        <name>Action on Success</name>
+        <name>Action on Flow Success</name>
         <defaultValue>NONE</defaultValue>
         <choices>
           <choice>None</choice>
