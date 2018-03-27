@@ -22,6 +22,6 @@ package org.jumpmind.metl.core.model;
 
 public enum StartType {
     
-    MANUAL, SCHEDULED_CRON
+    MANUAL, SCHEDULED_CRON, ON_STARTUP
     
 }
