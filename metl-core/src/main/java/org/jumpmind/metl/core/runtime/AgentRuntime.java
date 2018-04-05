@@ -203,6 +203,27 @@ public class AgentRuntime {
             started = true;
             starting = false;
             log.info("Agent '{}' has been started", agent);
+            
+            // loop through the deployed agents and start those that are set to run on startup
+            for (AgentDeploy deployment : deployments) {
+                Flow flow = configurationService.findFlow(deployment.getFlowId());
+                ProjectVersion projectVersion = configurationService.findProjectVersion(flow.getProjectVersionId());
+                if (!projectVersion.isDeleted()) {
+                	DeploymentStatus status = deployment.getDeploymentStatus();
+                    if (!status.equals(DeploymentStatus.DISABLED) && !status.equals(DeploymentStatus.REQUEST_DISABLE)
+                            && !status.equals(DeploymentStatus.REQUEST_REMOVE)) {
+                        try {
+            	            if (deployment.asStartType() == StartType.ON_STARTUP) {
+            	            	scheduleNow("system startup", deployment);
+            	            }
+                        } catch (Exception e) {
+                            log.warn("Failed to start '{}'", deployment.getName(), e);
+                            deployment.setStatus(DeploymentStatus.ERROR.name());
+                            deployment.setMessage(ExceptionUtils.getRootCauseMessage(e));
+                        }
+                    }
+                } 
+            }
         }
     }
 
