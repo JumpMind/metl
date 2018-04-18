@@ -78,7 +78,6 @@ import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.security.SecurityConstants;
 import org.jumpmind.metl.core.security.SecurityService;
-import org.jumpmind.metl.core.util.AppConstants;
 import org.jumpmind.metl.core.util.EnvConstants;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.MockJdbcDriver;
@@ -353,7 +352,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Bean
     @Scope(value = "singleton")
     public String configDir() {
-        return env.getProperty(EnvConstants.CONFIG_DIR);
+        return AppUtils.getConfigDir();
     }
 
     @Bean
@@ -450,8 +449,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IPluginManager pluginManager() {
         if (pluginManager == null) {
-            String localPluginDir = String.format("%s/%s", env.getProperty(AppConstants.PROP_CONFIG_DIR), AppConstants.PLUGINS_DIR);
-            pluginManager = new PluginManager(localPluginDir, pluginServive());
+            pluginManager = new PluginManager(AppUtils.getPluginsDir(), pluginServive());
         }
         return pluginManager;
     }
@@ -499,7 +497,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
                 securityService = (ISecurityService) Class
                         .forName(System.getProperty(SecurityConstants.CLASS_NAME_SECURITY_SERVICE, SecurityService.class.getName()))
                         .newInstance();
-                securityService.setConfigDir(configDir());
+                securityService.setConfigDir(AppUtils.getBaseDir());
             } catch (RuntimeException e) {
                 throw e;
             } catch (Exception e) {

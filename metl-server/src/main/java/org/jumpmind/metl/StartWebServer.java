@@ -125,7 +125,11 @@ public class StartWebServer {
 
         WebAppContext webapp = new WebAppContext();
         webapp.setContextPath("/metl");
-        webapp.setWar(location.toExternalForm());
+        if (location.toExternalForm().toLowerCase().endsWith(".war")) {
+            webapp.setWar(location.toExternalForm());
+        } else {
+            webapp.setWar("web");
+        }
         webapp.addAliasCheck(new AllowSymLinkAliasChecker());
         webapp.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed", allowDirListing);
 
