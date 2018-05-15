@@ -18,25 +18,50 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jumpmind.metl.ui.views.design.menu;
+package org.jumpmind.metl.core.model;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.jumpmind.metl.ui.views.design.DesignNavigator;
 
-public class ProjectMenuManager extends AbstractDesignSelectedValueMenuManager {
+public class EntityTag extends AbstractObject {
 
-    public ProjectMenuManager(DesignNavigator navigator) {
-        super(navigator);
+    private static final long serialVersionUID = 1L;
+    
+    String tagId;
+
+    String entityId;    
+    
+    String entityType;
+
+    public EntityTag() {
     }
     
-    @Override
-    protected String[] getEnabledPaths(Object selected) {
-        return (String[])ArrayUtils.addAll(super.getEnabledPaths(selected), new String[] {
-                "File|Hide",
-                "Edit|Rename",
-                "Edit|Remove",
-                "Tag",
-        });
+    public EntityTag(String entityId, String entityType, String tagId) {
+        this.entityId = entityId;
+        this.entityType = entityType;
+        this.tagId = tagId;
     }
 
+    public String getEntityId() {
+        return entityId;
+    }
+
+    public void setEntityId(String entityId) {
+        this.entityId = entityId;
+    }
+
+    public String getTagId() {
+        return tagId;
+    }
+
+    public void setTagId(String tagId) {
+        this.tagId = tagId;
+    }
+
+    public String getEntityType() {
+        return entityType;
+    }
+
+    public void setEntityType(String entityType) {
+        this.entityType = entityType;
+    }
+    
 }

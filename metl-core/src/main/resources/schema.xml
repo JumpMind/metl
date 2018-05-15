@@ -670,5 +670,38 @@
             <reference local="project_version_id" foreign="id" />
         </foreign-key>
     </table>
-</database>
     
+    <table name="tag" description="Tags that can be applied to misc. objects for identification/filtering purposes">
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier." />
+        <column name="name" type="VARCHAR" size="255" description="A description for the tag." />
+        <column name="color" type="INTEGER" description="A description for the tag." />
+        <column name="deleted" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this row has been deleted."/>        
+        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
+        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
+    </table>
+    
+    <table name="entity_tag" description="Tags applied to given entities.">
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier." />
+        <column name="entity_id" type="CHAR" size="36" required="true" primaryKey="true" description="The corresponding entity." />
+        <column name="tag_id" type="CHAR" size="36" required="true" primaryKey="true" description="The corresponding tag." />
+        <column name="entity_type" type="VARCHAR" size="50" required="true" primaryKey="true" description="The corresponding tag." />
+        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
+        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
+        <foreign-key foreignTable="tag" name="fk_et_2_t">
+            <reference local="tag_id" foreign="id" />
+        </foreign-key>
+    </table>
+    
+    <table name="license_key" description="License Key.">
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier." />
+        <column name="key_text" type="VARCHAR" size="500" required="true" description="License key text." />      
+        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
+        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
+    </table>
+</database>

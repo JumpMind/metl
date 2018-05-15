@@ -14,5 +14,5 @@
 <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.jumpmind.metl.Develop"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="metl-develop"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dorg.jumpmind.metl.ui.init.config.dir=working -Xmx1024m -Dlog.to.console.enabled=true -Djava.io.tmpdir=working/tmp"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dorg.jumpmind.metl.ui.init.config.dir=working -Xmx1024m -Dlog.to.console.enabled=true -Djava.io.tmpdir=working/tmp -Dh2.baseDir=working"/>
 </launchConfiguration>

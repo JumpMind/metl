@@ -48,6 +48,7 @@ import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.ComponentName;
 import org.jumpmind.metl.core.model.ComponentSetting;
+import org.jumpmind.metl.core.model.EntityTag;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FlowParameter;
@@ -72,6 +73,7 @@ import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.ResourceSetting;
 import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.model.Setting;
+import org.jumpmind.metl.core.model.Tag;
 import org.jumpmind.metl.core.model.Version;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.util.AppConstants;
@@ -374,6 +376,8 @@ public class ConfigurationService extends AbstractService
         for (ProjectVersion projectVersion : versions) {
             projectVersion.setProject(project);
         }
+        List<Tag> tags = this.findTagsForEntity(Project.class.getName(), project.getId());
+        project.setTags(tags);
     }
 
     @Override
@@ -400,7 +404,7 @@ public class ConfigurationService extends AbstractService
         }
         return list;
     }
-
+    
     @Override
     public Resource findResource(String id) {
         Resource resource = findOne(Resource.class, new NameValue("id", id));
@@ -543,8 +547,6 @@ public class ConfigurationService extends AbstractService
         }
         return list;
     }
-
-
 
     @Override
     public void delete(Flow flow, FlowStep flowStep) {
@@ -1705,4 +1707,120 @@ public class ConfigurationService extends AbstractService
         return modelRelations;
 	}
 
+    @Override
+    public List<Tag> findTags() {
+        return persistenceManager.find(Tag.class, null, null, null, tableName(Tag.class));
+    }
+
+    @Override
+    public void refresh(Tag tag) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params = new HashMap<String, Object>();
+        params.put("tagId", tag.getId());
+
+        List<EntityTag> taggedItems = persistenceManager.find(EntityTag.class,
+                params, null, null, tableName(EntityTag.class));
+        tag.setTaggedItems(taggedItems);
+    }
+
+    @Override
+    public void delete(Tag tag) {
+//TODO: do we want to allow them to delete tags
+//        refresh(user);
+//        for (Setting setting : user.getSettings()) {
+//            persistenceManager.delete(setting, null, null, tableName(UserSetting.class));
+//        }
+//        for (Group group : user.getGroups()) {
+//            persistenceManager.delete(new UserGroup(user.getId(), group.getId()), null, null,
+//                    tableName(UserGroup.class));
+//        }
+//
+//        List<UserHist> history = findUserHist(user.getId());
+//        for (UserHist userHist : history) {
+//            persistenceManager.delete(userHist, null, null, tableName(UserHist.class));
+//        }
+//
+        persistenceManager.delete(tag, null, null, tableName(Tag.class));
+    }
+    
+    @Override
+    public List<EntityTag> findEntityTagsForEntity(String entityId) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("entityId", entityId);
+        return find(EntityTag.class, params,EntityTag.class);
+    }
+    
+    @Override
+    public void delete(EntityTag entityTag) {
+        persistenceManager.delete(entityTag, null, null, tableName(EntityTag.class));
+    }
+
+    @Override
+    public void deleteEntityTags(String entityId) {
+        String sql = "delete from %1$s_entity_tag where entity_id='%2$s'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        template.update(String.format(sql, tablePrefix, entityId));
+    }
+
+    @Override
+    public List<Project> findProjectsWithTagLike(String tagFilterText) {
+        List<Project> projects = new ArrayList<Project>();
+        final String PROJECTS_WITH_TAG_LIKE_SQL = 
+                "select "
+                + "  distinct p.id "
+                + "from %1$s_project p "
+                + "   inner join %1$s_entity_tag et "
+                + "      on p.id = et.entity_id "
+                + "   inner join %1$s_tag t "
+                + "      on et.tag_id = t.id "
+                + "where "
+                + "   p.deleted=0 and "
+                + "   t.name like '%%" + tagFilterText + "%%'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(PROJECTS_WITH_TAG_LIKE_SQL, tablePrefix));
+        for (Row row : ids) {
+            projects.add(this.findProject(row.getString("id")));
+        }
+        return projects;
+    }
+    
+    @Override
+    public Project findProject(String id) {
+        Project project = new Project();
+        project.setId(id);
+        refresh(project);
+        return project;
+    }
+
+    public List<Tag> findTagsForEntity(String entityType, String entityId) {
+        List<Tag> tags = new ArrayList<Tag>();        
+        String sql;
+        
+        if (entityType.equals(Project.class.getName())) {
+                sql =                
+                        "select "
+                        + "  t.id, t.name, t.color "
+                        + "from %1$s_tag t "
+                        + "   inner join %1$s_entity_tag et "
+                        + "      on t.id = et.tag_id "
+                        + "where "
+                        + "   et.entity_id='%2$s' ";
+        } else {
+            throw new UnsupportedOperationException();
+        }
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(sql, tablePrefix, entityId));
+        for (Row row : ids) {
+            Tag tag = new Tag(row.getString("id"), row.getString("name"), row.getInt("color"));
+            tags.add(tag);
+        }
+        return tags;
+    }
+
+    @Override
+    public void deleteEntityTagsForTag(Tag tag) {
+        String sql = "delete from %1$s_entity_tag where tag_id='%2$s'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        template.update(String.format(sql, tablePrefix, tag.getId()));        
+    }
 }

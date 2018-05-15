@@ -78,6 +78,8 @@ public class DesignMenuBar extends AbstractMenuBar {
         add("Edit|Change Dependency Version");
         addSeparator("Edit");
         add("Edit|Remove");
+        
+        add("Tag");
     }
 
     static class NothingSelectAction extends AbstractDesignSelectedValueMenuManager {

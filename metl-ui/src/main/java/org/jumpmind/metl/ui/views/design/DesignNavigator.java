@@ -62,13 +62,15 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
+import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DefaultFieldFactory;
 import com.vaadin.ui.Field;
@@ -113,6 +115,10 @@ public class DesignNavigator extends VerticalLayout {
     IConfigurationService configurationService;
 
     CutCopyPasteManager cutCopyPasteManager;
+    
+    BeanItemContainer<AbstractNamedObject> treeTblContainer = new BeanItemContainer<AbstractNamedObject>(AbstractNamedObject.class);
+    
+    String tagFilterText=null;
 
     public DesignNavigator(ApplicationContext context, TabbedPanel tabs) {
         this.context = context;
@@ -122,12 +128,13 @@ public class DesignNavigator extends VerticalLayout {
 
         setSizeFull();
         addStyleName(ValoTheme.MENU_ROOT);
-
         buildTreeTable();
-
+        HorizontalLayout hLayout = new HorizontalLayout();
         menuBar = new DesignMenuBar(this, treeTable);
-        addComponent(menuBar);
-
+        hLayout.addComponent(menuBar);
+        hLayout.addComponent(buildFilterField());
+        hLayout.setSpacing(true);
+        addComponent(hLayout);
     }
 
     public void addNewProject() {
@@ -145,17 +152,25 @@ public class DesignNavigator extends VerticalLayout {
         startEditingItem(project);
     }
 
-    protected HorizontalLayout buildSearchBar() {
-        HorizontalLayout layout = new HorizontalLayout();
-        layout.setMargin(new MarginInfo(false, true, true, true));
-        layout.setWidth(100, Unit.PERCENTAGE);
-        layout.setVisible(false);
-        TextField search = new TextField();
-        search.setIcon(Icons.SEARCH);
-        search.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
-        search.setWidth(100, Unit.PERCENTAGE);
-        layout.addComponent(search);
-        return layout;
+    protected TextField buildFilterField() {
+        TextField filterField = new TextField();
+        filterField.setIcon(Icons.SEARCH);
+        filterField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
+        filterField.setInputPrompt("Tag Filter");
+        filterField.setImmediate(true);
+        filterField.setTextChangeEventMode(TextChangeEventMode.LAZY);
+        filterField.setTextChangeTimeout(200);
+        filterField.addTextChangeListener(new TextChangeListener() {
+            public void textChange(TextChangeEvent event) {
+                if (!event.getText().isEmpty()) {
+                    tagFilterText=event.getText();
+                } else {
+                    tagFilterText = null;
+                }
+                refreshProjects();
+            }
+        });        
+        return filterField;
     }
 
     protected TreeTable buildTreeTable() {
@@ -173,7 +188,7 @@ public class DesignNavigator extends VerticalLayout {
         treeTable.setImmediate(true);
         treeTable.setSelectable(true);
         treeTable.setEditable(true);
-        treeTable.setContainerDataSource(new BeanItemContainer<AbstractNamedObject>(AbstractNamedObject.class));
+        treeTable.setContainerDataSource(treeTblContainer);
         treeTable.setTableFieldFactory(new DefaultFieldFactory() {
             @Override
             public Field<?> createField(Container container, Object itemId, Object propertyId, Component uiContext) {
@@ -229,7 +244,6 @@ public class DesignNavigator extends VerticalLayout {
                 }
             }
             return null;
-
         });
         treeTable.addValueChangeListener(e -> selectionChanged());
 
@@ -404,7 +418,12 @@ public class DesignNavigator extends VerticalLayout {
         try {
             long ts = System.currentTimeMillis();
             Object selected = treeTable.getValue();
-            List<Project> projects = configurationService.findProjects();
+            List<Project> projects;
+            if (tagFilterText == null) {
+                projects = configurationService.findProjects();
+            } else {
+                projects = configurationService.findProjectsWithTagLike(tagFilterText);
+            }
             Collection<?> itemIds = treeTable.getItemIds();
             for (Object itemId : itemIds) {
                 collapseAll(itemId);
@@ -662,6 +681,10 @@ public class DesignNavigator extends VerticalLayout {
 
     public void doExport() {
         ExportDialog.show(context, treeTable.getValue());
+    }
+    
+    public void doTag() {
+        TagDialog.show(context, treeTable.getValue());
     }
 
     public void doChangeDependencyVersion() {

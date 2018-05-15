@@ -111,6 +111,8 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
                 navigator.doPaste();
             } else if ("Edit|Change Dependency Version".equals(menuSelected)) {
                 navigator.doChangeDependencyVersion();
+            } else if ("Tag".equals(menuSelected)) {
+                navigator.doTag();
             }
         }
         return handled;
@@ -131,7 +133,7 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
                     "File|New|Model|Hierarchical", "File|New|Model|Relational",
                     "File|New|Resource|Database", "File|New|Resource|Directory|FTP", "File|New|Resource|Directory|File System",
                     "File|New|Resource|Directory|JMS", "File|New|Resource|Directory|SFTP", "File|New|Resource|Directory|SMB",
-                    "File|New|Resource|HTTP", "File|New|Resource|Mail Session", "File|New|Resource|Subscribe|JMS", "Edit|Rename" };
+                    "File|New|Resource|HTTP", "File|New|Resource|Mail Session", "File|New|Resource|Subscribe|JMS", "Edit|Rename", "Tag" };
         } else {
             return null;
         }
