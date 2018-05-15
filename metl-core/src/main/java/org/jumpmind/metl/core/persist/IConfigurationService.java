@@ -26,6 +26,7 @@ import java.util.Map;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentName;
+import org.jumpmind.metl.core.model.EntityTag;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FlowStep;
@@ -47,6 +48,7 @@ import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.model.Setting;
+import org.jumpmind.metl.core.model.Tag;
 
 public interface IConfigurationService {
 
@@ -218,4 +220,23 @@ public interface IConfigurationService {
     
     public List<ModelRelation> findRelationshipsBetweenEntities(String entity1Id, String entity2Id);
 
+    public List<Tag> findTags();
+
+    public void refresh(Tag tag);
+
+    public void delete(Tag tag);
+
+    public List<EntityTag> findEntityTagsForEntity(String entityId);
+    
+    public void delete(EntityTag entityTag);
+    
+    public void deleteEntityTagsForTag(Tag tag);
+    
+    public void deleteEntityTags(String entityId);
+    
+    public List<Project> findProjectsWithTagLike(String tagFilterText);
+    
+    public Project findProject(String id);
+    
+    public List<Tag> findTagsForEntity(String entityType, String entityId);
 }

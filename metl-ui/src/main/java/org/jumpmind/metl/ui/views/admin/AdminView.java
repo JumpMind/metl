@@ -97,6 +97,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         table.setColumnExpandRatio("id", 1);
         addItem("Users", Icons.USER);
         addItem("Groups", Icons.GROUP);
+        addItem("Tags", Icons.TAG);
         addItem("REST", Icons.REST);
         addItem("General Settings", Icons.SETTINGS);
         addItem("Plugin Repositories", Icons.DATABASE);
@@ -145,6 +146,8 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
                     panel = new UserPanel(context, tabbedPanel);
                 } else if (id.equals("Groups")) {
                     panel = new GroupPanel(context, tabbedPanel);
+                } else if (id.equals("Tags")) {
+                    panel = new TagPanel(context, tabbedPanel);
                 } else if (id.equals("REST")) {
                     panel = new ApiPanel(context, tabbedPanel);
                 } else if (id.equals("General Settings")) {

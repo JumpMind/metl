@@ -18,25 +18,54 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jumpmind.metl.ui.views.design.menu;
+package org.jumpmind.metl.core.model;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.jumpmind.metl.ui.views.design.DesignNavigator;
+import java.util.List;
 
-public class ProjectMenuManager extends AbstractDesignSelectedValueMenuManager {
+public class Tag extends AbstractNamedObject implements IAuditable {
 
-    public ProjectMenuManager(DesignNavigator navigator) {
-        super(navigator);
+    private static final long serialVersionUID = 1L;
+    
+    String name;
+    
+    int color;
+
+    List<EntityTag> taggedItems;
+
+    public Tag() {
+        
+    }
+    
+    public Tag(String id, String name, int color) {
+        this.setId(id);
+        this.name = name;
+        this.color = color;
     }
     
     @Override
-    protected String[] getEnabledPaths(Object selected) {
-        return (String[])ArrayUtils.addAll(super.getEnabledPaths(selected), new String[] {
-                "File|Hide",
-                "Edit|Rename",
-                "Edit|Remove",
-                "Tag",
-        });
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    public List<EntityTag> getTaggedItems() {
+        return taggedItems;
+    }
+
+    public void setTaggedItems(List<EntityTag> taggedItems) {
+        this.taggedItems = taggedItems;
+    }
+
+    public int getColor() {
+        return color;
+    }
+
+    public void setColor(int color) {
+        this.color = color;
     }
 
 }
