@@ -358,14 +358,17 @@ public class PluginManager implements IPluginManager {
     public String getLatestLocalVersion(String artifactGroup, String artifactName) {
         String latestVersion = null;
         try {
+            logger.info(String.format("Getting latest local version for artifact group %s and artifcat name %s", artifactGroup, artifactName));
             VersionRangeRequest rangeRequest = new VersionRangeRequest();
             rangeRequest.setArtifact(new DefaultArtifact(artifactGroup, artifactName, "jar", "[0,)"));
             VersionRangeResult rangeResult = repositorySystem.resolveVersionRange(repositorySystemSession, rangeRequest);
+            logger.info(String.format("rangeresult %s", rangeResult.toString()));
             if (rangeResult != null && rangeResult.getHighestVersion() != null) {
                 latestVersion = rangeResult.getHighestVersion().toString();
+                logger.info(String.format("Found version %s for artifact %s", latestVersion, artifactName));
             }
         } catch (VersionRangeResolutionException e) {
-            logger.error("", e);
+            logger.error("Error getting latest local version of plugin from local repository.", e);
         }
         return latestVersion;
     }

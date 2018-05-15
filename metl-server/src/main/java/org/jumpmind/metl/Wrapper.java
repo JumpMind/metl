@@ -30,7 +30,6 @@ import java.security.ProtectionDomain;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.jumpmind.symmetric.wrapper.WrapperHelper;
 
 
 public class Wrapper {
@@ -40,16 +39,19 @@ public class Wrapper {
     
     public static void runServiceWrapper(String[] args) throws Exception {
 
-    	String configFileName="metl_service.conf";   
-    	ProtectionDomain protectionDomain = Wrapper.class.getProtectionDomain();
-    	String jarFileName=protectionDomain.getCodeSource().getLocation().getFile();
-    	
+        String configFileName="metl_service.conf";   
+        ProtectionDomain protectionDomain = Wrapper.class.getProtectionDomain();
+        String jarFileName=protectionDomain.getCodeSource().getLocation().getFile();
+        
         String appHomeDir = getConfigDir(args, true);
-    	createConfigFileIfNeeded(appHomeDir, configFileName, jarFileName);
-    	createLogDirIfNeeded(appHomeDir);
+        createConfigFileIfNeeded(appHomeDir, configFileName, jarFileName);
+        createLogDirIfNeeded(appHomeDir);
 
-        WrapperHelper.run(args, appHomeDir, appHomeDir + File.separator + configFileName,
-        		jarFileName);
+        String[] wrapperArgs = new String[0];
+        if (args.length > 0) {
+            wrapperArgs = new String[] { args[0], appHomeDir + File.separator + configFileName };
+        }
+        org.jumpmind.symmetric.wrapper.Wrapper.main(wrapperArgs);
     }
     
     protected static void createLogDirIfNeeded(String appHomeDir) {
