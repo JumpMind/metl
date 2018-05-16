@@ -118,7 +118,7 @@ public class TextFileWriter extends AbstractFileWriter {
                         for (Object rec : recs) {
                             initStreamAndWriter(inputMessage);
                             bufferedWriter.write(rec != null ? rec.toString() : "");
-                            if (StringUtils.isNotBlank(lineTerminator)) {
+                            if (lineTerminator != null && lineTerminator.length()!=0) { 
                                 bufferedWriter.write(lineTerminator);
                             } else {
                                 bufferedWriter.newLine();
