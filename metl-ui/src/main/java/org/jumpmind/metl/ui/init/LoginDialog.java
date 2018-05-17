@@ -337,7 +337,7 @@ public class LoginDialog extends Window {
                         loginButton.setCaption("Change Password");
                         validatePasswordField.setVisible(true);
                     } else {
-                        CommonUiUtils.notify("Invalid user id or password");
+                        CommonUiUtils.notify("Invalid user id or password", Type.WARNING_MESSAGE);
                     }
                 } catch(ConsoleAuthenticationConnectionException ex) {
                     CommonUiUtils.notify("Unable to connect to network resource.", Type.WARNING_MESSAGE);

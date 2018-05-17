@@ -72,7 +72,7 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
         FormLayout form = new FormLayout();
         form.setSpacing(true);
         
-        NativeSelect authField = new NativeSelect("Authenticantion Method");
+        NativeSelect authField = new NativeSelect("Authentication Method");
         authField.setWidth(16, Unit.EM);
         authField.setHeight(2.15f, Unit.EM);
         authField.setNullSelectionAllowed(false);

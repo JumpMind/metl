@@ -36,6 +36,8 @@ public class GlobalSetting extends Setting {
     public static final String PASSWORD_REQUIRE_MIXED_CASE = "password.require.mixed.case";
     public static final String PASSWORD_EXPIRE_DAYS = "password.expire.days";
     public static final int PASSWORD_EXPIRE_DAYS_DEFAULT = 60;
+    public static final String PASSWORD_FAILED_ATTEMPTS = "password.failed.attempts";
+    public static final int PASSWORD_FAILED_ATTEMPTS_DEFAULT = 3;
     
     public static final String CONFIG_BACKUP_ENABLED = "config.backup.enabled";
     public static final String CONFIG_BACKUP_CRON = "config.backup.cron";
