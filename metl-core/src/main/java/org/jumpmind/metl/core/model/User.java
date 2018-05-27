@@ -47,6 +47,8 @@ public class User extends AbstractObjectWithSettings {
     
     List<Group> groups;
     
+    int failedLogins;
+    
     public User() {
         groups = new ArrayList<Group>();
     }
@@ -132,10 +134,18 @@ public class User extends AbstractObjectWithSettings {
         }
         return false;
     }
+
+	public int getFailedLogins() {
+		return failedLogins;
+	}
+	
+	public void setFailedLogins(int failedLogins) {
+		this.failedLogins = failedLogins;
+	}
     
-   @Override
-   public String toString() {
-      return loginId;
-   }
+	@Override
+	public String toString() {
+		return loginId;
+	}
 
 }

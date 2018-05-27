@@ -433,6 +433,7 @@ public class OperationsService extends AbstractService implements IOperationsSer
         user.setSalt(securityService.nextSecureHexString(10));
         user.setLastPasswordTime(new Date());
         user.setPassword(securityService.hash(user.getSalt(), newPassword));
+        user.setFailedLogins(0);
         save(user);
     }
     
@@ -440,6 +441,20 @@ public class OperationsService extends AbstractService implements IOperationsSer
     public boolean isUserLoginEnabled() {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         return template.queryForInt(String.format("select count(*) from %1$s_user where password is not null", tablePrefix)) > 0;
+    }
+
+    public boolean isUserLocked(User user) {
+    	GlobalSetting failedAttemptLimitSetting = findGlobalSetting(GlobalSetting.PASSWORD_FAILED_ATTEMPTS, 
+                Integer.toString(GlobalSetting.PASSWORD_FAILED_ATTEMPTS_DEFAULT));
+        int failedAttempts = Integer.parseInt(failedAttemptLimitSetting.getValue());
+     
+        boolean result = false;
+        if (failedAttempts > 0) {
+            if (user.getFailedLogins() >= failedAttempts) {
+                result = true;
+            }
+        }
+        return result;
     }
 
     @Override
