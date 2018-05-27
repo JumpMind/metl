@@ -130,7 +130,7 @@
             <setting id='url' required='true' type='text'>
                 <name>URL</name>
             </setting>
-            <setting id='http.method' required='true' type='choice'>
+            <setting id='http.method' required='false' type='choice'>
                 <name>HTTP Method</name>
                 <defaultValue>GET</defaultValue>
                 <choices>

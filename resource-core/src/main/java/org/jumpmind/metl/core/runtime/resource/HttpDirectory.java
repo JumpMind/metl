@@ -54,6 +54,8 @@ public class HttpDirectory implements IDirectory {
     public static final String HTTP_METHOD_GET = "GET";
     public static final String HTTP_METHOD_PUT = "PUT";
     public static final String HTTP_METHOD_POST = "POST";
+    public static final String HTTP_METHOD_PATCH = "PATCH";
+    public static final String HTTP_METHOD_DELETE = "DELETE";
 
     public static final String SECURITY_NONE = "None";
     public static final String SECURITY_BASIC = "Basic Auth";
@@ -337,6 +339,40 @@ public class HttpDirectory implements IDirectory {
     @Override
     public void connect() {
     }
+
+    public String getToken() {
+        return token;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public String getHttpMethod() {
+        return httpMethod;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public String getSecurity() {
+        return security;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public int getTimeout() {
+        return timeout;
+    }
+
+
 
     private class OAuthReq implements OAuthRequest {
 
