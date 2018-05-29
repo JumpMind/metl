@@ -412,7 +412,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
             XMLComponentDefinition definition = context.getDefinitionFactory().getComponentDefinition(flow.getProjectVersionId(), type);
             if (definition == null) {
-                throw new MisconfiguredException("Could not find the component defintion for a component of type '%s'", type);
+                throw new MisconfiguredException("Could not find the component definition for a component of type '%s'", type);
             }
             node.setInputLabel(definition.getInputMessageType().getLetter());
             node.setOutputLabel(definition.getOutputMessageType().getLetter());
