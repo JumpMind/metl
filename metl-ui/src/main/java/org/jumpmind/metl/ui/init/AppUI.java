@@ -281,6 +281,7 @@ public class AppUI extends UI implements LoginListener {
 
     @Override
     public void login(User user) {
+        
         appSession.setUser(user);
         AppSession.addAppSession(appSession);
         WebApplicationContext ctx = getWebApplicationContext();
@@ -296,7 +297,8 @@ public class AppUI extends UI implements LoginListener {
         appCtx.setUser(user);
         
         appCtx.getConfigurationService().save(new AuditEvent(EventType.LOGIN, "Logged in", user.getLoginId()));
-
+        user.setLastLoginTime(new Date());
+        appCtx.getOperationsService().save(user);
         viewManager = ctx.getBean(ViewManager.class);
         viewManager.init(this, contentArea);
 
