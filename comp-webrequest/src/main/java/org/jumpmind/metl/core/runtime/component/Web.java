@@ -160,7 +160,7 @@ public class Web extends AbstractComponentRuntime {
                 String path = assemblePath(httpDirectory.getUrl());
                 for (String requestContent : inputPayload) {
                     getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                    replaceParameters(inputMessage, requestContent);
+                    requestContent = replaceParameters(inputMessage, requestContent);
                     HttpRequestBase httpRequest = buildHttpRequest(path, httpHeaders, httpDirectory, requestContent);
 
                     if (isNotBlank(requestContent)) {
@@ -249,11 +249,12 @@ public class Web extends AbstractComponentRuntime {
         }
 	}
 	
-	private void replaceParameters(Message inputMessage, String requestContent) {
+	private String replaceParameters(Message inputMessage, String requestContent) {
         if (parameterReplacement) {
             resolveHttpHeaderVars(httpHeaders, inputMessage);
             requestContent = resolveParamsAndHeaders(requestContent, inputMessage);
         }
+        return requestContent;
 	}
 	
 	protected HttpRequestBase buildHttpRequest(String path,  Map<String, String> headers, HttpDirectory httpDirectory,
