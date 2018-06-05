@@ -194,8 +194,8 @@ public class Web extends AbstractComponentRuntime {
         CloseableHttpResponse httpResponse=null;
         try {
             httpResponse = httpClient.execute(httpRequest);
-            int responseCode = httpResponse.getStatusLine().getStatusCode();
-            if (responseCode != HttpStatus.SC_OK) {
+            int responseCode = httpResponse.getStatusLine().getStatusCode();           
+            if (responseCode / 100 != 2) {
                 throw new IoException(String.format("Error calling http method.  HTTP Status %d, HTTP Status Description %s, HTTP Result %s", 
                         responseCode, httpResponse.getStatusLine().getReasonPhrase(), 
                         IOUtils.toString(httpResponse.getEntity().getContent())));
