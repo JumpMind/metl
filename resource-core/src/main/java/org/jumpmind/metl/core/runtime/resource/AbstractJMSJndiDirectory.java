@@ -41,6 +41,7 @@ import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.TextMessage;
+import javax.jms.TopicPublisher;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -313,7 +314,12 @@ abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
                         }
                         jmsMsg.setJMSType(jmsType);
                     }
-                    producer.send(jmsMsg);
+                    if (producer instanceof TopicPublisher) {
+                        TopicPublisher pub = (TopicPublisher) producer;
+                        pub.publish(jmsMsg);
+                    } else {
+                        producer.send(jmsMsg);
+                    }
                 }
             } catch (Exception e) {
                 AbstractJMSJndiDirectory.this.close();
