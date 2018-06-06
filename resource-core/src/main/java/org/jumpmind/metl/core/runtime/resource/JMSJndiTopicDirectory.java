@@ -39,16 +39,20 @@ import org.jumpmind.properties.TypedProperties;
 public class JMSJndiTopicDirectory extends AbstractJMSJndiDirectory {
 
     TopicPublisher producer;
+    String resourceType;
 
-    public JMSJndiTopicDirectory(TypedProperties properties) throws JMSException, NamingException {
+    public JMSJndiTopicDirectory(TypedProperties properties, String resourceType) throws JMSException, NamingException {
         super(properties);
+        this.resourceType = resourceType;
     }
-    
+
     @Override
     protected void initialize() throws JMSException, NamingException {
         super.initialize();
-        MessageConsumer consumer = createConsumer();
-        close(consumer);
+        if (resourceType != null && resourceType.equalsIgnoreCase(JMS.RESOURCE_TYPE_SUBSCRIBE)) {
+            MessageConsumer consumer = createConsumer();
+            close(consumer);
+        }
     }
 
     @Override
