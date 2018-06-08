@@ -209,7 +209,9 @@ public class Web extends AbstractComponentRuntime {
             throw new IoException(String.format("Error calling service %s.  Error: %s", httpRequest.getURI().getPath(), ex.getMessage()));
         } finally {
             try {
-            httpResponse.close(); 
+                if (httpResponse != null) {
+                    httpResponse.close();
+                }
             } catch (IOException iox) {
                 //close quietly
                 log.info(String.format("Unable to close http session %s", iox.getMessage()));
