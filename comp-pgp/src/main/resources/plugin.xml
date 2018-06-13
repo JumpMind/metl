@@ -1,0 +1,81 @@
+<!--
+
+    Licensed to JumpMind Inc under one or more contributor
+    license agreements.  See the NOTICE file distributed
+    with this work for additional information regarding
+    copyright ownership.  JumpMind Inc licenses this file
+    to you under the GNU General Public License, version 3.0 (GPLv3)
+    (the "License"); you may not use this file except in compliance
+    with the License.
+
+    You should have received a copy of the GNU General Public License,
+    version 3.0 (GPLv3) along with this library; if not, see
+    <http://www.gnu.org/licenses/>.
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<definitions>
+  <component category='PROCESSOR'
+             id='PGP Encrypt'
+             inputMessageType='binary'
+             inputOutputModelsMatch='false'
+             outputMessageType='binary'
+             resourceCategory='none'>
+    <name>PGP Encrypt</name>
+    <className>org.jumpmind.metl.core.runtime.component.PgpEncrypt</className>
+    <keywords>encrypt,pgp</keywords>
+    <description></description>
+    <settings>
+      <setting id='pgp.public.key.location'
+               required='true'
+               type='text'>
+        <name>Public Key Location</name>
+      </setting>    
+      <setting id='pgp.key.algorithm'
+               required='true'
+               type='choice'>
+        <name>Key Algorithm</name>
+        <defaultValue>CAST5</defaultValue>
+        <choices>
+          <choice>CAST5</choice>
+          <choice>IDEA</choice>
+          <choice>TRIPLE_DES</choice>
+          <choice>BLOWFISH</choice>
+          <choice>SAFER</choice>
+          <choice>TRIPLE_DES</choice>
+          <choice>DES</choice>
+          <choice>AES_128</choice>
+          <choice>AES_192</choice>
+          <choice>AES_256</choice>
+          <choice>TWOFISH</choice>          
+          <choice>CAMELLIA_128</choice>          
+          <choice>CAMELLIA_192</choice>          
+          <choice>CAMELLIA_256</choice>          
+        </choices>
+      </setting>
+      <setting id='pgp.compression.algorithm'
+               required='true'
+               type='choice'>
+        <name>Compression Algorithm</name>
+        <defaultValue>ZIP</defaultValue>
+        <choices>
+          <choice>ZIP</choice>
+          <choice>ZLIB</choice>
+          <choice>BZIP2</choice>
+        </choices>
+      </setting>   
+      <setting id='pgp.armored'
+               required='true'
+               type='boolean'>
+        <name>Armored</name>
+        <defaultValue>false</defaultValue>
+      </setting>            
+    </settings>
+  </component>  
+</definitions>
