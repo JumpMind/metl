@@ -104,11 +104,35 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
                 Writer writer = new StringWriter();
                 CsvWriter csvWriter = getCsvWriter(writer);
                 try {
-                    for (AttributeFormat attr : attributes) {
-                        if (attr.getAttribute() != null) {
-                            csvWriter.write(attr.getAttribute().getName(), !trimColumns);
+                	if (attributes.size() == 0) {
+                        Model inputModel = getInputModel();
+                        boolean found = false;
+
+                    	for (EntityData inputData : inputRows) {
+                            for (String inputKey : inputData.keySet()) {
+	                    		for (ModelEntity entity : inputModel.getModelEntities()) {
+	                                for (ModelAttrib attr : entity.getModelAttributes()) {
+	                                	if (inputKey.equals(attr.getId())) {
+	                                		csvWriter.write(attr.getName(), !trimColumns);
+	                                		found = true;
+	                                		break;
+	                                	}
+	                                }
+	                                if (found) {
+	                                	break;
+	                                }
+	                    		}
+	                    		found = false;
+                        	}
+                    		break;
                         }
-                    }
+                	} else {
+	                    for (AttributeFormat attr : attributes) {
+	                        if (attr.getAttribute() != null) {
+	                            csvWriter.write(attr.getAttribute().getName(), !trimColumns);
+	                        }
+	                    }
+                	}
                 } catch (IOException e) {
                     throw new IoException("Error writing to stream for formatted output. " + e.getMessage());
                 }
