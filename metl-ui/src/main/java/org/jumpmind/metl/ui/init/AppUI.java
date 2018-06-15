@@ -294,9 +294,10 @@ public class AppUI extends UI implements LoginListener {
 
         ApplicationContext appCtx = ctx.getBean(ApplicationContext.class);
         appCtx.setUser(user);
-        
         appCtx.getConfigurationService().save(new AuditEvent(EventType.LOGIN, "Logged in", user.getLoginId()));
-
+        user.setLastLoginTime(new Date());
+        appCtx.getOperationsService().save(user);
+        
         viewManager = ctx.getBean(ViewManager.class);
         viewManager.init(this, contentArea);
 
