@@ -35,10 +35,10 @@ public class PluginManagerTest {
         VersionRangeRequest rangeRequest = new VersionRangeRequest();
         rangeRequest.setArtifact(new DefaultArtifact("org.jumpmind.metl", "comp-text", "jar", "[0,)"));
         VersionRangeResult rangeResult = repositorySystem.resolveVersionRange(repositorySystemSession, rangeRequest);
-        String latestVersion = rangeResult.getHighestVersion().toString();
-        System.out.println(latestVersion);
-
-
+        if (rangeResult != null) {
+            String latestVersion = rangeResult.getHighestVersion().toString();
+            System.out.println(latestVersion);
+        }
 //        assertNotNull(components);
 //        assertEquals("test", components.getComponent().get(0).getName());
 
