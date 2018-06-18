@@ -3,13 +3,9 @@ package org.jumpmind.core.plugin;
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
-import org.eclipse.aether.RepositorySystemSession;
-import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
 import org.eclipse.aether.impl.DefaultServiceLocator;
 import org.eclipse.aether.repository.LocalRepository;
-import org.eclipse.aether.resolution.VersionRangeRequest;
-import org.eclipse.aether.resolution.VersionRangeResult;
 import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
 import org.eclipse.aether.spi.connector.transport.TransporterFactory;
 import org.eclipse.aether.transport.classpath.ClasspathTransporterFactory;
@@ -24,23 +20,7 @@ public class PluginManagerTest {
     @Test
     public void testReadLocalRepo() throws Exception {
 
-        RepositorySystem repositorySystem;
-        
-        RepositorySystemSession repositorySystemSession;
-
-        repositorySystem = newRepositorySystem();
-        repositorySystemSession = newRepositorySystemSession(repositorySystem, "/Users/gregwilmer/devtools/metl312/plugins");
-        //repositorySystemSession = newRepositorySystemSession(repositorySystem, "/Users/gregwilmer/devtools/metlcom/plugins");
-        
-        VersionRangeRequest rangeRequest = new VersionRangeRequest();
-        rangeRequest.setArtifact(new DefaultArtifact("org.jumpmind.metl", "comp-text", "jar", "[0,)"));
-        VersionRangeResult rangeResult = repositorySystem.resolveVersionRange(repositorySystemSession, rangeRequest);
-        if (rangeResult != null) {
-            String latestVersion = rangeResult.getHighestVersion().toString();
-            System.out.println(latestVersion);
-        }
-//        assertNotNull(components);
-//        assertEquals("test", components.getComponent().get(0).getName());
+        //TODO: write tests for plugin infrastructure
 
     }
     
