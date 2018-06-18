@@ -48,7 +48,6 @@ import org.jumpmind.metl.core.runtime.resource.IOutputStreamWithResponse;
 //import org.jumpmind.metl.core.runtime.resource.HttpDirectory;
 //import org.jumpmind.metl.core.runtime.resource.HttpOutputStream;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.util.FormatUtils;
 
 public class Web extends AbstractComponentRuntime {
 
@@ -116,7 +115,7 @@ public class Web extends AbstractComponentRuntime {
 	        Map<String, Serializable> outputMessageHeaders = new HashMap<String, Serializable>();
 			httpHeaders = getHttpHeaderConfigEntries(inputMessage);
 			httpParameters = getHttpParameterConfigEntries(inputMessage);
-			assembleRelativePathPlusParameters();
+			assembleRelativePathPlusParameters(inputMessage);
 			ArrayList<String> outputPayload = new ArrayList<String>();
 			ArrayList<String> inputPayload = new ArrayList<String>();
 			if (bodyFrom.equals("Message") && inputMessage instanceof TextMessage) {
@@ -214,10 +213,9 @@ public class Web extends AbstractComponentRuntime {
         return parsedMap;
     }
     
-    private void assembleRelativePathPlusParameters() {
+    private void assembleRelativePathPlusParameters(Message inputMessage) {
         Component component = getComponent();
-        String basePath = FormatUtils.replaceTokens(component.get(RELATIVE_PATH),
-                context.getFlowParameters(), true);
+        String basePath = resolveParamsAndHeaders(component.get(RELATIVE_PATH), inputMessage);
         relativePath = basePath;
         int parmCount = 0;
         for (Map.Entry<String, String> entry : httpParameters.entrySet()) {
