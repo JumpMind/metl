@@ -60,7 +60,7 @@ public class DelimitedFormatterTest {
     @Test
     public void testDelimitedFormatterFromSingleContentMsg() throws Exception {
         DelimitedFormatter delimitedFormatter = new DelimitedFormatter();
-        delimitedFormatter.setContext(new ComponentContext(null, delimitedFormatterFlowStep, null, new ExecutionTrackerNoOp(), null, null, null));
+        delimitedFormatter.setContext(new ComponentContext(null, delimitedFormatterFlowStep, null, new ExecutionTrackerNoOp(), null, null, null,null));
         delimitedFormatter.start();
         Message message = createInboundMessage();        
         SendMessageCallback<ArrayList<EntityData>> msgTarget = new SendMessageCallback<ArrayList<EntityData>>();

@@ -44,6 +44,8 @@ public class ComponentContext {
     Map<String, IResourceRuntime> deployedResources;
 
     Map<String, String> flowParameters;
+    
+    Map<String, String> flowVariables;
 
     Map<String, String> globalSettings;
 
@@ -58,13 +60,15 @@ public class ComponentContext {
     static public final ThreadLocal<String> projectVersionId = new ThreadLocal<>();
 
     public ComponentContext(AgentDeploy deployment, FlowStep flowStep, Flow manipulatedFlow, IExecutionTracker executionTracker,
-            Map<String, IResourceRuntime> deployedResources, Map<String, String> flowParameters, Map<String, String> globalSettings) {
+            Map<String, IResourceRuntime> deployedResources, Map<String, String> flowParameters, Map<String, String> globalSettings,
+            Map<String, String> flowVariables) {
         this.deployment = deployment;
         this.flowStep = flowStep;
         this.manipulatedFlow = manipulatedFlow;
         this.executionTracker = executionTracker;
         this.deployedResources = deployedResources;
         this.flowParameters = flowParameters == null ? Collections.synchronizedMap(new HashMap<>()) : Collections.synchronizedMap(new HashMap<>(flowParameters));
+        this.flowVariables = flowVariables;
         this.globalSettings = globalSettings;
         this.context = new LinkedCaseInsensitiveMap<Object>();
     }
@@ -127,6 +131,10 @@ public class ComponentContext {
     
     public Map<Integer, IComponentRuntime> getComponentRuntimeByThread() {
         return componentRuntimeByThread;
+    }
+
+    public Map<String, String> getFlowVariables() {
+        return flowVariables;
     }
 
 }
