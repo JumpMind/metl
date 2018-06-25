@@ -26,6 +26,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -100,6 +101,8 @@ public class FlowRuntime {
     Agent agent;
 
     Map<String, String> flowParameters;
+    
+    Map<String, String> flowVariables;
 
     List<Notification> notifications;
 
@@ -157,6 +160,7 @@ public class FlowRuntime {
         if (runtimeParameters != null) {
             this.flowParameters.putAll(runtimeParameters);
         }
+        this.flowVariables = Collections.synchronizedMap(new HashMap<>());
         
         if (threadService != null && executionService != null) {
             this.executionTracker = new ExecutionTrackerRecorder(agent, deployment, threadService,
@@ -175,7 +179,7 @@ public class FlowRuntime {
             if (enabled) {
                 ComponentContext context = new ComponentContext(deployment.getAgentDeployment(), flowStep,
                         manipulatedFlow, executionTracker, deployedResources, flowParameters,
-                        globalSettings);
+                        globalSettings, flowVariables);
                 StepRuntime stepRuntime = new StepRuntime(componentRuntimeFactory,
                         definitionFactory, context, this);
                 stepRuntimes.put(flowStep.getId(), stepRuntime);

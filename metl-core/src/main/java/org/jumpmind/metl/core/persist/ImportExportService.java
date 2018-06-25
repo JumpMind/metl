@@ -483,7 +483,6 @@ public class ImportExportService extends AbstractService implements IImportExpor
             save(new AuditEvent(AuditEvent.EventType.IMPORT, msg, userId));
             rethrow(e);
         }
-
     }
 
     private void processDeletes(ImportConfigData importData, ISqlTransaction transaction) {
@@ -723,7 +722,8 @@ public class ImportExportService extends AbstractService implements IImportExpor
             excludeInsertColumns(table);
             DmlStatement stmt = databasePlatform.createDmlStatement(DmlType.INSERT,
                     table.getCatalog(), table.getSchema(), table.getName(),
-                    table.getPrimaryKeyColumns(), table.getColumns(), null, null, true);
+                    table.getPrimaryKeyColumns(), table.getColumns(), null, null);
+            int[] types = stmt.getTypes();
 
             Iterator<String> itr = inserts.getTableData().keySet().iterator();
             while (itr.hasNext()) {
@@ -733,10 +733,10 @@ public class ImportExportService extends AbstractService implements IImportExpor
                 Date createTime = new Date();
                 row.put("create_time", createTime);
                 row.put("last_update_time", createTime);
-                useDefaultsForMissingRequiredColumns(table, row);                
-                transaction.prepareAndExecute(stmt.getSql().toLowerCase(), row);
+                useDefaultsForMissingRequiredColumns(table, row);                       
+                Object[] values = stmt.getValueArray(row);
+                databasePlatform.getSqlTemplate().update(stmt.getSql(), values, types);                    
             }
-
     }
 
     private void convertTimestampColumns(Table table, LinkedCaseInsensitiveMap<Object> row) {
@@ -759,10 +759,11 @@ public class ImportExportService extends AbstractService implements IImportExpor
     
     private void processTableUpdates(TableData updates, ISqlTransaction transaction) {
             Table table = databasePlatform.getTableFromCache(null, null, updates.getTableName(), false);
-            excludeUpdateColumns(table);
+            excludeUpdateColumns(table);         
             DmlStatement stmt = databasePlatform.createDmlStatement(DmlType.UPDATE, table.getCatalog(),
                     table.getSchema(), table.getName(), table.getPrimaryKeyColumns(),
-                    getUpdateColumns(table), null, null, true);
+                    getUpdateColumns(table), null, null);
+            int[] types = stmt.getTypes();
             
             Iterator<String> itr = updates.getTableData().keySet().iterator();
             while (itr.hasNext()) {
@@ -772,7 +773,8 @@ public class ImportExportService extends AbstractService implements IImportExpor
                 row.put("last_update_time", new Date());
                 useDefaultsForMissingRequiredColumns(table, row);
                 try {
-                    transaction.prepareAndExecute(stmt.getSql().toLowerCase(), row);
+                    Object[] values = stmt.getValueArray(row);
+                    databasePlatform.getSqlTemplate().update(stmt.getSql(), values, types);                    
                 } catch (DataIntegrityViolationException e) {
                     if (updates.getTableName().toLowerCase().endsWith("_component")) {
                         String resourceLocation = "'" + row.get("resource_name")+ "' located in project '" + row.get("resource_project_name") + "' version '" + 

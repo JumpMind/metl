@@ -60,7 +60,7 @@ public class FixedLengthFormatterTest {
     @Test
     public void testDelimitedFormatterFromSingleContentMsg() throws Exception {
         FixedLengthFormatter fixLengthFormatter = new FixedLengthFormatter();
-        fixLengthFormatter.setContext(new ComponentContext(null, fixLengthFormatterFlowStep, null, new ExecutionTrackerNoOp(), null, null, null));
+        fixLengthFormatter.setContext(new ComponentContext(null, fixLengthFormatterFlowStep, null, new ExecutionTrackerNoOp(), null, null, null,null));
         fixLengthFormatter.start();
         Message message = createInboundMessage();        
         SendMessageCallback<ArrayList<EntityData>> msgTarget = new SendMessageCallback<ArrayList<EntityData>>();

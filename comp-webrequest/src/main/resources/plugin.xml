@@ -23,7 +23,7 @@
 <definitions>
   <component category='PROCESSOR'
              id='Web'
-             inputMessageType='text'
+             inputMessageType='any'
              inputOutputModelsMatch='false'
              outputMessageType='text'
              resourceCategory='http'
