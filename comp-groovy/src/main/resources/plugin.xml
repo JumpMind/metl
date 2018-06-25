@@ -27,6 +27,7 @@
              showInputModel='true'
              inputOutputModelsMatch='false'
              outputMessageType='any'
+             showOutputModel='true'
              resourceCategory='any'
              supportsMultipleThreads='true'>
     <name>Groovy Script</name>
