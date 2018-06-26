@@ -3,7 +3,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 import java.text.SimpleDateFormat
 import java.util.Date
 
-    apply from: metlAssembleDir + '/asciidoc.gradle'
+    apply from: '../metl-assemble/asciidoc.gradle'
 
     group = 'org.jumpmind.metl'
         
