@@ -69,8 +69,8 @@ import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainer
 
 public class StartWebServer {
 
-    private final static String DEFAULT_HTTP_PORT = "42000";
-    private final static String DEFAULT_HTTPS_PORT = "42443";
+    private final static String DEFAULT_HTTP_PORT = "80";
+    private final static String DEFAULT_HTTPS_PORT = "8080";
 
     private final static String HTTP_ENABLE = "http.enable";
     private final static String HTTP_PORT = "http.port";
