@@ -437,4 +437,17 @@ public class HttpDirectory implements IDirectory {
             conn.addRequestProperty(name, value);
         }
     }
+    
+    public boolean test() {
+        try {
+            HttpURLConnection httpConnection = buildHttpUrlConnection(null, null, null);
+            httpConnection.connect();
+            if (HttpURLConnection.HTTP_OK == httpConnection.getResponseCode()) {
+                return true;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to connect to HTTP resource", e);
+        }
+        return false;
+    }
 }
