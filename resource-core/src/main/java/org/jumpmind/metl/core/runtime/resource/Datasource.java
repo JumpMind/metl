@@ -20,9 +20,11 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.db.model.Table;
 import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ResettableBasicDataSource;
@@ -103,4 +105,22 @@ public class Datasource extends AbstractResourceRuntime implements IDatasourceRu
         String key = Table.getFullyQualifiedTableName(catalogName, schemaName, tableName);
         return tableCache.get(key);
     }
+    
+    @Override
+    public boolean isTestSupported() {
+        return true;
+    }
+    
+    @Override
+    public boolean test() {
+        try {
+            Connection c = dataSource.getConnection();
+            c.close();
+            dataSource.close();
+            return true;
+        } catch (Exception ex) {
+            throw new RuntimeException("Error connecting to database", ex);
+        }
+    }
+    
 }
