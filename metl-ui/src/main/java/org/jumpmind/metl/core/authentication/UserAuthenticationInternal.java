@@ -19,8 +19,14 @@ public class UserAuthenticationInternal implements IConsoleUserAuthentication {
         User user = operationsService.findUserByLoginId(userName);
         String passwordHash = securityService.hash(user.getSalt(), password);
         
-        if (user.getPassword() != null && user.getPassword().equals(passwordHash)) {
-            
+        if (operationsService.isUserLocked(user)) {
+            return AuthenticationStatus.LOCKED;
+        } else if (user.getPassword() != null && user.getPassword().equals(passwordHash)) {
+        	if (user.getFailedLogins() > 0) {
+                user.setFailedLogins(0);
+                context.getOperationsService().save(user);
+            }
+        	
             GlobalSetting expireSetting = context.getOperationsService().findGlobalSetting(GlobalSetting.PASSWORD_EXPIRE_DAYS, 
                     Integer.toString(GlobalSetting.PASSWORD_EXPIRE_DAYS_DEFAULT));
             int passwordExpiresInDays = Integer.parseInt(expireSetting.getValue());
@@ -34,6 +40,15 @@ public class UserAuthenticationInternal implements IConsoleUserAuthentication {
             }
             return AuthenticationStatus.VALID;
         }
+
+        GlobalSetting failedAttemptLimitSetting = context.getOperationsService().findGlobalSetting(GlobalSetting.PASSWORD_FAILED_ATTEMPTS, 
+                Integer.toString(GlobalSetting.PASSWORD_FAILED_ATTEMPTS_DEFAULT));
+        int failedAttemptsLimit = Integer.parseInt(failedAttemptLimitSetting.getValue());
+        if (failedAttemptsLimit > 0) {
+            user.setFailedLogins(user.getFailedLogins() + 1);
+            context.getOperationsService().save(user);
+        }
+        
         return AuthenticationStatus.INVALID;
     }
 

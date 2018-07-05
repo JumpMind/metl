@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.AbstractObjectWithSettings;
@@ -53,10 +54,15 @@ import org.jumpmind.metl.core.plugin.XMLComponentDefinition.ResourceCategory;
 import org.jumpmind.metl.core.plugin.XMLResourceDefinition;
 import org.jumpmind.metl.core.plugin.XMLSetting;
 import org.jumpmind.metl.core.plugin.XMLSetting.Type;
+import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.flow.StepRuntime;
+import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.common.ButtonBar;
+import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.ImmediateUpdateTogglePasswordField;
 import org.jumpmind.metl.ui.common.TabbedPanel;
+import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextArea;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
@@ -72,13 +78,16 @@ import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.ui.AbsoluteLayout;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.Layout;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
@@ -124,6 +133,7 @@ public class PropertySheet extends AbsoluteLayout {
     @SuppressWarnings("unchecked")
     public void setSource(Object obj) {
         value = obj;
+        VerticalLayout vLayout = new VerticalLayout();
         FormLayout formLayout = new FormLayout();
         formLayout.setWidth(100, Unit.PERCENTAGE);
         formLayout.setMargin(false);
@@ -152,6 +162,7 @@ public class PropertySheet extends AbsoluteLayout {
 
             if (obj instanceof Resource) {
                 Resource resource = (Resource) obj;
+                addButtonBar(vLayout, resource);
                 addResourceProperties(formLayout, resource);
             }
 
@@ -176,9 +187,38 @@ public class PropertySheet extends AbsoluteLayout {
             }
 
         }
-        panel.setContent(formLayout);
+        vLayout.addComponent(formLayout);
+        panel.setContent(vLayout);
     }
-
+    
+    private void addButtonBar(Layout layout, Resource resource) {
+        ButtonBar buttonBar = new ButtonBar();
+        Button testBtn = buttonBar.addButton("Test", Icons.RUN);
+        testBtn.addClickListener((event)->testResource(resource));
+        testBtn.setEnabled(createResourceRuntime(resource).isTestSupported());
+        layout.addComponent(buttonBar);
+    }
+    
+    private void testResource(Resource resource) {
+        try {
+            createResourceRuntime(resource).test();
+            CommonUiUtils.notify("Test Successful");
+        } catch (Exception ex) {
+            Throwable rootCause = ExceptionUtils.getRootCause(ex);
+            if (rootCause == null) {
+                rootCause = ex;
+            }
+            CommonUiUtils.notify("Resource test failed. Root Cause: " + rootCause.getMessage(), com.vaadin.ui.Notification.Type.ERROR_MESSAGE);
+        }
+    }
+    
+    private IResourceRuntime createResourceRuntime(Resource resource) {
+        XMLResourceDefinition definition = 
+                context.getDefinitionFactory().getResourceDefintion(resource.getProjectVersionId(), resource.getType());
+        TypedProperties properties = resource.toTypedProperties(definition.getSettings().getSetting());
+        return AgentRuntime.create(definition, resource, properties);
+    }
+    
     @SuppressWarnings("unchecked")
     protected void addCommonComponentSettings(FormLayout formLayout, Object obj) {
         List<Object> list = (List<Object>) obj;

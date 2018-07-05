@@ -109,6 +109,9 @@ public class GeneralSettingsPanel extends Panel implements IUiPanel {
 
         addSetting("Expiration in Days", GlobalSetting.PASSWORD_EXPIRE_DAYS, "60", "",
                 Integer.class);
+        
+        addSetting("Number of Failed Attempts", GlobalSetting.PASSWORD_FAILED_ATTEMPTS, 
+        		Integer.toString(GlobalSetting.PASSWORD_FAILED_ATTEMPTS_DEFAULT), "", Integer.class);
 
         addSetting("Prohibit Common Words", GlobalSetting.PASSWORD_PROHIBIT_COMMON_WORDS, "true",
                 "", Boolean.class);

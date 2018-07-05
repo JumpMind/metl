@@ -1,0 +1,11 @@
+apply from: '../metl-assemble/common.gradle'
+
+version = '3.1.2.' + pluginBuildNumber
+
+dependencies {
+    provided project(':metl-ui')   
+    compile project(':comp-abstract')
+    compile "org.bouncycastle:bcprov-jdk15on:1.59"
+    compile "org.bouncycastle:bcpg-jdk15on:1.59"
+    testCompile project(path: ':metl-core', configuration: 'testArtifacts')     
+}

@@ -111,7 +111,7 @@ public class ContentRouterTest {
     protected SendMessageCallback<ArrayList<EntityData>> route(EntityData...data) {
         SendMessageCallback<ArrayList<EntityData>> target = new SendMessageCallback<ArrayList<EntityData>>();
         ContentRouter router = new ContentRouter();
-        ComponentContext context = new ComponentContext(null, step, flow, new ExecutionTrackerNoOp(), null, null, null);
+        ComponentContext context = new ComponentContext(null, step, flow, new ExecutionTrackerNoOp(), null, null, null, null);
         router.setContext(context);
         router.start();
         EntityDataMessage inputMessage = new EntityDataMessage("");

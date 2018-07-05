@@ -106,6 +106,8 @@ public interface IOperationsService {
     public void savePassword(User user, String newPassword);
     
     public boolean isUserLoginEnabled();
+    
+    public boolean isUserLocked(User user);
 
     public Group findGroupByName(String name);
         
