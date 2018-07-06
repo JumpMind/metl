@@ -52,5 +52,15 @@ public abstract class AbstractResourceRuntime extends AbstractRuntimeObject impl
     public TypedProperties getResourceRuntimeSettings() {
         return resourceRuntimeSettings;
     }    
+    
+    @Override
+    public boolean isTestSupported() {
+        return false;
+    }
+    
+    @Override
+    public boolean test() {
+        throw new RuntimeException("This resource does not support testing.");
+    }
 
 }

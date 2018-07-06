@@ -22,6 +22,8 @@ package org.jumpmind.metl.core.runtime.resource;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.sql.Connection;
+
 import org.jumpmind.properties.TypedProperties;
 
 public class Ftp extends AbstractResourceRuntime {
@@ -60,5 +62,22 @@ public class Ftp extends AbstractResourceRuntime {
     @Override
     public <T> T reference() {
         return (T) streamableResource;
+    }
+    
+    @Override
+    public boolean isTestSupported() {
+        return true;
+    }
+    
+    @Override
+    public boolean test() {
+        try {
+            streamableResource.createClient();
+            return true;
+        } catch (Exception ex) {
+            throw new RuntimeException("Error connecting to database", ex);
+        } finally {
+            streamableResource.close();
+        }
     }
 }

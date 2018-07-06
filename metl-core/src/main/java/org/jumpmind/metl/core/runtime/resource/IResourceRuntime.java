@@ -35,4 +35,8 @@ public interface IResourceRuntime {
     
     public TypedProperties getResourceRuntimeSettings();
     
+    public boolean isTestSupported(); 
+    
+    public boolean test();
+    
 }
