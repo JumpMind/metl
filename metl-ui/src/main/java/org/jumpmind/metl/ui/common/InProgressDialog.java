@@ -22,6 +22,9 @@ package org.jumpmind.metl.ui.common;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.util.Locale;
+
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.metl.ui.init.BackgroundRefresherService;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.slf4j.Logger;
@@ -52,6 +55,8 @@ public class InProgressDialog<T> extends Window {
     BackgroundRefresherService backgroundService;
     
     String failureMessage;
+    
+    Locale locale;
 
     public InProgressDialog(String caption, InProgressWorker<T> worker, BackgroundRefresherService backgroundService) {
         this(caption, worker, backgroundService, null);        
@@ -63,7 +68,7 @@ public class InProgressDialog<T> extends Window {
         this.failureMessage = failureMessage;
         setWidth(300, Unit.PIXELS);
         setHeight(150, Unit.PIXELS);
-        setCaption("Working...");
+        setCaption(MessageSource.message("inprogressDialog.caption", locale));
         setModal(true);
 
         VerticalLayout content = new VerticalLayout();
@@ -88,7 +93,7 @@ public class InProgressDialog<T> extends Window {
         HorizontalLayout buttonBar = new HorizontalLayout();
         buttonBar.setWidth(100, Unit.PERCENTAGE);
         buttonBar.addStyleName(ValoTheme.WINDOW_BOTTOM_TOOLBAR);
-        Button dismiss = new Button("Dismiss");
+        Button dismiss = new Button(MessageSource.message("inprogressDialog.dismiss", locale));
         dismiss.addStyleName(ValoTheme.BUTTON_PRIMARY);
         dismiss.setClickShortcut(KeyCode.ENTER);
         dismiss.addClickListener(new ClickListener() {

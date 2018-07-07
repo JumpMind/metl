@@ -24,8 +24,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
 import com.vaadin.addon.contextmenu.ContextMenu;
@@ -51,6 +53,8 @@ public class TabbedPanel extends TabSheet {
     protected List<String> selectedOrder = new ArrayList<>();
 
     boolean closing = false;
+    
+    Locale locale;
 
     public TabbedPanel() {
         setSizeFull();
@@ -77,12 +81,12 @@ public class TabbedPanel extends TabSheet {
         setCloseHandler((tabsheet, tabContent) -> close(tabContent));
 
         ContextMenu menu = new ContextMenu(this, true);
-        menu.addItem("Close", selectedItem -> close());
-        menu.addItem("Close Others", selectedItem -> closeOthers());
-        menu.addItem("Close To the Left", selectedItem -> closeToTheLeft());
-        menu.addItem("Close To the Right", selectedItem -> closeToTheRight());
+        menu.addItem(MessageSource.message("tabbedPanel.close", locale), selectedItem -> close());
+        menu.addItem(MessageSource.message("tabbedPanel.closeOthers", locale), selectedItem -> closeOthers());
+        menu.addItem(MessageSource.message("tabbedPanel.closeToTheLeft", locale), selectedItem -> closeToTheLeft());
+        menu.addItem(MessageSource.message("tabbedPanel.closeToTheRight", locale), selectedItem -> closeToTheRight());
         menu.addSeparator();
-        menu.addItem("Close All", selectedItem -> closeAll());
+        menu.addItem(MessageSource.message("tabbedPanel.closeAll", locale), selectedItem -> closeAll());
     }
 
     protected void close(Component tabContent) {

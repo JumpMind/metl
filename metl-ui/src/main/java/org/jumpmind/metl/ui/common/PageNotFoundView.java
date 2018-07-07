@@ -22,6 +22,10 @@ package org.jumpmind.metl.ui.common;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
+import java.util.Locale;
+
+import org.jumpmind.metl.ui.i18n.MessageSource;
+
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
@@ -35,6 +39,8 @@ public class PageNotFoundView extends VerticalLayout implements View {
     Label pageNotFoundLabel = new Label();
 
     ViewManager viewManager;
+    
+    Locale locale;
 
     public PageNotFoundView(ViewManager viewManager) {
         this.viewManager = viewManager;
@@ -50,7 +56,8 @@ public class PageNotFoundView extends VerticalLayout implements View {
             viewManager.navigateToDefault();
         } else {
             pageNotFoundLabel.addStyleName("failure");
-            pageNotFoundLabel.setValue("Could not find page for " + uriFragment);
+            Object[] params = {uriFragment};
+            pageNotFoundLabel.setValue(MessageSource.message("", params, locale));
         }
     }
 

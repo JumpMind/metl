@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
@@ -40,6 +41,7 @@ import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.slf4j.Logger;
@@ -71,6 +73,7 @@ public class ExportDialog extends ResizableWindow {
     OptionGroup exportResourceGroup;
     VerticalLayout affectedLayout;
     String projectVersionId;
+    Locale locale;
 
     public ExportDialog(ApplicationContext context, Object selectedElement) {
         super("Export Configuration");
@@ -79,7 +82,7 @@ public class ExportDialog extends ResizableWindow {
     }
 
     private void initWindow(Object selectedItem) {
-        Panel exportPanel = new Panel("Export and Dependencies");
+        Panel exportPanel = new Panel(MessageSource.message("exportDialog.exportPanel", locale));
         exportPanel.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
         exportPanel.setSizeFull();
         VerticalLayout exportLayout = new VerticalLayout();
@@ -87,7 +90,7 @@ public class ExportDialog extends ResizableWindow {
         addSelectedAndDependentObjects(exportLayout, selectedItem);
         exportPanel.setContent(exportLayout);
 
-        Panel affectedPanel = new Panel("Possible Affected Flows");
+		Panel affectedPanel = new Panel(MessageSource.message("exportDialog.affectedPanel", locale));
         affectedPanel.setSizeFull();
         exportPanel.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
         affectedLayout = new VerticalLayout();
@@ -103,15 +106,15 @@ public class ExportDialog extends ResizableWindow {
 
         addComponent(splitPanel, 1);
         
-        Button selectAllLink = new Button("Select All");
+        Button selectAllLink = new Button(MessageSource.message("exportDialog.selectAll", locale));
         selectAllLink.addStyleName(ValoTheme.BUTTON_LINK);
         selectAllLink.addClickListener((event) -> selectAll());
 
-        Button selectNoneLink = new Button("Select None");
+        Button selectNoneLink = new Button(MessageSource.message("exportDialog.selectNone", locale));
         selectNoneLink.addStyleName(ValoTheme.BUTTON_LINK);
         selectNoneLink.addClickListener((event) -> selectNone());
         
-        addComponent(buildButtonFooter(new Button[] {selectAllLink, selectNoneLink}, new Button("Export", new ExportClickListener()), buildCloseButton()));
+        addComponent(buildButtonFooter(new Button[] {selectAllLink, selectNoneLink}, new Button(MessageSource.message("exportDialog.exportButton", locale), new ExportClickListener()), buildCloseButton()));
 
         setWidth(700, Unit.PIXELS);
         setHeight(500, Unit.PIXELS);
@@ -175,7 +178,7 @@ public class ExportDialog extends ResizableWindow {
         AbstractObjectNameBasedSorter.sort(allFlows);
 
         // flows
-        exportFlowGroup = new OptionGroup("Flows");
+        exportFlowGroup = new OptionGroup(MessageSource.message("common.Flows", locale));
         exportFlowGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         exportFlowGroup.setMultiSelect(true);
         for (FlowName key : allFlows) {
@@ -191,7 +194,7 @@ public class ExportDialog extends ResizableWindow {
         // models
         List<ModelName> models = configurationService.findModelsInProject(projectVersionId);
         AbstractObjectNameBasedSorter.sort(models);
-        exportModelGroup = new OptionGroup("Models");
+        exportModelGroup = new OptionGroup(MessageSource.message("common.Models", locale));
         exportModelGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         exportModelGroup.setMultiSelect(true);
         for (ModelName key : models) {
@@ -206,7 +209,7 @@ public class ExportDialog extends ResizableWindow {
         // resources
         List<ResourceName> resources = configurationService.findResourcesInProject(projectVersionId);
         AbstractObjectNameBasedSorter.sort(resources);
-        exportResourceGroup = new OptionGroup("Resources");
+        exportResourceGroup = new OptionGroup(MessageSource.message("common.Resources", locale));
         exportResourceGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         exportResourceGroup.setMultiSelect(true);
         for (ResourceName key : resources) {
@@ -273,7 +276,7 @@ public class ExportDialog extends ResizableWindow {
                     return new ByteArrayInputStream(export.getBytes(Charset.forName("utf-8")));
                 } catch (Exception e) {
                     log.error("Failed to export configuration", e);
-                    CommonUiUtils.notify("Failed to export configuration.", Type.ERROR_MESSAGE);
+                    CommonUiUtils.notify(MessageSource.message("exportDialog.exportError", locale), Type.ERROR_MESSAGE);
                     return null;
                 }
             }

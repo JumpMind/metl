@@ -21,9 +21,11 @@
 package org.jumpmind.metl.ui.common;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 
 import com.vaadin.server.FontAwesome;
@@ -47,6 +49,8 @@ public class SelectProjectVersionDialog extends ResizableWindow {
     Tree tree = new Tree();
 
     IProjectVersionSelectListener listener;
+    
+    Locale locale;
 
     @SuppressWarnings({ "serial" })
     public SelectProjectVersionDialog(ApplicationContext context, Project projectToExclude,
@@ -78,8 +82,8 @@ public class SelectProjectVersionDialog extends ResizableWindow {
         layout.setExpandRatio(scrollable, 1.0f);
         addComponent(layout, 1);
 
-        Button cancelButton = new Button("Cancel");
-        Button selectButton = new Button("Select");
+        Button cancelButton = new Button(MessageSource.message("common.cancel", locale));
+        Button selectButton = new Button(MessageSource.message("common.select", locale));
         addComponent(buildButtonFooter(cancelButton, selectButton));
 
         cancelButton.addClickListener(new ClickListener() {
@@ -101,7 +105,7 @@ public class SelectProjectVersionDialog extends ResizableWindow {
     public static void show(ApplicationContext context, Project projectToExclude,
             IProjectVersionSelectListener listener, String introText) {
         SelectProjectVersionDialog dialog = new SelectProjectVersionDialog(context,
-                projectToExclude, "Select Version", introText);
+                projectToExclude, MessageSource.message("selectProjectVersion.dialog", null), introText);
         dialog.setProjectVersionSelectListener(listener);
         UI.getCurrent().addWindow(dialog);
     }

@@ -20,10 +20,13 @@
  */
 package org.jumpmind.metl.ui.init;
 
+import java.util.Locale;
+
 import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,9 +55,11 @@ public class ChangePasswordDialog extends Window {
     private PasswordField newPasswordField;
 
     private PasswordField validatePasswordField;
+    
+    Locale locale;
 
     public ChangePasswordDialog(ApplicationContext context) {
-        super("Change Password");
+        super(MessageSource.message("changePasswordDialog",null));
 
         this.context = context;
 
@@ -69,17 +74,17 @@ public class ChangePasswordDialog extends Window {
         fieldLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         //fieldLayout.setSpacing(true);
         
-        currentPasswordField = new PasswordField("Current Password");
+        currentPasswordField = new PasswordField(MessageSource.message("changePasswordDialog.currentPassword", locale));
         currentPasswordField.setWidth(100, Unit.PERCENTAGE);
         currentPasswordField.setNullRepresentation("");
         fieldLayout.addComponent(currentPasswordField);
 
-        newPasswordField = new PasswordField("New Password");
+        newPasswordField = new PasswordField(MessageSource.message("changePasswordDialog.newPassword", locale));
         newPasswordField.setWidth(100, Unit.PERCENTAGE);
         newPasswordField.setNullRepresentation("");
         fieldLayout.addComponent(newPasswordField);
 
-        validatePasswordField = new PasswordField("Verify Password");
+        validatePasswordField = new PasswordField(MessageSource.message("changePasswordDialog.verifyPassword", locale));
         validatePasswordField.setWidth(100, Unit.PERCENTAGE);
         validatePasswordField.setNullRepresentation("");
         fieldLayout.addComponent(validatePasswordField);
@@ -93,12 +98,12 @@ public class ChangePasswordDialog extends Window {
         buttonLayout.addComponent(spacer);
         buttonLayout.setExpandRatio(spacer, 1);
 
-        Button cancelButton = new Button("Cancel", (e) -> close());
+        Button cancelButton = new Button(MessageSource.message("common.cancel", locale), (e) -> close());
         cancelButton.setClickShortcut(KeyCode.ESCAPE);
         buttonLayout.addComponent(cancelButton);
         buttonLayout.setComponentAlignment(cancelButton, Alignment.BOTTOM_RIGHT);
 
-        Button changeButton = new Button("Change", (e) -> changePassword());
+        Button changeButton = new Button(MessageSource.message("common.change", locale), (e) -> changePassword());
         changeButton.setClickShortcut(KeyCode.ENTER);
         changeButton.setStyleName(ValoTheme.BUTTON_PRIMARY);
         buttonLayout.addComponent(changeButton);
@@ -134,7 +139,7 @@ public class ChangePasswordDialog extends Window {
             String address = Page.getCurrent().getWebBrowser().getAddress();
             log.warn("Invalid change password attempt for user " + user.getLoginId()
                     + " from address " + address);
-            notify("Invalid Password", "The current password is invalid");
+            notify(MessageSource.message("changePasswordDialog.invalidPassword", locale), MessageSource.message("changePasswordDialog.invalidPasswordMessage", locale));
             currentPasswordField.selectAll();
         }
 

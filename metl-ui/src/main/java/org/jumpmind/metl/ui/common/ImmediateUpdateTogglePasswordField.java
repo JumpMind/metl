@@ -21,6 +21,10 @@
 package org.jumpmind.metl.ui.common;
 
 
+import java.util.Locale;
+
+import org.jumpmind.metl.ui.i18n.MessageSource;
+
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
@@ -34,13 +38,14 @@ import com.vaadin.ui.TextField;
 public abstract class ImmediateUpdateTogglePasswordField extends CustomField<String> {
     private static final long serialVersionUID = 1L;
     
-    private static final String BUTTON_SHOW = "Show";
-    private static final String BUTTON_HIDE = "Hide";
+    private static final String BUTTON_SHOW = "togglePasswordField.show";
+    private static final String BUTTON_HIDE = "togglePasswordField.hide";
     
     private final Button button = new Button(BUTTON_SHOW);
     private final PasswordField passwordField = new PasswordField();
     private final TextField textField = new TextField();
     private boolean toggleAllowed = true;
+    Locale locale;
 
     public ImmediateUpdateTogglePasswordField() {
     }
@@ -58,14 +63,14 @@ public abstract class ImmediateUpdateTogglePasswordField extends CustomField<Str
         
         button.addClickListener(event -> {
             if (toggleAllowed) {
-                if (button.getCaption().equals(BUTTON_SHOW)) {
+                if (button.getCaption().equals(MessageSource.message(BUTTON_SHOW, locale))) {
                     // Show password
-                    button.setCaption(BUTTON_HIDE);
+                    button.setCaption(MessageSource.message(BUTTON_HIDE, locale));
                     textField.setValue(passwordField.getValue());
                     layout.replaceComponent(passwordField, textField);
                 } else {
                     // Hide password
-                    button.setCaption(BUTTON_SHOW);
+                    button.setCaption(MessageSource.message(BUTTON_SHOW, locale));
                     passwordField.setValue(textField.getValue());
                     layout.replaceComponent(textField, passwordField);
                 }
