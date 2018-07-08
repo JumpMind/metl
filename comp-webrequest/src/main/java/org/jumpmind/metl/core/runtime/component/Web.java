@@ -173,7 +173,7 @@ public class Web extends AbstractComponentRuntime {
         HttpEntityEnclosingRequestBase encHttpRequest = (HttpEntityEnclosingRequestBase) httpRequest;
         ByteArrayEntity requestEntity = new ByteArrayEntity(requestContent);
         encHttpRequest.setEntity(requestEntity);
-        executeRequestAndSendOutputMessage(encHttpRequest, callback);
+        executeRequestAndSendOutputMessage(encHttpRequest, callback, inputMessage);
     }
 
     private void handleTextInput(String path, Message inputMessage, ISendMessageCallback callback) {
@@ -196,17 +196,18 @@ public class Web extends AbstractComponentRuntime {
                         throw new IoException(ex);
                     }
                     encHttpRequest.setEntity(requestEntity);
-                    executeRequestAndSendOutputMessage(encHttpRequest, callback);
+                    executeRequestAndSendOutputMessage(encHttpRequest, callback, inputMessage);
                 } else {
                     info("getting content from %s", path);
-                    executeRequestAndSendOutputMessage(httpRequest, callback);
+                    executeRequestAndSendOutputMessage(httpRequest, callback, inputMessage);
                 }
             }
         }
     }
     
-    private void executeRequestAndSendOutputMessage(HttpRequestBase httpRequest, ISendMessageCallback callback) {
+    private void executeRequestAndSendOutputMessage(HttpRequestBase httpRequest, ISendMessageCallback callback, Message inputMessage) {
         Map<String, Serializable> outputMessageHeaders = new HashMap<String, Serializable>();
+        
         ArrayList<String> outputPayload = new ArrayList<String>();
         CloseableHttpResponse httpResponse = null;
         try {
@@ -219,6 +220,7 @@ public class Web extends AbstractComponentRuntime {
             } else {
                 HttpEntity resultEntity = httpResponse.getEntity();
                 outputPayload.add(IOUtils.toString(resultEntity.getContent()));
+                outputMessageHeaders.putAll(inputMessage.getHeader());
                 outputMessageHeaders.putAll(responseHeadersToMap(httpResponse.getAllHeaders()));
                 EntityUtils.consume(resultEntity);
             }
@@ -357,7 +359,7 @@ public class Web extends AbstractComponentRuntime {
     private String assemblePath(String basePath, Message inputMessage) {
         Component component = getComponent();
         if (isNotBlank(relativePath)) {
-            String path = basePath + resolveParamsAndHeaders(component.get(RELATIVE_PATH), inputMessage);
+            String path = resolveParamsAndHeaders(basePath + component.get(RELATIVE_PATH), inputMessage);
             int parmCount = 0;
             if (httpParameters != null) {
                 for (Map.Entry<String, String> entry : httpParameters.entrySet()) {
@@ -377,7 +379,7 @@ public class Web extends AbstractComponentRuntime {
             }
             return path;
         } else {
-            return basePath;
+            return resolveParamsAndHeaders(basePath, inputMessage);
         }
     }
 
