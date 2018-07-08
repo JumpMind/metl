@@ -39,8 +39,6 @@ public class PageNotFoundView extends VerticalLayout implements View {
     Label pageNotFoundLabel = new Label();
 
     ViewManager viewManager;
-    
-    Locale locale;
 
     public PageNotFoundView(ViewManager viewManager) {
         this.viewManager = viewManager;
@@ -57,7 +55,7 @@ public class PageNotFoundView extends VerticalLayout implements View {
         } else {
             pageNotFoundLabel.addStyleName("failure");
             Object[] params = {uriFragment};
-            pageNotFoundLabel.setValue(MessageSource.message("", params, locale));
+            pageNotFoundLabel.setValue(MessageSource.message("", params));
         }
     }
 

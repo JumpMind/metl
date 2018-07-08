@@ -7,6 +7,7 @@ import java.util.ResourceBundle;
 public class MessageSource {
 	private static String RESOUCE_BUNDLE_BASENAME = "locales.metl";
 	private static volatile MessageSource instance;
+	private static final ThreadLocal<Locale> LOCALE = new ThreadLocal<Locale>();
 
 	private MessageSource() {}
 
@@ -20,11 +21,25 @@ public class MessageSource {
 		}
 		return instance;
 	}
-	public static String message(String key, Object[] params, Locale locale) {
-		return MessageSource.getInstance().getMessage(key, params, locale);
+	
+	public static void setLocale(Locale locale) {
+		LOCALE.set(locale);
 	}
+	
+	public static String message(String key) {
+		return MessageSource.getInstance().getMessage(key, null, LOCALE.get());
+	}
+
+	public static String message(String key, Object[] params) {
+		return MessageSource.getInstance().getMessage(key, params, LOCALE.get());
+	}
+
 	public static String message(String key, Locale locale) {
 		return MessageSource.getInstance().getMessage(key, null, locale);
+	}
+	
+	public static String message(String key, Object[] params, Locale locale) {
+		return MessageSource.getInstance().getMessage(key, params, locale);
 	}
 	
 	public String getMessage(String key, Object[] params, Locale locale) {

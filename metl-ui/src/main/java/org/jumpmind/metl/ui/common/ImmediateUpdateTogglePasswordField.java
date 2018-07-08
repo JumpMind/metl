@@ -63,14 +63,14 @@ public abstract class ImmediateUpdateTogglePasswordField extends CustomField<Str
         
         button.addClickListener(event -> {
             if (toggleAllowed) {
-                if (button.getCaption().equals(MessageSource.message(BUTTON_SHOW, locale))) {
+                if (button.getCaption().equals(MessageSource.message(BUTTON_SHOW))) {
                     // Show password
-                    button.setCaption(MessageSource.message(BUTTON_HIDE, locale));
+                    button.setCaption(MessageSource.message(BUTTON_HIDE));
                     textField.setValue(passwordField.getValue());
                     layout.replaceComponent(passwordField, textField);
                 } else {
                     // Hide password
-                    button.setCaption(MessageSource.message(BUTTON_SHOW, locale));
+                    button.setCaption(MessageSource.message(BUTTON_SHOW));
                     passwordField.setValue(textField.getValue());
                     layout.replaceComponent(textField, passwordField);
                 }

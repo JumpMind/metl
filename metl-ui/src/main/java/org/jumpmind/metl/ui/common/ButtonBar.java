@@ -50,13 +50,7 @@ public class ButtonBar extends HorizontalLayout {
     HorizontalLayout left;
 
     HorizontalLayout right;
-    
-    Locale locale;
 
-    public ButtonBar(Locale loc) {
-    	this();
-    	this.locale = loc;
-    }
     public ButtonBar() {
         setWidth(100, Unit.PERCENTAGE);
         setMargin(new MarginInfo(true, false, true, false));
@@ -94,7 +88,7 @@ public class ButtonBar extends HorizontalLayout {
         TextField textField = new TextField();
         textField.setColumns(15);
         textField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
-        textField.setInputPrompt(MessageSource.message("buttonBar.filter.prompt", locale));
+        textField.setInputPrompt(MessageSource.message("buttonBar.filter.prompt"));
         textField.setIcon(FontAwesome.SEARCH);
         textField.setTextChangeEventMode(TextChangeEventMode.LAZY);
         textField.setTextChangeTimeout(500);

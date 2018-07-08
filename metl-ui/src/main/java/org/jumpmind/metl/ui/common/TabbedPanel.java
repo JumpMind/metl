@@ -54,8 +54,6 @@ public class TabbedPanel extends TabSheet {
 
     boolean closing = false;
     
-    Locale locale;
-
     public TabbedPanel() {
         setSizeFull();
         addStyleName(ValoTheme.TABSHEET_FRAMED);
@@ -81,12 +79,12 @@ public class TabbedPanel extends TabSheet {
         setCloseHandler((tabsheet, tabContent) -> close(tabContent));
 
         ContextMenu menu = new ContextMenu(this, true);
-        menu.addItem(MessageSource.message("tabbedPanel.close", locale), selectedItem -> close());
-        menu.addItem(MessageSource.message("tabbedPanel.closeOthers", locale), selectedItem -> closeOthers());
-        menu.addItem(MessageSource.message("tabbedPanel.closeToTheLeft", locale), selectedItem -> closeToTheLeft());
-        menu.addItem(MessageSource.message("tabbedPanel.closeToTheRight", locale), selectedItem -> closeToTheRight());
+        menu.addItem(MessageSource.message("tabbedPanel.close"), selectedItem -> close());
+        menu.addItem(MessageSource.message("tabbedPanel.closeOthers"), selectedItem -> closeOthers());
+        menu.addItem(MessageSource.message("tabbedPanel.closeToTheLeft"), selectedItem -> closeToTheLeft());
+        menu.addItem(MessageSource.message("tabbedPanel.closeToTheRight"), selectedItem -> closeToTheRight());
         menu.addSeparator();
-        menu.addItem(MessageSource.message("tabbedPanel.closeAll", locale), selectedItem -> closeAll());
+        menu.addItem(MessageSource.message("tabbedPanel.closeAll"), selectedItem -> closeAll());
     }
 
     protected void close(Component tabContent) {
