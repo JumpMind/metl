@@ -176,7 +176,7 @@ public class ExportDialog extends ResizableWindow {
         AbstractObjectNameBasedSorter.sort(allFlows);
 
         // flows
-        exportFlowGroup = new OptionGroup(MessageSource.message("common.Flows"));
+        exportFlowGroup = new OptionGroup(MessageSource.message("common.flows"));
         exportFlowGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         exportFlowGroup.setMultiSelect(true);
         for (FlowName key : allFlows) {
@@ -207,7 +207,7 @@ public class ExportDialog extends ResizableWindow {
         // resources
         List<ResourceName> resources = configurationService.findResourcesInProject(projectVersionId);
         AbstractObjectNameBasedSorter.sort(resources);
-        exportResourceGroup = new OptionGroup(MessageSource.message("common.Resources"));
+        exportResourceGroup = new OptionGroup(MessageSource.message("common.resources"));
         exportResourceGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         exportResourceGroup.setMultiSelect(true);
         for (ResourceName key : resources) {
