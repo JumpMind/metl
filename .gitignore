@@ -130,3 +130,6 @@ Temporary Items
 .apdisk
 
 /.metadata/
+/.gradle/
+.project
+.settings
