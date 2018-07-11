@@ -61,6 +61,7 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.HttpDirectory;
+import org.jumpmind.metl.core.runtime.resource.IHttpDirectory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 
 public class Web extends AbstractComponentRuntime {
@@ -105,7 +106,7 @@ public class Web extends AbstractComponentRuntime {
 
     String encoding = "UTF-8";
 
-    HttpDirectory httpDirectory;
+    IHttpDirectory httpDirectory;
 
     @Override
     public void start() {
@@ -113,7 +114,7 @@ public class Web extends AbstractComponentRuntime {
         if (httpResource == null) {
             throw new IllegalStateException("An HTTP resource must be configured");
         }
-        httpDirectory = getResourceReference();
+        httpDirectory = (IHttpDirectory) getResourceReference();
         Component component = getComponent();
         bodyFrom = component.get(BODY_FROM, "Message");
         bodyText = component.get(BODY_TEXT);
@@ -278,7 +279,7 @@ public class Web extends AbstractComponentRuntime {
         return requestContent;
     }
 
-    protected HttpRequestBase buildHttpRequest(String path, Map<String, String> headers, HttpDirectory httpDirectory,
+    protected HttpRequestBase buildHttpRequest(String path, Map<String, String> headers, IHttpDirectory httpDirectory,
             boolean hasRequestContent) {
         HttpRequestBase request = null;
         if (httpMethod.equalsIgnoreCase(HttpDirectory.HTTP_METHOD_GET)) {
@@ -343,7 +344,7 @@ public class Web extends AbstractComponentRuntime {
         return parsedMap;
     }
 
-    protected void setAuthIfNeeded(HttpRequestBase request, HttpDirectory httpDirectory) {
+    protected void setAuthIfNeeded(HttpRequestBase request, IHttpDirectory httpDirectory) {
         if (HttpDirectory.SECURITY_BASIC.equals(httpDirectory.getSecurity())) {
             String userpassword = String.format("%s:%s", httpDirectory.getUsername(), httpDirectory.getPassword());
             String encodedAuthorization = new String(Base64.encodeBase64(userpassword.getBytes()));
