@@ -35,6 +35,7 @@ import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,12 +103,12 @@ public class PluginsPanelAddDialog extends ResizableWindow {
         TabSheet tabSheet = new TabSheet();
 
         AbstractLayout searchLayout = buildSearchLayout();
-        tabSheet.addTab(searchLayout, "Search For New Versions");
+        tabSheet.addTab(searchLayout, MessageSource.message("pluginspaneladddialog.search.version"));
 
         AbstractLayout uploadLayout = buildUploadLayout();
-        tabSheet.addTab(uploadLayout, "Upload");
+        tabSheet.addTab(uploadLayout, MessageSource.message("common.upload"));
 
-        searchButton = new Button("Search", e -> search());
+        searchButton = new Button(MessageSource.message("common.search"), e -> search());
         searchButton.setEnabled(false);
 
         uploadHandler = new UploadHandler();
@@ -125,11 +126,11 @@ public class PluginsPanelAddDialog extends ResizableWindow {
 
         addComponent(tabSheet, 1);
         tabSheet.setSelectedTab(0);
-
-        cancelButton = new Button("Cancel");
+     
+        cancelButton = new Button(MessageSource.message("common.cancel"));
         cancelButton.addClickListener(new CloseButtonListener());
 
-        addButton = new Button("Add");
+        addButton = new Button(MessageSource.message("common.add"));
         addButton.setEnabled(false);
         addButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
         addButton.addClickListener(e -> addPlugin());
@@ -181,10 +182,10 @@ public class PluginsPanelAddDialog extends ResizableWindow {
             groups.add(plugin.getArtifactGroup());
             names.add(plugin.getArtifactName());
         }
-
-        versionSelect = new ListSelect("Versions");
-        groupCombo = new ComboBox("Group");
-        nameCombo = new ComboBox("Name");
+        
+        versionSelect = new ListSelect(MessageSource.message("common.versions"));
+        groupCombo = new ComboBox(MessageSource.message("common.group"));
+        nameCombo = new ComboBox(MessageSource.message("common.name"));
 
         versionSelect.setRows(4);
         versionSelect.setMultiSelect(false);
@@ -257,18 +258,18 @@ public class PluginsPanelAddDialog extends ResizableWindow {
     protected AbstractLayout buildUploadLayout() {
         FormLayout layout = new FormLayout();
         layout.setMargin(true);
-
-        groupField = new TextField("Group");
+   
+        groupField = new TextField(MessageSource.message("common.group"));
         groupField.setWidth(100, Unit.PERCENTAGE);
         groupField.setRequired(true);
         layout.addComponent(groupField);
 
-        nameField = new TextField("Name");
+        nameField = new TextField(MessageSource.message("common.name"));
         nameField.setWidth(100, Unit.PERCENTAGE);
         nameField.setRequired(true);
         layout.addComponent(nameField);
 
-        versionField = new TextField("Version");
+        versionField = new TextField(MessageSource.message("common.version"));
         versionField.setWidth(100, Unit.PERCENTAGE);
         versionField.setRequired(true);
         layout.addComponent(versionField);

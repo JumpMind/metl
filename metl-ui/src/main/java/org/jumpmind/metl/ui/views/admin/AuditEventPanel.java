@@ -25,6 +25,7 @@ import java.util.List;
 import org.jumpmind.metl.core.model.AuditEvent;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.TabbedPanel;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +67,7 @@ public class AuditEventPanel extends VerticalLayout implements IUiPanel {
         grid = new Grid();
         BeanContainer<AuditEvent, AuditEvent> container = new BeanContainer<>(AuditEvent.class);
         grid.setContainerDataSource(container);
+       // MessageSource.message("aboutPanel.host.name")
         grid.setColumnOrder("createTime", "name", "eventText", "lastUpdateBy");
         grid.getColumn("createTime").setHeaderCaption("Event Time");
         grid.getColumn("name").setHeaderCaption("Event Type");

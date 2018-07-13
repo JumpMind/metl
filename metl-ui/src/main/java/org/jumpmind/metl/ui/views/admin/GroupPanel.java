@@ -30,6 +30,7 @@ import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.TabbedPanel;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -70,13 +71,13 @@ public class GroupPanel extends VerticalLayout implements IUiPanel {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        newButton = buttonBar.addButton("New", FontAwesome.PLUS);
+        newButton = buttonBar.addButton(MessageSource.message("groupPanel.new"), FontAwesome.PLUS);
         newButton.addClickListener(new NewClickListener());
 
-        editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
+        editButton = buttonBar.addButton(MessageSource.message("groupPanel.edit"), FontAwesome.EDIT);
         editButton.addClickListener(new EditClickListener());
 
-        removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
+        removeButton = buttonBar.addButton(MessageSource.message("groupPanel.remove"), FontAwesome.TRASH_O);
         removeButton.addClickListener(new RemoveClickListener());
 
         container = new BeanItemContainer<Group>(Group.class);
@@ -88,13 +89,13 @@ public class GroupPanel extends VerticalLayout implements IUiPanel {
         table.setImmediate(true);
         table.setSelectable(true);
         table.setMultiSelect(true);
-
+      //MessageSource.message("grouppanel.update.time")
         table.setContainerDataSource(container);
-        table.setVisibleColumns("name", "createTime", "lastUpdateTime");
-        table.setColumnHeaders("Name", "Create Time", "Update Time");
+        table.setVisibleColumns(MessageSource.message("groupPanel.name"), MessageSource.message("groupPanel.createTime"), MessageSource.message("groupPanel.lastUpdateTime"));
+        table.setColumnHeaders(MessageSource.message("groupPanel.Name"), MessageSource.message("groupPanel.create.time"), MessageSource.message("grouppanel.update.time"));
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());
-        table.setSortContainerPropertyId("name");
+        table.setSortContainerPropertyId(MessageSource.message("groupPanel.name"));
         table.setSortAscending(true);
 
         addComponent(table);

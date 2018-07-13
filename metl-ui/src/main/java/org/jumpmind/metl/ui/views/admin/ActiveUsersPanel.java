@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.TabbedPanel;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.metl.ui.init.AppSession;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.slf4j.Logger;
@@ -63,7 +64,8 @@ public class ActiveUsersPanel extends VerticalLayout implements IUiPanel {
         grid = new Grid();
         BeanContainer<AppSession, AppSession> container = new BeanContainer<>(AppSession.class);
         grid.setContainerDataSource(container);
-        grid.setColumnOrder("loginId", "loginTime", "lastActivity", "userAgent", "remoteUser", "remoteAddress", "remoteHost");
+        //MessageSource.message("lastActivity")
+        grid.setColumnOrder(MessageSource.message("activeUsersPanel.loginId"), MessageSource.message("activeUsersPanel.loginTime"), MessageSource.message("activeUsersPanel.lastActivity"),MessageSource.message("activeUsersPanel.userAgent") ,MessageSource.message( "activeUsersPanel.remoteUser"),MessageSource.message( "activeUsersPanel.remoteAddress"), MessageSource.message("activeUsersPanel.remoteHost"));
         grid.setSizeFull();
         List<AppSession> list =  AppSession.getAppSessions();
         for (AppSession appSession : list) {

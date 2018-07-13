@@ -69,6 +69,7 @@ public class DeployView extends HorizontalLayout implements View {
         leftSplit.setFirstComponent(deployNavigator);
         VerticalLayout container = new VerticalLayout();
         container.setSizeFull();
+        
         container.addComponent(tabbedPanel);
         leftSplit.setSecondComponent(container);
 

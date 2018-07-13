@@ -32,6 +32,7 @@ import org.jumpmind.metl.core.model.StartType;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.TabbedPanel;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 
@@ -89,13 +90,14 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         cronLayout = new HorizontalLayout();
         cronLayout.setSpacing(true);
         cronLayout.setMargin(true);
-        cronLayout.addComponent(getScheduleComponent("Second"));
-        cronLayout.addComponent(getScheduleComponent("Minute"));
-        cronLayout.addComponent(getScheduleComponent("Hour"));
-        cronLayout.addComponent(getScheduleComponent("Day"));
-        cronLayout.addComponent(getScheduleComponent("Month"));
-        cronLayout.addComponent(getScheduleComponent("Day of Week"));
-        cronLayout.addComponent(getScheduleComponent("Year"));
+        //MessageSource.message("common.lowercase.agent")
+        cronLayout.addComponent(getScheduleComponent(MessageSource.message("editagentdeploymentpanel.second")));
+        cronLayout.addComponent(getScheduleComponent(MessageSource.message("editagentdeploymentpanel.minute")));
+        cronLayout.addComponent(getScheduleComponent(MessageSource.message("editagentdeploymentpanel.hour")));
+        cronLayout.addComponent(getScheduleComponent(MessageSource.message("editagentdeploymentpanel.day")));
+        cronLayout.addComponent(getScheduleComponent(MessageSource.message("editagentdeploymentpanel.month")));
+        cronLayout.addComponent(getScheduleComponent(MessageSource.message("editagentdeploymentpanel.week")));
+        cronLayout.addComponent(getScheduleComponent(MessageSource.message("editagentdeploymentpanel.year")));
         vlay.addComponent(cronLayout);
 
         FormLayout cronForm = new FormLayout();
@@ -111,8 +113,8 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         table.setEditable(true);
         table.setSelectable(true);
         table.setTableFieldFactory(new EditFieldFactory());
-        table.setVisibleColumns("name", "value");
-        table.setColumnHeaders("Parameter Name", "Value");
+        table.setVisibleColumns(MessageSource.message("common.lowercase.name"), MessageSource.message("common.lowercase.value"));
+        table.setColumnHeaders(MessageSource.message("common.parameter.name"), MessageSource.message("common.value"));
 
         container.addAll(agentDeployment.getAgentDeploymentParms());
 
@@ -159,7 +161,9 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
     }
 
     protected ComboBox getLogLevelComponent() {
-        final ComboBox combo = new ComboBox("Log Level");
+    	//MessageSource.message("editagentdeploymentpanel.log.level")
+    	
+        final ComboBox combo = new ComboBox(MessageSource.message("editagentdeploymentpanel.log.level"));
         combo.setNullSelectionAllowed(false);
         combo.setWidth(200, Unit.PIXELS);
         LogLevel[] levels = LogLevel.values();
@@ -177,7 +181,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
     }
 
     protected ComboBox getStartTypeComponent() {
-        startTypeCombo = new ComboBox("Start Type");
+        startTypeCombo = new ComboBox(MessageSource.message("editagentdeploymentpanel.start.type"));
         startTypeCombo.setWidth(200, Unit.PIXELS);
         startTypeCombo.setNullSelectionAllowed(false);
         StartType[] values = StartType.values();
@@ -217,23 +221,23 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         listSelect.setImmediate(true);
         listSelect.addItem("*");
         listSelect.setItemCaption("*", "<All>");
-        if (caption.equals("Second") || caption.equals("Minute")) {
+        if (caption.equals(MessageSource.message("editagentdeploymentpanel.second")) || caption.equals(MessageSource.message("editagentdeploymentpanel.minute"))) {
             for (int i = 0; i <= 59; i++) {
                 listSelect.addItem(String.valueOf(i));
             }
-        } else if (caption.equals("Hour")) {
+        } else if (caption.equals(MessageSource.message("editagentdeploymentpanel.hour"))) {
             for (int i = 0; i <= 23; i++) {
                 listSelect.addItem(String.valueOf(i));
             }            
-        } else if (caption.equals("Day")) {
+        } else if (caption.equals(MessageSource.message("editagentdeploymentpanel.day"))) {
             for (int i = 1; i <= 31; i++) {
                 listSelect.addItem(String.valueOf(i));
             }            
-        } else if (caption.equals("Month")) {
+        } else if (caption.equals(MessageSource.message("editagentdeploymentpanel.month"))) {
             listSelect.addItems("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC");
-        } else if (caption.equals("Day of Week")) {
+        } else if (caption.equals(MessageSource.message("editagentdeploymentpanel.week"))) {
             listSelect.addItems("SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT");
-        } else if (caption.equals("Year")) {
+        } else if (caption.equals(MessageSource.message("editagentdeploymentpanel.year"))) {
             for (int i = Calendar.getInstance().get(Calendar.YEAR); i <= 2099; i++) {
                 listSelect.addItem(String.valueOf(i));
             }

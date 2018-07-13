@@ -29,6 +29,7 @@ import org.jumpmind.metl.core.model.GlobalSetting;
 import org.jumpmind.metl.core.runtime.resource.MailSession;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.TabbedPanel;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdatePasswordField;
@@ -75,8 +76,8 @@ public class MailServerPanel extends Panel implements IUiPanel {
 
         FormLayout form = new FormLayout();
         form.setSpacing(true);
-
-        ImmediateUpdateTextField hostField = new ImmediateUpdateTextField("Host name") {
+      
+        ImmediateUpdateTextField hostField = new ImmediateUpdateTextField(MessageSource.message("mailServerPanel.host.name")) {
             protected void save(String value) {
                 saveSetting(hostNameSetting, value);
             }
@@ -86,7 +87,7 @@ public class MailServerPanel extends Panel implements IUiPanel {
         form.addComponent(hostField);
         hostField.focus();
 
-        NativeSelect transportField = new NativeSelect("Transport");
+        NativeSelect transportField = new NativeSelect(MessageSource.message("mailServerPanel.transport"));
         transportField.addItem("smtp");
         transportField.addItem("smtps");
         transportField.addItem("mock_smtp");
@@ -100,8 +101,8 @@ public class MailServerPanel extends Panel implements IUiPanel {
             }
         });
         form.addComponent(transportField);
-
-        ImmediateUpdateTextField portField = new ImmediateUpdateTextField("Port") {
+       
+        ImmediateUpdateTextField portField = new ImmediateUpdateTextField(MessageSource.message("mailServerPanel.port")) {
             protected void save(String value) {
                 saveSetting(portSetting, value);
             }
@@ -110,7 +111,7 @@ public class MailServerPanel extends Panel implements IUiPanel {
         portField.setWidth(25f, Unit.EM);
         form.addComponent(portField);
 
-        ImmediateUpdateTextField fromField = new ImmediateUpdateTextField("From Address") {
+        ImmediateUpdateTextField fromField = new ImmediateUpdateTextField(MessageSource.message("mailServerPanel.from.address")) {
             protected void save(String value) {
                 saveSetting(fromSetting, value);
             }
@@ -118,8 +119,8 @@ public class MailServerPanel extends Panel implements IUiPanel {
         fromField.setValue(fromSetting.getValue());
         fromField.setWidth(25f, Unit.EM);
         form.addComponent(fromField);
-
-        CheckBox tlsField = new CheckBox("Use TLS", Boolean.valueOf(useTlsSetting.getValue()));
+       
+        CheckBox tlsField = new CheckBox(MessageSource.message("mailServerPanel.use.tls"), Boolean.valueOf(useTlsSetting.getValue()));
         tlsField.setImmediate(true);
         tlsField.addValueChangeListener(new ValueChangeListener() {
             public void valueChange(ValueChangeEvent event) {
@@ -128,15 +129,15 @@ public class MailServerPanel extends Panel implements IUiPanel {
         });
         form.addComponent(tlsField);
 
-        final ImmediateUpdateTextField userField = new ImmediateUpdateTextField("Username") {
+        final ImmediateUpdateTextField userField = new ImmediateUpdateTextField(MessageSource.message("mailServerPanel.username")) {
             protected void save(String value) {
                 saveSetting(usernameSetting, value);
             }            
         };
         userField.setValue(usernameSetting.getValue());
         userField.setWidth(25f, Unit.EM);
-
-        final ImmediateUpdatePasswordField passwordField = new ImmediateUpdatePasswordField("Password") {
+      
+        final ImmediateUpdatePasswordField passwordField = new ImmediateUpdatePasswordField(MessageSource.message("mailServerPanel.password")) {
             protected void save(String value) {
                 saveSetting(passwordSetting, value);
             }            
@@ -144,7 +145,7 @@ public class MailServerPanel extends Panel implements IUiPanel {
         passwordField.setValue(passwordSetting.getValue());
         passwordField.setWidth(25f, Unit.EM);
 
-        CheckBox authField = new CheckBox("Use Authentication", Boolean.valueOf(useAuthSetting.getValue()));
+        CheckBox authField = new CheckBox( MessageSource.message("mailServerPanel.use.authentication"), Boolean.valueOf(useAuthSetting.getValue()));
         authField.setImmediate(true);
         authField.addValueChangeListener(new ValueChangeListener() {
             public void valueChange(ValueChangeEvent event) {
@@ -160,7 +161,7 @@ public class MailServerPanel extends Panel implements IUiPanel {
         passwordField.setEnabled(authField.getValue());
         form.addComponent(passwordField);
         
-        Button testButton = new Button("Test Connection");
+        Button testButton = new Button(MessageSource.message("mailServerPanel.test.connection"));
         testButton.addClickListener(new TestClickListener());
         form.addComponent(testButton);
         
@@ -169,7 +170,7 @@ public class MailServerPanel extends Panel implements IUiPanel {
         paddedLayout.addComponent(form);
         setContent(paddedLayout);
     }
-
+ 
     private void saveSetting(GlobalSetting setting, String value) {
         setting.setValue(value);
         context.getConfigurationService().save(setting);
@@ -211,13 +212,14 @@ public class MailServerPanel extends Panel implements IUiPanel {
         public void buttonClick(ClickEvent event) {
             MailSession mailSession = new MailSession(context.getOperationsService().findGlobalSettingsAsMap());
             try {                
-                mailSession.getTransport();                
-                CommonUiUtils.notify("SMTP Test", "Success!");
+                mailSession.getTransport();    
+                // MessageSource.message("mailServerPanel.failed.with.message.exception")
+                CommonUiUtils.notify(MessageSource.message("mailServerPanel.smtp.test"), MessageSource.message("mailServerPanel.success"));
             } catch (AuthenticationFailedException e) {
-                CommonUiUtils.notify("SMTP Test", "Failed with authentication exception: " + e.getMessage(), Type.ERROR_MESSAGE);
+                CommonUiUtils.notify(MessageSource.message("mailServerPanel.smtp.test"), MessageSource.message("mailServerPanel.Failed.with.authentication.exception")+": " + e.getMessage(), Type.ERROR_MESSAGE);
                 log.warn("SMTP test failed authentication", e);
             } catch (MessagingException e) {
-                CommonUiUtils.notify("SMTP Test", "Failed with message exception: " + e.getMessage(), Type.ERROR_MESSAGE);
+                CommonUiUtils.notify(MessageSource.message("mailServerPanel.smtp.test"),MessageSource.message("mailServerPanel.failed.with.message.exception")+": " + e.getMessage(), Type.ERROR_MESSAGE);
                 log.warn("SMTP test failed", e);
             } finally {
                 mailSession.closeTransport();

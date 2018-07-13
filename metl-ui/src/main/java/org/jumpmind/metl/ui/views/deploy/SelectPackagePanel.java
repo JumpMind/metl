@@ -29,6 +29,7 @@ import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.metl.core.model.ReleasePackage;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.Grid;
@@ -69,7 +70,8 @@ public class SelectPackagePanel extends VerticalLayout {
         BeanItemContainer<ReleasePackage> container = new BeanItemContainer<>(ReleasePackage.class);
         container.addAll(configService.findReleasePackages());
         grid.setContainerDataSource(container);
-        grid.setColumns("name", "versionLabel", "releaseDate");
+        grid.setColumns(MessageSource.message("common.lowercase.name"),MessageSource.message("common.versionLabel") , 
+        		MessageSource.message("common.releaseDate") );
         grid.addSelectionListener((e) -> rowSelected());        
         this.addComponent(grid);
         this.setExpandRatio(grid, 1);        

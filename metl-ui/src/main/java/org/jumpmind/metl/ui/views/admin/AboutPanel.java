@@ -21,7 +21,7 @@
 package org.jumpmind.metl.ui.views.admin;
 
 import java.util.Date;
-
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.jumpmind.metl.core.runtime.AgentManager;
 import org.jumpmind.metl.core.util.VersionUtils;
@@ -56,7 +56,7 @@ public class AboutPanel extends VerticalLayout implements IUiPanel, IBackgroundR
         setMargin(true);
         setSpacing(true);
 
-        Button gcCollect = new Button("Garbage Collect", (e) -> {
+        Button gcCollect = new Button(MessageSource.message("aboutPanel.garbageCollect"), (e) -> {
             Runtime.getRuntime().gc();
             refresh();
         });
@@ -65,10 +65,10 @@ public class AboutPanel extends VerticalLayout implements IUiPanel, IBackgroundR
 
         table = new Table();
         table.setSizeFull();
-        table.addStyleName("noscroll");
-        table.addContainerProperty("Name", String.class, null);
-        table.setColumnWidth("Name", 200);
-        table.addContainerProperty("Value", String.class, null);
+        table.addStyleName(MessageSource.message("aboutPanel.noscroll"));
+        table.addContainerProperty(MessageSource.message("aboutPanel.common.name"), String.class, null);
+        table.setColumnWidth(MessageSource.message("aboutPanel.common.name"), 200);
+        table.addContainerProperty(MessageSource.message("aboutPanel.common.value"), String.class, null);
         addComponent(table);
         setExpandRatio(table, 1);
         refresh();
@@ -108,27 +108,29 @@ public class AboutPanel extends VerticalLayout implements IUiPanel, IBackgroundR
     protected void refresh() {
         table.removeAllItems();
         int itemId = 0;
-        table.addItem(new Object[] { "Application Version", VersionUtils.getCurrentVersion() },
+     
+        table.addItem(new Object[] {MessageSource.message("aboutPanel.application.version") , VersionUtils.getCurrentVersion() },
                 itemId++);
-        table.addItem(new Object[] { "Build Time", VersionUtils.getBuildTime() }, itemId++);
-        table.addItem(new Object[] { "SCM Revision", VersionUtils.getScmVersion() }, itemId++);
-        table.addItem(new Object[] { "SCM Branch", VersionUtils.getScmBranch() }, itemId++);
+        table.addItem(new Object[] {MessageSource.message("aboutPanel.build.time") , VersionUtils.getBuildTime() }, itemId++);
+        table.addItem(new Object[] { MessageSource.message("aboutPanel.SCM.revision"), VersionUtils.getScmVersion() }, itemId++);
+        table.addItem(new Object[] { MessageSource.message("aboutPanel.SCM.branch"), VersionUtils.getScmBranch() }, itemId++);
 
-        table.addItem(new Object[] { "Host Name", AppUtils.getHostName() }, itemId++);
-        table.addItem(new Object[] { "IP Address", AppUtils.getIpAddress() }, itemId++);
-        table.addItem(new Object[] { "Java Version", System.getProperty("java.version") },
+        table.addItem(new Object[] { MessageSource.message("aboutPanel.host.name"), AppUtils.getHostName() }, itemId++);
+        table.addItem(new Object[] { MessageSource.message("aboutPanel.IP.address"), AppUtils.getIpAddress() }, itemId++);
+        table.addItem(new Object[] { MessageSource.message("aboutPanel.java.version"), System.getProperty("java.version") },
                 itemId++);
         table.addItem(
-                new Object[] { "System Time",
+                new Object[] { MessageSource.message("aboutPanel.system.time"),
                         FastDateFormat.getTimeInstance(FastDateFormat.MEDIUM).format(new Date()) },
                 itemId++);
         table.addItem(
-                new Object[] { "Used Heap", Long.toString(
+                new Object[] { MessageSource.message("aboutPanel.used.heap"), Long.toString(
                         Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) },
                 itemId++);
-        table.addItem(new Object[] { "Heap Size", Long.toString(Runtime.getRuntime().maxMemory()) },
+        table.addItem(new Object[] { MessageSource.message("aboutPanel.heap.size"), Long.toString(Runtime.getRuntime().maxMemory()) },
                 itemId++);
-        table.addItem(new Object[] { "Last Restart",
+        // MessageSource.message("aboutPanel.lastr.restart")
+        table.addItem(new Object[] {MessageSource.message("aboutPanel.lastr.restart"),
                 CommonUiUtils.formatDateTime(AgentManager.lastRestartTime) }, itemId++);
     }
 

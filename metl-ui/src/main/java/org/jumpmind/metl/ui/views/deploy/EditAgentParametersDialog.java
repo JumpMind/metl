@@ -25,6 +25,7 @@ import org.jumpmind.metl.core.model.AgentParameter;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 
@@ -61,14 +62,14 @@ class EditAgentParametersDialog extends ResizableWindow implements ValueChangeLi
         this.context = context;
         this.agent = agent;
 
-        Button closeButton = new Button("Close");
+        Button closeButton = new Button(MessageSource.message("common.close"));
         closeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
         closeButton.addClickListener(new CloseClickListener());
 
         ButtonBar buttonBar = new ButtonBar();
-        buttonBar.addButton("Add", FontAwesome.PLUS, new AddClickListener());
+        buttonBar.addButton(MessageSource.message("common.add"), FontAwesome.PLUS, new AddClickListener());
 
-        removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O, new RemoveClickListener());
+        removeButton = buttonBar.addButton(MessageSource.message("common.remove"), FontAwesome.TRASH_O, new RemoveClickListener());
         removeButton.setEnabled(false);
         addComponent(buttonBar);
 
@@ -79,8 +80,8 @@ class EditAgentParametersDialog extends ResizableWindow implements ValueChangeLi
         table.setEditable(true);
         table.setSelectable(true);
         table.setTableFieldFactory(new EditFieldFactory());
-        table.setVisibleColumns("name", "value");
-        table.setColumnHeaders("Name", "Value");
+        table.setVisibleColumns(MessageSource.message("common.lowercase.name"), "value");
+        table.setColumnHeaders(MessageSource.message("common.name"), "Value");
         table.addValueChangeListener(this);
         addComponent(table, 1);
 

@@ -38,6 +38,7 @@ import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.metl.ui.views.deploy.ValidateFlowDeploymentPanel.DeploymentLine;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 
@@ -114,9 +115,9 @@ public class DeployDialog extends ResizableWindow {
         selectDeploymentLayout.setMargin(new MarginInfo(true, false));
         layout.addComponent(selectDeploymentLayout);
         layout.setExpandRatio(selectDeploymentLayout, 1);
-
-        backButton = new Button("Cancel", e -> back());
-        actionButton = new Button("Deploy", e -> takeAction());
+  
+        backButton = new Button(MessageSource.message("common.cancel"), e -> back());
+        actionButton = new Button(MessageSource.message("common.deploy"), e -> takeAction());
         actionButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
         actionButton.setClickShortcut(KeyCode.ENTER);
         addComponent(buildButtonFooter(backButton, actionButton));
@@ -149,19 +150,20 @@ public class DeployDialog extends ResizableWindow {
 
     protected Component buildDeployByFlow() {
         if (selectFlowsPanel == null) {
-            String introText = "Select one or more flows for deployment to this agent:";
+        	  
+            String introText = MessageSource.message("deployDialog.introText");
             selectFlowsPanel = new SelectFlowsPanel(context, introText, parentPanel.getAgent().isAllowTestFlows());
         }
-        actionButton.setCaption("Next");
+        actionButton.setCaption(MessageSource.message("common.next"));
         return selectFlowsPanel;
     }
 
     protected Component buildDeployByPackage() {
         if (selectPackagePanel == null) {
-            String introText = "Select a package for deployment to this agent:";
+            String introText = MessageSource.message("deployDialog.introText2");
             selectPackagePanel = new SelectPackagePanel(context, introText);            
         }
-        actionButton.setCaption("Next");
+        actionButton.setCaption(MessageSource.message("common.next"));
         return selectPackagePanel;        
     }
     
@@ -180,7 +182,8 @@ public class DeployDialog extends ResizableWindow {
     protected void takeAction() {
         if (isDeployByFlow() || isDeployByPackage()) {
             if (validateFlowDeploymentPanel == null) {
-                String introText = "Validate deployment actions";
+            
+                String introText =  MessageSource.message("deployDialog.introText3");
                 if (isDeployByPackage()) {
                     validateFlowDeploymentPanel = new ValidateFlowDeploymentPanel(
                             context, introText, getFlowsFromReleasePackages(selectPackagePanel.getSelectedPackages()),
@@ -193,8 +196,8 @@ public class DeployDialog extends ResizableWindow {
                 }
             }
             deployByOptionGroup.setVisible(false);
-            backButton.setCaption("Previous");
-            actionButton.setCaption("Deploy");
+            backButton.setCaption(MessageSource.message("deployDialog.previous"));
+            actionButton.setCaption( MessageSource.message("deployDialog.deploy"));
             selectDeploymentLayout.removeAllComponents();
             selectDeploymentLayout.addComponent(validateFlowDeploymentPanel);            
         } else {
@@ -205,7 +208,7 @@ public class DeployDialog extends ResizableWindow {
 
     protected Component buildValidatePackageDeploymentAction() {
         if (validateFlowDeploymentPanel == null) {
-            String introText = "Validate deployment actions";
+            String introText =MessageSource.message("deployDialog.introText3");
             validateFlowDeploymentPanel = new ValidateFlowDeploymentPanel(
                     context, introText, getFlowsFromReleasePackages(selectPackagePanel.getSelectedPackages()),
                     parentPanel.getAgent().getId());
@@ -263,7 +266,8 @@ public class DeployDialog extends ResizableWindow {
             close();
         } else {
             deployByOptionGroup.setVisible(true);
-            backButton.setCaption("Cancel");
+       	 
+            backButton.setCaption(MessageSource.message("common.cancel"));
             deployByChanged();
         }
     }

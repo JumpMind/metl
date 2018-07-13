@@ -28,6 +28,7 @@ import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.TabbedPanel;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -65,14 +66,14 @@ public class TagPanel extends VerticalLayout implements IUiPanel {
         
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
-
-        newButton = buttonBar.addButton("New", FontAwesome.PLUS);
+      //MessageSource.message("common.color")  
+        newButton = buttonBar.addButton(MessageSource.message("common.new"), FontAwesome.PLUS);
         newButton.addClickListener(new NewClickListener());
 
-        editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
+        editButton = buttonBar.addButton(MessageSource.message("common.lowercase.edit"), FontAwesome.EDIT);
         editButton.addClickListener(new EditClickListener());
 
-        removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
+        removeButton = buttonBar.addButton(MessageSource.message("common.remove"), FontAwesome.TRASH_O);
         removeButton.addClickListener(new RemoveClickListener());
 
         container = new BeanItemContainer<Tag>(Tag.class);
@@ -86,11 +87,12 @@ public class TagPanel extends VerticalLayout implements IUiPanel {
         table.setMultiSelect(true);
 
         table.setContainerDataSource(container);
-        table.setVisibleColumns("name", "color");
-        table.setColumnHeaders("Tag Name", "Color");
+     
+        table.setVisibleColumns(MessageSource.message("common.name"), MessageSource.message("common.lowercase.color"));
+        table.setColumnHeaders(MessageSource.message("tagEditPanel.tag.name"), MessageSource.message("common.color"));
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());
-        table.setSortContainerPropertyId("name");
+        table.setSortContainerPropertyId(MessageSource.message("common.lowercase.name"));
         table.setSortAscending(true);
 
         addComponent(table);
@@ -145,7 +147,8 @@ public class TagPanel extends VerticalLayout implements IUiPanel {
         public void buttonClick(ClickEvent event) {
             Tag tag = new Tag();
             TagEditPanel editPanel = new TagEditPanel(context, tag);
-            tabbedPanel.addCloseableTab(tag.getId(), "Edit Tag", getIcon(), editPanel);
+            //  MessageSource.message("common.color")
+            tabbedPanel.addCloseableTab(tag.getId(), MessageSource.message("tagEditPanel.edit.tag") , getIcon(), editPanel);
         }
     }
 
@@ -155,7 +158,7 @@ public class TagPanel extends VerticalLayout implements IUiPanel {
 //TODO: refresh if we want to do things like show all entities that are tagged            
 //            context.getOperationsService().refresh(tag);
             TagEditPanel editPanel = new TagEditPanel(context, tag);
-            tabbedPanel.addCloseableTab(tag.getId(), "Edit Tag", getIcon(), editPanel);
+            tabbedPanel.addCloseableTab(tag.getId(), MessageSource.message("tagEditPanel.edit.tag") , getIcon(), editPanel);
         }
     }
 

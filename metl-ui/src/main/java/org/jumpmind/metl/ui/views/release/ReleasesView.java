@@ -48,6 +48,7 @@ import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.InProgressDialog;
 import org.jumpmind.metl.ui.common.TopBarLink;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.UiComponent;
@@ -126,8 +127,8 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
         grid.addSelectionListener((e) -> rowSelected(e));
         container = new BeanItemContainer<>(ReleasePackage.class);
         grid.setContainerDataSource(container);
-        grid.setColumns("name", "versionLabel", "releaseDate", "released");
-        grid.sort("releaseDate", SortDirection.DESCENDING);
+        grid.setColumns(MessageSource.message("common.lowercase.name"), MessageSource.message("releasesView.versionLabel"),MessageSource.message("releasesView.releaseDate"), MessageSource.message("releasesView.released"));
+        grid.sort(MessageSource.message("releasesView.releaseDate"), SortDirection.DESCENDING);
         addComponent(grid);
         setExpandRatio(grid, 1);
         progressBar = new ProgressBar(0.0f);
@@ -213,7 +214,7 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
                 }
             } else {
                 CommonUiUtils.notify(String.format(String.format(
-                        "Release Package %s is not released, it cannot be archived.  Skipping this release package",
+                		MessageSource.message("releasesView.intro")  ,
                         releasePackage.getName())), Type.WARNING_MESSAGE);
             }
         }
@@ -228,10 +229,10 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     }
 
     protected void finalize() {
-        ConfirmDialog.show("Release the selected packages?",
-                "Are you sure you want to release the selected packages?", () -> {
-                    InProgressDialog<Object> dialog = new InProgressDialog<Object>("Finalizing Release Package", 
-                            new ReleaseWorker(), context.getBackgroundRefresherService(), "Finalize of Release Package Failed");
+        ConfirmDialog.show(MessageSource.message("releasesView.release.question2"),
+        		MessageSource.message("releasesView.release.question2"), () -> {
+                    InProgressDialog<Object> dialog = new InProgressDialog<Object>(MessageSource.message("releasesView.release.package"), 
+                            new ReleaseWorker(), context.getBackgroundRefresherService(), MessageSource.message("releasesView.release.package.failed"));
                     dialog.show();
                     return true;
                 });                
@@ -246,7 +247,7 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
             releasePackage = configurationService.findReleasePackage(releasePackage.getId());
             if (releasePackage.isReleased()) {
                 CommonUiUtils.notify(String.format(
-                        "The release package '%s:%s' is already released.  It cannot be re-released.  Skipping this release package.",
+                		MessageSource.message("releasesView.released"),
                         releasePackage.getName(), releasePackage.getVersionLabel()));
             } else {
                 releasePackage.setReleaseDate(new Date());
@@ -344,8 +345,8 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
                 try {
                     return new ByteArrayInputStream(export.getBytes(Charset.forName("utf-8")));
                 } catch (Exception e) {
-                    log.error("Failed to export configuration", e);
-                    CommonUiUtils.notify("Failed to export configuration.", Type.ERROR_MESSAGE);
+                    log.error(MessageSource.message("releasesView.failed"), e);
+                    CommonUiUtils.notify(MessageSource.message("releasesView.failed"), Type.ERROR_MESSAGE);
                     return null;
                 }
             }

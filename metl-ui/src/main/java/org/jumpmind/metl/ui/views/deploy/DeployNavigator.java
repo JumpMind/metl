@@ -44,6 +44,7 @@ import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.ImportDialog;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.ImportDialog.IImportListener;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog.IConfirmListener;
@@ -119,15 +120,16 @@ public class DeployNavigator extends VerticalLayout {
     public DeployNavigator(ApplicationContext context, TabbedPanel tabbedPanel) {
         this.context = context;
         this.tabbedPanel = tabbedPanel;
-        setCaption("Navigator");
+ 
+        setCaption(MessageSource.message("deployNavigator.navigator"));
         setSizeFull();
-        addStyleName("noborder");
+        addStyleName(MessageSource.message("deployNavigator.noborder"));
         addStyleName(ValoTheme.MENU_ROOT);
 
         addComponent(buildMenuBar());
 
         treeTable = buildTreeTable();
-        treeTable.addStyleName("noselect");
+        treeTable.addStyleName(MessageSource.message("deployNavigator.noselect"));
         addComponent(treeTable);
         setExpandRatio(treeTable, 1);
         selectionChanged(null);
@@ -192,25 +194,25 @@ public class DeployNavigator extends VerticalLayout {
         leftMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
         leftMenuBar.setWidth(100, Unit.PERCENTAGE);
 
-        MenuItem fileMenu = leftMenuBar.addItem("File", null);
+        MenuItem fileMenu = leftMenuBar.addItem(MessageSource.message("common.file"), null);
         
-        MenuItem newMenu = fileMenu.addItem("New", null);
+        MenuItem newMenu = fileMenu.addItem(MessageSource.message("common.new"), null);
         
-        miImport = fileMenu.addItem("Import",new Command() {
+        miImport = fileMenu.addItem(MessageSource.message("common.import"),new Command() {
             @Override
             public void menuSelected(MenuItem selectedItem) {
                 importAgentData();
             }
         });
         
-        export = fileMenu.addItem("Export", new Command() {
+        export = fileMenu.addItem(MessageSource.message("common.export"), new Command() {
             @Override
             public void menuSelected(MenuItem selectedItem) {
                 exportAgentData();
             }
         });
 
-        newFolder = newMenu.addItem("Folder", new Command() {
+        newFolder = newMenu.addItem(MessageSource.message("common.folder"), new Command() {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
@@ -218,17 +220,17 @@ public class DeployNavigator extends VerticalLayout {
             }
         });
 
-        newAgent = newMenu.addItem("Agent", new Command() {
+        newAgent = newMenu.addItem(MessageSource.message("common.agent"), new Command() {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
                 addAgent();
             }
         });
+     
+        MenuItem editMenu = leftMenuBar.addItem(MessageSource.message("common.edit"), null);
 
-        MenuItem editMenu = leftMenuBar.addItem("Edit", null);
-
-        open = editMenu.addItem("Open", new Command() {
+        open = editMenu.addItem(MessageSource.message("common.open"), new Command() {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
@@ -236,14 +238,14 @@ public class DeployNavigator extends VerticalLayout {
             }
         });
 
-        rename = editMenu.addItem("Rename", new Command() {
+        rename = editMenu.addItem(MessageSource.message("common.rename"), new Command() {
             @Override
             public void menuSelected(MenuItem selectedItem) {
                 startEditingItem((AbstractObject) treeTable.getValue());
             }
         });
 
-        delete = editMenu.addItem("Remove", new Command() {
+        delete = editMenu.addItem(MessageSource.message("common.remove"), new Command() {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
@@ -283,7 +285,8 @@ public class DeployNavigator extends VerticalLayout {
             }
         });
         table.setVisibleColumns(new Object[] { "name" });
-        table.setColumnExpandRatio("name", 1);
+        
+        table.setColumnExpandRatio(MessageSource.message("common.lowercase.name"), 1);
         table.addValueChangeListener(new ValueChangeListener() {
             private static final long serialVersionUID = 1L;
 
@@ -488,8 +491,9 @@ public class DeployNavigator extends VerticalLayout {
 
     protected void handleDelete() {
         if (getSelectedFolder() != null) {
-            ConfirmDialog.show("Delete Folder?",
-                    "Are you sure you want to delete the selected folders?",
+        	
+            ConfirmDialog.show(MessageSource.message("deployDialog.delete.folder"),
+            		MessageSource.message("deployDialog.delete.message"),
                     new IConfirmListener() {
 
                         private static final long serialVersionUID = 1L;
@@ -503,8 +507,8 @@ public class DeployNavigator extends VerticalLayout {
                                     context.getConfigurationService().delete(folder);
                                 } catch (Exception ex) {
                                     log.error("", ex);
-                                    CommonUiUtils.notify("Could not delete the \""
-                                            + folder.getName() + "\" folder", Type.WARNING_MESSAGE);
+                                    CommonUiUtils.notify(MessageSource.message("deployNavigator.delete.message")+" \""
+                                            + folder.getName() + "\""+MessageSource.message("common.lowercase.folder"), Type.WARNING_MESSAGE);
                                 }
                             }
                             refresh();
@@ -518,9 +522,9 @@ public class DeployNavigator extends VerticalLayout {
             deleteTreeItems(obj);
         }
     }
-
+ 
     protected void importAgentData() {
-        ImportDialog.show("Import Config", "Click the upload button to import your config", new ImportConfigurationListener());
+        ImportDialog.show(MessageSource.message("common.import.config"), MessageSource.message("deployNavigator.upload.message"), new ImportConfigurationListener());
     }
     
     class ImportConfigurationListener implements IImportListener {
@@ -542,8 +546,9 @@ public class DeployNavigator extends VerticalLayout {
                 try {
                     return new ByteArrayInputStream(export.getBytes());
                 } catch (Exception e) {
-                    log.error("Failed to export configuration", e);
-                    CommonUiUtils.notify("Failed to export configuration.", Type.ERROR_MESSAGE);
+                	 //MessageSource.message("deployNavigator.Failed.configuration")
+                    log.error(MessageSource.message("deployNavigator.Failed.configuration"), e);
+                    CommonUiUtils.notify(MessageSource.message("deployNavigator.Failed.configuration"), Type.ERROR_MESSAGE);
                     return null;
                 }
 
@@ -562,7 +567,8 @@ public class DeployNavigator extends VerticalLayout {
         Folder parentFolder = getSelectedFolder();
 
         Folder folder = new Folder();
-        folder.setName("New Folder");
+       
+        folder.setName(MessageSource.message("common.new.folder"));
         folder.setType(FolderType.AGENT.name());
         folder.setParent(parentFolder);
 
@@ -575,11 +581,11 @@ public class DeployNavigator extends VerticalLayout {
 
         startEditingItem(folder);
     }
-
+   
     protected void addAgent() {
         Folder folder = getSelectedFolder();
         Agent agent = new Agent();
-        agent.setName("New Agent");
+        agent.setName(MessageSource.message("common.new.agent"));
         agent.setFolder(folder);
         context.getConfigurationService().save(agent);
         context.getAgentManager().refresh(agent);
@@ -624,8 +630,9 @@ public class DeployNavigator extends VerticalLayout {
     protected void deleteTreeItems(AbstractObject obj) {
         if (obj instanceof AgentName) {
             AgentName agentName = (AgentName) obj;
-            ConfirmDialog.show("Delete Agent?",
-                    "Are you sure you want to delete the '" + agentName.getName() + "' agent?",
+          
+            ConfirmDialog.show(MessageSource.message("deployNavigator.delete.agent"),
+            		MessageSource.message("deployNavigator.delete.forward")+" '" + agentName.getName() + "' "+MessageSource.message("common.lowercase.agent")+"?",
                     () -> {
                         Agent agent = context.getOperationsService().findAgent(agentName.getId(),
                                 false);

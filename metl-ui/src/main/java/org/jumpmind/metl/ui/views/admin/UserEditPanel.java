@@ -34,6 +34,7 @@ import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.model.UserGroup;
 import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
@@ -86,19 +87,20 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
         }
         authField.setImmediate(true);
         authField.setRequired(true);
-        authField.setRequiredError("Field Authentication Method is required");
+  
+        authField.setRequiredError( MessageSource.message("userEditpanel.tips"));
         form.addComponent(authField);
 
-        TextField loginField = new TextField("Login ID", StringUtils.trimToEmpty(user.getLoginId()));
+        TextField loginField = new TextField(MessageSource.message("userEditpanel.login.id"), StringUtils.trimToEmpty(user.getLoginId()));
         form.addComponent(loginField);
         loginField.addValueChangeListener(new LoginChangeListener());
         loginField.focus();
-
-        TextField nameField = new TextField("Full Name", StringUtils.trimToEmpty(user.getName()));
+        
+        TextField nameField = new TextField(MessageSource.message("userEditpanel.full.name"), StringUtils.trimToEmpty(user.getName()));
         nameField.addValueChangeListener(new NameChangeListener());
         form.addComponent(nameField);
 
-        PasswordField passwordField = new PasswordField("Password", NOCHANGE);
+        PasswordField passwordField = new PasswordField(MessageSource.message("common.password"), NOCHANGE);
         passwordField.addValueChangeListener(new PasswordChangeListener());
         form.addComponent(passwordField);
         if (User.AUTH_METHOD_INTERNAL.equals(authField.getValue())) {
@@ -139,8 +141,9 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
         groupSelect.setNullSelectionAllowed(true);
         groupSelect.setMultiSelect(true);
         groupSelect.setImmediate(true);
-        groupSelect.setLeftColumnCaption("Available groups");
-        groupSelect.setRightColumnCaption("Selected groups");
+    //  MessageSource.message("userEditpanel.selected.groups")
+        groupSelect.setLeftColumnCaption(MessageSource.message("userEditpanel.available.groups"));
+        groupSelect.setRightColumnCaption(MessageSource.message("userEditpanel.selected.groups"));
         groupSelect.addValueChangeListener(new GroupChangeListener());
         form.addComponent(groupSelect);
 

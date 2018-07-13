@@ -30,6 +30,7 @@ import org.jumpmind.metl.core.model.AgentDeploy;
 import org.jumpmind.metl.core.model.AgentStatus;
 import org.jumpmind.metl.core.model.Notification;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextArea;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
@@ -76,7 +77,7 @@ public class NotificationEditPanel extends Panel implements IUiPanel {
     public NotificationEditPanel(final ApplicationContext context, final Notification notification) {
         this.context = context;
         this.notification = notification;
-
+      
         sampleSubjectByEvent = new HashMap<String, String>();
         sampleSubjectByEvent.put(Notification.EventType.FLOW_START.toString(), "Flow $(_flowName) started");
         sampleSubjectByEvent.put(Notification.EventType.FLOW_END.toString(), "Flow $(_flowName) ended");
@@ -90,8 +91,8 @@ public class NotificationEditPanel extends Panel implements IUiPanel {
         FormLayout form = new FormLayout();
         form.setSizeFull();
         form.setSpacing(true);
-
-        levelField = new NativeSelect("Level");
+      
+        levelField = new NativeSelect(MessageSource.message("notificationEditPanel.level"));
         for (Notification.NotificationLevel level : Notification.NotificationLevel.values()) {
             levelField.addItem(level.toString());
         }
@@ -101,21 +102,21 @@ public class NotificationEditPanel extends Panel implements IUiPanel {
         levelField.addValueChangeListener(new LevelFieldListener());
         form.addComponent(levelField);
 
-        linkField = new ComboBox("Linked To");
+        linkField = new ComboBox(MessageSource.message("notificationEditPanel.linked.to"));
         linkField.setNullSelectionAllowed(false);
         linkField.setImmediate(true);
         linkField.setWidth(15f, Unit.EM);
         linkField.addValueChangeListener(new LinkFieldListener());
         form.addComponent(linkField);
 
-        eventField = new NativeSelect("Event");
+        eventField = new NativeSelect(MessageSource.message("notificationEditPanel.event"));
         eventField.setNullSelectionAllowed(false);
         eventField.setImmediate(true);
         eventField.setWidth(15f, Unit.EM);
         eventField.addValueChangeListener(new EventFieldListener());
         form.addComponent(eventField);
-
-        nameField = new ImmediateUpdateTextField("Name") {
+     
+        nameField = new ImmediateUpdateTextField(MessageSource.message("notificationEditPanel.name")) {
             protected void save(String value) {
                 notification.setName(value);
                 saveNotification();
@@ -123,10 +124,10 @@ public class NotificationEditPanel extends Panel implements IUiPanel {
         };
         nameField.setValue(StringUtils.trimToEmpty(notification.getName()));
         nameField.setWidth(20f, Unit.EM);
-        nameField.setDescription("Display name for the notification");
+        nameField.setDescription( MessageSource.message("notificationEditPanel.display.name.for.the.notification"));
         form.addComponent(nameField);
-
-        ImmediateUpdateTextArea recipientsField = new ImmediateUpdateTextArea("Recipients") {
+        
+        ImmediateUpdateTextArea recipientsField = new ImmediateUpdateTextArea(MessageSource.message("notificationEditPanel.recipients")) {
             protected void save(String value) {
                 notification.setRecipients(value);
                 saveNotification();
@@ -135,11 +136,11 @@ public class NotificationEditPanel extends Panel implements IUiPanel {
         recipientsField.setValue(StringUtils.trimToEmpty(notification.getRecipients()));
         recipientsField.setColumns(20);
         recipientsField.setRows(10);
-        recipientsField.setInputPrompt("address1@example.com\r\naddress2@example.com");
-        recipientsField.setDescription("Email addresses of recipients, separated by commas.");
+        recipientsField.setInputPrompt(MessageSource.message("notificationEditPanel.email"));
+        recipientsField.setDescription(MessageSource.message("notificationEditPanel.email.tips"));
         form.addComponent(recipientsField);
-
-        subjectField = new ImmediateUpdateTextField("Subject") {
+    
+        subjectField = new ImmediateUpdateTextField(MessageSource.message("notificationEditPanel.subject")) {
             protected void save(String value) {
                 notification.setSubject(value);
                 saveNotification();
@@ -147,10 +148,10 @@ public class NotificationEditPanel extends Panel implements IUiPanel {
         };
         subjectField.setValue(StringUtils.trimToEmpty(notification.getSubject()));
         subjectField.setWidth(40f, Unit.EM);
-        subjectField.setDescription("The subject of the email can contain...");
+        subjectField.setDescription(MessageSource.message("notificationEditPanel.email.tips2"));
         form.addComponent(subjectField);
 
-        messageField = new ImmediateUpdateTextArea("Message") {
+        messageField = new ImmediateUpdateTextArea(MessageSource.message("notificationEditPanel.message")) {
             protected void save(String value) {
                 notification.setMessage(value);
                 saveNotification();
@@ -159,10 +160,10 @@ public class NotificationEditPanel extends Panel implements IUiPanel {
         messageField.setValue(StringUtils.trimToEmpty(notification.getMessage()));
         messageField.setColumns(40);
         messageField.setRows(10);
-        messageField.setDescription("The body of the email can contain...");
+        messageField.setDescription(MessageSource.message("notificationEditPanel.email.tips2"));
         form.addComponent(messageField);
         
-        CheckBox enableField = new CheckBox("Enabled", notification.isEnabled());
+        CheckBox enableField = new CheckBox(MessageSource.message("notificationEditPanel.enabled"), notification.isEnabled());
         enableField.setImmediate(true);
         enableField.addValueChangeListener(new ValueChangeListener() {
             public void valueChange(ValueChangeEvent event) {

@@ -29,6 +29,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.Group;
 import org.jumpmind.metl.core.model.Tag;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -63,13 +64,13 @@ public class TagEditPanel extends VerticalLayout implements IUiPanel {
 
         FormLayout form = new FormLayout();
         form.setSpacing(true);
-        
-        TextField nameField = new TextField("Name", StringUtils.trimToEmpty(tag.getName()));
+      
+        TextField nameField = new TextField(MessageSource.message("common.name"), StringUtils.trimToEmpty(tag.getName()));
         form.addComponent(nameField);
         nameField.addValueChangeListener(new NameChangeListener());
         nameField.focus();
 
-        ColorPicker colorPickerField = new ColorPicker("Tag Color");
+        ColorPicker colorPickerField = new ColorPicker(MessageSource.message("tagEditPanel.tag.color"));
         colorPickerField.setSwatchesVisibility(true);
         colorPickerField.setHistoryVisibility(true);
         colorPickerField.setTextfieldVisibility(false);
@@ -78,9 +79,9 @@ public class TagEditPanel extends VerticalLayout implements IUiPanel {
         colorPickerField.addColorChangeListener(new ColorFieldListener());         
 
         HorizontalLayout hLayout = new HorizontalLayout();
-        hLayout.setCaption("Color");
+        hLayout.setCaption(MessageSource.message("common.color") );
         hLayout.addComponent(colorPickerField);
-                
+             
         form.addComponent(hLayout);
         
 //        List<Group> groups = context.getOperationsService().findGroups();

@@ -25,6 +25,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -50,13 +51,13 @@ public class PluginRepositoryEditPanel extends VerticalLayout implements IUiPane
         FormLayout form = new FormLayout();
         form.setSpacing(true);
 
-        TextField field = new TextField("Name", StringUtils.trimToEmpty(pluginRepository.getName()));
+        TextField field = new TextField(MessageSource.message("common.name"), StringUtils.trimToEmpty(pluginRepository.getName()));
         field.setWidth(20, Unit.EM);
         form.addComponent(field);
         field.addValueChangeListener(new NameChangeListener());
         field.focus();
 
-        field = new TextField("Url", StringUtils.trimToEmpty(pluginRepository.getUrl()));
+        field = new TextField(MessageSource.message("common.url"), StringUtils.trimToEmpty(pluginRepository.getUrl()));
         field.setWidth(45, Unit.EM);
         field.addValueChangeListener(new UrlChangeListener());
         form.addComponent(field);

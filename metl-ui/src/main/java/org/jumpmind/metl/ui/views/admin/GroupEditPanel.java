@@ -31,6 +31,7 @@ import org.jumpmind.metl.core.model.Group;
 import org.jumpmind.metl.core.model.GroupPrivilege;
 import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -60,12 +61,12 @@ public class GroupEditPanel extends VerticalLayout implements IUiPanel {
 
         FormLayout layout = new FormLayout();
 
-        TextField nameField = new TextField("Group Name", StringUtils.trimToEmpty(group.getName()));
+        TextField nameField = new TextField(MessageSource.message("groupEditPanel.group.name"), StringUtils.trimToEmpty(group.getName()));
         nameField.addValueChangeListener(new NameChangeListener());
         layout.addComponent(nameField);
         nameField.focus();
         
-        readOnly = new CheckBox("Read Only");
+        readOnly = new CheckBox(MessageSource.message("groupEditPanel.read.only"));
         readOnly.setEnabled(isNotBlank(group.getName()));
         readOnly.setImmediate(true);
         readOnly.setValue(group.isReadOnly());
@@ -86,8 +87,9 @@ public class GroupEditPanel extends VerticalLayout implements IUiPanel {
         privSelect.setNullSelectionAllowed(true);
         privSelect.setMultiSelect(true);
         privSelect.setImmediate(true);
-        privSelect.setLeftColumnCaption("Available privileges");
-        privSelect.setRightColumnCaption("Selected privileges");
+      //MessageSource.message("groupEditPanel.selected.privileges")
+        privSelect.setLeftColumnCaption(MessageSource.message("groupEditPanel.available.privileges"));
+        privSelect.setRightColumnCaption(MessageSource.message("groupEditPanel.selected.privileges"));
         privSelect.addValueChangeListener(new PrivilegeChangeListener());
         layout.addComponent(privSelect);
 

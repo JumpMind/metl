@@ -29,6 +29,7 @@ import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.TabbedPanel;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -71,14 +72,14 @@ public class NotificationPanel extends VerticalLayout implements IUiPanel, TextC
 
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
-
-        newButton = buttonBar.addButton("New", FontAwesome.PLUS);
+     
+        newButton = buttonBar.addButton(MessageSource.message("notificationEditPanel.new"), FontAwesome.PLUS);
         newButton.addClickListener(new NewClickListener());
 
-        editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
+        editButton = buttonBar.addButton(MessageSource.message("notificationEditPanel.edit"), FontAwesome.EDIT);
         editButton.addClickListener(new EditClickListener());
 
-        removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
+        removeButton = buttonBar.addButton(MessageSource.message("notificationEditPanel.remove"), FontAwesome.TRASH_O);
         removeButton.addClickListener(new RemoveClickListener());
 
         filterField = buttonBar.addFilter();
@@ -93,13 +94,13 @@ public class NotificationPanel extends VerticalLayout implements IUiPanel, TextC
         table.setImmediate(true);
         table.setSelectable(true);
         table.setMultiSelect(true);
-
+     // MessageSource.message("groupPanel.name")
         table.setContainerDataSource(container);
-        table.setVisibleColumns("notificationLevel", "name", "notifyType", "eventType", "enabled");
-        table.setColumnHeaders("Level", "Name", "Notify Type", "Event Type", "Enabled");
+        table.setVisibleColumns(MessageSource.message("notificationEditPanel.notificationLevel"), MessageSource.message("common.lowercase.name"), "notifyType", "eventType", "enabled");
+        table.setColumnHeaders(MessageSource.message("common.level"), MessageSource.message("common.name"), MessageSource.message("notificationEditPanel.notify.type"), MessageSource.message("notificationEditPanel.event.type"), MessageSource.message("notificationEditPanel.enabled"));
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());
-        table.setSortContainerPropertyId("name");
+        table.setSortContainerPropertyId(MessageSource.message("groupPanel.name"));
         table.setSortAscending(true);
 
         addComponent(table);

@@ -28,6 +28,7 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.UIConstants;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -66,13 +67,13 @@ public class PluginRepositoriesPanel extends VerticalLayout implements IUiPanel 
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        newButton = buttonBar.addButton("Add", FontAwesome.PLUS);
+        newButton = buttonBar.addButton(MessageSource.message("notificationEditPanel.add"), FontAwesome.PLUS);
         newButton.addClickListener(new NewClickListener());
 
-        editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
+        editButton = buttonBar.addButton(MessageSource.message("notificationEditPanel.edit"), FontAwesome.EDIT);
         editButton.addClickListener(new EditClickListener());
 
-        removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
+        removeButton = buttonBar.addButton(MessageSource.message("notificationEditPanel.remove"), FontAwesome.TRASH_O);
         removeButton.addClickListener(new RemoveClickListener());
 
         container = new BeanItemContainer<PluginRepository>(PluginRepository.class);
@@ -86,12 +87,13 @@ public class PluginRepositoriesPanel extends VerticalLayout implements IUiPanel 
         table.setMultiSelect(true);
 
         table.setContainerDataSource(container);
-        table.setVisibleColumns("name", "url", "lastUpdateTime");
-        table.setColumnHeaders("Name", "Url", "Updated");
-        table.setColumnWidth("lastUpdateTime", UIConstants.DATETIME_WIDTH_PIXELS);
+        //MessageSource.message("common.updated")
+        table.setVisibleColumns(MessageSource.message("common.lowercase.name"), MessageSource.message("common.lowercase.url"),MessageSource.message("common.lastUpdateTime"));
+        table.setColumnHeaders(MessageSource.message("common.name"), MessageSource.message("common.url"),MessageSource.message("common.updated"));
+        table.setColumnWidth(MessageSource.message("common.lastUpdateTime"), UIConstants.DATETIME_WIDTH_PIXELS);
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());
-        table.setSortContainerPropertyId("name");
+        table.setSortContainerPropertyId(MessageSource.message("common.lowercase.name"));
         table.setSortAscending(true);
 
         addComponent(table);

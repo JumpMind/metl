@@ -29,6 +29,7 @@ import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.TabbedPanel;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -66,14 +67,14 @@ public class UserPanel extends VerticalLayout implements IUiPanel {
         
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
-
-        newButton = buttonBar.addButton("New", FontAwesome.PLUS);
+     
+        newButton = buttonBar.addButton(MessageSource.message("common.new"), FontAwesome.PLUS);
         newButton.addClickListener(new NewClickListener());
 
-        editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
+        editButton = buttonBar.addButton(MessageSource.message("common.lowercase.edit"), FontAwesome.EDIT);
         editButton.addClickListener(new EditClickListener());
 
-        removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
+        removeButton = buttonBar.addButton(MessageSource.message("common.remove"), FontAwesome.TRASH_O);
         removeButton.addClickListener(new RemoveClickListener());
 
         container = new BeanItemContainer<User>(User.class);
@@ -85,13 +86,13 @@ public class UserPanel extends VerticalLayout implements IUiPanel {
         table.setImmediate(true);
         table.setSelectable(true);
         table.setMultiSelect(true);
-
+        
         table.setContainerDataSource(container);
-        table.setVisibleColumns("loginId", "name", "authMethod", "lastLoginTime");
-        table.setColumnHeaders("Login ID", "Full Name", "Authentication Method", "Last Login Time");
+        table.setVisibleColumns(MessageSource.message("common.lower.loginId"), MessageSource.message("common.lower.name"),  MessageSource.message("common.authMethod"), MessageSource.message("common.lastLoginTime"));
+        table.setColumnHeaders(MessageSource.message("common.loginId"), MessageSource.message("common.full.name"), MessageSource.message("common.authentication.method"), MessageSource.message("common.last.login.time"));
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());
-        table.setSortContainerPropertyId("loginId");
+        table.setSortContainerPropertyId(MessageSource.message("common.lower.loginId"));
         table.setSortAscending(true);
 
         addComponent(table);

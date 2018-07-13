@@ -38,6 +38,7 @@ import org.jumpmind.metl.core.model.ReleasePackage;
 import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -109,15 +110,15 @@ public class EditReleasePackageDialog extends ResizableWindow {
         FormLayout form = new FormLayout();
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         form.setMargin(true);
-        nameField = new TextField("Name");
+        nameField = new TextField(MessageSource.message("common.lowercase.name"));
         nameField.setValue(releasePackage.getName() != null ? releasePackage.getName() : "");
         nameField.setReadOnly(releasePackage.isReleased());
         form.addComponent(nameField);
-        versionLabelField = new TextField("Version");
+        versionLabelField = new TextField(MessageSource.message("common.version"));
         versionLabelField.setValue(releasePackage.getVersionLabel() != null ? releasePackage.getVersionLabel() : "");
         versionLabelField.setReadOnly(releasePackage.isReleased());
         form.addComponent(versionLabelField);
-        releaseDateField = new DateField("Release Date");
+        releaseDateField = new DateField(MessageSource.message("editReleasePackageDialog.release.date"));
         releaseDateField.setValue(releasePackage.getReleaseDate() != null ? releasePackage.getReleaseDate() : null);
         releaseDateField.setReadOnly(releasePackage.isReleased());
         form.addComponent(releaseDateField);
@@ -125,7 +126,7 @@ public class EditReleasePackageDialog extends ResizableWindow {
     }
 
     protected Panel buildProjectsAndVersions(String releasePackageId) {
-        Panel projectsAndVersionsPanel = new Panel("Projects and Branches");
+        Panel projectsAndVersionsPanel = new Panel(MessageSource.message("editReleasePackageDialog.projects.branches"));
         projectsAndVersionsPanel.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
         projectsAndVersionsPanel.setSizeFull();
 
@@ -144,7 +145,7 @@ public class EditReleasePackageDialog extends ResizableWindow {
             projectLayout.addComponent(checkBox);
             //now put the project version options for each project            
             OptionGroup optionGroup = new OptionGroup();   
-            optionGroup.addStyleName("indent");
+            optionGroup.addStyleName(MessageSource.message("editReleasePackageDialog.indent"));
             List<Rppv> rppvs = configurationService.findReleasePackageProjectVersions(releasePackageId);
             Set<String> projectVersionsInReleasePackage = getListOfProjectVersionsInReleasePackages(rppvs);
             for (ProjectVersion projectVersion : project.getProjectVersions()) {
