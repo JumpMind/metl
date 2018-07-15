@@ -141,7 +141,6 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
         groupSelect.setNullSelectionAllowed(true);
         groupSelect.setMultiSelect(true);
         groupSelect.setImmediate(true);
-    //  MessageSource.message("userEditpanel.selected.groups")
         groupSelect.setLeftColumnCaption(MessageSource.message("userEditpanel.available.groups"));
         groupSelect.setRightColumnCaption(MessageSource.message("userEditpanel.selected.groups"));
         groupSelect.addValueChangeListener(new GroupChangeListener());

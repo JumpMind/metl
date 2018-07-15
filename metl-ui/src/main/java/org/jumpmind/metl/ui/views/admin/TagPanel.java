@@ -66,11 +66,11 @@ public class TagPanel extends VerticalLayout implements IUiPanel {
         
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
-      //MessageSource.message("common.color")  
+ 
         newButton = buttonBar.addButton(MessageSource.message("common.new"), FontAwesome.PLUS);
         newButton.addClickListener(new NewClickListener());
 
-        editButton = buttonBar.addButton(MessageSource.message("common.lowercase.edit"), FontAwesome.EDIT);
+        editButton = buttonBar.addButton(MessageSource.message("common.edit").toLowerCase(), FontAwesome.EDIT);
         editButton.addClickListener(new EditClickListener());
 
         removeButton = buttonBar.addButton(MessageSource.message("common.remove"), FontAwesome.TRASH_O);
@@ -88,11 +88,11 @@ public class TagPanel extends VerticalLayout implements IUiPanel {
 
         table.setContainerDataSource(container);
      
-        table.setVisibleColumns(MessageSource.message("common.name"), MessageSource.message("common.lowercase.color"));
+        table.setVisibleColumns(MessageSource.message("common.name").toLowerCase(), MessageSource.message("common.color").toLowerCase());
         table.setColumnHeaders(MessageSource.message("tagEditPanel.tag.name"), MessageSource.message("common.color"));
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());
-        table.setSortContainerPropertyId(MessageSource.message("common.lowercase.name"));
+        table.setSortContainerPropertyId(MessageSource.message("common.name").toLowerCase());
         table.setSortAscending(true);
 
         addComponent(table);
@@ -147,7 +147,7 @@ public class TagPanel extends VerticalLayout implements IUiPanel {
         public void buttonClick(ClickEvent event) {
             Tag tag = new Tag();
             TagEditPanel editPanel = new TagEditPanel(context, tag);
-            //  MessageSource.message("common.color")
+
             tabbedPanel.addCloseableTab(tag.getId(), MessageSource.message("tagEditPanel.edit.tag") , getIcon(), editPanel);
         }
     }

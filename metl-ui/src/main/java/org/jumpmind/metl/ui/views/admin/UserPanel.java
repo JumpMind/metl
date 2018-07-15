@@ -71,7 +71,7 @@ public class UserPanel extends VerticalLayout implements IUiPanel {
         newButton = buttonBar.addButton(MessageSource.message("common.new"), FontAwesome.PLUS);
         newButton.addClickListener(new NewClickListener());
 
-        editButton = buttonBar.addButton(MessageSource.message("common.lowercase.edit"), FontAwesome.EDIT);
+        editButton = buttonBar.addButton(MessageSource.message("common.edit").toLowerCase(), FontAwesome.EDIT);
         editButton.addClickListener(new EditClickListener());
 
         removeButton = buttonBar.addButton(MessageSource.message("common.remove"), FontAwesome.TRASH_O);

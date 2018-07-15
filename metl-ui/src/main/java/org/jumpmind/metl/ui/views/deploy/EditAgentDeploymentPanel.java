@@ -90,7 +90,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         cronLayout = new HorizontalLayout();
         cronLayout.setSpacing(true);
         cronLayout.setMargin(true);
-        //MessageSource.message("common.lowercase.agent")
+    
         cronLayout.addComponent(getScheduleComponent(MessageSource.message("editagentdeploymentpanel.second")));
         cronLayout.addComponent(getScheduleComponent(MessageSource.message("editagentdeploymentpanel.minute")));
         cronLayout.addComponent(getScheduleComponent(MessageSource.message("editagentdeploymentpanel.hour")));
@@ -113,7 +113,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         table.setEditable(true);
         table.setSelectable(true);
         table.setTableFieldFactory(new EditFieldFactory());
-        table.setVisibleColumns(MessageSource.message("common.lowercase.name"), MessageSource.message("common.lowercase.value"));
+        table.setVisibleColumns(MessageSource.message("common.name").toLowerCase(), MessageSource.message("common.value").toLowerCase());
         table.setColumnHeaders(MessageSource.message("common.parameter.name"), MessageSource.message("common.value"));
 
         container.addAll(agentDeployment.getAgentDeploymentParms());

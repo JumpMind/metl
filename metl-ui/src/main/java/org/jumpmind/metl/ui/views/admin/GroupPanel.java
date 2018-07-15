@@ -89,7 +89,6 @@ public class GroupPanel extends VerticalLayout implements IUiPanel {
         table.setImmediate(true);
         table.setSelectable(true);
         table.setMultiSelect(true);
-      //MessageSource.message("grouppanel.update.time")
         table.setContainerDataSource(container);
         table.setVisibleColumns(MessageSource.message("groupPanel.name"), MessageSource.message("groupPanel.createTime"), MessageSource.message("groupPanel.lastUpdateTime"));
         table.setColumnHeaders(MessageSource.message("groupPanel.Name"), MessageSource.message("groupPanel.create.time"), MessageSource.message("grouppanel.update.time"));

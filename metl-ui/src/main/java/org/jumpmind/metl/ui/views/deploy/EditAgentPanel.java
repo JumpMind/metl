@@ -180,7 +180,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
 
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
-      //  MessageSource.message("common.run")
+
         addDeploymentButton = buttonBar.addButton(MessageSource.message("common.deploy"), Icons.DEPLOYMENT);
         addDeploymentButton.addClickListener(e->new DeployDialog(context, this).show());
 
@@ -217,7 +217,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         table.setMultiSelect(true);
 
         table.setContainerDataSource(container);
-        table.setVisibleColumns(MessageSource.message("common.lowercase.name"), MessageSource.message("common.projectName"),MessageSource.message("common.projectVersionLabel"),
+        table.setVisibleColumns(MessageSource.message("common.name").toLowerCase(), MessageSource.message("common.projectName"),MessageSource.message("common.projectVersionLabel"),
         		MessageSource.message("common.loercase.type"), MessageSource.message("common.status"),  MessageSource.message("common.logLevel"), MessageSource.message("common.startType"), MessageSource.message("common.startExpression"));
         table.setColumnHeaders(MessageSource.message("common.deployment"), MessageSource.message("common.Project"), MessageSource.message("common.version"), MessageSource.message("common.type"), MessageSource.message("common.status"),
         		MessageSource.message("common.log.level"),MessageSource.message("common.start.type") ,MessageSource.message("common.start.expression") );

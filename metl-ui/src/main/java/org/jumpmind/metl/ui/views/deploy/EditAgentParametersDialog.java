@@ -80,7 +80,7 @@ class EditAgentParametersDialog extends ResizableWindow implements ValueChangeLi
         table.setEditable(true);
         table.setSelectable(true);
         table.setTableFieldFactory(new EditFieldFactory());
-        table.setVisibleColumns(MessageSource.message("common.lowercase.name"), "value");
+        table.setVisibleColumns(MessageSource.message("common.name").toLowerCase(), "value");
         table.setColumnHeaders(MessageSource.message("common.name"), "Value");
         table.addValueChangeListener(this);
         addComponent(table, 1);

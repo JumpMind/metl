@@ -96,7 +96,7 @@ public class NotificationPanel extends VerticalLayout implements IUiPanel, TextC
         table.setMultiSelect(true);
      // MessageSource.message("groupPanel.name")
         table.setContainerDataSource(container);
-        table.setVisibleColumns(MessageSource.message("notificationEditPanel.notificationLevel"), MessageSource.message("common.lowercase.name"), "notifyType", "eventType", "enabled");
+        table.setVisibleColumns(MessageSource.message("notificationEditPanel.notificationLevel"), MessageSource.message("common.name").toLowerCase(),MessageSource.message("notificationEditPanel.notifyType"), MessageSource.message("notificationEditPanel.eventType"),MessageSource.message("notificationEditPanel.enabled") );
         table.setColumnHeaders(MessageSource.message("common.level"), MessageSource.message("common.name"), MessageSource.message("notificationEditPanel.notify.type"), MessageSource.message("notificationEditPanel.event.type"), MessageSource.message("notificationEditPanel.enabled"));
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());

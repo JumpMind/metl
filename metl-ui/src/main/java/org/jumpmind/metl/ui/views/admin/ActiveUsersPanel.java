@@ -64,7 +64,6 @@ public class ActiveUsersPanel extends VerticalLayout implements IUiPanel {
         grid = new Grid();
         BeanContainer<AppSession, AppSession> container = new BeanContainer<>(AppSession.class);
         grid.setContainerDataSource(container);
-        //MessageSource.message("lastActivity")
         grid.setColumnOrder(MessageSource.message("activeUsersPanel.loginId"), MessageSource.message("activeUsersPanel.loginTime"), MessageSource.message("activeUsersPanel.lastActivity"),MessageSource.message("activeUsersPanel.userAgent") ,MessageSource.message( "activeUsersPanel.remoteUser"),MessageSource.message( "activeUsersPanel.remoteAddress"), MessageSource.message("activeUsersPanel.remoteHost"));
         grid.setSizeFull();
         List<AppSession> list =  AppSession.getAppSessions();

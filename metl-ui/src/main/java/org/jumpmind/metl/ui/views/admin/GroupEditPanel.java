@@ -87,7 +87,6 @@ public class GroupEditPanel extends VerticalLayout implements IUiPanel {
         privSelect.setNullSelectionAllowed(true);
         privSelect.setMultiSelect(true);
         privSelect.setImmediate(true);
-      //MessageSource.message("groupEditPanel.selected.privileges")
         privSelect.setLeftColumnCaption(MessageSource.message("groupEditPanel.available.privileges"));
         privSelect.setRightColumnCaption(MessageSource.message("groupEditPanel.selected.privileges"));
         privSelect.addValueChangeListener(new PrivilegeChangeListener());

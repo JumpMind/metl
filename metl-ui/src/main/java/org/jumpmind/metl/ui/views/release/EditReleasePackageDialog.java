@@ -110,7 +110,7 @@ public class EditReleasePackageDialog extends ResizableWindow {
         FormLayout form = new FormLayout();
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         form.setMargin(true);
-        nameField = new TextField(MessageSource.message("common.lowercase.name"));
+        nameField = new TextField(MessageSource.message("common.name").toLowerCase());
         nameField.setValue(releasePackage.getName() != null ? releasePackage.getName() : "");
         nameField.setReadOnly(releasePackage.isReleased());
         form.addComponent(nameField);
