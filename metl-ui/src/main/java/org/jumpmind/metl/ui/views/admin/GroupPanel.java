@@ -90,11 +90,11 @@ public class GroupPanel extends VerticalLayout implements IUiPanel {
         table.setSelectable(true);
         table.setMultiSelect(true);
         table.setContainerDataSource(container);
-        table.setVisibleColumns(MessageSource.message("groupPanel.name"), MessageSource.message("groupPanel.createTime"), MessageSource.message("groupPanel.lastUpdateTime"));
+        table.setVisibleColumns("name", "createTime", "lastUpdateTime");
         table.setColumnHeaders(MessageSource.message("groupPanel.Name"), MessageSource.message("groupPanel.create.time"), MessageSource.message("grouppanel.update.time"));
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());
-        table.setSortContainerPropertyId(MessageSource.message("groupPanel.name"));
+        table.setSortContainerPropertyId("name");
         table.setSortAscending(true);
 
         addComponent(table);

@@ -87,12 +87,12 @@ public class PluginRepositoriesPanel extends VerticalLayout implements IUiPanel 
         table.setMultiSelect(true);
 
         table.setContainerDataSource(container);
-        table.setVisibleColumns(MessageSource.message("common.name").toLowerCase(), MessageSource.message("common.url").toLowerCase(),MessageSource.message("common.lastUpdateTime"));
+        table.setVisibleColumns("name", "url", "lastUpdateTime");
         table.setColumnHeaders(MessageSource.message("common.name"), MessageSource.message("common.url"),MessageSource.message("common.updated"));
-        table.setColumnWidth(MessageSource.message("common.lastUpdateTime"), UIConstants.DATETIME_WIDTH_PIXELS);
+        table.setColumnWidth("lastUpdateTime", UIConstants.DATETIME_WIDTH_PIXELS);
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());
-        table.setSortContainerPropertyId(MessageSource.message("common.name").toLowerCase());
+        table.setSortContainerPropertyId("name");
         table.setSortAscending(true);
 
         addComponent(table);

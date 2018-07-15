@@ -217,8 +217,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         table.setMultiSelect(true);
 
         table.setContainerDataSource(container);
-        table.setVisibleColumns(MessageSource.message("common.name").toLowerCase(), MessageSource.message("common.projectName"),MessageSource.message("common.projectVersionLabel"),
-        		MessageSource.message("common.loercase.type"), MessageSource.message("common.status"),  MessageSource.message("common.logLevel"), MessageSource.message("common.startType"), MessageSource.message("common.startExpression"));
+        table.setVisibleColumns("name", "projectName", "projectVersionLabel", "type", "status", "logLevel", "startType", "startExpression");
         table.setColumnHeaders(MessageSource.message("common.deployment"), MessageSource.message("common.Project"), MessageSource.message("common.version"), MessageSource.message("common.type"), MessageSource.message("common.status"),
         		MessageSource.message("common.log.level"),MessageSource.message("common.start.type") ,MessageSource.message("common.start.expression") );
         table.addGeneratedColumn(MessageSource.message("common.status"), new StatusRenderer());
