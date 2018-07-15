@@ -121,15 +121,15 @@ public class DeployNavigator extends VerticalLayout {
         this.context = context;
         this.tabbedPanel = tabbedPanel;
  
-        setCaption(MessageSource.message("deployNavigator.navigator"));
+        setCaption("Navigator");
         setSizeFull();
-        addStyleName(MessageSource.message("deployNavigator.noborder"));
+        addStyleName("noborder");
         addStyleName(ValoTheme.MENU_ROOT);
 
         addComponent(buildMenuBar());
 
         treeTable = buildTreeTable();
-        treeTable.addStyleName(MessageSource.message("deployNavigator.noselect"));
+        treeTable.addStyleName("noselect");
         addComponent(treeTable);
         setExpandRatio(treeTable, 1);
         selectionChanged(null);

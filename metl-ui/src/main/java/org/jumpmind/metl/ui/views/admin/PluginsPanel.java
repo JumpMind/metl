@@ -89,9 +89,9 @@ public class PluginsPanel extends VerticalLayout implements IUiPanel {
         table.setMultiSelect(true);
         table.setSortEnabled(false);
         table.setContainerDataSource(container);
-        table.setVisibleColumns(MessageSource.message("pluginsPanel.artifactGroup"), MessageSource.message("pluginsPanel.artifactName"), MessageSource.message("pluginsPanel.artifactVersion"), MessageSource.message("pluginsPanel.lastUpdateTime"));
+        table.setVisibleColumns("artifactGroup", "artifactName", "artifactVersion", "lastUpdateTime");
         table.setColumnHeaders(MessageSource.message("common.group"), MessageSource.message("common.name"),  MessageSource.message("common.version"), MessageSource.message("common.updated") );
-        table.setColumnWidth(MessageSource.message("common.lastUpdateTime"), UIConstants.DATETIME_WIDTH_PIXELS);
+        table.setColumnWidth("lastUpdateTime", UIConstants.DATETIME_WIDTH_PIXELS);
         table.addValueChangeListener(e -> setButtonsEnabled());
 
         addComponent(table);

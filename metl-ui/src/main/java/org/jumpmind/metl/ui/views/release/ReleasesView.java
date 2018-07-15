@@ -127,8 +127,8 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
         grid.addSelectionListener((e) -> rowSelected(e));
         container = new BeanItemContainer<>(ReleasePackage.class);
         grid.setContainerDataSource(container);
-        grid.setColumns(MessageSource.message("common.name").toLowerCase(), MessageSource.message("releasesView.versionLabel"),MessageSource.message("releasesView.releaseDate"), MessageSource.message("releasesView.released"));
-        grid.sort(MessageSource.message("releasesView.releaseDate"), SortDirection.DESCENDING);
+        grid.setColumns("name", "versionLabel", "releaseDate", "released");
+        grid.sort("releaseDate", SortDirection.DESCENDING);
         addComponent(grid);
         setExpandRatio(grid, 1);
         progressBar = new ProgressBar(0.0f);

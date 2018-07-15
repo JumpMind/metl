@@ -92,8 +92,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         table.setImmediate(true);
         table.setSelectable(true);
         table.addItemClickListener(this);
-       // MessageSource.message("adminView.users")
-        table.addStyleName(MessageSource.message("adminView.noselect"));
+        table.addStyleName("noselect");
         table.addContainerProperty("id", String.class, null);
         table.setVisibleColumns(new Object[] { "id" });
         table.setColumnExpandRatio("id", 1);

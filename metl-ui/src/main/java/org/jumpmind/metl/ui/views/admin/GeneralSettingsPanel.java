@@ -65,7 +65,7 @@ public class GeneralSettingsPanel extends Panel implements IUiPanel {
         form.addComponent(section);
 
         addSetting(MessageSource.message("generalSettingsPanel.system.text"), GlobalSetting.SYSTEM_TEXT, "",
-        		MessageSource.message("generalSettingsPanel.set.HTML.content.to.be.displayed.in.the.top.bar.that.can.identify.a.particular.environment"))
+        		MessageSource.message("generalSettingsPanel.intro"))
                         .focus();
 
         section = new Label(MessageSource.message("generalSettingsPanel.purge.settings"));

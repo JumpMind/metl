@@ -65,10 +65,10 @@ public class AboutPanel extends VerticalLayout implements IUiPanel, IBackgroundR
 
         table = new Table();
         table.setSizeFull();
-        table.addStyleName(MessageSource.message("aboutPanel.noscroll"));
-        table.addContainerProperty(MessageSource.message("aboutPanel.common.name"), String.class, null);
-        table.setColumnWidth(MessageSource.message("aboutPanel.common.name"), 200);
-        table.addContainerProperty(MessageSource.message("aboutPanel.common.value"), String.class, null);
+        table.addStyleName("noscroll");
+        table.addContainerProperty(MessageSource.message("common.name"), String.class, null);
+        table.setColumnWidth(MessageSource.message("common.name"), 200);
+        table.addContainerProperty(MessageSource.message("common.value"), String.class, null);
         addComponent(table);
         setExpandRatio(table, 1);
         refresh();

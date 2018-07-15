@@ -70,8 +70,7 @@ public class SelectPackagePanel extends VerticalLayout {
         BeanItemContainer<ReleasePackage> container = new BeanItemContainer<>(ReleasePackage.class);
         container.addAll(configService.findReleasePackages());
         grid.setContainerDataSource(container);
-        grid.setColumns(MessageSource.message("common.name").toLowerCase(),MessageSource.message("common.versionLabel") , 
-        		MessageSource.message("common.releaseDate") );
+        grid.setColumns("name", "versionLabel", "releaseDate");
         grid.addSelectionListener((e) -> rowSelected());        
         this.addComponent(grid);
         this.setExpandRatio(grid, 1);        
