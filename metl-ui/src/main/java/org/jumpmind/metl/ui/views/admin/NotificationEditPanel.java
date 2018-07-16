@@ -102,7 +102,7 @@ public class NotificationEditPanel extends Panel implements IUiPanel {
         levelField.addValueChangeListener(new LevelFieldListener());
         form.addComponent(levelField);
 
-        linkField = new ComboBox(MessageSource.message("notificationEditPanel.linked.to"));
+        linkField = new ComboBox(MessageSource.message("notificationEditPanel.linked"));
         linkField.setNullSelectionAllowed(false);
         linkField.setImmediate(true);
         linkField.setWidth(15f, Unit.EM);
@@ -124,7 +124,7 @@ public class NotificationEditPanel extends Panel implements IUiPanel {
         };
         nameField.setValue(StringUtils.trimToEmpty(notification.getName()));
         nameField.setWidth(20f, Unit.EM);
-        nameField.setDescription( MessageSource.message("notificationEditPanel.display.name.for.the.notification"));
+        nameField.setDescription( MessageSource.message("notificationEditPanel.displayNotification"));
         form.addComponent(nameField);
         
         ImmediateUpdateTextArea recipientsField = new ImmediateUpdateTextArea(MessageSource.message("notificationEditPanel.recipients")) {
@@ -148,7 +148,7 @@ public class NotificationEditPanel extends Panel implements IUiPanel {
         };
         subjectField.setValue(StringUtils.trimToEmpty(notification.getSubject()));
         subjectField.setWidth(40f, Unit.EM);
-        subjectField.setDescription(MessageSource.message("notificationEditPanel.email.tips2"));
+        subjectField.setDescription(MessageSource.message("notificationEditPanel.emailContain"));
         form.addComponent(subjectField);
 
         messageField = new ImmediateUpdateTextArea(MessageSource.message("notificationEditPanel.message")) {
@@ -160,7 +160,7 @@ public class NotificationEditPanel extends Panel implements IUiPanel {
         messageField.setValue(StringUtils.trimToEmpty(notification.getMessage()));
         messageField.setColumns(40);
         messageField.setRows(10);
-        messageField.setDescription(MessageSource.message("notificationEditPanel.email.tips2"));
+        messageField.setDescription(MessageSource.message("notificationEditPanel.emailContain"));
         form.addComponent(messageField);
         
         CheckBox enableField = new CheckBox(MessageSource.message("notificationEditPanel.enabled"), notification.isEnabled());

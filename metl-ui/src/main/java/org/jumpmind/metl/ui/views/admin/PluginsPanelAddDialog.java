@@ -103,7 +103,7 @@ public class PluginsPanelAddDialog extends ResizableWindow {
         TabSheet tabSheet = new TabSheet();
 
         AbstractLayout searchLayout = buildSearchLayout();
-        tabSheet.addTab(searchLayout, MessageSource.message("pluginspaneladddialog.search.version"));
+        tabSheet.addTab(searchLayout, MessageSource.message("pluginsPanelAddDialog.searchVersion"));
 
         AbstractLayout uploadLayout = buildUploadLayout();
         tabSheet.addTab(uploadLayout, MessageSource.message("common.upload"));

@@ -84,7 +84,7 @@ public class LdapPanel extends Panel implements IUiPanel {
 		baseDnField.setWidth(25f, Unit.EM);
 		form.addComponent(baseDnField);
 
-		searchAttrField = new ImmediateUpdateTextField(MessageSource.message("ldapPanel.search.attribute")) {
+		searchAttrField = new ImmediateUpdateTextField(MessageSource.message("ldapPanel.searchAttribute")) {
 			private static final long serialVersionUID = 1L;
 
 			protected void save(String value) {
@@ -96,7 +96,7 @@ public class LdapPanel extends Panel implements IUiPanel {
 		searchAttrField.setWidth(25f, Unit.EM);
 		form.addComponent(searchAttrField);
 
-		securityPrincipalField = new ImmediateUpdateTextField(MessageSource.message("ldapPanel.security.principal")) {
+		securityPrincipalField = new ImmediateUpdateTextField(MessageSource.message("ldapPanel.securityPrincipal")) {
 			private static final long serialVersionUID = 1L;
 
 			protected void save(String value) {
@@ -229,7 +229,7 @@ public class LdapPanel extends Panel implements IUiPanel {
 
 		protected void addComponentsToLayout(VerticalLayout fieldLayout) {
 
-			sampleUser = new TextField(MessageSource.message("ldapPanel.user.id"));
+			sampleUser = new TextField(MessageSource.message("ldapPanel.userId"));
 			sampleUser.setNullRepresentation("");
 			sampleUser.setValidationVisible(false);
 			sampleUser.setWidth(100, Unit.PERCENTAGE);
@@ -247,7 +247,7 @@ public class LdapPanel extends Panel implements IUiPanel {
 				if (ldapAuthenticate.authenticate(sampleUser.getValue(), samplePassword.getValue(),
 						hostField.getValue(), baseDnField.getValue(), searchAttrField.getValue(),
 						securityPrincipalField.getValue())) {
-					CommonUiUtils.notify(MessageSource.message("ldapPanel.user.authentication.succeeded"));
+					CommonUiUtils.notify(MessageSource.message("ldapPanel.authSucceeded"));
 				}
 				/*
 				 * TODO fix these exceptions. Currently if the base DN is wrong, it says invalid
@@ -256,13 +256,13 @@ public class LdapPanel extends Panel implements IUiPanel {
 				 */
 			} catch (Throwable t) {
 				// MessageSource.message("ldapPanel.general.error")
-				log.warn(MessageSource.message("ldapPanel.failed.ldap.test.authentication"), t);
+				log.warn(MessageSource.message("ldapPanel.failedAuthentication"), t);
 				if (t instanceof ConsoleAuthenticationConnectionException) {
-					CommonUiUtils.notify(MessageSource.message("ldapPanel.unable.to.connect.to.network.resource"));
+					CommonUiUtils.notify(MessageSource.message("ldapPanel.unableConnectResource"));
 				} else if (t instanceof ConsoleAuthenticationCredentialException) {
 					CommonUiUtils.notify(MessageSource.message("ldapPanel.invalidPassword"));
 				} else {
-					CommonUiUtils.notify(MessageSource.message("ldapPanel.general.error") + ": " + t.getMessage(),
+					CommonUiUtils.notify(MessageSource.message("ldapPanel.generalError") + ": " + t.getMessage(),
 							Type.HUMANIZED_MESSAGE);
 				}
 			}

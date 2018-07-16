@@ -73,11 +73,11 @@ public class PluginsPanel extends VerticalLayout implements IUiPanel {
         addButton = buttonBar.addButton(MessageSource.message("common.add"), FontAwesome.PLUS);
         addButton.addClickListener(e -> addPlugin());
 
-        moveUpButton = buttonBar.addButton(MessageSource.message("pluginsPanel.move.up"), FontAwesome.ARROW_UP, e -> moveUp());
+        moveUpButton = buttonBar.addButton(MessageSource.message("pluginsPanel.moveUp"), FontAwesome.ARROW_UP, e -> moveUp());
 
-        moveDownButton = buttonBar.addButton(MessageSource.message("pluginsPanel.move.down"), FontAwesome.ARROW_DOWN, e -> moveDown());
+        moveDownButton = buttonBar.addButton(MessageSource.message("pluginsPanel.moveDown"), FontAwesome.ARROW_DOWN, e -> moveDown());
 
-        removeButton = buttonBar.addButton(MessageSource.message("pluginsPanel.purge.unused"), FontAwesome.TRASH_O, e -> purgeUnused());
+        removeButton = buttonBar.addButton(MessageSource.message("pluginsPanel.purgeUnused"), FontAwesome.TRASH_O, e -> purgeUnused());
 
         container = new BeanItemContainer<Plugin>(Plugin.class);
 

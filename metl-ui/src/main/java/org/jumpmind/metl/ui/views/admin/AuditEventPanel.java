@@ -67,7 +67,6 @@ public class AuditEventPanel extends VerticalLayout implements IUiPanel {
         grid = new Grid();
         BeanContainer<AuditEvent, AuditEvent> container = new BeanContainer<>(AuditEvent.class);
         grid.setContainerDataSource(container);
-       // MessageSource.message("aboutPanel.host.name")
         grid.setColumnOrder("createTime", "name", "eventText", "lastUpdateBy");
         grid.getColumn("createTime").setHeaderCaption("Event Time");
         grid.getColumn("name").setHeaderCaption("Event Type");

@@ -61,12 +61,12 @@ public class GroupEditPanel extends VerticalLayout implements IUiPanel {
 
         FormLayout layout = new FormLayout();
 
-        TextField nameField = new TextField(MessageSource.message("groupEditPanel.group.name"), StringUtils.trimToEmpty(group.getName()));
+        TextField nameField = new TextField(MessageSource.message("groupEditPanel.groupName"), StringUtils.trimToEmpty(group.getName()));
         nameField.addValueChangeListener(new NameChangeListener());
         layout.addComponent(nameField);
         nameField.focus();
         
-        readOnly = new CheckBox(MessageSource.message("groupEditPanel.read.only"));
+        readOnly = new CheckBox(MessageSource.message("groupEditPanel.readOnly"));
         readOnly.setEnabled(isNotBlank(group.getName()));
         readOnly.setImmediate(true);
         readOnly.setValue(group.isReadOnly());
@@ -87,8 +87,8 @@ public class GroupEditPanel extends VerticalLayout implements IUiPanel {
         privSelect.setNullSelectionAllowed(true);
         privSelect.setMultiSelect(true);
         privSelect.setImmediate(true);
-        privSelect.setLeftColumnCaption(MessageSource.message("groupEditPanel.available.privileges"));
-        privSelect.setRightColumnCaption(MessageSource.message("groupEditPanel.selected.privileges"));
+        privSelect.setLeftColumnCaption(MessageSource.message("groupEditPanel.availablePrivileges"));
+        privSelect.setRightColumnCaption(MessageSource.message("groupEditPanel.selectedPrivileges"));
         privSelect.addValueChangeListener(new PrivilegeChangeListener());
         layout.addComponent(privSelect);
 

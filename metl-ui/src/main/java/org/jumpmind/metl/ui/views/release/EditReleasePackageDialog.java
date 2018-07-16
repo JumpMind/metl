@@ -118,7 +118,7 @@ public class EditReleasePackageDialog extends ResizableWindow {
         versionLabelField.setValue(releasePackage.getVersionLabel() != null ? releasePackage.getVersionLabel() : "");
         versionLabelField.setReadOnly(releasePackage.isReleased());
         form.addComponent(versionLabelField);
-        releaseDateField = new DateField(MessageSource.message("editReleasePackageDialog.release.date"));
+        releaseDateField = new DateField(MessageSource.message("editReleasePackageDialog.releaseDate"));
         releaseDateField.setValue(releasePackage.getReleaseDate() != null ? releasePackage.getReleaseDate() : null);
         releaseDateField.setReadOnly(releasePackage.isReleased());
         form.addComponent(releaseDateField);
@@ -126,7 +126,7 @@ public class EditReleasePackageDialog extends ResizableWindow {
     }
 
     protected Panel buildProjectsAndVersions(String releasePackageId) {
-        Panel projectsAndVersionsPanel = new Panel(MessageSource.message("editReleasePackageDialog.projects.branches"));
+        Panel projectsAndVersionsPanel = new Panel(MessageSource.message("editReleasePackageDialog.projectsBranches"));
         projectsAndVersionsPanel.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
         projectsAndVersionsPanel.setSizeFull();
 

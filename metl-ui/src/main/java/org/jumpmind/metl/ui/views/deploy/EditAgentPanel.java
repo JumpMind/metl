@@ -119,13 +119,12 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         editAgentLayout.setMargin(new MarginInfo(true, false, false, true));
         editAgentLayout.addStyleName(ValoTheme.LAYOUT_HORIZONTAL_WRAPPING);
         addComponent(editAgentLayout);
-//MessageSource.message("common.execution.threads")
         Button parameterButton = new Button(MessageSource.message("common.parameters"));
         parameterButton.addClickListener(new ParameterClickListener());
         editAgentLayout.addComponent(parameterButton);
         editAgentLayout.setComponentAlignment(parameterButton, Alignment.BOTTOM_LEFT);
 
-        TextField executionThreadsField = new ImmediateUpdateTextField(MessageSource.message("common.execution.threads")) {
+        TextField executionThreadsField = new ImmediateUpdateTextField(MessageSource.message("common.executionThreads")) {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -136,7 +135,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
                     context.getOperationsService().save((AbstractObject) agent);
                     EditAgentPanel.this.context.getAgentManager().refresh(agent);
                 } catch (NumberFormatException ex) {
-                    NotifyDialog.show(MessageSource.message("editAgentPanel.number.required"),
+                    NotifyDialog.show(MessageSource.message("editAgentPanel.numberRequired"),
                     		MessageSource.message("editAgentPanel.enter"), null, Type.WARNING_MESSAGE);
                 }
             }
@@ -157,7 +156,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         editAgentLayout.setComponentAlignment(autoRefresh, Alignment.BOTTOM_LEFT);
 
         CheckBox showInExploreViewField = new CheckBox(MessageSource.message("editAgentPanel.explore"), Boolean.valueOf(agent.isShowResourcesInExploreView()));
-        showInExploreViewField.setDescription(MessageSource.message("editAgentPanel.show.view"));
+        showInExploreViewField.setDescription(MessageSource.message("editAgentPanel.showView"));
         showInExploreViewField.setImmediate(true);
         showInExploreViewField.addValueChangeListener(event -> {
             agent.setShowResourcesInExploreView(showInExploreViewField.getValue());
@@ -168,7 +167,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         editAgentLayout.setComponentAlignment(showInExploreViewField, Alignment.BOTTOM_LEFT);
 
         CheckBox allowTestFlowsField = new CheckBox(MessageSource.message("editAgentPanel.test"), Boolean.valueOf(agent.isAllowTestFlows()));
-        allowTestFlowsField.setDescription(MessageSource.message("editAgentPanel.deployed.agent"));
+        allowTestFlowsField.setDescription(MessageSource.message("editAgentPanel.deployedAgent"));
         allowTestFlowsField.setImmediate(true);
         allowTestFlowsField.addValueChangeListener(event -> {
             agent.setAllowTestFlows(allowTestFlowsField.getValue());
@@ -219,11 +218,11 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         table.setContainerDataSource(container);
         table.setVisibleColumns("name", "projectName", "projectVersionLabel", "type", "status", "logLevel", "startType", "startExpression");
         table.setColumnHeaders(MessageSource.message("common.deployment"), MessageSource.message("common.Project"), MessageSource.message("common.version"), MessageSource.message("common.type"), MessageSource.message("common.status"),
-        		MessageSource.message("common.log.level"),MessageSource.message("common.start.type") ,MessageSource.message("common.start.expression") );
-        table.addGeneratedColumn(MessageSource.message("common.status"), new StatusRenderer());
+        		MessageSource.message("common.logLevel"),MessageSource.message("common.startType") ,MessageSource.message("common.startExpression") );
+        table.addGeneratedColumn("status", new StatusRenderer());
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());
-        table.setSortContainerPropertyId(MessageSource.message("common.loercase.type"));
+        table.setSortContainerPropertyId("type");
         table.setSortAscending(true);
 
         addComponent(table);

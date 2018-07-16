@@ -100,14 +100,14 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         addItem(MessageSource.message("adminView.groups"), Icons.GROUP);
         addItem(MessageSource.message("adminView.tags"), Icons.TAG);
         addItem(MessageSource.message("adminView.rest"), Icons.REST);
-        addItem(MessageSource.message("adminView.general.settings"), Icons.SETTINGS);
-        addItem(MessageSource.message("adminView.plugin.repositories"), Icons.DATABASE);
+        addItem(MessageSource.message("adminView.generalSettings"), Icons.SETTINGS);
+        addItem(MessageSource.message("adminView.pluginRepositories"), Icons.DATABASE);
         addItem(MessageSource.message("adminView.plugins"), Icons.COMPONENT);
-        addItem(MessageSource.message("adminView.mail.server"), Icons.EMAIL);
+        addItem(MessageSource.message("adminView.mailServer"), Icons.EMAIL);
         addItem(MessageSource.message("adminView.ldap"),Icons.BOOK);
         addItem(MessageSource.message("adminView.notifications"), Icons.NOTIFICATION);
-        addItem(MessageSource.message("adminView.active.users"), FontAwesome.USERS);
-        addItem(MessageSource.message("adminView.audit.events"), FontAwesome.BARS);
+        addItem(MessageSource.message("adminView.activeUsers"), FontAwesome.USERS);
+        addItem(MessageSource.message("adminView.auditEvents"), FontAwesome.BARS);
         addItem(MessageSource.message("adminView.logging"), Icons.LOGGING);
         addItem(MessageSource.message("adminView.about"), FontAwesome.QUESTION);
         

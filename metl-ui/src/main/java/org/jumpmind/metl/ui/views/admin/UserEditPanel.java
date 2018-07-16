@@ -91,12 +91,12 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
         authField.setRequiredError( MessageSource.message("userEditpanel.tips"));
         form.addComponent(authField);
 
-        TextField loginField = new TextField(MessageSource.message("userEditpanel.login.id"), StringUtils.trimToEmpty(user.getLoginId()));
+        TextField loginField = new TextField(MessageSource.message("userEditpanel.loginId"), StringUtils.trimToEmpty(user.getLoginId()));
         form.addComponent(loginField);
         loginField.addValueChangeListener(new LoginChangeListener());
         loginField.focus();
         
-        TextField nameField = new TextField(MessageSource.message("userEditpanel.full.name"), StringUtils.trimToEmpty(user.getName()));
+        TextField nameField = new TextField(MessageSource.message("userEditpanel.fullName"), StringUtils.trimToEmpty(user.getName()));
         nameField.addValueChangeListener(new NameChangeListener());
         form.addComponent(nameField);
 
@@ -141,8 +141,8 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
         groupSelect.setNullSelectionAllowed(true);
         groupSelect.setMultiSelect(true);
         groupSelect.setImmediate(true);
-        groupSelect.setLeftColumnCaption(MessageSource.message("userEditpanel.available.groups"));
-        groupSelect.setRightColumnCaption(MessageSource.message("userEditpanel.selected.groups"));
+        groupSelect.setLeftColumnCaption(MessageSource.message("userEditpanel.availableGroups"));
+        groupSelect.setRightColumnCaption(MessageSource.message("userEditpanel.selectedGroups"));
         groupSelect.addValueChangeListener(new GroupChangeListener());
         form.addComponent(groupSelect);
 

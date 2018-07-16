@@ -151,7 +151,7 @@ public class DeployDialog extends ResizableWindow {
     protected Component buildDeployByFlow() {
         if (selectFlowsPanel == null) {
         	  
-            String introText = MessageSource.message("deployDialog.introText");
+            String introText = MessageSource.message("deployDialog.introFlows");
             selectFlowsPanel = new SelectFlowsPanel(context, introText, parentPanel.getAgent().isAllowTestFlows());
         }
         actionButton.setCaption(MessageSource.message("common.next"));
@@ -160,7 +160,7 @@ public class DeployDialog extends ResizableWindow {
 
     protected Component buildDeployByPackage() {
         if (selectPackagePanel == null) {
-            String introText = MessageSource.message("deployDialog.introText2");
+            String introText = MessageSource.message("deployDialog.introPackage");
             selectPackagePanel = new SelectPackagePanel(context, introText);            
         }
         actionButton.setCaption(MessageSource.message("common.next"));
@@ -183,7 +183,7 @@ public class DeployDialog extends ResizableWindow {
         if (isDeployByFlow() || isDeployByPackage()) {
             if (validateFlowDeploymentPanel == null) {
             
-                String introText =  MessageSource.message("deployDialog.introText3");
+                String introText =  MessageSource.message("deployDialog.introDeployment");
                 if (isDeployByPackage()) {
                     validateFlowDeploymentPanel = new ValidateFlowDeploymentPanel(
                             context, introText, getFlowsFromReleasePackages(selectPackagePanel.getSelectedPackages()),

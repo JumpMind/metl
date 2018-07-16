@@ -55,7 +55,7 @@ public class ChangePasswordDialog extends Window {
     private PasswordField validatePasswordField;
     
     public ChangePasswordDialog(ApplicationContext context) {
-        super(MessageSource.message("changePasswordDialog"));
+        super(MessageSource.message("changePasswordDialog.changePassword"));
 
         this.context = context;
 

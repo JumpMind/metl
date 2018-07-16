@@ -70,7 +70,7 @@ public class TagEditPanel extends VerticalLayout implements IUiPanel {
         nameField.addValueChangeListener(new NameChangeListener());
         nameField.focus();
 
-        ColorPicker colorPickerField = new ColorPicker(MessageSource.message("tagEditPanel.tag.color"));
+        ColorPicker colorPickerField = new ColorPicker(MessageSource.message("tagEditPanel.tagColor"));
         colorPickerField.setSwatchesVisibility(true);
         colorPickerField.setHistoryVisibility(true);
         colorPickerField.setTextfieldVisibility(false);

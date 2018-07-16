@@ -247,7 +247,7 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
             releasePackage = configurationService.findReleasePackage(releasePackage.getId());
             if (releasePackage.isReleased()) {
                 CommonUiUtils.notify(String.format(
-                		MessageSource.message("releasesView.released"),
+                		"released",
                         releasePackage.getName(), releasePackage.getVersionLabel()));
             } else {
                 releasePackage.setReleaseDate(new Date());

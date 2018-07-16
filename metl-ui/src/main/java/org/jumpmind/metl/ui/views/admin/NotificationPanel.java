@@ -73,13 +73,13 @@ public class NotificationPanel extends VerticalLayout implements IUiPanel, TextC
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
      
-        newButton = buttonBar.addButton(MessageSource.message("notificationEditPanel.new"), FontAwesome.PLUS);
+        newButton = buttonBar.addButton(MessageSource.message("notificationPanel.new"), FontAwesome.PLUS);
         newButton.addClickListener(new NewClickListener());
 
-        editButton = buttonBar.addButton(MessageSource.message("notificationEditPanel.edit"), FontAwesome.EDIT);
+        editButton = buttonBar.addButton(MessageSource.message("notificationPanel.edit"), FontAwesome.EDIT);
         editButton.addClickListener(new EditClickListener());
 
-        removeButton = buttonBar.addButton(MessageSource.message("notificationEditPanel.remove"), FontAwesome.TRASH_O);
+        removeButton = buttonBar.addButton(MessageSource.message("notificationPanel.remove"), FontAwesome.TRASH_O);
         removeButton.addClickListener(new RemoveClickListener());
 
         filterField = buttonBar.addFilter();
@@ -94,13 +94,12 @@ public class NotificationPanel extends VerticalLayout implements IUiPanel, TextC
         table.setImmediate(true);
         table.setSelectable(true);
         table.setMultiSelect(true);
-     // MessageSource.message("groupPanel.name")
         table.setContainerDataSource(container);
         table.setVisibleColumns("notificationLevel", "name", "notifyType", "eventType", "enabled");
-        table.setColumnHeaders(MessageSource.message("common.level"), MessageSource.message("common.name"), MessageSource.message("notificationEditPanel.notify.type"), MessageSource.message("notificationEditPanel.event.type"), MessageSource.message("notificationEditPanel.enabled"));
+        table.setColumnHeaders(MessageSource.message("common.level"), MessageSource.message("common.name"), MessageSource.message("notificationPanel.notifyType"), MessageSource.message("notificationPanel.eventType"), MessageSource.message("notificationPanel.enabled"));
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());
-        table.setSortContainerPropertyId(MessageSource.message("groupPanel.name"));
+        table.setSortContainerPropertyId("name");
         table.setSortAscending(true);
 
         addComponent(table);

@@ -134,7 +134,7 @@ public class LoggingPanel extends VerticalLayout implements IUiPanel, IBackgroun
         topPanelLayout.addComponent(filter);
         topPanelLayout.setComponentAlignment(filter, Alignment.BOTTOM_LEFT);
        
-        autoRefreshOn = new CheckBox(MessageSource.message("loggingPanel.auto.refresh"));
+        autoRefreshOn = new CheckBox(MessageSource.message("loggingPanel.autoRefresh"));
         autoRefreshOn.setValue(true);
         autoRefreshOn.setImmediate(true);
         topPanelLayout.addComponent(autoRefreshOn);
@@ -145,7 +145,7 @@ public class LoggingPanel extends VerticalLayout implements IUiPanel, IBackgroun
         topPanelLayout.setExpandRatio(spacer, 1);
 
         if (logFile != null && logFile.exists()) {
-            Button downloadButton = new Button(MessageSource.message("loggingPanel.download.log.file"));
+            Button downloadButton = new Button(MessageSource.message("loggingPanel.downloadLogFile"));
             
             downloadButton.addStyleName(ValoTheme.BUTTON_LINK);
             downloadButton.addStyleName(ValoTheme.BUTTON_SMALL);
@@ -158,7 +158,7 @@ public class LoggingPanel extends VerticalLayout implements IUiPanel, IBackgroun
 
         addComponent(topPanelLayout);
        
-        logPanel = new Panel(MessageSource.message("loggingPanel.log.output"));
+        logPanel = new Panel(MessageSource.message("loggingPanel.logOutput"));
         logPanel.setSizeFull();
         logView = new Label("", ContentMode.HTML);
         logView.setSizeUndefined();
@@ -176,8 +176,8 @@ public class LoggingPanel extends VerticalLayout implements IUiPanel, IBackgroun
                     return new BufferedInputStream(new FileInputStream(logFile));
                 } catch (FileNotFoundException e) {
                 	 // MessageSource.message("loggingPanel.to.download")
-                    Notification note = new Notification(MessageSource.message("loggingPanel.file.not.found"), MessageSource.message("loggingPanel.could.not.find")
-                            + logFile.getName() + MessageSource.message("loggingPanel.to.download"));
+                    Notification note = new Notification(MessageSource.message("loggingPanel.fileNotFound"), MessageSource.message("loggingPanel.notFind")
+                            + logFile.getName() + MessageSource.message("loggingPanel.download"));
                     note.show(Page.getCurrent());
                     return null;
                 }

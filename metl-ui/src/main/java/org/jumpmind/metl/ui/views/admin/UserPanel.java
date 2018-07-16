@@ -89,7 +89,7 @@ public class UserPanel extends VerticalLayout implements IUiPanel {
         
         table.setContainerDataSource(container);
         table.setVisibleColumns("loginId", "name", "authMethod", "lastLoginTime");
-        table.setColumnHeaders(MessageSource.message("common.loginId"), MessageSource.message("common.full.name"), MessageSource.message("common.authentication.method"), MessageSource.message("common.last.login.time"));
+        table.setColumnHeaders(MessageSource.message("common.loginId"), MessageSource.message("common.fullName"), MessageSource.message("common.authenticationMethod"), MessageSource.message("common.lastLoginTime"));
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());
         table.setSortContainerPropertyId("loginId");

@@ -67,13 +67,13 @@ public class PluginRepositoriesPanel extends VerticalLayout implements IUiPanel 
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        newButton = buttonBar.addButton(MessageSource.message("notificationEditPanel.add"), FontAwesome.PLUS);
+        newButton = buttonBar.addButton(MessageSource.message("pluginRepositoriesPanel.add"), FontAwesome.PLUS);
         newButton.addClickListener(new NewClickListener());
 
-        editButton = buttonBar.addButton(MessageSource.message("notificationEditPanel.edit"), FontAwesome.EDIT);
+        editButton = buttonBar.addButton(MessageSource.message("pluginRepositoriesPanel.edit"), FontAwesome.EDIT);
         editButton.addClickListener(new EditClickListener());
 
-        removeButton = buttonBar.addButton(MessageSource.message("notificationEditPanel.remove"), FontAwesome.TRASH_O);
+        removeButton = buttonBar.addButton(MessageSource.message("pluginRepositoriesPanel.remove"), FontAwesome.TRASH_O);
         removeButton.addClickListener(new RemoveClickListener());
 
         container = new BeanItemContainer<PluginRepository>(PluginRepository.class);

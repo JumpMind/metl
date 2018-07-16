@@ -88,11 +88,11 @@ public class TagPanel extends VerticalLayout implements IUiPanel {
 
         table.setContainerDataSource(container);
      
-        table.setVisibleColumns(MessageSource.message("common.name").toLowerCase(), MessageSource.message("common.color").toLowerCase());
-        table.setColumnHeaders(MessageSource.message("tagEditPanel.tag.name"), MessageSource.message("common.color"));
+        table.setVisibleColumns("name", "color");
+        table.setColumnHeaders(MessageSource.message("tagPanel.tagName"), MessageSource.message("common.color"));
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());
-        table.setSortContainerPropertyId(MessageSource.message("common.name").toLowerCase());
+        table.setSortContainerPropertyId("name");
         table.setSortAscending(true);
 
         addComponent(table);
@@ -148,7 +148,7 @@ public class TagPanel extends VerticalLayout implements IUiPanel {
             Tag tag = new Tag();
             TagEditPanel editPanel = new TagEditPanel(context, tag);
 
-            tabbedPanel.addCloseableTab(tag.getId(), MessageSource.message("tagEditPanel.edit.tag") , getIcon(), editPanel);
+            tabbedPanel.addCloseableTab(tag.getId(), MessageSource.message("tagPanel.editTag") , getIcon(), editPanel);
         }
     }
 
@@ -158,7 +158,7 @@ public class TagPanel extends VerticalLayout implements IUiPanel {
 //TODO: refresh if we want to do things like show all entities that are tagged            
 //            context.getOperationsService().refresh(tag);
             TagEditPanel editPanel = new TagEditPanel(context, tag);
-            tabbedPanel.addCloseableTab(tag.getId(), MessageSource.message("tagEditPanel.edit.tag") , getIcon(), editPanel);
+            tabbedPanel.addCloseableTab(tag.getId(), MessageSource.message("tagPanel.editTag") , getIcon(), editPanel);
         }
     }
 

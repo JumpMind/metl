@@ -59,71 +59,71 @@ public class GeneralSettingsPanel extends Panel implements IUiPanel {
         form = new FormLayout();
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
      
-        Label section = new Label(MessageSource.message("generalSettingsPanel.display.settings"));
+        Label section = new Label(MessageSource.message("generalSettingsPanel.displaySettings"));
         section.addStyleName(ValoTheme.LABEL_H3);
         section.addStyleName(ValoTheme.LABEL_COLORED);
         form.addComponent(section);
 
-        addSetting(MessageSource.message("generalSettingsPanel.system.text"), GlobalSetting.SYSTEM_TEXT, "",
+        addSetting(MessageSource.message("generalSettingsPanel.systemText"), GlobalSetting.SYSTEM_TEXT, "",
         		MessageSource.message("generalSettingsPanel.intro"))
                         .focus();
 
-        section = new Label(MessageSource.message("generalSettingsPanel.purge.settings"));
+        section = new Label(MessageSource.message("generalSettingsPanel.purgeSettings"));
         section.addStyleName(ValoTheme.LABEL_H3);
         section.addStyleName(ValoTheme.LABEL_COLORED);
         form.addComponent(section);
        
-        addSetting(MessageSource.message("generalSettingsPanel.audit.event.retention.in.days"), GlobalSetting.AUDIT_EVENT_RETENTION_IN_DAYS,
+        addSetting(MessageSource.message("generalSettingsPanel.auditRetention"), GlobalSetting.AUDIT_EVENT_RETENTION_IN_DAYS,
                 Integer.toString(GlobalSetting.DEFAULT_AUDIT_EVENT_RETENTION_IN_DAYS), "",
                 Integer.class);
         
-        section = new Label(MessageSource.message("generalSettingsPanel.auto.backup"));
+        section = new Label(MessageSource.message("generalSettingsPanel.autoBackup"));
         section.addStyleName(ValoTheme.LABEL_H3);
         section.addStyleName(ValoTheme.LABEL_COLORED);
         form.addComponent(section); 
         
-        Label instructions = new Label(MessageSource.message("generalSettingsPanel.a.restart.is.required.after.changing.these.settings"));
+        Label instructions = new Label(MessageSource.message("generalSettingsPanel.restartRequired"));
         instructions.addStyleName(ValoTheme.LABEL_LIGHT);
         form.addComponent(instructions);
        
-        addSetting(MessageSource.message("generalSettingsPanel.enable.backup"), GlobalSetting.CONFIG_BACKUP_ENABLED,
+        addSetting(MessageSource.message("generalSettingsPanel.enableBackup"), GlobalSetting.CONFIG_BACKUP_ENABLED,
                 Boolean.toString(GlobalSetting.DEFAULT_CONFIG_BACKUP_ENABLED),
                 THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART, Boolean.class);
 
-        addSetting(MessageSource.message("generalSettingsPanel.backup.cron.expression") , GlobalSetting.CONFIG_BACKUP_CRON,
+        addSetting(MessageSource.message("generalSettingsPanel.backupExpression") , GlobalSetting.CONFIG_BACKUP_CRON,
                 GlobalSetting.DEFAULT_CONFIG_BACKUP_CRON,
                 THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART, String.class);
        
-        addSetting(MessageSource.message("generalSettingsPanel.retention.in.days"), GlobalSetting.CONFIG_BACKUP_RETENTION_IN_DAYS,
+        addSetting(MessageSource.message("generalSettingsPanel.retention"), GlobalSetting.CONFIG_BACKUP_RETENTION_IN_DAYS,
                 Integer.toString(GlobalSetting.DEFAULT_CONFIG_BACKUP_RETENTION_IN_DAYS),
                 THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART, Integer.class);       
         
-        section = new Label(MessageSource.message("generalSettingsPanel.user.password.settings"));
+        section = new Label(MessageSource.message("generalSettingsPanel.passwordSettings"));
         section.addStyleName(ValoTheme.LABEL_H3);
         section.addStyleName(ValoTheme.LABEL_COLORED);
         form.addComponent(section);
 
-        addSetting(MessageSource.message("generalSettingsPanel.minimum.length"), GlobalSetting.PASSWORD_MIN_LENGTH, "6", "", Integer.class);
+        addSetting(MessageSource.message("generalSettingsPanel.minimumLength"), GlobalSetting.PASSWORD_MIN_LENGTH, "6", "", Integer.class);
     
-        addSetting(MessageSource.message("generalSettingsPanel.prohibit.reuse") , GlobalSetting.PASSWORD_PROHIBIT_PREVIOUS, "5", "",
+        addSetting(MessageSource.message("generalSettingsPanel.prohibitReuse") , GlobalSetting.PASSWORD_PROHIBIT_PREVIOUS, "5", "",
                 Integer.class);
 
-        addSetting(MessageSource.message("generalSettingsPanel.expiration.in.days") , GlobalSetting.PASSWORD_EXPIRE_DAYS, "60", "",
+        addSetting(MessageSource.message("generalSettingsPanel.expiration") , GlobalSetting.PASSWORD_EXPIRE_DAYS, "60", "",
                 Integer.class);
         
-        addSetting(MessageSource.message("generalSettingsPanel.number.of.failed.attempts") , GlobalSetting.PASSWORD_FAILED_ATTEMPTS, 
+        addSetting(MessageSource.message("generalSettingsPanel.failedAttempts") , GlobalSetting.PASSWORD_FAILED_ATTEMPTS, 
         		Integer.toString(GlobalSetting.PASSWORD_FAILED_ATTEMPTS_DEFAULT), "", Integer.class);
 
-        addSetting(MessageSource.message("generalSettingsPanel.prohibit.common.words") , GlobalSetting.PASSWORD_PROHIBIT_COMMON_WORDS, "true",
+        addSetting(MessageSource.message("generalSettingsPanel.commonWords") , GlobalSetting.PASSWORD_PROHIBIT_COMMON_WORDS, "true",
                 "", Boolean.class);
         // MessageSource.message("generalSettingsPanel.require.mixed.case") 
-        addSetting(MessageSource.message("generalSettingsPanel.require.alphanumeric") , GlobalSetting.PASSWORD_REQUIRE_ALPHANUMERIC, "true", "",
+        addSetting(MessageSource.message("generalSettingsPanel.requireAlphanumeric") , GlobalSetting.PASSWORD_REQUIRE_ALPHANUMERIC, "true", "",
                 Boolean.class);
 
-        addSetting(MessageSource.message("generalSettingsPanel.require.symbol") , GlobalSetting.PASSWORD_REQUIRE_SYMBOL, "true", "",
+        addSetting(MessageSource.message("generalSettingsPanel.requireSymbol") , GlobalSetting.PASSWORD_REQUIRE_SYMBOL, "true", "",
                 Boolean.class);
 
-        addSetting(MessageSource.message("generalSettingsPanel.require.mixed.case"), GlobalSetting.PASSWORD_REQUIRE_MIXED_CASE, "true", "",
+        addSetting(MessageSource.message("generalSettingsPanel.requireMixedCase"), GlobalSetting.PASSWORD_REQUIRE_MIXED_CASE, "true", "",
                 Boolean.class);
 
         VerticalLayout paddedLayout = new VerticalLayout();

@@ -121,7 +121,7 @@ public class DeployNavigator extends VerticalLayout {
         this.context = context;
         this.tabbedPanel = tabbedPanel;
  
-        setCaption("Navigator");
+        setCaption(MessageSource.message("deployNavigator.navigator"));
         setSizeFull();
         addStyleName("noborder");
         addStyleName(ValoTheme.MENU_ROOT);
@@ -492,8 +492,8 @@ public class DeployNavigator extends VerticalLayout {
     protected void handleDelete() {
         if (getSelectedFolder() != null) {
         	
-            ConfirmDialog.show(MessageSource.message("deployDialog.delete.folder"),
-            		MessageSource.message("deployDialog.delete.message"),
+            ConfirmDialog.show(MessageSource.message("deployDialog.deleteFolder"),
+            		MessageSource.message("deployDialog.deleteMessage"),
                     new IConfirmListener() {
 
                         private static final long serialVersionUID = 1L;
@@ -507,7 +507,7 @@ public class DeployNavigator extends VerticalLayout {
                                     context.getConfigurationService().delete(folder);
                                 } catch (Exception ex) {
                                     log.error("", ex);
-                                    CommonUiUtils.notify(MessageSource.message("deployNavigator.delete.message")+" \""
+                                    CommonUiUtils.notify(MessageSource.message("deployNavigator.deleteMessage")+" \""
                                             + folder.getName() + "\""+MessageSource.message("common.folder").toLowerCase(), Type.WARNING_MESSAGE);
                                 }
                             }
@@ -524,7 +524,7 @@ public class DeployNavigator extends VerticalLayout {
     }
  
     protected void importAgentData() {
-        ImportDialog.show(MessageSource.message("common.import.config"), MessageSource.message("deployNavigator.upload.message"), new ImportConfigurationListener());
+        ImportDialog.show(MessageSource.message("common.importConfig"), MessageSource.message("deployNavigator.uploadMessage"), new ImportConfigurationListener());
     }
     
     class ImportConfigurationListener implements IImportListener {
@@ -546,8 +546,8 @@ public class DeployNavigator extends VerticalLayout {
                 try {
                     return new ByteArrayInputStream(export.getBytes());
                 } catch (Exception e) {             
-                    log.error(MessageSource.message("deployNavigator.Failed.configuration"), e);
-                    CommonUiUtils.notify(MessageSource.message("deployNavigator.Failed.configuration"), Type.ERROR_MESSAGE);
+                    log.error("Failed to export configuration.", e);
+                    CommonUiUtils.notify(MessageSource.message("deployNavigator.FailedConfiguration"), Type.ERROR_MESSAGE);
                     return null;
                 }
 
@@ -567,7 +567,7 @@ public class DeployNavigator extends VerticalLayout {
 
         Folder folder = new Folder();
        
-        folder.setName(MessageSource.message("common.new.folder"));
+        folder.setName(MessageSource.message("common.newFolder"));
         folder.setType(FolderType.AGENT.name());
         folder.setParent(parentFolder);
 
@@ -584,7 +584,7 @@ public class DeployNavigator extends VerticalLayout {
     protected void addAgent() {
         Folder folder = getSelectedFolder();
         Agent agent = new Agent();
-        agent.setName(MessageSource.message("common.new.agent"));
+        agent.setName(MessageSource.message("common.newAgent"));
         agent.setFolder(folder);
         context.getConfigurationService().save(agent);
         context.getAgentManager().refresh(agent);
@@ -630,8 +630,8 @@ public class DeployNavigator extends VerticalLayout {
         if (obj instanceof AgentName) {
             AgentName agentName = (AgentName) obj;
           
-            ConfirmDialog.show(MessageSource.message("deployNavigator.delete.agent"),
-            		MessageSource.message("deployNavigator.delete.forward")+" '" + agentName.getName() + "' "+MessageSource.message("common.agent").toLowerCase()+"?",
+            ConfirmDialog.show(MessageSource.message("deployNavigator.deleteAgent"),
+            		MessageSource.message("deployNavigator.deleteForward")+" '" + agentName.getName() + "' "+MessageSource.message("common.agent").toLowerCase()+"?",
                     () -> {
                         Agent agent = context.getOperationsService().findAgent(agentName.getId(),
                                 false);
