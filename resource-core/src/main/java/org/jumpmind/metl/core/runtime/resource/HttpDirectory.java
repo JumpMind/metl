@@ -45,7 +45,7 @@ import com.sun.jersey.oauth.signature.OAuthRequest;
 import com.sun.jersey.oauth.signature.OAuthSecrets;
 import com.sun.jersey.oauth.signature.OAuthSignature;
 
-public class HttpDirectory implements IDirectory {
+public class HttpDirectory implements IHttpDirectory {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
