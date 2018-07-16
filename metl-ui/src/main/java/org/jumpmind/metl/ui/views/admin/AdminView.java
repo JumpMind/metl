@@ -53,7 +53,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope(value = "ui")
-@TopBarLink(category = Category.Admin, name = "Admin", id = "admin", icon = FontAwesome.GEARS, menuOrder = 10)
+@TopBarLink(category = Category.Admin, name = "π‹¿Ì‘±", id = "admin", icon = FontAwesome.GEARS, menuOrder = 10)
 public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemClickListener {
 
     private static final long serialVersionUID = 1L;
@@ -143,33 +143,33 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
             if (value != null) {
                 String id = value.toString();
                 Component panel = null;
-                if (id.equals("Users")) {
+                if (id.equals(MessageSource.message("adminView.users"))) {
                     panel = new UserPanel(context, tabbedPanel);
-                } else if (id.equals("Groups")) {
+                } else if (id.equals(MessageSource.message("adminView.groups"))) {
                     panel = new GroupPanel(context, tabbedPanel);
-                } else if (id.equals("Tags")) {
+                } else if (id.equals(MessageSource.message("adminView.tags"))) {
                     panel = new TagPanel(context, tabbedPanel);
-                } else if (id.equals("REST")) {
+                } else if (id.equals(MessageSource.message("adminView.rest"))) {
                     panel = new ApiPanel(context, tabbedPanel);
-                } else if (id.equals("General Settings")) {
+                } else if (id.equals(MessageSource.message("adminView.generalSettings"))) {
                     panel = new GeneralSettingsPanel(context, tabbedPanel);
-                } else if (id.equals("Mail Server")) {
+                } else if (id.equals(MessageSource.message("adminView.mailServer"))) {
                     panel = new MailServerPanel(context, tabbedPanel);
-                } else if (id.equals("LDAP")) {
+                } else if (id.equals(MessageSource.message("adminView.ldap"))) {
                     panel = new LdapPanel(context, tabbedPanel);
-                } else if (id.equals("Notifications")) {
+                } else if (id.equals(MessageSource.message("adminView.notifications"))) {
                     panel = new NotificationPanel(context, tabbedPanel);
-                } else if (id.equals("Logging")) {
+                } else if (id.equals(MessageSource.message("adminView.logging"))) {
                     panel = new LoggingPanel(context, tabbedPanel);
-                } else if (id.equals("Plugin Repositories")) {
+                } else if (id.equals(MessageSource.message("adminView.pluginRepositories") )) {
                     panel = new PluginRepositoriesPanel(context, tabbedPanel);                    
-                } else if (id.equals("About")) {
+                } else if (id.equals(MessageSource.message("adminView.about"))) {
                     panel = new AboutPanel(context, tabbedPanel);
-                } else if (id.equals("Plugins")) {
+                } else if (id.equals(MessageSource.message("adminView.plugins"))) {
                     panel = new PluginsPanel(context, tabbedPanel);
-                } else if (id.equals("Active Users")) {
+                } else if (id.equals(MessageSource.message("adminView.activeUsers"))) {
                     panel = new ActiveUsersPanel(context, tabbedPanel);
-                } else if (id.equals("Audit Events")) {
+                } else if (id.equals(MessageSource.message("adminView.auditEvents"))) {
                     panel = new AuditEventPanel(context, tabbedPanel);
                 }
                 tabbedPanel.addCloseableTab(id, id, table.getItemIcon(id), panel);

@@ -507,8 +507,8 @@ public class DeployNavigator extends VerticalLayout {
                                     context.getConfigurationService().delete(folder);
                                 } catch (Exception ex) {
                                     log.error("", ex);
-                                    CommonUiUtils.notify(MessageSource.message("deployNavigator.deleteMessage")+" \""
-                                            + folder.getName() + "\""+MessageSource.message("common.folder").toLowerCase(), Type.WARNING_MESSAGE);
+                                    
+                                    CommonUiUtils.notify(MessageSource.message("pageNotFound.label",  new Object[] {folder.getName()}), Type.WARNING_MESSAGE);
                                 }
                             }
                             refresh();
@@ -631,7 +631,9 @@ public class DeployNavigator extends VerticalLayout {
             AgentName agentName = (AgentName) obj;
           
             ConfirmDialog.show(MessageSource.message("deployNavigator.deleteAgent"),
-            		MessageSource.message("deployNavigator.deleteForward")+" '" + agentName.getName() + "' "+MessageSource.message("common.agent").toLowerCase()+"?",
+            		
+            		
+            		MessageSource.message("deployNavigator.deleteMessage", new Object[] {agentName.getName()}),
                     () -> {
                         Agent agent = context.getOperationsService().findAgent(agentName.getId(),
                                 false);
