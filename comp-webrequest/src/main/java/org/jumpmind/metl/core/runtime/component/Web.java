@@ -26,9 +26,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,6 +46,7 @@ import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -170,7 +169,7 @@ public class Web extends AbstractComponentRuntime {
         info("sending content to %s", path);                
         getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
         byte[] requestContent = ((BinaryMessage) inputMessage).getPayload();
-        HttpRequestBase httpRequest = buildHttpRequest(path, httpHeaders, httpDirectory, requestContent.length > 0);        
+        HttpRequestBase httpRequest = buildHttpRequest(path, httpHeaders, httpParameters, httpDirectory, requestContent.length > 0);        
         HttpEntityEnclosingRequestBase encHttpRequest = (HttpEntityEnclosingRequestBase) httpRequest;
         ByteArrayEntity requestEntity = new ByteArrayEntity(requestContent);
         encHttpRequest.setEntity(requestEntity);
@@ -185,7 +184,7 @@ public class Web extends AbstractComponentRuntime {
                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                 requestContent = replaceParameters(inputMessage, requestContent);
                 boolean hasContent = isNotBlank(requestContent);
-                HttpRequestBase httpRequest = buildHttpRequest(path, httpHeaders, httpDirectory, hasContent);
+                HttpRequestBase httpRequest = buildHttpRequest(path, httpHeaders, httpParameters, httpDirectory, hasContent);
                 if (isNotBlank(requestContent)) {
                     info("sending content to %s", path);
                     HttpEntityEnclosingRequestBase encHttpRequest = (HttpEntityEnclosingRequestBase) httpRequest;
@@ -279,7 +278,7 @@ public class Web extends AbstractComponentRuntime {
         return requestContent;
     }
 
-    protected HttpRequestBase buildHttpRequest(String path, Map<String, String> headers, IHttpDirectory httpDirectory,
+    protected HttpRequestBase buildHttpRequest(String path, Map<String, String> headers, Map<String,String> parameters, IHttpDirectory httpDirectory,
             boolean hasRequestContent) {
         HttpRequestBase request = null;
         if (httpMethod.equalsIgnoreCase(HttpDirectory.HTTP_METHOD_GET)) {
@@ -298,8 +297,14 @@ public class Web extends AbstractComponentRuntime {
             request = new HttpDelete();
         }
         try {
-            request.setURI(new URL(path).toURI());
-        } catch (MalformedURLException | URISyntaxException ex) {
+            URIBuilder builder = new URIBuilder(path);
+            if (parameters != null) {
+                for (String key : parameters.keySet()) {
+                    builder.setParameter(key, parameters.get(key));
+                }
+            }
+            request.setURI(builder.build());
+        } catch (URISyntaxException ex) {
             throw new IoException(ex);
         }
         if (headers != null) {
