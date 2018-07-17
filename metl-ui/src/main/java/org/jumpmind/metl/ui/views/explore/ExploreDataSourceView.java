@@ -23,6 +23,7 @@ package org.jumpmind.metl.ui.views.explore;
 import javax.annotation.PostConstruct;
 
 import org.jumpmind.metl.ui.common.UIConstants;
+import org.jumpmind.metl.ui.i18n.MenuLabel;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.DbProvider;
@@ -39,7 +40,7 @@ import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
 @Scope("ui")
-@TopBarLink(id = "exploreDataSources", category = Category.Explore, menuOrder = 10, name = "Êý¾Ý¿â", icon = FontAwesome.DATABASE)
+@TopBarLink(id = "exploreDataSources", category = Category.Explore, menuOrder = 10, name = MenuLabel.DATABASE, icon = FontAwesome.DATABASE)
 public class ExploreDataSourceView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = 1L;

@@ -46,6 +46,7 @@ import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.Table;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.metl.ui.common.UIConstants;
+import org.jumpmind.metl.ui.i18n.MenuLabel;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.UiComponent;
@@ -80,7 +81,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope(value = "ui")
-@TopBarLink(category = Category.Manage, name = "№ЬАн", id = "manage", icon = FontAwesome.GEARS, menuOrder = 25)
+@TopBarLink(category = Category.Manage, name = MenuLabel.MANAGE, id = "manage", icon = FontAwesome.GEARS, menuOrder = 25)
 public class ManageView extends HorizontalLayout implements View, IUiPanel, IBackgroundRefreshable<Object> {
     
     final Logger log = LoggerFactory.getLogger(getClass());

@@ -59,6 +59,7 @@ import org.jumpmind.metl.ui.diagram.Node;
 import org.jumpmind.metl.ui.diagram.NodeDoubleClickedEvent;
 import org.jumpmind.metl.ui.diagram.NodeMovedEvent;
 import org.jumpmind.metl.ui.diagram.NodeSelectedEvent;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.metl.ui.views.manage.ExecutionRunPanel;
 import org.jumpmind.util.AppUtils;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
@@ -147,7 +148,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             }
             refreshStepOnDiagram(steps);
         });
-        propertySheet.setCaption("Property Sheet");
+        propertySheet.setCaption(MessageSource.message("editFlowPanel.propertySheet"));
 
         componentPalette = new EditFlowPalette(this, context, flow.getProjectVersionId());
 
@@ -200,34 +201,34 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     protected HorizontalLayout buildButtonBar() {
         ButtonBar buttonBar = new ButtonBar();
         if (!readOnly) {
-            runButton = buttonBar.addButton("Run", Icons.RUN);
+            runButton = buttonBar.addButton(MessageSource.message("editFlowPanel.run"), Icons.RUN);
             runButton.addClickListener((event)->runFlow());
         }
 
-        settingsButton = buttonBar.addButton("Settings", FontAwesome.GEARS);
+        settingsButton = buttonBar.addButton(MessageSource.message("editFlowPanel.settings"), FontAwesome.GEARS);
         settingsButton.addClickListener((event) -> new EditFlowSettingsDialog(context, flow, readOnly).showAtSize(.75));        
 
         if (!readOnly) {
-            Button selectAllButton = buttonBar.addButton("Select All", FontAwesome.CROSSHAIRS);
+            Button selectAllButton = buttonBar.addButton(MessageSource.message("editFlowPanel.selectAll"), FontAwesome.CROSSHAIRS);
             selectAllButton.addClickListener((event)->setSelectedAll());
 
-            copyButton = buttonBar.addButton("Copy", FontAwesome.COPY);
+            copyButton = buttonBar.addButton(MessageSource.message("editFlowPanel.selectAll"), FontAwesome.COPY);
             copyButton.addClickListener((event)->copySelected());
             copyButton.setEnabled(false);
 
-            delButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
+            delButton = buttonBar.addButton(MessageSource.message("editFlowPanel.remove"), FontAwesome.TRASH_O);
             delButton.addClickListener((event)->deleteSelected());
             delButton.setEnabled(false);;
 
         }
         
-        advancedEditButton = buttonBar.addButton("Advanced Edit", FontAwesome.EDIT, e->openAdvancedEditor());
+        advancedEditButton = buttonBar.addButton(MessageSource.message("editFlowPanel.advancedEdit"), FontAwesome.EDIT, e->openAdvancedEditor());
         advancedEditButton.setEnabled(false);
 
-        Button exportButton = buttonBar.addButtonRight("Capture", FontAwesome.CAMERA, (event)->export());
+        Button exportButton = buttonBar.addButtonRight(MessageSource.message("editFlowPanel.capture"), FontAwesome.CAMERA, (event)->export());
         exportButton.setId("exportButton");
         
-        buttonBar.addButtonRight("Layout", FontAwesome.COLUMNS, (event)->toggleView());
+        buttonBar.addButtonRight(MessageSource.message("editFlowPanel.layout"), FontAwesome.COLUMNS, (event)->toggleView());
         
         return buttonBar;
     }

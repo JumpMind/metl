@@ -45,6 +45,7 @@ import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TopBarLink;
+import org.jumpmind.metl.ui.i18n.MenuLabel;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +69,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope("ui")
-@TopBarLink(id = "exploreDirectories", category = Category.Explore, menuOrder = 20, name = "Ŀ¼", icon = FontAwesome.DATABASE)
+@TopBarLink(id = "exploreDirectories", category = Category.Explore, menuOrder = 20, name = MenuLabel.DIRECTORY, icon = FontAwesome.DATABASE)
 public class ExploreDirectoryView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = 1L;

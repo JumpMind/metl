@@ -57,6 +57,7 @@ import org.jumpmind.metl.core.runtime.flow.StepRuntime;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ImmediateUpdateTogglePasswordField;
 import org.jumpmind.metl.ui.common.TabbedPanel;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextArea;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
@@ -191,7 +192,7 @@ public class PropertySheet extends AbsoluteLayout {
             }
         }
         if (components.size() != 0 && !readOnly) {
-            formLayout.addComponent(buildOptionGroup("Enabled", ENABLED, components));
+            formLayout.addComponent(buildOptionGroup(MessageSource.message("propertySheet.enabled"), ENABLED, components));
             formLayout.addComponent(buildOptionGroup("Log Input", LOG_INPUT, components));
             formLayout.addComponent(buildOptionGroup("Log Output", LOG_OUTPUT, components));
         }

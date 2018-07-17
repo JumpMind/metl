@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.reficio.ws.builder.SoapOperation;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
@@ -43,7 +44,7 @@ public class ChooseWsdlServiceOperationWindow extends Window {
 
     public ChooseWsdlServiceOperationWindow(List<SoapOperation> operations,
             final ServiceChosenListener listener) {
-        setCaption("Choose SOAP Operation");
+        setCaption(MessageSource.message("chooseWsdlServiceOperationWindow.chooseOperation"));
         setModal(true);
         setResizable(false);
         setSizeUndefined();
@@ -54,7 +55,7 @@ public class ChooseWsdlServiceOperationWindow extends Window {
         layout.setMargin(true);
         setContent(layout);
 
-        layout.addComponent(new Label("Choose the SOAP operation to use."));
+        layout.addComponent(new Label(MessageSource.message("chooseWsdlServiceOperationWindow.chooseOperationToUse")));
 
         final ListSelect field = new ListSelect();
         field.setNullSelectionAllowed(false);
@@ -91,7 +92,7 @@ public class ChooseWsdlServiceOperationWindow extends Window {
         });
         buttonLayout.addComponent(cancelButton);
 
-        Button okButton = new Button("Ok");
+        Button okButton = new Button(MessageSource.message("chooseWsdlServiceOperationWindow.ok"));
         okButton.setClickShortcut(KeyCode.ENTER);
         okButton.addClickListener(new ClickListener() {
             public void buttonClick(ClickEvent event) {

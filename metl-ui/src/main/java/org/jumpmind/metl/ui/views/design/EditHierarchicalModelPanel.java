@@ -39,6 +39,7 @@ import org.jumpmind.metl.core.model.ModelEntitySorter;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UiUtils;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.ExportDialog;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
@@ -108,22 +109,22 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         ButtonBar buttonBar1 = new ButtonBar();
         addComponent(buttonBar1);
 
-        addEntityButton = buttonBar1.addButton("Add Entity", FontAwesome.TABLE);
+        addEntityButton = buttonBar1.addButton(MessageSource.message("editHierarchicalModelPanel.addEntity"), FontAwesome.TABLE);
         addEntityButton.addClickListener(new AddEntityClickListener());
 
-        addAttributeButton = buttonBar1.addButton("Add Attr", FontAwesome.COLUMNS);
+        addAttributeButton = buttonBar1.addButton(MessageSource.message("editHierarchicalModelPanel.addAttr"), FontAwesome.COLUMNS);
         addAttributeButton.addClickListener(new AddAttributeClickListener());
 
-        editButton = buttonBar1.addButton("Edit", FontAwesome.EDIT);
+        editButton = buttonBar1.addButton(MessageSource.message("editHierarchicalModelPanel.edit"), FontAwesome.EDIT);
         editButton.addClickListener(new EditClickListener());
 
-        removeButton = buttonBar1.addButton("Remove", FontAwesome.TRASH_O);
+        removeButton = buttonBar1.addButton(MessageSource.message("editHierarchicalModelPanel.remove"), FontAwesome.TRASH_O);
         removeButton.addClickListener(new RemoveClickListener());
 
-        importButton = buttonBar1.addButtonRight("Import ...", FontAwesome.UPLOAD,
+        importButton = buttonBar1.addButtonRight(MessageSource.message("editHierarchicalModelPanel.import"), FontAwesome.UPLOAD,
                 new ImportClickListener());
 
-        buttonBar1.addButtonRight("Export...", FontAwesome.DOWNLOAD, (e) -> export());
+        buttonBar1.addButtonRight(MessageSource.message("editHierarchicalModelPanel.export"), FontAwesome.DOWNLOAD, (e) -> export());
 
         treeTable.setSizeFull();
         treeTable.setCacheRate(100);
@@ -158,7 +159,7 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
                                 obj.setName(newName);
                                 EditHierarchicalModelPanel.this.context.getConfigurationService().save(obj);
                             } else {
-                                NotifyDialog.show("Name needs to be unique", "Name needs to be unique", null, Type.WARNING_MESSAGE);
+                                NotifyDialog.show(MessageSource.message("editHierarchicalModelPanel.nameUnique"), MessageSource.message("editHierarchicalModelPanel.nameUnique"), null, Type.WARNING_MESSAGE);
                             }
                         };
                     };
@@ -277,13 +278,13 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         HorizontalLayout hlayout = new HorizontalLayout();
         addComponent(hlayout);
 
-        Button collapseAll = new Button("Collapse All");
+        Button collapseAll = new Button(MessageSource.message("editHierarchicalModelPanel.collapseAll"));
         collapseAll.addStyleName(ValoTheme.BUTTON_LINK);
         collapseAll.addStyleName(ValoTheme.BUTTON_SMALL);
         hlayout.addComponent(collapseAll);
         collapseAll.addClickListener(e -> collapseAll());
 
-        Button expandAll = new Button("Expand All");
+        Button expandAll = new Button(MessageSource.message("editHierarchicalModelPanel.expandAll"));
         expandAll.addStyleName(ValoTheme.BUTTON_LINK);
         expandAll.addStyleName(ValoTheme.BUTTON_SMALL);
         hlayout.addComponent(expandAll);
@@ -569,8 +570,8 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         public void buttonClick(ClickEvent event) {
 
             Set<Object> selectedItems = getSelectedItems();
-            ConfirmDialog.show("Delete?",
-                    "Are you sure you want to delete the " + selectedItems.size() + " selected items?",
+            ConfirmDialog.show(MessageSource.message("editHierarchicalModelPanel.delete"),
+            		MessageSource.message("editHierarchicalModelPanel.deleteConfirm", new Object[] {selectedItems.size()}),
                     ()->{
                     		deleteSelectedItems(selectedItems);
                     		return true;                    	
