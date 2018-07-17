@@ -44,6 +44,7 @@ import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.DbProvider;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.symmetric.csv.CsvReader;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.jumpmind.vaadin.ui.sqlexplorer.DbTree;
@@ -110,7 +111,7 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
     String encoding = "UTF-8";
 
     public TableColumnSelectWindow(ApplicationContext context, Model model) {
-        super("Import Model Entity and Attributes");
+        super(MessageSource.message("tableColumnSelectWindow.importModelAndAttributes"));
         this.context = context;
         this.model = model;
 
@@ -121,9 +122,9 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
         layout.setSpacing(true);
         layout.setMargin(true);
         layout.setSizeFull();
-        layout.addComponent(new Label("Import Entity and Attributes from a database, csv file or source file header row into the model."));
+        layout.addComponent(new Label(MessageSource.message("tableColumnSelectWindow.importModelAndAttributesDatabase")));
 
-        optionGroup = new OptionGroup("Select the location of the model.");
+        optionGroup = new OptionGroup(MessageSource.message("tableColumnSelectWindow.selectModel"));
         optionGroup.addItem(OPTION_DB);
         optionGroup.addItem(OPTION_REL_FILE);
         optionGroup.addItem(OPTION_FILE_HEADER_ROW);
@@ -149,12 +150,12 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
         relCsvUpload.addSucceededListener(this);
         relCsvUpload.setButtonCaption(null);
 
-        fileHeaderEntity = new TextField("Entity Name");
+        fileHeaderEntity = new TextField(MessageSource.message("tableColumnSelectWindow.entityName"));
         fileHeaderEntity.setColumns(25);
         fileHeaderEntity.setNullRepresentation("");
         fileHeaderEntity.setRequired(true);
 
-        fileHeaderDelimiter = new TextField("Header Row Delimiter", ",");
+        fileHeaderDelimiter = new TextField(MessageSource.message("tableColumnSelectWindow.headerRowDelimiter"), ",");
         fileHeaderDelimiter.setColumns(5);
         fileHeaderDelimiter.setNullRepresentation("");
         fileHeaderDelimiter.setRequired(true);
@@ -168,9 +169,9 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
         rebuildOptionLayout();
         addComponent(layout, 1);
 
-        Button refreshButton = new Button("Refresh");
-        Button cancelButton = new Button("Cancel");
-        Button selectButton = new Button("Import");
+        Button refreshButton = new Button(MessageSource.message("tableColumnSelectWindow.refresh"));
+        Button cancelButton = new Button(MessageSource.message("tableColumnSelectWindow.cancel"));
+        Button selectButton = new Button(MessageSource.message("tableColumnSelectWindow.import"));
         addComponent(buildButtonFooter(refreshButton, cancelButton, selectButton));
 
         cancelButton.addClickListener(event -> close());
