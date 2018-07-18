@@ -299,7 +299,7 @@ public class AppUI extends UI implements LoginListener {
         appCtx.getConfigurationService().save(new AuditEvent(EventType.LOGIN, "Logged in", user.getLoginId()));
         user.setLastLoginTime(new Date());
         appCtx.getOperationsService().save(user);
-        viewManager = ctx.getBean(ViewManager.class);
+        viewManager = getViewManager();
         viewManager.init(this, contentArea);
 
         TopBar menu = new TopBar(viewManager, appCtx);
@@ -326,4 +326,7 @@ public class AppUI extends UI implements LoginListener {
         root.setExpandRatio(contentArea, 1);
     }
 
+    protected ViewManager getViewManager() {
+        return getWebApplicationContext().getBean(ViewManager.class);
+    }
 }

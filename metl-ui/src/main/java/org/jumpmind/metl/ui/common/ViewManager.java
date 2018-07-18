@@ -124,4 +124,11 @@ public class ViewManager implements Serializable {
         defaultView = menuId;
     }
 
+    protected Navigator getNavigator() {
+        return this.navigator;
+    }
+    
+    protected List<View> getViews() {
+        return this.views;
+    }
 }

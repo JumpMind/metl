@@ -39,8 +39,11 @@ import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainer
 public class Develop {
 
     public static void main(String[] args) throws Exception {
-        
-        System.out.println(IOUtils.toString(new FileInputStream("../metl-server/src/main/resources/Metl.asciiart")));
+        String pathPrefix = "../";
+        if (args.length > 0) {
+            pathPrefix = args[0];
+        }
+        System.out.println(IOUtils.toString(new FileInputStream(pathPrefix + "metl-server/src/main/resources/Metl.asciiart")));
 
         new File(System.getProperty("java.io.tmpdir")).mkdirs();
         new File("working").mkdirs();
@@ -54,8 +57,8 @@ public class Develop {
         webapp.setParentLoaderPriority(true);
         webapp.setConfigurationDiscovered(true);
         webapp.setContextPath("/metl");
-        webapp.setWar("../metl-war/src/main/webapp");
-        webapp.setResourceBase("../metl-war/src/main/webapp");
+        webapp.setWar(pathPrefix + "metl-war/src/main/webapp");
+        webapp.setResourceBase(pathPrefix + "metl-war/src/main/webapp");
 
         ConcurrentHashMap<String, ConcurrentHashSet<String>> map = new ClassInheritanceMap();
         ConcurrentHashSet<String> set = new ConcurrentHashSet<>();
@@ -71,6 +74,10 @@ public class Develop {
         server.start();
         server.join();
 
+    }
+    
+    public static String getPathPrefix() {
+        return "../";
     }
 
 }

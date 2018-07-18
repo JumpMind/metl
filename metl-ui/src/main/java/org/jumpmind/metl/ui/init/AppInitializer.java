@@ -39,6 +39,7 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -115,7 +116,17 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         ServletRegistration.Dynamic apidocs = servletContext.addServlet("docs", DefaultServlet.class);
         apidocs.addMapping("/api.html", "/ws-api.html", "/doc/*", "/ace/*");
         
-        ServletRegistration.Dynamic vaadin = servletContext.addServlet("vaadin", AppServlet.class);
+        Class appServletClazz = AppServlet.class;
+        String appServletString = System.getProperty("metl.app.servlet");
+        try {
+            if (appServletString != null) {
+                appServletClazz = Class.forName(appServletString);
+                applicationContext.scan("com.jumpmind.metl");
+            }
+        } catch (ClassNotFoundException cnfe) {
+            System.out.println("Unable to load app servlet " + appServletString);
+        }
+        ServletRegistration.Dynamic vaadin = servletContext.addServlet("vaadin", appServletClazz);
         vaadin.setAsyncSupported(true);
         vaadin.setInitParameter("org.atmosphere.cpr.asyncSupport", JSR356AsyncSupport.class.getName());
         vaadin.setInitParameter("beanName", "appUI");

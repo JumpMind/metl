@@ -192,4 +192,18 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
     @Override
     public void selected() {        
     }
+
+    protected ApplicationContext getContext() {
+        return context;
+    }
+
+    protected TabbedPanel getTabbedPanel() {
+        return tabbedPanel;
+    }
+
+    protected TreeTable getTable() {
+        return table;
+    }
+    
+    
 }
