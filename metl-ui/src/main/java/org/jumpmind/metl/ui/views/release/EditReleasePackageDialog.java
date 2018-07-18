@@ -196,8 +196,8 @@ public class EditReleasePackageDialog extends ResizableWindow {
     }
     
     protected HorizontalLayout buildButtonBar() {
-        Button cancelButton = new Button("Cancel", e->cancel());
-        Button saveButton = new Button("Save", e->save());
+        Button cancelButton = new Button(MessageSource.message("common.cancel"), e->cancel());
+        Button saveButton = new Button(MessageSource.message("common.save"), e->save());
         saveButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
         saveButton.setClickShortcut(KeyCode.ENTER);
         return buildButtonFooter(cancelButton, saveButton);        

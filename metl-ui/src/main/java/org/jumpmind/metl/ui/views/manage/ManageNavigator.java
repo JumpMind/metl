@@ -41,6 +41,7 @@ import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Icons;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
@@ -59,9 +60,9 @@ import com.vaadin.ui.themes.ValoTheme;
 @SuppressWarnings("serial")
 public class ManageNavigator extends Panel {
 
-    protected static final Name CURRENTLY_RUNNING = new Name("Currently Running");
+    protected static final Name CURRENTLY_RUNNING = new Name(MessageSource.message("manageNavigator.currentlyRunning"));
     
-    protected static final Name IN_ERROR = new Name("In Error");
+    protected static final Name IN_ERROR = new Name(MessageSource.message("manageNavigator.inError"));
 
     TreeTable treeTable;
 
@@ -92,10 +93,10 @@ public class ManageNavigator extends Panel {
         content.setExpandRatio(treeTable, 1);
 
         agentsFolder = new Folder();
-        agentsFolder.setName("Agents");
+        agentsFolder.setName(MessageSource.message("manageNavigator.agents"));
 
         flowsFolder = new Folder();
-        flowsFolder.setName("Flows");
+        flowsFolder.setName(MessageSource.message("manageNavigator.flows"));
     }
 
     public void refresh() {

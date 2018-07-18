@@ -112,13 +112,13 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
         setSizeFull();
         setMargin(false);
         ButtonBar buttonBar = new ButtonBar();
-        addButton = buttonBar.addButton("Add", FontAwesome.PLUS, e -> add());
-        editButton = buttonBar.addButton("Edit", FontAwesome.EDIT, e -> edit());
-        exportButton = buttonBar.addButton("Export", FontAwesome.DOWNLOAD, e -> export());
-        archiveButton = buttonBar.addButton("Archive", FontAwesome.ARCHIVE, e -> archive());
+        addButton = buttonBar.addButton(MessageSource.message("releasesView.add"), FontAwesome.PLUS, e -> add());
+        editButton = buttonBar.addButton(MessageSource.message("releasesView.edit"), FontAwesome.EDIT, e -> edit());
+        exportButton = buttonBar.addButton(MessageSource.message("releasesView.export"), FontAwesome.DOWNLOAD, e -> export());
+        archiveButton = buttonBar.addButton(MessageSource.message("releasesView.archive"), FontAwesome.ARCHIVE, e -> archive());
         // TODO add support for the archive button
         archiveButton.setVisible(false);
-        finalizeButton = buttonBar.addButton("Finalize", FontAwesome.CUBE, e -> finalize());
+        finalizeButton = buttonBar.addButton(MessageSource.message("releasesView.finalize"), FontAwesome.CUBE, e -> finalize());
         addComponent(buttonBar);
         enableDisableButtonsForSelectionSize(0);
         grid = new Grid();
@@ -214,9 +214,10 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
                     configurationService.save(projectVersion);
                 }
             } else {
-                CommonUiUtils.notify(String.format(String.format(
-                		MessageSource.message("releasesView.intro")  ,
+            	CommonUiUtils.notify(String.format(String.format(
+                        "Release Package %s is not released, it cannot be archived.  Skipping this release package",
                         releasePackage.getName())), Type.WARNING_MESSAGE);
+               
             }
         }
     }
@@ -230,10 +231,10 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
     }
 
     protected void finalize() {
-        ConfirmDialog.show(MessageSource.message("releasesView.release.question2"),
-        		MessageSource.message("releasesView.release.question2"), () -> {
-                    InProgressDialog<Object> dialog = new InProgressDialog<Object>(MessageSource.message("releasesView.release.package"), 
-                            new ReleaseWorker(), context.getBackgroundRefresherService(), MessageSource.message("releasesView.release.package.failed"));
+        ConfirmDialog.show(MessageSource.message("releasesView.release"),
+        		MessageSource.message("releasesView.releaseConfirm"), () -> {
+                    InProgressDialog<Object> dialog = new InProgressDialog<Object>(MessageSource.message("releasesView.finalizingRelease"), 
+                            new ReleaseWorker(), context.getBackgroundRefresherService(), MessageSource.message("releasesView.finalizingReleaseConfirm"));
                     dialog.show();
                     return true;
                 });                

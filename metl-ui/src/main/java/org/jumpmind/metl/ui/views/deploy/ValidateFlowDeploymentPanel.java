@@ -31,6 +31,7 @@ import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 
 import com.vaadin.annotations.StyleSheet;
 import com.vaadin.data.util.BeanItemContainer;
@@ -91,17 +92,17 @@ public class ValidateFlowDeploymentPanel extends VerticalLayout {
     protected void buildGridHeader() {
         HeaderRow hdr1 = grid.prependHeaderRow();
         HeaderCell newDeployHdr = hdr1.join("newDeployName","newDeployVersion","newDeployType");
-        newDeployHdr.setText("New Deployment");
+        newDeployHdr.setText(MessageSource.message("validateFlowDeploymentPanel.newDeployment"));
         newDeployHdr.setStyleName("header-center");
         HeaderCell existingDeployHdr = hdr1.join("existingDeployName","existingDeployVersion","existingDeployType");
-        existingDeployHdr.setText("Existing Deployment");
+        existingDeployHdr.setText(MessageSource.message("validateFlowDeploymentPanel.existingDeployment"));
         existingDeployHdr.setStyleName("header-center");
-        grid.getColumn("newDeployName").setHeaderCaption("Name");
-        grid.getColumn("newDeployVersion").setHeaderCaption("Version");
-        grid.getColumn("newDeployType").setHeaderCaption("Type");
-        grid.getColumn("existingDeployName").setHeaderCaption("Name");
-        grid.getColumn("existingDeployVersion").setHeaderCaption("Version");
-        grid.getColumn("existingDeployType").setHeaderCaption("Type");
+        grid.getColumn("newDeployName").setHeaderCaption(MessageSource.message("validateFlowDeploymentPanel.name"));
+        grid.getColumn("newDeployVersion").setHeaderCaption(MessageSource.message("validateFlowDeploymentPanel.version"));
+        grid.getColumn("newDeployType").setHeaderCaption(MessageSource.message("validateFlowDeploymentPanel.type"));
+        grid.getColumn("existingDeployName").setHeaderCaption(MessageSource.message("validateFlowDeploymentPanel.name"));
+        grid.getColumn("existingDeployVersion").setHeaderCaption(MessageSource.message("validateFlowDeploymentPanel.version"));
+        grid.getColumn("existingDeployType").setHeaderCaption(MessageSource.message("validateFlowDeploymentPanel.type"));
     }
     
     protected void buildGrid() {
