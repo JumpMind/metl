@@ -46,6 +46,7 @@ import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.metl.ui.i18n.MenuLabel;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +87,7 @@ public class ExploreDirectoryView extends VerticalLayout implements View {
         setMargin(false);
 
         ButtonBar buttonBar = new ButtonBar();
-        Button refreshButton = buttonBar.addButton("Refresh", FontAwesome.REFRESH);
+        Button refreshButton = buttonBar.addButton(MessageSource.message("exploreDirectoryView.refresh"), FontAwesome.REFRESH);
         refreshButton.addClickListener(event -> refresh());
         addComponent(buttonBar);
 

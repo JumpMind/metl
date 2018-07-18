@@ -56,6 +56,7 @@ import org.jumpmind.metl.ui.common.UiUtils;
 import org.jumpmind.metl.ui.diagram.Node;
 import org.jumpmind.metl.ui.diagram.NodeSelectedEvent;
 import org.jumpmind.metl.ui.diagram.RunDiagram;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.util.AppUtils;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
@@ -197,7 +198,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         topBar.addComponent(right);
         topBar.setComponentAlignment(right, Alignment.MIDDLE_RIGHT);
 
-        Label limitLabel = new Label("Max Log Messages To Show :");
+        Label limitLabel = new Label(MessageSource.message("executionRunPanel.maxLogMessages"));
         right.addComponent(limitLabel);
         right.setComponentAlignment(limitLabel, Alignment.MIDDLE_RIGHT);
         limitField = new ImmediateUpdateTextField(null) {
@@ -218,7 +219,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         right.addComponent(limitField);
         right.setComponentAlignment(limitField, Alignment.MIDDLE_RIGHT);
 
-        showDiagramCheckbox = new CheckBox("Show Diagram");
+        showDiagramCheckbox = new CheckBox(MessageSource.message("executionRunPanel.showDiagram"));
         showDiagramCheckbox.addValueChangeListener((event) -> {
             if (showDiagramCheckbox.getValue()) {
                 showDiagram();
@@ -233,11 +234,11 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
 
         ButtonBar buttonBar = new ButtonBar();
 
-        rerunButton = buttonBar.addButton("Rerun", Icons.RUN, event -> rerun());
+        rerunButton = buttonBar.addButton(MessageSource.message("executionRunPanel.rerun"), Icons.RUN, event -> rerun());
         rerunButton.setVisible(false);
-        removeButton = buttonBar.addButton("Remove", Icons.DELETE, event -> remove());
+        removeButton = buttonBar.addButton(MessageSource.message("executionRunPanel.remove"), Icons.DELETE, event -> remove());
         removeButton.setVisible(false);
-        cancelButton = buttonBar.addButton("Cancel", Icons.CANCEL, event -> cancel());
+        cancelButton = buttonBar.addButton(MessageSource.message("common.cancel"), Icons.CANCEL, event -> cancel());
 
         addComponent(buttonBar);
 
@@ -279,25 +280,25 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         stepTable.setSelectionMode(SelectionMode.SINGLE);
         stepTable.setImmediate(true);
         stepTable.setSizeFull();
-        stepTable.addColumn("componentName", String.class).setHeaderCaption("Component Name")
+        stepTable.addColumn("componentName", String.class).setHeaderCaption(MessageSource.message("executionRunPanel.componentName"))
                 .setWidth(250);
-        stepTable.addColumn("threadNumber", Integer.class).setHeaderCaption("Thread").setWidth(100);
+        stepTable.addColumn("threadNumber", Integer.class).setHeaderCaption(MessageSource.message("executionRunPanel.thread")).setWidth(100);
         stepTable.addColumn("status", String.class).setHeaderCaption("Status").setWidth(120);
-        stepTable.addColumn("payloadReceived", Integer.class).setHeaderCaption("Payload Recvd")
+        stepTable.addColumn("payloadReceived", Integer.class).setHeaderCaption(MessageSource.message("executionRunPanel.payloadRecvd"))
                 .setWidth(120);
-        stepTable.addColumn("messagesReceived", Integer.class).setHeaderCaption("Msgs Recvd")
+        stepTable.addColumn("messagesReceived", Integer.class).setHeaderCaption(MessageSource.message("executionRunPanel.msgsRecvd"))
                 .setWidth(100);
-        stepTable.addColumn("messagesProduced", Integer.class).setHeaderCaption("Msgs Sent")
+        stepTable.addColumn("messagesProduced", Integer.class).setHeaderCaption(MessageSource.message("executionRunPanel.msgsSent"))
                 .setWidth(100);
-        stepTable.addColumn("payloadProduced", Integer.class).setHeaderCaption("Payload Sent")
+        stepTable.addColumn("payloadProduced", Integer.class).setHeaderCaption(MessageSource.message("executionRunPanel.payloadSent"))
                 .setWidth(120);
-        stepTable.addColumn("startTime", Date.class).setHeaderCaption("Start").setWidth(120)
+        stepTable.addColumn("startTime", Date.class).setHeaderCaption(MessageSource.message("executionRunPanel.start")).setWidth(120)
                 .setMaximumWidth(170).setRenderer(new DateRenderer(UIConstants.TIME_FORMAT));
-        stepTable.addColumn("endTime", Date.class).setHeaderCaption("End").setWidth(120)
+        stepTable.addColumn("endTime", Date.class).setHeaderCaption(MessageSource.message("executionRunPanel.end")).setWidth(120)
                 .setMaximumWidth(170).setRenderer(new DateRenderer(UIConstants.TIME_FORMAT));
-        stepTable.addColumn("handleDurationString", String.class).setHeaderCaption("Run Duration")
+        stepTable.addColumn("handleDurationString", String.class).setHeaderCaption(MessageSource.message("executionRunPanel.runDuration"))
                 .setWidth(140);
-        stepTable.addColumn("queueDurationString", String.class).setHeaderCaption("Wait Duration")
+        stepTable.addColumn("queueDurationString", String.class).setHeaderCaption(MessageSource.message("executionRunPanel.waitDuration"))
                 .setWidth(140);
         stepTable.setContainerDataSource(stepContainer);
         stepTable.addSelectionListener(event -> {
@@ -327,11 +328,11 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
 
 
         logTable = new Grid();
-        logTable.addColumn("level", String.class).setHeaderCaption("Level").setWidth(110)
+        logTable.addColumn("level", String.class).setHeaderCaption(MessageSource.message("executionRunPanel.level")).setWidth(110)
                 .setMaximumWidth(200);
-        logTable.addColumn("createTime", Date.class).setHeaderCaption("Time").setWidth(120)
+        logTable.addColumn("createTime", Date.class).setHeaderCaption(MessageSource.message("executionRunPanel.time")).setWidth(120)
                 .setMaximumWidth(200).setRenderer(new DateRenderer(UIConstants.TIME_FORMAT));
-        logTable.addColumn("logText", String.class).setHeaderCaption("Message").setExpandRatio(1);
+        logTable.addColumn("logText", String.class).setHeaderCaption(MessageSource.message("executionRunPanel.message")).setExpandRatio(1);
         logTable.setContainerDataSource(logContainer);
         logTable.setSizeFull();
         logTable.addItemClickListener(event -> logTableCellClicked(logTable, event));
@@ -392,7 +393,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         statusBar.setComponentAlignment(status, Alignment.MIDDLE_LEFT);
         logLayout.addComponent(statusBar);
 
-        downloadLink = new Button("Download", FontAwesome.DOWNLOAD);
+        downloadLink = new Button(MessageSource.message("executionRunPanel.download"), FontAwesome.DOWNLOAD);
         downloadLink.addClickListener(e -> download());
         downloadLink.addStyleName(ValoTheme.BUTTON_LINK);
         statusBar.addComponent(downloadLink);
@@ -427,7 +428,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
                         return new FileInputStream(file);
                     } catch (Exception e) {
                         log.error("Failed to download log file", e);
-                        CommonUiUtils.notify("Failed to download log file", Type.ERROR_MESSAGE);
+                        CommonUiUtils.notify(MessageSource.message("executionRunPanel.failDownloadLog"), Type.ERROR_MESSAGE);
                         return null;
                     }
                 }
@@ -559,7 +560,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
     }
 
     protected void remove() {
-        ConfirmDialog.show("Delete Execution?", "Are you sure you want to delete this execution?",
+        ConfirmDialog.show(MessageSource.message("executionRunPanel.deleteExecution"), MessageSource.message("executionRunPanel.deleteExecutionConfirm"),
                 () -> {
                     context.getExecutionService().deleteExecution(executionId);
                     parentTabSheet.closeTab(executionId);
@@ -569,7 +570,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
     }
 
     protected void cancel() {
-        ConfirmDialog.show("Cancel Execution?", "Are you sure you want to cancel this execution?",
+        ConfirmDialog.show(MessageSource.message("executionRunPanel.cancelExecution"), MessageSource.message("executionRunPanel.cancelExecutionConfirm"),
                 () -> {
                     context.getAgentManager().cancel(executionId);
                     cancelButton.setEnabled(false);

@@ -54,9 +54,9 @@ import com.vaadin.ui.themes.ValoTheme;
 
 public class DeployDialog extends ResizableWindow {
 
-    private static final String DEPLOY_BY_FLOW = "By Flow";
+    private static final String DEPLOY_BY_FLOW = MessageSource.message("deployDialog.byFlow");
 
-    private static final String DEPLOY_BY_PACKAGE = "By Package";
+    private static final String DEPLOY_BY_PACKAGE = MessageSource.message("deployDialog.byPackage");
 
     private static final long serialVersionUID = 1L;
 
@@ -83,7 +83,7 @@ public class DeployDialog extends ResizableWindow {
     ValidateFlowDeploymentPanel validateFlowDeploymentPanel;
 
     public DeployDialog(ApplicationContext context, EditAgentPanel parentPanel) {
-        super("Deploy");
+        super(MessageSource.message("common.deploy"));
         this.context = context;
         this.configurationService = context.getConfigurationService();
         this.operationsService = context.getOperationsService();
@@ -104,7 +104,7 @@ public class DeployDialog extends ResizableWindow {
         layout.setSizeFull();
         addComponent(layout, 1);
 
-        deployByOptionGroup = new OptionGroup("Deployment Type:");
+        deployByOptionGroup = new OptionGroup(MessageSource.message("deployDialog.deploymentType"));
         deployByOptionGroup.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
         deployByOptionGroup.addItem(DEPLOY_BY_PACKAGE);
         deployByOptionGroup.addItem(DEPLOY_BY_FLOW);

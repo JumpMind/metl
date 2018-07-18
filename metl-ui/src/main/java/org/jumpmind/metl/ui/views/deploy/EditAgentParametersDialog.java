@@ -58,7 +58,7 @@ class EditAgentParametersDialog extends ResizableWindow implements ValueChangeLi
     Button removeButton;
 
     public EditAgentParametersDialog(final ApplicationContext context, final Agent agent) {
-        super("Agent Parameters");
+        super(MessageSource.message("ditAgentParametersDialog.agentParameters"));
         this.context = context;
         this.agent = agent;
 

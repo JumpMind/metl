@@ -47,6 +47,7 @@ import org.jumpmind.metl.ui.common.Table;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.metl.ui.i18n.MenuLabel;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.UiComponent;
@@ -113,7 +114,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     @SuppressWarnings("serial")
     @PostConstruct
     protected void init() {
-        viewButton = new Button("View Log");
+        viewButton = new Button(MessageSource.message("manageView.viewLog"));
         viewButton.setEnabled(false);
         viewButton.addClickListener(new ClickListener() {
             public void buttonClick(ClickEvent event) {
@@ -126,8 +127,8 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         HorizontalLayout header = new HorizontalLayout();
         header.addComponent(viewButton);
         header.setComponentAlignment(viewButton, Alignment.BOTTOM_RIGHT);
-
-        statusSelect = new ComboBox("Status");
+ 
+        statusSelect = new ComboBox(MessageSource.message("manageView.status"));
         statusSelect.setNewItemsAllowed(false);
         statusSelect.setNullSelectionAllowed(false);
         statusSelect.addItem(ANY);
@@ -147,7 +148,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
         HorizontalLayout limitLayout = new HorizontalLayout();
         limitLayout.setSpacing(true);
-        Label limitLabel = new Label("Limit:");
+        Label limitLabel = new Label(MessageSource.message("manageView.limit"));
         limitLayout.addComponent(limitLabel);
         limitLayout.setComponentAlignment(limitLabel, Alignment.MIDDLE_CENTER);
         TextField limitField = new TextField(null, String.valueOf(DEFAULT_LIMIT));
