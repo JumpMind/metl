@@ -16,6 +16,6 @@ public interface MenuLabel {
 	
 	public static final String SERVE = "\u670d\u52a1";
 	
-	public static final String MANAGE = "\u7ba1\u7406\u5458";
+	public static final String MANAGE = "\u7ba1\u7406";
 	
 }
