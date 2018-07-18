@@ -30,6 +30,7 @@ import java.security.ProtectionDomain;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.jumpmind.symmetric.wrapper.WrapperHelper;
 
 
 public class Wrapper {
@@ -47,11 +48,8 @@ public class Wrapper {
         createConfigFileIfNeeded(appHomeDir, configFileName, jarFileName);
         createLogDirIfNeeded(appHomeDir);
 
-        String[] wrapperArgs = new String[0];
-        if (args.length > 0) {
-            wrapperArgs = new String[] { args[0], appHomeDir + File.separator + configFileName };
-        }
-        org.jumpmind.symmetric.wrapper.Wrapper.main(wrapperArgs);
+        WrapperHelper.run(args, appHomeDir, appHomeDir + File.separator + configFileName,
+                jarFileName);
     }
     
     protected static void createLogDirIfNeeded(String appHomeDir) {

@@ -2,6 +2,7 @@ package org.jumpmind.metl.core.authentication;
 
 import java.util.Date;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.jumpmind.metl.core.model.GlobalSetting;
 import org.jumpmind.metl.core.model.User;
@@ -29,7 +30,10 @@ public class UserAuthenticationInternal implements IConsoleUserAuthentication {
         	
             GlobalSetting expireSetting = context.getOperationsService().findGlobalSetting(GlobalSetting.PASSWORD_EXPIRE_DAYS, 
                     Integer.toString(GlobalSetting.PASSWORD_EXPIRE_DAYS_DEFAULT));
-            int passwordExpiresInDays = Integer.parseInt(expireSetting.getValue());
+            int passwordExpiresInDays = 0;
+            if (!StringUtils.isEmpty(expireSetting.getValue())) {
+            	passwordExpiresInDays = Integer.parseInt(expireSetting.getValue());
+            }
             
             Date expireTime = DateUtils.addDays(new Date(), -passwordExpiresInDays);
             if ( passwordExpiresInDays > 0 

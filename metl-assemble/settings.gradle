@@ -6,5 +6,5 @@ includeFlat 'metl-server', 'metl-core',  'metl-ui', 'resource-core',
 'comp-control', 'comp-groovy', 'comp-route', 'comp-map',
 'comp-transform', 'comp-xml', 'comp-format', 'comp-email',
 'comp-execute', 'comp-test', 'comp-text', 'comp-webrequest', 
-'comp-stamp', 'comp-subscribe',
+'comp-stamp', 'comp-subscribe', 'comp-pgp',
 'metl-war', 'metl-develop'
