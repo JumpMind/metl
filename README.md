@@ -38,13 +38,13 @@ table.prefix=metl
 h2.port=9092
 ~~~~
 
-### Run
+#### Run
 ~~~~~
 cd ../metl-war/build/libs
 java -jar metl.war
 ~~~~~
 
-### Deploy
+#### Deploy
 
 To Tomcat:
 ~~~~~
