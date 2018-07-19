@@ -28,7 +28,10 @@ import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.ui.common.AbstractMenuBar;
+import org.jumpmind.metl.ui.i18n.MessageAppend;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
+import org.postgresql.translation.messages_bg;
 
 import com.vaadin.ui.AbstractSelect;
 
@@ -49,37 +52,37 @@ public class DesignMenuBar extends AbstractMenuBar {
 
     @Override
     protected void buildMenu() {
-        add("File|New|Project");
-        add("File|New|Project Branch");
-        add("File|New|Project Dependency");
-        add("File|New|Flow|Design");
-        add("File|New|Flow|Test");
-        add("File|New|Model|Hierarchical");
-        add("File|New|Model|Relational");
-        add("File|New|Resource|Database");
-        add("File|New|Resource|Directory|FTP");
-        add("File|New|Resource|Directory|File System");
-        add("File|New|Resource|Directory|JMS");
-        add("File|New|Resource|Directory|SFTP");
-        add("File|New|Resource|Directory|SMB");
-        add("File|New|Resource|HTTP");
-        add("File|New|Resource|Mail Session");
-        add("File|New|Resource|Subscribe|JMS");
-        add("File|Open");
-        addSeparator("File");
-        add("File|Import...");        
-        add("File|Export...");
+        add( MessageAppend.getNewProject());
+        add( MessageAppend.getNewBranch());
+        add(MessageAppend.getNewDependency());
+        add(MessageAppend.getNewDesign());
+        add(MessageAppend.getNewTest());
+        add(MessageAppend.getNewHierarchical());
+        add(MessageAppend.getNewRelational());
+        add(MessageAppend.getNewDatabase());
+        add(MessageAppend.getNewFTP());
+        add(MessageAppend.getNewFileSystem());
+        add(MessageAppend.getNewJMS());
+        add(MessageAppend.getNewSFTP());
+        add(MessageAppend.getNewSMB());
+        add(MessageAppend.getNewHTTP());
+        add(MessageAppend.getNewMailSession());
+        add(MessageAppend.getNewSubscribeJMS());
+        add(MessageAppend.getFileOpen());
+        addSeparator(MessageSource.message("common.file"));
+        add(MessageAppend.getFileImport());        
+        add(MessageAppend.getFileExport());
         
-        add("Edit|Rename");
-        add("Edit|Cut");
-        add("Edit|Copy");
-        add("Edit|Paste");
-        addSeparator("Edit");
-        add("Edit|Change Dependency Version");
-        addSeparator("Edit");
-        add("Edit|Remove");
+        add(MessageAppend.getEditRename());
+        add(MessageAppend.getEditCut());
+        add(MessageAppend.getEditCopy());
+        add(MessageAppend.getEditPaste());
+        addSeparator(MessageSource.message("common.edit"));
+        add(MessageAppend.getEditChangeDependency());
+        addSeparator(MessageSource.message("common.edit"));
+        add(MessageAppend.getEditRemove());
         
-        add("Tag");
+        add(MessageSource.message("common.tag"));
     }
 
     static class NothingSelectAction extends AbstractDesignSelectedValueMenuManager {
