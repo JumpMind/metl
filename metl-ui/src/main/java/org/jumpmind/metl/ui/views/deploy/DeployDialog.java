@@ -54,9 +54,9 @@ import com.vaadin.ui.themes.ValoTheme;
 
 public class DeployDialog extends ResizableWindow {
 
-    private static final String DEPLOY_BY_FLOW = MessageSource.message("deployDialog.byFlow");
+    private static final String DEPLOY_BY_FLOW = "deployDialog.byFlow";
 
-    private static final String DEPLOY_BY_PACKAGE = MessageSource.message("deployDialog.byPackage");
+    private static final String DEPLOY_BY_PACKAGE = "deployDialog.byPackage";
 
     private static final long serialVersionUID = 1L;
 
@@ -106,8 +106,8 @@ public class DeployDialog extends ResizableWindow {
 
         deployByOptionGroup = new OptionGroup(MessageSource.message("deployDialog.deploymentType"));
         deployByOptionGroup.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
-        deployByOptionGroup.addItem(DEPLOY_BY_PACKAGE);
-        deployByOptionGroup.addItem(DEPLOY_BY_FLOW);
+        deployByOptionGroup.addItem(MessageSource.message(DEPLOY_BY_PACKAGE));
+        deployByOptionGroup.addItem(MessageSource.message(DEPLOY_BY_FLOW));
         layout.addComponent(deployByOptionGroup);
 
         selectDeploymentLayout = new VerticalLayout();
@@ -123,18 +123,18 @@ public class DeployDialog extends ResizableWindow {
         addComponent(buildButtonFooter(backButton, actionButton));
 
         deployByOptionGroup.addValueChangeListener(e -> deployByChanged());
-        deployByOptionGroup.setValue(DEPLOY_BY_PACKAGE);
+        deployByOptionGroup.setValue(MessageSource.message(DEPLOY_BY_PACKAGE));
 
     }
 
     protected boolean isDeployByFlow() {
         Object deployByChoice = deployByOptionGroup.getValue();
-        return deployByOptionGroup.isVisible() && DEPLOY_BY_FLOW.equals(deployByChoice);
+        return deployByOptionGroup.isVisible() && MessageSource.message(DEPLOY_BY_FLOW).equals(deployByChoice);
     }
 
     protected boolean isDeployByPackage() {
         Object deployByChoice = deployByOptionGroup.getValue();
-        return deployByOptionGroup.isVisible() && DEPLOY_BY_PACKAGE.equals(deployByChoice);
+        return deployByOptionGroup.isVisible() && MessageSource.message(DEPLOY_BY_PACKAGE).equals(deployByChoice);
     }
 
     protected void deployByChanged() {

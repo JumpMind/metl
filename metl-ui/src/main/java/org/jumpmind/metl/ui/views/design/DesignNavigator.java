@@ -87,15 +87,15 @@ import com.vaadin.ui.themes.ValoTheme;
 @SuppressWarnings("serial")
 public class DesignNavigator extends VerticalLayout {
 
-    public static final String LABEL_DEPENDENCIES = MessageSource.message("designNavigator.dependencies");
+    public static final String LABEL_DEPENDENCIES = "designNavigator.dependencies";
 
-    public static final String LABEL_FLOWS = MessageSource.message("designNavigator.flows");
+    public static final String LABEL_FLOWS = "designNavigator.flows";
 
-    public static final String LABEL_TESTS = MessageSource.message("designNavigator.tests");
+    public static final String LABEL_TESTS = "designNavigator.tests";
 
-    public static final String LABEL_MODELS = MessageSource.message("designNavigator.models");
+    public static final String LABEL_MODELS = "designNavigator.models";
 
-    public static final String LABEL_RESOURCES = MessageSource.message("designNavigator.resources");
+    public static final String LABEL_RESOURCES = "designNavigator.resources";
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -396,11 +396,11 @@ public class DesignNavigator extends VerticalLayout {
 
             treeTable.setChildrenAllowed(projectVersion, true);
             treeTable.setParent(projectVersion, project);
-            addFlowsToFolder(LABEL_FLOWS, projectVersion, false);
-            addFlowsToFolder(LABEL_TESTS, projectVersion, true);
-            addModelsToFolder(LABEL_MODELS, projectVersion);
-            addResourcesToFolder(LABEL_RESOURCES, projectVersion);
-            addDependenciesToFolder(LABEL_DEPENDENCIES, projectVersion);
+            addFlowsToFolder(MessageSource.message(LABEL_FLOWS), projectVersion, false);
+            addFlowsToFolder(MessageSource.message(LABEL_TESTS), projectVersion, true);
+            addModelsToFolder(MessageSource.message(LABEL_MODELS), projectVersion);
+            addResourcesToFolder(MessageSource.message(LABEL_RESOURCES), projectVersion);
+            addDependenciesToFolder(MessageSource.message(LABEL_DEPENDENCIES), projectVersion);
         }
     }
 
@@ -863,9 +863,9 @@ public class DesignNavigator extends VerticalLayout {
             dependency.setTargetProjectVersion(targetVersion);
             configurationService.save(dependency);
 
-            FolderName folder = findFolderWithName(LABEL_DEPENDENCIES);
+            FolderName folder = findFolderWithName(MessageSource.message(LABEL_DEPENDENCIES));
             if (folder == null) {
-                folder = addVirtualFolder(LABEL_DEPENDENCIES, projectVersion);
+                folder = addVirtualFolder(MessageSource.message(LABEL_DEPENDENCIES), projectVersion);
             }
             treeTable.setChildrenAllowed(folder, true);
 
@@ -945,9 +945,9 @@ public class DesignNavigator extends VerticalLayout {
 
     protected void addNewResource(String type, String defaultName, FontAwesome icon) {
         ProjectVersion projectVersion = findProjectVersion();
-        FolderName folder = findFolderWithName(LABEL_RESOURCES);
+        FolderName folder = findFolderWithName(MessageSource.message(LABEL_RESOURCES));
         if (folder == null) {
-            folder = addVirtualFolder(LABEL_RESOURCES, projectVersion);
+            folder = addVirtualFolder(MessageSource.message(LABEL_RESOURCES), projectVersion);
         }
         treeTable.setChildrenAllowed(folder, true);
 
@@ -969,9 +969,9 @@ public class DesignNavigator extends VerticalLayout {
 
     public void addNewModel(String type) {
         ProjectVersion projectVersion = findProjectVersion();
-        FolderName folder = findFolderWithName(LABEL_MODELS);
+        FolderName folder = findFolderWithName(MessageSource.message(LABEL_MODELS));
         if (folder == null) {
-            folder = addVirtualFolder(LABEL_MODELS, projectVersion);
+            folder = addVirtualFolder(MessageSource.message(LABEL_MODELS), projectVersion);
         }
         treeTable.setChildrenAllowed(folder, true);
 

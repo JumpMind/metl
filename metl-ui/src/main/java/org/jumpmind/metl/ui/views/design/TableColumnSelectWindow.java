@@ -70,11 +70,11 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
 
     private static final long serialVersionUID = 1L;
 
-    private static final String OPTION_DB = "Database";
+    private static final String OPTION_DB = "common.database";
 
-    private static final String OPTION_REL_FILE = "Relational CSV File";
+    private static final String OPTION_REL_FILE = "tableColumnSelectWindow.relationalFile";
     
-    private static final String OPTION_FILE_HEADER_ROW = "Source File Header Row";
+    private static final String OPTION_FILE_HEADER_ROW = "tableColumnSelectWindow.sourceRow";
 
     ApplicationContext context;
 
@@ -125,12 +125,12 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
         layout.addComponent(new Label(MessageSource.message("tableColumnSelectWindow.importModelAndAttributesDatabase")));
 
         optionGroup = new OptionGroup(MessageSource.message("tableColumnSelectWindow.selectModel"));
-        optionGroup.addItem(OPTION_DB);
-        optionGroup.addItem(OPTION_REL_FILE);
-        optionGroup.addItem(OPTION_FILE_HEADER_ROW);
+        optionGroup.addItem(MessageSource.message(OPTION_DB));
+        optionGroup.addItem(MessageSource.message(OPTION_REL_FILE));
+        optionGroup.addItem(MessageSource.message(OPTION_FILE_HEADER_ROW));
         optionGroup.setNullSelectionAllowed(false);
         optionGroup.setImmediate(true);
-        optionGroup.select(OPTION_DB);
+        optionGroup.select(MessageSource.message(OPTION_DB));
         optionGroup.addValueChangeListener(this);
         layout.addComponent(optionGroup);
 
@@ -181,13 +181,13 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
 
     protected void rebuildOptionLayout() {
         optionLayout.removeAllComponents();
-        if (optionGroup.getValue().equals(OPTION_DB)) {
+        if (optionGroup.getValue().equals(MessageSource.message(OPTION_DB))) {
             optionLayout.addComponent(scrollable);
             scrollable.focus();
-        } else if (optionGroup.getValue().equals(OPTION_REL_FILE)) {
+        } else if (optionGroup.getValue().equals(MessageSource.message(OPTION_REL_FILE))) {
         	optionLayout.addComponent(relCsvUpload);
             relCsvUpload.focus();
-        } else if (optionGroup.getValue().equals(OPTION_FILE_HEADER_ROW)) {
+        } else if (optionGroup.getValue().equals(MessageSource.message(OPTION_FILE_HEADER_ROW))) {
         	optionLayout.addComponent(fileHeaderEntity);
         	optionLayout.setExpandRatio(fileHeaderEntity, 0.2f);
         	optionLayout.addComponent(fileHeaderDelimiter);
@@ -206,9 +206,9 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
     @Override
     public void uploadSucceeded(SucceededEvent event) {
         try {
-        	if (optionGroup.getValue().equals(OPTION_REL_FILE)) {
+        	if (optionGroup.getValue().equals(MessageSource.message(OPTION_REL_FILE))) {
         		listener.selected(importRelationalCsvModel(new String(uploadedData.toByteArray())));
-            } else if (optionGroup.getValue().equals(OPTION_FILE_HEADER_ROW)) {
+            } else if (optionGroup.getValue().equals(MessageSource.message(OPTION_FILE_HEADER_ROW))) {
             	listener.selected(importFileHeaderModel(new String(uploadedData.toByteArray())));
             }
 		} catch (IOException e) {
@@ -222,7 +222,7 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
     }
 
     protected void refresh() {
-        if (optionGroup.getValue().equals(OPTION_DB)) {
+        if (optionGroup.getValue().equals(MessageSource.message(OPTION_DB))) {
             provider.refresh(true);
             dbTree.refresh();
         }
@@ -235,12 +235,12 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
     }
     
     protected void select() {
-        if (optionGroup.getValue().equals(OPTION_DB)) {
+        if (optionGroup.getValue().equals(MessageSource.message(OPTION_DB))) {
         	listener.selected(getModelEntityCollection());
             close();
-        } else if (optionGroup.getValue().equals(OPTION_REL_FILE)) {
+        } else if (optionGroup.getValue().equals(MessageSource.message(OPTION_REL_FILE))) {
             relCsvUpload.submitUpload();
-        } else if (optionGroup.getValue().equals(OPTION_FILE_HEADER_ROW)) {
+        } else if (optionGroup.getValue().equals(MessageSource.message(OPTION_FILE_HEADER_ROW))) {
             fileHeaderUpload.submitUpload();
         }
     }

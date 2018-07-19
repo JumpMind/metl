@@ -40,7 +40,7 @@ import com.vaadin.ui.themes.ValoTheme;
 @SuppressWarnings("serial")
 public class GeneralSettingsPanel extends Panel implements IUiPanel {
 
-    private static final String THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART = "This will take effect on the next server restart";
+    private static final String THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART = "generalSettingsPanel.thisServer";
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -88,15 +88,15 @@ public class GeneralSettingsPanel extends Panel implements IUiPanel {
        
         addSetting(MessageSource.message("generalSettingsPanel.enableBackup"), GlobalSetting.CONFIG_BACKUP_ENABLED,
                 Boolean.toString(GlobalSetting.DEFAULT_CONFIG_BACKUP_ENABLED),
-                THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART, Boolean.class);
+                MessageSource.message(THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART), Boolean.class);
 
         addSetting(MessageSource.message("generalSettingsPanel.backupExpression") , GlobalSetting.CONFIG_BACKUP_CRON,
                 GlobalSetting.DEFAULT_CONFIG_BACKUP_CRON,
-                THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART, String.class);
+                MessageSource.message(THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART), String.class);
        
         addSetting(MessageSource.message("generalSettingsPanel.retention"), GlobalSetting.CONFIG_BACKUP_RETENTION_IN_DAYS,
                 Integer.toString(GlobalSetting.DEFAULT_CONFIG_BACKUP_RETENTION_IN_DAYS),
-                THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART, Integer.class);       
+                MessageSource.message(THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART), Integer.class);       
         
         section = new Label(MessageSource.message("generalSettingsPanel.passwordSettings"));
         section.addStyleName(ValoTheme.LABEL_H3);

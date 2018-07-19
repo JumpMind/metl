@@ -88,15 +88,15 @@ import jlibs.xml.xsd.XSParser;
 @SuppressWarnings("serial")
 public class ImportXmlTemplateWindow extends ResizableWindow implements ValueChangeListener, ClickListener, Receiver, SucceededListener {
 
-    private static final String OPTION_TEXT = MessageSource.message("common.test");
+    private static final String OPTION_TEXT = "common.test";
 
-    private static final String OPTION_FILE = MessageSource.message("common.file");
+    private static final String OPTION_FILE = "common.file";
 
-    private static final String OPTION_URL = MessageSource.message("common.url").toUpperCase() ;
+    private static final String OPTION_URL = "common.url";
 
-    private static final String OPTION_RESOURCE =MessageSource.message("common.resource") ;
+    private static final String OPTION_RESOURCE = "common.resource";
     
-    private static final String URL_SETTING = MessageSource.message("common.url").toLowerCase();
+    private static final String URL_SETTING = "common.url";
 
     VerticalLayout optionLayout;
 
@@ -134,13 +134,13 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
         layout.addComponent(new Label(MessageSource.message("importXmlTemplateWindow.importSource")));
 
         optionGroup = new OptionGroup(MessageSource.message("importXmlTemplateWindow.selectSorce"));
-        optionGroup.addItem(OPTION_TEXT);
-        optionGroup.addItem(OPTION_FILE);
-        optionGroup.addItem(OPTION_URL);
-        optionGroup.addItem(OPTION_RESOURCE);
+        optionGroup.addItem(MessageSource.message(OPTION_TEXT));
+        optionGroup.addItem(MessageSource.message(OPTION_FILE));
+        optionGroup.addItem(MessageSource.message(OPTION_URL).toUpperCase());
+        optionGroup.addItem(MessageSource.message(OPTION_RESOURCE));
         optionGroup.setNullSelectionAllowed(false);
         optionGroup.setImmediate(true);
-        optionGroup.select(OPTION_TEXT);
+        optionGroup.select(MessageSource.message(OPTION_TEXT));
         optionGroup.addValueChangeListener(this);
         layout.addComponent(optionGroup);
 
@@ -200,16 +200,16 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
 
     protected void rebuildOptionLayout() {
         optionLayout.removeAllComponents();
-        if (optionGroup.getValue().equals(OPTION_TEXT)) {
+        if (optionGroup.getValue().equals(MessageSource.message(OPTION_TEXT))) {
             optionLayout.addComponent(editor);
             editor.focus();
-        } else if (optionGroup.getValue().equals(OPTION_FILE)) {
+        } else if (optionGroup.getValue().equals(MessageSource.message(OPTION_FILE))) {
             optionLayout.addComponent(upload);
             upload.focus();
-        } else if (optionGroup.getValue().equals(OPTION_URL)) {
+        } else if (optionGroup.getValue().equals(MessageSource.message(OPTION_URL).toUpperCase())) {
             optionLayout.addComponent(urlTextField);
             urlTextField.focus();
-        } else if (optionGroup.getValue().equals(OPTION_RESOURCE)) {
+        } else if (optionGroup.getValue().equals(MessageSource.message(OPTION_RESOURCE))) {
             optionLayout.addComponent(resourceComboBox);
             resourceComboBox.focus();
         }
@@ -232,11 +232,11 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
 
     @Override
     public void buttonClick(ClickEvent event) {
-        if (optionGroup.getValue().equals(OPTION_TEXT)) {
+        if (optionGroup.getValue().equals(MessageSource.message(OPTION_TEXT))) {
             importXml(editor.getValue());
-        } else if (optionGroup.getValue().equals(OPTION_FILE)) {
+        } else if (optionGroup.getValue().equals(MessageSource.message(OPTION_FILE))) {
             upload.submitUpload();
-        } else if (optionGroup.getValue().equals(OPTION_URL)) {
+        } else if (optionGroup.getValue().equals(MessageSource.message(OPTION_URL).toUpperCase())) {
             InputStream in = null;
             String text = null;
             try {
@@ -248,12 +248,12 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
                 IOUtils.closeQuietly(in);
             }
             importXml(text);
-        } else if (optionGroup.getValue().equals(OPTION_RESOURCE)) {
+        } else if (optionGroup.getValue().equals(MessageSource.message(OPTION_RESOURCE))) {
             InputStream in = null;
             String text = null;
             try {
                 Resource resource = (Resource) resourceComboBox.getValue();
-                String resourceUrl = resource.findSetting(URL_SETTING).getValue();
+                String resourceUrl = resource.findSetting(MessageSource.message(URL_SETTING).toLowerCase()).getValue();
                 in = new URL(resourceUrl).openStream();
                 text = IOUtils.toString(in);
             } catch (Exception e) {
