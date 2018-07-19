@@ -88,15 +88,15 @@ import jlibs.xml.xsd.XSParser;
 @SuppressWarnings("serial")
 public class ImportXmlTemplateWindow extends ResizableWindow implements ValueChangeListener, ClickListener, Receiver, SucceededListener {
 
-    private static final String OPTION_TEXT = "Text";
+    private static final String OPTION_TEXT = MessageSource.message("common.test");
 
-    private static final String OPTION_FILE = "File";
+    private static final String OPTION_FILE = MessageSource.message("common.file");
 
-    private static final String OPTION_URL = "URL";
+    private static final String OPTION_URL = MessageSource.message("common.url").toUpperCase() ;
 
-    private static final String OPTION_RESOURCE = "Resource";
+    private static final String OPTION_RESOURCE =MessageSource.message("common.resource") ;
     
-    private static final String URL_SETTING = "url";
+    private static final String URL_SETTING = MessageSource.message("common.url").toLowerCase();
 
     VerticalLayout optionLayout;
 
