@@ -404,13 +404,18 @@ public class PropertySheet extends AbsoluteLayout {
     }
 
     protected List<XMLSetting> buildSettings(Object obj) {
+    	
         if (obj instanceof Component) {
             Component component = (Component) obj;
             XMLComponentDefinition definition = context.getDefinitionFactory().getComponentDefinition(component.getProjectVersionId(),
                     component.getType());
             return definition.getSettings().getSetting();
         } else if (obj instanceof Resource) {
+        	System.out.println(obj);
+        	
             Resource resource = (Resource) obj;
+            System.out.println(resource);
+            System.out.println(resource.getProjectVersionId());
             XMLResourceDefinition definition = context.getDefinitionFactory().getResourceDefintion(resource.getProjectVersionId(),
                     resource.getType());         
             if (definition != null) {

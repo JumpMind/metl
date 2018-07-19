@@ -908,39 +908,39 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public void addNewDatabase() {
-        addNewResource(MessageSource.message("designNavigator.database"), MessageSource.message("designNavigator.database"), Icons.DATABASE);
+        addNewResource("Database", MessageSource.message("common.database"), Icons.DATABASE);
     }
 
     public void addNewFtpFileSystem() {
-        addNewResource(MessageSource.message("designNavigator.ftp"), MessageSource.message("designNavigator.ftpDirectory"), Icons.FILE_SYSTEM);
+        addNewResource("Ftp", MessageSource.message("designNavigator.ftpDirectory"), Icons.FILE_SYSTEM);
     }
     
     public void addNewJmsSubscribe() {
-        addNewResource(MessageSource.message("designNavigator.jmsSubscribe"), MessageSource.message("designNavigator.jmsSubscribe"), Icons.QUEUE);
+        addNewResource("JMS Subscribe", MessageSource.message("designNavigator.jmsSubscribe"), Icons.QUEUE);
     }    
 
     public void addNewLocalFileSystem() {
-        addNewResource(MessageSource.message("designNavigator.localFileSystem"), MessageSource.message("designNavigator.directory"), Icons.FILE_SYSTEM);
+        addNewResource("Local File System", MessageSource.message("designNavigator.directory"), Icons.FILE_SYSTEM);
     }
 
     public void addNewSftpFileSystem() {
-        addNewResource(MessageSource.message("designNavigator.sftp"), MessageSource.message("designNavigator.sftpDirectory"), Icons.FILE_SYSTEM);
+        addNewResource("Sftp", MessageSource.message("designNavigator.sftpDirectory"), Icons.FILE_SYSTEM);
     }
 
     public void addNewJMSFileSystem() {
-        addNewResource(MessageSource.message("designNavigator.jms"), MessageSource.message("designNavigator.jmsDirectory"), Icons.QUEUE);
+        addNewResource("JMS", MessageSource.message("designNavigator.jmsDirectory"), Icons.QUEUE);
     }
 
     public void addNewSMBFileSystem() {
-        addNewResource(MessageSource.message("designNavigator.smb"), MessageSource.message("designNavigator.smbDirectory"), Icons.FILE_SYSTEM);
+        addNewResource("SMB", MessageSource.message("designNavigator.smbDirectory"), Icons.FILE_SYSTEM);
     }
 
     public void addNewHttpResource() {
-        addNewResource(MessageSource.message("designNavigator.http"), MessageSource.message("designNavigator.http"), Icons.WEB);
+        addNewResource("Http", MessageSource.message("designNavigator.http"), Icons.WEB);
     }
 
     public void addNewMailSession() {
-        addNewResource(MessageSource.message("designNavigator.mailSession"),MessageSource.message("designNavigator.mailSessions"), Icons.EMAIL);
+        addNewResource("MailSession",MessageSource.message("designNavigator.mailSessions"), Icons.EMAIL);
     }
 
     protected void addNewResource(String type, String defaultName, FontAwesome icon) {
