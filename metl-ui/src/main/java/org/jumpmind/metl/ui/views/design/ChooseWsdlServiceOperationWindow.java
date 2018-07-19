@@ -83,7 +83,7 @@ public class ChooseWsdlServiceOperationWindow extends Window {
         buttonLayout.addComponent(spacer);
         buttonLayout.setExpandRatio(spacer, 1);
 
-        Button cancelButton = new Button("Cancel");
+        Button cancelButton = new Button(MessageSource.message("common.cancel"));
         cancelButton.setClickShortcut(KeyCode.ESCAPE);
         cancelButton.addClickListener(new ClickListener() {
             public void buttonClick(ClickEvent event) {

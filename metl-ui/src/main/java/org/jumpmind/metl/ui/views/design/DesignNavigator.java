@@ -891,7 +891,7 @@ public class DesignNavigator extends VerticalLayout {
 
         FlowName flow = new FlowName();
         flow.setProjectVersionId(projectVersion.getId());
-        flow.setName("New Flow");
+        flow.setName(MessageSource.message("designNavigator.newFlow"));
         flow.setTest(testFlow);
         configurationService.save(flow);
 

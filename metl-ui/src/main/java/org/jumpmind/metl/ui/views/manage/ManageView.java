@@ -172,7 +172,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         header.setExpandRatio(limitLayout, 1.0f);
 
         TextField filterField = new TextField();
-        filterField.setInputPrompt("Filter");
+        filterField.setInputPrompt(MessageSource.message("buttonBar.filter.prompt"));
         filterField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
         filterField.setIcon(FontAwesome.SEARCH);
         filterField.setImmediate(true);
@@ -212,8 +212,9 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         });
         table.setVisibleColumns(new Object[] { "agentName", "deploymentName", "hostName", "status",
                 "startTime", "endTime", "createBy", "parameters" });
-        table.setColumnHeaders(new String[] { "Agent", "Deployment", "Host", "Status", "Start",
-                "End", "Caller", "Parameters" });
+        table.setColumnHeaders(new String[] { MessageSource.message("common.agent"), MessageSource.message("common.deployment"), 
+        		MessageSource.message("manageView.host"), MessageSource.message("common.status"), MessageSource.message("executionRunPanel.start"),
+        		MessageSource.message("executionRunPanel.end"), MessageSource.message("manageView.caller"), MessageSource.message("common.parameters") });
         table.setColumnWidth("agentName", 250);
         table.setColumnWidth("deploymentName", 250);
         table.setColumnWidth("hostName", 145);
@@ -230,7 +231,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         mainTab.setExpandRatio(table, 1.0f);
 
         tabs = new TabbedPanel();
-        tabs.setMainTab("Executions", Icons.EXECUTION, mainTab);
+        tabs.setMainTab(MessageSource.message("manageView.executions"), Icons.EXECUTION, mainTab);
 
         HorizontalSplitPanel split = new HorizontalSplitPanel();
         split.setSizeFull();
