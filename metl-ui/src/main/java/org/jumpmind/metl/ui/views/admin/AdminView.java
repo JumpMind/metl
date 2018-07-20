@@ -23,7 +23,8 @@ package org.jumpmind.metl.ui.views.admin;
 import javax.annotation.PostConstruct;
 
 import org.jumpmind.metl.ui.common.UIConstants;
-import org.jumpmind.metl.ui.i18n.MenuLabel;
+import org.jumpmind.metl.ui.i18n.MessageResource;
+import org.jumpmind.metl.ui.i18n.MessageResource;
 import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
@@ -54,7 +55,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope(value = "ui")
-@TopBarLink(category = Category.Admin, name = MenuLabel.ADMIN, id = "admin", icon = FontAwesome.GEARS, menuOrder = 10)
+@TopBarLink(category = Category.Admin, name = MessageResource.ADMIN, id = "admin", icon = FontAwesome.GEARS, menuOrder = 10)
 public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemClickListener {
 
     private static final long serialVersionUID = 1L;

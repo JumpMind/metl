@@ -28,7 +28,7 @@ import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.ui.common.AbstractMenuBar;
-import org.jumpmind.metl.ui.i18n.MessageAppend;
+import org.jumpmind.metl.ui.i18n.MessageResource;
 import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
 import org.postgresql.translation.messages_bg;
@@ -52,35 +52,35 @@ public class DesignMenuBar extends AbstractMenuBar {
 
     @Override
     protected void buildMenu() {
-        add( MessageAppend.getNewProject());
-        add( MessageAppend.getNewBranch());
-        add(MessageAppend.getNewDependency());
-        add(MessageAppend.getNewDesign());
-        add(MessageAppend.getNewTest());
-        add(MessageAppend.getNewHierarchical());
-        add(MessageAppend.getNewRelational());
-        add(MessageAppend.getNewDatabase());
-        add(MessageAppend.getNewFTP());
-        add(MessageAppend.getNewFileSystem());
-        add(MessageAppend.getNewJMS());
-        add(MessageAppend.getNewSFTP());
-        add(MessageAppend.getNewSMB());
-        add(MessageAppend.getNewHTTP());
-        add(MessageAppend.getNewMailSession());
-        add(MessageAppend.getNewSubscribeJMS());
-        add(MessageAppend.getFileOpen());
+        add( MessageResource.getNewProject());
+        add( MessageResource.getNewBranch());
+        add(MessageResource.getNewDependency());
+        add(MessageResource.getNewDesign());
+        add(MessageResource.getNewTest());
+        add(MessageResource.getNewHierarchical());
+        add(MessageResource.getNewRelational());
+        add(MessageResource.getNewDatabase());
+        add(MessageResource.getNewFTP());
+        add(MessageResource.getNewFileSystem());
+        add(MessageResource.getNewJMS());
+        add(MessageResource.getNewSFTP());
+        add(MessageResource.getNewSMB());
+        add(MessageResource.getNewHTTP());
+        add(MessageResource.getNewMailSession());
+        add(MessageResource.getNewSubscribeJMS());
+        add(MessageResource.getFileOpen());
         addSeparator(MessageSource.message("common.file"));
-        add(MessageAppend.getFileImport());        
-        add(MessageAppend.getFileExport());
+        add(MessageResource.getFileImport());        
+        add(MessageResource.getFileExport());
         
-        add(MessageAppend.getEditRename());
-        add(MessageAppend.getEditCut());
-        add(MessageAppend.getEditCopy());
-        add(MessageAppend.getEditPaste());
+        add(MessageResource.getEditRename());
+        add(MessageResource.getEditCut());
+        add(MessageResource.getEditCopy());
+        add(MessageResource.getEditPaste());
         addSeparator(MessageSource.message("common.edit"));
-        add(MessageAppend.getEditChangeDependency());
+        add(MessageResource.getEditChangeDependency());
         addSeparator(MessageSource.message("common.edit"));
-        add(MessageAppend.getEditRemove());
+        add(MessageResource.getEditRemove());
         
         add(MessageSource.message("common.tag"));
     }
