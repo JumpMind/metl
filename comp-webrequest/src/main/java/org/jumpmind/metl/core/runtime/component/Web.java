@@ -189,12 +189,7 @@ public class Web extends AbstractComponentRuntime {
                     info("sending content to %s", path);
                     HttpEntityEnclosingRequestBase encHttpRequest = (HttpEntityEnclosingRequestBase) httpRequest;
                     StringEntity requestEntity;
-                    try {
-                        requestEntity = new StringEntity(requestContent);
-                    } catch (UnsupportedEncodingException ex) {
-                        log.error(String.format("Unable to encode content for web request %s", ex.getMessage()));
-                        throw new IoException(ex);
-                    }
+                    requestEntity = new StringEntity(requestContent, DEFAULT_CHARSET);
                     encHttpRequest.setEntity(requestEntity);
                     executeRequestAndSendOutputMessage(encHttpRequest, callback, inputMessage);
                 } else {
