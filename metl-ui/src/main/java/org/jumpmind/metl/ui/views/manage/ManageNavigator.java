@@ -60,9 +60,9 @@ import com.vaadin.ui.themes.ValoTheme;
 @SuppressWarnings("serial")
 public class ManageNavigator extends Panel {
 
-    protected static final Name CURRENTLY_RUNNING = new Name(MessageSource.message("manageNavigator.currentlyRunning"));
+    protected static final Name CURRENTLY_RUNNING = new Name("Currently Running");
     
-    protected static final Name IN_ERROR = new Name(MessageSource.message("manageNavigator.inError"));
+    protected static final Name IN_ERROR = new Name("In Error");
 
     TreeTable treeTable;
 
