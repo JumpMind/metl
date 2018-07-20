@@ -30,6 +30,7 @@ import org.jumpmind.metl.core.plugin.XMLComponentDefinition;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UiUtils;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +84,7 @@ public class EditFlowPalette extends VerticalLayout {
         
         TextField filterField = new TextField();
         filterField.setWidth(WIDTH-30, Unit.PIXELS);
-        filterField.setInputPrompt("Filter");
+        filterField.setInputPrompt(MessageSource.message("buttonBar.filter.prompt"));
         filterField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
         filterField.setIcon(FontAwesome.SEARCH);
         filterField.setImmediate(true);
