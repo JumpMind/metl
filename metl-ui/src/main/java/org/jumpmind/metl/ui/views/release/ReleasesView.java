@@ -48,7 +48,7 @@ import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.InProgressDialog;
 import org.jumpmind.metl.ui.common.TopBarLink;
-import org.jumpmind.metl.ui.i18n.MenuLabel;
+import org.jumpmind.metl.ui.i18n.MessageResource;
 import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
@@ -80,7 +80,7 @@ import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
 @Scope(value = "ui")
-@TopBarLink(id = "release", category = Category.Release, menuOrder = 20, name = MenuLabel.RELEASE, icon = FontAwesome.CUBE)
+@TopBarLink(id = "release", category = Category.Release, menuOrder = 20, name = MessageResource.RELEASE, icon = FontAwesome.CUBE)
 public class ReleasesView extends VerticalLayout implements View, IReleasePackageListener {
 
     private static final long serialVersionUID = 1L;

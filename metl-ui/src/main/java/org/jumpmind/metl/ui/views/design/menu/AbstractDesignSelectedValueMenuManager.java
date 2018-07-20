@@ -24,7 +24,7 @@ import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.ui.common.AbstractSelectedValueMenuManager;
-import org.jumpmind.metl.ui.i18n.MessageAppend;
+import org.jumpmind.metl.ui.i18n.MessageResource;
 import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
 
@@ -40,79 +40,79 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
     public boolean handle(String menuSelected, Object valueSelected) {
         boolean handled = false;
         if (!super.handle(menuSelected, valueSelected)) {
-            if (MessageAppend.getNewProject().equals(menuSelected)) {
-            String a =	MessageAppend.getNewProject();
+            if (MessageResource.getNewProject().equals(menuSelected)) {
+            String a =	MessageResource.getNewProject();
                 navigator.addNewProject();
                 return true;
-            } else if (MessageAppend.getEditRename().equals(menuSelected)) {
+            } else if (MessageResource.getEditRename().equals(menuSelected)) {
                 navigator.startEditingItem((AbstractNamedObject) valueSelected);
                 return true;
-            } else if (MessageAppend.getEditChangeDependency().equals(menuSelected)) {
+            } else if (MessageResource.getEditChangeDependency().equals(menuSelected)) {
                 navigator.promptForNewDependency();
                 return true;
-            } else if (MessageAppend.getNewBranch().equals(menuSelected)) {
+            } else if (MessageResource.getNewBranch().equals(menuSelected)) {
                 navigator.doNewProjectBranch();
                 return true;
-            } else if (MessageAppend.getNewDesign().equals(menuSelected)) {
+            } else if (MessageResource.getNewDesign().equals(menuSelected)) {
                 navigator.addNewFlow(false);
                 return true;
-            } else if (MessageAppend.getNewTest().equals(menuSelected)) {
+            } else if (MessageResource.getNewTest().equals(menuSelected)) {
                 navigator.addNewFlow(true);
                 return true;
-            } else if (MessageAppend.getNewHierarchical().equals(menuSelected)) {
+            } else if (MessageResource.getNewHierarchical().equals(menuSelected)) {
                 navigator.addNewModel(Model.TYPE_HIERARCHICAL);
                 return true;
-            } else if (MessageAppend.getNewRelational().equals(menuSelected)) {
+            } else if (MessageResource.getNewRelational().equals(menuSelected)) {
                 navigator.addNewModel(Model.TYPE_RELATIONAL);
                 return true;
-            } else if (MessageAppend.getNewDatabase().equals(menuSelected)) {
+            } else if (MessageResource.getNewDatabase().equals(menuSelected)) {
                 navigator.addNewDatabase();
                 return true;
-            } else if (MessageAppend.getNewFTP().equals(menuSelected)) {
+            } else if (MessageResource.getNewFTP().equals(menuSelected)) {
                 navigator.addNewFtpFileSystem();
                 return true;
-            } else if (MessageAppend.getNewSubscribeJMS().equals(menuSelected)) {
+            } else if (MessageResource.getNewSubscribeJMS().equals(menuSelected)) {
                 navigator.addNewJmsSubscribe();
                 return true;                
-            } else if (MessageAppend.getNewFileSystem().equals(menuSelected)) {
+            } else if (MessageResource.getNewFileSystem().equals(menuSelected)) {
                 navigator.addNewLocalFileSystem();
                 return true;
-            } else if (MessageAppend.getNewJMS().equals(menuSelected)) {
+            } else if (MessageResource.getNewJMS().equals(menuSelected)) {
                 navigator.addNewJMSFileSystem();
                 return true;
-            } else if (MessageAppend.getNewSFTP().equals(menuSelected)) {
+            } else if (MessageResource.getNewSFTP().equals(menuSelected)) {
                 navigator.addNewSftpFileSystem();
                 return true;
-            } else if (MessageAppend.getNewSMB().equals(menuSelected)) {
+            } else if (MessageResource.getNewSMB().equals(menuSelected)) {
                 navigator.addNewSMBFileSystem();
                 return true;
-            } else if (MessageAppend.getNewHTTP().equals(menuSelected)) {
+            } else if (MessageResource.getNewHTTP().equals(menuSelected)) {
                 navigator.addNewHttpResource();
                 return true;
-            } else if (MessageAppend.getNewMailSession().equals(menuSelected)) {
+            } else if (MessageResource.getNewMailSession().equals(menuSelected)) {
                 navigator.addNewMailSession();
                 return true;
-            } else if (MessageAppend.getFileImport().equals(menuSelected)) {
+            } else if (MessageResource.getFileImport().equals(menuSelected)) {
                 navigator.doImport();
                 return true;
-            } else if (MessageAppend.getFileExport().equals(menuSelected)) {
+            } else if (MessageResource.getFileExport().equals(menuSelected)) {
                 navigator.doExport();
                 return true;
-            } else if (MessageAppend.getFileOpen().equals(menuSelected)) {
+            } else if (MessageResource.getFileOpen().equals(menuSelected)) {
                 navigator.doOpen();
                 return true;
-            } else if (MessageAppend.getEditRemove().equals(menuSelected)) {
+            } else if (MessageResource.getEditRemove().equals(menuSelected)) {
                 navigator.doRemove();
                 return true;
-            } else if (MessageAppend.getEditCut().equals(menuSelected)) {
+            } else if (MessageResource.getEditCut().equals(menuSelected)) {
                 navigator.doCut();
                 return true;
-            } else if (MessageAppend.getEditCopy().equals(menuSelected)) {
+            } else if (MessageResource.getEditCopy().equals(menuSelected)) {
                 navigator.doCopy();
                 return true;
-            } else if (MessageAppend.getEditPaste().equals(menuSelected)) {
+            } else if (MessageResource.getEditPaste().equals(menuSelected)) {
                 navigator.doPaste();
-            } else if (MessageAppend.getEditChangeDependency().equals(menuSelected)) {
+            } else if (MessageResource.getEditChangeDependency().equals(menuSelected)) {
                 navigator.doChangeDependencyVersion();
             } else if (MessageSource.message("common.tag").equals(menuSelected)) {
                 navigator.doTag();
@@ -132,11 +132,11 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
     
     protected String[] getDisabledPaths(Object selected) {
         if (isReadOnly(selected)) {
-            return new String[] { MessageAppend.getNewDependency(), MessageAppend.getNewDesign(), MessageAppend.getNewTest(), 
-            		MessageAppend.getNewHierarchical(), MessageAppend.getNewRelational(),
-            		MessageAppend.getNewDatabase(), MessageAppend.getNewFTP(), MessageAppend.getNewFileSystem(),
-            		MessageAppend.getNewJMS(), MessageAppend.getNewSFTP(), MessageAppend.getNewSMB(),
-            		MessageAppend.getNewHTTP(), MessageAppend.getNewMailSession(), MessageAppend.getNewSubscribeJMS(), MessageAppend.getEditRename(), MessageSource.message("common.tag") };
+            return new String[] { MessageResource.getNewDependency(), MessageResource.getNewDesign(), MessageResource.getNewTest(), 
+            		MessageResource.getNewHierarchical(), MessageResource.getNewRelational(),
+            		MessageResource.getNewDatabase(), MessageResource.getNewFTP(), MessageResource.getNewFileSystem(),
+            		MessageResource.getNewJMS(), MessageResource.getNewSFTP(), MessageResource.getNewSMB(),
+            		MessageResource.getNewHTTP(), MessageResource.getNewMailSession(), MessageResource.getNewSubscribeJMS(), MessageResource.getEditRename(), MessageSource.message("common.tag") };
         } else {
             return null;
         }
@@ -144,7 +144,7 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
 
     @Override
     protected String[] getEnabledPaths(Object selected) {        
-        return new String[] { MessageAppend.getNewProject(), "View|Hidden", MessageAppend.getFileImport() };
+        return new String[] { MessageResource.getNewProject(), "View|Hidden", MessageResource.getFileImport() };
     }
 
 }

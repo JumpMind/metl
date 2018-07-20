@@ -1,9 +1,24 @@
 package org.jumpmind.metl.ui.i18n;
 
+import org.apache.commons.lang3.StringUtils;
 
+public class MessageResource {
 
-public class MessageAppend {
-
+	public static final String RELEASE = "\u53d1\u5e03";
+	
+	public static final String ADMIN = "\u7ba1\u7406\u5458";
+	
+	public static final String DEPLOY = "\u90e8\u7f72";
+	
+	public static final String DESIGN = "\u8bbe\u8ba1";
+	
+	public static final String DATABASE = "\u6570\u636e\u5e93";
+	
+	public static final String DIRECTORY = "\u76ee\u5f55";
+	
+	public static final String SERVE = "\u670d\u52a1";
+	
+	public static final String MANAGE = "\u7ba1\u7406";
 	
 	
 	public  static  String getNewProject() {
@@ -12,7 +27,7 @@ public class MessageAppend {
 				MessageSource.message("common.new"),
 				MessageSource.message("common.project"),
 		};	
-		return getStringAppend(newProjectArray);
+		return    StringUtils.join(newProjectArray, "|");
 	}
 	
 	
@@ -23,7 +38,7 @@ public class MessageAppend {
 				MessageSource.message("common.new"),
 				MessageSource.message("common.projectBranch"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 
 //     add("File|New|Project Dependency");
@@ -33,7 +48,7 @@ public class MessageAppend {
 				MessageSource.message("common.new"),
 				MessageSource.message("common.projectDependency"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 //     add("File|New|Flow|Design");
 	public  static  String getNewDesign() {
@@ -43,7 +58,7 @@ public class MessageAppend {
 				MessageSource.message("common.flow"),
 				MessageSource.message("common.design"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 //     add("File|New|Flow|Test");
 	public  static  String getNewTest() {
@@ -53,7 +68,7 @@ public class MessageAppend {
 				MessageSource.message("common.flow"),
 				MessageSource.message("common.test"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 //     add("File|New|Model|Hierarchical");
 	public  static  String getNewHierarchical() {
@@ -63,7 +78,7 @@ public class MessageAppend {
 				MessageSource.message("common.model"),
 				MessageSource.message("common.hierarchical"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 //     add("File|New|Model|Relational");
 	public  static  String getNewRelational() {
@@ -73,7 +88,7 @@ public class MessageAppend {
 				MessageSource.message("common.model"),
 				MessageSource.message("common.relational"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 //     add("File|New|Resource|Database");
 	public  static  String getNewDatabase() {
@@ -83,7 +98,7 @@ public class MessageAppend {
 				MessageSource.message("common.resource"),
 				MessageSource.message("common.database"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 //     add("File|New|Resource|Directory|FTP");
 	public  static  String getNewFTP() {
@@ -94,7 +109,7 @@ public class MessageAppend {
 				MessageSource.message("common.directory"),
 				MessageSource.message("common.FTP"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 //     add("File|New|Resource|Directory|File System");
 	public  static  String getNewFileSystem() {
@@ -105,7 +120,7 @@ public class MessageAppend {
 				MessageSource.message("common.directory"),
 				MessageSource.message("common.fileSystem"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 //     add("File|New|Resource|Directory|JMS");
 	public  static  String getNewJMS() {
@@ -116,7 +131,7 @@ public class MessageAppend {
 				MessageSource.message("common.directory"),
 				MessageSource.message("common.JMS"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 //     add("File|New|Resource|Directory|SFTP");
 	public  static  String getNewSFTP() {
@@ -127,7 +142,7 @@ public class MessageAppend {
 				MessageSource.message("common.directory"),
 				MessageSource.message("common.SFTP"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 //     add("File|New|Resource|Directory|SMB");
 	public  static  String getNewSMB() {
@@ -138,7 +153,7 @@ public class MessageAppend {
 				MessageSource.message("common.directory"),
 				MessageSource.message("common.SMB"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 //     add("File|New|Resource|HTTP");
 	public  static  String getNewHTTP() {
@@ -148,7 +163,7 @@ public class MessageAppend {
 				MessageSource.message("common.resource"),
 				MessageSource.message("common.HTTP"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 //     add("File|New|Resource|Mail Session");
 	public  static  String getNewMailSession() {
@@ -158,7 +173,7 @@ public class MessageAppend {
 				MessageSource.message("common.resource"),
 				MessageSource.message("common.mailSesssion"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 //     add("File|New|Resource|Subscribe|JMS");
 	public  static  String getNewSubscribeJMS() {
@@ -169,7 +184,7 @@ public class MessageAppend {
 				MessageSource.message("common.subscribe"),
 				MessageSource.message("common.JMS"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 //     add("File|Open");
 	public  static  String getFileOpen() {
@@ -177,7 +192,7 @@ public class MessageAppend {
 				MessageSource.message("common.file"),
 				MessageSource.message("common.open"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 //     addSeparator("File");
 //     add("File|Import..."); 
@@ -186,7 +201,7 @@ public class MessageAppend {
 				MessageSource.message("common.file"),
 				MessageSource.message("common.import"),
 		};	
-		return getStringAppend(newProjectArray) + "...";
+		return  StringUtils.join(newProjectArray, "|") + "...";
 	}
 //     add("File|Export...");
 	public  static  String getFileExport() {
@@ -194,7 +209,7 @@ public class MessageAppend {
 				MessageSource.message("common.file"),
 				MessageSource.message("common.export"),
 		};	
-		return getStringAppend(newProjectArray) + "...";
+		return  StringUtils.join(newProjectArray, "|") + "...";
 	}
 //     
 //     add("Edit|Rename");
@@ -203,7 +218,7 @@ public class MessageAppend {
 				MessageSource.message("common.edit"),
 				MessageSource.message("common.rename"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 //     add("Edit|Cut");
 	public  static  String getEditCut() {
@@ -211,7 +226,7 @@ public class MessageAppend {
 				MessageSource.message("common.edit"),
 				MessageSource.message("common.cut"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 //     add("Edit|Copy");
 	public  static  String getEditCopy() {
@@ -219,7 +234,7 @@ public class MessageAppend {
 				MessageSource.message("common.edit"),
 				MessageSource.message("common.copy"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 //     add("Edit|Paste");
 	public  static  String getEditPaste() {
@@ -227,7 +242,7 @@ public class MessageAppend {
 				MessageSource.message("common.edit"),
 				MessageSource.message("common.paste"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 //     addSeparator("Edit");
 //     add("Edit|Change Dependency Version");
@@ -236,7 +251,7 @@ public class MessageAppend {
 				MessageSource.message("common.edit"),
 				MessageSource.message("common.changeDependencyVersion"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
 //     addSeparator("Edit");
 //     add("Edit|Remove");
@@ -245,26 +260,9 @@ public class MessageAppend {
 				MessageSource.message("common.edit"),
 				MessageSource.message("common.remove"),
 		};	
-		return getStringAppend(newProjectArray);
+		return  StringUtils.join(newProjectArray, "|");
 	}
-//     add("Tag");
-	
-	
-	
-	public  static String getStringAppend( String[] params) {
-		
-		String result = null;
-		//File|New|Project
-		for(int i = 0;i <params.length; i++   ) {
-			if(i==0) {
-				result= params[0];
-			}else {
-				result = result +'|' + params[i];
-			}	
-		}
-		
-		return result;
-	}
+
 	
 	
 }
