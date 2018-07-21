@@ -29,12 +29,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.net.util.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
@@ -348,13 +348,8 @@ public class Web extends AbstractComponentRuntime {
     protected void setAuthIfNeeded(HttpRequestBase request, IHttpDirectory httpDirectory) {
         if (HttpDirectory.SECURITY_BASIC.equals(httpDirectory.getSecurity())) {
             String userpassword = String.format("%s:%s", httpDirectory.getUsername(), httpDirectory.getPassword());
-            String encodedAuthroization;
-            try {
-                encodedAuthroization = Base64.getEncoder().encodeToString(userpassword.getBytes("UTF-8"));
-            } catch (Exception e) {
-                throw new IoException("blah");
-            }
-            request.setHeader("Authorization", "Basic " + encodedAuthroization);
+            String encodedAuthorization = new String(Base64.encodeBase64(userpassword.getBytes()));
+            request.setHeader("Authorization", "Basic " + encodedAuthorization);
         } else if (HttpDirectory.SECURITY_TOKEN.equals(httpDirectory.getSecurity())) {
             request.setHeader("Authorization", "Bearer " + httpDirectory.getToken());
         } else if (HttpDirectory.SECURITY_OAUTH_10.equals(httpDirectory.getSecurity())) {
