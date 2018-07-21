@@ -1,6 +1,6 @@
 apply from: '../metl-assemble/common.gradle'
 
-version = '3.2.2.' + pluginBuildNumber
+version = '3.2.3.' + pluginBuildNumber
 
 dependencies {
     provided project(':metl-core')   
