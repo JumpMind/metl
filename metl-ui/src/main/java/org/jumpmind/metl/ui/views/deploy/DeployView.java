@@ -41,7 +41,7 @@ import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
 @Scope(value = "ui")
-@TopBarLink(category = Category.Deploy, name = MenuResource.DEPLOY, id = "deploy", icon = FontAwesome.GEARS, menuOrder = 10)
+@TopBarLink(category = Category.Deploy, name = "Deploy", id = "deploy", icon = FontAwesome.GEARS, menuOrder = 10)
 public class DeployView extends HorizontalLayout implements View {
 
     private static final long serialVersionUID = 1L;

@@ -80,7 +80,7 @@ import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
 @Scope(value = "ui")
-@TopBarLink(id = "release", category = Category.Release, menuOrder = 20, name = MenuResource.RELEASE, icon = FontAwesome.CUBE)
+@TopBarLink(id = "release", category = Category.Release, menuOrder = 20, name = "Release", icon = FontAwesome.CUBE)
 public class ReleasesView extends VerticalLayout implements View, IReleasePackageListener {
 
     private static final long serialVersionUID = 1L;

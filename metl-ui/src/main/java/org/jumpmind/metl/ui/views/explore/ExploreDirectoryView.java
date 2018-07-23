@@ -70,7 +70,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope("ui")
-@TopBarLink(id = "exploreDirectories", category = Category.Explore, menuOrder = 20, name = MenuResource.DIRECTORY, icon = FontAwesome.DATABASE)
+@TopBarLink(id = "exploreDirectories", category = Category.Explore, menuOrder = 20, name = "Directory", icon = FontAwesome.DATABASE)
 public class ExploreDirectoryView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = 1L;

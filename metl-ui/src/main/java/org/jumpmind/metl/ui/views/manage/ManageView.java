@@ -82,7 +82,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope(value = "ui")
-@TopBarLink(category = Category.Manage, name = MenuResource.MANAGE, id = "manage", icon = FontAwesome.GEARS, menuOrder = 25)
+@TopBarLink(category = Category.Manage, name = "Manager", id = "manage", icon = FontAwesome.GEARS, menuOrder = 25)
 public class ManageView extends HorizontalLayout implements View, IUiPanel, IBackgroundRefreshable<Object> {
     
     final Logger log = LoggerFactory.getLogger(getClass());

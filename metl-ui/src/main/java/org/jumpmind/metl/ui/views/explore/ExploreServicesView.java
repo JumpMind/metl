@@ -40,7 +40,7 @@ import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
 @Scope("ui")
-@TopBarLink(id = "exploreServices", category = Category.Explore, menuOrder = 30, name = MenuResource.SERVE, icon = FontAwesome.GLOBE)
+@TopBarLink(id = "exploreServices", category = Category.Explore, menuOrder = 30, name = "Service", icon = FontAwesome.GLOBE)
 public class ExploreServicesView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = 1L;
