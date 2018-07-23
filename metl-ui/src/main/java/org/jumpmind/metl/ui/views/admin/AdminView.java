@@ -31,10 +31,7 @@ import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.metl.ui.common.UIConstants;
-<<<<<<< HEAD
 import org.jumpmind.metl.ui.init.AppUI;
-=======
->>>>>>> branch 'master' of https://github.com/JumpMind/metl.git
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
