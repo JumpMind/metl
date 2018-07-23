@@ -358,7 +358,7 @@
             </setting>
         </settings>
     </component>
-    <!-- <component category='READER' id='DBF Reader' inputMessageType='text' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='streamable'>
+    <component category='READER' id='DBF Reader' inputMessageType='text' inputOutputModelsMatch='false' outputMessageType='text' >
         <name>DBF Reader</name>
         <className>org.jumpmind.metl.core.runtime.component.DBFReader</className>
         <keywords>file,files</keywords>
@@ -430,5 +430,5 @@
                 <defaultValue>1</defaultValue>                
             </setting>            
         </settings>
-    </component> -->
+    </component> 
 </definitions>
