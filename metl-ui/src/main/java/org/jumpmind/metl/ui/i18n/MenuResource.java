@@ -2,7 +2,7 @@ package org.jumpmind.metl.ui.i18n;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class MessageResource {
+public class MenuResource {
 
 	public static final String RELEASE = "\u53d1\u5e03";
 	

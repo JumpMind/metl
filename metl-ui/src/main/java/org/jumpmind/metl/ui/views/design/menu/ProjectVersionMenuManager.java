@@ -23,7 +23,7 @@ package org.jumpmind.metl.ui.views.design.menu;
 import org.apache.commons.lang.ArrayUtils;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.ui.common.CutCopyPasteManager;
-import org.jumpmind.metl.ui.i18n.MessageResource;
+import org.jumpmind.metl.ui.i18n.MenuResource;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
 
 public class ProjectVersionMenuManager extends AbstractDesignSelectedValueMenuManager {
@@ -44,35 +44,35 @@ public class ProjectVersionMenuManager extends AbstractDesignSelectedValueMenuMa
     @Override
     protected String[] getEnabledPaths(Object selected) {
         String[] enabledPaths = (String[]) ArrayUtils.addAll(super.getEnabledPaths(selected), new String[] {
-        		MessageResource.getNewDependency(),
-        		MessageResource.getNewDesign(),
-        		MessageResource.getNewTest(),
-        		MessageResource.getNewHierarchical(),
-        		MessageResource.getNewRelational(),
-        		MessageResource.getNewDatabase(),
-        		MessageResource.getNewFTP(),
-        		MessageResource.getNewFileSystem(),
-        		MessageResource.getNewJMS(),
-        		MessageResource.getNewSFTP(),
-        		MessageResource.getNewSMB(),
-        		MessageResource.getNewHTTP(),
-        		MessageResource.getNewMailSession(),
-        		MessageResource.getNewSubscribeJMS(),
-        		MessageResource.getFileOpen(),
-        		MessageResource.getFileImport(),        
-        		MessageResource.getFileExport(),
-        		MessageResource.getEditRename(),
-        		MessageResource.getEditCopy(),
-        		MessageResource.getEditRemove(),
+        		MenuResource.getNewDependency(),
+        		MenuResource.getNewDesign(),
+        		MenuResource.getNewTest(),
+        		MenuResource.getNewHierarchical(),
+        		MenuResource.getNewRelational(),
+        		MenuResource.getNewDatabase(),
+        		MenuResource.getNewFTP(),
+        		MenuResource.getNewFileSystem(),
+        		MenuResource.getNewJMS(),
+        		MenuResource.getNewSFTP(),
+        		MenuResource.getNewSMB(),
+        		MenuResource.getNewHTTP(),
+        		MenuResource.getNewMailSession(),
+        		MenuResource.getNewSubscribeJMS(),
+        		MenuResource.getFileOpen(),
+        		MenuResource.getFileImport(),        
+        		MenuResource.getFileExport(),
+        		MenuResource.getEditRename(),
+        		MenuResource.getEditCopy(),
+        		MenuResource.getEditRemove(),
         });
         if (navigator.getContext().getClipboard()
                 .containsKey(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE)) {
-            enabledPaths = (String[]) ArrayUtils.add(enabledPaths, MessageResource.getEditPaste());
+            enabledPaths = (String[]) ArrayUtils.add(enabledPaths, MenuResource.getEditPaste());
         }
         ProjectVersion version = (ProjectVersion) selected;
         if (version.getVersionType() != null && (version.getVersionType().equalsIgnoreCase(ProjectVersion.VersionType.RELEASE.toString())
                 || version.getVersionType().equalsIgnoreCase(ProjectVersion.VersionType.MASTER.toString()))) {
-            enabledPaths = (String[]) ArrayUtils.add(enabledPaths, MessageResource.getNewBranch());
+            enabledPaths = (String[]) ArrayUtils.add(enabledPaths, MenuResource.getNewBranch());
         }
         
         return enabledPaths;
