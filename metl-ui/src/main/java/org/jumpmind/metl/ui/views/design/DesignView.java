@@ -44,6 +44,7 @@ import com.vaadin.ui.VerticalLayout;
 @TopBarLink(category = Category.Design, name = "Design", id = "design", icon = FontAwesome.SHARE_ALT, menuOrder = 1, useAsDefault = true)
 public class DesignView extends HorizontalLayout implements View {
 
+	
     private static final long serialVersionUID = 1L;
 
     @Autowired
