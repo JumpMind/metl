@@ -31,7 +31,10 @@ import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.metl.ui.common.UIConstants;
+<<<<<<< HEAD
 import org.jumpmind.metl.ui.init.AppUI;
+=======
+>>>>>>> branch 'master' of https://github.com/JumpMind/metl.git
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,22 +115,6 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
                     sideMenuById.put(link.id(), sideView.getView());
                 }
         }
-        /*
-        addItem("Users", Icons.USER);
-        addItem("Groups", Icons.GROUP);
-        addItem("Tags", Icons.TAG);
-        addItem("REST", Icons.REST);
-        addItem("General Settings", Icons.SETTINGS);
-        addItem("Plugin Repositories", Icons.DATABASE);
-        addItem("Plugins", Icons.COMPONENT);
-        addItem("Mail Server", Icons.EMAIL);
-        addItem("LDAP",Icons.BOOK);
-        addItem("Notifications", Icons.NOTIFICATION);
-        addItem("Active Users", FontAwesome.USERS);
-        addItem("Audit Events", FontAwesome.BARS);
-        addItem("Logging", Icons.LOGGING);
-        addItem("About", FontAwesome.QUESTION);
-        */
         VerticalLayout navigator = new VerticalLayout();
         navigator.addStyleName(ValoTheme.MENU_ROOT);
         navigator.setSizeFull();
@@ -160,37 +147,6 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
             if (value != null) {
                 String id = value.toString();
                 Component panel = sideMenuById.get(id);
-                /*
-                if (id.equals("Users")) {
-                    panel = new UserPanel(context, tabbedPanel);
-                } else if (id.equals("Groups")) {
-                    panel = new GroupPanel(context, tabbedPanel);
-                } else if (id.equals("Tags")) {
-                    panel = new TagPanel(context, tabbedPanel);
-                } else if (id.equals("REST")) {
-                    panel = new ApiPanel(context, tabbedPanel);
-                } else if (id.equals("General Settings")) {
-                    panel = new GeneralSettingsPanel(context, tabbedPanel);
-                } else if (id.equals("Mail Server")) {
-                    panel = new MailServerPanel(context, tabbedPanel);
-                } else if (id.equals("LDAP")) {
-                    panel = new LdapPanel(context, tabbedPanel);
-                } else if (id.equals("Notifications")) {
-                    panel = new NotificationPanel(context, tabbedPanel);
-                } else if (id.equals("Logging")) {
-                    panel = new LoggingPanel(context, tabbedPanel);
-                } else if (id.equals("Plugin Repositories")) {
-                    panel = new PluginRepositoriesPanel(context, tabbedPanel);                    
-                } else if (id.equals("About")) {
-                    panel = new AboutPanel(context, tabbedPanel);
-                } else if (id.equals("Plugins")) {
-                    panel = new P(context, tabbedPanel);
-                } else if (id.equals("Active Users")) {
-                    panel = new ActiveUsersPanel(context, tabbedPanel);
-                } else if (id.equals("Audit Events")) {
-                    panel = new AuditEventPanel(context, tabbedPanel);
-                }
-                */
                 tabbedPanel.addCloseableTab(id, id, table.getItemIcon(id), panel);
             }
         }

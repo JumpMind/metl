@@ -33,8 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.net.util.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
@@ -189,12 +189,7 @@ public class Web extends AbstractComponentRuntime {
                     info("sending content to %s", path);
                     HttpEntityEnclosingRequestBase encHttpRequest = (HttpEntityEnclosingRequestBase) httpRequest;
                     StringEntity requestEntity;
-                    try {
-                        requestEntity = new StringEntity(requestContent);
-                    } catch (UnsupportedEncodingException ex) {
-                        log.error(String.format("Unable to encode content for web request %s", ex.getMessage()));
-                        throw new IoException(ex);
-                    }
+                    requestEntity = new StringEntity(requestContent, DEFAULT_CHARSET);
                     encHttpRequest.setEntity(requestEntity);
                     executeRequestAndSendOutputMessage(encHttpRequest, callback, inputMessage);
                 } else {
@@ -216,7 +211,8 @@ public class Web extends AbstractComponentRuntime {
             if (responseCode / 100 != 2) {
                 throw new IoException(
                         String.format("Error calling http method.  HTTP Status %d, HTTP Status Description %s, HTTP Result %s", responseCode,
-                                httpResponse.getStatusLine().getReasonPhrase(), IOUtils.toString(httpResponse.getEntity().getContent())));
+                                httpResponse.getStatusLine().getReasonPhrase(), 
+                                IOUtils.toString(httpResponse.getEntity().getContent())).replace("%", "%%"));
             } else {
                 HttpEntity resultEntity = httpResponse.getEntity();
                 outputPayload.add(IOUtils.toString(resultEntity.getContent()));
@@ -353,7 +349,7 @@ public class Web extends AbstractComponentRuntime {
         if (HttpDirectory.SECURITY_BASIC.equals(httpDirectory.getSecurity())) {
             String userpassword = String.format("%s:%s", httpDirectory.getUsername(), httpDirectory.getPassword());
             String encodedAuthorization = new String(Base64.encodeBase64(userpassword.getBytes()));
-            request.setHeader("Authorization", "Baisc " + encodedAuthorization);
+            request.setHeader("Authorization", "Basic " + encodedAuthorization);
         } else if (HttpDirectory.SECURITY_TOKEN.equals(httpDirectory.getSecurity())) {
             request.setHeader("Authorization", "Bearer " + httpDirectory.getToken());
         } else if (HttpDirectory.SECURITY_OAUTH_10.equals(httpDirectory.getSecurity())) {

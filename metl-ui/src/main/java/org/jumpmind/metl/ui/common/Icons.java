@@ -97,4 +97,6 @@ final public class Icons {
     
     public static final FontAwesome TAG = FontAwesome.TAG;
     
+    public static final FontAwesome LOCK = FontAwesome.LOCK;
+    
 }
