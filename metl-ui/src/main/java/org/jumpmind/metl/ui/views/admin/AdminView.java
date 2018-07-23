@@ -22,12 +22,12 @@ package org.jumpmind.metl.ui.views.admin;
 
 import javax.annotation.PostConstruct;
 
-import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.TopBarLink;
+import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,8 +95,6 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         table.addContainerProperty("id", String.class, null);
         table.setVisibleColumns(new Object[] { "id" });
         table.setColumnExpandRatio("id", 1);
-        addItem("Users", Icons.USER);
-        addItem("Groups", Icons.GROUP);
         addItem("Tags", Icons.TAG);
         addItem("REST", Icons.REST);
         addItem("General Settings", Icons.SETTINGS);
@@ -142,11 +140,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
             if (value != null) {
                 String id = value.toString();
                 Component panel = null;
-                if (id.equals("Users")) {
-                    panel = new UserPanel(context, tabbedPanel);
-                } else if (id.equals("Groups")) {
-                    panel = new GroupPanel(context, tabbedPanel);
-                } else if (id.equals("Tags")) {
+                if (id.equals("Tags")) {
                     panel = new TagPanel(context, tabbedPanel);
                 } else if (id.equals("REST")) {
                     panel = new ApiPanel(context, tabbedPanel);

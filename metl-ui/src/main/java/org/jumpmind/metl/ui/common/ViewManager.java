@@ -48,6 +48,9 @@ public class ViewManager implements Serializable {
 
     @Autowired(required = false)
     List<View> views;
+    
+    @Autowired
+    List<TopBarButton> topBarButtons;
 
     Navigator navigator;
     
@@ -122,6 +125,10 @@ public class ViewManager implements Serializable {
     
     public void setDefaultView(String menuId) {
         defaultView = menuId;
+    }
+
+    public List<TopBarButton> getTopBarButtons() {
+        return topBarButtons;
     }
 
     protected Navigator getNavigator() {

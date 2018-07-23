@@ -97,34 +97,6 @@ public class GeneralSettingsPanel extends Panel implements IUiPanel {
                 Integer.toString(GlobalSetting.DEFAULT_CONFIG_BACKUP_RETENTION_IN_DAYS),
                 THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART, Integer.class);       
 
-        section = new Label("User Password Settings");
-        section.addStyleName(ValoTheme.LABEL_H3);
-        section.addStyleName(ValoTheme.LABEL_COLORED);
-        form.addComponent(section);
-
-        addSetting("Minimum Length", GlobalSetting.PASSWORD_MIN_LENGTH, "6", "", Integer.class);
-
-        addSetting("Prohibit Reuse", GlobalSetting.PASSWORD_PROHIBIT_PREVIOUS, "5", "",
-                Integer.class);
-
-        addSetting("Expiration in Days", GlobalSetting.PASSWORD_EXPIRE_DAYS, "60", "",
-                Integer.class);
-        
-        addSetting("Number of Failed Attempts", GlobalSetting.PASSWORD_FAILED_ATTEMPTS, 
-        		Integer.toString(GlobalSetting.PASSWORD_FAILED_ATTEMPTS_DEFAULT), "", Integer.class);
-
-        addSetting("Prohibit Common Words", GlobalSetting.PASSWORD_PROHIBIT_COMMON_WORDS, "true",
-                "", Boolean.class);
-
-        addSetting("Require Alphanumeric", GlobalSetting.PASSWORD_REQUIRE_ALPHANUMERIC, "true", "",
-                Boolean.class);
-
-        addSetting("Require Symbol", GlobalSetting.PASSWORD_REQUIRE_SYMBOL, "true", "",
-                Boolean.class);
-
-        addSetting("Require Mixed Case", GlobalSetting.PASSWORD_REQUIRE_MIXED_CASE, "true", "",
-                Boolean.class);
-
         VerticalLayout paddedLayout = new VerticalLayout();
         paddedLayout.setMargin(true);
         paddedLayout.addComponent(form);
