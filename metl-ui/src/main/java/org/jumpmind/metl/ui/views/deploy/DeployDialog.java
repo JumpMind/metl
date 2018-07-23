@@ -197,7 +197,7 @@ public class DeployDialog extends ResizableWindow {
             }
             deployByOptionGroup.setVisible(false);
             backButton.setCaption(MessageSource.message("deployDialog.previous"));
-            actionButton.setCaption( MessageSource.message("deployDialog.deploy"));
+            actionButton.setCaption( MessageSource.message("common.deploy"));
             selectDeploymentLayout.removeAllComponents();
             selectDeploymentLayout.addComponent(validateFlowDeploymentPanel);            
         } else {

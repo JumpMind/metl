@@ -112,7 +112,7 @@ public class ExportDialog extends ResizableWindow {
         selectNoneLink.addStyleName(ValoTheme.BUTTON_LINK);
         selectNoneLink.addClickListener((event) -> selectNone());
         
-        addComponent(buildButtonFooter(new Button[] {selectAllLink, selectNoneLink}, new Button(MessageSource.message("exportDialog.exportButton"), new ExportClickListener()), buildCloseButton()));
+        addComponent(buildButtonFooter(new Button[] {selectAllLink, selectNoneLink}, new Button(MessageSource.message("common.export"), new ExportClickListener()), buildCloseButton()));
 
         setWidth(700, Unit.PIXELS);
         setHeight(500, Unit.PIXELS);

@@ -91,12 +91,12 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
         authField.setRequiredError( MessageSource.message("userEditpanel.tips"));
         form.addComponent(authField);
 
-        TextField loginField = new TextField(MessageSource.message("userEditpanel.loginId"), StringUtils.trimToEmpty(user.getLoginId()));
+        TextField loginField = new TextField(MessageSource.message("common.loginId"), StringUtils.trimToEmpty(user.getLoginId()));
         form.addComponent(loginField);
         loginField.addValueChangeListener(new LoginChangeListener());
         loginField.focus();
         
-        TextField nameField = new TextField(MessageSource.message("userEditpanel.fullName"), StringUtils.trimToEmpty(user.getName()));
+        TextField nameField = new TextField(MessageSource.message("common.fullName"), StringUtils.trimToEmpty(user.getName()));
         nameField.addValueChangeListener(new NameChangeListener());
         form.addComponent(nameField);
 

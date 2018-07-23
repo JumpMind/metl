@@ -87,7 +87,7 @@ public class ExploreDirectoryView extends VerticalLayout implements View {
         setMargin(false);
 
         ButtonBar buttonBar = new ButtonBar();
-        Button refreshButton = buttonBar.addButton(MessageSource.message("exploreDirectoryView.refresh"), FontAwesome.REFRESH);
+        Button refreshButton = buttonBar.addButton(MessageSource.message("common.refresh"), FontAwesome.REFRESH);
         refreshButton.addClickListener(event -> refresh());
         addComponent(buttonBar);
 

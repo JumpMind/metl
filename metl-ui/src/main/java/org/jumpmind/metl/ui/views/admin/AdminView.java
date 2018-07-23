@@ -100,7 +100,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         table.setColumnExpandRatio("id", 1);
         addItem(MessageSource.message("adminView.users"), Icons.USER);
         addItem(MessageSource.message("adminView.groups"), Icons.GROUP);
-        addItem(MessageSource.message("adminView.tags"), Icons.TAG);
+        addItem(MessageSource.message("common.tags"), Icons.TAG);
         addItem(MessageSource.message("adminView.rest"), Icons.REST);
         addItem(MessageSource.message("adminView.generalSettings"), Icons.SETTINGS);
         addItem(MessageSource.message("adminView.pluginRepositories"), Icons.DATABASE);
@@ -149,7 +149,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
                     panel = new UserPanel(context, tabbedPanel);
                 } else if (id.equals(MessageSource.message("adminView.groups"))) {
                     panel = new GroupPanel(context, tabbedPanel);
-                } else if (id.equals(MessageSource.message("adminView.tags"))) {
+                } else if (id.equals(MessageSource.message("common.tags"))) {
                     panel = new TagPanel(context, tabbedPanel);
                 } else if (id.equals(MessageSource.message("adminView.rest"))) {
                     panel = new ApiPanel(context, tabbedPanel);

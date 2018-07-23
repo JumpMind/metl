@@ -154,7 +154,7 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
         editor.setHighlightActiveLine(true);
         editor.setShowPrintMargin(false);
 
-        Button importButton = new Button(MessageSource.message("importXmlTemplateWindow.import"));
+        Button importButton = new Button(MessageSource.message("common.import"));
         importButton.addClickListener(this);
 
         upload = new Upload(null, this);

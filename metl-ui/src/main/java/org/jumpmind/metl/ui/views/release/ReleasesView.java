@@ -114,9 +114,9 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
         setSizeFull();
         setMargin(false);
         ButtonBar buttonBar = new ButtonBar();
-        addButton = buttonBar.addButton(MessageSource.message("releasesView.add"), FontAwesome.PLUS, e -> add());
-        editButton = buttonBar.addButton(MessageSource.message("releasesView.edit"), FontAwesome.EDIT, e -> edit());
-        exportButton = buttonBar.addButton(MessageSource.message("releasesView.export"), FontAwesome.DOWNLOAD, e -> export());
+        addButton = buttonBar.addButton(MessageSource.message("common.add"), FontAwesome.PLUS, e -> add());
+        editButton = buttonBar.addButton(MessageSource.message("common.edit"), FontAwesome.EDIT, e -> edit());
+        exportButton = buttonBar.addButton(MessageSource.message("common.export"), FontAwesome.DOWNLOAD, e -> export());
         archiveButton = buttonBar.addButton(MessageSource.message("releasesView.archive"), FontAwesome.ARCHIVE, e -> archive());
         // TODO add support for the archive button
         archiveButton.setVisible(false);

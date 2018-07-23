@@ -98,7 +98,7 @@ public class LoggingPanel extends VerticalLayout implements IUiPanel, IBackgroun
         topPanelLayout.setWidth(100, Unit.PERCENTAGE);
         topPanelLayout.setSpacing(true);
       
-        Button refreshButton = new Button(MessageSource.message("loggingPanel.refresh"));
+        Button refreshButton = new Button(MessageSource.message("common.refresh"));
         refreshButton.addClickListener(new ClickListener() {
             public void buttonClick(ClickEvent event) {
                 refresh();

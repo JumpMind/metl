@@ -192,7 +192,7 @@ public class PropertySheet extends AbsoluteLayout {
             }
         }
         if (components.size() != 0 && !readOnly) {
-            formLayout.addComponent(buildOptionGroup(MessageSource.message("propertySheet.enabled"), ENABLED, components));
+            formLayout.addComponent(buildOptionGroup(MessageSource.message("common.enabled"), ENABLED, components));
             formLayout.addComponent(buildOptionGroup(MessageSource.message("propertySheet.logInput"), LOG_INPUT, components));
             formLayout.addComponent(buildOptionGroup(MessageSource.message("propertySheet.logOutput"), LOG_OUTPUT, components));
         }

@@ -115,16 +115,16 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         addAttributeButton = buttonBar1.addButton(MessageSource.message("editHierarchicalModelPanel.addAttr"), FontAwesome.COLUMNS);
         addAttributeButton.addClickListener(new AddAttributeClickListener());
 
-        editButton = buttonBar1.addButton(MessageSource.message("editHierarchicalModelPanel.edit"), FontAwesome.EDIT);
+        editButton = buttonBar1.addButton(MessageSource.message("common.edit"), FontAwesome.EDIT);
         editButton.addClickListener(new EditClickListener());
 
-        removeButton = buttonBar1.addButton(MessageSource.message("editHierarchicalModelPanel.remove"), FontAwesome.TRASH_O);
+        removeButton = buttonBar1.addButton(MessageSource.message("common.remove"), FontAwesome.TRASH_O);
         removeButton.addClickListener(new RemoveClickListener());
 
-        importButton = buttonBar1.addButtonRight(MessageSource.message("editHierarchicalModelPanel.import"), FontAwesome.UPLOAD,
+        importButton = buttonBar1.addButtonRight(MessageSource.message("editRelationalModelPanel.import"), FontAwesome.UPLOAD,
                 new ImportClickListener());
 
-        buttonBar1.addButtonRight(MessageSource.message("editHierarchicalModelPanel.export"), FontAwesome.DOWNLOAD, (e) -> export());
+        buttonBar1.addButtonRight(MessageSource.message("editRelationalModelPanel.export"), FontAwesome.DOWNLOAD, (e) -> export());
 
         treeTable.setSizeFull();
         treeTable.setCacheRate(100);

@@ -96,7 +96,7 @@ public class ManageNavigator extends Panel {
         agentsFolder.setName(MessageSource.message("manageNavigator.agents"));
 
         flowsFolder = new Folder();
-        flowsFolder.setName(MessageSource.message("manageNavigator.flows"));
+        flowsFolder.setName(MessageSource.message("common.flows"));
     }
 
     public void refresh() {

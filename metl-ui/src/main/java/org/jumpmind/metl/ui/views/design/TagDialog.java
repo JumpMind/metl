@@ -56,7 +56,7 @@ public class TagDialog  extends ResizableWindow {
         }
         List<EntityTag> entityTags = configurationService.findEntityTagsForEntity(entityId);
         List<Tag> tags = configurationService.findTags();
-        tagGroup = new OptionGroup(MessageSource.message("tagDialog.tags"));
+        tagGroup = new OptionGroup(MessageSource.message("common.tags"));
         tagGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         tagGroup.setMultiSelect(true);
         for (Tag tag : tags) {
