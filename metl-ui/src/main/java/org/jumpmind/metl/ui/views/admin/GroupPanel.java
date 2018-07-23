@@ -27,16 +27,17 @@ import java.util.Set;
 
 import org.jumpmind.metl.core.model.Group;
 import org.jumpmind.metl.core.model.User;
-import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.metl.ui.common.TabbedPanel;
-import org.jumpmind.vaadin.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.UiComponent;
+import org.springframework.context.annotation.Scope;
+import org.springframework.core.annotation.Order;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.ui.Button;
@@ -44,14 +45,13 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Table;
-import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class GroupPanel extends VerticalLayout implements IUiPanel {
-
-    ApplicationContext context;
-
-    TabbedPanel tabbedPanel;
+@UiComponent
+@Scope(value = "ui")
+@Order(200)
+@AdminMenuLink(name = "Groups", id = "Groups", icon = FontAwesome.GROUP)
+public class GroupPanel extends AbstractAdminPanel {
 
     Button newButton;
     
@@ -63,10 +63,7 @@ public class GroupPanel extends VerticalLayout implements IUiPanel {
     
     Table table;
 
-    public GroupPanel(ApplicationContext context, TabbedPanel tabbedPanel) {
-        this.context = context;
-        this.tabbedPanel = tabbedPanel;
-
+    public GroupPanel() {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
@@ -99,7 +96,6 @@ public class GroupPanel extends VerticalLayout implements IUiPanel {
 
         addComponent(table);
         setExpandRatio(table, 1.0f);
-        refresh();
     }
 
     @Override
@@ -149,7 +145,7 @@ public class GroupPanel extends VerticalLayout implements IUiPanel {
         public void buttonClick(ClickEvent event) {
             Group group = new Group();
             GroupEditPanel editPanel = new GroupEditPanel(context, group);
-            tabbedPanel.addCloseableTab(group.getId(), "Edit Group", getIcon(), editPanel);
+            adminView.getTabbedPanel().addCloseableTab(group.getId(), "Edit Group", getIcon(), editPanel);
         }
     }
 
@@ -158,7 +154,7 @@ public class GroupPanel extends VerticalLayout implements IUiPanel {
             Group group = getFirstSelectedItem();
             context.getOperationsService().refresh(group);
             GroupEditPanel editPanel = new GroupEditPanel(context, group);
-            tabbedPanel.addCloseableTab(group.getId(), "Edit Group", getIcon(), editPanel);
+            adminView.getTabbedPanel().addCloseableTab(group.getId(), "Edit Group", getIcon(), editPanel);
         }
     }
 
@@ -209,4 +205,9 @@ public class GroupPanel extends VerticalLayout implements IUiPanel {
             setButtonsEnabled();
         }
     }
+
+    @Override
+    public void enter(ViewChangeEvent event) {
+    }
+
 }

@@ -26,27 +26,29 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
 import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.persist.IPluginService;
-import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.UIConstants;
-import org.jumpmind.vaadin.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.UiComponent;
+import org.springframework.context.annotation.Scope;
+import org.springframework.core.annotation.Order;
 
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class PluginsPanel extends VerticalLayout implements IUiPanel {
-
-    ApplicationContext context;
-
-    TabbedPanel tabbedPanel;
+@UiComponent
+@Scope(value = "ui")
+@Order(700)
+@AdminMenuLink(name = "Plugins", id = "Plugins", icon = FontAwesome.PUZZLE_PIECE)
+public class PluginsPanel extends AbstractAdminPanel {
 
     Button addButton;
 
@@ -62,10 +64,12 @@ public class PluginsPanel extends VerticalLayout implements IUiPanel {
 
     List<Plugin> plugins;
 
-    public PluginsPanel(ApplicationContext context, TabbedPanel tabbedPanel) {
-        this.context = context;
-        this.tabbedPanel = tabbedPanel;
-
+    public PluginsPanel() {
+    }
+    
+    @PostConstruct
+    @Override
+    public void init() {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
@@ -98,8 +102,6 @@ public class PluginsPanel extends VerticalLayout implements IUiPanel {
         setExpandRatio(table, 1.0f);
 
         context.getPluginManager().refresh();
-
-        refresh();
     }
 
     public List<Plugin> getPlugins() {
@@ -229,5 +231,10 @@ public class PluginsPanel extends VerticalLayout implements IUiPanel {
             refresh();
         }
     }
+
+    @Override
+    public void enter(ViewChangeEvent event) {
+    }
+    
 
 }

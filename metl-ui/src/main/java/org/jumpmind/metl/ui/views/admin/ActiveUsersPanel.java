@@ -26,14 +26,23 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.init.AppSession;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.core.annotation.Order;
 
 import com.vaadin.data.util.BeanContainer;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.VerticalLayout;
 
-public class ActiveUsersPanel extends VerticalLayout implements IUiPanel {
+@UiComponent
+@Scope(value = "ui")
+@Order(1100)
+@AdminMenuLink(name = "Active Users", id = "Active Users", icon = FontAwesome.USERS)
+public class ActiveUsersPanel extends AbstractAdminPanel {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -41,7 +50,7 @@ public class ActiveUsersPanel extends VerticalLayout implements IUiPanel {
 
     Grid grid;
 
-    public ActiveUsersPanel(ApplicationContext context, TabbedPanel tabbedPanel) {
+    public ActiveUsersPanel() {
         setSizeFull();
         setMargin(true);
     }
@@ -72,6 +81,14 @@ public class ActiveUsersPanel extends VerticalLayout implements IUiPanel {
         addComponent(grid);
         setExpandRatio(grid, 1);
 
+    }
+
+    @Override
+    public void enter(ViewChangeEvent event) {
+    }
+
+    @Override
+    protected void refresh() {
     }
 
 }

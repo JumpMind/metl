@@ -21,35 +21,33 @@
 package org.jumpmind.metl.ui.views.admin;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
-import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.User;
-import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.metl.ui.common.TabbedPanel;
-import org.jumpmind.vaadin.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.UiComponent;
+import org.springframework.context.annotation.Scope;
+import org.springframework.core.annotation.Order;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table;
-import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class UserPanel extends VerticalLayout implements IUiPanel {
+@UiComponent
+@Scope(value = "ui")
+@Order(100)
+@AdminMenuLink(name = "Users", id = "Users", icon = FontAwesome.USER)
+public class UserPanel extends AbstractAdminPanel {
 
-    ApplicationContext context;
-    
-    TabbedPanel tabbedPanel;
-    
     Button newButton;
     
     Button editButton;
@@ -60,10 +58,7 @@ public class UserPanel extends VerticalLayout implements IUiPanel {
     
     Table table;
     
-    public UserPanel(ApplicationContext context, TabbedPanel tabbedPanel) {
-        this.context = context;
-        this.tabbedPanel = tabbedPanel;
-        
+    public UserPanel() {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
@@ -96,10 +91,9 @@ public class UserPanel extends VerticalLayout implements IUiPanel {
 
         addComponent(table);
         setExpandRatio(table, 1.0f);
-        refresh();
     }
 
-    @Override
+   @Override
     public void selected() {
         refresh();
     }
@@ -146,7 +140,7 @@ public class UserPanel extends VerticalLayout implements IUiPanel {
         public void buttonClick(ClickEvent event) {
             User user = new User();
             UserEditPanel editPanel = new UserEditPanel(context, user);
-            tabbedPanel.addCloseableTab(user.getId(), "Edit User", getIcon(), editPanel);
+            adminView.getTabbedPanel().addCloseableTab(user.getId(), "Edit User", getIcon(), editPanel);
         }
     }
 
@@ -155,7 +149,7 @@ public class UserPanel extends VerticalLayout implements IUiPanel {
             User user = getFirstSelectedItem();
             context.getOperationsService().refresh(user);
             UserEditPanel editPanel = new UserEditPanel(context, user);
-            tabbedPanel.addCloseableTab(user.getId(), "Edit User", getIcon(), editPanel);
+            adminView.getTabbedPanel().addCloseableTab(user.getId(), "Edit User", getIcon(), editPanel);
         }
     }
 
@@ -188,6 +182,10 @@ public class UserPanel extends VerticalLayout implements IUiPanel {
         public void valueChange(ValueChangeEvent event) {
             setButtonsEnabled();
         }
+    }
+
+    @Override
+    public void enter(ViewChangeEvent event) {
     }
 
 }

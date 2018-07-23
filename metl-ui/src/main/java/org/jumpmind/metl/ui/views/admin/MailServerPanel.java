@@ -20,6 +20,7 @@
  */
 package org.jumpmind.metl.ui.views.admin;
 
+import javax.annotation.PostConstruct;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 
@@ -27,18 +28,19 @@ import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentStatus;
 import org.jumpmind.metl.core.model.GlobalSetting;
 import org.jumpmind.metl.core.runtime.resource.MailSession;
-import org.jumpmind.metl.ui.common.ApplicationContext;
-import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
-import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdatePasswordField;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
+import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.core.annotation.Order;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.server.Sizeable.Unit;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -46,24 +48,25 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class MailServerPanel extends Panel implements IUiPanel {
+@UiComponent
+@Scope(value = "ui")
+@Order(800)
+@AdminMenuLink(name = "Mail Server", id = "Mail Server", icon = FontAwesome.ENVELOPE_O)
+public class MailServerPanel extends AbstractAdminPanel {
 
     final Logger log = LoggerFactory.getLogger(getClass());
     
-    ApplicationContext context;
-
-    TabbedPanel tabbedPanel;
-    
     boolean isChanged;
 
-    public MailServerPanel(final ApplicationContext context, TabbedPanel tabbedPanel) {
-        this.context = context;
-        this.tabbedPanel = tabbedPanel;
-
+    public MailServerPanel() {
+    }
+    
+    @PostConstruct
+    @Override
+    public void init() {
         final GlobalSetting hostNameSetting = getGlobalSetting(MailSession.SETTING_HOST_NAME, "localhost");
         final GlobalSetting transportSetting = getGlobalSetting(MailSession.SETTING_TRANSPORT, "smtp");
         final GlobalSetting portSetting = getGlobalSetting(MailSession.SETTING_PORT_NUMBER, "25");
@@ -167,7 +170,7 @@ public class MailServerPanel extends Panel implements IUiPanel {
         VerticalLayout paddedLayout = new VerticalLayout();
         paddedLayout.setMargin(true);
         paddedLayout.addComponent(form);
-        setContent(paddedLayout);
+        addComponent(paddedLayout);
     }
 
     private void saveSetting(GlobalSetting setting, String value) {
@@ -223,6 +226,14 @@ public class MailServerPanel extends Panel implements IUiPanel {
                 mailSession.closeTransport();
             }
         }        
+    }
+
+    @Override
+    public void enter(ViewChangeEvent event) {
+    }
+
+    @Override
+    protected void refresh() {
     }
 
 }

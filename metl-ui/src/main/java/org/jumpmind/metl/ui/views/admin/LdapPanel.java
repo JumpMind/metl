@@ -12,10 +12,15 @@ import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
+import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.core.annotation.Order;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -28,15 +33,16 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class LdapPanel extends Panel implements IUiPanel {
+
+@UiComponent
+@Scope(value = "ui")
+@Order(900)
+@AdminMenuLink(name = "LDAP", id = "LDAP", icon = FontAwesome.BOOK)
+public class LdapPanel extends AbstractAdminPanel {
 
     private static final long serialVersionUID = 1L;
 
     final Logger log = LoggerFactory.getLogger(getClass());
-    
-    ApplicationContext context;
-
-    TabbedPanel tabbedPanel;
     
     boolean isChanged;
     
@@ -45,10 +51,10 @@ public class LdapPanel extends Panel implements IUiPanel {
     ImmediateUpdateTextField searchAttrField;
     ImmediateUpdateTextField securityPrincipalField;
 
-    public LdapPanel(final ApplicationContext context, TabbedPanel tabbedPanel) {
-        this.context = context;
-        this.tabbedPanel = tabbedPanel;
-
+    public LdapPanel() {
+    }
+    
+    public void init() {
         final GlobalSetting hostNameSetting = getGlobalSetting(GlobalSetting.LDAP_HOST, "");
         final GlobalSetting baseDnSetting = getGlobalSetting(GlobalSetting.LDAP_BASE_DN, "");
         final GlobalSetting searchAttrSetting = getGlobalSetting(GlobalSetting.LDAP_SEARCH_ATR, "");
@@ -115,7 +121,7 @@ public class LdapPanel extends Panel implements IUiPanel {
         VerticalLayout paddedLayout = new VerticalLayout();
         paddedLayout.setMargin(true);
         paddedLayout.addComponent(form);
-        setContent(paddedLayout);
+        addComponent(paddedLayout);
     }
 
     private void saveSetting(GlobalSetting setting, String value) {
@@ -262,6 +268,14 @@ public class LdapPanel extends Panel implements IUiPanel {
             }
         }
 
+    }
+
+    @Override
+    public void enter(ViewChangeEvent event) {
+    }
+
+    @Override
+    protected void refresh() {
     }
 
 }

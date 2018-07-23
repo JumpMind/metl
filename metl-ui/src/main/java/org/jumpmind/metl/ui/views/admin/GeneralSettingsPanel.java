@@ -25,9 +25,14 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
+import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.core.annotation.Order;
 
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.FormLayout;
@@ -37,24 +42,24 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class GeneralSettingsPanel extends Panel implements IUiPanel {
+@UiComponent
+@Scope(value = "ui")
+@Order(500)
+@AdminMenuLink(name = "General Settings", id = "General Settings", icon = FontAwesome.GEARS)
+public class GeneralSettingsPanel extends AbstractAdminPanel {
 
     private static final String THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART = "This will take effect on the next server restart";
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
-    ApplicationContext context;
-
-    TabbedPanel tabbedPanel;
-
     boolean isChanged;
 
     FormLayout form;
 
-    public GeneralSettingsPanel(final ApplicationContext context, TabbedPanel tabbedPanel) {
-        this.context = context;
-        this.tabbedPanel = tabbedPanel;
-
+    public GeneralSettingsPanel() {
+    }
+    
+    public void init() {
         form = new FormLayout();
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
 
@@ -128,7 +133,7 @@ public class GeneralSettingsPanel extends Panel implements IUiPanel {
         VerticalLayout paddedLayout = new VerticalLayout();
         paddedLayout.setMargin(true);
         paddedLayout.addComponent(form);
-        setContent(paddedLayout);
+        addComponent(paddedLayout);
     }
 
     protected AbstractField<?> addSetting(String text, String globalSetting, String defaultValue,
@@ -193,6 +198,18 @@ public class GeneralSettingsPanel extends Panel implements IUiPanel {
             setting.setValue(defaultValue);
         }
         return setting;
+    }
+
+    @Override
+    public void enter(ViewChangeEvent event) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    protected void refresh() {
+        // TODO Auto-generated method stub
+        
     }
 
 }

@@ -25,15 +25,22 @@ import java.util.List;
 import org.jumpmind.metl.core.model.AuditEvent;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.TabbedPanel;
-import org.jumpmind.vaadin.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.core.annotation.Order;
 
 import com.vaadin.data.util.BeanContainer;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Grid;
-import com.vaadin.ui.VerticalLayout;
 
-public class AuditEventPanel extends VerticalLayout implements IUiPanel {
+@UiComponent
+@Scope(value = "ui")
+@Order(1200)
+@AdminMenuLink(name = "Audit Events", id = "Audit Events", icon = FontAwesome.BARS)
+public class AuditEventPanel extends AbstractAdminPanel {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -41,10 +48,7 @@ public class AuditEventPanel extends VerticalLayout implements IUiPanel {
 
     Grid grid;
     
-    ApplicationContext context;
-
-    public AuditEventPanel(ApplicationContext context, TabbedPanel tabbedPanel) {
-        this.context = context;
+    public AuditEventPanel() {
         setSizeFull();
         setMargin(true);
     }
@@ -81,6 +85,14 @@ public class AuditEventPanel extends VerticalLayout implements IUiPanel {
         }
         addComponent(grid);
         setExpandRatio(grid, 1);
+    }
+
+    @Override
+    public void enter(ViewChangeEvent event) {
+    }
+
+    @Override
+    protected void refresh() {
     }
 
 }

@@ -23,6 +23,8 @@ package org.jumpmind.metl.ui.views.admin;
 import java.util.Iterator;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.metl.core.model.Notification;
 import org.jumpmind.metl.core.model.User;
@@ -30,6 +32,9 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.UiComponent;
+import org.springframework.context.annotation.Scope;
+import org.springframework.core.annotation.Order;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -38,6 +43,7 @@ import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -47,11 +53,11 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class NotificationPanel extends VerticalLayout implements IUiPanel, TextChangeListener {
-
-    ApplicationContext context;
-    
-    TabbedPanel tabbedPanel;
+@UiComponent
+@Scope(value = "ui")
+@Order(1000)
+@AdminMenuLink(name = "Notifications", id = "Notifications", icon = FontAwesome.COMMENT)
+public class NotificationPanel extends AbstractAdminPanel implements TextChangeListener {
 
     Button newButton;
     
@@ -65,10 +71,12 @@ public class NotificationPanel extends VerticalLayout implements IUiPanel, TextC
     
     TextField filterField;
 
-    public NotificationPanel(ApplicationContext context, TabbedPanel tabbedPanel) {
-        this.context = context;
-        this.tabbedPanel = tabbedPanel;
-
+    public NotificationPanel() {
+    }
+    
+    @PostConstruct
+    @Override
+    public void init() {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
@@ -170,7 +178,7 @@ public class NotificationPanel extends VerticalLayout implements IUiPanel, TextC
             User user = new User();
             Notification notification = new Notification();
             NotificationEditPanel editPanel = new NotificationEditPanel(context, notification); 
-            tabbedPanel.addCloseableTab(user.getId(), "Edit Notification", getIcon(), editPanel);
+            adminView.getTabbedPanel().addCloseableTab(user.getId(), "Edit Notification", getIcon(), editPanel);
         }
     }
 
@@ -179,7 +187,7 @@ public class NotificationPanel extends VerticalLayout implements IUiPanel, TextC
             Notification item = getFirstSelectedItem();
             context.getOperationsService().refresh(item);
             NotificationEditPanel editPanel = new NotificationEditPanel(context, item);
-            tabbedPanel.addCloseableTab(item.getId(), "Edit Notification", getIcon(), editPanel);
+            adminView.getTabbedPanel().addCloseableTab(item.getId(), "Edit Notification", getIcon(), editPanel);
         }
     }
 
@@ -212,6 +220,12 @@ public class NotificationPanel extends VerticalLayout implements IUiPanel, TextC
         public void valueChange(ValueChangeEvent event) {
             setButtonsEnabled();
         }
+    }
+
+    @Override
+    public void enter(ViewChangeEvent event) {
+        // TODO Auto-generated method stub
+        
     }
 
 }
