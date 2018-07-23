@@ -41,4 +41,8 @@ public abstract class AbstractAdminPanel extends VerticalLayout implements Admin
     public ApplicationContext getContext() {
         return this.context;
     }
+    
+    public AdminView getAdminView() {
+        return this.adminView;
+    }
 }

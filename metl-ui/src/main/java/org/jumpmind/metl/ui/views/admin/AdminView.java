@@ -170,7 +170,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         return context;
     }
 
-    protected TabbedPanel getTabbedPanel() {
+    public TabbedPanel getTabbedPanel() {
         return tabbedPanel;
     }
 
