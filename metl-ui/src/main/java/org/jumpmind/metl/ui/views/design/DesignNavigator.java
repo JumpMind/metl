@@ -86,17 +86,15 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 public class DesignNavigator extends VerticalLayout {
-	 public static final String LABEL_DEPENDENCIES = "Dependencies";
+		public static final String LABEL_DEPENDENCIES = "designNavigator.dependencies";
 
-	    public static final String LABEL_FLOWS = "Flows";
+	    public static final String LABEL_TESTS = "common.tests";
 	    
-	    public static final String LABEL_TESTS = "Tests";
-	    
-	    public static final String LABEL_MODELS = "Models";
+	    public static final String LABEL_FLOWS = "common.flows";
+    
+	    public static final String LABEL_MODELS = "common.models";
 
-	    public static final String LABEL_RESOURCES = "Resources";
-
-   
+	    public static final String LABEL_RESOURCES = "common.resouces";
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
