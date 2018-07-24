@@ -48,7 +48,7 @@ import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.InProgressDialog;
 import org.jumpmind.metl.ui.common.TopBarLink;
-import org.jumpmind.metl.ui.i18n.MessageResource;
+import org.jumpmind.metl.ui.i18n.MenuResource;
 import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
@@ -80,7 +80,7 @@ import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
 @Scope(value = "ui")
-@TopBarLink(id = "release", category = Category.Release, menuOrder = 20, name = MessageResource.RELEASE, icon = FontAwesome.CUBE)
+@TopBarLink(id = "release", category = Category.Release, menuOrder = 20, name = "Release", icon = FontAwesome.CUBE)
 public class ReleasesView extends VerticalLayout implements View, IReleasePackageListener {
 
     private static final long serialVersionUID = 1L;
@@ -114,9 +114,9 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
         setSizeFull();
         setMargin(false);
         ButtonBar buttonBar = new ButtonBar();
-        addButton = buttonBar.addButton(MessageSource.message("releasesView.add"), FontAwesome.PLUS, e -> add());
-        editButton = buttonBar.addButton(MessageSource.message("releasesView.edit"), FontAwesome.EDIT, e -> edit());
-        exportButton = buttonBar.addButton(MessageSource.message("releasesView.export"), FontAwesome.DOWNLOAD, e -> export());
+        addButton = buttonBar.addButton(MessageSource.message("common.add"), FontAwesome.PLUS, e -> add());
+        editButton = buttonBar.addButton(MessageSource.message("common.edit"), FontAwesome.EDIT, e -> edit());
+        exportButton = buttonBar.addButton(MessageSource.message("common.export"), FontAwesome.DOWNLOAD, e -> export());
         archiveButton = buttonBar.addButton(MessageSource.message("releasesView.archive"), FontAwesome.ARCHIVE, e -> archive());
         // TODO add support for the archive button
         archiveButton.setVisible(false);

@@ -137,7 +137,7 @@ public class MailServerPanel extends Panel implements IUiPanel {
         userField.setValue(usernameSetting.getValue());
         userField.setWidth(25f, Unit.EM);
       
-        final ImmediateUpdatePasswordField passwordField = new ImmediateUpdatePasswordField(MessageSource.message("mailServerPanel.password")) {
+        final ImmediateUpdatePasswordField passwordField = new ImmediateUpdatePasswordField(MessageSource.message("common.password")) {
             protected void save(String value) {
                 saveSetting(passwordSetting, value);
             }            

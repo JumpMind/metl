@@ -201,7 +201,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     protected HorizontalLayout buildButtonBar() {
         ButtonBar buttonBar = new ButtonBar();
         if (!readOnly) {
-            runButton = buttonBar.addButton(MessageSource.message("editFlowPanel.run"), Icons.RUN);
+            runButton = buttonBar.addButton(MessageSource.message("common.run"), Icons.RUN);
             runButton.addClickListener((event)->runFlow());
         }
 
@@ -216,7 +216,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             copyButton.addClickListener((event)->copySelected());
             copyButton.setEnabled(false);
 
-            delButton = buttonBar.addButton(MessageSource.message("editFlowPanel.remove"), FontAwesome.TRASH_O);
+            delButton = buttonBar.addButton(MessageSource.message("common.remove"), FontAwesome.TRASH_O);
             delButton.addClickListener((event)->deleteSelected());
             delButton.setEnabled(false);;
 

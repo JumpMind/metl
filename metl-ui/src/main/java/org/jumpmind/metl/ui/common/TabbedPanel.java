@@ -79,7 +79,7 @@ public class TabbedPanel extends TabSheet {
         setCloseHandler((tabsheet, tabContent) -> close(tabContent));
 
         ContextMenu menu = new ContextMenu(this, true);
-        menu.addItem(MessageSource.message("tabbedPanel.close"), selectedItem -> close());
+        menu.addItem(MessageSource.message("common.close"), selectedItem -> close());
         menu.addItem(MessageSource.message("tabbedPanel.closeOthers"), selectedItem -> closeOthers());
         menu.addItem(MessageSource.message("tabbedPanel.closeToTheLeft"), selectedItem -> closeToTheLeft());
         menu.addItem(MessageSource.message("tabbedPanel.closeToTheRight"), selectedItem -> closeToTheRight());

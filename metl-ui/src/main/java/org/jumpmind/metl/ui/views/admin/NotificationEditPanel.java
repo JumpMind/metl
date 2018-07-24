@@ -92,7 +92,7 @@ public class NotificationEditPanel extends Panel implements IUiPanel {
         form.setSizeFull();
         form.setSpacing(true);
       
-        levelField = new NativeSelect(MessageSource.message("notificationEditPanel.level"));
+        levelField = new NativeSelect(MessageSource.message("common.level"));
         for (Notification.NotificationLevel level : Notification.NotificationLevel.values()) {
             levelField.addItem(level.toString());
         }
@@ -116,7 +116,7 @@ public class NotificationEditPanel extends Panel implements IUiPanel {
         eventField.addValueChangeListener(new EventFieldListener());
         form.addComponent(eventField);
      
-        nameField = new ImmediateUpdateTextField(MessageSource.message("notificationEditPanel.name")) {
+        nameField = new ImmediateUpdateTextField(MessageSource.message("common.name")) {
             protected void save(String value) {
                 notification.setName(value);
                 saveNotification();
@@ -151,7 +151,7 @@ public class NotificationEditPanel extends Panel implements IUiPanel {
         subjectField.setDescription(MessageSource.message("notificationEditPanel.emailContain"));
         form.addComponent(subjectField);
 
-        messageField = new ImmediateUpdateTextArea(MessageSource.message("notificationEditPanel.message")) {
+        messageField = new ImmediateUpdateTextArea(MessageSource.message("executionRunPanel.message")) {
             protected void save(String value) {
                 notification.setMessage(value);
                 saveNotification();
@@ -163,7 +163,7 @@ public class NotificationEditPanel extends Panel implements IUiPanel {
         messageField.setDescription(MessageSource.message("notificationEditPanel.emailContain"));
         form.addComponent(messageField);
         
-        CheckBox enableField = new CheckBox(MessageSource.message("notificationEditPanel.enabled"), notification.isEnabled());
+        CheckBox enableField = new CheckBox(MessageSource.message("common.enabled"), notification.isEnabled());
         enableField.setImmediate(true);
         enableField.addValueChangeListener(new ValueChangeListener() {
             public void valueChange(ValueChangeEvent event) {

@@ -86,16 +86,15 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 public class DesignNavigator extends VerticalLayout {
+		public static final String LABEL_DEPENDENCIES = "designNavigator.dependencies";
 
-    public static final String LABEL_DEPENDENCIES = "designNavigator.dependencies";
+	    public static final String LABEL_TESTS = "common.tests";
+	    
+	    public static final String LABEL_FLOWS = "common.flows";
+    
+	    public static final String LABEL_MODELS = "common.models";
 
-    public static final String LABEL_FLOWS = "designNavigator.flows";
-
-    public static final String LABEL_TESTS = "designNavigator.tests";
-
-    public static final String LABEL_MODELS = "designNavigator.models";
-
-    public static final String LABEL_RESOURCES = "designNavigator.resources";
+	    public static final String LABEL_RESOURCES = "common.resouces";
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -694,7 +693,7 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public void doImport() {
-        ImportDialog.show(MessageSource.message("designNavigator.importConfig"), 
+        ImportDialog.show(MessageSource.message("common.importConfig"), 
         		MessageSource.message("designNavigator.clickButton"), new ImportConfigurationListener());
     }
 
@@ -920,7 +919,7 @@ public class DesignNavigator extends VerticalLayout {
     }    
 
     public void addNewLocalFileSystem() {
-        addNewResource("Local File System", MessageSource.message("designNavigator.directory"), Icons.FILE_SYSTEM);
+        addNewResource("Local File System", MessageSource.message("common.directory"), Icons.FILE_SYSTEM);
     }
 
     public void addNewSftpFileSystem() {
@@ -940,7 +939,7 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public void addNewMailSession() {
-        addNewResource("MailSession",MessageSource.message("designNavigator.mailSessions"), Icons.EMAIL);
+        addNewResource("MailSession",MessageSource.message("common.mailSession"), Icons.EMAIL);
     }
 
     protected void addNewResource(String type, String defaultName, FontAwesome icon) {

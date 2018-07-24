@@ -23,8 +23,8 @@ package org.jumpmind.metl.ui.views.admin;
 import javax.annotation.PostConstruct;
 
 import org.jumpmind.metl.ui.common.UIConstants;
-import org.jumpmind.metl.ui.i18n.MessageResource;
-import org.jumpmind.metl.ui.i18n.MessageResource;
+import org.jumpmind.metl.ui.i18n.MenuResource;
+import org.jumpmind.metl.ui.i18n.MenuResource;
 import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
@@ -55,7 +55,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope(value = "ui")
-@TopBarLink(category = Category.Admin, name = MessageResource.ADMIN, id = "admin", icon = FontAwesome.GEARS, menuOrder = 10)
+@TopBarLink(category = Category.Admin, name = "Admin", id = "admin", icon = FontAwesome.GEARS, menuOrder = 10)
 public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemClickListener {
 
     private static final long serialVersionUID = 1L;
@@ -100,7 +100,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         table.setColumnExpandRatio("id", 1);
         addItem(MessageSource.message("adminView.users"), Icons.USER);
         addItem(MessageSource.message("adminView.groups"), Icons.GROUP);
-        addItem(MessageSource.message("adminView.tags"), Icons.TAG);
+        addItem(MessageSource.message("common.tags"), Icons.TAG);
         addItem(MessageSource.message("adminView.rest"), Icons.REST);
         addItem(MessageSource.message("adminView.generalSettings"), Icons.SETTINGS);
         addItem(MessageSource.message("adminView.pluginRepositories"), Icons.DATABASE);
@@ -149,7 +149,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
                     panel = new UserPanel(context, tabbedPanel);
                 } else if (id.equals(MessageSource.message("adminView.groups"))) {
                     panel = new GroupPanel(context, tabbedPanel);
-                } else if (id.equals(MessageSource.message("adminView.tags"))) {
+                } else if (id.equals(MessageSource.message("common.tags"))) {
                     panel = new TagPanel(context, tabbedPanel);
                 } else if (id.equals(MessageSource.message("adminView.rest"))) {
                     panel = new ApiPanel(context, tabbedPanel);

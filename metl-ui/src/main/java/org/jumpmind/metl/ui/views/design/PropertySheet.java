@@ -192,7 +192,7 @@ public class PropertySheet extends AbsoluteLayout {
             }
         }
         if (components.size() != 0 && !readOnly) {
-            formLayout.addComponent(buildOptionGroup(MessageSource.message("propertySheet.enabled"), ENABLED, components));
+            formLayout.addComponent(buildOptionGroup(MessageSource.message("common.enabled"), ENABLED, components));
             formLayout.addComponent(buildOptionGroup(MessageSource.message("propertySheet.logInput"), LOG_INPUT, components));
             formLayout.addComponent(buildOptionGroup(MessageSource.message("propertySheet.logOutput"), LOG_OUTPUT, components));
         }
@@ -368,7 +368,7 @@ public class PropertySheet extends AbsoluteLayout {
             FlowStep step = getSingleFlowStep();
             if (componentDefintion.getResourceCategory() != null && componentDefintion.getResourceCategory() != ResourceCategory.NONE
                     && step != null) {
-                final AbstractSelect resourcesCombo = new ComboBox(MessageSource.message("propertySheet.resource"));
+                final AbstractSelect resourcesCombo = new ComboBox(MessageSource.message("common.resource"));
                 resourcesCombo.setImmediate(true);
                 String projectVersionId = step.getComponent().getProjectVersionId();
                 Set<XMLResourceDefinition> types = context.getDefinitionFactory().getResourceDefinitions(projectVersionId,

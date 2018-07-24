@@ -359,8 +359,8 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
 
             headersGrid = new Grid();
             headersGrid.setEditorEnabled(editable);
-            headersGrid.setEditorSaveCaption(MessageSource.message("callWebServicePanel.save"));
-            headersGrid.setEditorCancelCaption(MessageSource.message("callWebServicePanel.cancel"));
+            headersGrid.setEditorSaveCaption(MessageSource.message("common.save"));
+            headersGrid.setEditorCancelCaption(MessageSource.message("common.cancel"));
             headersGrid.setSelectionMode(SelectionMode.SINGLE);
             headersGrid.setSizeFull();
             headersGrid.addColumn("headerName").setHeaderCaption("Header").setEditable(true)

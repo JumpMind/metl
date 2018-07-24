@@ -2,23 +2,9 @@ package org.jumpmind.metl.ui.i18n;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class MessageResource {
+public class MenuResource {
 
-	public static final String RELEASE = "\u53d1\u5e03";
 	
-	public static final String ADMIN = "\u7ba1\u7406\u5458";
-	
-	public static final String DEPLOY = "\u90e8\u7f72";
-	
-	public static final String DESIGN = "\u8bbe\u8ba1";
-	
-	public static final String DATABASE = "\u6570\u636e\u5e93";
-	
-	public static final String DIRECTORY = "\u76ee\u5f55";
-	
-	public static final String SERVE = "\u670d\u52a1";
-	
-	public static final String MANAGE = "\u7ba1\u7406";
 	
 	
 	public  static  String getNewProject() {
@@ -31,7 +17,6 @@ public class MessageResource {
 	}
 	
 	
-//	 add("File|New|Project Branch");
 	public  static  String getNewBranch() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.file"),
@@ -41,7 +26,6 @@ public class MessageResource {
 		return  StringUtils.join(newProjectArray, "|");
 	}
 
-//     add("File|New|Project Dependency");
 	public  static  String getNewDependency() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.file"),
@@ -50,7 +34,6 @@ public class MessageResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-//     add("File|New|Flow|Design");
 	public  static  String getNewDesign() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.file"),
@@ -60,7 +43,6 @@ public class MessageResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-//     add("File|New|Flow|Test");
 	public  static  String getNewTest() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.file"),
@@ -90,7 +72,6 @@ public class MessageResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-//     add("File|New|Resource|Database");
 	public  static  String getNewDatabase() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.file"),
@@ -100,7 +81,6 @@ public class MessageResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-//     add("File|New|Resource|Directory|FTP");
 	public  static  String getNewFTP() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.file"),
@@ -111,7 +91,6 @@ public class MessageResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-//     add("File|New|Resource|Directory|File System");
 	public  static  String getNewFileSystem() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.file"),
@@ -122,7 +101,6 @@ public class MessageResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-//     add("File|New|Resource|Directory|JMS");
 	public  static  String getNewJMS() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.file"),
@@ -133,7 +111,6 @@ public class MessageResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-//     add("File|New|Resource|Directory|SFTP");
 	public  static  String getNewSFTP() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.file"),
@@ -144,7 +121,6 @@ public class MessageResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-//     add("File|New|Resource|Directory|SMB");
 	public  static  String getNewSMB() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.file"),
@@ -155,7 +131,6 @@ public class MessageResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-//     add("File|New|Resource|HTTP");
 	public  static  String getNewHTTP() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.file"),
@@ -165,7 +140,6 @@ public class MessageResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-//     add("File|New|Resource|Mail Session");
 	public  static  String getNewMailSession() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.file"),
@@ -175,7 +149,6 @@ public class MessageResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-//     add("File|New|Resource|Subscribe|JMS");
 	public  static  String getNewSubscribeJMS() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.file"),
@@ -194,8 +167,6 @@ public class MessageResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-//     addSeparator("File");
-//     add("File|Import..."); 
 	public  static  String getFileImport() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.file"),
@@ -203,7 +174,6 @@ public class MessageResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|") + "...";
 	}
-//     add("File|Export...");
 	public  static  String getFileExport() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.file"),
@@ -211,8 +181,6 @@ public class MessageResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|") + "...";
 	}
-//     
-//     add("Edit|Rename");
 	public  static  String getEditRename() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.edit"),
@@ -220,7 +188,6 @@ public class MessageResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-//     add("Edit|Cut");
 	public  static  String getEditCut() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.edit"),
@@ -228,7 +195,6 @@ public class MessageResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-//     add("Edit|Copy");
 	public  static  String getEditCopy() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.edit"),
@@ -236,7 +202,6 @@ public class MessageResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-//     add("Edit|Paste");
 	public  static  String getEditPaste() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.edit"),
@@ -244,8 +209,6 @@ public class MessageResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-//     addSeparator("Edit");
-//     add("Edit|Change Dependency Version");
 	public  static  String getEditChangeDependency() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.edit"),
@@ -253,8 +216,6 @@ public class MessageResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-//     addSeparator("Edit");
-//     add("Edit|Remove");
 	public  static  String getEditRemove() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.edit"),

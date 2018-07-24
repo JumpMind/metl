@@ -23,7 +23,7 @@ package org.jumpmind.metl.ui.views.design;
 import javax.annotation.PostConstruct;
 
 import org.jumpmind.metl.ui.common.UIConstants;
-import org.jumpmind.metl.ui.i18n.MessageResource;
+import org.jumpmind.metl.ui.i18n.MenuResource;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.TabbedPanel;
@@ -41,9 +41,10 @@ import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
 @Scope(value = "ui")
-@TopBarLink(category = Category.Design, name = MessageResource.DESIGN, id = "design", icon = FontAwesome.SHARE_ALT, menuOrder = 1, useAsDefault = true)
+@TopBarLink(category = Category.Design, name = "Design", id = "design", icon = FontAwesome.SHARE_ALT, menuOrder = 1, useAsDefault = true)
 public class DesignView extends HorizontalLayout implements View {
 
+	
     private static final long serialVersionUID = 1L;
 
     @Autowired

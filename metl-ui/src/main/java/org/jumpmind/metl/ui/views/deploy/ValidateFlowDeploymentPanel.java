@@ -97,12 +97,12 @@ public class ValidateFlowDeploymentPanel extends VerticalLayout {
         HeaderCell existingDeployHdr = hdr1.join("existingDeployName","existingDeployVersion","existingDeployType");
         existingDeployHdr.setText(MessageSource.message("validateFlowDeploymentPanel.existingDeployment"));
         existingDeployHdr.setStyleName("header-center");
-        grid.getColumn("newDeployName").setHeaderCaption(MessageSource.message("validateFlowDeploymentPanel.name"));
-        grid.getColumn("newDeployVersion").setHeaderCaption(MessageSource.message("validateFlowDeploymentPanel.version"));
-        grid.getColumn("newDeployType").setHeaderCaption(MessageSource.message("validateFlowDeploymentPanel.type"));
-        grid.getColumn("existingDeployName").setHeaderCaption(MessageSource.message("validateFlowDeploymentPanel.name"));
-        grid.getColumn("existingDeployVersion").setHeaderCaption(MessageSource.message("validateFlowDeploymentPanel.version"));
-        grid.getColumn("existingDeployType").setHeaderCaption(MessageSource.message("validateFlowDeploymentPanel.type"));
+        grid.getColumn("newDeployName").setHeaderCaption(MessageSource.message("common.name"));
+        grid.getColumn("newDeployVersion").setHeaderCaption(MessageSource.message("common.version"));
+        grid.getColumn("newDeployType").setHeaderCaption(MessageSource.message("common.type"));
+        grid.getColumn("existingDeployName").setHeaderCaption(MessageSource.message("common.name"));
+        grid.getColumn("existingDeployVersion").setHeaderCaption(MessageSource.message("common.version"));
+        grid.getColumn("existingDeployType").setHeaderCaption(MessageSource.message("common.type"));
     }
     
     protected void buildGrid() {
