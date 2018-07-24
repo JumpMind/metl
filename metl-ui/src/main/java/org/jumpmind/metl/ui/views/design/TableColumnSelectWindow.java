@@ -169,9 +169,9 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
         rebuildOptionLayout();
         addComponent(layout, 1);
 
-        Button refreshButton = new Button(MessageSource.message("tableColumnSelectWindow.refresh"));
-        Button cancelButton = new Button(MessageSource.message("tableColumnSelectWindow.cancel"));
-        Button selectButton = new Button(MessageSource.message("tableColumnSelectWindow.import"));
+        Button refreshButton = new Button(MessageSource.message("common.refresh"));
+        Button cancelButton = new Button(MessageSource.message("common.cancel"));
+        Button selectButton = new Button(MessageSource.message("common.import"));
         addComponent(buildButtonFooter(refreshButton, cancelButton, selectButton));
 
         cancelButton.addClickListener(event -> close());

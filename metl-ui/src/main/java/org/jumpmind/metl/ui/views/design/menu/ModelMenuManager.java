@@ -22,7 +22,7 @@ package org.jumpmind.metl.ui.views.design.menu;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.jumpmind.metl.ui.common.CutCopyPasteManager;
-import org.jumpmind.metl.ui.i18n.MessageResource;
+import org.jumpmind.metl.ui.i18n.MenuResource;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
 
 public class ModelMenuManager extends AbstractDesignSelectedValueMenuManager {
@@ -43,7 +43,7 @@ public class ModelMenuManager extends AbstractDesignSelectedValueMenuManager {
     @Override
     protected String[] getDisabledPaths(Object selected) {
         if (isReadOnly(selected)) {
-            return (String[])ArrayUtils.addAll(super.getDisabledPaths(selected), new String[] { MessageResource.getEditRemove()
+            return (String[])ArrayUtils.addAll(super.getDisabledPaths(selected), new String[] { MenuResource.getEditRemove()
             });            
         } else {
             return super.getDisabledPaths(selected);
@@ -54,31 +54,31 @@ public class ModelMenuManager extends AbstractDesignSelectedValueMenuManager {
     protected String[] getEnabledPaths(Object selected) {
         
         String[] enabledPaths = (String[]) ArrayUtils.addAll(super.getEnabledPaths(selected), new String[] {
-        		MessageResource.getNewDependency(),
-        		MessageResource.getNewDesign(),
-        		MessageResource.getNewTest(),
-        		MessageResource.getNewHierarchical(),
-        		MessageResource.getNewRelational(),
-        		MessageResource.getNewDatabase(),
-        		MessageResource.getNewFTP(),
-        		MessageResource.getNewFileSystem(),
-        		MessageResource.getNewJMS(),
-        		MessageResource.getNewSFTP(),
-        		MessageResource.getNewSMB(),
-        		MessageResource.getNewHTTP(),
-        		MessageResource.getNewMailSession(),
-        		MessageResource.getNewSubscribeJMS(),
-        		MessageResource.getFileOpen(),
-        		MessageResource.getFileImport(),        
-        		MessageResource.getFileExport(),                
-        		MessageResource.getEditRename(),
-        		MessageResource.getEditCut(),
-        		MessageResource.getEditCopy(),
-        		MessageResource.getEditRemove()
+        		MenuResource.getNewDependency(),
+        		MenuResource.getNewDesign(),
+        		MenuResource.getNewTest(),
+        		MenuResource.getNewHierarchical(),
+        		MenuResource.getNewRelational(),
+        		MenuResource.getNewDatabase(),
+        		MenuResource.getNewFTP(),
+        		MenuResource.getNewFileSystem(),
+        		MenuResource.getNewJMS(),
+        		MenuResource.getNewSFTP(),
+        		MenuResource.getNewSMB(),
+        		MenuResource.getNewHTTP(),
+        		MenuResource.getNewMailSession(),
+        		MenuResource.getNewSubscribeJMS(),
+        		MenuResource.getFileOpen(),
+        		MenuResource.getFileImport(),        
+        		MenuResource.getFileExport(),                
+        		MenuResource.getEditRename(),
+        		MenuResource.getEditCut(),
+        		MenuResource.getEditCopy(),
+        		MenuResource.getEditRemove()
         });        
         if (navigator.getContext().getClipboard()
                 .containsKey(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE)) {
-            enabledPaths = (String[]) ArrayUtils.add(enabledPaths, MessageResource.getEditPaste());
+            enabledPaths = (String[]) ArrayUtils.add(enabledPaths, MenuResource.getEditPaste());
         }
         return enabledPaths; 
     }

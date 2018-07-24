@@ -136,8 +136,8 @@ public class ChangeDependencyVersionDialog extends ResizableWindow  {
     }
 
     protected HorizontalLayout buildButtonBar() {
-        Button cancelButton = new Button(MessageSource.message("changeDependencyVersionDialog.cancel"), e->cancel());
-        Button changeButton = new Button(MessageSource.message("changeDependencyVersionDialog.change"), e->change());
+        Button cancelButton = new Button(MessageSource.message("common.cancel"), e->cancel());
+        Button changeButton = new Button(MessageSource.message("common.change"), e->change());
         changeButton.setDisableOnClick(true);
         changeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
         changeButton.setClickShortcut(KeyCode.ENTER);

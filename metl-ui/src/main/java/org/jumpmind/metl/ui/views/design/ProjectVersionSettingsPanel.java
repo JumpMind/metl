@@ -109,7 +109,7 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
 
         ButtonBar buttonBar = new ButtonBar();
         content.addComponent(buttonBar);
-        buttonBar.addButton(MessageSource.message("projectVersionSettingsPanel.refresh"), Icons.REFRESH, (event)->refreshPlugins()); 
+        buttonBar.addButton(MessageSource.message("common.refresh"), Icons.REFRESH, (event)->refreshPlugins()); 
         updateButton = buttonBar.addButton(MessageSource.message("projectVersionSettingsPanel.update"), Icons.UPDATE, (event)->update());        
         pinButton =  buttonBar.addButton(MessageSource.message("projectVersionSettingsPanel.pin"), FontAwesome.CHECK_CIRCLE_O, (event)->pin(true));
         unpinButton = buttonBar.addButton(MessageSource.message("projectVersionSettingsPanel.unpin"), FontAwesome.CIRCLE_O, (event)->pin(false));
@@ -119,15 +119,15 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
         componentPluginsGrid.setHeightMode(HeightMode.ROW);
         componentPluginsGrid.setWidth(100, Unit.PERCENTAGE);
         componentPluginsGrid.addColumn("definitionType", String.class).setHeaderCaption(MessageSource.message("projectVersionSettingsPanel.pluginType")).setEditable(false);
-        componentPluginsGrid.addColumn("definitionName", String.class).setHeaderCaption(MessageSource.message("projectVersionSettingsPanel.name")).setEditable(false);
-        componentPluginsGrid.addColumn("definitionTypeId", String.class).setHeaderCaption(MessageSource.message("projectVersionSettingsPanel.type")).setEditable(false);
+        componentPluginsGrid.addColumn("definitionName", String.class).setHeaderCaption(MessageSource.message("common.name")).setEditable(false);
+        componentPluginsGrid.addColumn("definitionTypeId", String.class).setHeaderCaption(MessageSource.message("common.type")).setEditable(false);
         componentPluginsGrid.addColumn("pluginId", String.class).setHeaderCaption(MessageSource.message("projectVersionSettingsPanel.plugin")).setEditable(false);
-        componentPluginsGrid.addColumn("enabled", Boolean.class).setHeaderCaption(MessageSource.message("projectVersionSettingsPanel.enabled")).setWidth(75);
+        componentPluginsGrid.addColumn("enabled", Boolean.class).setHeaderCaption(MessageSource.message("common.enabled")).setWidth(75);
         componentPluginsGrid.addColumn("pinVersion", Boolean.class).setHeaderCaption(MessageSource.message("projectVersionSettingsPanel.pinVersion")).setWidth(95);
         
         final double VERSION_WIDTH = 190;
         
-        componentPluginsGrid.addColumn("artifactVersion", String.class).setHeaderCaption(MessageSource.message("projectVersionSettingsPanel.version")).setWidth(VERSION_WIDTH)
+        componentPluginsGrid.addColumn("artifactVersion", String.class).setHeaderCaption(MessageSource.message("common.version")).setWidth(VERSION_WIDTH)
                 .setEditable(false);
         componentPluginsGrid.addColumn("updatesAvailable", String.class).setHeaderCaption("").setWidth(55)
                 .setEditable(false).setRenderer(new HtmlRenderer());

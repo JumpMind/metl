@@ -163,7 +163,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
     protected ComboBox getLogLevelComponent() {
     	//MessageSource.message("editagentdeploymentpanel.log.level")
     	
-        final ComboBox combo = new ComboBox(MessageSource.message("editagentdeploymentpanel.log.level"));
+        final ComboBox combo = new ComboBox(MessageSource.message("editagentdeploymentpanel.logLevel"));
         combo.setNullSelectionAllowed(false);
         combo.setWidth(200, Unit.PIXELS);
         LogLevel[] levels = LogLevel.values();

@@ -73,13 +73,13 @@ public class NotificationPanel extends VerticalLayout implements IUiPanel, TextC
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
      
-        newButton = buttonBar.addButton(MessageSource.message("notificationPanel.new"), FontAwesome.PLUS);
+        newButton = buttonBar.addButton(MessageSource.message("common.new"), FontAwesome.PLUS);
         newButton.addClickListener(new NewClickListener());
 
-        editButton = buttonBar.addButton(MessageSource.message("notificationPanel.edit"), FontAwesome.EDIT);
+        editButton = buttonBar.addButton(MessageSource.message("common.edit"), FontAwesome.EDIT);
         editButton.addClickListener(new EditClickListener());
 
-        removeButton = buttonBar.addButton(MessageSource.message("notificationPanel.remove"), FontAwesome.TRASH_O);
+        removeButton = buttonBar.addButton(MessageSource.message("common.remove"), FontAwesome.TRASH_O);
         removeButton.addClickListener(new RemoveClickListener());
 
         filterField = buttonBar.addFilter();
@@ -96,7 +96,7 @@ public class NotificationPanel extends VerticalLayout implements IUiPanel, TextC
         table.setMultiSelect(true);
         table.setContainerDataSource(container);
         table.setVisibleColumns("notificationLevel", "name", "notifyType", "eventType", "enabled");
-        table.setColumnHeaders(MessageSource.message("common.level"), MessageSource.message("common.name"), MessageSource.message("notificationPanel.notifyType"), MessageSource.message("notificationPanel.eventType"), MessageSource.message("notificationPanel.enabled"));
+        table.setColumnHeaders(MessageSource.message("common.level"), MessageSource.message("common.name"), MessageSource.message("notificationPanel.notifyType"), MessageSource.message("notificationPanel.eventType"), MessageSource.message("common.enabled"));
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());
         table.setSortContainerPropertyId("name");

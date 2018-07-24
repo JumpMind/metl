@@ -23,7 +23,7 @@ package org.jumpmind.metl.ui.views.deploy;
 import javax.annotation.PostConstruct;
 
 import org.jumpmind.metl.ui.common.UIConstants;
-import org.jumpmind.metl.ui.i18n.MessageResource;
+import org.jumpmind.metl.ui.i18n.MenuResource;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.TabbedPanel;
@@ -41,7 +41,7 @@ import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
 @Scope(value = "ui")
-@TopBarLink(category = Category.Deploy, name = MessageResource.DEPLOY, id = "deploy", icon = FontAwesome.GEARS, menuOrder = 10)
+@TopBarLink(category = Category.Deploy, name = "Deploy", id = "deploy", icon = FontAwesome.GEARS, menuOrder = 10)
 public class DeployView extends HorizontalLayout implements View {
 
     private static final long serialVersionUID = 1L;

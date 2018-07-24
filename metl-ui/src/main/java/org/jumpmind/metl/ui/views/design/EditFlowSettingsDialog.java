@@ -83,7 +83,7 @@ class EditFlowSettingsDialog extends ResizableWindow implements ValueChangeListe
         this.context = context;
         this.flow = flow;
 
-        Button closeButton = new Button(MessageSource.message("editFlowSettingsDialog.close"));
+        Button closeButton = new Button(MessageSource.message("common.close"));
         closeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
         closeButton.addClickListener(new CloseClickListener());
         
@@ -108,10 +108,10 @@ class EditFlowSettingsDialog extends ResizableWindow implements ValueChangeListe
         
         if (!readOnly) {
             ButtonBar buttonBar = new ButtonBar();
-            buttonBar.addButton(MessageSource.message("editFlowSettingsDialog.add"), FontAwesome.PLUS, new AddClickListener());
+            buttonBar.addButton(MessageSource.message("common.add"), FontAwesome.PLUS, new AddClickListener());
             insertButton = buttonBar.addButton(MessageSource.message("editFlowSettingsDialog.insert"), FontAwesome.CHEVRON_RIGHT, new InsertClickListener());
             insertButton.setEnabled(false);
-            removeButton = buttonBar.addButton(MessageSource.message("editFlowSettingsDialog.remove"), FontAwesome.TRASH_O, new RemoveClickListener());
+            removeButton = buttonBar.addButton(MessageSource.message("common.remove"), FontAwesome.TRASH_O, new RemoveClickListener());
             removeButton.setEnabled(false);
             addComponent(buttonBar);
         }

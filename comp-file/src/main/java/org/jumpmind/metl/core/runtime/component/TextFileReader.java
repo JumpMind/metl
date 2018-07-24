@@ -107,6 +107,8 @@ public class TextFileReader extends AbstractFileReader {
                         info("Reading file: %s", file);
                     }
                     String filePath = resolveParamsAndHeaders(file, inputMessage);
+                    System.out.println("文件路径");
+                    System.out.println(filePath);
                     BufferedReader reader = null;
                     try {
                         InputStream inStream = directory.getInputStream(filePath, mustExist);
@@ -127,7 +129,7 @@ public class TextFileReader extends AbstractFileReader {
                                     }
                                 }
                             } else {
-                                payload.add(IOUtils.toString(reader));
+                               payload.add(IOUtils.toString(reader));
                             }
                             if (payload.size() > 0) {
                                 callback.sendTextMessage(headers, payload);

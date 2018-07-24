@@ -192,6 +192,7 @@ public class TextFileWriter extends AbstractFileWriter {
                 directory = (IDirectory) getResourceReference();
             }
             String fileName = getFileName(inputMessage);
+            System.out.println(fileName);
             if (!(directory instanceof JMSJndiQueueDirectory) &&
     				!(directory instanceof JMSJndiTopicDirectory)) {
 	            if (isNotBlank(fileName)) {

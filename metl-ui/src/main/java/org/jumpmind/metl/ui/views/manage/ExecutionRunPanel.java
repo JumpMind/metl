@@ -236,7 +236,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
 
         rerunButton = buttonBar.addButton(MessageSource.message("executionRunPanel.rerun"), Icons.RUN, event -> rerun());
         rerunButton.setVisible(false);
-        removeButton = buttonBar.addButton(MessageSource.message("executionRunPanel.remove"), Icons.DELETE, event -> remove());
+        removeButton = buttonBar.addButton(MessageSource.message("common.remove"), Icons.DELETE, event -> remove());
         removeButton.setVisible(false);
         cancelButton = buttonBar.addButton(MessageSource.message("common.cancel"), Icons.CANCEL, event -> cancel());
 
@@ -328,7 +328,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
 
 
         logTable = new Grid();
-        logTable.addColumn("level", String.class).setHeaderCaption(MessageSource.message("executionRunPanel.level")).setWidth(110)
+        logTable.addColumn("level", String.class).setHeaderCaption(MessageSource.message("common.level")).setWidth(110)
                 .setMaximumWidth(200);
         logTable.addColumn("createTime", Date.class).setHeaderCaption(MessageSource.message("executionRunPanel.time")).setWidth(120)
                 .setMaximumWidth(200).setRenderer(new DateRenderer(UIConstants.TIME_FORMAT));

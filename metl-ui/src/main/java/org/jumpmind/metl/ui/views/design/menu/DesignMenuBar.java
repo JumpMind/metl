@@ -28,7 +28,7 @@ import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.ui.common.AbstractMenuBar;
-import org.jumpmind.metl.ui.i18n.MessageResource;
+import org.jumpmind.metl.ui.i18n.MenuResource;
 import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
 import org.postgresql.translation.messages_bg;
@@ -52,35 +52,35 @@ public class DesignMenuBar extends AbstractMenuBar {
 
     @Override
     protected void buildMenu() {
-        add( MessageResource.getNewProject());
-        add( MessageResource.getNewBranch());
-        add(MessageResource.getNewDependency());
-        add(MessageResource.getNewDesign());
-        add(MessageResource.getNewTest());
-        add(MessageResource.getNewHierarchical());
-        add(MessageResource.getNewRelational());
-        add(MessageResource.getNewDatabase());
-        add(MessageResource.getNewFTP());
-        add(MessageResource.getNewFileSystem());
-        add(MessageResource.getNewJMS());
-        add(MessageResource.getNewSFTP());
-        add(MessageResource.getNewSMB());
-        add(MessageResource.getNewHTTP());
-        add(MessageResource.getNewMailSession());
-        add(MessageResource.getNewSubscribeJMS());
-        add(MessageResource.getFileOpen());
+        add( MenuResource.getNewProject());
+        add( MenuResource.getNewBranch());
+        add(MenuResource.getNewDependency());
+        add(MenuResource.getNewDesign());
+        add(MenuResource.getNewTest());
+        add(MenuResource.getNewHierarchical());
+        add(MenuResource.getNewRelational());
+        add(MenuResource.getNewDatabase());
+        add(MenuResource.getNewFTP());
+        add(MenuResource.getNewFileSystem());
+        add(MenuResource.getNewJMS());
+        add(MenuResource.getNewSFTP());
+        add(MenuResource.getNewSMB());
+        add(MenuResource.getNewHTTP());
+        add(MenuResource.getNewMailSession());
+        add(MenuResource.getNewSubscribeJMS());
+        add(MenuResource.getFileOpen());
         addSeparator(MessageSource.message("common.file"));
-        add(MessageResource.getFileImport());        
-        add(MessageResource.getFileExport());
+        add(MenuResource.getFileImport());        
+        add(MenuResource.getFileExport());
         
-        add(MessageResource.getEditRename());
-        add(MessageResource.getEditCut());
-        add(MessageResource.getEditCopy());
-        add(MessageResource.getEditPaste());
+        add(MenuResource.getEditRename());
+        add(MenuResource.getEditCut());
+        add(MenuResource.getEditCopy());
+        add(MenuResource.getEditPaste());
         addSeparator(MessageSource.message("common.edit"));
-        add(MessageResource.getEditChangeDependency());
+        add(MenuResource.getEditChangeDependency());
         addSeparator(MessageSource.message("common.edit"));
-        add(MessageResource.getEditRemove());
+        add(MenuResource.getEditRemove());
         
         add(MessageSource.message("common.tag"));
     }
