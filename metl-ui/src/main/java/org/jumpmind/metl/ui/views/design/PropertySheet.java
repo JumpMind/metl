@@ -368,7 +368,7 @@ public class PropertySheet extends AbsoluteLayout {
             FlowStep step = getSingleFlowStep();
             if (componentDefintion.getResourceCategory() != null && componentDefintion.getResourceCategory() != ResourceCategory.NONE
                     && step != null) {
-                final AbstractSelect resourcesCombo = new ComboBox(MessageSource.message("propertySheet.resource"));
+                final AbstractSelect resourcesCombo = new ComboBox(MessageSource.message("common.resource"));
                 resourcesCombo.setImmediate(true);
                 String projectVersionId = step.getComponent().getProjectVersionId();
                 Set<XMLResourceDefinition> types = context.getDefinitionFactory().getResourceDefinitions(projectVersionId,

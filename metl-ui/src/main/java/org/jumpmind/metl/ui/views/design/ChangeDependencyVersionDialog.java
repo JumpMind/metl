@@ -55,7 +55,7 @@ public class ChangeDependencyVersionDialog extends ResizableWindow  {
     DesignNavigator designNavigator;
 
     public ChangeDependencyVersionDialog(ApplicationContext context, Object selectedElement, DesignNavigator designNavigator) {
-        super(MessageSource.message("changeDependencyVersionDialog.changeDependencyVersion"));
+        super(MessageSource.message("common.changeDependencyVersion"));
         this.configService = context.getConfigurationService();
         this.designNavigator = designNavigator;
         initWindow(selectedElement);

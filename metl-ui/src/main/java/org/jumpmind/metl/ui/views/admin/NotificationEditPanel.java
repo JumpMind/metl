@@ -92,7 +92,7 @@ public class NotificationEditPanel extends Panel implements IUiPanel {
         form.setSizeFull();
         form.setSpacing(true);
       
-        levelField = new NativeSelect(MessageSource.message("notificationEditPanel.level"));
+        levelField = new NativeSelect(MessageSource.message("common.level"));
         for (Notification.NotificationLevel level : Notification.NotificationLevel.values()) {
             levelField.addItem(level.toString());
         }

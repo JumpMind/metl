@@ -128,7 +128,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         header.addComponent(viewButton);
         header.setComponentAlignment(viewButton, Alignment.BOTTOM_RIGHT);
  
-        statusSelect = new ComboBox(MessageSource.message("manageView.status"));
+        statusSelect = new ComboBox(MessageSource.message("common.status"));
         statusSelect.setNewItemsAllowed(false);
         statusSelect.setNullSelectionAllowed(false);
         statusSelect.addItem(ANY);
