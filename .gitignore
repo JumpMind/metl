@@ -133,3 +133,4 @@ Temporary Items
 /.gradle/
 .project
 .settings
+/.recommenders/
