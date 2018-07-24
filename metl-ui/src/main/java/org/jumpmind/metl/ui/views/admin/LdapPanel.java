@@ -109,7 +109,7 @@ public class LdapPanel extends Panel implements IUiPanel {
 		securityPrincipalField.setWidth(25f, Unit.EM);
 		form.addComponent(securityPrincipalField);
 
-		Button testButton = new Button(MessageSource.message("ldapPanel.test"));
+		Button testButton = new Button(MessageSource.message("common.test"));
 		testButton.addClickListener(new TestClickListener());
 		form.addComponent(testButton);
 
@@ -205,7 +205,7 @@ public class LdapPanel extends Panel implements IUiPanel {
 
 		protected void addButtonFooter() {
 
-			Button testButton = new Button(MessageSource.message("ldapPanel.test"));
+			Button testButton = new Button(MessageSource.message("common.test"));
 			testButton.addClickListener(new Button.ClickListener() {
 				private static final long serialVersionUID = 1L;
 
@@ -235,7 +235,7 @@ public class LdapPanel extends Panel implements IUiPanel {
 			sampleUser.setWidth(100, Unit.PERCENTAGE);
 			fieldLayout.addComponent(sampleUser);
 
-			samplePassword = new PasswordField(MessageSource.message("ldapPanel.password"));
+			samplePassword = new PasswordField(MessageSource.message("common.password"));
 			samplePassword.setNullRepresentation("");
 			samplePassword.setValidationVisible(false);
 			samplePassword.setWidth(100, Unit.PERCENTAGE);

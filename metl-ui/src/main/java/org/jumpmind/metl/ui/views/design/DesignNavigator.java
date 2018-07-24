@@ -919,7 +919,7 @@ public class DesignNavigator extends VerticalLayout {
     }    
 
     public void addNewLocalFileSystem() {
-        addNewResource("Local File System", MessageSource.message("designNavigator.directory"), Icons.FILE_SYSTEM);
+        addNewResource("Local File System", MessageSource.message("common.directory"), Icons.FILE_SYSTEM);
     }
 
     public void addNewSftpFileSystem() {
@@ -939,7 +939,7 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public void addNewMailSession() {
-        addNewResource("MailSession",MessageSource.message("designNavigator.mailSessions"), Icons.EMAIL);
+        addNewResource("MailSession",MessageSource.message("common.mailSession"), Icons.EMAIL);
     }
 
     protected void addNewResource(String type, String defaultName, FontAwesome icon) {
