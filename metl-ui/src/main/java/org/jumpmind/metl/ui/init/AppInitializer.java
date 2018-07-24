@@ -39,7 +39,6 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -93,6 +92,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
     
     Properties properties;
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
         System.out.println("Version: " + VersionUtils.getCurrentVersion());
