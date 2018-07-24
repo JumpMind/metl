@@ -47,6 +47,7 @@ import org.jumpmind.metl.core.model.UserHist;
 import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.slf4j.Logger;
@@ -72,7 +73,7 @@ public class LoginDialog extends Window {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
-    private final String PASSWORD_EXPIRED = "Password Expired";
+    private final String PASSWORD_EXPIRED = "loginDialog.passwordExpired";
 
     private ApplicationContext context;
 
@@ -123,7 +124,7 @@ public class LoginDialog extends Window {
                 layout.addComponent(userNameField);
                 layout.addComponent(passwordField);
 
-                validatePasswordField = new PasswordField("Verify Password");
+                validatePasswordField = new PasswordField( MessageSource.message("changePasswordDialog.verifyPassword") );
                 validatePasswordField.setWidth(100, Unit.PERCENTAGE);
                 validatePasswordField.setNullRepresentation("");
                 validatePasswordField.setVisible(false);
@@ -150,7 +151,7 @@ public class LoginDialog extends Window {
     }
 
     protected boolean isNewPasswordMode() {
-        return PASSWORD_EXPIRED.equals(getCaption());
+        return MessageSource.message(PASSWORD_EXPIRED).equals(getCaption());
     }
 
     // TODO: This should probably be moved to the authentication method object and should return
@@ -160,7 +161,7 @@ public class LoginDialog extends Window {
         boolean passedTest = true;
         if (validatePasswordField.getValue() == null || passwordField.getValue() == null
                 || !validatePasswordField.getValue().equals(passwordField.getValue())) {
-            notify("Invalid Password", "The passwords did not match");
+            notify("Invalid Password", MessageSource.message("loginDialog.invalidPassword"));
             passedTest = false;
         } else {
             TypedProperties settings = new TypedProperties();
@@ -171,8 +172,8 @@ public class LoginDialog extends Window {
             if (passwordField.getValue().length() < minPasswordLength) {
                 passedTest = false;
                 notify("Password too short",
-                        "The password is required to be at least " + minPasswordLength
-                                + " characters long.  Please choose a different password.");
+                		MessageSource.message("loginDialog.shortPassword", new Object[]{minPasswordLength})
+                        );
             }
 
             int prohibitNPreviousPasswords = settings.getInt(PASSWORD_PROHIBIT_PREVIOUS, 5);
@@ -188,8 +189,8 @@ public class LoginDialog extends Window {
                             passwordField.getValue());
                     if (toCompare.equals(hist.getPassword())) {
                         passedTest = false;
-                        notify("Password Repeated",
-                                "You have used this password in the past.  Please choose a different password.");
+                        notify(MessageSource.message("loginDialog.passwordRepeated"),
+                        		MessageSource.message("loginDialog.passwordRepeatedIntro"));
                         break;
                     }
                 }
@@ -199,8 +200,8 @@ public class LoginDialog extends Window {
                 boolean requiresAlphaNumberic = settings.is(PASSWORD_REQUIRE_ALPHANUMERIC, true);
                 if (requiresAlphaNumberic && !containsAlphanumeric(passwordField.getValue())) {
                     passedTest = false;
-                    notify("At least one letter and one number is required",
-                            "At least one letter and one number is required.  Please choose a different password.");
+                    notify(MessageSource.message("loginDialog.differentPasswordWithLeterAndNumber"),
+                            MessageSource.message("loginDialog.differentPasswordWithLeterAndNumberIntro"));
                 }
             }
 
@@ -208,8 +209,8 @@ public class LoginDialog extends Window {
                 boolean requiresSymbol = settings.is(PASSWORD_REQUIRE_SYMBOL, true);
                 if (requiresSymbol && !containsSymbol(passwordField.getValue())) {
                     passedTest = false;
-                    notify("Password requires a symbol",
-                            "At least one symbol character is required.  Please choose a different password.");
+                    notify(MessageSource.message("loginDialog.requiredSymbol"),
+                            MessageSource.message("loginDialog.differentPasswordWithCharacter"));
                 }
             }
 
@@ -217,8 +218,8 @@ public class LoginDialog extends Window {
                 boolean requiresMixedCase = settings.is(PASSWORD_REQUIRE_MIXED_CASE, true);
                 if (requiresMixedCase && !containsMixedCase(passwordField.getValue())) {
                     passedTest = false;
-                    notify("Password requires mixed case",
-                            "At least one upper case and one lower case character is required.  Please choose a different password.");
+                    notify(MessageSource.message("loginDialog.mixCases"),
+                            MessageSource.message("loginDialog.differentPasswordWithCharacterWithUpperAndLower"));
                 }
             }
 
@@ -226,8 +227,8 @@ public class LoginDialog extends Window {
                 boolean prohibitCommonWords = settings.is(PASSWORD_PROHIBIT_COMMON_WORDS, true);
                 if (prohibitCommonWords && containsCommonWords(passwordField.getValue())) {
                     passedTest = false;
-                    notify("Common word detected",
-                            "You used a common word in your password.  Please choose a different password.");
+                    notify( MessageSource.message("loginDialog.commonPassword"),
+                            MessageSource.message("loginDialog.commonPasswordIntro"));
 
                 }
             }
@@ -332,17 +333,17 @@ public class LoginDialog extends Window {
                     } else if (status.equals(AuthenticationStatus.EXPIRED)) {
                         userNameField.setVisible(false);
                         passwordField.setValue(null);
-                        setCaption(PASSWORD_EXPIRED);
-                        passwordField.setCaption("New Password");
-                        loginButton.setCaption("Change Password");
+                        setCaption(MessageSource.message(PASSWORD_EXPIRED));
+                        passwordField.setCaption(MessageSource.message("changePasswordDialog.newPassword"));
+                        loginButton.setCaption(MessageSource.message("changePasswordDialog.changePassword"));
                         validatePasswordField.setVisible(true);
                     } else {
-                        CommonUiUtils.notify("Invalid user id or password", Type.WARNING_MESSAGE);
+                        CommonUiUtils.notify(MessageSource.message("ldapPanel.invalidPassword"), Type.WARNING_MESSAGE);
                     }
                 } catch(ConsoleAuthenticationConnectionException ex) {
-                    CommonUiUtils.notify("Unable to connect to network resource.", Type.WARNING_MESSAGE);
+                    CommonUiUtils.notify(MessageSource.message("ldapPanel.unableConnectResource"), Type.WARNING_MESSAGE);
                 } catch(ConsoleAuthenticationCredentialException ex) {
-                    CommonUiUtils.notify("Invalid user id or password", Type.WARNING_MESSAGE);
+                    CommonUiUtils.notify(MessageSource.message("ldapPanel.invalidPassword"), Type.WARNING_MESSAGE);
                 } catch(Throwable t) {
                     log.error("", t);
                     CommonUiUtils.notify(t);
@@ -350,7 +351,7 @@ public class LoginDialog extends Window {
             }
             
         } else {
-            CommonUiUtils.notify("Invalid user id or password", Type.WARNING_MESSAGE);
+            CommonUiUtils.notify(MessageSource.message("ldapPanel.invalidPassword"), Type.WARNING_MESSAGE);
         }
         
     }

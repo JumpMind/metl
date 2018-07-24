@@ -36,6 +36,7 @@ dependencies {
     compile "javax.el:javax.el-api:3.0.0"
     compile "com.h2database:h2:$h2Version"
     compile "jdbc.postgresql:postgresql:$postgresqlVersion"
+    compile "mysql:mysql-connector-java:$mysqlVersion"
     compile "net.sourceforge.jtds:jtds:$jtdsVersion"
     compile "net.sf.jt400:jt400:$jt400Version"
     compile "org.apache.httpcomponents:httpclient:$httpComponentsVersion"
