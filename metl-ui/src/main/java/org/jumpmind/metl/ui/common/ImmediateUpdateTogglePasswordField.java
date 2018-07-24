@@ -41,7 +41,7 @@ public abstract class ImmediateUpdateTogglePasswordField extends CustomField<Str
     private static final String BUTTON_SHOW = "togglePasswordField.show";
     private static final String BUTTON_HIDE = "togglePasswordField.hide";
     
-    private final Button button = new Button(BUTTON_SHOW);
+    private final Button button = new Button(MessageSource.message(BUTTON_SHOW));
     private final PasswordField passwordField = new PasswordField();
     private final TextField textField = new TextField();
     private boolean toggleAllowed = true;

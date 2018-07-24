@@ -20,224 +20,222 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jamel.dbf.DbfReader;
-import org.jamel.dbf.exception.DbfException;
 import org.jamel.dbf.structure.DbfField;
 import org.jamel.dbf.structure.DbfHeader;
-import org.jamel.dbf.utils.StringUtils;
-import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
-import org.jumpmind.metl.core.runtime.resource.IDirectory;
-import org.jumpmind.metl.core.runtime.resource.LocalFileDirectory;
 import org.jumpmind.properties.TypedProperties;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-public class DBFReader extends AbstractFileReader {
+import com.alibaba.fastjson.JSON;
+
+
+public class DBFReader extends AbstractRdbmsComponentRuntime {
 
     public static final String TYPE = "DBF Reader";
 
-    public static final String SETTING_ROWS_PER_MESSAGE = "text.rows.per.message";
-
     public static final String SETTING_ENCODING = "encoding";
+    
+    public static final String DBF_CONF_DIR_PATH = "dbf.conf.dir.path";
+    
+    public static final String DBF_CONF_MAPPING = "dbf.conf.mapping";
+    
+    public static final String DBF_CONF_TABLE_MAPPING = "dbf.conf.table.mapping";
 
-    public static final String SETTING_HEADER_LINES_TO_SKIP = "text.header.lines.to.skip";
-
-    public static final String SETTING_NUMBER_OF_TIMES_TO_READ_FILE = "number.of.times.to.read.file";
-
-    public static final String SETTING_SPLIT_ON_LINE_FEED = "split.on.line.feed";
-
-    int textRowsPerMessage = 1000;
-
-    int numberOfTimesToReadFile = 1;
-
-    int textHeaderLinesToSkip;
 
     String encoding = "UTF-8";
     
-    String delimit = "#";
+    String dbfConfDirPath = "";
     
+    String dbfConfMapping = "";
+    
+    String dbfConfTableMapping = "";
+     
+    String runWhen = PER_MESSAGE;
 
     @Override
     public void start() {
-        init();
         TypedProperties properties = getTypedProperties();
-       
-        textHeaderLinesToSkip = properties.getInt(SETTING_HEADER_LINES_TO_SKIP, textHeaderLinesToSkip);
-        textRowsPerMessage = properties.getInt(SETTING_ROWS_PER_MESSAGE, textRowsPerMessage);
-        numberOfTimesToReadFile = properties.getInt(SETTING_NUMBER_OF_TIMES_TO_READ_FILE, numberOfTimesToReadFile);
         encoding = properties.get(SETTING_ENCODING, encoding);
+        dbfConfDirPath = properties.get(DBF_CONF_DIR_PATH, "").replaceAll("\n", "").replaceAll("\t", "").replaceAll("\r", "").replaceAll(" ", "");
+        dbfConfMapping = properties.get(DBF_CONF_MAPPING, "").replaceAll("\n", "").replaceAll("\t", "").replaceAll("\r", "").replaceAll(" ", "");
+        dbfConfTableMapping = properties.get(DBF_CONF_TABLE_MAPPING, "").replaceAll("\n", "").replaceAll("\t", "").replaceAll("\r", "").replaceAll(" ", "");
         if ("".equals(encoding)) {
         	encoding = "UTF-8";
         	log(LogLevel.INFO, "File Encoding has not been set, using the default of UTF-8.");
+        }
+        runWhen = properties.get(RUN_WHEN, PER_MESSAGE);
+        if (getResourceRuntime() == null) {
+            throw new IllegalStateException("This component requires a data source");
         }
     }
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
-                || (PER_MESSAGE.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
-        	// 读取文件情况信息
-        	System.out.println("dbf"+inputMessage);
-        	List<String> files = getFilesToRead(inputMessage);
-        	System.out.println("dbf"+files.get(0));
-            processFiles(files, inputMessage, callback, unitOfWorkBoundaryReached);
-        }
+            process(inputMessage, callback, unitOfWorkBoundaryReached);
+    }
+    /***
+     * handle dbf files 
+     * @param inputMessage
+     * @param callback
+     * @param unitOfWorkBoundaryReached
+     */
+	private void process(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+		//文件或目录
+		List<String> paths = Arrays.asList(dbfConfDirPath.trim().split(";"));
+		//文件名正则和表对应关系
+		Map<String,String> mapping = new HashMap<String, String>();
+		Arrays.asList(dbfConfMapping.trim().split(";")).forEach(item->{
+			if(StringUtils.isNotBlank(item) && item.contains(":")) {
+				String[] subItems = item.split(":");
+				mapping.put(subItems[0], subItems[1]);
+			}
+		});
+		//表字段对应关系
+		Map<String, TableConfig> tableMaps = 
+				JSON.parseArray(dbfConfTableMapping, TableConfig.class)
+				.stream().collect(Collectors.toMap(TableConfig::getName, t->t));
+		//判断路径
+		if(paths != null && paths.size() > 0) {
+			//循环处理dbf文件
+			paths.forEach(path->{
+				File file = null;
+				try {
+					file = new File(path);
+					//目录
+					if(file.isDirectory()) {
+						//子文件
+						File[] children = file.listFiles();
+						//遍历子文件
+						for(File child:children) {
+							handleFile(child, mapping, tableMaps);
+						}
+					}
+					//文件
+					else{
+						handleFile(file, mapping, tableMaps);
+					}
+				}catch (Exception e) {
+					log(LogLevel.ERROR,"处理文件失败");
+					e.printStackTrace();
+					throw new RuntimeException("处理文件失败");
+				}
+				
+			});
+		}
+		
+	}
+    private void handleFile(File file, Map<String,String> mapping, Map<String, TableConfig> tableMaps) throws Exception {
+    	//校验文件类型
+		if(file.isFile() && file.getName().toLowerCase().endsWith(".dbf")) {
+			
+			results.clear();
+	        NamedParameterJdbcTemplate template = getJdbcTemplate();
+	        
+			//确定文件对应表
+			String table = "";
+			for(String key:mapping.keySet()) {
+				if(file.getName().matches(mapping.get(key))) {
+					table = key;
+					break;
+				}
+			}
+			//无对应表,直接返回
+			if(StringUtils.isBlank(table)) return;
+			
+			//处理数据
+			TableConfig tableConfig = tableMaps.get(table);
+			if(tableConfig == null) return;
+			//读取数据
+			try {
+				//dbf reader
+				DbfReader reader = new DbfReader(file);
+				//dbf header
+				DbfHeader header = reader.getHeader();
+				//列对应关系反转,以dbf的列名为key
+				Map<String, String> keyMap = new HashMap();
+				tableConfig.getMapping().forEach((k, v)->{
+					keyMap.put(v, k);
+				});
+				Map<String, Object>[] mapArray =new Map[]{};
+				//参数列表
+				List<Map<String, Object>> batchParams = new ArrayList<Map<String, Object>>();
+				Object[] row;
+	            while ((row = reader.nextRecord()) != null) {
+	            	//单条参数
+	            	Map<String, Object> params = new HashMap<String, Object>();
+	                for (int i = 0; i < header.getFieldsCount(); i++) {
+	                    DbfField field = header.getField(i);
+	                    String column = keyMap.get(String.valueOf(i+1));
+	                    if(field.getDataType().byteValue == 'C'){
+	                        if(row[i] != null){
+	                            params.put(column, new String((byte[]) row[i], this.encoding));
+	                        }else {
+	                        	params.put(column, "");
+	                        }
+
+	                    }else if(field.getDataType().byteValue == 'N'){
+
+	                        if(row[i] != null){
+	                            if(field.getDecimalCount()>0){
+	                            	params.put(column, ((Number) row[i]).doubleValue());
+	                            }else{
+	                            	params.put(column, ((Number) row[i]).longValue());
+	                            }
+	                        }else{
+	                            if(field.getDecimalCount()>0){
+	                            	params.put(column, 0.00);
+	                            }else{
+	                            	params.put(column, 0);
+	                            }
+	                        }
+
+	                    }else{
+	                    	params.put(column, String.valueOf(row[i]));
+	                    }
+	                }
+	                batchParams.add(params);
+	                if(batchParams.size() > 999) {
+	                	System.err.println(tableConfig.getDeleteSQL());
+	                	System.err.println(tableConfig.getInsertSQL());
+	                	
+	                	template.batchUpdate(tableConfig.getDeleteSQL(), batchParams.toArray(mapArray));
+	                	template.batchUpdate(tableConfig.getInsertSQL(), batchParams.toArray(mapArray));
+	                	batchParams = null;
+	                	batchParams = new ArrayList<Map<String, Object>>();
+	                }
+	            }
+	            if(batchParams.size()>0) {
+	            	template.batchUpdate(tableConfig.getDeleteSQL(), batchParams.toArray(mapArray));
+                	template.batchUpdate(tableConfig.getInsertSQL(), batchParams.toArray(mapArray));
+	            }
+				
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw e;
+			}
+			
+			
+			
+		}
     }
 
-    private void processFiles(List<String> files, Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-        int linesInMessage = 0;
-        ArrayList<String> payload = new ArrayList<String>();
-
-        filesRead.addAll(files);
-
-        for (String file : files) {
-            Map<String, Serializable> headers = new HashMap<>(1);
-            headers.put("source.file.path", file);
-            int currentFileLinesRead = 0;
-            String currentLine;
-            boolean readContent = true;
-            if (directory == null) {
-                throw new IllegalStateException("The resource was not created.  Please check to see that it is properly configured");
-            }
-            try {
-                for (int i = 0; i < numberOfTimesToReadFile && readContent; i++) {
-                    checkForInterruption();
-                    if (isNotBlank(file)) {
-                        info("Reading file: %s", file);
-                    }
-                    String filePath = resolveParamsAndHeaders(file, inputMessage);
-                    BufferedReader reader = null;
-                    try {
-                        InputStream inStream = directory.getInputStream(filePath, mustExist);
-                        if (inStream != null) {
-               
-                        	String DBFName =files.get(0).toString();
-                        	String CSVName=DBFName.substring(0, DBFName.length()-4)+".csv";                        	
-                        	writeToTxtFile(new File(DBFName),new File(CSVName),Charset.forName("gbk"));
-                        	//删除文件
-                        	//deleteFile(fileName); 	
-                        	
-                    } else {
-                            if (isNotBlank(file)) {
-                                info("File %s didn't exist, but must exist setting was false.  Continuing", file);
-                            } else {
-                                info("There was no content to read");
-                            }
-                            readContent = false;
-                        }
-                    } finally {
-                        // Closes the reader and the inStream.
-                        IOUtils.closeQuietly(reader);
-                    }
-                }
-            } catch (Exception e) {
-                throw new IoException("Error reading from file " + e.getMessage());
-            }
-
-            if (controlMessageOnEof) {
-                callback.sendControlMessage(headers);
-            }
-        }
-    }
-    
-    public static void writeToTxtFile(File dbf,File csv, Charset dbfEncoding) {
-    	String delimit="#";
-        try {
-            DbfReader reader = new DbfReader(dbf);
-            
-           // PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(csv)));
-           
-            PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(csv)));
-            DbfHeader header = reader.getHeader();
-
-            String[] titles = new String[header.getFieldsCount()];
-            for (int i = 0; i < header.getFieldsCount(); i++) {
-                DbfField field = header.getField(i);
-                titles[i] = StringUtils.rightPad(field.getName(), field.getFieldLength(), ' ');
-            }
-            for (String title : titles) {
-                writer.print(title);
-                writer.print(delimit);
-            };
-            writer.println();
-            Object[] row;
-            while ((row = reader.nextRecord()) != null) {
-                for (int i = 0; i < header.getFieldsCount(); i++) {
-                    DbfField field = header.getField(i);
-                    if(field.getDataType() == 'C'){
-                        if(row[i] != null){
-                            writer.print(new String((byte[]) row[i], dbfEncoding));
-                        }
-
-                    }else if(field.getDataType() == 'N'){
-
-                        if(row[i] != null){
-                            if(field.getDecimalCount()>0){
-                                writer.print(((Number) row[i]).doubleValue());
-                            }else{
-                                writer.print(((Number) row[i]).longValue());
-                            }
-                        }else{
-                            if(field.getDecimalCount()>0){
-                                writer.print(0.00);
-                            }else{
-                                writer.print(0);
-                            }
-                        }
-
-                    }else{
-                        writer.print(String.valueOf(row[i]));
-                    }
-                    writer.print(delimit);
-                }
-                /****
-                 *  海关月度数据
-                 */
-                if(dbf.getName().toLowerCase().startsWith("h")){
-                    writer.print("20" + dbf.getName().substring(1,3));
-                    writer.print(delimit);
-                    writer.print(dbf.getName().substring(3,5));
-                }
-                /***
-                 *  季度数据
-                 */
-                if(dbf.getName().toLowerCase().startsWith("gb")){
-                    writer.print("20" + dbf.getName().substring(2,4));
-                    writer.print(delimit);
-                    writer.print(dbf.getName().substring(4,6));
-                }
-                if(dbf.getName().contains("产量")){
-                    writer.print(dbf.getName().substring(0,4));
-                    writer.print(delimit);
-                    writer.print(dbf.getName().substring(4,6));
-                }
-                writer.println();
-            }
-            writer.close();
-            reader.close();
-        } catch (Exception e) {
-            throw new DbfException("Cannot write .dbf file to .txt", e);
-        }
-    }
+	@Override
+	public boolean supportsStartupMessages() {
+		// TODO Auto-generated method stub
+		return true;
+	}
 }
