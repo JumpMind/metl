@@ -82,6 +82,14 @@ final public class VersionUtils {
                     version = gradleProperties.getProperty("version");
                 } catch (Exception e) {
                     IOUtils.closeQuietly(is);
+                    try {
+                        Properties gradleProperties = new Properties();
+                        is = new FileInputStream(new File("../metl-com-assemble/gradle.properties"));
+                        gradleProperties.load(is);
+                        version = gradleProperties.getProperty("version");
+                    } catch (Exception ee) {
+                        IOUtils.closeQuietly(is);
+                    }
                 }
             }
         }
