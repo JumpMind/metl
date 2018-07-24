@@ -414,4 +414,77 @@
             </setting>            
         </settings>
     </component>
+     <component category='READER' id='Dat Reader' inputMessageType='text' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='streamable'>
+        <name>Dat Reader</name>
+        <className>org.jumpmind.metl.core.runtime.component.DatReader</className>
+        <keywords>file,files</keywords>
+        <description></description>
+        <settings>
+            <setting id='run.when' required='false' type='choice'>
+                <name>Run When</name>
+                <defaultValue>PER UNIT OF WORK</defaultValue>
+                <choices>
+                    <choice>PER UNIT OF WORK</choice>
+                    <choice>PER MESSAGE</choice>
+                </choices>
+            </setting>
+            <setting id='get.file.name.from.message' required='false' type='boolean'>
+                <name>Get File Name From Message</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='must.exist' required='false' type='boolean'>
+                <name>Must Exist</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='relative.path' required='false' type='text'>
+                <name>File Path</name>
+            </setting>
+            <setting id='split.on.line.feed' required='false' type='boolean'>
+                <name>Split On Line Feed</name>
+                <defaultValue>true</defaultValue>
+            </setting>            
+            <setting id='text.rows.per.message' required='false' type='integer'>
+                <name>Rows/Msg</name>
+                <defaultValue>1000</defaultValue>
+            </setting>
+            <setting id='action.on.success' required='false' type='choice'>
+                <name>Action on Flow Success</name>
+                <defaultValue>NONE</defaultValue>
+                <choices>
+                    <choice>None</choice>
+                    <choice>Archive</choice>
+                    <choice>Delete</choice>
+                </choices>
+            </setting>
+            <setting id='archive.on.success.path' required='false' type='text'>
+                <name>Archive On Success Path</name>
+            </setting>
+            <setting id='action.on.error' required='false' type='choice'>
+                <name>Action on Error</name>
+                <defaultValue>NONE</defaultValue>
+                <choices>
+                    <choice>None</choice>
+                    <choice>Archive</choice>
+                    <choice>Delete</choice>
+                </choices>
+            </setting>
+            <setting id='archive.on.error.path' required='false' type='text'>
+                <name>Archive On Error Path</name>
+            </setting>
+            <setting id='encoding' required='false' type='text'>
+                <name>Encoding</name>
+                <defaultValue>UTF-8</defaultValue>
+            </setting>
+            <setting id='text.header.lines.to.skip' required='false' type='integer'>
+                <name>Header Lines to Skip</name>
+            </setting>
+            <setting id='control.message.on.eof' required='false' type='boolean'>
+                <name>Send Control Message on EOF</name>
+            </setting>
+            <setting id='number.of.times.to.read.file' required='false' type='integer'>
+                <name>Number of times to read file content</name>
+                <defaultValue>1</defaultValue>                
+            </setting>            
+        </settings>
+    </component>
 </definitions>
