@@ -142,7 +142,7 @@ public class DesignNavigator extends VerticalLayout {
         project.setName(MessageSource.message("designNavigator.newProject"));
         ProjectVersion version = new ProjectVersion();
         version.setVersionType(ProjectVersion.VersionType.MASTER.toString());
-        version.setVersionLabel("master");
+        version.setVersionLabel(MessageSource.message("designNavigator.master"));
         version.setProject(project);
         project.getProjectVersions().add(version);
         configurationService.save(project);
@@ -709,7 +709,7 @@ public class DesignNavigator extends VerticalLayout {
                     return;
                 }
             }
-            ProjectVersion newVersion = configurationService.saveNewVersion("branch", original, "branch");
+            ProjectVersion newVersion = configurationService.saveNewVersion(MessageSource.message("designNavigator.branch"), original, "branch");
             newVersion = configurationService.findProjectVersion(newVersion.getId());
             newVersion.setReleaseDate(null);
             configurationService.save(newVersion);
@@ -975,7 +975,7 @@ public class DesignNavigator extends VerticalLayout {
         treeTable.setChildrenAllowed(folder, true);
 
         ModelName model = new ModelName();
-        model.setName("New Model");
+        model.setName(MessageSource.message("designNavigator.newModel"));
         model.setProjectVersionId(projectVersion.getId());
         model.setType(type);
         
