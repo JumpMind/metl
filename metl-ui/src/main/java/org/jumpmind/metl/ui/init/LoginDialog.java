@@ -73,7 +73,7 @@ public class LoginDialog extends Window {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
-    private final String PASSWORD_EXPIRED = "LoginDialog.passwordExpired";
+    private final String PASSWORD_EXPIRED = "loginDialog.passwordExpired";
 
     private ApplicationContext context;
 
@@ -161,7 +161,7 @@ public class LoginDialog extends Window {
         boolean passedTest = true;
         if (validatePasswordField.getValue() == null || passwordField.getValue() == null
                 || !validatePasswordField.getValue().equals(passwordField.getValue())) {
-            notify("Invalid Password", MessageSource.message("LoginDialog.invalidPassword"));
+            notify("Invalid Password", MessageSource.message("loginDialog.invalidPassword"));
             passedTest = false;
         } else {
             TypedProperties settings = new TypedProperties();
@@ -172,7 +172,7 @@ public class LoginDialog extends Window {
             if (passwordField.getValue().length() < minPasswordLength) {
                 passedTest = false;
                 notify("Password too short",
-                		MessageSource.message("LoginDialog.shortPassword", new Object[]{minPasswordLength})
+                		MessageSource.message("loginDialog.shortPassword", new Object[]{minPasswordLength})
                         );
             }
 
@@ -189,8 +189,8 @@ public class LoginDialog extends Window {
                             passwordField.getValue());
                     if (toCompare.equals(hist.getPassword())) {
                         passedTest = false;
-                        notify(MessageSource.message("LoginDialog.passwordRepeated"),
-                        		MessageSource.message("LoginDialog.passwordRepeatedIntro"));
+                        notify(MessageSource.message("loginDialog.passwordRepeated"),
+                        		MessageSource.message("loginDialog.passwordRepeatedIntro"));
                         break;
                     }
                 }
@@ -200,8 +200,8 @@ public class LoginDialog extends Window {
                 boolean requiresAlphaNumberic = settings.is(PASSWORD_REQUIRE_ALPHANUMERIC, true);
                 if (requiresAlphaNumberic && !containsAlphanumeric(passwordField.getValue())) {
                     passedTest = false;
-                    notify(MessageSource.message("LoginDialog.differentPasswordWithLeterAndNumber"),
-                            MessageSource.message("LoginDialog.differentPasswordWithLeterAndNumberIntro"));
+                    notify(MessageSource.message("loginDialog.differentPasswordWithLeterAndNumber"),
+                            MessageSource.message("loginDialog.differentPasswordWithLeterAndNumberIntro"));
                 }
             }
 
@@ -209,8 +209,8 @@ public class LoginDialog extends Window {
                 boolean requiresSymbol = settings.is(PASSWORD_REQUIRE_SYMBOL, true);
                 if (requiresSymbol && !containsSymbol(passwordField.getValue())) {
                     passedTest = false;
-                    notify(MessageSource.message("LoginDialog.requiredSymbol"),
-                            MessageSource.message("LoginDialog.differentPasswordWithCharacter"));
+                    notify(MessageSource.message("loginDialog.requiredSymbol"),
+                            MessageSource.message("loginDialog.differentPasswordWithCharacter"));
                 }
             }
 
@@ -218,8 +218,8 @@ public class LoginDialog extends Window {
                 boolean requiresMixedCase = settings.is(PASSWORD_REQUIRE_MIXED_CASE, true);
                 if (requiresMixedCase && !containsMixedCase(passwordField.getValue())) {
                     passedTest = false;
-                    notify(MessageSource.message("LoginDialog.mixCases"),
-                            MessageSource.message("LoginDialog.differentPasswordWithCharacterWithUpperAndLower"));
+                    notify(MessageSource.message("loginDialog.mixCases"),
+                            MessageSource.message("loginDialog.differentPasswordWithCharacterWithUpperAndLower"));
                 }
             }
 
@@ -227,8 +227,8 @@ public class LoginDialog extends Window {
                 boolean prohibitCommonWords = settings.is(PASSWORD_PROHIBIT_COMMON_WORDS, true);
                 if (prohibitCommonWords && containsCommonWords(passwordField.getValue())) {
                     passedTest = false;
-                    notify( MessageSource.message("LoginDialog.commonPassword"),
-                            MessageSource.message("LoginDialog.commonPasswordIntro"));
+                    notify( MessageSource.message("loginDialog.commonPassword"),
+                            MessageSource.message("loginDialog.commonPasswordIntro"));
 
                 }
             }
