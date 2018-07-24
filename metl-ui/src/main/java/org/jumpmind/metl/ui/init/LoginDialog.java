@@ -73,7 +73,7 @@ public class LoginDialog extends Window {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
-    private final String PASSWORD_EXPIRED = "PLoginDialog.passwordExpired";
+    private final String PASSWORD_EXPIRED = "LoginDialog.passwordExpired";
 
     private ApplicationContext context;
 
