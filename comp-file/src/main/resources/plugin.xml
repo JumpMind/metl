@@ -432,11 +432,11 @@
                 <name>Get File Name From Message</name>
                 <defaultValue>false</defaultValue>
             </setting>
-            <setting id='must.exist' required='false' type='boolean'>
+            <setting id='must.exist' required='true' type='boolean'>
                 <name>Must Exist</name>
-                <defaultValue>false</defaultValue>
+                <defaultValue>true</defaultValue>
             </setting>
-            <setting id='relative.path' required='false' type='text'>
+            <setting id='relative.path' required='true' type='text'>
                 <name>File Path</name>
             </setting>
             <setting id='split.on.line.feed' required='false' type='boolean'>
@@ -484,6 +484,9 @@
             <setting id='number.of.times.to.read.file' required='false' type='integer'>
                 <name>Number of times to read file content</name>
                 <defaultValue>1</defaultValue>                
+            </setting>
+             <setting id='dat.config.mapping' required='true' type='multiline_text'>
+                <name>截取位数与列的映射</name>            
             </setting>            
         </settings>
     </component>
