@@ -32,7 +32,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jamel.dbf.DbfReader;
 import org.jamel.dbf.structure.DbfField;
 import org.jamel.dbf.structure.DbfHeader;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -111,6 +110,9 @@ public class DBFReader extends AbstractRdbmsComponentRuntime {
 		if(paths != null && paths.size() > 0) {
 			//循环处理dbf文件
 			paths.forEach(path->{
+				//有个需求，当配置的文件或目录  没有dbf文件时   报错
+				//处理文件计数器
+				int fileCount = 0;
 				File file = null;
 				try {
 					file = new File(path);
@@ -120,19 +122,30 @@ public class DBFReader extends AbstractRdbmsComponentRuntime {
 						File[] children = file.listFiles();
 						//遍历子文件
 						for(File child:children) {
-							handleFile(child, mapping, tableMaps);
+							if(child.isFile() && child.getName().toLowerCase().endsWith(".dbf")) {
+								handleFile(child, mapping, tableMaps);
+								fileCount++;
+							}
+							
 						}
 					}
 					//文件
 					else{
-						handleFile(file, mapping, tableMaps);
+						if(file.isFile() && file.getName().toLowerCase().endsWith(".dbf")) {
+							handleFile(file, mapping, tableMaps);
+							fileCount++;
+						}
 					}
 				}catch (Exception e) {
 					log(LogLevel.ERROR,"处理文件失败");
 					e.printStackTrace();
 					throw new RuntimeException("处理文件失败");
 				}
-				
+				if(fileCount > 0) {
+					log(LogLevel.INFO,path + " dbf数据读取成功");
+				}else {
+					log(LogLevel.WARN,path + " 不是或没有dbf文件");
+				}
 			});
 		}
 		
