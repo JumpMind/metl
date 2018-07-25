@@ -158,10 +158,11 @@ public class DBFReader extends AbstractRdbmsComponentRuntime {
 			//处理数据
 			TableConfig tableConfig = tableMaps.get(table);
 			if(tableConfig == null) return;
+			DbfReader reader = null;
 			//读取数据
 			try {
 				//dbf reader
-				DbfReader reader = new DbfReader(file);
+				reader = new DbfReader(file);
 				//dbf header
 				DbfHeader header = reader.getHeader();
 				//列对应关系反转,以dbf的列名为key
@@ -226,6 +227,10 @@ public class DBFReader extends AbstractRdbmsComponentRuntime {
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw e;
+			}finally {
+				if(reader != null) {
+					reader.close();
+				}
 			}
 			
 			
