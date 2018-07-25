@@ -49,7 +49,7 @@ public abstract class AbstractService {
     
     protected ISecurityService securityService;
 
-    AbstractService(ISecurityService securityService, IPersistenceManager persistenceManager, String tablePrefix) {
+    public AbstractService(ISecurityService securityService, IPersistenceManager persistenceManager, String tablePrefix) {
         this.persistenceManager = persistenceManager;
         this.tablePrefix = tablePrefix;
         this.securityService = securityService;
