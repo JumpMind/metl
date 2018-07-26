@@ -8,4 +8,6 @@ public interface AdminSideView extends View {
     Component getView();
     
     void setAdminView(AdminView view);
+    
+    boolean isAccessible();
 }

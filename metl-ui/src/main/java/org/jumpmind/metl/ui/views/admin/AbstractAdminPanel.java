@@ -45,4 +45,9 @@ public abstract class AbstractAdminPanel extends VerticalLayout implements Admin
     public AdminView getAdminView() {
         return this.adminView;
     }
+    
+    @Override
+    public boolean isAccessible() {
+        return true;
+    }
 }

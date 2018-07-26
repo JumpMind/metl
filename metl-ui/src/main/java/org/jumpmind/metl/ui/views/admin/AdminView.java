@@ -108,7 +108,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         for (AdminSideView sideView : sideMenu) {
             AdminMenuLink link = (AdminMenuLink) sideView.getClass().getAnnotation(AdminMenuLink.class);
             sideView.setAdminView(this);
-                if (link != null && link.uiClass().equals(AppUI.class)) {
+                if (link != null && link.uiClass().equals(AppUI.class) && sideView.isAccessible()) {
                     addItem(link.id(), link.icon());
                     sideMenuById.put(link.id(), sideView.getView());
                 }
@@ -178,6 +178,6 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
     protected TreeTable getTable() {
         return table;
     }
-    
-    
+
+
 }
