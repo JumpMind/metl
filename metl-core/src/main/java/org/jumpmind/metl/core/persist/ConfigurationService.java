@@ -67,11 +67,9 @@ import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.model.ProjectVersionPlugin;
-import org.jumpmind.metl.core.model.ReleasePackage;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.ResourceSetting;
-import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.Tag;
 import org.jumpmind.metl.core.model.Version;
@@ -1159,42 +1157,6 @@ public class ConfigurationService extends AbstractService
         }
         return previousResource;
     }
-
-    @Override
-    public List<ReleasePackage> findReleasePackages() {
-        // TODO this should really be ReleasePackageName as it won't be fully
-        // refreshed with ReleasePackageProjectVersion
-        Map<String, Object> params = new HashMap<String, Object>();
-        List<ReleasePackage> releasePackages = find(ReleasePackage.class, params);
-        AbstractObjectNameBasedSorter.sort(releasePackages);
-        return releasePackages;
-    }
-
-    @Override
-    public ReleasePackage findReleasePackage(String releasePackageId) {
-        ReleasePackage releasePackage = findOne(ReleasePackage.class,
-                new NameValue("id", releasePackageId));
-        releasePackage.setProjectVersions(findReleasePackageProjectVersions(releasePackageId));
-        return releasePackage;
-    }
-
-    @Override
-    public List<Rppv> findReleasePackageProjectVersions(
-            String releasePackageId) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("releasePackageId", releasePackageId);
-        List<Rppv> rppvs = persistenceManager.find(
-                Rppv.class, params, null, null,
-                tableName(Rppv.class));
-        return rppvs;
-    }
-
-    @Override
-    public void refresh(ReleasePackage releasePackage) {
-        refresh((AbstractObject) releasePackage);
-        releasePackage
-                .setProjectVersions(findReleasePackageProjectVersions(releasePackage.getId()));
-    }
     
     @Override
     public void doInBackground() {
@@ -1371,14 +1333,6 @@ public class ConfigurationService extends AbstractService
             flows.add(this.findFlow(row.getString("flow_id")));
         }
         return flows;
-    }
-
-    @Override
-    public void deleteReleasePackageProjectVersionsForReleasePackage(String releasePackageId) {
-        final String DELETE_RELEASE_PACKAGE_VERSIONS_FOR_RELEASE_PACKAGE = "delete from %1$s_rppv " +
-                "where release_package_id = '%2$s'";
-        ISqlTemplate template = databasePlatform.getSqlTemplate();
-        template.update(String.format(DELETE_RELEASE_PACKAGE_VERSIONS_FOR_RELEASE_PACKAGE, tablePrefix, releasePackageId));                
     }
 
     @Override

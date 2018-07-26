@@ -37,6 +37,7 @@ import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_URL;
 import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_USER;
 import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_VALIDATION_QUERY;
 
+import java.lang.reflect.Constructor;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashSet;
@@ -56,6 +57,7 @@ import org.jumpmind.db.sql.SqlPersistenceManager;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
+import org.jumpmind.metl.core.persist.ConfigurationService;
 import org.jumpmind.metl.core.persist.ExecutionService;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
@@ -83,7 +85,6 @@ import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.MockJdbcDriver;
 import org.jumpmind.metl.ui.definition.DefinitionPlusUIFactory;
 import org.jumpmind.metl.ui.definition.IDefinitionPlusUIFactory;
-import org.jumpmind.metl.ui.persist.AuditableConfigurationService;
 import org.jumpmind.metl.ui.persist.IUICache;
 import org.jumpmind.metl.ui.persist.UICache;
 import org.jumpmind.persist.IPersistenceManager;
@@ -410,8 +411,16 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IConfigurationService configurationService() {
         if (configurationService == null) {
-            configurationService = new AuditableConfigurationService(operationsService(), securityService(), configDatabasePlatform(),
-                    persistenceManager(), tablePrefix());
+            try {
+                Class<?> clazz = Class.forName("com.jumpmind.metl.core.persist.AuditableConfigurationService");
+                Constructor<?> con = clazz.getConstructor(IDatabasePlatform.class, IPersistenceManager.class, String.class,
+                        IConfigurationService.class, IOperationsService.class, ISecurityService.class);
+                configurationService = (IConfigurationService) con.newInstance(operationsService(), securityService(), configDatabasePlatform(),
+                        persistenceManager(), tablePrefix());
+            } catch (Exception e) {
+                configurationService = new ConfigurationService(operationsService(), securityService(), configDatabasePlatform(),
+                        persistenceManager(), tablePrefix());
+            }
         }
         return configurationService;
     }
@@ -429,8 +438,16 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IImportExportService importExportService() {
         if (importExportService == null) {
-            importExportService = new ImportExportService(configDatabasePlatform(), persistenceManager(), tablePrefix(),
-                    configurationService(), operationsService(), securityService());
+            try {
+                Class<?> clazz = Class.forName("com.jumpmind.metl.core.persist.ImportExportService");
+                Constructor<?> con = clazz.getConstructor(IDatabasePlatform.class, IPersistenceManager.class, String.class,
+                        IConfigurationService.class, IOperationsService.class, ISecurityService.class);
+                importExportService = (IImportExportService) con.newInstance(configDatabasePlatform(), persistenceManager(), tablePrefix(),
+                        configurationService(), operationsService(), securityService());
+            } catch (Exception e) {
+                importExportService = new ImportExportService(configDatabasePlatform(), persistenceManager(), tablePrefix(),
+                        configurationService(), operationsService(), securityService());
+            }
         }
         return importExportService;
     }
