@@ -6,10 +6,7 @@ import org.jumpmind.metl.core.authentication.UserAuthenticationLDAP;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentStatus;
 import org.jumpmind.metl.core.model.GlobalSetting;
-import org.jumpmind.metl.ui.common.ApplicationContext;
-import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
-import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.jumpmind.vaadin.ui.common.UiComponent;
@@ -32,7 +29,6 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-
 
 @UiComponent
 @Scope(value = "ui")
