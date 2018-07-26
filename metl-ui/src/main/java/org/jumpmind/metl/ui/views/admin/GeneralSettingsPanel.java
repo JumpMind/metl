@@ -21,9 +21,6 @@
 package org.jumpmind.metl.ui.views.admin;
 
 import org.jumpmind.metl.core.model.GlobalSetting;
-import org.jumpmind.metl.ui.common.ApplicationContext;
-import org.jumpmind.metl.ui.common.TabbedPanel;
-import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.slf4j.Logger;
@@ -37,7 +34,6 @@ import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -71,15 +67,6 @@ public class GeneralSettingsPanel extends AbstractAdminPanel {
         addSetting("System Text", GlobalSetting.SYSTEM_TEXT, "",
                 "Set HTML content to be displayed in the top bar that can identify a particular environment")
                         .focus();
-
-        section = new Label("Purge Settings");
-        section.addStyleName(ValoTheme.LABEL_H3);
-        section.addStyleName(ValoTheme.LABEL_COLORED);
-        form.addComponent(section);
-
-        addSetting("Audit Event Retention in Days", GlobalSetting.AUDIT_EVENT_RETENTION_IN_DAYS,
-                Integer.toString(GlobalSetting.DEFAULT_AUDIT_EVENT_RETENTION_IN_DAYS), "",
-                Integer.class);
         
         section = new Label("Auto Backup");
         section.addStyleName(ValoTheme.LABEL_H3);
