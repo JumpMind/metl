@@ -37,7 +37,6 @@ import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_URL;
 import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_USER;
 import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_VALIDATION_QUERY;
 
-import java.lang.reflect.Constructor;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashSet;
@@ -411,16 +410,8 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IConfigurationService configurationService() {
         if (configurationService == null) {
-            try {
-                Class<?> clazz = Class.forName("com.jumpmind.metl.core.persist.AuditableConfigurationService");
-                Constructor<?> con = clazz.getConstructor(IDatabasePlatform.class, IPersistenceManager.class, String.class,
-                        IConfigurationService.class, IOperationsService.class, ISecurityService.class);
-                configurationService = (IConfigurationService) con.newInstance(operationsService(), securityService(), configDatabasePlatform(),
-                        persistenceManager(), tablePrefix());
-            } catch (Exception e) {
-                configurationService = new ConfigurationService(operationsService(), securityService(), configDatabasePlatform(),
-                        persistenceManager(), tablePrefix());
-            }
+            configurationService = new ConfigurationService(operationsService(), securityService(), configDatabasePlatform(),
+                    persistenceManager(), tablePrefix());
         }
         return configurationService;
     }
@@ -438,16 +429,8 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IImportExportService importExportService() {
         if (importExportService == null) {
-            try {
-                Class<?> clazz = Class.forName("com.jumpmind.metl.core.persist.ImportExportService");
-                Constructor<?> con = clazz.getConstructor(IDatabasePlatform.class, IPersistenceManager.class, String.class,
-                        IConfigurationService.class, IOperationsService.class, ISecurityService.class);
-                importExportService = (IImportExportService) con.newInstance(configDatabasePlatform(), persistenceManager(), tablePrefix(),
-                        configurationService(), operationsService(), securityService());
-            } catch (Exception e) {
-                importExportService = new ImportExportService(configDatabasePlatform(), persistenceManager(), tablePrefix(),
-                        configurationService(), operationsService(), securityService());
-            }
+            importExportService = new ImportExportService(configDatabasePlatform(), persistenceManager(), tablePrefix(),
+                    configurationService(), operationsService(), securityService());
         }
         return importExportService;
     }
