@@ -211,7 +211,7 @@ public class DBFReader extends AbstractRdbmsComponentRuntime {
 	                if(batchParams.size() > 999) {
 	                	System.err.println(tableConfig.getDeleteSQL());
 	                	System.err.println(tableConfig.getInsertSQL());
-	                	
+	                	if(tableConfig.key != null && tableConfig.key.size() > 0)
 	                	template.batchUpdate(tableConfig.getDeleteSQL(), batchParams.toArray(mapArray));
 	                	template.batchUpdate(tableConfig.getInsertSQL(), batchParams.toArray(mapArray));
 	                	batchParams = null;
@@ -219,6 +219,7 @@ public class DBFReader extends AbstractRdbmsComponentRuntime {
 	                }
 	            }
 	            if(batchParams.size()>0) {
+	            	if(tableConfig.key != null && tableConfig.key.size() > 0)
 	            	template.batchUpdate(tableConfig.getDeleteSQL(), batchParams.toArray(mapArray));
                 	template.batchUpdate(tableConfig.getInsertSQL(), batchParams.toArray(mapArray));
 	            }
