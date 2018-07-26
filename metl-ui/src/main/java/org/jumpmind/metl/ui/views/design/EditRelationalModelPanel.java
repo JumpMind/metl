@@ -130,7 +130,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
             addEntityButton = buttonBar1.addButton(MessageSource.message("editRelationalModelPanel.addEntity"), FontAwesome.TABLE);
             addEntityButton.addClickListener(new AddEntityClickListener());
 
-            addAttributeButton = buttonBar1.addButton("Add Attr", FontAwesome.COLUMNS);
+            addAttributeButton = buttonBar1.addButton(MessageSource.message("editRelationalModelPanel.addAttr"), FontAwesome.COLUMNS);
             addAttributeButton.addClickListener(new AddAttributeClickListener());
 
             editButton = buttonBar1.addButton(MessageSource.message("common.edit"), FontAwesome.EDIT);
