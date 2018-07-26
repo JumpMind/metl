@@ -28,11 +28,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
@@ -61,7 +64,10 @@ public class DatReader extends AbstractFileReader {
     int textHeaderLinesToSkip;
 
     String encoding = "UTF-8";
-
+    
+    public static final String DAT_CONFIG_MAPPING = "dat.config.mapping";
+    String datConfigMapping = "";
+    List<String[]> positions = null;
     @Override
     public void start() {
         init();
@@ -70,6 +76,9 @@ public class DatReader extends AbstractFileReader {
         textRowsPerMessage = properties.getInt(SETTING_ROWS_PER_MESSAGE, textRowsPerMessage);
         numberOfTimesToReadFile = properties.getInt(SETTING_NUMBER_OF_TIMES_TO_READ_FILE, numberOfTimesToReadFile);
         encoding = properties.get(SETTING_ENCODING, encoding);
+        datConfigMapping = properties.get(DAT_CONFIG_MAPPING, "").replaceAll("\t", "").replaceAll("\r", "").replaceAll("\n", "")
+        		.replaceAll(" ", "");
+        positions = Arrays.stream(datConfigMapping.split(";")).map(it->it.split(",")).collect(Collectors.toList());
         if ("".equals(encoding)) {
         	encoding = "UTF-8";
         	log(LogLevel.INFO, "File Encoding has not been set, using the default of UTF-8.");
@@ -116,6 +125,8 @@ public class DatReader extends AbstractFileReader {
                             reader = new BufferedReader(new InputStreamReader(inStream, encoding));
                             if (properties.is(SETTING_SPLIT_ON_LINE_FEED, true)) {
                                 while ((currentLine = reader.readLine()) != null) {
+                                	//添加逗号
+                                	currentLine = addComma(currentLine);
                                     currentFileLinesRead++;
                                     if (linesInMessage == textRowsPerMessage) {
                                         callback.sendTextMessage(headers, payload);
@@ -160,4 +171,18 @@ public class DatReader extends AbstractFileReader {
             }
         }
     }
+    //添加逗号位
+	private String addComma(String currentLine) {
+		if(StringUtils.isBlank(currentLine) || StringUtils.isBlank(datConfigMapping)) {
+			return currentLine;
+		}
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < positions.size(); i++) {
+			sb.append(currentLine.substring(Integer.valueOf(positions.get(i)[0]) -1,Integer.valueOf(positions.get(i)[1])));
+			if(i<positions.size() -1) {
+				sb.append(",");
+			}
+		}
+		return sb.toString();
+	}
 }
