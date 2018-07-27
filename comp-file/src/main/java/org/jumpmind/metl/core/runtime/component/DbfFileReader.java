@@ -135,12 +135,7 @@ public class DbfFileReader extends AbstractFileReader {
                                 	sb.append(delimit);
                                 }
                             }
-                            if (linesInMessage == textRowsPerMessage) {
-                                callback.sendTextMessage(headers, payload);
-                                linesInMessage = 0;
-                                payload = new ArrayList<String>();
-                            }
-                            if (textHeaderLinesToSkip > 0) {
+                            if (textHeaderLinesToSkip < 1) {
                                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                                 payload.add(sb.toString());
                                 linesInMessage++;
