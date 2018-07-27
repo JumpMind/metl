@@ -39,4 +39,7 @@
     <component-ui id="File Util UI" componentId="File Util">
         <iconImage>org/jumpmind/metl/core/runtime/component/metl-file-util-48x48-color.png</iconImage>
     </component-ui>
+     <component-ui id="DBF Reader UI" componentId="DBF Reader">
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-dbf-file-48x48-color.png</iconImage>
+    </component-ui>
 </ui>
