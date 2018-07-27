@@ -223,7 +223,13 @@ public class MenuResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-
+	public  static  String getFileHidden() {
+		String[] newProjectArray =   new String[] {
+				MessageSource.message("common.file"),
+				MessageSource.message("common.hidden"),
+		};	
+		return  StringUtils.join(newProjectArray, "|");
+	}
 	
 	
 }
