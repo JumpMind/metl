@@ -62,13 +62,24 @@ public class ViewManager implements Serializable {
     public void init(AppUI ui, ComponentContainer container) {
         navigator = new Navigator(ui, container);
         navigator.setErrorView(new PageNotFoundView(this));
+        List<View> filteredViews = new ArrayList<View>();
         if (views != null) {
             for (View view : views) {
                 TopBarLink menu = (TopBarLink) view.getClass().getAnnotation(TopBarLink.class);
                 if (menu != null && menu.uiClass().equals(AppUI.class)) {
-                    navigator.addView(menu.id(), view);
+                    if (view instanceof TopView) {
+                        if (((TopView)view).isAccessible()) {
+                            navigator.addView(menu.id(), view);
+                            filteredViews.add(view);
+                        }
+                    } else {
+                        navigator.addView(menu.id(), view);
+                        filteredViews.add(view);
+                    }
                 }
             }
+            views.clear();
+            views.addAll(filteredViews);
         }
     }
     
