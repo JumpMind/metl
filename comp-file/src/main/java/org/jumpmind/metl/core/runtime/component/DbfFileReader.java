@@ -150,12 +150,12 @@ public class DbfFileReader extends AbstractFileReader {
                                 	sb.setLength(0);
                                 	for (int  t= 0; t < header.getFieldsCount(); t++) {
                                         DbfField field = header.getField(t);
-                                        if(field.getDataType().byteValue== 'C'){
+                                        if(field.getDataType()== 'C'){
                                             if(row[t] != null){
                                             	sb.append(new String((byte[]) row[t], encoding));
                                             }
                                            
-                                        }else if(field.getDataType().byteValue == 'N'){
+                                        }else if(field.getDataType() == 'N'){
 
                                             if(row[t] != null){
                                                 if(field.getDecimalCount()>0){
@@ -172,7 +172,7 @@ public class DbfFileReader extends AbstractFileReader {
                                             }
 
                                         }else{
-                                        	sb.append(String.valueOf(row[i]));
+                                        	sb.append(String.valueOf(row[t]));
                                         }
                                         sb.append(delimit);
                                     }

@@ -186,12 +186,12 @@ public class DBFTransfromCVS extends AbstractFileReader {
             while ((row = reader.nextRecord()) != null) {
                 for (int i = 0; i < header.getFieldsCount(); i++) {
                     DbfField field = header.getField(i);
-                    if(field.getDataType().toString()== "C"){
+                    if(field.getDataType()== 'C'){
                         if(row[i] != null){
                             writer.print(new String((byte[]) row[i], dbfEncoding));
                         }
                        
-                    }else if(field.getDataType().toString() == "N"){
+                    }else if(field.getDataType() == 'N'){
 
                         if(row[i] != null){
                             if(field.getDecimalCount()>0){
