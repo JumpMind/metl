@@ -358,7 +358,7 @@
             </setting>
         </settings>
     </component>
-    <component category='WRITER' id='DBF Reader' inputMessageType='any' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='datasource'>
+  <!--  <component category='WRITER' id='DBF Reader' inputMessageType='any' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='datasource'>
         <name>DBF Reader</name>
         <className>org.jumpmind.metl.core.runtime.component.DBFReader</className>
         <keywords>file,files</keywords>
@@ -413,9 +413,9 @@
                 <defaultValue></defaultValue>                
             </setting>            
         </settings>
-    </component>
-     <component category='READER' id='Dat Reader' inputMessageType='text' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='streamable'>
-        <name>Dat Reader</name>
+    </component>-->
+     <component category='READER' id='Digit Reader' inputMessageType='text' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='streamable'>
+        <name>Digit Reader</name>
         <className>org.jumpmind.metl.core.runtime.component.DatReader</className>
         <keywords>file,files</keywords>
         <description></description>
@@ -490,7 +490,7 @@
             </setting>            
         </settings>
     </component>
-      <component category='READER' id='DBF Transfrom' inputMessageType='text' inputOutputModelsMatch='false' outputMessageType='text' >
+ <!--     <component category='READER' id='DBF Transfrom' inputMessageType='text' inputOutputModelsMatch='false' outputMessageType='text' >
         <name>DBF Transfrom</name>
         <className>org.jumpmind.metl.core.runtime.component.DBFReader</className>
         <keywords>file,files</keywords>
@@ -562,9 +562,9 @@
                 <defaultValue>1</defaultValue>                
             </setting>            
         </settings>
-    </component>
-     <component category='READER' id='DBF File Reader' inputMessageType='text' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='streamable'>
-        <name>DBF File Reader</name>
+    </component>-->
+     <component category='READER' id='DBF Reader' inputMessageType='text' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='streamable'>
+        <name>DBF Reader</name>
         <className>org.jumpmind.metl.core.runtime.component.DbfFileReader</className>
         <keywords>file,files</keywords>
         <description></description>

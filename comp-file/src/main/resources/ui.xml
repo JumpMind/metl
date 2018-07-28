@@ -42,4 +42,7 @@
      <component-ui id="DBF Reader UI" componentId="DBF Reader">
         <iconImage>org/jumpmind/metl/core/runtime/component/metl-dbf-file-48x48-color.png</iconImage>
     </component-ui>
+    <component-ui id="Digit Reader UI" componentId="Digit Reader">
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-digit-reader-48x48-color.png</iconImage>
+    </component-ui>
 </ui>
