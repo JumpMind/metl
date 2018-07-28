@@ -1,8 +1,8 @@
 /**
- * Licensed to JumpMind Inc under one or more contributor
+ * Licensed to KanasInfo Ltd. under one or more contributor
  * license agreements.  See the NOTICE file distributed
  * with this work for additional information regarding
- * copyright ownership.  JumpMind Inc licenses this file
+ * copyright ownership.  KanasInfo Ltd. licenses this file
  * to you under the GNU General Public License, version 3.0 (GPLv3)
  * (the "License"); you may not use this file except in compliance
  * with the License.
@@ -116,8 +116,6 @@ public class DatReader extends AbstractFileReader {
                         info("Reading file: %s", file);
                     }
                     String filePath = resolveParamsAndHeaders(file, inputMessage);
-                    System.out.println("文件路径");
-                    System.out.println(filePath);
                     BufferedReader reader = null;
                     try {
                         InputStream inStream = directory.getInputStream(filePath, mustExist);

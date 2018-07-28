@@ -35,6 +35,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.ControlMessage;
+import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
@@ -69,6 +70,10 @@ public class TextFileReader extends AbstractFileReader {
         textRowsPerMessage = properties.getInt(SETTING_ROWS_PER_MESSAGE, textRowsPerMessage);
         numberOfTimesToReadFile = properties.getInt(SETTING_NUMBER_OF_TIMES_TO_READ_FILE, numberOfTimesToReadFile);
         encoding = properties.get(SETTING_ENCODING, encoding);
+        if ("".equals(encoding)) {
+        	encoding = "UTF-8";
+        	log(LogLevel.INFO, "File Encoding has not been set, using the default of UTF-8.");
+        }
     }
 
     @Override
@@ -102,8 +107,6 @@ public class TextFileReader extends AbstractFileReader {
                         info("Reading file: %s", file);
                     }
                     String filePath = resolveParamsAndHeaders(file, inputMessage);
-                    System.out.println("文件路径");
-                    System.out.println(filePath);
                     BufferedReader reader = null;
                     try {
                         InputStream inStream = directory.getInputStream(filePath, mustExist);
@@ -124,7 +127,7 @@ public class TextFileReader extends AbstractFileReader {
                                     }
                                 }
                             } else {
-                               payload.add(IOUtils.toString(reader));
+                                payload.add(IOUtils.toString(reader));
                             }
                             if (payload.size() > 0) {
                                 callback.sendTextMessage(headers, payload);
