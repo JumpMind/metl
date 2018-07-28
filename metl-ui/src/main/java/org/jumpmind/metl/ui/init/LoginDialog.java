@@ -92,7 +92,7 @@ public class LoginDialog extends Window {
     private TypedProperties settings;
 
     public LoginDialog(ApplicationContext context, LoginListener loginListener) {
-        super("Login to Metl");
+        super(MessageSource.message("loginDialog.login"));
 
         this.context = context;
         this.loginListener = loginListener;
