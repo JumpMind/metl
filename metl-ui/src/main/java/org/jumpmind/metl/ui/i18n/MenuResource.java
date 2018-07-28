@@ -7,53 +7,53 @@ public class MenuResource {
 	
 	
 	
-	public  static  String getNewProject() {
-		String[] newProjectArray =   new String[] {
+	public static String getNewProject() {
+		String[] newProjectArray = new String[] {
 				MessageSource.message("common.file"),
 				MessageSource.message("common.new"),
 				MessageSource.message("common.project"),
 		};	
-		return    StringUtils.join(newProjectArray, "|");
+		return StringUtils.join(newProjectArray, "|");
 	}
 	
 	
-	public  static  String getNewBranch() {
-		String[] newProjectArray =   new String[] {
+	public static String getNewBranch() {
+		String[] newProjectArray = new String[] {
 				MessageSource.message("common.file"),
 				MessageSource.message("common.new"),
 				MessageSource.message("common.projectBranch"),
 		};	
-		return  StringUtils.join(newProjectArray, "|");
+		return StringUtils.join(newProjectArray, "|");
 	}
 
-	public  static  String getNewDependency() {
-		String[] newProjectArray =   new String[] {
+	public static String getNewDependency() {
+		String[] newProjectArray = new String[] {
 				MessageSource.message("common.file"),
 				MessageSource.message("common.new"),
 				MessageSource.message("common.projectDependency"),
 		};	
-		return  StringUtils.join(newProjectArray, "|");
+		return StringUtils.join(newProjectArray, "|");
 	}
-	public  static  String getNewDesign() {
-		String[] newProjectArray =   new String[] {
+	public static String getNewDesign() {
+		String[] newProjectArray = new String[] {
 				MessageSource.message("common.file"),
 				MessageSource.message("common.new"),
 				MessageSource.message("common.flow"),
 				MessageSource.message("common.design"),
 		};	
-		return  StringUtils.join(newProjectArray, "|");
+		return StringUtils.join(newProjectArray, "|");
 	}
-	public  static  String getNewTest() {
-		String[] newProjectArray =   new String[] {
+	public static String getNewTest() {
+		String[] newProjectArray = new String[] {
 				MessageSource.message("common.file"),
 				MessageSource.message("common.new"),
 				MessageSource.message("common.flow"),
 				MessageSource.message("common.test"),
 		};	
-		return  StringUtils.join(newProjectArray, "|");
+		return StringUtils.join(newProjectArray, "|");
 	}
-//     add("File|New|Model|Hierarchical");
-	public  static  String getNewHierarchical() {
+
+	public  static String getNewHierarchical() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.file"),
 				MessageSource.message("common.new"),
@@ -62,7 +62,7 @@ public class MenuResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-//     add("File|New|Model|Relational");
+
 	public  static  String getNewRelational() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.file"),
@@ -159,7 +159,7 @@ public class MenuResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-//     add("File|Open");
+
 	public  static  String getFileOpen() {
 		String[] newProjectArray =   new String[] {
 				MessageSource.message("common.file"),
@@ -223,7 +223,13 @@ public class MenuResource {
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
-
+	public  static  String getFileHidden() {
+		String[] newProjectArray =   new String[] {
+				MessageSource.message("common.file"),
+				MessageSource.message("common.hidden"),
+		};	
+		return  StringUtils.join(newProjectArray, "|");
+	}
 	
 	
 }

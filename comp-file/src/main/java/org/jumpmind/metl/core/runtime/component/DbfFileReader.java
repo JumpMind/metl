@@ -1,8 +1,8 @@
 /**
- * Licensed to JumpMind Inc under one or more contributor
+ * Licensed to KanasInfo Ltd. under one or more contributor
  * license agreements.  See the NOTICE file distributed
  * with this work for additional information regarding
- * copyright ownership.  JumpMind Inc licenses this file
+ * copyright ownership.  KanasInfo Ltd. licenses this file
  * to you under the GNU General Public License, version 3.0 (GPLv3)
  * (the "License"); you may not use this file except in compliance
  * with the License.
@@ -22,10 +22,8 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +31,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.jamel.dbf.DbfReader;
+import org.jamel.dbf.structure.DbfField;
+import org.jamel.dbf.structure.DbfHeader;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
@@ -40,9 +41,9 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 
-public class TextFileReader extends AbstractFileReader {
+public class DbfFileReader extends AbstractFileReader {
 
-    public static final String TYPE = "Text File Reader";
+    public static final String TYPE = "DBF File Reader";
 
     public static final String SETTING_ROWS_PER_MESSAGE = "text.rows.per.message";
 
@@ -53,6 +54,8 @@ public class TextFileReader extends AbstractFileReader {
     public static final String SETTING_NUMBER_OF_TIMES_TO_READ_FILE = "number.of.times.to.read.file";
 
     public static final String SETTING_SPLIT_ON_LINE_FEED = "split.on.line.feed";
+    
+    public static final String DBF_CONF_DELIMIT = "dbf.conf.delimit";
 
     int textRowsPerMessage = 1000;
 
@@ -61,6 +64,7 @@ public class TextFileReader extends AbstractFileReader {
     int textHeaderLinesToSkip;
 
     String encoding = "UTF-8";
+    String delimit = ",";
 
     @Override
     public void start() {
@@ -70,6 +74,7 @@ public class TextFileReader extends AbstractFileReader {
         textRowsPerMessage = properties.getInt(SETTING_ROWS_PER_MESSAGE, textRowsPerMessage);
         numberOfTimesToReadFile = properties.getInt(SETTING_NUMBER_OF_TIMES_TO_READ_FILE, numberOfTimesToReadFile);
         encoding = properties.get(SETTING_ENCODING, encoding);
+        delimit = properties.get(DBF_CONF_DELIMIT, delimit);
         if ("".equals(encoding)) {
         	encoding = "UTF-8";
         	log(LogLevel.INFO, "File Encoding has not been set, using the default of UTF-8.");
@@ -88,7 +93,6 @@ public class TextFileReader extends AbstractFileReader {
     private void processFiles(List<String> files, Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         int linesInMessage = 0;
         ArrayList<String> payload = new ArrayList<String>();
-
         filesRead.addAll(files);
 
         for (String file : files) {
@@ -100,20 +104,74 @@ public class TextFileReader extends AbstractFileReader {
             if (directory == null) {
                 throw new IllegalStateException("The resource was not created.  Please check to see that it is properly configured");
             }
+            StringBuilder sb = new StringBuilder();
             try {
+            	
                 for (int i = 0; i < numberOfTimesToReadFile && readContent; i++) {
                     checkForInterruption();
                     if (isNotBlank(file)) {
                         info("Reading file: %s", file);
                     }
                     String filePath = resolveParamsAndHeaders(file, inputMessage);
-                    BufferedReader reader = null;
+                    DbfReader reader = null;
+                    InputStream inStream;
                     try {
-                        InputStream inStream = directory.getInputStream(filePath, mustExist);
+                    	
+                        inStream = directory.getInputStream(filePath, mustExist);
                         if (inStream != null) {
-                            reader = new BufferedReader(new InputStreamReader(inStream, encoding));
+                            reader = new DbfReader(inStream);
+                            DbfHeader header = reader.getHeader();
+                            sb.setLength(0);
+                            for (int j = 0; j < header.getFieldsCount(); j++) {
+                                DbfField field = header.getField(j);
+                                sb.append(new String(field.getName().getBytes(), encoding));
+                                if(j < header.getFieldsCount() - 1) {
+                                	sb.append(delimit);
+                                }
+                            }
+                            if (textHeaderLinesToSkip < 1) {
+                                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+                                payload.add(sb.toString());
+                                linesInMessage++;
+                            }
+                            //file head line 
+                            currentFileLinesRead++;
                             if (properties.is(SETTING_SPLIT_ON_LINE_FEED, true)) {
-                                while ((currentLine = reader.readLine()) != null) {
+                            	//reader dbf file
+                            	Object[] row;
+                                while ((row = reader.nextRecord()) != null) {
+                                	//reset StringBuilder
+                                	sb.setLength(0);
+                                	for (int  t= 0; t < header.getFieldsCount(); t++) {
+                                        DbfField field = header.getField(t);
+                                        if(field.getDataType()== 'C'){
+                                            if(row[t] != null){
+                                            	sb.append(new String((byte[]) row[t], encoding));
+                                            }
+                                           
+                                        }else if(field.getDataType() == 'N'){
+
+                                            if(row[t] != null){
+                                                if(field.getDecimalCount()>0){
+                                                	sb.append(((Number) row[t]).doubleValue());
+                                                }else{
+                                                	sb.append(((Number) row[t]).longValue());
+                                                }
+                                            }else{
+                                                if(field.getDecimalCount()>0){
+                                                	sb.append(0.00);
+                                                }else{
+                                                	sb.append(0);
+                                                }
+                                            }
+
+                                        }else{
+                                        	sb.append(String.valueOf(row[t]));
+                                        }
+                                        sb.append(delimit);
+                                    }
+                                	currentLine = sb.toString();
+                                	log.debug(currentLine);
                                     currentFileLinesRead++;
                                     if (linesInMessage == textRowsPerMessage) {
                                         callback.sendTextMessage(headers, payload);
@@ -127,7 +185,7 @@ public class TextFileReader extends AbstractFileReader {
                                     }
                                 }
                             } else {
-                                payload.add(IOUtils.toString(reader));
+                               payload.add(IOUtils.toString(inStream));
                             }
                             if (payload.size() > 0) {
                                 callback.sendTextMessage(headers, payload);

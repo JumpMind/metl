@@ -1,3 +1,4 @@
+
 /**
  * Licensed to JumpMind Inc under one or more contributor
  * license agreements.  See the NOTICE file distributed
@@ -23,26 +24,39 @@ package org.jumpmind.metl.core.runtime.component;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.jamel.dbf.DbfReader;
+import org.jamel.dbf.exception.DbfException;
+import org.jamel.dbf.structure.DbfField;
+import org.jamel.dbf.structure.DbfHeader;
+import org.jamel.dbf.utils.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
+import org.jumpmind.metl.core.runtime.resource.IDirectory;
+import org.jumpmind.metl.core.runtime.resource.LocalFileDirectory;
 import org.jumpmind.properties.TypedProperties;
 
-public class TextFileReader extends AbstractFileReader {
+public class DBFTransfromCVS extends AbstractFileReader {
 
-    public static final String TYPE = "Text File Reader";
+    public static final String TYPE = "DBF Transfrom";
 
     public static final String SETTING_ROWS_PER_MESSAGE = "text.rows.per.message";
 
@@ -61,11 +75,15 @@ public class TextFileReader extends AbstractFileReader {
     int textHeaderLinesToSkip;
 
     String encoding = "UTF-8";
+    
+    String delimit = "#";
+    
 
     @Override
     public void start() {
         init();
         TypedProperties properties = getTypedProperties();
+       
         textHeaderLinesToSkip = properties.getInt(SETTING_HEADER_LINES_TO_SKIP, textHeaderLinesToSkip);
         textRowsPerMessage = properties.getInt(SETTING_ROWS_PER_MESSAGE, textRowsPerMessage);
         numberOfTimesToReadFile = properties.getInt(SETTING_NUMBER_OF_TIMES_TO_READ_FILE, numberOfTimesToReadFile);
@@ -80,7 +98,10 @@ public class TextFileReader extends AbstractFileReader {
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
                 || (PER_MESSAGE.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
-            List<String> files = getFilesToRead(inputMessage);
+        	// 读取文件情况信息
+        	System.out.println("dbf"+inputMessage);
+        	List<String> files = getFilesToRead(inputMessage);
+        	System.out.println("dbf"+files.get(0));
             processFiles(files, inputMessage, callback, unitOfWorkBoundaryReached);
         }
     }
@@ -111,32 +132,14 @@ public class TextFileReader extends AbstractFileReader {
                     try {
                         InputStream inStream = directory.getInputStream(filePath, mustExist);
                         if (inStream != null) {
-                            reader = new BufferedReader(new InputStreamReader(inStream, encoding));
-                            if (properties.is(SETTING_SPLIT_ON_LINE_FEED, true)) {
-                                while ((currentLine = reader.readLine()) != null) {
-                                    currentFileLinesRead++;
-                                    if (linesInMessage == textRowsPerMessage) {
-                                        callback.sendTextMessage(headers, payload);
-                                        linesInMessage = 0;
-                                        payload = new ArrayList<String>();
-                                    }
-                                    if (currentFileLinesRead > textHeaderLinesToSkip) {
-                                        getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                                        payload.add(currentLine);
-                                        linesInMessage++;
-                                    }
-                                }
-                            } else {
-                                payload.add(IOUtils.toString(reader));
-                            }
-                            if (payload.size() > 0) {
-                                callback.sendTextMessage(headers, payload);
-                                payload = new ArrayList<>();
-                            } else {
-                                readContent = false;
-                            }
-                            linesInMessage = 0;
-                        } else {
+               
+                        	String DBFName =files.get(0).toString();
+                        	String CSVName=DBFName.substring(0, DBFName.length()-4)+".csv";                        	
+                        	writeToTxtFile(new File(DBFName),new File(CSVName),Charset.forName("gbk"));
+                        	//删除文件
+                        	//deleteFile(fileName); 	
+                        	
+                    } else {
                             if (isNotBlank(file)) {
                                 info("File %s didn't exist, but must exist setting was false.  Continuing", file);
                             } else {
@@ -149,13 +152,93 @@ public class TextFileReader extends AbstractFileReader {
                         IOUtils.closeQuietly(reader);
                     }
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new IoException("Error reading from file " + e.getMessage());
             }
 
             if (controlMessageOnEof) {
                 callback.sendControlMessage(headers);
             }
+        }
+    }
+    
+    public static void writeToTxtFile(File dbf,File csv, Charset dbfEncoding) {
+    	String delimit="#";
+        try {
+            DbfReader reader = new DbfReader(dbf);
+            
+           // PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(csv)));
+           
+            PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(csv)));
+            DbfHeader header = reader.getHeader();
+
+            String[] titles = new String[header.getFieldsCount()];
+            for (int i = 0; i < header.getFieldsCount(); i++) {
+                DbfField field = header.getField(i);
+                titles[i] = StringUtils.rightPad(field.getName(), field.getFieldLength(), ' ');
+            }
+            for (String title : titles) {
+                writer.print(title);
+                writer.print(delimit);
+            };
+            writer.println();
+            Object[] row;
+            while ((row = reader.nextRecord()) != null) {
+                for (int i = 0; i < header.getFieldsCount(); i++) {
+                    DbfField field = header.getField(i);
+                    if(field.getDataType()== 'C'){
+                        if(row[i] != null){
+                            writer.print(new String((byte[]) row[i], dbfEncoding));
+                        }
+                       
+                    }else if(field.getDataType() == 'N'){
+
+                        if(row[i] != null){
+                            if(field.getDecimalCount()>0){
+                                writer.print(((Number) row[i]).doubleValue());
+                            }else{
+                                writer.print(((Number) row[i]).longValue());
+                            }
+                        }else{
+                            if(field.getDecimalCount()>0){
+                                writer.print(0.00);
+                            }else{
+                                writer.print(0);
+                            }
+                        }
+
+                    }else{
+                        writer.print(String.valueOf(row[i]));
+                    }
+                    writer.print(delimit);
+                }
+                /****
+                 *  海关月度数据
+                 */
+                if(dbf.getName().toLowerCase().startsWith("h")){
+                    writer.print("20" + dbf.getName().substring(1,3));
+                    writer.print(delimit);
+                    writer.print(dbf.getName().substring(3,5));
+                }
+                /***
+                 *  季度数据
+                 */
+                if(dbf.getName().toLowerCase().startsWith("gb")){
+                    writer.print("20" + dbf.getName().substring(2,4));
+                    writer.print(delimit);
+                    writer.print(dbf.getName().substring(4,6));
+                }
+                if(dbf.getName().contains("产量")){
+                    writer.print(dbf.getName().substring(0,4));
+                    writer.print(delimit);
+                    writer.print(dbf.getName().substring(4,6));
+                }
+                writer.println();
+            }
+            writer.close();
+            reader.close();
+        } catch (Exception e) {
+            throw new DbfException("Cannot write .dbf file to .txt", e);
         }
     }
 }

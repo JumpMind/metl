@@ -193,14 +193,14 @@ public class DBFReader extends AbstractRdbmsComponentRuntime {
 	                for (int i = 0; i < header.getFieldsCount(); i++) {
 	                    DbfField field = header.getField(i);
 	                    String column = keyMap.get(String.valueOf(i+1));
-	                    if(field.getDataType().byteValue == 'C'){
+	                    if(field.getDataType() == 'C'){
 	                        if(row[i] != null){
 	                            params.put(column, new String((byte[]) row[i], this.encoding));
 	                        }else {
 	                        	params.put(column, "");
 	                        }
 
-	                    }else if(field.getDataType().byteValue == 'N'){
+	                    }else if(field.getDataType() == 'N'){
 
 	                        if(row[i] != null){
 	                            if(field.getDecimalCount()>0){

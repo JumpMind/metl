@@ -94,7 +94,7 @@ public class DesignNavigator extends VerticalLayout {
     
 	    public static final String LABEL_MODELS = "common.models";
 
-	    public static final String LABEL_RESOURCES = "common.resouces";
+	    public static final String LABEL_RESOURCES = "common.resources";
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
