@@ -485,8 +485,8 @@
                 <name>Number of times to read file content</name>
                 <defaultValue>1</defaultValue>                
             </setting>
-             <setting id='dat.config.mapping' required='true' type='multiline_text'>
-                <name>截取位数与列的映射</name>            
+             <setting id='digit.config.mapping' required='true' type='multiline_text'>
+                <name>Column digit Mapping</name>          
             </setting>            
         </settings>
     </component>

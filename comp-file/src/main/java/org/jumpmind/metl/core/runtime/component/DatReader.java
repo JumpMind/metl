@@ -65,7 +65,7 @@ public class DatReader extends AbstractFileReader {
 
     String encoding = "UTF-8";
     
-    public static final String DAT_CONFIG_MAPPING = "dat.config.mapping";
+    public static final String DIGIT_CONFIG_MAPPING = "digit.config.mapping";
     String datConfigMapping = "";
     List<String[]> positions = null;
     @Override
@@ -76,7 +76,7 @@ public class DatReader extends AbstractFileReader {
         textRowsPerMessage = properties.getInt(SETTING_ROWS_PER_MESSAGE, textRowsPerMessage);
         numberOfTimesToReadFile = properties.getInt(SETTING_NUMBER_OF_TIMES_TO_READ_FILE, numberOfTimesToReadFile);
         encoding = properties.get(SETTING_ENCODING, encoding);
-        datConfigMapping = properties.get(DAT_CONFIG_MAPPING, "").replaceAll("\t", "").replaceAll("\r", "").replaceAll("\n", "")
+        datConfigMapping = properties.get(DIGIT_CONFIG_MAPPING, "").replaceAll("\t", "").replaceAll("\r", "").replaceAll("\n", "")
         		.replaceAll(" ", "");
         positions = Arrays.stream(datConfigMapping.split(";")).map(it->it.split(",")).collect(Collectors.toList());
         if ("".equals(encoding)) {
