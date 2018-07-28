@@ -1,8 +1,8 @@
 /**
- * Licensed to JumpMind Inc under one or more contributor
+ * Licensed to KanasInfo Ltd. under one or more contributor
  * license agreements.  See the NOTICE file distributed
  * with this work for additional information regarding
- * copyright ownership.  JumpMind Inc licenses this file
+ * copyright ownership.  KanasInfo Ltd. licenses this file
  * to you under the GNU General Public License, version 3.0 (GPLv3)
  * (the "License"); you may not use this file except in compliance
  * with the License.
@@ -22,11 +22,8 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,7 +34,6 @@ import org.apache.commons.io.IOUtils;
 import org.jamel.dbf.DbfReader;
 import org.jamel.dbf.structure.DbfField;
 import org.jamel.dbf.structure.DbfHeader;
-import org.jamel.dbf.utils.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
@@ -117,8 +113,6 @@ public class DbfFileReader extends AbstractFileReader {
                         info("Reading file: %s", file);
                     }
                     String filePath = resolveParamsAndHeaders(file, inputMessage);
-                    System.out.println("文件路径");
-                    System.out.println(filePath);
                     DbfReader reader = null;
                     InputStream inStream;
                     try {
