@@ -192,7 +192,7 @@ public class ExportDialog extends ResizableWindow {
         // models
         List<ModelName> models = configurationService.findModelsInProject(projectVersionId);
         AbstractObjectNameBasedSorter.sort(models);
-        exportModelGroup = new OptionGroup(MessageSource.message("common.Models"));
+        exportModelGroup = new OptionGroup(MessageSource.message("common.models"));
         exportModelGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         exportModelGroup.setMultiSelect(true);
         for (ModelName key : models) {
