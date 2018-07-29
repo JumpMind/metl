@@ -40,7 +40,7 @@ import com.vaadin.ui.themes.ValoTheme;
 @SuppressWarnings("serial")
 public class GeneralSettingsPanel extends Panel implements IUiPanel {
 
-    private static final String THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART = "This will take effect on the next server restart";
+    private static final String THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART ="generalSettingsPanel.restartMessage" ;
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
