@@ -45,15 +45,15 @@ public class Zip extends AbstractComponentRuntime {
 
     public static final String TYPE = "Zip";
 
-    public final static String SETTING_TARGET_RESOURCE = "target.resource";
+    public final static String SETTING_TARGET_RESOURCE = "zip.target.resource";
 
-    public final static String SETTING_SOURCE_RESOURCE = "source.resource";
+    public final static String SETTING_SOURCE_RESOURCE = "zip.source.resource";
 
     public final static String SETTING_TARGET_RELATIVE_PATH = "target.relative.path";
 
     public static final String SETTING_MUST_EXIST = "must.exist";
 
-    public final static String SETTING_DELETE_FILES_ON_COMPLETE = "delete.files.on.complete";
+    public final static String SETTING_DELETE_ON_COMPLETE = "zip.delete.on.complete";
 
     public final static String SETTING_ENCODING = "encoding";
 
@@ -80,7 +80,7 @@ public class Zip extends AbstractComponentRuntime {
         
         TypedProperties properties = getTypedProperties();
 
-        deleteOnComplete = properties.is(SETTING_DELETE_FILES_ON_COMPLETE, deleteOnComplete);
+        deleteOnComplete = properties.is(SETTING_DELETE_ON_COMPLETE, deleteOnComplete);
         encoding = properties.get(SETTING_ENCODING, encoding);
         fileNames = new ArrayList<String>();
 

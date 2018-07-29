@@ -50,9 +50,9 @@ import org.jumpmind.properties.TypedProperties;
 public class UnZip extends AbstractComponentRuntime {
     public static final String TYPE = "UnZip";
 
-    public final static String SETTING_TARGET_RESOURCE = "target.resource";
+    public final static String SETTING_TARGET_RESOURCE = "unzip.target.resource";
 
-    public final static String SETTING_SOURCE_RESOURCE = "source.resource";
+    public final static String SETTING_SOURCE_RESOURCE = "unzip.source.resource";
 
     public final static String SETTING_TARGET_SUB_DIR = "target.sub.dir";
 
@@ -60,7 +60,7 @@ public class UnZip extends AbstractComponentRuntime {
 
     public static final String SETTING_MUST_EXIST = "must.exist";
 
-    public final static String SETTING_DELETE_ON_COMPLETE = "delete.on.complete";
+    public final static String SETTING_DELETE_ON_COMPLETE = "unzip.delete.on.complete";
 
     public final static String SETTING_EXTRACT_EMPTY_FILES = "extract.empty.files";
 
