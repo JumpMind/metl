@@ -53,7 +53,7 @@
         <name>Must Exist</name>
         <defaultValue>false</defaultValue>
       </setting>
-      <setting id='delete.on.complete'
+      <setting id='delete.files.on.complete'
                required='false'
                type='boolean'>
         <name>Delete Source Files</name>
