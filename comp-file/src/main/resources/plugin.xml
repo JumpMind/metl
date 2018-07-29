@@ -58,7 +58,7 @@
                 <name>Sort Descending</name>
                 <defaultValue>false</defaultValue>
             </setting>
-            <setting id='rows.per.message' required='false' type='integer'>
+            <setting id='files.per.message' required='false' type='integer'>
                 <name>Files/Msg</name>
                 <defaultValue>1</defaultValue>
             </setting>
@@ -132,6 +132,7 @@
                     <choice>Delete</choice>
                 </choices>
             </setting>
+            <!-- TODO -->
             <setting id='relative.path' required='false' type='text'>
                 <name>Source Relative Path</name>
             </setting>
