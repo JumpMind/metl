@@ -45,7 +45,7 @@ public class FileUtil extends AbstractComponentRuntime {
 
     public final static String SETTING_ACTION = "action";
 
-    public final static String SETTING_RELATIVE_PATH = "relative.path";
+    public final static String SETTING_RELATIVE_PATH = "source.relative.path";
 
     public final static String SETTING_GET_FILE_FROM_MESSAGE = "get.file.name.from.message";
 
