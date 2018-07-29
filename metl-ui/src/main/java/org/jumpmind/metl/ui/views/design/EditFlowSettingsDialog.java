@@ -87,7 +87,7 @@ class EditFlowSettingsDialog extends ResizableWindow implements ValueChangeListe
         closeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
         closeButton.addClickListener(new CloseClickListener());
         
-        addHeader(MessageSource.message("editFlowSettingsDialog.generalSettings"));
+        addHeader(MessageSource.message("common.generalSettings"));
         
         FormLayout formLayout = new FormLayout();
         formLayout.setMargin(true);

@@ -129,7 +129,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
         ButtonBar buttonBar = new ButtonBar();
         buttonBar.addButton(MessageSource.message("callWebServicePanel.callService"), Icons.RUN, (e) -> runFlow());
         
-        viewExecutionLogButton = buttonBar.addButton(MessageSource.message("callWebServicePanel.viewLog"), Icons.LOG, (e) -> openExecution());
+        viewExecutionLogButton = buttonBar.addButton(MessageSource.message("common.viewLog"), Icons.LOG, (e) -> openExecution());
         viewExecutionLogButton.setEnabled(false);
 
         addComponent(buttonBar);

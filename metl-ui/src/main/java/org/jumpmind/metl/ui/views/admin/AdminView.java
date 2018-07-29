@@ -102,7 +102,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         addItem(MessageSource.message("adminView.groups"), Icons.GROUP);
         addItem(MessageSource.message("common.tags"), Icons.TAG);
         addItem(MessageSource.message("adminView.rest"), Icons.REST);
-        addItem(MessageSource.message("adminView.generalSettings"), Icons.SETTINGS);
+        addItem(MessageSource.message("common.generalSettings"), Icons.SETTINGS);
         addItem(MessageSource.message("adminView.pluginRepositories"), Icons.DATABASE);
         addItem(MessageSource.message("adminView.plugins"), Icons.COMPONENT);
         addItem(MessageSource.message("adminView.mailServer"), Icons.EMAIL);
@@ -153,7 +153,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
                     panel = new TagPanel(context, tabbedPanel);
                 } else if (id.equals(MessageSource.message("adminView.rest"))) {
                     panel = new ApiPanel(context, tabbedPanel);
-                } else if (id.equals(MessageSource.message("adminView.generalSettings"))) {
+                } else if (id.equals(MessageSource.message("common.generalSettings"))) {
                     panel = new GeneralSettingsPanel(context, tabbedPanel);
                 } else if (id.equals(MessageSource.message("adminView.mailServer"))) {
                     panel = new MailServerPanel(context, tabbedPanel);

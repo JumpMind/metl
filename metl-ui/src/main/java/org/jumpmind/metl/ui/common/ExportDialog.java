@@ -104,7 +104,7 @@ public class ExportDialog extends ResizableWindow {
 
         addComponent(splitPanel, 1);
         
-        Button selectAllLink = new Button(MessageSource.message("exportDialog.selectAll"));
+        Button selectAllLink = new Button(MessageSource.message("common.selectAll"));
         selectAllLink.addStyleName(ValoTheme.BUTTON_LINK);
         selectAllLink.addClickListener((event) -> selectAll());
 
@@ -274,7 +274,7 @@ public class ExportDialog extends ResizableWindow {
                     return new ByteArrayInputStream(export.getBytes(Charset.forName("utf-8")));
                 } catch (Exception e) {
                     log.error("Failed to export configuration", e);
-                    CommonUiUtils.notify(MessageSource.message("exportDialog.exportError"), Type.ERROR_MESSAGE);
+                    CommonUiUtils.notify(MessageSource.message("common.exportConfigFailed"), Type.ERROR_MESSAGE);
                     return null;
                 }
             }

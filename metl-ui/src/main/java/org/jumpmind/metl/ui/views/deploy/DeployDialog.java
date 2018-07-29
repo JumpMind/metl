@@ -83,7 +83,7 @@ public class DeployDialog extends ResizableWindow {
     ValidateFlowDeploymentPanel validateFlowDeploymentPanel;
 
     public DeployDialog(ApplicationContext context, EditAgentPanel parentPanel) {
-        super(MessageSource.message("common.deploy"));
+        super(MessageSource.message("menu.deploy"));
         this.context = context;
         this.configurationService = context.getConfigurationService();
         this.operationsService = context.getOperationsService();
@@ -117,7 +117,7 @@ public class DeployDialog extends ResizableWindow {
         layout.setExpandRatio(selectDeploymentLayout, 1);
   
         backButton = new Button(MessageSource.message("common.cancel"), e -> back());
-        actionButton = new Button(MessageSource.message("common.deploy"), e -> takeAction());
+        actionButton = new Button(MessageSource.message("menu.deploy"), e -> takeAction());
         actionButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
         actionButton.setClickShortcut(KeyCode.ENTER);
         addComponent(buildButtonFooter(backButton, actionButton));
@@ -197,7 +197,7 @@ public class DeployDialog extends ResizableWindow {
             }
             deployByOptionGroup.setVisible(false);
             backButton.setCaption(MessageSource.message("deployDialog.previous"));
-            actionButton.setCaption( MessageSource.message("common.deploy"));
+            actionButton.setCaption( MessageSource.message("menu.deploy"));
             selectDeploymentLayout.removeAllComponents();
             selectDeploymentLayout.addComponent(validateFlowDeploymentPanel);            
         } else {
