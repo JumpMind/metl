@@ -51,7 +51,7 @@ public class FileUtil extends AbstractComponentRuntime {
 
     public static final String SETTING_MUST_EXIST = "must.exist";
 
-    public static final String SETTING_TARGET_RELATIVE_PATH = "target.relative.path";
+    public static final String SETTING_TARGET_RELATIVE_PATH = "fileutil.target.relative.path";
 
     public static final String SETTING_APPEND_TO_NAME = "append.to.name";
     
