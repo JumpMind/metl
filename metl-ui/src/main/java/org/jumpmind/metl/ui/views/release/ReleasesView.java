@@ -137,7 +137,7 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
         HeaderCell cellVersionLabel = headerRow.getCell("versionLabel");
         cellVersionLabel.setText(MessageSource.message("releasesView.versionLabel"));
         HeaderCell cellReleaseDate = headerRow.getCell("releaseDate");
-        cellReleaseDate.setText(MessageSource.message("releasesView.releaseDate"));
+        cellReleaseDate.setText(MessageSource.message("common.releaseDate"));
         HeaderCell cellReleased = headerRow.getCell("released");
         cellReleased.setText(MessageSource.message("releasesView.released"));
         grid.sort("releaseDate", SortDirection.DESCENDING);
@@ -358,8 +358,8 @@ public class ReleasesView extends VerticalLayout implements View, IReleasePackag
                 try {
                     return new ByteArrayInputStream(export.getBytes(Charset.forName("utf-8")));
                 } catch (Exception e) {
-                    log.error(MessageSource.message("releasesView.failed"), e);
-                    CommonUiUtils.notify(MessageSource.message("releasesView.failed"), Type.ERROR_MESSAGE);
+                    log.error("Failed to export configuration", e);
+                    CommonUiUtils.notify(MessageSource.message("common.exportConfigFailed"), Type.ERROR_MESSAGE);
                     return null;
                 }
             }

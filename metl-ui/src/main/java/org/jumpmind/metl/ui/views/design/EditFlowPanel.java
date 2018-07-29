@@ -209,10 +209,10 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         settingsButton.addClickListener((event) -> new EditFlowSettingsDialog(context, flow, readOnly).showAtSize(.75));        
 
         if (!readOnly) {
-            Button selectAllButton = buttonBar.addButton(MessageSource.message("editFlowPanel.selectAll"), FontAwesome.CROSSHAIRS);
+            Button selectAllButton = buttonBar.addButton(MessageSource.message("common.selectAll"), FontAwesome.CROSSHAIRS);
             selectAllButton.addClickListener((event)->setSelectedAll());
 
-            copyButton = buttonBar.addButton(MessageSource.message("editFlowPanel.selectAll"), FontAwesome.COPY);
+            copyButton = buttonBar.addButton(MessageSource.message("common.selectAll"), FontAwesome.COPY);
             copyButton.addClickListener((event)->copySelected());
             copyButton.setEnabled(false);
 

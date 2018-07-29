@@ -127,10 +127,10 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
         ButtonBar buttonBar2 = new ButtonBar();
         addComponent(buttonBar2);
 
-            addEntityButton = buttonBar1.addButton(MessageSource.message("editRelationalModelPanel.addEntity"), FontAwesome.TABLE);
+            addEntityButton = buttonBar1.addButton(MessageSource.message("editModelPanel.addEntity"), FontAwesome.TABLE);
             addEntityButton.addClickListener(new AddEntityClickListener());
 
-            addAttributeButton = buttonBar1.addButton(MessageSource.message("editRelationalModelPanel.addAttr"), FontAwesome.COLUMNS);
+            addAttributeButton = buttonBar1.addButton(MessageSource.message("editModelPanel.addAttr"), FontAwesome.COLUMNS);
             addAttributeButton.addClickListener(new AddAttributeClickListener());
 
             editButton = buttonBar1.addButton(MessageSource.message("common.edit"), FontAwesome.EDIT);
@@ -193,7 +193,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                                 obj.setName(newName);
                                 EditRelationalModelPanel.this.context.getConfigurationService().save(obj);
                             } else {
-                                NotifyDialog.show(MessageSource.message("editRelationalModelPanel.nameUnique"), MessageSource.message("editRelationalModelPanel.nameUnique"), null, Type.WARNING_MESSAGE);
+                                NotifyDialog.show(MessageSource.message("editModelPanel.nameUnique"), MessageSource.message("editRelationalModelPanel.nameUnique"), null, Type.WARNING_MESSAGE);
                             }
                         };
                     };
@@ -343,7 +343,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
         HorizontalLayout hlayout = new HorizontalLayout();
         addComponent(hlayout);
 
-        Button collapseAll = new Button(MessageSource.message("editRelationalModelPanel.collapseAll"));
+        Button collapseAll = new Button(MessageSource.message("editModelPanel.collapseAll"));
         collapseAll.addStyleName(ValoTheme.BUTTON_LINK);
         collapseAll.addStyleName(ValoTheme.BUTTON_SMALL);
         hlayout.addComponent(collapseAll);
@@ -640,8 +640,8 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
             Set<Object> itemIds = new HashSet<Object>();
             Set<Object> selectedIds = getSelectedItems();
             
-            ConfirmDialog.show(MessageSource.message("editRelationalModelPanel.delete"),
-            		MessageSource.message("editRelationalModelPanel.deleteConfirm",new Object[] {selectedIds.size()}),
+            ConfirmDialog.show(MessageSource.message("editModelPanel.delete"),
+            		MessageSource.message("editModelPanel.deleteConfirm",new Object[] {selectedIds.size()}),
                     ()->{
                         for (Object itemId : selectedIds) {
                             Collection<Object> children = (Collection<Object>) treeTable

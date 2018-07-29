@@ -93,7 +93,7 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
         
         FormLayout formLayout = new FormLayout();
         formLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        DateField releaseDateField = new DateField(MessageSource.message("projectVersionSettingsPanel.releaseDate"));
+        DateField releaseDateField = new DateField(MessageSource.message("common.releaseDate"));
         releaseDateField.setValue(projectVersion.getReleaseDate());
         releaseDateField.setEnabled(false);        
         formLayout.addComponent(releaseDateField);

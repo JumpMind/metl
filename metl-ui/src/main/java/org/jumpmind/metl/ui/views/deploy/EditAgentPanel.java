@@ -180,7 +180,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        addDeploymentButton = buttonBar.addButton(MessageSource.message("common.deploy"), Icons.DEPLOYMENT);
+        addDeploymentButton = buttonBar.addButton(MessageSource.message("menu.deploy"), Icons.DEPLOYMENT);
         addDeploymentButton.addClickListener(e->new DeployDialog(context, this).show());
 
         editButton = buttonBar.addButton( MessageSource.message("common.edit"), FontAwesome.EDIT);

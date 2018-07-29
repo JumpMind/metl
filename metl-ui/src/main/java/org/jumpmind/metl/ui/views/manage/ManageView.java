@@ -114,7 +114,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     @SuppressWarnings("serial")
     @PostConstruct
     protected void init() {
-        viewButton = new Button(MessageSource.message("manageView.viewLog"));
+        viewButton = new Button(MessageSource.message("common.viewLog"));
         viewButton.setEnabled(false);
         viewButton.addClickListener(new ClickListener() {
             public void buttonClick(ClickEvent event) {

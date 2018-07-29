@@ -524,7 +524,7 @@ public class DeployNavigator extends VerticalLayout {
     }
  
     protected void importAgentData() {
-        ImportDialog.show(MessageSource.message("common.importConfig"), MessageSource.message("deployNavigator.uploadMessage"), new ImportConfigurationListener());
+        ImportDialog.show(MessageSource.message("common.importConfig"), MessageSource.message("common.click2uploadConfig"), new ImportConfigurationListener());
     }
     
     class ImportConfigurationListener implements IImportListener {
@@ -547,7 +547,7 @@ public class DeployNavigator extends VerticalLayout {
                     return new ByteArrayInputStream(export.getBytes());
                 } catch (Exception e) {             
                     log.error("Failed to export configuration.", e);
-                    CommonUiUtils.notify(MessageSource.message("deployNavigator.FailedConfiguration"), Type.ERROR_MESSAGE);
+                    CommonUiUtils.notify(MessageSource.message("common.exportConfigFailed"), Type.ERROR_MESSAGE);
                     return null;
                 }
 

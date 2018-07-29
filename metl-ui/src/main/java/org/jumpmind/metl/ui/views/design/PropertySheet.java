@@ -196,7 +196,7 @@ public class PropertySheet extends AbsoluteLayout {
         if (components.size() != 0 && !readOnly) {
             formLayout.addComponent(buildOptionGroup(MessageSource.message("common.enabled"), ENABLED, components));
             formLayout.addComponent(buildOptionGroup(MessageSource.message("propertySheet.logInput"), LOG_INPUT, components));
-            formLayout.addComponent(buildOptionGroup(MessageSource.message("propertySheet.logOutput"), LOG_OUTPUT, components));
+            formLayout.addComponent(buildOptionGroup(MessageSource.message("common.logOutput"), LOG_OUTPUT, components));
         }
     }
 
@@ -295,7 +295,7 @@ public class PropertySheet extends AbsoluteLayout {
 
     protected void addComponentName(FormLayout formLayout, final Component component) {
 
-        ImmediateUpdateTextField textField = new ImmediateUpdateTextField(MessageSource.message("propertySheet.componentName")) {
+        ImmediateUpdateTextField textField = new ImmediateUpdateTextField(MessageSource.message("common.componentName")) {
             private static final long serialVersionUID = 1L;
 
             protected void save(String text) {

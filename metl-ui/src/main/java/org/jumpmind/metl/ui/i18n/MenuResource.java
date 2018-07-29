@@ -39,7 +39,7 @@ public class MenuResource {
 				MessageSource.message("common.file"),
 				MessageSource.message("common.new"),
 				MessageSource.message("common.flow"),
-				MessageSource.message("common.design"),
+				MessageSource.message("menu.design"),
 		};	
 		return StringUtils.join(newProjectArray, "|");
 	}
@@ -86,7 +86,7 @@ public class MenuResource {
 				MessageSource.message("common.file"),
 				MessageSource.message("common.new"),
 				MessageSource.message("common.resource"),
-				MessageSource.message("common.directory"),
+				MessageSource.message("menu.directory"),
 				MessageSource.message("common.FTP"),
 		};	
 		return  StringUtils.join(newProjectArray, "|");
@@ -96,7 +96,7 @@ public class MenuResource {
 				MessageSource.message("common.file"),
 				MessageSource.message("common.new"),
 				MessageSource.message("common.resource"),
-				MessageSource.message("common.directory"),
+				MessageSource.message("menu.directory"),
 				MessageSource.message("common.fileSystem"),
 		};	
 		return  StringUtils.join(newProjectArray, "|");
@@ -106,7 +106,7 @@ public class MenuResource {
 				MessageSource.message("common.file"),
 				MessageSource.message("common.new"),
 				MessageSource.message("common.resource"),
-				MessageSource.message("common.directory"),
+				MessageSource.message("menu.directory"),
 				MessageSource.message("common.JMS"),
 		};	
 		return  StringUtils.join(newProjectArray, "|");
@@ -116,7 +116,7 @@ public class MenuResource {
 				MessageSource.message("common.file"),
 				MessageSource.message("common.new"),
 				MessageSource.message("common.resource"),
-				MessageSource.message("common.directory"),
+				MessageSource.message("menu.directory"),
 				MessageSource.message("common.SFTP"),
 		};	
 		return  StringUtils.join(newProjectArray, "|");
@@ -126,7 +126,7 @@ public class MenuResource {
 				MessageSource.message("common.file"),
 				MessageSource.message("common.new"),
 				MessageSource.message("common.resource"),
-				MessageSource.message("common.directory"),
+				MessageSource.message("menu.directory"),
 				MessageSource.message("common.SMB"),
 		};	
 		return  StringUtils.join(newProjectArray, "|");

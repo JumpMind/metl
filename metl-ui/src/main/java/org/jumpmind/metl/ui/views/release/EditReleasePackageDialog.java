@@ -118,7 +118,7 @@ public class EditReleasePackageDialog extends ResizableWindow {
         versionLabelField.setValue(releasePackage.getVersionLabel() != null ? releasePackage.getVersionLabel() : "");
         versionLabelField.setReadOnly(releasePackage.isReleased());
         form.addComponent(versionLabelField);
-        releaseDateField = new DateField(MessageSource.message("editReleasePackageDialog.releaseDate"));
+        releaseDateField = new DateField(MessageSource.message("common.releaseDate"));
         releaseDateField.setValue(releasePackage.getReleaseDate() != null ? releasePackage.getReleaseDate() : null);
         releaseDateField.setReadOnly(releasePackage.isReleased());
         form.addComponent(releaseDateField);

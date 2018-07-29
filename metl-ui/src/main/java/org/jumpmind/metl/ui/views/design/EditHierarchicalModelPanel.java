@@ -109,10 +109,10 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         ButtonBar buttonBar1 = new ButtonBar();
         addComponent(buttonBar1);
 
-        addEntityButton = buttonBar1.addButton(MessageSource.message("editHierarchicalModelPanel.addEntity"), FontAwesome.TABLE);
+        addEntityButton = buttonBar1.addButton(MessageSource.message("editModelPanel.addEntity"), FontAwesome.TABLE);
         addEntityButton.addClickListener(new AddEntityClickListener());
 
-        addAttributeButton = buttonBar1.addButton(MessageSource.message("editHierarchicalModelPanel.addAttr"), FontAwesome.COLUMNS);
+        addAttributeButton = buttonBar1.addButton(MessageSource.message("editModelPanel.addAttr"), FontAwesome.COLUMNS);
         addAttributeButton.addClickListener(new AddAttributeClickListener());
 
         editButton = buttonBar1.addButton(MessageSource.message("common.edit"), FontAwesome.EDIT);
@@ -159,7 +159,7 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
                                 obj.setName(newName);
                                 EditHierarchicalModelPanel.this.context.getConfigurationService().save(obj);
                             } else {
-                                NotifyDialog.show(MessageSource.message("editHierarchicalModelPanel.nameUnique"), MessageSource.message("editHierarchicalModelPanel.nameUnique"), null, Type.WARNING_MESSAGE);
+                                NotifyDialog.show(MessageSource.message("editModelPanel.nameUnique"), MessageSource.message("editHierarchicalModelPanel.nameUnique"), null, Type.WARNING_MESSAGE);
                             }
                         };
                     };
@@ -278,7 +278,7 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         HorizontalLayout hlayout = new HorizontalLayout();
         addComponent(hlayout);
 
-        Button collapseAll = new Button(MessageSource.message("editHierarchicalModelPanel.collapseAll"));
+        Button collapseAll = new Button(MessageSource.message("editModelPanel.collapseAll"));
         collapseAll.addStyleName(ValoTheme.BUTTON_LINK);
         collapseAll.addStyleName(ValoTheme.BUTTON_SMALL);
         hlayout.addComponent(collapseAll);
@@ -570,8 +570,8 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         public void buttonClick(ClickEvent event) {
 
             Set<Object> selectedItems = getSelectedItems();
-            ConfirmDialog.show(MessageSource.message("editHierarchicalModelPanel.delete"),
-            		MessageSource.message("editHierarchicalModelPanel.deleteConfirm", new Object[] {selectedItems.size()}),
+            ConfirmDialog.show(MessageSource.message("editModelPanel.delete"),
+            		MessageSource.message("editModelPanel.deleteConfirm", new Object[] {selectedItems.size()}),
                     ()->{
                     		deleteSelectedItems(selectedItems);
                     		return true;                    	

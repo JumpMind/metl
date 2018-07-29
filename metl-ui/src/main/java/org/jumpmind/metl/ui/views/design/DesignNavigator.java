@@ -694,7 +694,7 @@ public class DesignNavigator extends VerticalLayout {
 
     public void doImport() {
         ImportDialog.show(MessageSource.message("common.importConfig"), 
-        		MessageSource.message("designNavigator.clickButton"), new ImportConfigurationListener());
+        		MessageSource.message("common.click2uploadConfig"), new ImportConfigurationListener());
     }
 
     public void doNewProjectBranch() {
@@ -919,7 +919,7 @@ public class DesignNavigator extends VerticalLayout {
     }    
 
     public void addNewLocalFileSystem() {
-        addNewResource("Local File System", MessageSource.message("common.directory"), Icons.FILE_SYSTEM);
+        addNewResource("Local File System", MessageSource.message("menu.directory"), Icons.FILE_SYSTEM);
     }
 
     public void addNewSftpFileSystem() {

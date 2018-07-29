@@ -158,7 +158,7 @@ public class LoggingPanel extends VerticalLayout implements IUiPanel, IBackgroun
 
         addComponent(topPanelLayout);
        
-        logPanel = new Panel(MessageSource.message("loggingPanel.logOutput"));
+        logPanel = new Panel(MessageSource.message("common.logOutput"));
         logPanel.setSizeFull();
         logView = new Label("", ContentMode.HTML);
         logView.setSizeUndefined();
