@@ -56,7 +56,7 @@ public class Assert extends AbstractComponentRuntime {
     public static final String EXPECTED_CUSTOM_CONTROL_HEADER_PAIRS = "expected.custom.control.header.pairs";
     public static final String EXPECTED_TEXT_PAYLOAD = "expected.text.payload";
     public static final String EXPECTED_SQL_COUNT = "expected.sql.count";
-    public static final String ASSERT_SQL = "sql";
+    public static final String ASSERT_SQL = "sql.assert";
     public static final String ASSERT_SQL_DATASOURCE = "sql.datasource";
 
     int expectedEntityMessageCount = 0;

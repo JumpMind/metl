@@ -90,6 +90,8 @@ public class FilePoller extends AbstractComponentRuntime {
 
     public final static String SETTING_TRIGGER_FILE_PATH = "trigger.file.path";
     
+    public final static String FILES_PER_MESSAGE="files.per.message";
+    
     String runWhen = PER_UNIT_OF_WORK;
 
     String filePattern;
@@ -132,7 +134,7 @@ public class FilePoller extends AbstractComponentRuntime {
             throw new MisconfiguredException("A resource is required");
         }
         TypedProperties properties = getTypedProperties();
-        filesPerMessage = properties.getInt(ROWS_PER_MESSAGE);
+        filesPerMessage = properties.getInt(FILES_PER_MESSAGE);
         filePattern = FormatUtils.replaceTokens(properties.get(SETTING_FILE_PATTERN),
                 context.getFlowParameters(), true);
         triggerFilePath = FormatUtils.replaceTokens(properties.get(SETTING_TRIGGER_FILE_PATH),

@@ -45,15 +45,15 @@ public class Zip extends AbstractComponentRuntime {
 
     public static final String TYPE = "Zip";
 
-    public final static String SETTING_TARGET_RESOURCE = "target.resource";
+    public final static String SETTING_TARGET_RESOURCE = "zip.target.resource";
 
-    public final static String SETTING_SOURCE_RESOURCE = "source.resource";
+    public final static String SETTING_SOURCE_RESOURCE = "zip.source.resource";
 
     public final static String SETTING_TARGET_RELATIVE_PATH = "target.relative.path";
 
     public static final String SETTING_MUST_EXIST = "must.exist";
 
-    public final static String SETTING_DELETE_ON_COMPLETE = "delete.on.complete";
+    public final static String SETTING_DELETE_ON_COMPLETE = "zip.delete.on.complete";
 
     public final static String SETTING_ENCODING = "encoding";
 

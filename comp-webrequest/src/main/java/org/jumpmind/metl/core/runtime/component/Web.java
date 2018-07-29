@@ -69,7 +69,7 @@ public class Web extends AbstractComponentRuntime {
 
     public static final String DEFAULT_CHARSET = "UTF-8";
 
-    public static final String RELATIVE_PATH = "relative.path";
+    public static final String RELATIVE_URL = "relative.url";
 
     public static final String BODY_FROM = "body.from";
 
@@ -84,7 +84,7 @@ public class Web extends AbstractComponentRuntime {
     public static final String PARAMETER_REPLACEMENT = "parameter.replacement";
 
     public static final String SETTING_ENCODING = "encoding";
-
+    
     String runWhen;
 
     String relativePath;
@@ -126,7 +126,7 @@ public class Web extends AbstractComponentRuntime {
             throw new IllegalStateException("HTTP Method must be set in Web component or Http resource");
         }
         parameterReplacement = component.getBoolean(PARAMETER_REPLACEMENT, false);
-        relativePath = component.get(RELATIVE_PATH);
+        relativePath = component.get(RELATIVE_URL);
         httpClient = HttpClients.createDefault();
         encoding = properties.get(SETTING_ENCODING, encoding);
     }
@@ -357,7 +357,7 @@ public class Web extends AbstractComponentRuntime {
     private String assemblePath(String basePath, Message inputMessage) {
         Component component = getComponent();
         if (isNotBlank(relativePath)) {
-            String path = basePath + resolveParamsAndHeaders(component.get(RELATIVE_PATH), inputMessage);
+            String path = basePath + resolveParamsAndHeaders(component.get(RELATIVE_URL), inputMessage);
             int parmCount = 0;
             if (httpParameters != null) {
                 for (Map.Entry<String, String> entry : httpParameters.entrySet()) {

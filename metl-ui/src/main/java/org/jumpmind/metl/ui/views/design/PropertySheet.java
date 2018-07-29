@@ -88,6 +88,8 @@ public class PropertySheet extends AbsoluteLayout {
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
     protected static final String DUMMY_PASSWORD = "*****";
+    
+    protected static final String RESOURCE_PLUGINS = "plugins";
 
     ApplicationContext context;
 
@@ -428,6 +430,12 @@ public class PropertySheet extends AbsoluteLayout {
         }
     }
 
+    private String pluginNameMessage(XMLSetting definition) {
+    	return MessageSource.messageWithDefault(RESOURCE_PLUGINS, definition.getId()+".setting", definition.getName());
+    }
+    private String pluginDescMessage(XMLSetting definition) {
+    	return MessageSource.messageWithDefault(RESOURCE_PLUGINS, definition.getId()+".setting.desc", definition.getDescription());
+    }
     protected void addSettingField(final XMLSetting definition, final AbstractObjectWithSettings obj, FormLayout formLayout) {
         boolean required = definition.isRequired();
         if (definition.isVisible()) {
@@ -435,12 +443,13 @@ public class PropertySheet extends AbsoluteLayout {
             if (obj instanceof Component) {
                 component = (Component) obj;
             }
-            String description = definition.getDescription();
+            String pluginName = pluginNameMessage(definition);
+            String description = pluginDescMessage(definition);
             Type type = definition.getType();
             FlowStep step = null;
             switch (type) {
                 case BOOLEAN:
-                    final CheckBox checkBox = new CheckBox(definition.getName());
+                    final CheckBox checkBox = new CheckBox(pluginName);
                     checkBox.setImmediate(true);
                     boolean defaultValue = false;
                     if (isNotBlank(definition.getDefaultValue())) {
@@ -468,7 +477,7 @@ public class PropertySheet extends AbsoluteLayout {
                     formLayout.addComponent(checkBox);
                     break;
                 case CHOICE:
-                    final AbstractSelect choice = new ComboBox(definition.getName());
+                    final AbstractSelect choice = new ComboBox(pluginName);
                     choice.setImmediate(true);
                     List<String> choices = definition.getChoices() != null ? definition.getChoices().getChoice() : new ArrayList<String>(0);
                     for (String c : choices) {
@@ -491,7 +500,7 @@ public class PropertySheet extends AbsoluteLayout {
                     break;
                 case PASSWORD:
                     
-                    ImmediateUpdateTogglePasswordField passwordField = new ImmediateUpdateTogglePasswordField(definition.getName()) {
+                    ImmediateUpdateTogglePasswordField passwordField = new ImmediateUpdateTogglePasswordField(pluginName) {
                         protected void save(String text) {
                             if (!DUMMY_PASSWORD.equals(text)) {
                                 saveSetting(definition.getId(), text, obj);
@@ -517,7 +526,7 @@ public class PropertySheet extends AbsoluteLayout {
                     formLayout.addComponent(passwordField);
                     break;
                 case INTEGER:
-                    ImmediateUpdateTextField integerField = new ImmediateUpdateTextField(definition.getName()) {
+                    ImmediateUpdateTextField integerField = new ImmediateUpdateTextField(pluginName) {
                         private static final long serialVersionUID = 1L;
 
                         protected void save(String text) {
@@ -532,7 +541,7 @@ public class PropertySheet extends AbsoluteLayout {
                     formLayout.addComponent(integerField);
                     break;
                 case TEXT:
-                    ImmediateUpdateTextField textField = new ImmediateUpdateTextField(definition.getName()) {
+                    ImmediateUpdateTextField textField = new ImmediateUpdateTextField(pluginName) {
                         private static final long serialVersionUID = 1L;
 
                         protected void save(String text) {
@@ -549,7 +558,7 @@ public class PropertySheet extends AbsoluteLayout {
                     step = getSingleFlowStep();
                     if (step != null) {
                         Flow flow = context.getConfigurationService().findFlow(step.getFlowId());
-                        final AbstractSelect sourceStepsCombo = new ComboBox(definition.getName());
+                        final AbstractSelect sourceStepsCombo = new ComboBox(pluginName);
                         sourceStepsCombo.setImmediate(true);
 
                         List<FlowStepLink> sourceSteps = flow.findFlowStepLinksWithTarget(step.getId());
@@ -580,7 +589,7 @@ public class PropertySheet extends AbsoluteLayout {
                     if (step != null) {
                         String projectVersionId = step.getComponent().getProjectVersionId();
                         List<FlowName> flows = context.getConfigurationService().findFlowsInProject(projectVersionId, false);
-                        final AbstractSelect combo = new ComboBox(definition.getName());
+                        final AbstractSelect combo = new ComboBox(pluginName);
                         combo.setImmediate(true);
                         for (FlowName name : flows) {
                             if (!step.getFlowId().equals(name.getId())) {
@@ -626,7 +635,7 @@ public class PropertySheet extends AbsoluteLayout {
                         }
                         AbstractObjectNameBasedSorter.sort(entities);
 
-                        final AbstractSelect entityColumnCombo = new ComboBox(definition.getName());
+                        final AbstractSelect entityColumnCombo = new ComboBox(pluginName);
                         entityColumnCombo.setImmediate(true);
 
                         for (ModelEntity modelEntity : entities) {
@@ -661,7 +670,7 @@ public class PropertySheet extends AbsoluteLayout {
                     editor.setTextChangeTimeout(200);
                     editor.setMode(AceMode.java);
                     editor.setHeight(10, Unit.EM);
-                    editor.setCaption(definition.getName());
+                    editor.setCaption(pluginName);
                     editor.setShowGutter(false);
                     editor.setShowPrintMargin(false);
                     editor.setValue(obj.get(definition.getId(), definition.getDefaultValue()));
@@ -678,7 +687,7 @@ public class PropertySheet extends AbsoluteLayout {
                     break;
                 case MULTILINE_TEXT:
                 case XML:
-                    ImmediateUpdateTextArea area = new ImmediateUpdateTextArea(definition.getName()) {
+                    ImmediateUpdateTextArea area = new ImmediateUpdateTextArea(pluginName) {
                         private static final long serialVersionUID = 1L;
 
                         protected void save(String text) {
@@ -704,9 +713,9 @@ public class PropertySheet extends AbsoluteLayout {
         IConfigurationService configurationService = context.getConfigurationService();
         FlowStep step = getSingleFlowStep();
         String projectVersionId = step.getComponent().getProjectVersionId();
-        final AbstractSelect combo = new ComboBox(definition.getName());
+        final AbstractSelect combo = new ComboBox(pluginNameMessage(definition));
         combo.setImmediate(true);
-        combo.setDescription(definition.getDescription());
+        combo.setDescription(pluginDescMessage(definition));
         combo.setNullSelectionAllowed(false);
         combo.setRequired(definition.isRequired());
         Set<XMLResourceDefinition> types = context.getDefinitionFactory()
