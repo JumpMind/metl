@@ -193,7 +193,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                                 obj.setName(newName);
                                 EditRelationalModelPanel.this.context.getConfigurationService().save(obj);
                             } else {
-                                NotifyDialog.show(MessageSource.message("editModelPanel.nameUnique"), MessageSource.message("editRelationalModelPanel.nameUnique"), null, Type.WARNING_MESSAGE);
+                                NotifyDialog.show(MessageSource.message("editModelPanel.nameUnique"), MessageSource.message("editModelPanel.nameUnique"), null, Type.WARNING_MESSAGE);
                             }
                         };
                     };
