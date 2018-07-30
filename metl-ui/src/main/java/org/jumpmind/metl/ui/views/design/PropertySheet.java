@@ -431,10 +431,10 @@ public class PropertySheet extends AbsoluteLayout {
     }
 
     private String pluginNameMessage(XMLSetting definition) {
-    	return MessageSource.messageWithDefault(RESOURCE_PLUGINS, definition.getId()+".setting", definition.getName());
+    	return MessageSource.messageWithDefault(RESOURCE_PLUGINS, definition.getId(), definition.getName());
     }
     private String pluginDescMessage(XMLSetting definition) {
-    	return MessageSource.messageWithDefault(RESOURCE_PLUGINS, definition.getId()+".setting.desc", definition.getDescription());
+    	return MessageSource.messageWithDefault(RESOURCE_PLUGINS, definition.getId()+".desc", definition.getDescription());
     }
     protected void addSettingField(final XMLSetting definition, final AbstractObjectWithSettings obj, FormLayout formLayout) {
         boolean required = definition.isRequired();
