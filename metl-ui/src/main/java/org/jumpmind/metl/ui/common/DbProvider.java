@@ -38,6 +38,7 @@ import org.jumpmind.metl.core.plugin.XMLResourceDefinition;
 import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.sqlexplorer.IDb;
 import org.jumpmind.vaadin.ui.sqlexplorer.IDbProvider;
 import org.slf4j.Logger;
@@ -136,7 +137,7 @@ public class DbProvider implements IDbProvider, Serializable {
 
         @Override
         public String getName() {
-            return "Metl DB - Exec";
+            return MessageSource.message("dbProvider.metlDBExec");
         }
 
     }
@@ -151,7 +152,7 @@ public class DbProvider implements IDbProvider, Serializable {
 
         @Override
         public String getName() {
-            return "Metl DB - Config";
+        	return MessageSource.message("dbProvider.metlDBConfig");
         }
 
     }
