@@ -145,7 +145,7 @@ public class MenuResource {
 				MessageSource.message("common.file"),
 				MessageSource.message("common.new"),
 				MessageSource.message("common.resource"),
-				MessageSource.message("common.mailSesssion"),
+				MessageSource.message("common.mailSession"),
 		};	
 		return  StringUtils.join(newProjectArray, "|");
 	}
