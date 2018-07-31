@@ -113,8 +113,8 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         table.setEditable(true);
         table.setSelectable(true);
         table.setTableFieldFactory(new EditFieldFactory());
-        table.setVisibleColumns(MessageSource.message("common.name").toLowerCase(), MessageSource.message("common.value").toLowerCase());
-        table.setColumnHeaders(MessageSource.message("common.parameter.name"), MessageSource.message("common.value"));
+        table.setVisibleColumns("name", "value");
+        table.setColumnHeaders(MessageSource.message("common.parameterName"), MessageSource.message("common.value"));
 
         container.addAll(agentDeployment.getAgentDeploymentParms());
 

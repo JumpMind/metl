@@ -58,7 +58,7 @@ class EditAgentParametersDialog extends ResizableWindow implements ValueChangeLi
     Button removeButton;
 
     public EditAgentParametersDialog(final ApplicationContext context, final Agent agent) {
-        super(MessageSource.message("ditAgentParametersDialog.agentParameters"));
+        super(MessageSource.message("editAgentParametersDialog.agentParameters"));
         this.context = context;
         this.agent = agent;
 
@@ -80,8 +80,8 @@ class EditAgentParametersDialog extends ResizableWindow implements ValueChangeLi
         table.setEditable(true);
         table.setSelectable(true);
         table.setTableFieldFactory(new EditFieldFactory());
-        table.setVisibleColumns(MessageSource.message("common.name").toLowerCase(), "value");
-        table.setColumnHeaders(MessageSource.message("common.name"), "Value");
+        table.setVisibleColumns("name", "value");
+        table.setColumnHeaders(MessageSource.message("common.name"), MessageSource.message("common.value"));
         table.addValueChangeListener(this);
         addComponent(table, 1);
 
