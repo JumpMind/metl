@@ -39,7 +39,7 @@ public abstract class ImmediateUpdateTogglePasswordField extends CustomField<Str
     private static final long serialVersionUID = 1L;
     
     private static final String BUTTON_SHOW = "togglePasswordField.show";
-    private static final String BUTTON_HIDE = "common.hide";
+    private static final String BUTTON_HIDE = "common.hidden";
     
     private final Button button = new Button(MessageSource.message(BUTTON_SHOW));
     private final PasswordField passwordField = new PasswordField();
