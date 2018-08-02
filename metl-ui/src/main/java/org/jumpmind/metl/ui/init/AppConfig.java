@@ -548,4 +548,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         return new UIScope();
     }
 
+    public Environment getEnv() {
+        return this.env;
+    }
 }
