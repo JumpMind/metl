@@ -17,9 +17,9 @@ import com.vaadin.ui.VerticalLayout;
 public abstract class AbstractAdminPanel extends VerticalLayout implements AdminSideView, IUiPanel {
    
     @Autowired
-    ApplicationContext context;
+    protected ApplicationContext context;
  
-    AdminView adminView;
+    protected AdminView adminView;
     
     protected abstract void refresh();
     
