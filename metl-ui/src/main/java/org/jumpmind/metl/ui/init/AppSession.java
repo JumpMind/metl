@@ -71,6 +71,19 @@ public class AppSession implements Serializable {
         this.userAgent = userAgent;
     }
     
+    public boolean equals(Object o) {
+        if (o != null && o instanceof AppSession) {
+            AppSession appSession = (AppSession) o;
+            if (vaadinSession.getSession() == null || appSession.getVaadinSession().getSession() == null) {
+                return user.getLoginId().equals(appSession.user.getLoginId())
+                        && remoteAddress.equals(appSession.remoteAddress) && loginTime.equals(appSession.loginTime);
+            } else {
+                return vaadinSession.getSession().getId().equals(((AppSession) o).vaadinSession.getSession().getId());
+            }
+        }
+        return false;
+    }
+    
     public void setUser(User user) {
         this.user = user;
     }
@@ -115,4 +128,7 @@ public class AppSession implements Serializable {
         return userAgent;
     }
 
+    public VaadinSession getVaadinSession() {
+        return vaadinSession;
+    }
 }
