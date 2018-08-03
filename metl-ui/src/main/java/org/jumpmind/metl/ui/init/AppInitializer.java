@@ -117,7 +117,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         apidocs.addMapping("/api.html", "/ws-api.html", "/doc/*", "/ace/*");
         
         Class appServletClazz = AppServlet.class;
-        String appServletString = System.getProperty("metl.app.servlet");
+        String appServletString = System.getProperty(AppConstants.METL_APP_SERVLET);
         try {
             if (appServletString != null) {
                 appServletClazz = Class.forName(appServletString);
