@@ -25,7 +25,21 @@ import java.util.Date
     sourceCompatibility=1.8
     targetCompatibility=1.8
     
-    if (project.name.startsWith('comp') || project.name.startsWith('resource')) {
+    if (project.name.startsWith('comp-cdc-')) {
+    		apply plugin: 'maven-publish'
+        publishing {
+            publications {
+                mavenJava(MavenPublication) {
+                    from components.java
+                }
+            }
+            repositories {
+                maven {
+                		url "../../metl-war/build/plugins"
+                }
+            }
+        }
+    } else if (project.name.startsWith('comp') || project.name.startsWith('resource')) {
         apply plugin: 'maven-publish'
         publishing {
             publications {
@@ -35,7 +49,7 @@ import java.util.Date
             }
             repositories {
                 maven {
-                    url "../metl-war/build/plugins"
+                		url "../metl-war/build/plugins"
                 }
             }
         }
