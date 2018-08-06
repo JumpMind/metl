@@ -307,6 +307,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
             try {
                 System.out.println(
                         "Could not find the " + configFile.getAbsolutePath() + " configuration file.  A default version will be written.");
+                configFile.getParentFile().mkdirs();
                 String propContent = IOUtils.toString(getClass().getResourceAsStream("/" + configFile.getName()));
                 propContent = FormatUtils.replaceToken(propContent, "configDir", configDir, true);
                 properties = new TypedProperties(new ByteArrayInputStream(propContent.getBytes()));
