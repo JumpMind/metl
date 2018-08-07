@@ -275,13 +275,18 @@ public class AppUI extends UI {
             operationsService.save(userGroup);
         }
         appCtx.setUser(user);
-        login(user);        
+        login(user);
+        initMenu();
     }
 
     protected void login(User user) {        
         appSession.setUser(user);
         AppSession.addAppSession(appSession);
+    }
+    
+    protected void initMenu() {
         WebApplicationContext ctx = getWebApplicationContext();
+        User user = appSession.getUser();
 
         VerticalLayout root = new VerticalLayout();
         root.setSizeFull();
