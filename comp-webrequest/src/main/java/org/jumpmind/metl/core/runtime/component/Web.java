@@ -308,7 +308,7 @@ public class Web extends AbstractComponentRuntime {
                 request.setHeader(key, headers.get(key));
             }
         }
-        if (isNotBlank(httpDirectory.getContentType())) {
+        if (headers.get("Content-Type") == null && isNotBlank(httpDirectory.getContentType())) {
             request.setHeader("Content-Type", httpDirectory.getContentType());
         }
         RequestConfig.Builder requestConfig = RequestConfig.custom();
