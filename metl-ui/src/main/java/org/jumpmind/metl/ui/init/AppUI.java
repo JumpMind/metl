@@ -48,7 +48,6 @@ import org.jumpmind.metl.ui.common.ViewManager;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -82,14 +81,13 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 @Theme("apptheme")
 @Title("Metl")
 @PreserveOnRefresh
 @Push(value = PushMode.AUTOMATIC)
-public class AppUI extends UI implements ILoginListener {
+public class AppUI extends UI {
 
     private static final long serialVersionUID = 1L;
 
@@ -100,8 +98,6 @@ public class AppUI extends UI implements ILoginListener {
     BackgroundRefresherService backgroundRefresherService;
 
     AppSession appSession;
-    
-    ILoginDialog loginDialog;
 
     @SuppressWarnings("serial")
     @Override
@@ -115,11 +111,6 @@ public class AppUI extends UI implements ILoginListener {
 
         backgroundRefresherService = ctx.getBean(BackgroundRefresherService.class);
         backgroundRefresherService.init(this);
-        try {
-            loginDialog = ctx.getBean(ILoginDialog.class);
-            loginDialog.setLoginListener(this);
-        } catch (NoSuchBeanDefinitionException e) {
-        }
 
         setErrorHandler(new DefaultErrorHandler() {
             public void error(com.vaadin.server.ErrorEvent event) {
@@ -202,35 +193,7 @@ public class AppUI extends UI implements ILoginListener {
         });
 
         Responsive.makeResponsive(this);
-        ApplicationContext appCtx = ctx.getBean(ApplicationContext.class);
-        IOperationsService operationsService = appCtx.getOperationsService();
-        if (operationsService.isUserLoginEnabled() && loginDialog != null) {
-            UI.getCurrent().addWindow((Window) loginDialog);
-        } else {
-            User user = operationsService.findUserByLoginId(DEFAULT_USER);
-            if (user == null) {
-                user = new User();
-                user.setLoginId(DEFAULT_USER);
-                operationsService.save(user);
-
-                Group group = operationsService.findGroupByName(DEFAULT_GROUP);
-                if (group == null) {
-                    group = new Group(DEFAULT_GROUP);
-                    user.getGroups().add(group);
-                    operationsService.save(group);
-                    for (Privilege priv : Privilege.values()) {
-                        GroupPrivilege groupPriv = new GroupPrivilege(group.getId(), priv.name());
-                        group.getGroupPrivileges().add(groupPriv);
-                        operationsService.save(groupPriv);
-                    }
-                }
-
-                UserGroup userGroup = new UserGroup(user.getId(), group.getId());
-                operationsService.save(userGroup);
-            }
-            appCtx.setUser(user);
-            login(user);
-        }
+        afterInit();
     }
 
     public static WebApplicationContext getWebApplicationContext() {
@@ -286,9 +249,36 @@ public class AppUI extends UI implements ILoginListener {
         }
     }
 
-    @Override
-    public void login(User user) {
-        
+    protected void afterInit() {
+        WebApplicationContext ctx = getWebApplicationContext();
+        ApplicationContext appCtx = ctx.getBean(ApplicationContext.class);
+        IOperationsService operationsService = appCtx.getOperationsService();
+        User user = operationsService.findUserByLoginId(DEFAULT_USER);
+        if (user == null) {
+            user = new User();
+            user.setLoginId(DEFAULT_USER);
+            operationsService.save(user);
+
+            Group group = operationsService.findGroupByName(DEFAULT_GROUP);
+            if (group == null) {
+                group = new Group(DEFAULT_GROUP);
+                user.getGroups().add(group);
+                operationsService.save(group);
+                for (Privilege priv : Privilege.values()) {
+                    GroupPrivilege groupPriv = new GroupPrivilege(group.getId(), priv.name());
+                    group.getGroupPrivileges().add(groupPriv);
+                    operationsService.save(groupPriv);
+                }
+            }
+
+            UserGroup userGroup = new UserGroup(user.getId(), group.getId());
+            operationsService.save(userGroup);
+        }
+        appCtx.setUser(user);
+        login(user);        
+    }
+
+    protected void login(User user) {        
         appSession.setUser(user);
         AppSession.addAppSession(appSession);
         WebApplicationContext ctx = getWebApplicationContext();
@@ -306,10 +296,9 @@ public class AppUI extends UI implements ILoginListener {
         appCtx.getConfigurationService().save(new AuditEvent(EventType.LOGIN, "Logged in", user.getLoginId()));
         user.setLastLoginTime(new Date());
         appCtx.getOperationsService().save(user);
-        viewManager = getViewManager();
-        viewManager.init(this, contentArea);
+        getViewManager().init(this, contentArea);
 
-        TopBar menu = new TopBar(viewManager, appCtx);
+        TopBar menu = new TopBar(getViewManager(), appCtx);
 
         HorizontalLayout bottom = new HorizontalLayout();
         bottom.addStyleName(ValoTheme.LAYOUT_WELL);
