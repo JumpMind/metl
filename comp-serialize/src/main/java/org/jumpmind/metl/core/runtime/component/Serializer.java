@@ -36,6 +36,7 @@ import org.jumpmind.metl.core.model.EntityTable;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
@@ -54,45 +55,46 @@ public class Serializer extends AbstractSerializer {
 
     List<EntityData> payload;
 
+    String runWhen = PER_UNIT_OF_WORK;
+
     @Override
     public void start() {
         super.start();
         validate();
         payload = new ArrayList<>();
+        runWhen = getComponent().get(RUN_WHEN, PER_UNIT_OF_WORK);
     }
 
-	protected void validate() {
-		if (getComponent().getInputModel() == null) {
-			throw new MisconfiguredException("Input model must be specified");
-		}
-	}
-    
+    protected void validate() {
+        if (getComponent().getInputModel() == null) {
+            throw new MisconfiguredException("Input model must be specified");
+        }
+    }
+
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback,
-            boolean unitOfWorkBoundaryReached) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         try {
             if (inputMessage instanceof EntityDataMessage) {
                 EntityDataMessage entityMessage = (EntityDataMessage) inputMessage;
                 payload.addAll(entityMessage.getPayload());
             }
 
-            if (unitOfWorkBoundaryReached) {
-                Map<String,Serializable> header = new HashMap<>(inputMessage.getHeader());
+            if ((PER_UNIT_OF_WORK.equals(runWhen) && unitOfWorkBoundaryReached)
+                    || (PER_MESSAGE.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
+                Map<String, Serializable> header = new HashMap<>(inputMessage.getHeader());
                 header.put(FORMAT, getDetectedFormat());
-                ObjectMapper mapper = getObjectMapper();                
-            	
+                ObjectMapper mapper = getObjectMapper();
+
                 if (getInputModel().getType().equalsIgnoreCase(Model.TYPE_RELATIONAL)) {
                     ArrayList<?> response = null;
-	                if (STRUCTURE_BY_TABLE.equals(structure)) {
-	                    response = createByTablePayload(payload);
-	                } else {
-	                    response = createByInboundRowPayload(payload);
-	                }
-	                callback.sendTextMessage(header,
-	                        mapper.writeValueAsString(response));
+                    if (STRUCTURE_BY_TABLE.equals(structure)) {
+                        response = createByTablePayload(payload);
+                    } else {
+                        response = createByInboundRowPayload(payload);
+                    }
+                    callback.sendTextMessage(header, mapper.writeValueAsString(response));
                 } else {
-	                callback.sendTextMessage(header,
-	                         createHierarchicalPayload(mapper));
+                    callback.sendTextMessage(header, createHierarchicalPayload(mapper));
                 }
                 payload = new ArrayList<>();
             }
@@ -105,54 +107,56 @@ public class Serializer extends AbstractSerializer {
     }
 
     private String createHierarchicalPayload(ObjectMapper mapper) throws JsonProcessingException {
-    		Iterator<EntityData> itr = payload.iterator();
-    		Object root;
-    		String rootName=null;
-    		if (payload.size() > 1) {
-    			root = mapper.createArrayNode();
-    			ArrayNode arrayRoot = (ArrayNode)root;
-    			while (itr.hasNext()) {
-    				EntityData entity = itr.next();
-    				ObjectNode node = mapper.createObjectNode();
-    				processHierarchicalEntity(mapper, node, entity, true);
-    				arrayRoot.add(node);    				
-    			}
-    		} else {
-    			root = mapper.createObjectNode();
-    			ObjectNode objRoot = (ObjectNode)root;
-    			if (itr.hasNext()) {
-    				rootName = processHierarchicalEntity(mapper, objRoot, itr.next(), true);
-    			}
-    		}
-    		ObjectWriter writer = mapper.writer();
-    		if (mapper instanceof XmlMapper) {
-        		return writer.withRootName(rootName).writeValueAsString(root);
-    		} else {
-    			return mapper.writeValueAsString(root);
-    		}
+        Iterator<EntityData> itr = payload.iterator();
+        Object root;
+        String rootName = null;
+        if (payload.size() > 1) {
+            root = mapper.createArrayNode();
+            ArrayNode arrayRoot = (ArrayNode) root;
+            while (itr.hasNext()) {
+                EntityData entity = itr.next();
+                ObjectNode node = mapper.createObjectNode();
+                processHierarchicalEntity(null, mapper, node, entity, true);
+                arrayRoot.add(node);
+            }
+        } else {
+            root = mapper.createObjectNode();
+            ObjectNode objRoot = (ObjectNode) root;
+            if (itr.hasNext()) {
+                rootName = processHierarchicalEntity(null, mapper, objRoot, itr.next(), true);
+            }
+        }
+        ObjectWriter writer = mapper.writer();
+        if (mapper instanceof XmlMapper) {
+            return writer.withRootName(rootName).writeValueAsString(root);
+        } else {
+            return mapper.writeValueAsString(root);
+        }
     }
-    
+
     @SuppressWarnings("unchecked")
-	private String processHierarchicalEntity(ObjectMapper mapper, ObjectNode parentNode, EntityData entity, boolean isRoot) {
-    		ObjectNode childNode=null;
-    		String entityDesc=null;
-    		for (Map.Entry<String, Object> entry : entity.entrySet()) {
-    			if (childNode == null) {
-        			entityDesc = getInputModel().getEntityById(getInputModel().getAttributeById(entry.getKey()).getEntityId()).getName();    				
-	    			if (isRoot) {
-	    				//childNode = parentNode.putObject(entityDesc);
-	    				childNode = parentNode;
-	    			} else {
-	    				childNode = mapper.createObjectNode();
-	    			}
-    			}
-    			if (entry.getValue() instanceof EntityData) {
-    				processHierarchicalEntity(mapper, childNode, (EntityData)entry.getValue(), false);
-    			} else if (entry.getValue() instanceof ArrayList) {
-    				childNode.set(getInputModel().getAttributeById(entry.getKey()).getName(), 
-    						processHierarchicalEntityArray(mapper, parentNode, (List<EntityData>)entry.getValue()));
-    			}
-    			else {
+    private String processHierarchicalEntity(String name, ObjectMapper mapper, ObjectNode parentNode, EntityData entity, boolean isRoot) {
+        ObjectNode childNode = null;
+        String entityDesc = null;
+        for (Map.Entry<String, Object> entry : entity.entrySet()) {
+            if (childNode == null) {
+                entityDesc = name == null ? getInputModel().getEntityById(getInputModel().getAttributeById(entry.getKey()).getEntityId()).getName() : name;
+                if (entry.getValue() instanceof EntityData) {
+                    entityDesc = getInputModel().getAttributeById(entry.getKey()).getName();
+                }
+                if (isRoot) {
+                    // childNode = parentNode.putObject(entityDesc);
+                    childNode = parentNode;
+                } else {
+                    childNode = mapper.createObjectNode();
+                }
+            }
+            if (entry.getValue() instanceof EntityData) {
+                processHierarchicalEntity(getInputModel().getAttributeById(entry.getKey()).getName(), mapper, childNode, (EntityData) entry.getValue(), false);
+            } else if (entry.getValue() instanceof ArrayList) {
+                childNode.set(getInputModel().getAttributeById(entry.getKey()).getName(),
+                        processHierarchicalEntityArray(mapper, parentNode, (List<EntityData>) entry.getValue()));
+            } else {
                 String stringValue = null;
                 Object value = entry.getValue();
                 if (value instanceof Date) {
@@ -160,26 +164,26 @@ public class Serializer extends AbstractSerializer {
                 }
                 if (value != null) {
                     stringValue = value.toString();
-                }    				
-	    			childNode.put(getInputModel().getAttributeById(entry.getKey()).getName(), stringValue);
-    			}
- 		}
-    		if (!isRoot) {
-    			parentNode.set(entityDesc, childNode);
-    		}
-    		return entityDesc;
+                }
+                childNode.put(getInputModel().getAttributeById(entry.getKey()).getName(), stringValue);
+            }
+        }
+        if (!isRoot) {
+            parentNode.set(entityDesc, childNode);
+        }
+        return entityDesc;
     }
-    
+
     private ArrayNode processHierarchicalEntityArray(ObjectMapper mapper, ObjectNode parentNode, List<EntityData> entityDatas) {
-    		ArrayNode arrayNode = mapper.createArrayNode();
-    		for (EntityData entityData : entityDatas) {
-    			ObjectNode node = mapper.createObjectNode();
-    			processHierarchicalEntity(mapper, node, entityData, true);
-    			arrayNode.add(node);
-    		}    		
-    		return arrayNode;
+        ArrayNode arrayNode = mapper.createArrayNode();
+        for (EntityData entityData : entityDatas) {
+            ObjectNode node = mapper.createObjectNode();
+            processHierarchicalEntity(null, mapper, node, entityData, true);
+            arrayNode.add(node);
+        }
+        return arrayNode;
     }
-    
+
     private ArrayList<EntityRow> createByInboundRowPayload(List<EntityData> payload) {
         ArrayList<EntityRow> entityResponse = new ArrayList<>();
         if (payload != null) {
@@ -190,8 +194,7 @@ public class Serializer extends AbstractSerializer {
                     for (ModelAttrib attribute : entity.getModelAttributes()) {
                         if (entityData.containsKey(attribute.getId())) {
                             if (row == null) {
-                                row = new EntityRow(entity.getName(),
-                                        new HashMap<>(entity.getModelAttributes().size()));
+                                row = new EntityRow(entity.getName(), new HashMap<>(entity.getModelAttributes().size()));
                                 entityResponse.add(row);
                             }
                             String stringValue = null;
@@ -223,8 +226,7 @@ public class Serializer extends AbstractSerializer {
                 while (itr.hasNext()) {
                     String attributeId = itr.next();
                     if (firstAttribute) {
-                        entity = inputModel.getEntityById(
-                                inputModel.getAttributeById(attributeId).getEntityId());
+                        entity = inputModel.getEntityById(inputModel.getAttributeById(attributeId).getEntityId());
                         if (!entityTables.containsKey(entity.getName())) {
                             entityTables.put(entity.getName(), new EntityTable(entity.getName()));
                         }
@@ -244,6 +246,6 @@ public class Serializer extends AbstractSerializer {
                 entityTables.get(entity.getName()).getRows().add(row);
             }
         }
-        return new ArrayList<>(entityTables.values());        
+        return new ArrayList<>(entityTables.values());
     }
 }
