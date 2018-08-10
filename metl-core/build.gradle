@@ -37,6 +37,7 @@ dependencies {
     compile "com.h2database:h2:$h2Version"
     compile "jdbc.postgresql:postgresql:$postgresqlVersion"
     compile "mysql:mysql-connector-java:$mysqlVersion"
+    compile "com.hynnet:oracle-driver-ojdbc:12.1.0.2"
     compile "net.sourceforge.jtds:jtds:$jtdsVersion"
     compile "net.sf.jt400:jt400:$jt400Version"
     compile "org.apache.httpcomponents:httpclient:$httpComponentsVersion"
