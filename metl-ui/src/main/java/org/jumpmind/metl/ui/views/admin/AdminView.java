@@ -20,17 +20,21 @@
  */
 package org.jumpmind.metl.ui.views.admin;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
+
 import org.jumpmind.metl.ui.common.UIConstants;
-import org.jumpmind.metl.ui.i18n.MenuResource;
-import org.jumpmind.metl.ui.i18n.MenuResource;
 import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.TopBarLink;
+import org.jumpmind.metl.ui.init.AppUI;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,10 +67,15 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
     @Autowired
     ApplicationContext context;
 
+    @Autowired 
+    List<AdminSideView> sideMenu;
+    
     TabbedPanel tabbedPanel;
     
     TreeTable table;
 
+    Map<String, Component> sideMenuById = new HashMap<String, Component>();
+    
     @PostConstruct
     protected void init() {
         setSizeFull();
@@ -113,6 +122,14 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         addItem(MessageSource.message("adminView.logging"), Icons.LOGGING);
         addItem(MessageSource.message("adminView.about"), FontAwesome.QUESTION);
         
+        for (AdminSideView sideView : sideMenu) {
+            AdminMenuLink link = (AdminMenuLink) sideView.getClass().getAnnotation(AdminMenuLink.class);
+            sideView.setAdminView(this);
+                if (link != null && link.uiClass().equals(AppUI.class) && sideView.isAccessible()) {
+                    addItem(link.id(), link.icon());
+                    sideMenuById.put(link.id(), sideView.getView());
+                }
+        }
         VerticalLayout navigator = new VerticalLayout();
         navigator.addStyleName(ValoTheme.MENU_ROOT);
         navigator.setSizeFull();
@@ -150,28 +167,26 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
                 } else if (id.equals(MessageSource.message("adminView.groups"))) {
                     panel = new GroupPanel(context, tabbedPanel);
                 } else if (id.equals(MessageSource.message("common.tags"))) {
-                    panel = new TagPanel(context, tabbedPanel);
+                    panel = new TagPanel();
                 } else if (id.equals(MessageSource.message("adminView.rest"))) {
-                    panel = new ApiPanel(context, tabbedPanel);
+                    panel = new ApiPanel();
                 } else if (id.equals(MessageSource.message("common.generalSettings"))) {
-                    panel = new GeneralSettingsPanel(context, tabbedPanel);
+                    panel = new GeneralSettingsPanel();
                 } else if (id.equals(MessageSource.message("adminView.mailServer"))) {
-                    panel = new MailServerPanel(context, tabbedPanel);
+                    panel = new MailServerPanel();
                 } else if (id.equals(MessageSource.message("adminView.ldap"))) {
                     panel = new LdapPanel(context, tabbedPanel);
                 } else if (id.equals(MessageSource.message("adminView.notifications"))) {
                     panel = new NotificationPanel(context, tabbedPanel);
                 } else if (id.equals(MessageSource.message("adminView.logging"))) {
-                    panel = new LoggingPanel(context, tabbedPanel);
+                    panel = new LoggingPanel();
                 } else if (id.equals(MessageSource.message("adminView.pluginRepositories") )) {
-                    panel = new PluginRepositoriesPanel(context, tabbedPanel);                    
+                    panel = new PluginRepositoriesPanel();                    
                 } else if (id.equals(MessageSource.message("adminView.about"))) {
-                    panel = new AboutPanel(context, tabbedPanel);
+                    panel = new AboutPanel();
                 } else if (id.equals(MessageSource.message("adminView.plugins"))) {
-                    panel = new PluginsPanel(context, tabbedPanel);
-                } else if (id.equals(MessageSource.message("adminView.activeUsers"))) {
-                    panel = new ActiveUsersPanel(context, tabbedPanel);
-                } else if (id.equals(MessageSource.message("adminView.auditEvents"))) {
+                    panel = new PluginsPanel();
+                }  else if (id.equals(MessageSource.message("adminView.auditEvents"))) {
                     panel = new AuditEventPanel(context, tabbedPanel);
                 }
                 tabbedPanel.addCloseableTab(id, id, table.getItemIcon(id), panel);
@@ -195,4 +210,18 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
     @Override
     public void selected() {        
     }
+
+    protected ApplicationContext getContext() {
+        return context;
+    }
+
+    public TabbedPanel getTabbedPanel() {
+        return tabbedPanel;
+    }
+
+    protected TreeTable getTable() {
+        return table;
+    }
+
+
 }

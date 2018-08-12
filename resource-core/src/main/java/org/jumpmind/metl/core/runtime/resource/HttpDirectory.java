@@ -45,7 +45,7 @@ import com.sun.jersey.oauth.signature.OAuthRequest;
 import com.sun.jersey.oauth.signature.OAuthSecrets;
 import com.sun.jersey.oauth.signature.OAuthSignature;
 
-public class HttpDirectory implements IDirectory {
+public class HttpDirectory implements IHttpDirectory {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -436,5 +436,18 @@ public class HttpDirectory implements IDirectory {
         public void addHeaderValue(String name, String value) throws IllegalStateException {
             conn.addRequestProperty(name, value);
         }
+    }
+    
+    public boolean test() {
+        try {
+            HttpURLConnection httpConnection = buildHttpUrlConnection(null, null, null);
+            httpConnection.connect();
+            if (HttpURLConnection.HTTP_OK == httpConnection.getResponseCode()) {
+                return true;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to connect to HTTP resource", e);
+        }
+        return false;
     }
 }

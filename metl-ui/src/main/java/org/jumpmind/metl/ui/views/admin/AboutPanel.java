@@ -20,27 +20,32 @@
  */
 package org.jumpmind.metl.ui.views.admin;
 
-
 import java.util.Date;
 import org.jumpmind.metl.ui.i18n.MessageSource;
+import javax.annotation.PostConstruct;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.jumpmind.metl.core.runtime.AgentManager;
 import org.jumpmind.metl.core.util.VersionUtils;
-import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
-import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.Table;
 import org.jumpmind.util.AppUtils;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
-import org.jumpmind.vaadin.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.core.annotation.Order;
 
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class AboutPanel extends VerticalLayout implements IUiPanel, IBackgroundRefreshable<Object> {
+@UiComponent
+@Scope(value = "ui")
+@Order(1400)
+@AdminMenuLink(name = "About", id = "About", icon = FontAwesome.QUESTION)
+public class AboutPanel extends AbstractAdminPanel implements IBackgroundRefreshable<Object> {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -48,11 +53,7 @@ public class AboutPanel extends VerticalLayout implements IUiPanel, IBackgroundR
 
     Table table;
 
-    ApplicationContext context;
-
-    public AboutPanel(ApplicationContext context, TabbedPanel tabbedPanel) {
-        this.context = context;
-
+    public AboutPanel() {
         setSizeFull();
         setMargin(true);
         setSpacing(true);
@@ -72,9 +73,15 @@ public class AboutPanel extends VerticalLayout implements IUiPanel, IBackgroundR
         table.addContainerProperty(MessageSource.message("common.value"), String.class, null);
         addComponent(table);
         setExpandRatio(table, 1);
-        refresh();
+    }
+    
+    @PostConstruct
+    @Override
+    public void init() {
+        super.init();
         context.getBackgroundRefresherService().register(this);
     }
+    
 
     @Override
     public boolean closing() {
@@ -133,6 +140,10 @@ public class AboutPanel extends VerticalLayout implements IUiPanel, IBackgroundR
        
         table.addItem(new Object[] {MessageSource.message("aboutPanel.lastRestart"),
                 CommonUiUtils.formatDateTime(AgentManager.lastRestartTime) }, itemId++);
+    }
+
+    @Override
+    public void enter(ViewChangeEvent event) {
     }
 
 }

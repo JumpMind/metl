@@ -26,17 +26,15 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.net.util.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
@@ -48,6 +46,7 @@ import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -61,6 +60,7 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.HttpDirectory;
+import org.jumpmind.metl.core.runtime.resource.IHttpDirectory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 
 public class Web extends AbstractComponentRuntime {
@@ -69,7 +69,7 @@ public class Web extends AbstractComponentRuntime {
 
     public static final String DEFAULT_CHARSET = "UTF-8";
 
-    public static final String RELATIVE_URL = "relative.url";
+    public static final String RELATIVE_PATH = "relative.path";
 
     public static final String BODY_FROM = "body.from";
 
@@ -84,7 +84,7 @@ public class Web extends AbstractComponentRuntime {
     public static final String PARAMETER_REPLACEMENT = "parameter.replacement";
 
     public static final String SETTING_ENCODING = "encoding";
-    
+
     String runWhen;
 
     String relativePath;
@@ -105,7 +105,7 @@ public class Web extends AbstractComponentRuntime {
 
     String encoding = "UTF-8";
 
-    HttpDirectory httpDirectory;
+    IHttpDirectory httpDirectory;
 
     @Override
     public void start() {
@@ -113,7 +113,7 @@ public class Web extends AbstractComponentRuntime {
         if (httpResource == null) {
             throw new IllegalStateException("An HTTP resource must be configured");
         }
-        httpDirectory = getResourceReference();
+        httpDirectory = (IHttpDirectory) getResourceReference();
         Component component = getComponent();
         bodyFrom = component.get(BODY_FROM, "Message");
         bodyText = component.get(BODY_TEXT);
@@ -126,7 +126,7 @@ public class Web extends AbstractComponentRuntime {
             throw new IllegalStateException("HTTP Method must be set in Web component or Http resource");
         }
         parameterReplacement = component.getBoolean(PARAMETER_REPLACEMENT, false);
-        relativePath = component.get(RELATIVE_URL);
+        relativePath = component.get(RELATIVE_PATH);
         httpClient = HttpClients.createDefault();
         encoding = properties.get(SETTING_ENCODING, encoding);
     }
@@ -169,11 +169,11 @@ public class Web extends AbstractComponentRuntime {
         info("sending content to %s", path);                
         getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
         byte[] requestContent = ((BinaryMessage) inputMessage).getPayload();
-        HttpRequestBase httpRequest = buildHttpRequest(path, httpHeaders, httpDirectory, requestContent.length > 0);        
+        HttpRequestBase httpRequest = buildHttpRequest(path, httpHeaders, httpParameters, httpDirectory, requestContent.length > 0);        
         HttpEntityEnclosingRequestBase encHttpRequest = (HttpEntityEnclosingRequestBase) httpRequest;
         ByteArrayEntity requestEntity = new ByteArrayEntity(requestContent);
         encHttpRequest.setEntity(requestEntity);
-        executeRequestAndSendOutputMessage(encHttpRequest, callback);
+        executeRequestAndSendOutputMessage(encHttpRequest, callback, inputMessage);
     }
 
     private void handleTextInput(String path, Message inputMessage, ISendMessageCallback callback) {
@@ -184,29 +184,25 @@ public class Web extends AbstractComponentRuntime {
                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                 requestContent = replaceParameters(inputMessage, requestContent);
                 boolean hasContent = isNotBlank(requestContent);
-                HttpRequestBase httpRequest = buildHttpRequest(path, httpHeaders, httpDirectory, hasContent);
+                HttpRequestBase httpRequest = buildHttpRequest(path, httpHeaders, httpParameters, httpDirectory, hasContent);
                 if (isNotBlank(requestContent)) {
                     info("sending content to %s", path);
                     HttpEntityEnclosingRequestBase encHttpRequest = (HttpEntityEnclosingRequestBase) httpRequest;
                     StringEntity requestEntity;
-                    try {
-                        requestEntity = new StringEntity(requestContent);
-                    } catch (UnsupportedEncodingException ex) {
-                        log.error(String.format("Unable to encode content for web request %s", ex.getMessage()));
-                        throw new IoException(ex);
-                    }
+                    requestEntity = new StringEntity(requestContent, DEFAULT_CHARSET);
                     encHttpRequest.setEntity(requestEntity);
-                    executeRequestAndSendOutputMessage(encHttpRequest, callback);
+                    executeRequestAndSendOutputMessage(encHttpRequest, callback, inputMessage);
                 } else {
                     info("getting content from %s", path);
-                    executeRequestAndSendOutputMessage(httpRequest, callback);
+                    executeRequestAndSendOutputMessage(httpRequest, callback, inputMessage);
                 }
             }
         }
     }
     
-    private void executeRequestAndSendOutputMessage(HttpRequestBase httpRequest, ISendMessageCallback callback) {
+    private void executeRequestAndSendOutputMessage(HttpRequestBase httpRequest, ISendMessageCallback callback, Message inputMessage) {
         Map<String, Serializable> outputMessageHeaders = new HashMap<String, Serializable>();
+        
         ArrayList<String> outputPayload = new ArrayList<String>();
         CloseableHttpResponse httpResponse = null;
         try {
@@ -215,10 +211,12 @@ public class Web extends AbstractComponentRuntime {
             if (responseCode / 100 != 2) {
                 throw new IoException(
                         String.format("Error calling http method.  HTTP Status %d, HTTP Status Description %s, HTTP Result %s", responseCode,
-                                httpResponse.getStatusLine().getReasonPhrase(), IOUtils.toString(httpResponse.getEntity().getContent())));
+                                httpResponse.getStatusLine().getReasonPhrase(), 
+                                IOUtils.toString(httpResponse.getEntity().getContent())).replace("%", "%%"));
             } else {
                 HttpEntity resultEntity = httpResponse.getEntity();
                 outputPayload.add(IOUtils.toString(resultEntity.getContent()));
+                outputMessageHeaders.putAll(inputMessage.getHeader());
                 outputMessageHeaders.putAll(responseHeadersToMap(httpResponse.getAllHeaders()));
                 EntityUtils.consume(resultEntity);
             }
@@ -276,7 +274,7 @@ public class Web extends AbstractComponentRuntime {
         return requestContent;
     }
 
-    protected HttpRequestBase buildHttpRequest(String path, Map<String, String> headers, HttpDirectory httpDirectory,
+    protected HttpRequestBase buildHttpRequest(String path, Map<String, String> headers, Map<String,String> parameters, IHttpDirectory httpDirectory,
             boolean hasRequestContent) {
         HttpRequestBase request = null;
         if (httpMethod.equalsIgnoreCase(HttpDirectory.HTTP_METHOD_GET)) {
@@ -295,8 +293,14 @@ public class Web extends AbstractComponentRuntime {
             request = new HttpDelete();
         }
         try {
-            request.setURI(new URL(path).toURI());
-        } catch (MalformedURLException | URISyntaxException ex) {
+            URIBuilder builder = new URIBuilder(path);
+            if (parameters != null) {
+                for (String key : parameters.keySet()) {
+                    builder.setParameter(key, parameters.get(key));
+                }
+            }
+            request.setURI(builder.build());
+        } catch (URISyntaxException ex) {
             throw new IoException(ex);
         }
         if (headers != null) {
@@ -304,7 +308,7 @@ public class Web extends AbstractComponentRuntime {
                 request.setHeader(key, headers.get(key));
             }
         }
-        if (isNotBlank(httpDirectory.getContentType())) {
+        if (headers.get("Content-Type") == null && isNotBlank(httpDirectory.getContentType())) {
             request.setHeader("Content-Type", httpDirectory.getContentType());
         }
         RequestConfig.Builder requestConfig = RequestConfig.custom();
@@ -341,11 +345,11 @@ public class Web extends AbstractComponentRuntime {
         return parsedMap;
     }
 
-    protected void setAuthIfNeeded(HttpRequestBase request, HttpDirectory httpDirectory) {
+    protected void setAuthIfNeeded(HttpRequestBase request, IHttpDirectory httpDirectory) {
         if (HttpDirectory.SECURITY_BASIC.equals(httpDirectory.getSecurity())) {
             String userpassword = String.format("%s:%s", httpDirectory.getUsername(), httpDirectory.getPassword());
             String encodedAuthorization = new String(Base64.encodeBase64(userpassword.getBytes()));
-            request.setHeader("Authorization", "Baisc " + encodedAuthorization);
+            request.setHeader("Authorization", "Basic " + encodedAuthorization);
         } else if (HttpDirectory.SECURITY_TOKEN.equals(httpDirectory.getSecurity())) {
             request.setHeader("Authorization", "Bearer " + httpDirectory.getToken());
         } else if (HttpDirectory.SECURITY_OAUTH_10.equals(httpDirectory.getSecurity())) {
@@ -357,7 +361,7 @@ public class Web extends AbstractComponentRuntime {
     private String assemblePath(String basePath, Message inputMessage) {
         Component component = getComponent();
         if (isNotBlank(relativePath)) {
-            String path = basePath + resolveParamsAndHeaders(component.get(RELATIVE_URL), inputMessage);
+            String path = resolveParamsAndHeaders(basePath + component.get(RELATIVE_PATH), inputMessage);
             int parmCount = 0;
             if (httpParameters != null) {
                 for (Map.Entry<String, String> entry : httpParameters.entrySet()) {
@@ -377,7 +381,7 @@ public class Web extends AbstractComponentRuntime {
             }
             return path;
         } else {
-            return basePath;
+            return resolveParamsAndHeaders(basePath, inputMessage);
         }
     }
 

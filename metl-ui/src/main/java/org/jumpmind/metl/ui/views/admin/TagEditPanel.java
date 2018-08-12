@@ -57,7 +57,6 @@ public class TagEditPanel extends VerticalLayout implements IUiPanel {
 
     Set<String> lastGroups;
 
-    @SuppressWarnings("deprecation")
     public TagEditPanel(ApplicationContext context, Tag tag) {
         this.context = context;
         this.tag = tag;

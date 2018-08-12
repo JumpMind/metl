@@ -65,6 +65,7 @@ public class BinaryFileReader extends AbstractFileReader {
 
         for (String file : files) {
             Map<String, Serializable> headers = new HashMap<>(1);
+            headers.putAll(inputMessage.getHeader());
             headers.put("source.file.path", file);
             InputStream inStream = null;
             try {

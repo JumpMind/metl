@@ -321,44 +321,21 @@ public class OperationsService extends AbstractService implements IOperationsSer
     
     @Override
     public List<Notification> findNotifications() {
-        return persistenceManager.find(Notification.class, null, null, null,
-                tableName(Notification.class));
+        return null;
     }
 
     @Override
     public List<Notification> findNotificationsForAgent(String agentId) {
-        Map<String, Object> param = new HashMap<String, Object>();
-        param.put("notificationLevel", Notification.NotificationLevel.AGENT.toString());
-        param.put("linkId", agentId);
-        param.put("enabled", 1);
-        List<Notification> agentNotifications = persistenceManager.find(Notification.class, param,
-                null, null, tableName(Notification.class));
-
-        param = new HashMap<String, Object>();
-        param.put("notificationLevel", Notification.NotificationLevel.GLOBAL.toString());
-        param.put("enabled", 1);
-        List<Notification> notifications = persistenceManager.find(Notification.class, param, null,
-                null, tableName(Notification.class));
-        notifications.addAll(agentNotifications);
-        return notifications;
+        return null;
     }
 
     @Override
     public List<Notification> findNotificationsForDeployment(AgentDeploy deployment) {
-        List<Notification> notifications = findNotificationsForAgent(deployment.getAgentId());
-        Map<String, Object> param = new HashMap<String, Object>();
-        param.put("notificationLevel", Notification.NotificationLevel.DEPLOYMENT.toString());
-        param.put("linkId", deployment.getId());
-        param.put("enabled", 1);
-        List<Notification> agentNotifications = persistenceManager.find(Notification.class, param,
-                null, null, tableName(Notification.class));
-        notifications.addAll(agentNotifications);
-        return notifications;
+        return null;
     }
 
     @Override
     public void refresh(Notification notification) {
-        refresh((AbstractObject) notification);
     }
 
     @SuppressWarnings("unchecked")

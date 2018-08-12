@@ -55,10 +55,8 @@ import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.ProjectVersion;
-import org.jumpmind.metl.core.model.ReleasePackage;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
-import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.security.SecurityConstants;
 import org.jumpmind.metl.core.util.MessageException;
@@ -76,28 +74,21 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class ImportExportService extends AbstractService implements IImportExportService {
     
-    final static Integer TABLE = new Integer(0);
-    final static Integer SQL = new Integer(1);
-    final static Integer KEY_COLUMNS = new Integer(2);
+    final static protected Integer TABLE = new Integer(0);
+    final static protected Integer SQL = new Integer(1);
+    final static protected Integer KEY_COLUMNS = new Integer(2);
     
     final static Integer PROJECT_IDX = new Integer(0);
     final static Integer PROJECT_VERSION_IDX = new Integer(1);
     final static Integer MODEL_IDX = new Integer(0);
     final static Integer RESOURCE_IDX = new Integer(0);
     final static Integer FLOW_IDX = new Integer(4);
-    final static Integer RELEASE_PACKAGE_IDX = new Integer(0);
     final static Integer AGENT_IDX = new Integer(0);
     
     final static Integer CREATE_TIME_IDX = new Integer(0);
     final static Integer LAST_UPDATE_TIME_IDX = new Integer(1);
     final static Integer CREATE_BY_IDX = new Integer(2);
     final static Integer LAST_UPDATE_BY_IDX = new Integer(3);
-
-    final String[][] RELEASE_PACKAGE_SQL = {
-            {"_release_package","select * from %1$s_release_package where id='%2$s' order by id", "id"},
-            {"_rppv","select * from %1$s_rppv where " +
-                    "release_package_id='%2$s' order by release_package_id", "release_package_id,project_version_id"}
-    };
 
     final String[][] PROJECT_SQL = {
             {"_project","select * from %1$s_project where id in (select project_id from %1$s_project_version where id='%2$s') union select * from %1$s_project where id='%3$s' order by 1","id"},
@@ -112,7 +103,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
     };
     
     final String[][] MODEL_SQL = {
-            {"_model","select * from %1$s_model where (project_version_id = '%2$s' or project_version_id in (select target_project_version_id from %1$s_project_version_depends where project_version_id='%2$s')) and id='%3$s' order by id","id"},
+            {"_model","select * from %1$s_model where project_version_id='%2$s' and id='%3$s' order by id","id"},
             {"_model_entity","select * from %1$s_model_entity where model_id='%3$s' order by id","id"},
             {"_model_attrib","select * from %1$s_model_attrib where entity_id in "
             + "(select id from %1$s_model_entity where model_id in "
@@ -120,7 +111,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
     };
     
     final String[][] RESOURCE_SQL = {
-            {"_resource","select * from %1$s_resource where (project_version_id = '%2$s' or project_version_id in (select target_project_version_id from %1$s_project_version_depends where project_version_id='%2$s')) and id='%3$s' order by id","id"},
+            {"_resource","select * from %1$s_resource where project_version_id = '%2$s' and id='%3$s' order by id","id"},
             {"_resource_setting","select * from %1$s_resource_setting where resource_id='%3$s' order by resource_id, name","resource_id,name"}
     };
     
@@ -156,14 +147,14 @@ public class ImportExportService extends AbstractService implements IImportExpor
             {"_agent_parameter", "select * from %1$s_agent_parameter where agent_id='%2$s' order by id","id"},
     };
     
-    private IDatabasePlatform databasePlatform;
-    private IConfigurationService configurationService;
-    private IOperationsService operationsService;
-    private String tablePrefix;
-    private String[] columnsToExclude;
-    private Set<String> importsToAudit = new HashSet<>();
-    private Set<String> projectsExported = new HashSet<>();
-    private List<IConfigurationChangedListener> configurationChangedListeners = Collections.synchronizedList(new ArrayList<>());
+    protected IDatabasePlatform databasePlatform;
+    protected IConfigurationService configurationService;
+    protected IOperationsService operationsService;
+    protected String tablePrefix;
+    protected String[] columnsToExclude;
+    protected Set<String> importsToAudit = new HashSet<>();
+    protected Set<String> projectsExported = new HashSet<>();
+    protected List<IConfigurationChangedListener> configurationChangedListeners = Collections.synchronizedList(new ArrayList<>());
 
     public ImportExportService(IDatabasePlatform databasePlatform,
             IPersistenceManager persistenceManager, String tablePrefix,
@@ -221,34 +212,6 @@ public class ImportExportService extends AbstractService implements IImportExpor
         return exportFlows(projectVersionId, flowIds, modelIds, resourceIds, userId);
     }
 
-    @Override
-    public String exportReleasePackage(String releasePackageId, String userId) {        
-        projectsExported.clear();
-        ConfigData exportData = initExport();
-        initConfigData(exportData.getReleasePackageData(), RELEASE_PACKAGE_SQL);
-        ReleasePackage releasePackage = configurationService.findReleasePackage(releasePackageId);
-        
-        List<Rppv> versions = new ReleasePackageProjectVersionSorter(configurationService).sort(releasePackage);
-        for (Rppv releasePackageProjectVersion : versions) {
-            String projectVersionId = releasePackageProjectVersion.getProjectVersionId();
-            initProjectVersionExport(exportData, projectVersionId);            
-            Set<String> flowIds = new HashSet<String>();
-            Set<String> modelIds = new HashSet<String>();
-            Set<String> resourceIds = new HashSet<String>();               
-            flowIds.addAll(convertAbstractNamesToIds(configurationService.findFlowsInProject(projectVersionId, false)));
-            modelIds.addAll(convertAbstractNamesToIds(configurationService.findModelsInProject(projectVersionId)));
-            resourceIds.addAll(convertAbstractNamesToIds(configurationService.findResourcesInProject(projectVersionId)));   
-            addProjectVersionToConfigData(projectVersionId, exportData, flowIds, modelIds, resourceIds);
-            
-            save(new AuditEvent(AuditEvent.EventType.EXPORT, String.format("%s, flows: %d, models %d, resources: %d", 
-                    releasePackage.getName(), flowIds.size(), modelIds.size(), resourceIds.size()), userId));
-        }
-        
-        addConfigData(exportData.getReleasePackageData(), RELEASE_PACKAGE_SQL, releasePackageId, releasePackageId);
-
-        return serializeExportToJson(exportData);
-    }
-
     protected Set<String> convertAbstractNamesToIds(List<? extends AbstractObject> objectNames) {
         Set<String> ids = new HashSet<String>();
         for (AbstractObject objectName : objectNames) {
@@ -285,7 +248,6 @@ public class ImportExportService extends AbstractService implements IImportExpor
         save(new AuditEvent(AuditEvent.EventType.EXPORT, String.format("%s, flows: %d, models %d, resources: %d", 
                 version.getName(), flowIds.size(), modelIds.size(), resourceIds.size()), userId));
         ConfigData exportData = initExport();
-        initConfigData(exportData.getReleasePackageData(), RELEASE_PACKAGE_SQL);
         initProjectVersionExport(exportData, projectVersionId);
         addProjectVersionToConfigData(projectVersionId, exportData, new HashSet<String>(flowIds), new HashSet<String>(modelIds), new HashSet<String>(resourceIds));
         
@@ -300,6 +262,9 @@ public class ImportExportService extends AbstractService implements IImportExpor
         return exportData;        
     }
     
+    protected void initExtraConfigData(ConfigData exportData) {
+    }
+
     protected void initProjectVersionExport(ConfigData exportData, String projectVersionId) {
         ProjectVersionData projectVersionData = new ProjectVersionData();
         projectVersionData.setProjectVersionId(projectVersionId);
@@ -323,8 +288,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         }
     }
 
-    private void convertConfigDataTablesColumnsToLowerCase(ConfigData configData) {
-        convertTableDataToLowerCase(configData.getReleasePackageData());
+    protected void convertConfigDataTablesColumnsToLowerCase(ConfigData configData) {
         for (ProjectVersionData projectVersionData : configData.getProjectVersionData()) {
             convertTableDataToLowerCase(projectVersionData.getProjectData());
             convertTableDataToLowerCase(projectVersionData.getResourceData());
@@ -334,7 +298,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         convertTableDataToLowerCase(configData.getAgentData());
     }
     
-    private void convertTableDataToLowerCase(List<TableData> tableDatas) {
+    protected void convertTableDataToLowerCase(List<TableData> tableDatas) {
         for (TableData tableData : tableDatas) {
             tableData.setTableName(tableData.getTableName().toLowerCase());
             Map<String, LinkedCaseInsensitiveMap<Object>> newRows = new HashMap<String, LinkedCaseInsensitiveMap<Object>>();
@@ -349,7 +313,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         }
     }
     
-    private String serializeExportToJson(ConfigData exportData) {
+    protected String serializeExportToJson(ConfigData exportData) {
         ObjectMapper mapper = new ObjectMapper();        
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
@@ -365,7 +329,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         return outData;
     }
 
-    private void addConfigData(List<TableData> tableData, String[][] sqlElements,
+    protected void addConfigData(List<TableData> tableData, String[][] sqlElements,
             String projectVersionId, String keyValue) {
         
         // Get existing ProjectVersion
@@ -468,9 +432,9 @@ public class ImportExportService extends AbstractService implements IImportExpor
                 // Delete all local records once the project version has been loaded.
                 processDeletes(importData, transaction);                
             }
-            if (importData.getReleasePackageData().size() != 0) {
-                importReleasePackageConfiguration(importData, transaction, userId);
-            }
+
+            importExtraConfiguration(importData, transaction, userId);
+
             if (importData.getAgentData().size() != 0) {
                 importAgentConfiguration(importData, transaction, userId);
             }
@@ -514,32 +478,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_model"), transaction);
     }
 
-    private void importReleasePackageConfiguration(ImportConfigData importData,
-            ISqlTransaction transaction, String userId) {
-
-        List<TableData> existingReleasePackageData = new ArrayList<TableData>();
-        initConfigData(existingReleasePackageData, RELEASE_PACKAGE_SQL);        
-        
-        Iterator<String> itr = importData.getReleasePackageData().get(RELEASE_PACKAGE_IDX)
-                .getTableData().keySet().iterator();
-        while (itr.hasNext()) {
-            String key = itr.next();
-            LinkedCaseInsensitiveMap<Object> row = importData.getReleasePackageData().get(RELEASE_PACKAGE_IDX).getTableData().get(key);
-            addConfigData(existingReleasePackageData, RELEASE_PACKAGE_SQL, (String) row.get(RELEASE_PACKAGE_SQL[RELEASE_PACKAGE_IDX][KEY_COLUMNS]),
-                    (String) row.get(RELEASE_PACKAGE_SQL[RELEASE_PACKAGE_IDX][KEY_COLUMNS]));
-        }
-        
-        for (int i = 0; i <= RELEASE_PACKAGE_SQL.length - 1; i++) {
-            if (importData.releasePackageData.size() > i) {
-                TableData importReleasePackageData = importData.releasePackageData.get(i);
-                try {
-                    processConfigTableData(importData, existingReleasePackageData.get(i), importReleasePackageData,
-                            RELEASE_PACKAGE_SQL[i][KEY_COLUMNS], transaction, userId);
-                } catch (RuntimeException e) {
-                    throw e;
-                }
-            }
-        }   
+    protected void importExtraConfiguration(ImportConfigData importData, ISqlTransaction transaction, String userId) {        
     }
 
     private void importAgentConfiguration(ImportConfigData importData,
@@ -680,7 +619,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         return isNotBlank(name) && name.contains("password");
     }
     
-    private void processConfigTableData(ImportConfigData configData, TableData existingData,
+    protected void processConfigTableData(ImportConfigData configData, TableData existingData,
             TableData importData, String primaryKeyColumns, ISqlTransaction transaction, String userId) {        
         if (importsToAudit.contains(importData.getTableName().toUpperCase())) {
             for (LinkedCaseInsensitiveMap<Object> row : importData.getTableData().values()) {
@@ -735,7 +674,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
                 row.put("last_update_time", createTime);
                 useDefaultsForMissingRequiredColumns(table, row);                       
                 Object[] values = stmt.getValueArray(row);
-                databasePlatform.getSqlTemplate().update(stmt.getSql(), values, types);                    
+                transaction.prepareAndExecute(stmt.getSql(), values, types);
             }
     }
 
@@ -960,7 +899,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         return pkDataAsString.toString();
     }
 
-    private void initConfigData(List<TableData> tableData, String[][] sqlElements) {
+    protected void initConfigData(List<TableData> tableData, String[][] sqlElements) {
         for (int i = 0; i <= sqlElements.length - 1; i++) {
             tableData.add(new TableData(tablePrefix + sqlElements[i][0]));
         }
@@ -1009,7 +948,12 @@ public class ImportExportService extends AbstractService implements IImportExpor
         return export.exportTables(new String[] { String.format("%s_%s", tablePrefix, table) });
     }
 
-    static class TableData {
+    @Override
+    public String exportReleasePackage(String releasePackageId, String userId) {
+        return null;
+    }
+
+    protected static class TableData {
 
         String tableName;
         Map<String, LinkedCaseInsensitiveMap<Object>> rows = new HashMap<String, LinkedCaseInsensitiveMap<Object>>();
@@ -1038,7 +982,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         }
     }
 
-    static class ConfigData {
+    protected static class ConfigData {
 
         String versionNumber;
         String hostName;
@@ -1205,7 +1149,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         }        
     }    
     
-    static class ImportConfigData extends ConfigData {
+    protected static class ImportConfigData extends ConfigData {
 
         public ImportConfigData(ConfigData configData) {
             this.hostName = configData.getHostName();
@@ -1217,4 +1161,5 @@ public class ImportExportService extends AbstractService implements IImportExpor
         }
         Map<String, TableData> deletesToProcess;
     }
+
 }

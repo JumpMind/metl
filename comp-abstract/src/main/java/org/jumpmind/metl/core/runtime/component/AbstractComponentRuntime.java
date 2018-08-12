@@ -198,7 +198,9 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
         Map<String,String> parms = new HashMap<>(getComponentContext().getFlowParameters());
         parms.putAll(inputMessage.getHeader().getAsStrings());
         parms.put("_sequence", Long.toString(paramFlowSequence++));
-        parms.putAll(context.getFlowVariables());
+        if (context.getFlowVariables() != null) {
+            parms.putAll(context.getFlowVariables());
+        }
         return FormatUtils.replaceTokens(text, parms, true);
     }
     

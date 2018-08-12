@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -44,10 +45,15 @@ import org.jumpmind.db.sql.ISqlRowMapper;
 import org.jumpmind.db.sql.ISqlTemplate;
 import org.jumpmind.db.sql.Row;
 import org.jumpmind.db.sql.mapper.StringMapper;
+import org.jumpmind.metl.core.model.Agent;
+import org.jumpmind.metl.core.model.AgentProjectVersionFlowDeployment;
 import org.jumpmind.metl.core.model.Execution;
 import org.jumpmind.metl.core.model.ExecutionStatus;
 import org.jumpmind.metl.core.model.ExecutionStep;
 import org.jumpmind.metl.core.model.ExecutionStepLog;
+import org.jumpmind.metl.core.runtime.ExecutionTrackerLogger;
+import org.jumpmind.metl.core.runtime.ExecutionTrackerRecorder;
+import org.jumpmind.metl.core.runtime.IExecutionTracker;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.persist.IPersistenceManager;
@@ -318,6 +324,20 @@ public class ExecutionService extends AbstractService implements IExecutionServi
                 log.info("Could not run execution purge for status '{}' because table had not been created yet", status);
             }
         }
+    }
+
+    @Override
+    public IExecutionTracker getExecutionTracker(ExecutorService threadService, IExecutionService executionService, 
+            Agent agent, AgentProjectVersionFlowDeployment deployment, String userId, Map<String, String> flowParameters) {
+        
+        IExecutionTracker executionTracker = null;
+        if (threadService != null && executionService != null) {
+            executionTracker = new ExecutionTrackerRecorder(agent, deployment, threadService,
+                    executionService, userId, flowParameters.toString());
+        } else {
+            executionTracker = new ExecutionTrackerLogger(deployment);
+        }
+        return executionTracker;
     }
 
 }
