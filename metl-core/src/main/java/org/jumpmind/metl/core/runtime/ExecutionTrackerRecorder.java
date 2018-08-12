@@ -47,7 +47,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
 
     Agent agent;
 
-    Map<String, ExecutionStep> steps;
+    protected Map<String, ExecutionStep> steps;
 
     Map<ExecutionStep, Date> lastStatUpdate = new HashMap<ExecutionStep, Date>();
 

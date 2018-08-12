@@ -30,7 +30,7 @@
     <name>Deserializer</name>
     <className>org.jumpmind.metl.core.runtime.component.Deserializer</className>
     <keywords>REST,ws,webservice,web</keywords>
-    <settings>
+    <settings> 
       <setting id='format'
                required='false'
                type='choice'>
@@ -64,6 +64,16 @@
     <className>org.jumpmind.metl.core.runtime.component.Serializer</className>
     <keywords>REST,ws,webservice,web</keywords>
     <settings>
+      <setting id='run.when'
+               required='false'
+               type='choice'>
+        <name>Run When</name>
+        <defaultValue>PER UNIT OF WORK</defaultValue>
+        <choices>
+          <choice>PER UNIT OF WORK</choice>
+          <choice>PER MESSAGE</choice>
+        </choices>
+      </setting>       
       <setting id='format'
                required='false'
                type='choice'>

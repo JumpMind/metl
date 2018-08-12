@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.Security;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -46,6 +47,7 @@ public class PgpEncrypt extends AbstractComponentRuntime {
     
     @Override
     public void start() {
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         TypedProperties properties = getTypedProperties();
         publicKeyLocation = properties.get(PUBLIC_KEY_LOCATION);
         keyAlgorithm = mapKeyAlgorithm(properties.get(KEY_ALGORITHM));

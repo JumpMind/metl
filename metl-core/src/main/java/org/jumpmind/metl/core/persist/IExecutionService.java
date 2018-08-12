@@ -24,11 +24,15 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 import org.jumpmind.metl.core.model.AbstractObject;
+import org.jumpmind.metl.core.model.Agent;
+import org.jumpmind.metl.core.model.AgentProjectVersionFlowDeployment;
 import org.jumpmind.metl.core.model.Execution;
 import org.jumpmind.metl.core.model.ExecutionStep;
 import org.jumpmind.metl.core.model.ExecutionStepLog;
+import org.jumpmind.metl.core.runtime.IExecutionTracker;
 
 public interface IExecutionService {
 
@@ -53,5 +57,8 @@ public interface IExecutionService {
     public List<String> findExecutedFlowIds();
 
     public File getExecutionStepLog(String executionStepId);
+    
+    public IExecutionTracker getExecutionTracker(ExecutorService threadService, IExecutionService executionService, 
+            Agent agent, AgentProjectVersionFlowDeployment deployment, String userId, Map<String, String> flowParameters);
     	
 }

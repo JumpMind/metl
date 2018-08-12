@@ -162,12 +162,8 @@ public class FlowRuntime {
         }
         this.flowVariables = Collections.synchronizedMap(new HashMap<>());
         
-        if (threadService != null && executionService != null) {
-            this.executionTracker = new ExecutionTrackerRecorder(agent, deployment, threadService,
-                    executionService, userId, flowParameters.toString());
-        } else {
-            this.executionTracker = new ExecutionTrackerLogger(deployment);
-        }
+        this.executionTracker = executionService.getExecutionTracker(this.threadService, this.executionService, agent, deployment, userId, flowParameters);
+                
         this.stepRuntimes = new HashMap<String, StepRuntime>();
 
         manipulatedFlow = manipulateFlow(deployment.getFlow());

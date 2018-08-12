@@ -151,6 +151,10 @@ public class AgentRuntime {
         return cancelled;
     }
 
+    public Agent getAgent() {
+        return this.agent;
+    }
+
     public void setAgent(Agent agent) {
         this.agent = agent;
     }
@@ -430,7 +434,7 @@ public class AgentRuntime {
     }
 
     @SuppressWarnings("unchecked")
-    private IResourceRuntime create(XMLResourceDefinition definition, Resource resource, TypedProperties agentOverrides) {
+    public static IResourceRuntime create(XMLResourceDefinition definition, Resource resource, TypedProperties agentOverrides) { // ADB
         try {
             String resourceType = resource.getType();
             Class<? extends IResourceRuntime> clazz = (Class<? extends IResourceRuntime>) definition.getClassLoader()

@@ -73,7 +73,7 @@ public class Gate extends AbstractComponentRuntime {
                 while (messages.hasNext()) {
                     Message message = messages.next();
                     getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                    callback.forward(message);
+                    callback.forward(message.getHeader(), message);
                 }
             }
         } else if (!gateOpened && !(inputMessage instanceof ControlMessage)) {
@@ -86,10 +86,10 @@ public class Gate extends AbstractComponentRuntime {
             while (messages.hasNext()) {
                 Message message = messages.next();
                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                callback.forward(message);
+                callback.forward(message.getHeader(), message);
             }
         } else if (unitOfWorkBoundaryReached && (inputMessage instanceof ControlMessage)) {
-            callback.forward(inputMessage);
+            callback.forward(inputMessage.getHeader(), inputMessage);
         }
     }
     
