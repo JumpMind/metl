@@ -107,20 +107,14 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         table.addContainerProperty("id", String.class, null);
         table.setVisibleColumns(new Object[] { "id" });
         table.setColumnExpandRatio("id", 1);
-        addItem(MessageSource.message("adminView.users"), Icons.USER);
-        addItem(MessageSource.message("adminView.groups"), Icons.GROUP);
-        addItem(MessageSource.message("common.tags"), Icons.TAG);
+        /*addItem(MessageSource.message("common.tags"), Icons.TAG);
         addItem(MessageSource.message("adminView.rest"), Icons.REST);
         addItem(MessageSource.message("common.generalSettings"), Icons.SETTINGS);
         addItem(MessageSource.message("adminView.pluginRepositories"), Icons.DATABASE);
         addItem(MessageSource.message("adminView.plugins"), Icons.COMPONENT);
         addItem(MessageSource.message("adminView.mailServer"), Icons.EMAIL);
-        addItem(MessageSource.message("adminView.ldap"),Icons.BOOK);
-        addItem(MessageSource.message("adminView.notifications"), Icons.NOTIFICATION);
-        addItem(MessageSource.message("adminView.activeUsers"), FontAwesome.USERS);
-        addItem(MessageSource.message("adminView.auditEvents"), FontAwesome.BARS);
         addItem(MessageSource.message("adminView.logging"), Icons.LOGGING);
-        addItem(MessageSource.message("adminView.about"), FontAwesome.QUESTION);
+        addItem(MessageSource.message("adminView.about"), FontAwesome.QUESTION);*/
         
         for (AdminSideView sideView : sideMenu) {
             AdminMenuLink link = (AdminMenuLink) sideView.getClass().getAnnotation(AdminMenuLink.class);
@@ -161,12 +155,8 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
             Object value = event.getItemId();
             if (value != null) {
                 String id = value.toString();
-                Component panel = null;
-                if (id.equals(MessageSource.message("adminView.users"))) {
-                    panel = new UserPanel(context, tabbedPanel);
-                } else if (id.equals(MessageSource.message("adminView.groups"))) {
-                    panel = new GroupPanel(context, tabbedPanel);
-                } else if (id.equals(MessageSource.message("common.tags"))) {
+                Component panel = sideMenuById.get(id);
+                /*if (id.equals(MessageSource.message("common.tags"))) {
                     panel = new TagPanel();
                 } else if (id.equals(MessageSource.message("adminView.rest"))) {
                     panel = new ApiPanel();
@@ -174,11 +164,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
                     panel = new GeneralSettingsPanel();
                 } else if (id.equals(MessageSource.message("adminView.mailServer"))) {
                     panel = new MailServerPanel();
-                } else if (id.equals(MessageSource.message("adminView.ldap"))) {
-                    panel = new LdapPanel(context, tabbedPanel);
-                } else if (id.equals(MessageSource.message("adminView.notifications"))) {
-                    panel = new NotificationPanel(context, tabbedPanel);
-                } else if (id.equals(MessageSource.message("adminView.logging"))) {
+                }else if (id.equals(MessageSource.message("adminView.logging"))) {
                     panel = new LoggingPanel();
                 } else if (id.equals(MessageSource.message("adminView.pluginRepositories") )) {
                     panel = new PluginRepositoriesPanel();                    
@@ -186,9 +172,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
                     panel = new AboutPanel();
                 } else if (id.equals(MessageSource.message("adminView.plugins"))) {
                     panel = new PluginsPanel();
-                }  else if (id.equals(MessageSource.message("adminView.auditEvents"))) {
-                    panel = new AuditEventPanel(context, tabbedPanel);
-                }
+                }*/
                 tabbedPanel.addCloseableTab(id, id, table.getItemIcon(id), panel);
             }
         }
