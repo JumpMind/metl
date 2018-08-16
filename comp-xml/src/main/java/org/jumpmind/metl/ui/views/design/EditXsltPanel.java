@@ -39,17 +39,17 @@ import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
+import com.vaadin.v7.event.FieldEvents.TextChangeEvent;
+import com.vaadin.v7.event.FieldEvents.TextChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.v7.ui.Label;
+import com.vaadin.v7.ui.TextArea;
+import com.vaadin.v7.ui.TextField;
+import com.vaadin.v7.ui.VerticalLayout;
 
 @SuppressWarnings({ "serial" })
 public class EditXsltPanel extends AbstractComponentEditPanel implements TextChangeListener {
