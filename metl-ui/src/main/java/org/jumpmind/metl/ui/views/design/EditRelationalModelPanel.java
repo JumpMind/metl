@@ -441,8 +441,10 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
         table.removeAllItems();
         updateExportTable(filterField.getValue(), model.getModelEntities());
         String fileNamePrefix = model.getName().toLowerCase().replace(' ', '-');
-        ExportDialog dialog = new ExportDialog(table, fileNamePrefix, model.getName());
-        UI.getCurrent().addWindow(dialog);
+        
+        // VaadinUpdate - Table changed to Grid
+//        ExportDialog dialog = new ExportDialog(table, fileNamePrefix, model.getName());
+//        UI.getCurrent().addWindow(dialog);
     }
 
     protected void togglePk(ModelAttrib a) {

@@ -39,7 +39,9 @@ public class Diagram extends AbstractJavaScriptComponent {
     public Diagram(boolean readOnly) {
         setPrimaryStyleName("diagram");
         setId("diagram");
-        getState().readOnly = readOnly;
+        
+        // VaadinUpdate - does not compile.
+        // getState().readOnly = readOnly;
 
         addFunction("onNodeSelected", (arguments) -> {
             DiagramState state = getState();

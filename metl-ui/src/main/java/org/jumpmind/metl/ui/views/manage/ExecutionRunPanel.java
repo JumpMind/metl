@@ -277,7 +277,10 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         flowPanel.setContent(wrapper);
 
         stepTable.setSelectionMode(SelectionMode.SINGLE);
-        stepTable.setImmediate(true);
+        
+        // VaadinUpdate - Does not compile.
+//        stepTable.setImmediate(true);
+        
         stepTable.setSizeFull();
         stepTable.addColumn("componentName", String.class).setHeaderCaption("Component Name")
                 .setWidth(250);

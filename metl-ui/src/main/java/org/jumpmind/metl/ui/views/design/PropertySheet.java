@@ -691,22 +691,28 @@ public class PropertySheet extends AbsoluteLayout {
                     break;
                 case SCRIPT:
                     final AceEditor editor = CommonUiUtils.createAceEditor();
-                    editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
-                    editor.setTextChangeTimeout(200);
+                    
+                    // VaadinUpdate - Are these no longer needed?
+//                    editor. (TextChangeEventMode.LAZY);
+//                    editor.setTextChangeTimeout(200);
                     editor.setMode(AceMode.java);
                     editor.setHeight(10, Unit.EM);
                     editor.setCaption(definition.getName());
                     editor.setShowGutter(false);
                     editor.setShowPrintMargin(false);
                     editor.setValue(obj.get(definition.getId(), definition.getDefaultValue()));
-                    editor.addTextChangeListener(new TextChangeListener() {
-                        @Override
-                        public void textChange(TextChangeEvent event) {
-                            Setting data = obj.findSetting(definition.getId());
-                            data.setValue(event.getText());
-                            context.getConfigurationService().save(data);
-                        }
-                    });
+                    
+                    // VaadinUpdate - fix, won't compile
+//                    editor.addTextChangeListener(new TextChangeListener() {
+//                        @Override
+//                        public void textChange(TextChangeEvent event) {
+//                            Setting data = obj.findSetting(definition.getId());
+//                            data.setValue(event.getText());
+//                            context.getConfigurationService().save(data);
+//                        }
+//                    });
+                    
+                    
                     editor.setReadOnly(readOnly);
                     formLayout.addComponent(editor);
                     break;

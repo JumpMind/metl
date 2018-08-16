@@ -22,8 +22,8 @@ package org.jumpmind.metl.ui.diagram;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.vaadin.shared.ui.JavaScriptComponentState;
+
 
 public class DiagramState extends JavaScriptComponentState {
 

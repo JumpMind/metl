@@ -320,8 +320,10 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         table.removeAllItems();
         updateExportTable(null, model.getModelEntities());
         String fileNamePrefix = model.getName().toLowerCase().replace(' ', '-');
-        ExportDialog dialog = new ExportDialog(table, fileNamePrefix, model.getName());
-        UI.getCurrent().addWindow(dialog);
+        
+        // VaadinUpdate - Constructor was changed in latest version. Switched from table to Grid.
+//        ExportDialog dialog = new ExportDialog(table, fileNamePrefix, model.getName());
+//        UI.getCurrent().addWindow(dialog);
     }
 
     protected void togglePk(ModelAttrib a) {

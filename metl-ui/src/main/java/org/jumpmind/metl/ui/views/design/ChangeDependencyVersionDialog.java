@@ -140,7 +140,9 @@ public class ChangeDependencyVersionDialog extends ResizableWindow  {
         changeButton.setDisableOnClick(true);
         changeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
         changeButton.setClickShortcut(KeyCode.ENTER);
-        return buildButtonFooter(cancelButton, changeButton);        
+        // VaadinUpdate - There is no v7 ResizableWindow?
+        // return buildButtonFooter(cancelButton, changeButton);   
+        return null;
     }
 
     protected void change() {
