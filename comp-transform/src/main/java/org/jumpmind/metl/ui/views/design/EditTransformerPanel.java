@@ -44,24 +44,24 @@ import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
+import com.vaadin.v7.data.Container;
+import com.vaadin.v7.data.Property.ValueChangeEvent;
+import com.vaadin.v7.data.Property.ValueChangeListener;
+import com.vaadin.v7.data.util.BeanItemContainer;
+import com.vaadin.v7.event.FieldEvents.TextChangeEvent;
+import com.vaadin.v7.event.FieldEvents.TextChangeListener;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.AbstractSelect;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.v7.ui.AbstractSelect;
+import com.vaadin.v7.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.ColumnGenerator;
-import com.vaadin.ui.TableFieldFactory;
-import com.vaadin.ui.TextField;
+import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.v7.ui.Field;
+import com.vaadin.v7.ui.Table;
+import com.vaadin.v7.ui.Table.ColumnGenerator;
+import com.vaadin.v7.ui.TableFieldFactory;
+import com.vaadin.v7.ui.TextField;
 import com.vaadin.ui.UI;
 
 @SuppressWarnings("serial")
@@ -296,8 +296,10 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         exportTable.removeAllItems();
         updateExportTable(filterField.getValue());
         String fileNamePrefix = component.getName().toLowerCase().replace(' ', '-');
-        ExportDialog dialog = new ExportDialog(exportTable, fileNamePrefix, component.getName());
-        UI.getCurrent().addWindow(dialog);
+        
+     // VaadinUpdate - Won't compile
+//        ExportDialog dialog = new ExportDialog(exportTable, fileNamePrefix, component.getName());
+//        UI.getCurrent().addWindow(dialog);
     }
 
     protected void updateExportTable(String filter) {
@@ -468,19 +470,23 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             
             
             editor = CommonUiUtils.createAceEditor();
-            editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
-            editor.setTextChangeTimeout(200);
-            editor.setMode(AceMode.java);
             
-            editor.addTextChangeListener(new TextChangeListener() {
-
-                @Override
-                public void textChange(TextChangeEvent event) {
-                    setting.setValue(event.getText());
-                    EditTransformerPanel.this.context.getConfigurationService()
-                            .save(setting);
-                }
-            });
+         // VaadinUpdate - Won't compile
+//            editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
+//            editor.setTextChangeTimeout(200);
+//            editor.setMode(AceMode.java);
+//            
+//            editor.addTextChangeListener(new TextChangeListener() {
+//
+//                @Override
+//                public void textChange(TextChangeEvent event) {
+//                    setting.setValue(event.getText());
+//                    EditTransformerPanel.this.context.getConfigurationService()
+//                            .save(setting);
+//                }
+//            });
+            
+            
             editor.setValue(setting.getValue());
             
             content.addComponent(editor);

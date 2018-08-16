@@ -27,9 +27,9 @@ import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.v7.event.FieldEvents.TextChangeEvent;
+import com.vaadin.v7.event.FieldEvents.TextChangeListener;
+import com.vaadin.v7.ui.AbstractTextField.TextChangeEventMode;
 
 @SuppressWarnings("serial")
 public class EditTextConstant extends AbstractComponentEditPanel {
@@ -41,17 +41,23 @@ public class EditTextConstant extends AbstractComponentEditPanel {
         addComponent(buttonBar);
 
         editor = CommonUiUtils.createAceEditor();
-        editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        editor.setTextChangeTimeout(200);
+        
+     // VaadinUpdate - won't compile
+//        editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
+//        editor.setTextChangeTimeout(200);
+        
+        
         editor.setMode(AceMode.text);
         editor.setValue(component.get(TextConstant.SETTING_TEXT));
-        editor.addTextChangeListener(new TextChangeListener() {
-            public void textChange(TextChangeEvent event) {
-                Setting data = component.findSetting(TextConstant.SETTING_TEXT);
-                data.setValue(event.getText());
-                context.getConfigurationService().save(data);
-            }
-        });
+        
+     // VaadinUpdate - won't compile
+//        editor.addTextChangeListener(new TextChangeListener() {
+//            public void textChange(TextChangeEvent event) {
+//                Setting data = component.findSetting(TextConstant.SETTING_TEXT);
+//                data.setValue(event.getText());
+//                context.getConfigurationService().save(data);
+//            }
+//        });
 
         addComponent(editor);
         setExpandRatio(editor, 1);

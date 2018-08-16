@@ -69,7 +69,9 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
 
 		MappingDiagramState state = getState();
 		state.component = component;
-		state.readOnly = readOnly;
+		
+		// VaadinUpdate - won't compile
+//		state.readOnly = readOnly;
 
 		state.inputModel = component.getInputModel();
 		if (state.inputModel != null) {

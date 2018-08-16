@@ -26,12 +26,12 @@ import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
-import com.vaadin.ui.ComboBox;
+import com.vaadin.v7.data.Property.ValueChangeEvent;
+import com.vaadin.v7.data.Property.ValueChangeListener;
+import com.vaadin.v7.event.FieldEvents.TextChangeEvent;
+import com.vaadin.v7.event.FieldEvents.TextChangeListener;
+import com.vaadin.v7.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.v7.ui.ComboBox;
 
 public class EditTempRdbmsPanel extends AbstractComponentEditPanel {
 
@@ -47,9 +47,12 @@ public class EditTempRdbmsPanel extends AbstractComponentEditPanel {
         addComponent(buttonBar);
         
     	editor = CommonUiUtils.createAceEditor();
-        editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        editor.setTextChangeTimeout(200);
-        editor.setMode(AceMode.sql);
+    	
+    	// VaadinUpdate - Won't compile
+//        editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
+//        editor.setTextChangeTimeout(200);
+        
+    	editor.setMode(AceMode.sql);
         
         select = new ComboBox();
         select.setWidth(40, Unit.EM);
@@ -72,16 +75,17 @@ public class EditTempRdbmsPanel extends AbstractComponentEditPanel {
         buttonBar.addLeft(select);
         
         if (!readOnly) {
-            editor.addTextChangeListener(new TextChangeListener() {
-
-                @Override
-                public void textChange(TextChangeEvent event) {
-                    String key = (String) select.getValue();
-                    EditTempRdbmsPanel.this.component.put(key, event.getText());
-                    EditTempRdbmsPanel.this.context.getConfigurationService()
-                            .save(EditTempRdbmsPanel.this.component.findSetting(key));
-                }
-            });
+         // VaadinUpdate - won't compile
+//            editor.addTextChangeListener(new TextChangeListener() {
+//
+//                @Override
+//                public void textChange(TextChangeEvent event) {
+//                    String key = (String) select.getValue();
+//                    EditTempRdbmsPanel.this.component.put(key, event.getText());
+//                    EditTempRdbmsPanel.this.context.getConfigurationService()
+//                            .save(EditTempRdbmsPanel.this.component.findSetting(key));
+//                }
+//            });
         }
         
         addComponent(editor);
