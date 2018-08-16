@@ -41,7 +41,7 @@ sourceSets.main.compileClasspath += [configurations.provided]
 
 dependencies {
     compile project(":metl-ui")
-    provided ("com.vaadin:vaadin-client-compiler:$vaadinVersion")  {
+    provided ("com.vaadin:vaadin-compatibility-client-compiled:$vaadinVersion")  {
        exclude group:'org.eclipse.jetty'
     }    
     executableWar project(":metl-server")    

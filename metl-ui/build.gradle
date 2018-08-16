@@ -21,9 +21,9 @@ dependencies {
        exclude group:'com.googlecode.guava-osgi'
     }    
     compile "jlibs:jlibs-xml:1.0"
-    compile "com.vaadin:vaadin-server:$vaadinVersion"    
+    compile "com.vaadin:vaadin-compatibility-server:$vaadinVersion"
     compile "com.vaadin:vaadin-push:$vaadinVersion"    
-    compile "com.vaadin:vaadin-themes:$vaadinVersion"    
+    compile "com.vaadin:vaadin-compatibility-themes:$vaadinVersion"
     compile "javax.servlet:javax.servlet-api:$servletVersion"
     compile "org.eclipse.jetty:jetty-servlet:$jettyVersion"
     compile "com.vaadin.addon:vaadin-context-menu:0.7.4"
