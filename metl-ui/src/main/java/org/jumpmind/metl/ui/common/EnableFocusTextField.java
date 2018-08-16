@@ -20,8 +20,8 @@
  */
 package org.jumpmind.metl.ui.common;
 
-import com.vaadin.data.Property;
-import com.vaadin.ui.TextField;
+import com.vaadin.v7.data.Property;
+import com.vaadin.v7.ui.TextField;
 
 @SuppressWarnings("serial")
 public class EnableFocusTextField extends TextField {

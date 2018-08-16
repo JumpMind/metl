@@ -25,9 +25,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.vaadin.addon.contextmenu.ContextMenu;
-import com.vaadin.event.ItemClickEvent.ItemClickNotifier;
+import com.vaadin.v7.event.ItemClickEvent.ItemClickNotifier;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
-import com.vaadin.ui.AbstractSelect;
+import com.vaadin.v7.ui.AbstractSelect;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.themes.ValoTheme;
 
