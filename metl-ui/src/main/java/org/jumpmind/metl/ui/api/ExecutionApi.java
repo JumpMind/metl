@@ -345,6 +345,9 @@ public class ExecutionApi {
             }
             AgentDeploy deployment = mapping.getDeployment();
             AgentRuntime agentRuntime = agentManager.getAgentRuntime(deployment.getAgentId());
+            if (agentRuntime.getAgent().isDesignTimeAgent()) {
+                throw new CallToDesignTimeAgentException("Remote execution of a design time flow is not allowed.");                
+            }
             FlowRuntime flowRuntime = agentRuntime.createFlowRuntime(whoAreYou(request), deployment, params);
             IHasSecurity security = flowRuntime.getHasSecurity();
             if (enforceSecurity(security, request, response)) {
@@ -447,6 +450,9 @@ public class ExecutionApi {
         boolean foundDeployment = false;
         for (Agent agent : agents) {
             if (agent.getName().equals(agentName)) {
+                if (agent.isDesignTimeAgent()) {
+                    throw new CallToDesignTimeAgentException("Remote execution of a design time flow is not allowed.");                
+                }
                 foundAgent = true;
                 List<AgentDeploy> deployments = agent.getAgentDeployments();
                 for (AgentDeploy agentDeployment : deployments) {

@@ -115,7 +115,7 @@ public class PluginManager implements IPluginManager {
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-text", 240));
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "resource-core", 250));
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-stamp", 250));
-
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-pgp", 260));
     }
 
     @Override
@@ -358,7 +358,7 @@ public class PluginManager implements IPluginManager {
     public String getLatestLocalVersion(String artifactGroup, String artifactName) {
         String latestVersion = null;
         try {
-            logger.info(String.format("Getting latest local version for artifact group %s and artifcat name %s", artifactGroup, artifactName));
+            logger.info(String.format("Getting latest local version for artifact group %s and name %s", artifactGroup, artifactName));
             VersionRangeRequest rangeRequest = new VersionRangeRequest();
             rangeRequest.setArtifact(new DefaultArtifact(artifactGroup, artifactName, "jar", "[0,)"));
             VersionRangeResult rangeResult = repositorySystem.resolveVersionRange(repositorySystemSession, rangeRequest);

@@ -93,6 +93,7 @@ public class TextFileReader extends AbstractFileReader {
 
         for (String file : files) {
             Map<String, Serializable> headers = new HashMap<>(1);
+            headers.putAll(inputMessage.getHeader());
             headers.put("source.file.path", file);
             int currentFileLinesRead = 0;
             String currentLine;

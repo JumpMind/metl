@@ -43,10 +43,8 @@ import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.model.ProjectVersionPlugin;
-import org.jumpmind.metl.core.model.ReleasePackage;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
-import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.Tag;
 
@@ -199,16 +197,6 @@ public interface IConfigurationService {
     Map<String, ProjectVersion> findProjectVersions();
     
     public List<ProjectVersion> findProjectVersionsByProject(Project project);
-    
-    public ReleasePackage findReleasePackage(String releasePackageId);
-    
-    public List<ReleasePackage> findReleasePackages();
-    
-    public void deleteReleasePackageProjectVersionsForReleasePackage(String releasePackageId);
-
-    public List<Rppv> findReleasePackageProjectVersions(String releasePackageId);
-    
-    public void refresh(ReleasePackage releasePackage);
     
     public void updateProjectVersionDependency(ProjectVersionDepends dependency, String newTargetProjectVersionId);
     

@@ -56,6 +56,7 @@ import org.jumpmind.db.sql.SqlPersistenceManager;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
+import org.jumpmind.metl.core.persist.ConfigurationService;
 import org.jumpmind.metl.core.persist.ExecutionService;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
@@ -83,7 +84,6 @@ import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.MockJdbcDriver;
 import org.jumpmind.metl.ui.definition.DefinitionPlusUIFactory;
 import org.jumpmind.metl.ui.definition.IDefinitionPlusUIFactory;
-import org.jumpmind.metl.ui.persist.AuditableConfigurationService;
 import org.jumpmind.metl.ui.persist.IUICache;
 import org.jumpmind.metl.ui.persist.UICache;
 import org.jumpmind.persist.IPersistenceManager;
@@ -410,7 +410,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IConfigurationService configurationService() {
         if (configurationService == null) {
-            configurationService = new AuditableConfigurationService(operationsService(), securityService(), configDatabasePlatform(),
+            configurationService = new ConfigurationService(operationsService(), securityService(), configDatabasePlatform(),
                     persistenceManager(), tablePrefix());
         }
         return configurationService;
@@ -548,4 +548,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         return new UIScope();
     }
 
+    public Environment getEnv() {
+        return this.env;
+    }
 }

@@ -33,4 +33,8 @@ final public class AppConstants {
     
     public static final String SYSTEM_USER = "system";
 
+    public static final String METL_APP_SERVLET = "metl.app.servlet";
+
+    public static final String SYS_CONFIG_DIR = "org.jumpmind.metl.ui.init.config.dir";
+    
 }

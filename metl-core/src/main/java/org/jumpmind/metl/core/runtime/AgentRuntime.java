@@ -151,6 +151,10 @@ public class AgentRuntime {
         return cancelled;
     }
 
+    public Agent getAgent() {
+        return this.agent;
+    }
+
     public void setAgent(Agent agent) {
         this.agent = agent;
     }
