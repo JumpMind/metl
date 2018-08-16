@@ -42,7 +42,7 @@ public class EnableFocusTextField extends TextField {
     }
     
     @Override
-    public void addValueChangeListener(com.vaadin.data.Property.ValueChangeListener listener) {
+    public void addValueChangeListener(com.vaadin.v7.data.Property.ValueChangeListener listener) {
         super.addValueChangeListener(listener);
         this.listener = listener;
     }

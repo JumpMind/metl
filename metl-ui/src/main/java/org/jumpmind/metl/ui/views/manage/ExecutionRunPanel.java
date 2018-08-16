@@ -823,7 +823,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         private static final long serialVersionUID = 1L;
 
         @SuppressWarnings("unchecked")
-        public Object generateCell(com.vaadin.ui.Table source, Object itemId, Object columnId) {
+        public Object generateCell(com.vaadin.v7.ui.Table source, Object itemId, Object columnId) {
             BeanItem<ExecutionStepLog> logItem = (BeanItem<ExecutionStepLog>) source
                     .getItem(itemId);
             String executionStepId = (String) logItem.getItemProperty("executionStepId").getValue();
