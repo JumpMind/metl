@@ -47,6 +47,10 @@
           <choice>PER ENTITY</choice>
         </choices>
       </setting>
+     <setting id='sql.get.from.message' required='false' type='boolean'>
+         <name>Get SQL From Message</name>
+         <defaultValue>false</defaultValue>
+      </setting>
       <setting id='sql.file'
                type='text'>
         <name>File</name>

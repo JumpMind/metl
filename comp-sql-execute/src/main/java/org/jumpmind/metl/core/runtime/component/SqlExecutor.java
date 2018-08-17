@@ -38,6 +38,7 @@ import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -45,6 +46,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 public class SqlExecutor extends AbstractRdbmsComponentRuntime {
 
     private static final String FILE = "sql.file";
+
+    private static final String SQL_FROM_MESSAGE = "sql.get.from.message";
 
     public static final String TYPE = "Sql Executor";    
 
@@ -54,9 +57,12 @@ public class SqlExecutor extends AbstractRdbmsComponentRuntime {
 
     String file;
 
+    boolean getSqlFromMessage = false;
+    
     @Override
     public void start() {
         TypedProperties properties = getTypedProperties();
+        getSqlFromMessage = properties.is(SQL_FROM_MESSAGE, getSqlFromMessage);
         file = properties.get(FILE);
         sqls = getExecutorSqlStatements();
         runWhen = properties.get(RUN_WHEN, PER_MESSAGE);
@@ -69,27 +75,29 @@ public class SqlExecutor extends AbstractRdbmsComponentRuntime {
 
         List<String> sqlStatements=null;;
 
-        //sqlstatements come from file or sql setting in the component
-        if (isNotBlank(file)) {
-            sqlStatements = new ArrayList<String>();
-            FileReader fileReader = null;
-            SqlScriptReader sqlReader = null;
-            try {
-                fileReader = new FileReader(file);
-                sqlReader = new SqlScriptReader(fileReader);
-                String sqlToExecute = sqlReader.readSqlStatement();
-                while (sqlToExecute != null) {
-                    sqlStatements.add(sqlToExecute);
-                    sqlToExecute = sqlReader.readSqlStatement();
-                }
-            } catch (FileNotFoundException e) {
-                throw new MisconfiguredException("Could not find configured file: %s", file);
-            } finally {
-                IOUtils.closeQuietly(fileReader);
-                IOUtils.closeQuietly(sqlReader);
-            }
-        } else {
-            sqlStatements = getSqlStatements(isBlank(file));            
+        //sqlstatements come from message, file, or sql setting in the component
+        if (!getSqlFromMessage) {
+	        if (isNotBlank(file)) {
+	            sqlStatements = new ArrayList<String>();
+	            FileReader fileReader = null;
+	            SqlScriptReader sqlReader = null;
+	            try {
+	                fileReader = new FileReader(file);
+	                sqlReader = new SqlScriptReader(fileReader);
+	                String sqlToExecute = sqlReader.readSqlStatement();
+	                while (sqlToExecute != null) {
+	                    sqlStatements.add(sqlToExecute);
+	                    sqlToExecute = sqlReader.readSqlStatement();
+	                }
+	            } catch (FileNotFoundException e) {
+	                throw new MisconfiguredException("Could not find configured file: %s", file);
+	            } finally {
+	                IOUtils.closeQuietly(fileReader);
+	                IOUtils.closeQuietly(sqlReader);
+	            }
+	        } else {
+	            sqlStatements = getSqlStatements(isBlank(file));            
+	        }
         }
         return sqlStatements;
     }
@@ -108,6 +116,13 @@ public class SqlExecutor extends AbstractRdbmsComponentRuntime {
         int inboundRecordCount = 0;
         
         Iterator<?> inboundPayload = null;
+        
+        if (getSqlFromMessage) {
+        		if (inputMessage instanceof TextMessage) {
+                this.sqls = ((TextMessage)inputMessage).getPayload();
+            } 
+        }
+        
         if (PER_ENTITY.equals(runWhen) && inputMessage instanceof ContentMessage<?>) {
             inboundPayload = ((Collection<?>) ((ContentMessage<?>) inputMessage).getPayload()).iterator();
             inboundRecordCount = ((Collection<?>) ((ContentMessage<?>) inputMessage).getPayload()).size();
