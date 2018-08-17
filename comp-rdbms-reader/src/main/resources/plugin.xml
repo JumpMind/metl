@@ -31,7 +31,11 @@
     <className>org.jumpmind.metl.core.runtime.component.RdbmsReader</className>
     <keywords>database,db,sql</keywords>
     <description></description>
-    <settings>
+    	  <settings>
+         <setting id='sql.get.from.message' required='false' type='boolean'>
+         <name>Get SQL From Message</name>
+         <defaultValue>false</defaultValue>
+      </setting>
       <setting id='sql'
                required='true'
                type='multiline_text'>

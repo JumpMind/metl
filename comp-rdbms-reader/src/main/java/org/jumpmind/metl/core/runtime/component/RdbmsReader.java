@@ -47,6 +47,7 @@ import org.jumpmind.metl.core.runtime.EntityData.ChangeType;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 import org.springframework.dao.DataAccessException;
@@ -75,6 +76,8 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     
     public static final String SQL_STATEMENT = "SQL STATEMENT";    
 
+    private static final String SQL_FROM_MESSAGE = "sql.get.from.message";
+
     List<String> sqls;
 
     String runWhen = PER_UNIT_OF_WORK;
@@ -93,10 +96,13 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     
     String unitOfWork = COMPONENT_LIFETIME;
     
+    boolean getSqlFromMessage = false;
+    
     @Override
     public void start() {
         TypedProperties properties = getTypedProperties();
-        sqls = getSqlStatements(true);
+        getSqlFromMessage = properties.is(SQL_FROM_MESSAGE, getSqlFromMessage);
+        sqls = getSqlStatements(!getSqlFromMessage);
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
         trimColumns = properties.is(TRIM_COLUMNS);
         matchOnColumnNameOnly = properties.is(MATCH_ON_COLUMN_NAME_ONLY, false);
@@ -118,6 +124,12 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
         NamedParameterJdbcTemplate template = getJdbcTemplate();
 
+        if (getSqlFromMessage) {
+	    		if (inputMessage instanceof TextMessage) {
+	            this.sqls = ((TextMessage)inputMessage).getPayload();
+	        } 
+	    }
+        
         int inboundRecordCount = 0;
         Iterator<?> inboundPayload = null;
         if (PER_ENTITY.equals(runWhen) && inputMessage instanceof ContentMessage<?>) {
