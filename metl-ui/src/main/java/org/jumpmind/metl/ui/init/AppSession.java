@@ -131,4 +131,8 @@ public class AppSession implements Serializable {
     public VaadinSession getVaadinSession() {
         return vaadinSession;
     }
+    
+    public User getUser() {
+        return user;
+    }
 }
