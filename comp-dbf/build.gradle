@@ -1,0 +1,11 @@
+apply from: '../metl-assemble/common.gradle'
+
+version = '3.2.0.' + pluginBuildNumber
+
+dependencies {
+    provided project(':metl-ui')   
+    compile project(':comp-abstract')
+    compile group: 'com.alibaba', name: 'fastjson', version: '1.2.47'
+    compile group: 'org.jamel.dbf', name: 'dbf-reader', version: '0.0.3'
+    testCompile project(path: ':metl-core', configuration: 'testArtifacts')     
+}

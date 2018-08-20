@@ -46,6 +46,8 @@ import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.Table;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.metl.ui.common.UIConstants;
+import org.jumpmind.metl.ui.i18n.MenuResource;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.UiComponent;
@@ -80,7 +82,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope(value = "ui")
-@TopBarLink(category = Category.Manage, name = "Manage", id = "manage", icon = FontAwesome.GEARS, menuOrder = 25)
+@TopBarLink(category = Category.Manage, name = "Manager", id = "manage", icon = FontAwesome.GEARS, menuOrder = 25)
 public class ManageView extends HorizontalLayout implements View, IUiPanel, IBackgroundRefreshable<Object> {
     
     final Logger log = LoggerFactory.getLogger(getClass());
@@ -112,7 +114,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     @SuppressWarnings("serial")
     @PostConstruct
     protected void init() {
-        viewButton = new Button("View Log");
+        viewButton = new Button(MessageSource.message("common.viewLog"));
         viewButton.setEnabled(false);
         viewButton.addClickListener(new ClickListener() {
             public void buttonClick(ClickEvent event) {
@@ -125,8 +127,8 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         HorizontalLayout header = new HorizontalLayout();
         header.addComponent(viewButton);
         header.setComponentAlignment(viewButton, Alignment.BOTTOM_RIGHT);
-
-        statusSelect = new ComboBox("Status");
+ 
+        statusSelect = new ComboBox(MessageSource.message("common.status"));
         statusSelect.setNewItemsAllowed(false);
         statusSelect.setNullSelectionAllowed(false);
         statusSelect.addItem(ANY);
@@ -146,7 +148,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
         HorizontalLayout limitLayout = new HorizontalLayout();
         limitLayout.setSpacing(true);
-        Label limitLabel = new Label("Limit:");
+        Label limitLabel = new Label(MessageSource.message("manageView.limit"));
         limitLayout.addComponent(limitLabel);
         limitLayout.setComponentAlignment(limitLabel, Alignment.MIDDLE_CENTER);
         TextField limitField = new TextField(null, String.valueOf(DEFAULT_LIMIT));
@@ -170,7 +172,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         header.setExpandRatio(limitLayout, 1.0f);
 
         TextField filterField = new TextField();
-        filterField.setInputPrompt("Filter");
+        filterField.setInputPrompt(MessageSource.message("buttonBar.filter.prompt"));
         filterField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
         filterField.setIcon(FontAwesome.SEARCH);
         filterField.setImmediate(true);
@@ -210,8 +212,9 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         });
         table.setVisibleColumns(new Object[] { "agentName", "deploymentName", "hostName", "status",
                 "startTime", "endTime", "createBy", "parameters" });
-        table.setColumnHeaders(new String[] { "Agent", "Deployment", "Host", "Status", "Start",
-                "End", "Caller", "Parameters" });
+        table.setColumnHeaders(new String[] { MessageSource.message("common.agent"), MessageSource.message("common.deployment"), 
+        		MessageSource.message("manageView.host"), MessageSource.message("common.status"), MessageSource.message("executionRunPanel.start"),
+        		MessageSource.message("executionRunPanel.end"), MessageSource.message("manageView.caller"), MessageSource.message("common.parameters") });
         table.setColumnWidth("agentName", 250);
         table.setColumnWidth("deploymentName", 250);
         table.setColumnWidth("hostName", 145);
@@ -228,7 +231,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         mainTab.setExpandRatio(table, 1.0f);
 
         tabs = new TabbedPanel();
-        tabs.setMainTab("Executions", Icons.EXECUTION, mainTab);
+        tabs.setMainTab(MessageSource.message("manageView.executions"), Icons.EXECUTION, mainTab);
 
         HorizontalSplitPanel split = new HorizontalSplitPanel();
         split.setSizeFull();

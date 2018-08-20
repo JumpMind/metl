@@ -53,6 +53,7 @@ import org.jumpmind.metl.ui.common.ImportDialog;
 import org.jumpmind.metl.ui.common.ImportDialog.IImportListener;
 import org.jumpmind.metl.ui.common.SelectProjectVersionDialog;
 import org.jumpmind.metl.ui.common.TabbedPanel;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.metl.ui.views.design.menu.DesignMenuBar;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
@@ -85,16 +86,15 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 public class DesignNavigator extends VerticalLayout {
+		public static final String LABEL_DEPENDENCIES = "designNavigator.dependencies";
 
-    public static final String LABEL_DEPENDENCIES = "Dependencies";
+	    public static final String LABEL_TESTS = "common.tests";
+	    
+	    public static final String LABEL_FLOWS = "common.flows";
+    
+	    public static final String LABEL_MODELS = "common.models";
 
-    public static final String LABEL_FLOWS = "Flows";
-
-    public static final String LABEL_TESTS = "Tests";
-
-    public static final String LABEL_MODELS = "Models";
-
-    public static final String LABEL_RESOURCES = "Resources";
+	    public static final String LABEL_RESOURCES = "common.resources";
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -139,10 +139,10 @@ public class DesignNavigator extends VerticalLayout {
 
     public void addNewProject() {
         Project project = new Project();
-        project.setName("New Project");
+        project.setName(MessageSource.message("designNavigator.newProject"));
         ProjectVersion version = new ProjectVersion();
         version.setVersionType(ProjectVersion.VersionType.MASTER.toString());
-        version.setVersionLabel("master");
+        version.setVersionLabel(MessageSource.message("designNavigator.master"));
         version.setProject(project);
         project.getProjectVersions().add(version);
         configurationService.save(project);
@@ -156,7 +156,7 @@ public class DesignNavigator extends VerticalLayout {
         TextField filterField = new TextField();
         filterField.setIcon(Icons.SEARCH);
         filterField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
-        filterField.setInputPrompt("Tag Filter");
+        filterField.setInputPrompt(MessageSource.message("designNavigator.tagFilter"));
         filterField.setImmediate(true);
         filterField.setTextChangeEventMode(TextChangeEventMode.LAZY);
         filterField.setTextChangeTimeout(200);
@@ -395,11 +395,11 @@ public class DesignNavigator extends VerticalLayout {
 
             treeTable.setChildrenAllowed(projectVersion, true);
             treeTable.setParent(projectVersion, project);
-            addFlowsToFolder(LABEL_FLOWS, projectVersion, false);
-            addFlowsToFolder(LABEL_TESTS, projectVersion, true);
-            addModelsToFolder(LABEL_MODELS, projectVersion);
-            addResourcesToFolder(LABEL_RESOURCES, projectVersion);
-            addDependenciesToFolder(LABEL_DEPENDENCIES, projectVersion);
+            addFlowsToFolder(MessageSource.message(LABEL_FLOWS), projectVersion, false);
+            addFlowsToFolder(MessageSource.message(LABEL_TESTS), projectVersion, true);
+            addModelsToFolder(MessageSource.message(LABEL_MODELS), projectVersion);
+            addResourcesToFolder(MessageSource.message(LABEL_RESOURCES), projectVersion);
+            addDependenciesToFolder(MessageSource.message(LABEL_DEPENDENCIES), projectVersion);
         }
     }
 
@@ -693,7 +693,8 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public void doImport() {
-        ImportDialog.show("Import Config", "Click the upload button to import your config", new ImportConfigurationListener());
+        ImportDialog.show(MessageSource.message("common.importConfig"), 
+        		MessageSource.message("common.click2uploadConfig"), new ImportConfigurationListener());
     }
 
     public void doNewProjectBranch() {
@@ -704,11 +705,11 @@ public class DesignNavigator extends VerticalLayout {
             List<ProjectVersion> versions = original.getProject().getProjectVersions();
             for (ProjectVersion version : versions) {
                 if (version.getVersionType().equalsIgnoreCase(ProjectVersion.VersionType.BRANCH.toString())) {
-                    CommonUiUtils.notify("Existing branch already exists for this project.  Cannot create a new one.", Type.WARNING_MESSAGE);
+                    CommonUiUtils.notify(MessageSource.message("designNavigator.warning"), Type.WARNING_MESSAGE);
                     return;
                 }
             }
-            ProjectVersion newVersion = configurationService.saveNewVersion("branch", original, "branch");
+            ProjectVersion newVersion = configurationService.saveNewVersion(MessageSource.message("designNavigator.branch"), original, "branch");
             newVersion = configurationService.findProjectVersion(newVersion.getId());
             newVersion.setReleaseDate(null);
             configurationService.save(newVersion);
@@ -771,29 +772,29 @@ public class DesignNavigator extends VerticalLayout {
         Object object = treeTable.getValue();
         if (object instanceof FlowName) {
             FlowName flow = (FlowName) object;
-            ConfirmDialog.show("Delete Flow?", "Are you sure you want to delete the '" + flow.getName() + "' flow?",
+            ConfirmDialog.show(MessageSource.message("designNavigator.deleteFlow"), MessageSource.message("designNavigator.deleteConfirm", new Object[] {flow.getName()}),
                     new DeleteFlowConfirmationListener(flow));
         } else if (object instanceof ResourceName) {
             ResourceName resource = (ResourceName) object;
-            ConfirmDialog.show("Delete Resource?", "Are you sure you want to delete the '" + resource.getName() + "' resource?",
+            ConfirmDialog.show(MessageSource.message("designNavigator.deleteResource"),MessageSource.message("designNavigator.deleteResourceConfirm", new Object[] {resource.getName()}),
                     new DeleteResourceConfirmationListener(resource));
 
         } else if (object instanceof ModelName) {
             ModelName model = (ModelName) object;
             if (!configurationService.isModelUsed(model.getId())) {
-                ConfirmDialog.show("Delete Model?", "Are you sure you want to delete the '" + model.getName() + "' model?",
+                ConfirmDialog.show(MessageSource.message("designNavigator.deleteModel"),MessageSource.message("designNavigator.deleteModelConfirm", new Object[] {model.getName()}),
                         new DeleteModelConfirmationListener(model));
             } else {
-                CommonUiUtils.notify("The model is currently in use.  It cannot be deleted.", Type.WARNING_MESSAGE);
+                CommonUiUtils.notify(MessageSource.message("designNavigator.modelNotDeleted"), Type.WARNING_MESSAGE);
             }
         } else if (object instanceof Project) {
             Project namedObject = (Project) object;
-            ConfirmDialog.show("Delete Project?", "Are you sure you want to delete the '" + namedObject.getName() + "' project?",
+            ConfirmDialog.show(MessageSource.message("designNavigator.deleteProject"), MessageSource.message("designNavigator.deleteProjectConfirm",new Object[] {namedObject.getName()}),
                     new DeleteProjectConfirmationListener(namedObject));
 
         } else if (object instanceof ProjectVersion) {
             ProjectVersion namedObject = (ProjectVersion) object;
-            ConfirmDialog.show("Delete Project Version?", "Are you sure you want to delete the '" + namedObject.getName() + "' version?",
+            ConfirmDialog.show(MessageSource.message("designNavigator.deleteProjectVersion"), MessageSource.message("designNavigator.deleteProjectVersionConfirm",new Object[] {namedObject.getName()}),
                     new DeleteProjectVersionConfirmationListener(namedObject));
         } else if (object instanceof ProjectVersionDepends) {
             configurationService.delete((ProjectVersionDepends) object);
@@ -842,7 +843,7 @@ public class DesignNavigator extends VerticalLayout {
 
     public void promptForNewDependency() {
         SelectProjectVersionDialog.show(context, findProjectVersion().getProject(), v -> addNewDependency(v),
-                "Please select a project version that this project depends upon.");
+        		MessageSource.message("designNavigator.selectProjectVersion"));
     }
 
     public void addNewDependency(ProjectVersion targetVersion) {
@@ -861,9 +862,9 @@ public class DesignNavigator extends VerticalLayout {
             dependency.setTargetProjectVersion(targetVersion);
             configurationService.save(dependency);
 
-            FolderName folder = findFolderWithName(LABEL_DEPENDENCIES);
+            FolderName folder = findFolderWithName(MessageSource.message(LABEL_DEPENDENCIES));
             if (folder == null) {
-                folder = addVirtualFolder(LABEL_DEPENDENCIES, projectVersion);
+                folder = addVirtualFolder(MessageSource.message(LABEL_DEPENDENCIES), projectVersion);
             }
             treeTable.setChildrenAllowed(folder, true);
 
@@ -889,7 +890,7 @@ public class DesignNavigator extends VerticalLayout {
 
         FlowName flow = new FlowName();
         flow.setProjectVersionId(projectVersion.getId());
-        flow.setName("New Flow");
+        flow.setName(MessageSource.message("designNavigator.newFlow"));
         flow.setTest(testFlow);
         configurationService.save(flow);
 
@@ -906,46 +907,46 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public void addNewDatabase() {
-        addNewResource("Database", "Database", Icons.DATABASE);
+        addNewResource("Database", MessageSource.message("common.database"), Icons.DATABASE);
     }
 
     public void addNewFtpFileSystem() {
-        addNewResource("Ftp", "FTP Directory", Icons.FILE_SYSTEM);
+        addNewResource("Ftp", MessageSource.message("designNavigator.ftpDirectory"), Icons.FILE_SYSTEM);
     }
     
     public void addNewJmsSubscribe() {
-        addNewResource("JMS Subscribe", "JMS Subscribe", Icons.QUEUE);
+        addNewResource("JMS Subscribe", MessageSource.message("designNavigator.jmsSubscribe"), Icons.QUEUE);
     }    
 
     public void addNewLocalFileSystem() {
-        addNewResource("Local File System", "Directory", Icons.FILE_SYSTEM);
+        addNewResource("Local File System", MessageSource.message("menu.directory"), Icons.FILE_SYSTEM);
     }
 
     public void addNewSftpFileSystem() {
-        addNewResource("Sftp", "SFTP Directory", Icons.FILE_SYSTEM);
+        addNewResource("Sftp", MessageSource.message("designNavigator.sftpDirectory"), Icons.FILE_SYSTEM);
     }
 
     public void addNewJMSFileSystem() {
-        addNewResource("JMS", "JMS Directory", Icons.QUEUE);
+        addNewResource("JMS", MessageSource.message("designNavigator.jmsDirectory"), Icons.QUEUE);
     }
 
     public void addNewSMBFileSystem() {
-        addNewResource("SMB", "SMB Directory", Icons.FILE_SYSTEM);
+        addNewResource("SMB", MessageSource.message("designNavigator.smbDirectory"), Icons.FILE_SYSTEM);
     }
 
     public void addNewHttpResource() {
-        addNewResource("Http", "Http", Icons.WEB);
+        addNewResource("Http", MessageSource.message("designNavigator.http"), Icons.WEB);
     }
 
     public void addNewMailSession() {
-        addNewResource("MailSession", "Mail Session", Icons.EMAIL);
+        addNewResource("MailSession",MessageSource.message("common.mailSession"), Icons.EMAIL);
     }
 
     protected void addNewResource(String type, String defaultName, FontAwesome icon) {
         ProjectVersion projectVersion = findProjectVersion();
-        FolderName folder = findFolderWithName(LABEL_RESOURCES);
+        FolderName folder = findFolderWithName(MessageSource.message(LABEL_RESOURCES));
         if (folder == null) {
-            folder = addVirtualFolder(LABEL_RESOURCES, projectVersion);
+            folder = addVirtualFolder(MessageSource.message(LABEL_RESOURCES), projectVersion);
         }
         treeTable.setChildrenAllowed(folder, true);
 
@@ -967,14 +968,14 @@ public class DesignNavigator extends VerticalLayout {
 
     public void addNewModel(String type) {
         ProjectVersion projectVersion = findProjectVersion();
-        FolderName folder = findFolderWithName(LABEL_MODELS);
+        FolderName folder = findFolderWithName(MessageSource.message(LABEL_MODELS));
         if (folder == null) {
-            folder = addVirtualFolder(LABEL_MODELS, projectVersion);
+            folder = addVirtualFolder(MessageSource.message(LABEL_MODELS), projectVersion);
         }
         treeTable.setChildrenAllowed(folder, true);
 
         ModelName model = new ModelName();
-        model.setName("New Model");
+        model.setName(MessageSource.message("designNavigator.newModel"));
         model.setProjectVersionId(projectVersion.getId());
         model.setType(type);
         

@@ -62,6 +62,7 @@ import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.ImmediateUpdateTogglePasswordField;
 import org.jumpmind.metl.ui.common.TabbedPanel;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextArea;
@@ -96,6 +97,8 @@ public class PropertySheet extends AbsoluteLayout {
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
     protected static final String DUMMY_PASSWORD = "*****";
+    
+    protected static final String RESOURCE_PLUGINS = "plugins";
 
     ApplicationContext context;
 
@@ -231,9 +234,9 @@ public class PropertySheet extends AbsoluteLayout {
             }
         }
         if (components.size() != 0 && !readOnly) {
-            formLayout.addComponent(buildOptionGroup("Enabled", ENABLED, components));
-            formLayout.addComponent(buildOptionGroup("Log Input", LOG_INPUT, components));
-            formLayout.addComponent(buildOptionGroup("Log Output", LOG_OUTPUT, components));
+            formLayout.addComponent(buildOptionGroup(MessageSource.message("common.enabled"), ENABLED, components));
+            formLayout.addComponent(buildOptionGroup(MessageSource.message("propertySheet.logInput"), LOG_INPUT, components));
+            formLayout.addComponent(buildOptionGroup(MessageSource.message("common.logOutput"), LOG_OUTPUT, components));
         }
     }
 
@@ -258,7 +261,7 @@ public class PropertySheet extends AbsoluteLayout {
     }
 
     protected void addResourceProperties(FormLayout formLayout, Resource resource) {
-        TextField textField = new TextField("Resource Type");
+        TextField textField = new TextField(MessageSource.message("propertySheet.resourceType"));
         textField.setValue(resource.getType());
         textField.setReadOnly(true);
         formLayout.addComponent(textField);
@@ -268,7 +271,7 @@ public class PropertySheet extends AbsoluteLayout {
         XMLComponentDefinition componentDefintion = context.getDefinitionFactory().getComponentDefinition(component.getProjectVersionId(),
                 component.getType());
         addComponentName(formLayout, component);
-        TextField textField = new TextField("Component Type");
+        TextField textField = new TextField(MessageSource.message("propertySheet.componentType"));
         textField.setValue(componentDefintion.getName());
         textField.setReadOnly(true);
         formLayout.addComponent(textField);
@@ -292,7 +295,7 @@ public class PropertySheet extends AbsoluteLayout {
             if ((componentDefintion.getOutputMessageType() == MessageType.ENTITY
                     || (componentDefintion.getOutputMessageType() == MessageType.ANY && componentDefintion.isShowOutputModel()))
                     && !componentDefintion.isInputOutputModelsMatch()) {
-                final AbstractSelect combo = new ComboBox("Output Model");
+                final AbstractSelect combo = new ComboBox(MessageSource.message("propertySheet.outputModel"));
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
                 List<ModelName> models = new ArrayList<>(configurationService.findModelsInProject(projectVersionId));
@@ -332,7 +335,7 @@ public class PropertySheet extends AbsoluteLayout {
 
     protected void addComponentName(FormLayout formLayout, final Component component) {
 
-        ImmediateUpdateTextField textField = new ImmediateUpdateTextField("Component Name") {
+        ImmediateUpdateTextField textField = new ImmediateUpdateTextField(MessageSource.message("common.componentName")) {
             private static final long serialVersionUID = 1L;
 
             protected void save(String text) {
@@ -347,7 +350,7 @@ public class PropertySheet extends AbsoluteLayout {
         };
         textField.setValue(component.getName());
         textField.setRequired(true);
-        textField.setDescription("Name for the component on the flow");
+        textField.setDescription(MessageSource.message("propertySheet.componentNameFlow"));
         formLayout.addComponent(textField);
     }
 
@@ -358,7 +361,7 @@ public class PropertySheet extends AbsoluteLayout {
             String projectVersionId = step.getComponent().getProjectVersionId();
             if (componentDefintion.getInputMessageType() == MessageType.ENTITY
                     || (componentDefintion.getInputMessageType() == MessageType.ANY && componentDefintion.isShowInputModel())) {
-                final AbstractSelect combo = new ComboBox("Input Model");
+                final AbstractSelect combo = new ComboBox(MessageSource.message("propertySheet.inputModel"));
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
                 List<ModelName> models = new ArrayList<>(configurationService.findModelsInProject(projectVersionId));
@@ -407,7 +410,7 @@ public class PropertySheet extends AbsoluteLayout {
             FlowStep step = getSingleFlowStep();
             if (componentDefintion.getResourceCategory() != null && componentDefintion.getResourceCategory() != ResourceCategory.NONE
                     && step != null) {
-                final AbstractSelect resourcesCombo = new ComboBox("Resource");
+                final AbstractSelect resourcesCombo = new ComboBox(MessageSource.message("common.resource"));
                 resourcesCombo.setImmediate(true);
                 String projectVersionId = step.getComponent().getProjectVersionId();
                 Set<XMLResourceDefinition> types = context.getDefinitionFactory().getResourceDefinitions(projectVersionId,
@@ -443,13 +446,18 @@ public class PropertySheet extends AbsoluteLayout {
     }
 
     protected List<XMLSetting> buildSettings(Object obj) {
+    	
         if (obj instanceof Component) {
             Component component = (Component) obj;
             XMLComponentDefinition definition = context.getDefinitionFactory().getComponentDefinition(component.getProjectVersionId(),
                     component.getType());
             return definition.getSettings().getSetting();
         } else if (obj instanceof Resource) {
+        	System.out.println(obj);
+        	
             Resource resource = (Resource) obj;
+            System.out.println(resource);
+            System.out.println(resource.getProjectVersionId());
             XMLResourceDefinition definition = context.getDefinitionFactory().getResourceDefintion(resource.getProjectVersionId(),
                     resource.getType());         
             if (definition != null) {
@@ -462,6 +470,12 @@ public class PropertySheet extends AbsoluteLayout {
         }
     }
 
+    private String pluginNameMessage(XMLSetting definition) {
+    	return MessageSource.messageWithDefault(RESOURCE_PLUGINS, definition.getId(), definition.getName());
+    }
+    private String pluginDescMessage(XMLSetting definition) {
+    	return MessageSource.messageWithDefault(RESOURCE_PLUGINS, definition.getId()+".desc", definition.getDescription());
+    }
     protected void addSettingField(final XMLSetting definition, final AbstractObjectWithSettings obj, FormLayout formLayout) {
         boolean required = definition.isRequired();
         if (definition.isVisible()) {
@@ -469,12 +483,13 @@ public class PropertySheet extends AbsoluteLayout {
             if (obj instanceof Component) {
                 component = (Component) obj;
             }
-            String description = definition.getDescription();
+            String pluginName = pluginNameMessage(definition);
+            String description = pluginDescMessage(definition);
             Type type = definition.getType();
             FlowStep step = null;
             switch (type) {
                 case BOOLEAN:
-                    final CheckBox checkBox = new CheckBox(definition.getName());
+                    final CheckBox checkBox = new CheckBox(pluginName);
                     checkBox.setImmediate(true);
                     boolean defaultValue = false;
                     if (isNotBlank(definition.getDefaultValue())) {
@@ -502,7 +517,7 @@ public class PropertySheet extends AbsoluteLayout {
                     formLayout.addComponent(checkBox);
                     break;
                 case CHOICE:
-                    final AbstractSelect choice = new ComboBox(definition.getName());
+                    final AbstractSelect choice = new ComboBox(pluginName);
                     choice.setImmediate(true);
                     List<String> choices = definition.getChoices() != null ? definition.getChoices().getChoice() : new ArrayList<String>(0);
                     for (String c : choices) {
@@ -525,7 +540,7 @@ public class PropertySheet extends AbsoluteLayout {
                     break;
                 case PASSWORD:
                     
-                    ImmediateUpdateTogglePasswordField passwordField = new ImmediateUpdateTogglePasswordField(definition.getName()) {
+                    ImmediateUpdateTogglePasswordField passwordField = new ImmediateUpdateTogglePasswordField(pluginName) {
                         protected void save(String text) {
                             if (!DUMMY_PASSWORD.equals(text)) {
                                 saveSetting(definition.getId(), text, obj);
@@ -551,7 +566,7 @@ public class PropertySheet extends AbsoluteLayout {
                     formLayout.addComponent(passwordField);
                     break;
                 case INTEGER:
-                    ImmediateUpdateTextField integerField = new ImmediateUpdateTextField(definition.getName()) {
+                    ImmediateUpdateTextField integerField = new ImmediateUpdateTextField(pluginName) {
                         private static final long serialVersionUID = 1L;
 
                         protected void save(String text) {
@@ -566,7 +581,7 @@ public class PropertySheet extends AbsoluteLayout {
                     formLayout.addComponent(integerField);
                     break;
                 case TEXT:
-                    ImmediateUpdateTextField textField = new ImmediateUpdateTextField(definition.getName()) {
+                    ImmediateUpdateTextField textField = new ImmediateUpdateTextField(pluginName) {
                         private static final long serialVersionUID = 1L;
 
                         protected void save(String text) {
@@ -583,7 +598,7 @@ public class PropertySheet extends AbsoluteLayout {
                     step = getSingleFlowStep();
                     if (step != null) {
                         Flow flow = context.getConfigurationService().findFlow(step.getFlowId());
-                        final AbstractSelect sourceStepsCombo = new ComboBox(definition.getName());
+                        final AbstractSelect sourceStepsCombo = new ComboBox(pluginName);
                         sourceStepsCombo.setImmediate(true);
 
                         List<FlowStepLink> sourceSteps = flow.findFlowStepLinksWithTarget(step.getId());
@@ -614,7 +629,7 @@ public class PropertySheet extends AbsoluteLayout {
                     if (step != null) {
                         String projectVersionId = step.getComponent().getProjectVersionId();
                         List<FlowName> flows = context.getConfigurationService().findFlowsInProject(projectVersionId, false);
-                        final AbstractSelect combo = new ComboBox(definition.getName());
+                        final AbstractSelect combo = new ComboBox(pluginName);
                         combo.setImmediate(true);
                         for (FlowName name : flows) {
                             if (!step.getFlowId().equals(name.getId())) {
@@ -660,7 +675,7 @@ public class PropertySheet extends AbsoluteLayout {
                         }
                         AbstractObjectNameBasedSorter.sort(entities);
 
-                        final AbstractSelect entityColumnCombo = new ComboBox(definition.getName());
+                        final AbstractSelect entityColumnCombo = new ComboBox(pluginName);
                         entityColumnCombo.setImmediate(true);
 
                         for (ModelEntity modelEntity : entities) {
@@ -695,7 +710,7 @@ public class PropertySheet extends AbsoluteLayout {
                     editor.setTextChangeTimeout(200);
                     editor.setMode(AceMode.java);
                     editor.setHeight(10, Unit.EM);
-                    editor.setCaption(definition.getName());
+                    editor.setCaption(pluginName);
                     editor.setShowGutter(false);
                     editor.setShowPrintMargin(false);
                     editor.setValue(obj.get(definition.getId(), definition.getDefaultValue()));
@@ -712,7 +727,7 @@ public class PropertySheet extends AbsoluteLayout {
                     break;
                 case MULTILINE_TEXT:
                 case XML:
-                    ImmediateUpdateTextArea area = new ImmediateUpdateTextArea(definition.getName()) {
+                    ImmediateUpdateTextArea area = new ImmediateUpdateTextArea(pluginName) {
                         private static final long serialVersionUID = 1L;
 
                         protected void save(String text) {
@@ -738,9 +753,9 @@ public class PropertySheet extends AbsoluteLayout {
         IConfigurationService configurationService = context.getConfigurationService();
         FlowStep step = getSingleFlowStep();
         String projectVersionId = step.getComponent().getProjectVersionId();
-        final AbstractSelect combo = new ComboBox(definition.getName());
+        final AbstractSelect combo = new ComboBox(pluginNameMessage(definition));
         combo.setImmediate(true);
-        combo.setDescription(definition.getDescription());
+        combo.setDescription(pluginDescMessage(definition));
         combo.setNullSelectionAllowed(false);
         combo.setRequired(definition.isRequired());
         Set<XMLResourceDefinition> types = context.getDefinitionFactory()

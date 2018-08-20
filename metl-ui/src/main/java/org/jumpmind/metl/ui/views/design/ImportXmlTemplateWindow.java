@@ -53,6 +53,7 @@ import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.plugin.XMLComponentDefinition.ResourceCategory;
 import org.jumpmind.metl.core.plugin.XMLResourceDefinition;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.metl.ui.views.design.ChooseWsdlServiceOperationWindow.ServiceChosenListener;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.reficio.ws.builder.SoapBuilder;
@@ -87,15 +88,15 @@ import jlibs.xml.xsd.XSParser;
 @SuppressWarnings("serial")
 public class ImportXmlTemplateWindow extends ResizableWindow implements ValueChangeListener, ClickListener, Receiver, SucceededListener {
 
-    private static final String OPTION_TEXT = "Text";
+    private static final String OPTION_TEXT = "common.test";
 
-    private static final String OPTION_FILE = "File";
+    private static final String OPTION_FILE = "common.file";
 
-    private static final String OPTION_URL = "URL";
+    private static final String OPTION_URL = "common.url";
 
-    private static final String OPTION_RESOURCE = "Resource";
+    private static final String OPTION_RESOURCE = "common.resource";
     
-    private static final String URL_SETTING = "url";
+    private static final String URL_SETTING = "common.url";
 
     VerticalLayout optionLayout;
 
@@ -130,16 +131,16 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
         layout.setSpacing(true);
         layout.setMargin(true);
         layout.addStyleName(ValoTheme.WINDOW_BOTTOM_TOOLBAR);
-        layout.addComponent(new Label("Import XML from either an XSD or WSDL source."));
+        layout.addComponent(new Label(MessageSource.message("importXmlTemplateWindow.importSource")));
 
-        optionGroup = new OptionGroup("Select the location of the XSD or WSDL.");
-        optionGroup.addItem(OPTION_TEXT);
-        optionGroup.addItem(OPTION_FILE);
-        optionGroup.addItem(OPTION_URL);
-        optionGroup.addItem(OPTION_RESOURCE);
+        optionGroup = new OptionGroup(MessageSource.message("importXmlTemplateWindow.selectSorce"));
+        optionGroup.addItem(MessageSource.message(OPTION_TEXT));
+        optionGroup.addItem(MessageSource.message(OPTION_FILE));
+        optionGroup.addItem(MessageSource.message(OPTION_URL).toUpperCase());
+        optionGroup.addItem(MessageSource.message(OPTION_RESOURCE));
         optionGroup.setNullSelectionAllowed(false);
         optionGroup.setImmediate(true);
-        optionGroup.select(OPTION_TEXT);
+        optionGroup.select(MessageSource.message(OPTION_TEXT));
         optionGroup.addValueChangeListener(this);
         layout.addComponent(optionGroup);
 
@@ -147,19 +148,19 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
         optionLayout.setSizeFull();
 
         editor = new AceEditor();
-        editor.setCaption("Enter the XML text:");
+        editor.setCaption(MessageSource.message("importXmlTemplateWindow.enterText"));
         editor.setMode(AceMode.xml);
         editor.setSizeFull();
         editor.setHighlightActiveLine(true);
         editor.setShowPrintMargin(false);
 
-        Button importButton = new Button("Import");
+        Button importButton = new Button(MessageSource.message("common.import"));
         importButton.addClickListener(this);
 
         upload = new Upload(null, this);
         upload.addSucceededListener(this);
         upload.setButtonCaption(null);
-        urlTextField = new TextField("Enter the URL:");
+        urlTextField = new TextField(MessageSource.message("importXmlTemplateWindow.enterUrl"));
         urlTextField.setWidth(100.0f, Unit.PERCENTAGE);
         
         resourceComboBox = createResourceCB();
@@ -174,7 +175,7 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
     }
     
     protected ComboBox createResourceCB() {
-        ComboBox cb = new ComboBox("HTTP Resource");
+        ComboBox cb = new ComboBox(MessageSource.message("importXmlTemplateWindow.httpResource"));
         
         String projectVersionId = component.getProjectVersionId();
         IConfigurationService configurationService = context.getConfigurationService();
@@ -199,16 +200,16 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
 
     protected void rebuildOptionLayout() {
         optionLayout.removeAllComponents();
-        if (optionGroup.getValue().equals(OPTION_TEXT)) {
+        if (optionGroup.getValue().equals(MessageSource.message(OPTION_TEXT))) {
             optionLayout.addComponent(editor);
             editor.focus();
-        } else if (optionGroup.getValue().equals(OPTION_FILE)) {
+        } else if (optionGroup.getValue().equals(MessageSource.message(OPTION_FILE))) {
             optionLayout.addComponent(upload);
             upload.focus();
-        } else if (optionGroup.getValue().equals(OPTION_URL)) {
+        } else if (optionGroup.getValue().equals(MessageSource.message(OPTION_URL).toUpperCase())) {
             optionLayout.addComponent(urlTextField);
             urlTextField.focus();
-        } else if (optionGroup.getValue().equals(OPTION_RESOURCE)) {
+        } else if (optionGroup.getValue().equals(MessageSource.message(OPTION_RESOURCE))) {
             optionLayout.addComponent(resourceComboBox);
             resourceComboBox.focus();
         }
@@ -231,11 +232,11 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
 
     @Override
     public void buttonClick(ClickEvent event) {
-        if (optionGroup.getValue().equals(OPTION_TEXT)) {
+        if (optionGroup.getValue().equals(MessageSource.message(OPTION_TEXT))) {
             importXml(editor.getValue());
-        } else if (optionGroup.getValue().equals(OPTION_FILE)) {
+        } else if (optionGroup.getValue().equals(MessageSource.message(OPTION_FILE))) {
             upload.submitUpload();
-        } else if (optionGroup.getValue().equals(OPTION_URL)) {
+        } else if (optionGroup.getValue().equals(MessageSource.message(OPTION_URL).toUpperCase())) {
             InputStream in = null;
             String text = null;
             try {
@@ -247,12 +248,12 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
                 IOUtils.closeQuietly(in);
             }
             importXml(text);
-        } else if (optionGroup.getValue().equals(OPTION_RESOURCE)) {
+        } else if (optionGroup.getValue().equals(MessageSource.message(OPTION_RESOURCE))) {
             InputStream in = null;
             String text = null;
             try {
                 Resource resource = (Resource) resourceComboBox.getValue();
-                String resourceUrl = resource.findSetting(URL_SETTING).getValue();
+                String resourceUrl = resource.findSetting(MessageSource.message(URL_SETTING).toLowerCase()).getValue();
                 in = new URL(resourceUrl).openStream();
                 text = IOUtils.toString(in);
             } catch (Exception e) {
@@ -277,7 +278,8 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
                 } else if (rootName.equals("schema")) {
                     importFromXsd(text);
                 } else {
-                    Notification note = new Notification("Unrecognized Content", "The XML file has a root element of " + rootName
+                    Notification note = new Notification(MessageSource.message("importXmlTemplateWindow.unrecognizedContent"), 
+                    		"The XML file has a root element of " + rootName
                             + ", but expected \"definitions\" for WSDL or \"schema\" for XSD.");
                     note.show(Page.getCurrent());
                 }
@@ -319,7 +321,7 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
         }
 
         if (allOperations.size() == 0) {
-            Notification note = new Notification("No operations", "No operations found in the WSDL.");
+            Notification note = new Notification(MessageSource.message("importXmlTemplateWindow.noOperations"),MessageSource.message("importXmlTemplateWindow.noOperationsInWsdl"));
             note.show(Page.getCurrent());
         } else if (allOperations.size() == 1) {
             importFromWsdl(wsdl, allOperations.get(0));

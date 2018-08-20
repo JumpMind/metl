@@ -55,6 +55,7 @@ import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.IFlowRunnable;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.metl.ui.views.manage.ExecutionRunPanel;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.springframework.http.HttpEntity;
@@ -126,9 +127,9 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
         Flow flow = configurationService.findFlow(deployment.getFlowId());
 
         ButtonBar buttonBar = new ButtonBar();
-        buttonBar.addButton("Call Service", Icons.RUN, (e) -> runFlow());
-
-        viewExecutionLogButton = buttonBar.addButton("View Log", Icons.LOG, (e) -> openExecution());
+        buttonBar.addButton(MessageSource.message("callWebServicePanel.callService"), Icons.RUN, (e) -> runFlow());
+        
+        viewExecutionLogButton = buttonBar.addButton(MessageSource.message("common.viewLog"), Icons.LOG, (e) -> openExecution());
         viewExecutionLogButton.setEnabled(false);
 
         addComponent(buttonBar);
@@ -157,13 +158,14 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
         methodGroup.addItem("DELETE");
         formLayout.addComponent(methodGroup);
 
-        ComboBox contentType = new ComboBox("Content Type");
+        ComboBox contentType = new ComboBox(MessageSource.message("callWebServicePanel.contentType"));
         contentType.addItem(MimeTypeUtils.APPLICATION_JSON.toString());
         contentType.addItem(MimeTypeUtils.APPLICATION_XML.toString());
         contentType.setNullSelectionAllowed(false);
         formLayout.addComponent(contentType);
 
-        securitySchemeCombo = new ComboBox("Security Scheme");
+        
+        securitySchemeCombo = new ComboBox(MessageSource.message("callWebServicePanel.securityScheme"));
         securitySchemeCombo.setNullSelectionAllowed(false);
         SecurityScheme[] types = SecurityScheme.values();
         for (SecurityScheme securityType : types) {
@@ -172,12 +174,12 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
         securitySchemeCombo.addValueChangeListener((e) -> securityMethodChanged());
         formLayout.addComponent(securitySchemeCombo);
 
-        userField = new TextField("Security Username");
+        userField = new TextField(MessageSource.message("callWebServicePanel.securityUsername"));
         userField.setNullRepresentation("");
         userField.setVisible(false);
         formLayout.addComponent(userField);
 
-        passwordField = new PasswordField("Security Password");
+        passwordField = new PasswordField(MessageSource.message("callWebServicePanel.securityPassword"));
         passwordField.setNullRepresentation("");
         passwordField.setVisible(false);
         formLayout.addComponent(passwordField);
@@ -250,7 +252,9 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
         if (isNotBlank(executionId)) {
             ExecutionRunPanel logPanel = new ExecutionRunPanel(executionId, context, tabs, this);
             logPanel.onBackgroundUIRefresh(logPanel.onBackgroundDataRefresh());
-            tabs.addCloseableTab(executionId, "Run " + deployment.getName(), Icons.LOG,
+            tabs.addCloseableTab(executionId,
+            		MessageSource.message("callWebServicePanel.runMessage", new Object[] {deployment.getName()}), 
+            		Icons.LOG,
                     logPanel);
         }
     }
@@ -338,7 +342,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
             payload.setNullRepresentation("");
             payload.setSizeFull();
             payloadLayout.addComponent(payload);
-            addTab(payloadLayout, "Payload");
+            addTab(payloadLayout, MessageSource.message("callWebServicePanel.payload"));
 
             VerticalLayout requestHeadersLayout = new VerticalLayout();
             requestHeadersLayout.setSizeFull();
@@ -355,8 +359,8 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
 
             headersGrid = new Grid();
             headersGrid.setEditorEnabled(editable);
-            headersGrid.setEditorSaveCaption("Save");
-            headersGrid.setEditorCancelCaption("Cancel");
+            headersGrid.setEditorSaveCaption(MessageSource.message("common.save"));
+            headersGrid.setEditorCancelCaption(MessageSource.message("common.cancel"));
             headersGrid.setSelectionMode(SelectionMode.SINGLE);
             headersGrid.setSizeFull();
             headersGrid.addColumn("headerName").setHeaderCaption("Header").setEditable(true)

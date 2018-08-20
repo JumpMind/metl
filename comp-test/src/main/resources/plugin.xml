@@ -100,7 +100,7 @@
         <name>Assert DataSource</name>
         <defaultValue>0</defaultValue>
       </setting>
-      <setting id='sql'
+      <setting id='sql.assert'
                required='true'
                type='multiline_text'>
         <name>Assert Sql</name>

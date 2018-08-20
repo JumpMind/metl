@@ -41,6 +41,7 @@ import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Icons;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
@@ -92,10 +93,10 @@ public class ManageNavigator extends Panel {
         content.setExpandRatio(treeTable, 1);
 
         agentsFolder = new Folder();
-        agentsFolder.setName("Agents");
+        agentsFolder.setName(MessageSource.message("manageNavigator.agents"));
 
         flowsFolder = new Folder();
-        flowsFolder.setName("Flows");
+        flowsFolder.setName(MessageSource.message("common.flows"));
     }
 
     public void refresh() {

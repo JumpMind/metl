@@ -31,6 +31,7 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.PostCommitHandler;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,45 +89,45 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
         VerticalLayout content = new VerticalLayout();
         setContent(content);
         
-        addHeader("Project Version Settings");
+        addHeader(MessageSource.message("projectVersionSettingsPanel.projectVersionSettings"));
         
         FormLayout formLayout = new FormLayout();
         formLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        DateField releaseDateField = new DateField("Release Date");
+        DateField releaseDateField = new DateField(MessageSource.message("common.releaseDate"));
         releaseDateField.setValue(projectVersion.getReleaseDate());
         releaseDateField.setEnabled(false);        
         formLayout.addComponent(releaseDateField);
         
-        CheckBox archiveCheckBox = new CheckBox("Archived");
+        CheckBox archiveCheckBox = new CheckBox(MessageSource.message("projectVersionSettingsPanel.archived"));
         archiveCheckBox.setImmediate(true);
         archiveCheckBox.setValue(projectVersion.isArchived());
         archiveCheckBox.addValueChangeListener(e->toggleArchived(e));
         formLayout.addComponent(archiveCheckBox);
         content.addComponent(formLayout);
 
-        addHeader("Component Plugin Settings");
+        addHeader(MessageSource.message("projectVersionSettingsPanel.componentPluginSettings"));
 
         ButtonBar buttonBar = new ButtonBar();
         content.addComponent(buttonBar);
-        buttonBar.addButton("Refresh", Icons.REFRESH, (event)->refreshPlugins()); 
-        updateButton = buttonBar.addButton("Update", Icons.UPDATE, (event)->update());        
-        pinButton =  buttonBar.addButton("Pin", FontAwesome.CHECK_CIRCLE_O, (event)->pin(true));
-        unpinButton = buttonBar.addButton("Unpin", FontAwesome.CIRCLE_O, (event)->pin(false));
+        buttonBar.addButton(MessageSource.message("common.refresh"), Icons.REFRESH, (event)->refreshPlugins()); 
+        updateButton = buttonBar.addButton(MessageSource.message("projectVersionSettingsPanel.update"), Icons.UPDATE, (event)->update());        
+        pinButton =  buttonBar.addButton(MessageSource.message("projectVersionSettingsPanel.pin"), FontAwesome.CHECK_CIRCLE_O, (event)->pin(true));
+        unpinButton = buttonBar.addButton(MessageSource.message("projectVersionSettingsPanel.unpin"), FontAwesome.CIRCLE_O, (event)->pin(false));
 
         componentPluginsGrid = new Grid();
         componentPluginsGrid.setSelectionMode(SelectionMode.MULTI);
         componentPluginsGrid.setHeightMode(HeightMode.ROW);
         componentPluginsGrid.setWidth(100, Unit.PERCENTAGE);
-        componentPluginsGrid.addColumn("definitionType", String.class).setHeaderCaption("Plugin Type").setEditable(false);
-        componentPluginsGrid.addColumn("definitionName", String.class).setHeaderCaption("Name").setEditable(false);
-        componentPluginsGrid.addColumn("definitionTypeId", String.class).setHeaderCaption("Type").setEditable(false);
-        componentPluginsGrid.addColumn("pluginId", String.class).setHeaderCaption("Plugin").setEditable(false);
-        componentPluginsGrid.addColumn("enabled", Boolean.class).setHeaderCaption("Enabled").setWidth(75);
-        componentPluginsGrid.addColumn("pinVersion", Boolean.class).setHeaderCaption("Pin Version").setWidth(95);
+        componentPluginsGrid.addColumn("definitionType", String.class).setHeaderCaption(MessageSource.message("projectVersionSettingsPanel.pluginType")).setEditable(false);
+        componentPluginsGrid.addColumn("definitionName", String.class).setHeaderCaption(MessageSource.message("common.name")).setEditable(false);
+        componentPluginsGrid.addColumn("definitionTypeId", String.class).setHeaderCaption(MessageSource.message("common.type")).setEditable(false);
+        componentPluginsGrid.addColumn("pluginId", String.class).setHeaderCaption(MessageSource.message("projectVersionSettingsPanel.plugin")).setEditable(false);
+        componentPluginsGrid.addColumn("enabled", Boolean.class).setHeaderCaption(MessageSource.message("common.enabled")).setWidth(75);
+        componentPluginsGrid.addColumn("pinVersion", Boolean.class).setHeaderCaption(MessageSource.message("projectVersionSettingsPanel.pinVersion")).setWidth(95);
         
         final double VERSION_WIDTH = 190;
         
-        componentPluginsGrid.addColumn("artifactVersion", String.class).setHeaderCaption("Version").setWidth(VERSION_WIDTH)
+        componentPluginsGrid.addColumn("artifactVersion", String.class).setHeaderCaption(MessageSource.message("common.version")).setWidth(VERSION_WIDTH)
                 .setEditable(false);
         componentPluginsGrid.addColumn("updatesAvailable", String.class).setHeaderCaption("").setWidth(55)
                 .setEditable(false).setRenderer(new HtmlRenderer());

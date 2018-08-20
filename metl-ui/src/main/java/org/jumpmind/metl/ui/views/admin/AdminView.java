@@ -26,11 +26,14 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+
+import org.jumpmind.metl.ui.common.UIConstants;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
+import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.TopBarLink;
-import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.metl.ui.init.AppUI;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.UiComponent;
@@ -104,6 +107,14 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         table.addContainerProperty("id", String.class, null);
         table.setVisibleColumns(new Object[] { "id" });
         table.setColumnExpandRatio("id", 1);
+        /*addItem(MessageSource.message("common.tags"), Icons.TAG);
+        addItem(MessageSource.message("adminView.rest"), Icons.REST);
+        addItem(MessageSource.message("common.generalSettings"), Icons.SETTINGS);
+        addItem(MessageSource.message("adminView.pluginRepositories"), Icons.DATABASE);
+        addItem(MessageSource.message("adminView.plugins"), Icons.COMPONENT);
+        addItem(MessageSource.message("adminView.mailServer"), Icons.EMAIL);
+        addItem(MessageSource.message("adminView.logging"), Icons.LOGGING);
+        addItem(MessageSource.message("adminView.about"), FontAwesome.QUESTION);*/
         
         for (AdminSideView sideView : sideMenu) {
             AdminMenuLink link = (AdminMenuLink) sideView.getClass().getAnnotation(AdminMenuLink.class);
@@ -145,6 +156,23 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
             if (value != null) {
                 String id = value.toString();
                 Component panel = sideMenuById.get(id);
+                /*if (id.equals(MessageSource.message("common.tags"))) {
+                    panel = new TagPanel();
+                } else if (id.equals(MessageSource.message("adminView.rest"))) {
+                    panel = new ApiPanel();
+                } else if (id.equals(MessageSource.message("common.generalSettings"))) {
+                    panel = new GeneralSettingsPanel();
+                } else if (id.equals(MessageSource.message("adminView.mailServer"))) {
+                    panel = new MailServerPanel();
+                }else if (id.equals(MessageSource.message("adminView.logging"))) {
+                    panel = new LoggingPanel();
+                } else if (id.equals(MessageSource.message("adminView.pluginRepositories") )) {
+                    panel = new PluginRepositoriesPanel();                    
+                } else if (id.equals(MessageSource.message("adminView.about"))) {
+                    panel = new AboutPanel();
+                } else if (id.equals(MessageSource.message("adminView.plugins"))) {
+                    panel = new PluginsPanel();
+                }*/
                 tabbedPanel.addCloseableTab(id, id, table.getItemIcon(id), panel);
             }
         }

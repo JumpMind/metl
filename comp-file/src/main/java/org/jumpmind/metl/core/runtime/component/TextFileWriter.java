@@ -87,10 +87,6 @@ public class TextFileWriter extends AbstractFileWriter {
         TypedProperties properties = getTypedProperties();
         lineTerminator = properties.get(SETTING_TEXT_LINE_TERMINATOR);
         encoding = properties.get(SETTING_ENCODING, DEFAULT_ENCODING);
-        if ("".equals(encoding)) {
-        	encoding = DEFAULT_ENCODING;
-        	log(LogLevel.INFO, "File Encoding has not been set, using the default of UTF-8.");
-        }
         append = properties.is(SETTING_APPEND, false);
         emptyFile = properties.is(SETTING_EMPTY_FILE, false);
         closeOn = properties.get(SETTING_CLOSE_ON, closeOn);
@@ -192,6 +188,7 @@ public class TextFileWriter extends AbstractFileWriter {
                 directory = (IDirectory) getResourceReference();
             }
             String fileName = getFileName(inputMessage);
+            System.out.println(fileName);
             if (!(directory instanceof JMSJndiQueueDirectory) &&
     				!(directory instanceof JMSJndiTopicDirectory)) {
 	            if (isNotBlank(fileName)) {

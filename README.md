@@ -23,13 +23,28 @@ cd metl-assemble
 ./gradlew assemble
 ~~~~~
 
-### Run
+在服务器部署需要有conf.properties文件。以下是一个conf文件数据信息：
+
+~~~~
+execution.retention.time.ms.cancelled=60000
+execution.purge.job.period.time.ms=3600000
+execution.db.url=jdbc\:h2\:tcp\://localhost\:9092/./metlexec;LOCK_TIMEOUT\=60000;DB_CLOSE_ON_EXIT\=FALSE;WRITE_DELAY\=0
+execution.retention.time.ms=604800000
+db.url=jdbc\:h2\:tcp\://localhost\:9092/./metldev;LOCK_TIMEOUT\=60000;DB_CLOSE_ON_EXIT\=FALSE;WRITE_DELAY\=0
+log.to.file.enabled=true
+db.driver=org.h2.Driver
+log.to.console.enabled=true
+table.prefix=metl
+h2.port=9092
+~~~~
+
+#### Run
 ~~~~~
 cd ../metl-war/build/libs
 java -jar metl.war
 ~~~~~
 
-### Deploy
+#### Deploy
 
 To Tomcat:
 ~~~~~

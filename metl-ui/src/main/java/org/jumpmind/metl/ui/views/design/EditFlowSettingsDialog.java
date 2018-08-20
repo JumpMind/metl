@@ -30,6 +30,7 @@ import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowParameter;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextArea;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
@@ -78,15 +79,15 @@ class EditFlowSettingsDialog extends ResizableWindow implements ValueChangeListe
     Button removeButton;
     
     public EditFlowSettingsDialog(ApplicationContext context, Flow flow, boolean readOnly) {
-        super("Flow Settings");
+        super(MessageSource.message("editFlowSettingsDialog.flowSettings"));
         this.context = context;
         this.flow = flow;
 
-        Button closeButton = new Button("Close");
+        Button closeButton = new Button(MessageSource.message("common.close"));
         closeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
         closeButton.addClickListener(new CloseClickListener());
         
-        addHeader("General Settings");
+        addHeader(MessageSource.message("common.generalSettings"));
         
         FormLayout formLayout = new FormLayout();
         formLayout.setMargin(true);
@@ -107,10 +108,10 @@ class EditFlowSettingsDialog extends ResizableWindow implements ValueChangeListe
         
         if (!readOnly) {
             ButtonBar buttonBar = new ButtonBar();
-            buttonBar.addButton("Add", FontAwesome.PLUS, new AddClickListener());
-            insertButton = buttonBar.addButton("Insert", FontAwesome.CHEVRON_RIGHT, new InsertClickListener());
+            buttonBar.addButton(MessageSource.message("common.add"), FontAwesome.PLUS, new AddClickListener());
+            insertButton = buttonBar.addButton(MessageSource.message("editFlowSettingsDialog.insert"), FontAwesome.CHEVRON_RIGHT, new InsertClickListener());
             insertButton.setEnabled(false);
-            removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O, new RemoveClickListener());
+            removeButton = buttonBar.addButton(MessageSource.message("common.remove"), FontAwesome.TRASH_O, new RemoveClickListener());
             removeButton.setEnabled(false);
             addComponent(buttonBar);
         }

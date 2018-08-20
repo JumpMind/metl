@@ -35,6 +35,8 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
+import org.jumpmind.metl.ui.common.TabbedPanel;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.metl.ui.init.BackgroundRefresherService;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.UiComponent;
@@ -101,8 +103,8 @@ public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefre
         HorizontalLayout topPanelLayout = new HorizontalLayout();
         topPanelLayout.setWidth(100, Unit.PERCENTAGE);
         topPanelLayout.setSpacing(true);
-
-        Button refreshButton = new Button("Refresh");
+      
+        Button refreshButton = new Button(MessageSource.message("common.refresh"));
         refreshButton.addClickListener(new ClickListener() {
             public void buttonClick(ClickEvent event) {
                 refresh();
@@ -137,8 +139,8 @@ public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefre
         });
         topPanelLayout.addComponent(filter);
         topPanelLayout.setComponentAlignment(filter, Alignment.BOTTOM_LEFT);
-
-        autoRefreshOn = new CheckBox("Auto Refresh");
+       
+        autoRefreshOn = new CheckBox(MessageSource.message("loggingPanel.autoRefresh"));
         autoRefreshOn.setValue(true);
         autoRefreshOn.setImmediate(true);
         topPanelLayout.addComponent(autoRefreshOn);
@@ -149,7 +151,8 @@ public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefre
         topPanelLayout.setExpandRatio(spacer, 1);
 
         if (logFile != null && logFile.exists()) {
-            Button downloadButton = new Button("Download log file");
+            Button downloadButton = new Button(MessageSource.message("loggingPanel.downloadLogFile"));
+            
             downloadButton.addStyleName(ValoTheme.BUTTON_LINK);
             downloadButton.addStyleName(ValoTheme.BUTTON_SMALL);
 
@@ -160,8 +163,8 @@ public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefre
         }
 
         addComponent(topPanelLayout);
-
-        logPanel = new Panel("Log Output");
+       
+        logPanel = new Panel(MessageSource.message("common.logOutput"));
         logPanel.setSizeFull();
         logView = new Label("", ContentMode.HTML);
         logView.setSizeUndefined();
@@ -178,8 +181,9 @@ public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefre
                 try {
                     return new BufferedInputStream(new FileInputStream(logFile));
                 } catch (FileNotFoundException e) {
-                    Notification note = new Notification("File Not Found", "Could not find "
-                            + logFile.getName() + " to download");
+                	 // MessageSource.message("loggingPanel.to.download")
+                    Notification note = new Notification(MessageSource.message("loggingPanel.fileNotFound"), MessageSource.message("loggingPanel.notFind")
+                            + logFile.getName() + MessageSource.message("loggingPanel.download"));
                     note.show(Page.getCurrent());
                     return null;
                 }

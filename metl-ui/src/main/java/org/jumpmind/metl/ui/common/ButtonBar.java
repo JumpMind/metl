@@ -20,6 +20,10 @@
  */
 package org.jumpmind.metl.ui.common;
 
+import java.util.Locale;
+
+import org.jumpmind.metl.ui.i18n.MessageSource;
+
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
 import com.vaadin.shared.ui.MarginInfo;
@@ -84,7 +88,7 @@ public class ButtonBar extends HorizontalLayout {
         TextField textField = new TextField();
         textField.setColumns(15);
         textField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
-        textField.setInputPrompt("Filter");
+        textField.setInputPrompt(MessageSource.message("buttonBar.filter.prompt"));
         textField.setIcon(FontAwesome.SEARCH);
         textField.setTextChangeEventMode(TextChangeEventMode.LAZY);
         textField.setTextChangeTimeout(500);

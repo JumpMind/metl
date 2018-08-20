@@ -53,8 +53,8 @@
               <choice>POST</choice>
               <choice>DELETE</choice>
           </choices>
-      </setting>  
-      <setting id='relative.path'
+      </setting>
+      <setting id='relative.url'
                required='false'
                type='text'>
         <name>Append To Url</name>

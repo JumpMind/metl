@@ -32,6 +32,7 @@ import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.persist.IPluginService;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UIConstants;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
@@ -73,14 +74,14 @@ public class PluginsPanel extends AbstractAdminPanel {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        addButton = buttonBar.addButton("Add", FontAwesome.PLUS);
+        addButton = buttonBar.addButton(MessageSource.message("common.add"), FontAwesome.PLUS);
         addButton.addClickListener(e -> addPlugin());
 
-        moveUpButton = buttonBar.addButton("Move Up", FontAwesome.ARROW_UP, e -> moveUp());
+        moveUpButton = buttonBar.addButton(MessageSource.message("pluginsPanel.moveUp"), FontAwesome.ARROW_UP, e -> moveUp());
 
-        moveDownButton = buttonBar.addButton("Move Down", FontAwesome.ARROW_DOWN, e -> moveDown());
+        moveDownButton = buttonBar.addButton(MessageSource.message("pluginsPanel.moveDown"), FontAwesome.ARROW_DOWN, e -> moveDown());
 
-        removeButton = buttonBar.addButton("Purge Unused", FontAwesome.TRASH_O, e -> purgeUnused());
+        removeButton = buttonBar.addButton(MessageSource.message("pluginsPanel.purgeUnused"), FontAwesome.TRASH_O, e -> purgeUnused());
 
         container = new BeanItemContainer<Plugin>(Plugin.class);
 
@@ -91,10 +92,9 @@ public class PluginsPanel extends AbstractAdminPanel {
         table.setSelectable(true);
         table.setMultiSelect(true);
         table.setSortEnabled(false);
-
         table.setContainerDataSource(container);
         table.setVisibleColumns("artifactGroup", "artifactName", "artifactVersion", "lastUpdateTime");
-        table.setColumnHeaders("Group", "Name", "Version", "Updated");
+        table.setColumnHeaders(MessageSource.message("common.group"), MessageSource.message("common.name"),  MessageSource.message("common.version"), MessageSource.message("common.updated") );
         table.setColumnWidth("lastUpdateTime", UIConstants.DATETIME_WIDTH_PIXELS);
         table.addValueChangeListener(e -> setButtonsEnabled());
 

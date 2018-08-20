@@ -32,12 +32,12 @@
     <keywords>compress</keywords>
     <description></description>
     <settings>
-      <setting id='source.resource'
+      <setting id='zip.source.resource'
                required='true'
                type='streamable_resource'>
         <name>Source Directory Resource</name>
       </setting>
-      <setting id='target.resource'
+      <setting id='zip.target.resource'
                required='true'
                type='streamable_resource'>
         <name>Zip Target Directory Resource</name>
@@ -53,7 +53,7 @@
         <name>Must Exist</name>
         <defaultValue>false</defaultValue>
       </setting>
-      <setting id='delete.on.complete'
+      <setting id='zip.delete.on.complete'
                required='false'
                type='boolean'>
         <name>Delete Source Files</name>
@@ -78,12 +78,12 @@
     <keywords>compress</keywords>
     <description></description>
     <settings>
-      <setting id='source.resource'
+      <setting id='unzip.source.resource'
                required='true'
                type='streamable_resource'>
         <name>Zip Source Directory Resource</name>
       </setting>
-      <setting id='target.resource'
+      <setting id='unzip.target.resource'
                required='true'
                type='streamable_resource'>
         <name>Unzip Target Directory Resource</name>
@@ -116,7 +116,7 @@
         <name>Encoding</name>
         <defaultValue>UTF-8</defaultValue>
       </setting>
-      <setting id='delete.on.complete'
+      <setting id='unzip.delete.on.complete'
                required='false'
                type='boolean'>
         <name>Delete Source File</name>

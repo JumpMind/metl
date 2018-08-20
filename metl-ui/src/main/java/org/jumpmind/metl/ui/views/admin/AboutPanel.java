@@ -21,9 +21,8 @@
 package org.jumpmind.metl.ui.views.admin;
 
 import java.util.Date;
-
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang.time.FastDateFormat;
 import org.jumpmind.metl.core.runtime.AgentManager;
 import org.jumpmind.metl.core.util.VersionUtils;
@@ -59,7 +58,7 @@ public class AboutPanel extends AbstractAdminPanel implements IBackgroundRefresh
         setMargin(true);
         setSpacing(true);
 
-        Button gcCollect = new Button("Garbage Collect", (e) -> {
+        Button gcCollect = new Button(MessageSource.message("aboutPanel.garbageCollect"), (e) -> {
             Runtime.getRuntime().gc();
             refresh();
         });
@@ -69,9 +68,9 @@ public class AboutPanel extends AbstractAdminPanel implements IBackgroundRefresh
         table = new Table();
         table.setSizeFull();
         table.addStyleName("noscroll");
-        table.addContainerProperty("Name", String.class, null);
-        table.setColumnWidth("Name", 200);
-        table.addContainerProperty("Value", String.class, null);
+        table.addContainerProperty(MessageSource.message("common.name"), String.class, null);
+        table.setColumnWidth(MessageSource.message("common.name"), 200);
+        table.addContainerProperty(MessageSource.message("common.value"), String.class, null);
         addComponent(table);
         setExpandRatio(table, 1);
     }
@@ -117,27 +116,29 @@ public class AboutPanel extends AbstractAdminPanel implements IBackgroundRefresh
     protected void refresh() {
         table.removeAllItems();
         int itemId = 0;
-        table.addItem(new Object[] { "Application Version", VersionUtils.getCurrentVersion() },
+     
+        table.addItem(new Object[] {MessageSource.message("aboutPanel.applicationVersion") , VersionUtils.getCurrentVersion() },
                 itemId++);
-        table.addItem(new Object[] { "Build Time", VersionUtils.getBuildTime() }, itemId++);
-        table.addItem(new Object[] { "SCM Revision", VersionUtils.getScmVersion() }, itemId++);
-        table.addItem(new Object[] { "SCM Branch", VersionUtils.getScmBranch() }, itemId++);
+        table.addItem(new Object[] {MessageSource.message("aboutPanel.buildTime") , VersionUtils.getBuildTime() }, itemId++);
+        table.addItem(new Object[] { MessageSource.message("aboutPanel.SCM.revision"), VersionUtils.getScmVersion() }, itemId++);
+        table.addItem(new Object[] { MessageSource.message("aboutPanel.SCM.branch"), VersionUtils.getScmBranch() }, itemId++);
 
-        table.addItem(new Object[] { "Host Name", AppUtils.getHostName() }, itemId++);
-        table.addItem(new Object[] { "IP Address", AppUtils.getIpAddress() }, itemId++);
-        table.addItem(new Object[] { "Java Version", System.getProperty("java.version") },
+        table.addItem(new Object[] { MessageSource.message("aboutPanel.hostName"), AppUtils.getHostName() }, itemId++);
+        table.addItem(new Object[] { MessageSource.message("aboutPanel.IP.address"), AppUtils.getIpAddress() }, itemId++);
+        table.addItem(new Object[] { MessageSource.message("aboutPanel.javaVersion"), System.getProperty("java.version") },
                 itemId++);
         table.addItem(
-                new Object[] { "System Time",
+                new Object[] { MessageSource.message("aboutPanel.systemTime"),
                         FastDateFormat.getTimeInstance(FastDateFormat.MEDIUM).format(new Date()) },
                 itemId++);
         table.addItem(
-                new Object[] { "Used Heap", Long.toString(
+                new Object[] { MessageSource.message("aboutPanel.usedHeap"), Long.toString(
                         Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) },
                 itemId++);
-        table.addItem(new Object[] { "Heap Size", Long.toString(Runtime.getRuntime().maxMemory()) },
+        table.addItem(new Object[] { MessageSource.message("aboutPanel.heapSize"), Long.toString(Runtime.getRuntime().maxMemory()) },
                 itemId++);
-        table.addItem(new Object[] { "Last Restart",
+       
+        table.addItem(new Object[] {MessageSource.message("aboutPanel.lastRestart"),
                 CommonUiUtils.formatDateTime(AgentManager.lastRestartTime) }, itemId++);
     }
 

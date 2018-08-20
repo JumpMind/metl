@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +75,7 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
             addComponent(topBarButton);
         }
 
-        Button logoutButton = new Button("Logout", FontAwesome.SIGN_OUT);
+        Button logoutButton = new Button(MessageSource.message("category.logout"), FontAwesome.SIGN_OUT);
         logoutButton.addClickListener(event -> logout());
         addComponent(logoutButton);
 
@@ -90,11 +90,16 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
             boolean needDefaultView = viewManager.getDefaultView() == null && links.size() > 0;
             MenuItem categoryItem = null;
             if (links.size() > 1) {
-                categoryItem = menuBar.addItem(category.name(), null);
+              
+            	if(category.name() == "Explore") {
+                categoryItem = menuBar.addItem(MessageSource.message("menu."+ category.name().toLowerCase() ), null);
+            	}
                 categoryItems.add(categoryItem);
             }
 
             if (needDefaultView) {
+            
+          
                 viewManager.setDefaultView(links.get(0).id());
             }
 
@@ -112,9 +117,11 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
                 };
                 MenuItem menuItem = null;
                 if (categoryItem == null) {
-                    menuItem = menuBar.addItem(menuLink.name(), command);
+                	
+                    menuItem = menuBar.addItem(MessageSource.message("menu."+ menuLink.name().toLowerCase()  ), command);
                 } else {
-                    menuItem = categoryItem.addItem(menuLink.name(), command);
+                	
+                    menuItem = categoryItem.addItem(MessageSource.message("menu."+ menuLink.name().toLowerCase()), command);
                 }
                 menuItem.setCheckable(true);
                 viewToButtonMapping.put(menuLink.id(), menuItem);

@@ -26,9 +26,11 @@ import java.util.Set;
 import org.jumpmind.metl.core.model.Tag;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ButtonBar;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
+
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -62,14 +64,14 @@ public class TagPanel extends AbstractAdminPanel {
     public TagPanel() {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
-
-        newButton = buttonBar.addButton("New", FontAwesome.PLUS);
+ 
+        newButton = buttonBar.addButton(MessageSource.message("common.new"), FontAwesome.PLUS);
         newButton.addClickListener(new NewClickListener());
 
-        editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
+        editButton = buttonBar.addButton(MessageSource.message("common.edit").toLowerCase(), FontAwesome.EDIT);
         editButton.addClickListener(new EditClickListener());
 
-        removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
+        removeButton = buttonBar.addButton(MessageSource.message("common.remove"), FontAwesome.TRASH_O);
         removeButton.addClickListener(new RemoveClickListener());
 
         container = new BeanItemContainer<Tag>(Tag.class);
@@ -83,8 +85,9 @@ public class TagPanel extends AbstractAdminPanel {
         table.setMultiSelect(true);
 
         table.setContainerDataSource(container);
+     
         table.setVisibleColumns("name", "color");
-        table.setColumnHeaders("Tag Name", "Color");
+        table.setColumnHeaders(MessageSource.message("tagPanel.tagName"), MessageSource.message("common.color"));
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());
         table.setSortContainerPropertyId("name");
@@ -141,7 +144,7 @@ public class TagPanel extends AbstractAdminPanel {
         public void buttonClick(ClickEvent event) {
             Tag tag = new Tag();
             TagEditPanel editPanel = new TagEditPanel(context, tag);
-            adminView.getTabbedPanel().addCloseableTab(tag.getId(), "Edit Tag", getIcon(), editPanel);
+			adminView.getTabbedPanel().addCloseableTab(tag.getId(), MessageSource.message("tagPanel.editTag") , getIcon(), editPanel);
         }
     }
 
@@ -151,7 +154,7 @@ public class TagPanel extends AbstractAdminPanel {
 //TODO: refresh if we want to do things like show all entities that are tagged            
 //            context.getOperationsService().refresh(tag);
             TagEditPanel editPanel = new TagEditPanel(context, tag);
-            adminView.getTabbedPanel().addCloseableTab(tag.getId(), "Edit Tag", getIcon(), editPanel);
+			adminView.getTabbedPanel().addCloseableTab(tag.getId(), MessageSource.message("tagPanel.editTag") , getIcon(), editPanel);
         }
     }
 

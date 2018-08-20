@@ -21,6 +21,8 @@
 package org.jumpmind.metl.ui.views.design.menu;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.jumpmind.metl.ui.i18n.MenuResource;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
 
 public class ProjectMenuManager extends AbstractDesignSelectedValueMenuManager {
@@ -32,10 +34,10 @@ public class ProjectMenuManager extends AbstractDesignSelectedValueMenuManager {
     @Override
     protected String[] getEnabledPaths(Object selected) {
         return (String[])ArrayUtils.addAll(super.getEnabledPaths(selected), new String[] {
-                "File|Hide",
-                "Edit|Rename",
-                "Edit|Remove",
-                "Tag",
+        		 MenuResource.getFileHidden(),
+                MenuResource.getEditRename(),
+                MenuResource.getEditRemove(),
+                MessageSource.message("common.tag"),
         });
     }
 

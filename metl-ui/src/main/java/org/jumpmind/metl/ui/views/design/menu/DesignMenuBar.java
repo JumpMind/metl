@@ -28,7 +28,10 @@ import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.ui.common.AbstractMenuBar;
+import org.jumpmind.metl.ui.i18n.MenuResource;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
+import org.postgresql.translation.messages_bg;
 
 import com.vaadin.ui.AbstractSelect;
 
@@ -49,37 +52,37 @@ public class DesignMenuBar extends AbstractMenuBar {
 
     @Override
     protected void buildMenu() {
-        add("File|New|Project");
-        add("File|New|Project Branch");
-        add("File|New|Project Dependency");
-        add("File|New|Flow|Design");
-        add("File|New|Flow|Test");
-        add("File|New|Model|Hierarchical");
-        add("File|New|Model|Relational");
-        add("File|New|Resource|Database");
-        add("File|New|Resource|Directory|FTP");
-        add("File|New|Resource|Directory|File System");
-        add("File|New|Resource|Directory|JMS");
-        add("File|New|Resource|Directory|SFTP");
-        add("File|New|Resource|Directory|SMB");
-        add("File|New|Resource|HTTP");
-        add("File|New|Resource|Mail Session");
-        add("File|New|Resource|Subscribe|JMS");
-        add("File|Open");
-        addSeparator("File");
-        add("File|Import...");        
-        add("File|Export...");
+        add( MenuResource.getNewProject());
+        add( MenuResource.getNewBranch());
+        add(MenuResource.getNewDependency());
+        add(MenuResource.getNewDesign());
+        add(MenuResource.getNewTest());
+        add(MenuResource.getNewHierarchical());
+        add(MenuResource.getNewRelational());
+        add(MenuResource.getNewDatabase());
+        add(MenuResource.getNewFTP());
+        add(MenuResource.getNewFileSystem());
+        add(MenuResource.getNewJMS());
+        add(MenuResource.getNewSFTP());
+        add(MenuResource.getNewSMB());
+        add(MenuResource.getNewHTTP());
+        add(MenuResource.getNewMailSession());
+        add(MenuResource.getNewSubscribeJMS());
+        add(MenuResource.getFileOpen());
+        addSeparator(MessageSource.message("common.file"));
+        add(MenuResource.getFileImport());        
+        add(MenuResource.getFileExport());
         
-        add("Edit|Rename");
-        add("Edit|Cut");
-        add("Edit|Copy");
-        add("Edit|Paste");
-        addSeparator("Edit");
-        add("Edit|Change Dependency Version");
-        addSeparator("Edit");
-        add("Edit|Remove");
+        add(MenuResource.getEditRename());
+        add(MenuResource.getEditCut());
+        add(MenuResource.getEditCopy());
+        add(MenuResource.getEditPaste());
+        addSeparator(MessageSource.message("common.edit"));
+        add(MenuResource.getEditChangeDependency());
+        addSeparator(MessageSource.message("common.edit"));
+        add(MenuResource.getEditRemove());
         
-        add("Tag");
+        add(MessageSource.message("common.tag"));
     }
 
     static class NothingSelectAction extends AbstractDesignSelectedValueMenuManager {

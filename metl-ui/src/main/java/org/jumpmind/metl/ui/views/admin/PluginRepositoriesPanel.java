@@ -26,6 +26,7 @@ import java.util.Set;
 import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UIConstants;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
@@ -63,13 +64,13 @@ public class PluginRepositoriesPanel extends AbstractAdminPanel {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        newButton = buttonBar.addButton("Add", FontAwesome.PLUS);
+        newButton = buttonBar.addButton(MessageSource.message("common.add"), FontAwesome.PLUS);
         newButton.addClickListener(new NewClickListener());
 
-        editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
+        editButton = buttonBar.addButton(MessageSource.message("common.edit"), FontAwesome.EDIT);
         editButton.addClickListener(new EditClickListener());
 
-        removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
+        removeButton = buttonBar.addButton(MessageSource.message("common.remove"), FontAwesome.TRASH_O);
         removeButton.addClickListener(new RemoveClickListener());
 
         container = new BeanItemContainer<PluginRepository>(PluginRepository.class);
@@ -84,7 +85,7 @@ public class PluginRepositoriesPanel extends AbstractAdminPanel {
 
         table.setContainerDataSource(container);
         table.setVisibleColumns("name", "url", "lastUpdateTime");
-        table.setColumnHeaders("Name", "Url", "Updated");
+        table.setColumnHeaders(MessageSource.message("common.name"), MessageSource.message("common.url"),MessageSource.message("common.updated"));
         table.setColumnWidth("lastUpdateTime", UIConstants.DATETIME_WIDTH_PIXELS);
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());

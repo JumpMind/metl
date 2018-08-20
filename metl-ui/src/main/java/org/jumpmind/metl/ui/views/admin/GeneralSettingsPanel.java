@@ -21,6 +21,7 @@
 package org.jumpmind.metl.ui.views.admin;
 
 import org.jumpmind.metl.core.model.GlobalSetting;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.slf4j.Logger;
@@ -44,7 +45,7 @@ import com.vaadin.ui.themes.ValoTheme;
 @AdminMenuLink(name = "General Settings", id = "General Settings", icon = FontAwesome.GEARS)
 public class GeneralSettingsPanel extends AbstractAdminPanel {
 
-    private static final String THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART = "This will take effect on the next server restart";
+    private static final String THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART ="generalSettingsPanel.restartMessage" ;
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -58,36 +59,72 @@ public class GeneralSettingsPanel extends AbstractAdminPanel {
     public void init() {
         form = new FormLayout();
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-
-        Label section = new Label("Display Settings");
+     
+        Label section = new Label(MessageSource.message("generalSettingsPanel.displaySettings"));
         section.addStyleName(ValoTheme.LABEL_H3);
         section.addStyleName(ValoTheme.LABEL_COLORED);
         form.addComponent(section);
 
-        addSetting("System Text", GlobalSetting.SYSTEM_TEXT, "",
-                "Set HTML content to be displayed in the top bar that can identify a particular environment")
+        addSetting(MessageSource.message("generalSettingsPanel.systemText"), GlobalSetting.SYSTEM_TEXT, "",
+        		MessageSource.message("generalSettingsPanel.intro"))
                         .focus();
+        section = new Label(MessageSource.message("generalSettingsPanel.purgeSettings"));
+        section.addStyleName(ValoTheme.LABEL_H3);
+        section.addStyleName(ValoTheme.LABEL_COLORED);
+        form.addComponent(section);
+       
+        addSetting(MessageSource.message("generalSettingsPanel.auditRetention"), GlobalSetting.AUDIT_EVENT_RETENTION_IN_DAYS,
+                Integer.toString(GlobalSetting.DEFAULT_AUDIT_EVENT_RETENTION_IN_DAYS), "",
+                Integer.class);
         
-        section = new Label("Auto Backup");
+        section = new Label(MessageSource.message("generalSettingsPanel.autoBackup"));
         section.addStyleName(ValoTheme.LABEL_H3);
         section.addStyleName(ValoTheme.LABEL_COLORED);
         form.addComponent(section); 
         
-        Label instructions = new Label("A restart is required after changing these settings");
+        Label instructions = new Label(MessageSource.message("generalSettingsPanel.restartRequired"));
         instructions.addStyleName(ValoTheme.LABEL_LIGHT);
         form.addComponent(instructions);
-        
-        addSetting("Enable Backup", GlobalSetting.CONFIG_BACKUP_ENABLED,
+       
+        addSetting(MessageSource.message("generalSettingsPanel.enableBackup"), GlobalSetting.CONFIG_BACKUP_ENABLED,
                 Boolean.toString(GlobalSetting.DEFAULT_CONFIG_BACKUP_ENABLED),
-                THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART, Boolean.class);
+                MessageSource.message(THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART), Boolean.class);
 
-        addSetting("Backup Cron Expression", GlobalSetting.CONFIG_BACKUP_CRON,
+        addSetting(MessageSource.message("generalSettingsPanel.backupExpression") , GlobalSetting.CONFIG_BACKUP_CRON,
                 GlobalSetting.DEFAULT_CONFIG_BACKUP_CRON,
-                THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART, String.class);
-
-        addSetting("Retention in Days", GlobalSetting.CONFIG_BACKUP_RETENTION_IN_DAYS,
+                MessageSource.message(THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART), String.class);
+       
+        addSetting(MessageSource.message("generalSettingsPanel.retention"), GlobalSetting.CONFIG_BACKUP_RETENTION_IN_DAYS,
                 Integer.toString(GlobalSetting.DEFAULT_CONFIG_BACKUP_RETENTION_IN_DAYS),
-                THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART, Integer.class);       
+                MessageSource.message(THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART), Integer.class);       
+        
+        section = new Label(MessageSource.message("generalSettingsPanel.passwordSettings"));
+        section.addStyleName(ValoTheme.LABEL_H3);
+        section.addStyleName(ValoTheme.LABEL_COLORED);
+        form.addComponent(section);
+
+        addSetting(MessageSource.message("generalSettingsPanel.minimumLength"), GlobalSetting.PASSWORD_MIN_LENGTH, "6", "", Integer.class);
+    
+        addSetting(MessageSource.message("generalSettingsPanel.prohibitReuse") , GlobalSetting.PASSWORD_PROHIBIT_PREVIOUS, "5", "",
+                Integer.class);
+
+        addSetting(MessageSource.message("generalSettingsPanel.expiration") , GlobalSetting.PASSWORD_EXPIRE_DAYS, "60", "",
+                Integer.class);
+        
+        addSetting(MessageSource.message("generalSettingsPanel.failedAttempts") , GlobalSetting.PASSWORD_FAILED_ATTEMPTS, 
+        		Integer.toString(GlobalSetting.PASSWORD_FAILED_ATTEMPTS_DEFAULT), "", Integer.class);
+
+        addSetting(MessageSource.message("generalSettingsPanel.commonWords") , GlobalSetting.PASSWORD_PROHIBIT_COMMON_WORDS, "true",
+                "", Boolean.class);
+        // MessageSource.message("generalSettingsPanel.require.mixed.case") 
+        addSetting(MessageSource.message("generalSettingsPanel.requireAlphanumeric") , GlobalSetting.PASSWORD_REQUIRE_ALPHANUMERIC, "true", "",
+                Boolean.class);
+
+        addSetting(MessageSource.message("generalSettingsPanel.requireSymbol") , GlobalSetting.PASSWORD_REQUIRE_SYMBOL, "true", "",
+                Boolean.class);
+
+        addSetting(MessageSource.message("generalSettingsPanel.requireMixedCase"), GlobalSetting.PASSWORD_REQUIRE_MIXED_CASE, "true", "",
+                Boolean.class);
 
         VerticalLayout paddedLayout = new VerticalLayout();
         paddedLayout.setMargin(true);

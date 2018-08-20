@@ -45,13 +45,13 @@ public class FileUtil extends AbstractComponentRuntime {
 
     public final static String SETTING_ACTION = "action";
 
-    public final static String SETTING_RELATIVE_PATH = "relative.path";
+    public final static String SETTING_RELATIVE_PATH = "source.relative.path";
 
     public final static String SETTING_GET_FILE_FROM_MESSAGE = "get.file.name.from.message";
 
     public static final String SETTING_MUST_EXIST = "must.exist";
 
-    public static final String SETTING_TARGET_RELATIVE_PATH = "target.relative.path";
+    public static final String SETTING_TARGET_RELATIVE_PATH = "fileutil.target.relative.path";
 
     public static final String SETTING_APPEND_TO_NAME = "append.to.name";
     

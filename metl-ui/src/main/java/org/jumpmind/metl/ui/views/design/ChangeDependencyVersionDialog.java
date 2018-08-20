@@ -26,6 +26,7 @@ import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,7 @@ public class ChangeDependencyVersionDialog extends ResizableWindow  {
     DesignNavigator designNavigator;
 
     public ChangeDependencyVersionDialog(ApplicationContext context, Object selectedElement, DesignNavigator designNavigator) {
-        super("Change Dependency Version");
+        super(MessageSource.message("common.changeDependencyVersion"));
         this.configService = context.getConfigurationService();
         this.designNavigator = designNavigator;
         initWindow(selectedElement);
@@ -90,12 +91,12 @@ public class ChangeDependencyVersionDialog extends ResizableWindow  {
     @SuppressWarnings("unchecked")
     protected Panel buildPossibleTargetVersions(ProjectVersion targetProjectVersion) {
 
-        Panel possibleTargetVersionsPanel = new Panel("Available Target Versions");        
+        Panel possibleTargetVersionsPanel = new Panel(MessageSource.message("changeDependencyVersionDialog.availableTargetVersions"));        
         possibleTargetVersionsPanel.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
         possibleTargetVersionsPanel.setSizeFull();
 
         IndexedContainer container = new IndexedContainer();
-        optionGroup = new OptionGroup("Project Version", container);
+        optionGroup = new OptionGroup(MessageSource.message("changeDependencyVersionDialog.projectVersion"), container);
         optionGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         optionGroup.setItemCaptionMode(ItemCaptionMode.PROPERTY);
         optionGroup.setItemCaptionPropertyId("versionLabel");
@@ -118,15 +119,15 @@ public class ChangeDependencyVersionDialog extends ResizableWindow  {
         FormLayout form = new FormLayout();
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         form.setMargin(true);
-        TextField sourceProjectNameField = new TextField("Source Project");
+        TextField sourceProjectNameField = new TextField(MessageSource.message("changeDependencyVersionDialog.sourceProject"));
         sourceProjectNameField.setValue(sourceProjectVersion.getProject().getName());
         sourceProjectNameField.setEnabled(false);
         form.addComponent(sourceProjectNameField);
-        TextField targetProjectNameField = new TextField("Target Project");
+        TextField targetProjectNameField = new TextField(MessageSource.message("changeDependencyVersionDialog.targetProject"));
         targetProjectNameField.setValue(targetProjectVersion.getProject().getName());
         targetProjectNameField.setEnabled(false);
         form.addComponent(targetProjectNameField);
-        TextField currentDependencyVersion = new TextField("Current Dependency Version");
+        TextField currentDependencyVersion = new TextField(MessageSource.message("changeDependencyVersionDialog.currentDependencyVersion"));
         currentDependencyVersion.setValue(targetProjectVersion.getVersionLabel());
         currentDependencyVersion.setEnabled(false);
         form.addComponent(currentDependencyVersion);
@@ -135,8 +136,8 @@ public class ChangeDependencyVersionDialog extends ResizableWindow  {
     }
 
     protected HorizontalLayout buildButtonBar() {
-        Button cancelButton = new Button("Cancel", e->cancel());
-        Button changeButton = new Button("Change", e->change());
+        Button cancelButton = new Button(MessageSource.message("common.cancel"), e->cancel());
+        Button changeButton = new Button(MessageSource.message("common.change"), e->change());
         changeButton.setDisableOnClick(true);
         changeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
         changeButton.setClickShortcut(KeyCode.ENTER);

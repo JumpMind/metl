@@ -8,6 +8,7 @@ import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.Tag;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.i18n.MessageSource;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,13 +29,13 @@ public class TagDialog  extends ResizableWindow {
     private String entityType;
     
     public TagDialog(ApplicationContext context, Object selectedElement) {
-        super("Tag Item");
+        super(MessageSource.message("tagDialog.tagItem"));
         this.configurationService = context.getConfigurationService();
         initWindow(selectedElement);
     }
     
     private void initWindow(Object selectedItem) {
-        Panel tagPanel = new Panel("Select tags");
+        Panel tagPanel = new Panel(MessageSource.message("tagDialog.selectTags"));
         tagPanel.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
         tagPanel.setSizeFull();
         VerticalLayout tagLayout = new VerticalLayout();
@@ -55,7 +56,7 @@ public class TagDialog  extends ResizableWindow {
         }
         List<EntityTag> entityTags = configurationService.findEntityTagsForEntity(entityId);
         List<Tag> tags = configurationService.findTags();
-        tagGroup = new OptionGroup("Tags");
+        tagGroup = new OptionGroup(MessageSource.message("common.tags"));
         tagGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         tagGroup.setMultiSelect(true);
         for (Tag tag : tags) {
