@@ -6,7 +6,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 // Gets the next id from a table where my value matches a lookup value attribute then set this as the value associated with the ID attribute
 int addId(String entityName, EntityData data, int id) {
     if (containsEntity(entityName, data)) {
-        String lookupValue = (Strimg)getAttributeValue(entityName, "LOOKUP_VALUE", data);
+        String lookupValue = (String)getAttributeValue(entityName, "LOOKUP_VALUE", data);
         id = getId(id, lookupValue);
         putAttributeValue(entityName, "ID", data, id);
    }
