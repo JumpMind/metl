@@ -23,9 +23,13 @@ package org.jumpmind.metl.core.runtime.component;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -48,6 +52,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -204,7 +209,9 @@ public class Web extends AbstractComponentRuntime {
         Map<String, Serializable> outputMessageHeaders = new HashMap<String, Serializable>();
         
         ArrayList<String> outputPayload = new ArrayList<String>();
+        byte[] outputBinaryPayload = null;
         CloseableHttpResponse httpResponse = null;
+        boolean isBinary = false;
         try {
             httpResponse = httpClient.execute(httpRequest);
             int responseCode = httpResponse.getStatusLine().getStatusCode();
@@ -215,7 +222,32 @@ public class Web extends AbstractComponentRuntime {
                                 IOUtils.toString(httpResponse.getEntity().getContent())).replace("%", "%%"));
             } else {
                 HttpEntity resultEntity = httpResponse.getEntity();
-                outputPayload.add(IOUtils.toString(resultEntity.getContent()));
+
+                if (resultEntity != null) {
+                    int cnt = 0;
+                    outputBinaryPayload = IOUtils.toByteArray(resultEntity.getContent());
+                	for (byte b : outputBinaryPayload) {
+                		int n = b & 0xFF;
+                		if ((Integer.parseInt(Integer.toHexString(n), 16) >= Integer.parseInt("00",16) 
+                		  && Integer.parseInt(Integer.toHexString(n), 16) <= Integer.parseInt("08",16)) ||
+                	 	    (Integer.parseInt(Integer.toHexString(n), 16) >= Integer.parseInt("0E",16) 
+                       	  && Integer.parseInt(Integer.toHexString(n), 16) <= Integer.parseInt("1A",16)) ||
+                	 	    (Integer.parseInt(Integer.toHexString(n), 16) >= Integer.parseInt("1C",16) 
+                          && Integer.parseInt(Integer.toHexString(n), 16) <= Integer.parseInt("1F",16))) {
+                			// value in range to be application/octet-stream type (ie binary)
+                			isBinary = true;
+                			break;
+                		}
+                		cnt++;
+                		if (cnt > 512) {
+                			break;
+                		}
+                	}
+
+	                if (!isBinary) {
+	                	outputPayload.add(IOUtils.toString(outputBinaryPayload, null));
+	                }
+                }
                 outputMessageHeaders.putAll(inputMessage.getHeader());
                 outputMessageHeaders.putAll(responseHeadersToMap(httpResponse.getAllHeaders()));
                 EntityUtils.consume(resultEntity);
@@ -232,8 +264,10 @@ public class Web extends AbstractComponentRuntime {
                 log.info(String.format("Unable to close http session %s", iox.getMessage()));
             }
         }
-        if (outputPayload.size() > 0) {
-            callback.sendTextMessage(outputMessageHeaders, outputPayload);
+    	if (isBinary) {
+    		callback.sendBinaryMessage(outputMessageHeaders, outputBinaryPayload);
+        } else {
+        	callback.sendTextMessage(outputMessageHeaders, outputPayload);
         }
     }
 
