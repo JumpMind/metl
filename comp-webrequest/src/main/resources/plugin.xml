@@ -25,7 +25,7 @@
              id='Web'
              inputMessageType='any'
              inputOutputModelsMatch='false'
-             outputMessageType='text'
+             outputMessageType='any'
              resourceCategory='http'
              supportsMultipleThreads='true'>
     <name>Web Request</name>
@@ -84,7 +84,7 @@
          required='false'
          type='multiline_text'>
          <name>Http Parameters</name>
-      </setting>                  
+      </setting>
       <setting id='parameter.replacement'
                required='false'
                type='boolean'>

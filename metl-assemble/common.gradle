@@ -26,7 +26,7 @@ import java.util.Date
     targetCompatibility=1.8
     
     if (project.name.startsWith('comp-') && projectDir.getPath().contains('metl-com')) {
-        apply plugin: 'maven-publish'
+    		apply plugin: 'maven-publish'
         publishing {
             publications {
                 mavenJava(MavenPublication) {
@@ -35,7 +35,7 @@ import java.util.Date
             }
             repositories {
                 maven {
-                    url "../../metl-war/build/plugins"
+                    url "../../metl/metl-war/build/plugins"
                 }
             }
         }
