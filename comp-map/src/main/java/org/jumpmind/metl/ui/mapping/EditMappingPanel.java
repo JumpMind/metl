@@ -454,7 +454,11 @@ public class EditMappingPanel extends AbstractFlowStepAwareComponentEditPanel {
                     setting = new ComponentEntitySetting(settings.getEntityId(), component.getId(), key, null);
                     component.addEntitySetting(setting);
                 }
-                setting.setValue(comboBox.getValue().toString());
+                if (comboBox.getValue() != null) {
+                    setting.setValue(comboBox.getValue().toString());
+                } else {
+                    setting.setValue(null);
+                }
                 if (oldValue == null || !oldValue.equals(setting.getValue())) {
                     context.getConfigurationService().save(setting);
                 }
