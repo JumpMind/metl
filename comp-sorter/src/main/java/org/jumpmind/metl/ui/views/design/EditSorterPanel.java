@@ -36,7 +36,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.Sorter;
@@ -135,10 +135,10 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
         filter = filter != null ? filter.toLowerCase() : null;
         filterTextField.setValue(filter);
         table.removeAllItems();
-        Model model = component.getInputModel();
+        RelationalModel model = (RelationalModel) component.getInputModel();
 
         if (model != null) {
-            model = context.getConfigurationService().findModel(model.getId());
+            model = context.getConfigurationService().findRelationalModel(model.getId());
             List<RecordFormat> checkedAttributes = new ArrayList<RecordFormat>();
             List<RecordFormat> attributes = new ArrayList<RecordFormat>();
 

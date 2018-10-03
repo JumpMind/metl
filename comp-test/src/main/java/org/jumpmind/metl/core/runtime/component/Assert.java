@@ -30,7 +30,7 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.runtime.BinaryMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -131,7 +131,7 @@ public class Assert extends AbstractComponentRuntime {
                         String.format("'\nThe expected %d entity message count has been exceeded.",
                                 expectedEntityMessageCount));
             }
-            Model inputModel = getInputModel();
+            RelationalModel inputModel = (RelationalModel) getInputModel();
             if (inputModel != null) {
                 for (EntityData entityData : payload) {
                     Set<String> attributeIds = entityData.keySet();

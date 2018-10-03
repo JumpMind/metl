@@ -41,7 +41,7 @@ import org.jdom2.xpath.XPathFactory;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
@@ -71,7 +71,7 @@ public class XmlParser extends AbstractXMLComponentRuntime {
         optimizeForSpeed = properties.is("optimize.for.speed");
         rowsPerMessage = properties.getInt(ROWS_PER_MESSAGE);
 
-        Model model = getComponent().getOutputModel();
+        RelationalModel model = (RelationalModel) getComponent().getOutputModel();
         if (model == null) {
             throw new IllegalStateException("The output model must be defined");
         }

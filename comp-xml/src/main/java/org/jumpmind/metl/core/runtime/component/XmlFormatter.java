@@ -44,7 +44,7 @@ import org.jdom2.xpath.XPathFactory;
 import org.jdom2.xpath.XPathHelper;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
@@ -89,7 +89,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
 
     Document templateDoc;
 
-    Model inputModel;
+    RelationalModel inputModel;
 
     String runWhen;
 
@@ -102,7 +102,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
         template = properties.get(XML_FORMATTER_TEMPLATE);
         nullHandling = properties.get(NULL_HANDLING);
         messagesToProcess = new ArrayList<Message>();
-        inputModel = getComponent().getInputModel();
+        inputModel = (RelationalModel) getComponent().getInputModel();
         templateDoc = getTemplateDoc();
         entityAttributeDtls = fillEntityAttributeDetails(templateDoc);
         runWhen = getComponent().get(RUN_WHEN, PER_MESSAGE);

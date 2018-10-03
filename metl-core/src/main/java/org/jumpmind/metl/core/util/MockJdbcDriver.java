@@ -31,10 +31,10 @@ import java.util.Properties;
 
 import org.jumpmind.db.sql.LogSqlBuilder;
 import org.jumpmind.metl.core.model.DataType;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
-import org.jumpmind.metl.core.model.ModelName;
+import org.jumpmind.metl.core.model.RelationalModelName;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.slf4j.Logger;
@@ -117,9 +117,9 @@ public class MockJdbcDriver extends com.mockrunner.mock.jdbc.MockDriver {
                 columns.addColumn("DATA_TYPE");
                 String projectVersionId = ComponentContext.projectVersionId.get();
                 if (isNotBlank(projectVersionId)) {
-                    List<ModelName> models = configurationService.findModelsInProject(projectVersionId);
-                    for (ModelName modelName : models) {
-                        Model model = configurationService.findModel(modelName.getId());
+                    List<RelationalModelName> models = configurationService.findRelationalModelsInProject(projectVersionId);
+                    for (RelationalModelName modelName : models) {
+                        RelationalModel model = configurationService.findRelationalModel(modelName.getId());
                         List<ModelEntity> entities = model.getModelEntities();
                         for (ModelEntity modelEntity : entities) {
                             if (modelEntity.getName().equals(tableNamePattern)) {
@@ -155,9 +155,9 @@ public class MockJdbcDriver extends com.mockrunner.mock.jdbc.MockDriver {
                 columns.addColumn("PK_NAME");
                 String projectVersionId = ComponentContext.projectVersionId.get();
                 if (isNotBlank(projectVersionId)) {
-                    List<ModelName> models = configurationService.findModelsInProject(projectVersionId);
-                    for (ModelName modelName : models) {
-                        Model model = configurationService.findModel(modelName.getId());
+                    List<RelationalModelName> models = configurationService.findRelationalModelsInProject(projectVersionId);
+                    for (RelationalModelName modelName : models) {
+                        RelationalModel model = configurationService.findRelationalModel(modelName.getId());
                         List<ModelEntity> entities = model.getModelEntities();
                         for (ModelEntity modelEntity : entities) {
                             if (modelEntity.getName().equals(table)) {

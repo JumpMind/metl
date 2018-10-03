@@ -57,16 +57,19 @@ import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.FolderName;
 import org.jumpmind.metl.core.model.FolderType;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.HierarchicalModel;
+import org.jumpmind.metl.core.model.HierarchicalModelName;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
-import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.ModelRelation;
 import org.jumpmind.metl.core.model.ModelRelationMapping;
+import org.jumpmind.metl.core.model.ModelSchemaObject;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.model.ProjectVersionPlugin;
+import org.jumpmind.metl.core.model.RelationalModel;
+import org.jumpmind.metl.core.model.RelationalModelName;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.ResourceSetting;
@@ -152,11 +155,19 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public List<ModelName> findModelsInProject(String projectVersionId) {
+    public List<RelationalModelName> findRelationalModelsInProject(String projectVersionId) {
         Map<String, Object> params = new TreeMap<String, Object>();
         params.put("deleted", 0);
         params.put("projectVersionId", projectVersionId);
-        return find(ModelName.class, params, Model.class);
+        return find(RelationalModelName.class, params, RelationalModel.class);
+    }
+
+    @Override
+    public List<HierarchicalModelName> findHierarchicalModelsInProject(String projectVersionId) {
+        Map<String, Object> params = new TreeMap<String, Object>();
+        params.put("deleted", 0);
+        params.put("projectVersionId", projectVersionId);
+        return find(HierarchicalModelName.class, params, HierarchicalModel.class);
     }
 
     @Override
@@ -253,10 +264,19 @@ public class ConfigurationService extends AbstractService
     }
     
     @Override
-    public List<ModelName> findModels() {
+    public List<RelationalModelName> findRelationalModels() {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("deleted", 0);
-        List<ModelName> objects = find(ModelName.class, params);
+        List<RelationalModelName> objects = find(RelationalModelName.class, params);
+        AbstractObjectNameBasedSorter.sort(objects);
+        return objects;
+    }
+    
+    @Override
+    public List<HierarchicalModelName> findHierarchicalModels() {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("deleted", 0);
+        List<HierarchicalModelName> objects = find(HierarchicalModelName.class, params);
         AbstractObjectNameBasedSorter.sort(objects);
         return objects;
     }
@@ -311,12 +331,12 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public List<Model> findModelsByName(String projectVersionId, String name) {
+    public List<RelationalModel> findModelsByName(String projectVersionId, String name) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("deleted", 0);
         params.put("name", name);
         params.put("projectVersionId", projectVersionId);
-        List<Model> models = find(Model.class, params);
+        List<RelationalModel> models = find(RelationalModel.class, params);
         return models;
     }
 
@@ -447,10 +467,10 @@ public class ConfigurationService extends AbstractService
 
         if (readRelations) {
             if (isNotBlank(component.getInputModelId())) {
-                component.setInputModel(findModel(component.getInputModelId()));
+                component.setInputModel(findRelationalModel(component.getInputModelId()));
             }
             if (isNotBlank(component.getOutputModelId())) {
-                component.setOutputModel(findModel(component.getOutputModelId()));
+                component.setOutputModel(findRelationalModel(component.getOutputModelId()));
             }
         }
 
@@ -476,13 +496,20 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public Model findModel(String id) {
-        Model model = new Model(id);
+    public RelationalModel findRelationalModel(String id) {
+        RelationalModel model = new RelationalModel(id);
         refresh(model);
         return model;
     }
 
-    protected Model refreshModelRelations(Model model) {
+    @Override
+    public HierarchicalModel findHierarchicalModel(String id) {
+        HierarchicalModel model = new HierarchicalModel(id);
+        refresh(model);
+        return model;
+    }
+
+    protected void refreshRelationalModel(RelationalModel model) {
         model.setModelEntities(new ArrayList<>());
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("modelId", model.getId());
@@ -515,7 +542,14 @@ public class ConfigurationService extends AbstractService
         		
         }
         AbstractObjectNameBasedSorter.sort(entities);
-        return model;
+    }
+    
+    protected void refreshHierarchicalModel(HierarchicalModel model) {
+        ModelSchemaObject root = this.getHierarchicalModelRoot(model.getId());
+        if (root != null) {
+            model.setRootObject(root);
+            this.refreshModelSchemaObject(root);
+        }
     }
     
     protected void refresh(ModelRelationMapping relationMapping) {
@@ -584,8 +618,8 @@ public class ConfigurationService extends AbstractService
             delete(component);
         }
 
-        List<Model> models = find(Model.class, params);
-        for (Model model : models) {
+        List<RelationalModel> models = find(RelationalModel.class, params);
+        for (RelationalModel model : models) {
             delete(model);
         }
 
@@ -656,7 +690,7 @@ public class ConfigurationService extends AbstractService
             }
         });
 
-        Map<String, Model> models = new HashMap<>();
+        Map<String, RelationalModel> models = new HashMap<>();
         Map<String, Resource> resources = new HashMap<>();
 
         for (FlowStep step : steps) {
@@ -666,9 +700,9 @@ public class ConfigurationService extends AbstractService
 
             String modelId = component.getOutputModelId();
             if (isNotBlank(modelId)) {
-                Model model = models.get(modelId);
+                RelationalModel model = models.get(modelId);
                 if (model == null) {
-                    model = findModel(modelId);
+                    model = findRelationalModel(modelId);
                     models.put(modelId, model);
                 }
                 component.setOutputModel(model);
@@ -676,9 +710,9 @@ public class ConfigurationService extends AbstractService
 
             modelId = component.getInputModelId();
             if (isNotBlank(modelId)) {
-                Model model = models.get(modelId);
+                RelationalModel model = models.get(modelId);
                 if (model == null) {
-                    model = findModel(modelId);
+                    model = findRelationalModel(modelId);
                     models.put(modelId, model);
                 }
                 component.setInputModel(model);
@@ -793,7 +827,7 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public void delete(Model model) {
+    public void delete(RelationalModel model) {
         model.setDeleted(true);
         save((AbstractObject) model);
     }
@@ -827,18 +861,18 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public void refresh(Model model) {
+    public void refresh(RelationalModel model) {
         refresh((AbstractObject) model);
 
         Map<String, Object> folderParams = new HashMap<String, Object>();
         folderParams.put("id", model.getFolderId());
         model.setFolder(findOne(Folder.class, folderParams));
 
-        refreshModelRelations(model);
+        refreshRelationalModel(model);
     }
-
+    
     @Override
-    public void save(Model model) {
+    public void save(RelationalModel model) {
         save((AbstractObject) model);
         for (ModelEntity modelEntity : model.getModelEntities()) {
             save(modelEntity);
@@ -852,7 +886,18 @@ public class ConfigurationService extends AbstractService
             save(modelAttribute);
         }
     }
+    
+    @Override
+    public void refresh(HierarchicalModel model) {
+        refresh((AbstractObject) model);
 
+        Map<String, Object> folderParams = new HashMap<String, Object>();
+        folderParams.put("id", model.getFolderId());
+        model.setFolder(findOne(Folder.class, folderParams));
+
+        refreshHierarchicalModel(model);
+    }    
+    
     @Override
     public String getLastKnownVersion() {
         if (doesTableExist(Version.class)) {
@@ -885,9 +930,9 @@ public class ConfigurationService extends AbstractService
             save(newDependency);
         }
 
-        List<ModelName> models = findModelsInProject(original.getId());
-        for (ModelName modelName : models) {
-            Model newModel = copy(oldToNewUUIDMapping, findModel(modelName.getId()));
+        List<RelationalModelName> models = findRelationalModelsInProject(original.getId());
+        for (RelationalModelName modelName : models) {
+            RelationalModel newModel = copy(oldToNewUUIDMapping, findRelationalModel(modelName.getId()));
             newModel.setProjectVersionId(newVersion.getId());
             save(newModel);
         }
@@ -1002,7 +1047,7 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public Model copy(Model original) {
+    public RelationalModel copy(RelationalModel original) {
         return copy(new HashMap<>(), original);
     }
 
@@ -1025,8 +1070,8 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public Model copy(Map<String, AbstractObject> oldToNewUUIDMapping, Model original) {
-        Model newModel = copyWithNewUUID(oldToNewUUIDMapping, original);
+    public RelationalModel copy(Map<String, AbstractObject> oldToNewUUIDMapping, RelationalModel original) {
+        RelationalModel newModel = copyWithNewUUID(oldToNewUUIDMapping, original);
         newModel.setModelEntities(new ArrayList<>());
         for (ModelEntity originalModelEntity : original.getModelEntities()) {
             ModelEntity newModelEntity = copyWithNewUUID(oldToNewUUIDMapping, originalModelEntity);
@@ -1255,15 +1300,15 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public List<Model> findDependentModels(String flowId) {
-        List<Model> models = new ArrayList<Model>();
+    public List<RelationalModel> findDependentModels(String flowId) {
+        List<RelationalModel> models = new ArrayList<RelationalModel>();
         final String MODELS_BY_FLOW_SQL = "select distinct dt.model_id from  "
                 + "(select distinct output_model_id as model_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s' and output_model_id is not null union "
                 + " select distinct input_model_id as model_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s' and input_model_id is not null) dt";
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         List<Row> ids = template.query(String.format(MODELS_BY_FLOW_SQL, tablePrefix, flowId));
         for (Row row : ids) {
-            models.add(this.findModel(row.getString("model_id")));
+            models.add(this.findRelationalModel(row.getString("model_id")));
         }
         return models;
     }
@@ -1777,4 +1822,59 @@ public class ConfigurationService extends AbstractService
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         template.update(String.format(sql, tablePrefix, tag.getId()));        
     }
+    
+    public ModelSchemaObject getHierarchicalModelRoot(String modelId) {
+        
+        final String ROOT_OF_HIERARCHY_MODEL_SQL = 
+                "select " + 
+                "   so.id " + 
+                "from " + 
+                "   %1$s_hierarchical_model hm " + 
+                "   inner join %1$s_model_schema_object so " + 
+                "      on hm.id = so.model_id " + 
+                "where " +
+                "   hm.id = '%2$s' " +
+                "   and not exists " + 
+                "   ( " + 
+                "      select * from %1$s_model_schema_object_rel sor " + 
+                "      where sor.child_id = so.id " + 
+                "   ) ";
+
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(ROOT_OF_HIERARCHY_MODEL_SQL, tablePrefix, modelId));
+        if (ids.size() == 0) {
+            return null;
+        } else {
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("id", ids.get(0).getString("id"));
+            ModelSchemaObject root = this.findOne(ModelSchemaObject.class, params);
+            if (root != null) {                
+                refreshModelSchemaObject(root);
+            }
+            return root;
+        }        
+    }
+    
+    private void refreshModelSchemaObject(ModelSchemaObject object) {
+
+        final String CHILD_NODES_HIERARCHY_MODEL_SQL = 
+                "select " + 
+                "   child_id " + 
+                "from " + 
+                "   %1$s_model_schema_object_rel " + 
+                "where " +
+                "   model_id = '%2$s' " +
+                "   and parent_id = '%3$s' ";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(CHILD_NODES_HIERARCHY_MODEL_SQL, tablePrefix,
+                object.getModelId(), object.getId()));
+        for (Row row : ids) {
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("id", row.getString("child_id"));
+            ModelSchemaObject childObject = this.findOne(ModelSchemaObject.class, params);
+            object.getChildObjects().add(childObject);
+            refreshModelSchemaObject(childObject);            
+        }
+    }
+    
 }

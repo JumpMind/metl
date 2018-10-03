@@ -23,8 +23,8 @@
 <definitions>
   <component category='PROCESSOR'
              id='Temp RDBMS'
-             inputMessageType='entity'
-             outputMessageType='entity'
+             inputMessageType='relational'
+             outputMessageType='relational'
              resourceCategory='none'>
     <name>Temp RDBMS</name>
     <className>org.jumpmind.metl.core.runtime.component.TempRdbms</className>

@@ -33,7 +33,7 @@ import java.util.Map;
 
 import org.jumpmind.metl.core.model.EntityRow;
 import org.jumpmind.metl.core.model.EntityTable;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.ControlMessage;
@@ -85,7 +85,7 @@ public class Serializer extends AbstractSerializer {
                 header.put(FORMAT, getDetectedFormat());
                 ObjectMapper mapper = getObjectMapper();
 
-                if (getInputModel().getType().equalsIgnoreCase(Model.TYPE_RELATIONAL)) {
+                if (getInputModel() instanceof RelationalModel) {
                     ArrayList<?> response = null;
                     if (STRUCTURE_BY_TABLE.equals(structure)) {
                         response = createByTablePayload(payload);
@@ -138,39 +138,40 @@ public class Serializer extends AbstractSerializer {
     private String processHierarchicalEntity(String name, ObjectMapper mapper, ObjectNode parentNode, EntityData entity, boolean isRoot) {
         ObjectNode childNode = null;
         String entityDesc = null;
-        for (Map.Entry<String, Object> entry : entity.entrySet()) {
-            if (childNode == null) {
-                entityDesc = name == null ? getInputModel().getEntityById(getInputModel().getAttributeById(entry.getKey()).getEntityId()).getName() : name;
-                if (entry.getValue() instanceof EntityData) {
-                    entityDesc = getInputModel().getAttributeById(entry.getKey()).getName();
-                }
-                if (isRoot) {
-                    // childNode = parentNode.putObject(entityDesc);
-                    childNode = parentNode;
-                } else {
-                    childNode = mapper.createObjectNode();
-                }
-            }
-            if (entry.getValue() instanceof EntityData) {
-                processHierarchicalEntity(getInputModel().getAttributeById(entry.getKey()).getName(), mapper, childNode, (EntityData) entry.getValue(), false);
-            } else if (entry.getValue() instanceof ArrayList) {
-                childNode.set(getInputModel().getAttributeById(entry.getKey()).getName(),
-                        processHierarchicalEntityArray(mapper, parentNode, (List<EntityData>) entry.getValue()));
-            } else {
-                String stringValue = null;
-                Object value = entry.getValue();
-                if (value instanceof Date) {
-                    stringValue = FormatUtils.TIMESTAMP_FORMATTER.format((Date) value);
-                }
-                if (value != null) {
-                    stringValue = value.toString();
-                }
-                childNode.put(getInputModel().getAttributeById(entry.getKey()).getName(), stringValue);
-            }
-        }
-        if (!isRoot) {
-            parentNode.set(entityDesc, childNode);
-        }
+        //TODO: WORK THIS OUR FOR HIERARCHICAL MODEL
+//        for (Map.Entry<String, Object> entry : entity.entrySet()) {
+//            if (childNode == null) {
+//                entityDesc = name == null ? getInputModel().getEntityById(getInputModel().getAttributeById(entry.getKey()).getEntityId()).getName() : name;
+//                if (entry.getValue() instanceof EntityData) {
+//                    entityDesc = getInputModel().getAttributeById(entry.getKey()).getName();
+//                }
+//                if (isRoot) {
+//                    // childNode = parentNode.putObject(entityDesc);
+//                    childNode = parentNode;
+//                } else {
+//                    childNode = mapper.createObjectNode();
+//                }
+//            }
+//            if (entry.getValue() instanceof EntityData) {
+//                processHierarchicalEntity(getInputModel().getAttributeById(entry.getKey()).getName(), mapper, childNode, (EntityData) entry.getValue(), false);
+//            } else if (entry.getValue() instanceof ArrayList) {
+//                childNode.set(getInputModel().getAttributeById(entry.getKey()).getName(),
+//                        processHierarchicalEntityArray(mapper, parentNode, (List<EntityData>) entry.getValue()));
+//            } else {
+//                String stringValue = null;
+//                Object value = entry.getValue();
+//                if (value instanceof Date) {
+//                    stringValue = FormatUtils.TIMESTAMP_FORMATTER.format((Date) value);
+//                }
+//                if (value != null) {
+//                    stringValue = value.toString();
+//                }
+//                childNode.put(getInputModel().getAttributeById(entry.getKey()).getName(), stringValue);
+//            }
+//        }
+//        if (!isRoot) {
+//            parentNode.set(entityDesc, childNode);
+//        }
         return entityDesc;
     }
 
@@ -187,7 +188,7 @@ public class Serializer extends AbstractSerializer {
     private ArrayList<EntityRow> createByInboundRowPayload(List<EntityData> payload) {
         ArrayList<EntityRow> entityResponse = new ArrayList<>();
         if (payload != null) {
-            Model inputModel = getInputModel();
+            RelationalModel inputModel = (RelationalModel) getInputModel();
             for (EntityData entityData : payload) {
                 for (ModelEntity entity : inputModel.getModelEntities()) {
                     EntityRow row = null;
@@ -217,7 +218,7 @@ public class Serializer extends AbstractSerializer {
     private ArrayList<EntityTable> createByTablePayload(List<EntityData> payload) {
         Map<String, EntityTable> entityTables = new HashMap<String, EntityTable>();
         if (payload != null) {
-            Model inputModel = getInputModel();
+            RelationalModel inputModel = (RelationalModel) getInputModel();
             for (EntityData entityData : payload) {
                 Iterator<String> itr = entityData.keySet().iterator();
                 boolean firstAttribute = true;

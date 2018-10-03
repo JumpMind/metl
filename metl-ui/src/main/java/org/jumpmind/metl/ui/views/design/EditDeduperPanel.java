@@ -30,7 +30,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.Deduper;
@@ -136,7 +136,7 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
             @Override
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 EntitySettings setting = (EntitySettings) itemId;
-                Model model = component.getInputModel();
+                RelationalModel model = (RelationalModel) component.getInputModel();
                 ModelEntity entity = model.getEntityById(setting.getEntityId());
                 return UiUtils.getName(entityFilterField.getValue(), entity.getName());
             }
@@ -166,8 +166,8 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
 
     protected void fillEntityContainer() {  	
         if (component.getInputModel() != null) {
-
-            for (ModelEntity entity : component.getInputModel().getModelEntities()) {
+            RelationalModel model = (RelationalModel) component.getInputModel();
+            for (ModelEntity entity : model.getModelEntities()) {
                 entitySettings.add(new EntitySettings(entity.getId()));
             }
         }    	
@@ -178,7 +178,7 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
         entityFilterField.setValue(filter);
         entityTable.removeAllItems();
         for (EntitySettings entitySetting : entitySettings) {
-            Model model = component.getInputModel();
+            RelationalModel model = (RelationalModel) component.getInputModel();
             ModelEntity entity = model.getEntityById(entitySetting.getEntityId());
             if (isBlank(filter) || entity.getName().toLowerCase().contains(filter)) {
             	entityTable.addItem(entitySetting);
@@ -283,7 +283,7 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
                 @Override
                 public Object generateCell(Table source, Object itemId, Object columnId) {
              	   AttributeSettings setting = (AttributeSettings) itemId;
-                    Model model = component.getInputModel();
+                    RelationalModel model = (RelationalModel) component.getInputModel();
                     ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
                     return UiUtils.getName(entityFilterField.getValue(), attribute.getName());
                 }
@@ -301,7 +301,8 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
         
     private void refreshAttributeContainer(EntitySettings selectedRow) {
   	   attributeSettings.clear();
-  	   ModelEntity entity = component.getInputModel().getEntityById(selectedRow.getEntityId());
+  	   RelationalModel model = (RelationalModel) component.getInputModel();
+  	   ModelEntity entity = model.getEntityById(selectedRow.getEntityId());
   	   for (ModelAttrib attribute : entity.getModelAttributes()) {
   		   
             ComponentAttribSetting compare = component.getSingleAttributeSetting(attribute.getId(), Deduper.ATTRIBUTE_DEDUPE_ENABLED);

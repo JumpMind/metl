@@ -39,9 +39,9 @@ import org.jumpmind.db.model.Table;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.DataType;
-import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.DbProvider;
 import org.jumpmind.symmetric.csv.CsvReader;
@@ -63,8 +63,6 @@ import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-import groovy.json.StringEscapeUtils;
-
 public class TableColumnSelectWindow extends ResizableWindow implements ValueChangeListener, Receiver, SucceededListener {
 
     private static final long serialVersionUID = 1L;
@@ -77,7 +75,7 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
 
     ApplicationContext context;
 
-    Model model;
+    RelationalModel model;
 
     DbTree dbTree;
 
@@ -109,7 +107,7 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
 
     String encoding = "UTF-8";
 
-    public TableColumnSelectWindow(ApplicationContext context, Model model) {
+    public TableColumnSelectWindow(ApplicationContext context, RelationalModel model) {
         super("Import Model Entity and Attributes");
         this.context = context;
         this.model = model;

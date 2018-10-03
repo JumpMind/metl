@@ -31,7 +31,7 @@ import java.util.Map;
 
 import org.h2.util.StringUtils;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -120,7 +120,8 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
         for (AttributeFormat attribute : attributesList) {
             Object value = inputRow.get(attribute.getAttributeId());
             if (isNotBlank(attribute.getFormatFunction())) {
-                value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), value, getInputModel(), attribute.getEntity(),
+                value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), value, 
+                        (RelationalModel) getInputModel(), attribute.getEntity(),
                         inputRow, attribute.getFormatFunction());
             }
             if (value != null) {
@@ -143,7 +144,7 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
         List<ComponentAttribSetting> attributeSettings = getComponent().getAttributeSettings();
         for (ComponentAttribSetting attributeSetting : attributeSettings) {
             if (!attributesMap.containsKey(attributeSetting.getAttributeId())) {
-                Model inputModel = getComponent().getInputModel();
+                RelationalModel inputModel = (RelationalModel) getComponent().getInputModel();
                 ModelAttrib attribute = inputModel.getAttributeById(attributeSetting.getAttributeId());
                 ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
                 attributesMap.put(attributeSetting.getAttributeId(), new AttributeFormat(attribute, entity));

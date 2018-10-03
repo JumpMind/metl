@@ -39,7 +39,7 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.jdom2.transform.XSLTransformer;
 import org.jumpmind.metl.core.model.DataType;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Setting;
@@ -109,7 +109,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
 
             ArrayList<String> outputPayload = new ArrayList<String>();
 
-            String batchXml = getBatchXml(getComponent().getInputModel(), inputRows, outputAllAttributes);
+            String batchXml = getBatchXml((RelationalModel) getComponent().getInputModel(), inputRows, outputAllAttributes);
             String stylesheetXml = stylesheet.getValue();
             if (useParameterReplacement) {
                 stylesheetXml = resolveParamsAndHeaders(stylesheetXml, inputMessage);
@@ -123,7 +123,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
         }
     }
 
-    public static String getBatchXml(Model model, ArrayList<EntityData> inputRows, boolean outputAllAttributes) {
+    public static String getBatchXml(RelationalModel model, ArrayList<EntityData> inputRows, boolean outputAllAttributes) {
         SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
         Element root = new Element("batch");
         Document doc = new Document(root);
@@ -180,7 +180,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
         return writer.toString();
     }
 
-    protected static List<ModelEntity> getModelEntities(Model model, ArrayList<EntityData> inputRows) {
+    protected static List<ModelEntity> getModelEntities(RelationalModel model, ArrayList<EntityData> inputRows) {
         Set<ModelEntity> entities = new LinkedHashSet<ModelEntity>();
         for (EntityData entityData : inputRows) {
             for (String attributeId : entityData.keySet()) {
@@ -196,7 +196,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
         return new ArrayList<ModelEntity>(entities);
     }
 
-    protected static List<ModelAttrib> getModelAttributes(Model model, String entityId, Set<String> attributeIds) {
+    protected static List<ModelAttrib> getModelAttributes(RelationalModel model, String entityId, Set<String> attributeIds) {
         List<ModelAttrib> attributes = new ArrayList<ModelAttrib>();
         for (String attributeId : attributeIds) {
             ModelAttrib attribute = model.getAttributeById(attributeId);

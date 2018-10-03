@@ -32,7 +32,7 @@ import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.HierarchicalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.Mapping;
@@ -195,26 +195,27 @@ public class EditMappingPanel extends AbstractFlowStepAwareComponentEditPanel {
         }
     }
 
+    //TODO: THIS SHOULD PROBABLY GO AWAY FOR THE HIERARCHICAL RELATIONAL MAPPER
     protected void autoMap(boolean fuzzy) {
-        for (ModelEntity entity1 : component.getInputModel().getModelEntities()) {
-            for (ModelAttrib attr : entity1.getModelAttributes()) {
-                /* look for exact match first */
-                for (ModelEntity entity2 : component.getOutputModel().getModelEntities()) {
-                    boolean foundExactMatch = false;
-                    for (ModelAttrib attr2 : entity2.getModelAttributes()) {
-                        foundExactMatch |= autoMap(entity1, entity2, attr, attr2, fuzzy, true);
-                    }
-
-                    if (!foundExactMatch) {
-                        for (ModelAttrib attr2 : entity2.getModelAttributes()) {
-                            autoMap(entity1, entity2, attr, attr2, fuzzy, false);
-                        }
-                    }
-
-                }
-
-            }
-        }
+//        for (ModelEntity entity1 : component.getInputModel().getModelEntities()) {
+//            for (ModelAttrib attr : entity1.getModelAttributes()) {
+//                /* look for exact match first */
+//                for (ModelEntity entity2 : component.getOutputModel().getModelEntities()) {
+//                    boolean foundExactMatch = false;
+//                    for (ModelAttrib attr2 : entity2.getModelAttributes()) {
+//                        foundExactMatch |= autoMap(entity1, entity2, attr, attr2, fuzzy, true);
+//                    }
+//
+//                    if (!foundExactMatch) {
+//                        for (ModelAttrib attr2 : entity2.getModelAttributes()) {
+//                            autoMap(entity1, entity2, attr, attr2, fuzzy, false);
+//                        }
+//                    }
+//
+//                }
+//
+//            }
+//        }
     }
 
     protected boolean autoMap(ModelEntity entity1, ModelEntity entity2, ModelAttrib attr, ModelAttrib attr2, boolean fuzzy,
@@ -281,12 +282,12 @@ public class EditMappingPanel extends AbstractFlowStepAwareComponentEditPanel {
         int itemId = 0;
         for (ComponentAttribSetting setting : component.getAttributeSettings()) {
             if (Mapping.ATTRIBUTE_MAPS_TO.equals(setting.getName())) {
-                ModelAttrib srcAttribute = component.getInputModel().getAttributeById(setting.getAttributeId());
-                ModelEntity srcEntity = component.getInputModel().getEntityById(srcAttribute.getEntityId());
-                ModelAttrib dstAttribute = component.getOutputModel().getAttributeById(setting.getValue());
-                ModelEntity dstEntity = component.getOutputModel().getEntityById(dstAttribute.getEntityId());
+//                ModelAttrib srcAttribute = component.getInputModel().getAttributeById(setting.getAttributeId());
+//                ModelEntity srcEntity = component.getInputModel().getEntityById(srcAttribute.getEntityId());
+//                ModelAttrib dstAttribute = component.getOutputModel().getAttributeById(setting.getValue());
+//                ModelEntity dstEntity = component.getOutputModel().getEntityById(dstAttribute.getEntityId());
                 
-                table.addItem(new Object[]{srcEntity.getName(), srcAttribute.getName(), dstEntity.getName(), dstAttribute.getName()}, itemId++);
+//                table.addItem(new Object[]{srcEntity.getName(), srcAttribute.getName(), dstEntity.getName(), dstAttribute.getName()}, itemId++);
             }
         }
         
@@ -377,9 +378,10 @@ public class EditMappingPanel extends AbstractFlowStepAwareComponentEditPanel {
                 @Override
                 public Object generateCell(Table source, Object itemId, Object columnId) {
                     EntitySettings setting = (EntitySettings) itemId;
-                    Model model = component.getOutputModel();
-                    ModelEntity entity = model.getEntityById(setting.getEntityId());
-                    return entity.getName();
+                    HierarchicalModel model = (HierarchicalModel) component.getOutputModel();
+//                    ModelEntity entity = model.getEntityById(setting.getEntityId());
+//                    return entity.getName(); 
+                    return null;
                 }
             });
             queryMappingTable.setVisibleColumns(new Object[] { "entityName", "sourceStep" });
@@ -394,20 +396,20 @@ public class EditMappingPanel extends AbstractFlowStepAwareComponentEditPanel {
     
     private void refreshEntitySettingsContainer() {
         entitySettings.clear();
-        List<ModelEntity> entities = component.getOutputModel().getModelEntities();
-        List<ComponentEntitySetting> compEntitySettings = component.getEntitySettings();
-        Set<String> existingEntitySettings = new HashSet<String>();
-        for (ComponentEntitySetting compEntitySetting:compEntitySettings) {
-            if (RelationalHierarchicalMapping.ENTITY_TO_ORGINATING_STEP_ID.equalsIgnoreCase(compEntitySetting.getName())) {
-                entitySettings.add(new EntitySettings(compEntitySetting.getEntityId(),compEntitySetting.getValue()));
-                existingEntitySettings.add(compEntitySetting.getEntityId());
-            }
-        }        
-        for (ModelEntity entity:entities) {
-            if (!existingEntitySettings.contains(entity.getId())) {
-                entitySettings.add(new EntitySettings(entity.getId(),null));
-            }
-        }        
+//        List<ModelEntity> entities = component.getOutputModel().getModelEntities();
+//        List<ComponentEntitySetting> compEntitySettings = component.getEntitySettings();
+//        Set<String> existingEntitySettings = new HashSet<String>();
+//        for (ComponentEntitySetting compEntitySetting:compEntitySettings) {
+//            if (RelationalHierarchicalMapping.ENTITY_TO_ORGINATING_STEP_ID.equalsIgnoreCase(compEntitySetting.getName())) {
+//                entitySettings.add(new EntitySettings(compEntitySetting.getEntityId(),compEntitySetting.getValue()));
+//                existingEntitySettings.add(compEntitySetting.getEntityId());
+//            }
+//        }        
+//        for (ModelEntity entity:entities) {
+//            if (!existingEntitySettings.contains(entity.getId())) {
+//                entitySettings.add(new EntitySettings(entity.getId(),null));
+//            }
+//        }        
     }
 
     protected void updateQueryMappingTable() {

@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jumpmind.metl.core.model.Component;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
@@ -103,7 +103,7 @@ public class SequenceGenerator extends AbstractRdbmsComponentRuntime {
             }
         }
 
-        Model inputModel = component.getInputModel();
+        RelationalModel inputModel = (RelationalModel) component.getInputModel();
         if (inputModel == null) {
             throw new IllegalStateException("An input model is required by the " + TYPE);
         }

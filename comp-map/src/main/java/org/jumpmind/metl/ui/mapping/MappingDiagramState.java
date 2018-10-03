@@ -21,7 +21,7 @@
 package org.jumpmind.metl.ui.mapping;
 
 import org.jumpmind.metl.core.model.Component;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.Mapping;
 
@@ -37,9 +37,9 @@ public class MappingDiagramState extends JavaScriptComponentState {
 
     public Component component;
     
-    public Model inputModel;
+    public RelationalModel inputModel;
     
-    public Model outputModel;
+    public RelationalModel outputModel;
     
     public ModelEntity outputRootNode;
 

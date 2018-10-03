@@ -28,7 +28,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.RdbmsWriter;
@@ -85,7 +85,7 @@ public class EditRdbmsWriterPanel extends AbstractComponentEditPanel {
             @Override
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 AttributeSettings setting = (AttributeSettings) itemId;
-                Model model = component.getInputModel();
+                RelationalModel model = (RelationalModel) component.getInputModel();
                 ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
                 ModelEntity entity = model.getEntityById(attribute.getEntityId());
                 return UiUtils.getName(filterField.getValue(), entity.getName());
@@ -96,7 +96,7 @@ public class EditRdbmsWriterPanel extends AbstractComponentEditPanel {
             @Override
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 AttributeSettings setting = (AttributeSettings) itemId;
-                Model model = component.getInputModel();
+                RelationalModel model = (RelationalModel) component.getInputModel();
                 ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
                 return UiUtils.getName(filterField.getValue(), attribute.getName());
             }
@@ -113,7 +113,7 @@ public class EditRdbmsWriterPanel extends AbstractComponentEditPanel {
 
         if (component.getInputModel() != null) {
 
-            for (ModelEntity entity : component.getInputModel().getModelEntities()) {
+            for (ModelEntity entity : ((RelationalModel)component.getInputModel()).getModelEntities()) {
                 for (ModelAttrib attr : entity.getModelAttributes()) {
                     ComponentAttribSetting insert = component.getSingleAttributeSetting(attr.getId(), RdbmsWriter.ATTRIBUTE_INSERT_ENABLED);
                     ComponentAttribSetting update = component.getSingleAttributeSetting(attr.getId(), RdbmsWriter.ATTRIBUTE_UPDATE_ENABLED);
@@ -126,7 +126,7 @@ public class EditRdbmsWriterPanel extends AbstractComponentEditPanel {
             Collections.sort(attributeSettings, new Comparator<AttributeSettings>() {
                 @Override
                 public int compare(AttributeSettings o1, AttributeSettings o2) {
-                    Model model = component.getInputModel();
+                    RelationalModel model = (RelationalModel) component.getInputModel();
                     ModelAttrib attribute1 = model.getAttributeById(o1.getAttributeId());
                     ModelEntity entity1 = model.getEntityById(attribute1.getEntityId());
 
@@ -150,7 +150,7 @@ public class EditRdbmsWriterPanel extends AbstractComponentEditPanel {
         filter = filter != null ? filter.toLowerCase() : null;
         table.removeAllItems();
         for (AttributeSettings attributeSetting : attributeSettings) {
-            Model model = component.getInputModel();
+            RelationalModel model = (RelationalModel) component.getInputModel();
             ModelAttrib attribute = model.getAttributeById(attributeSetting.getAttributeId());
             ModelEntity entity = model.getEntityById(attribute.getEntityId());
             if (isBlank(filter) || entity.getName().toLowerCase().contains(filter) || attribute.getName().toLowerCase().contains(filter)) {

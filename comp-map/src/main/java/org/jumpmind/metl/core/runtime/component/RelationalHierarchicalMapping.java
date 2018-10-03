@@ -28,11 +28,12 @@ import java.util.Map;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.DataType;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.HierarchicalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelRelation;
 import org.jumpmind.metl.core.model.ModelRelationMapping;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
@@ -90,18 +91,19 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
     protected void validate() {
     		String message = "The ";
         if (getComponent().getInputModel() == null ||
-        		!getComponent().getInputModel().getType().equalsIgnoreCase(Model.TYPE_RELATIONAL)) {
+        		!(getComponent().getInputModel() instanceof RelationalModel)) {
             message = message + "input model must be configured and be a relational model ";
         }
 
-        if (getComponent().getOutputModel() == null ||
-        		!getComponent().getOutputModel().getType().equalsIgnoreCase(Model.TYPE_HIERARCHICAL)) {
-        	
-            if (!message.equalsIgnoreCase("The ")) {
-                message = message + " and the ";
-            }
-            message = message + " output model must be configured and be a hierarchical model";
-        }
+//TODO: FIX THIS FOR HIERARCHICAL MODEL
+//        if (getComponent().getOutputModel() == null ||
+//        		!(getComponent().getOutputModel() instanceof HierarchicalModel)) {
+//        	
+//            if (!message.equalsIgnoreCase("The ")) {
+//                message = message + " and the ";
+//            }
+//            message = message + " output model must be configured and be a hierarchical model";
+//        }
 
         if (!message.equals("The ")) {
             throw new MisconfiguredException(message);
@@ -137,15 +139,16 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
     		ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
     		
     		currentInputRow=0;    		
-		Model outModel = getOutputModel();
-		ModelEntity rootEntity = outModel.getRootElement();
-
-		do {
-			outputPayload.add(processByJoinEntity(inputRows, rootEntity));
-    			currentInputRow = currentInputRow+1;
-		} while (inputRows.size() > currentInputRow);
-		
-        callback.sendEntityDataMessage(null, outputPayload);
+		HierarchicalModel outModel = (HierarchicalModel) getOutputModel();
+//TODO: FIX THIS FOR HIERARCHICAL MODEL
+//		ModelEntity rootEntity = outModel.getRootElement();
+//
+//		do {
+//			outputPayload.add(processByJoinEntity(inputRows, rootEntity));
+//    			currentInputRow = currentInputRow+1;
+//		} while (inputRows.size() > currentInputRow);
+//		
+//        callback.sendEntityDataMessage(null, outputPayload);
     }
     
     private EntityData processByJoinEntity(ArrayList<EntityData> inputRows, ModelEntity entity) {
@@ -153,11 +156,11 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
 
 		for (ModelAttrib attrib:entity.getModelAttributes()) {
     			if (attrib.getDataType().equals(DataType.ARRAY)) {
-    				ModelEntity childEntity = getOutputModel().getEntityById(attrib.getTypeEntityId());
-    				entityData.put(attrib.getId(), processByJoinEntityArray(inputRows, entity, childEntity, currentInputRow));    				
+//    				ModelEntity childEntity = getOutputModel().getEntityById(attrib.getTypeEntityId());
+//    				entityData.put(attrib.getId(), processByJoinEntityArray(inputRows, entity, childEntity, currentInputRow));    				
     			} else if (attrib.getDataType().equals(DataType.REF)) {
-    				ModelEntity childEntity = getOutputModel().getEntityById(attrib.getTypeEntityId());
-    				entityData.put(attrib.getId(), processByJoinEntity(inputRows, childEntity));
+//    				ModelEntity childEntity = getOutputModel().getEntityById(attrib.getTypeEntityId());
+//    				entityData.put(attrib.getId(), processByJoinEntity(inputRows, childEntity));
     			} else {
     				//TODO: if this has multiple sources mapped to a single target, can we automatically create a new entity here?
     				entityData.put(attrib.getId(),mapValueFromInputToOutput(attrib.getId(), inputRows.get(currentInputRow)));
@@ -240,7 +243,7 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
         if (entityToEntityMap != null) {
             String srcParentEntity = entityToEntityMap.get(parentEntity.getId());
             String srcChildEntity = entityToEntityMap.get(childEntity.getId());
-            for (ModelRelation relation : getInputModel().getModelRelations()) {
+            for (ModelRelation relation : ((RelationalModel)getInputModel()).getModelRelations()) {
                 for (ModelRelationMapping mapping : relation.getModelRelationMappings()) {
                     if (mapping.getSourceAttribute().getEntityId().equalsIgnoreCase(srcParentEntity)
                             && mapping.getTargetAttribute().getEntityId().equalsIgnoreCase(srcChildEntity)) {
@@ -251,7 +254,7 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
             // if no foreign keys, attempt to use parent primary key mapped in
             // the child table
             if (cntrlBreakAttributes.size() == 0) {
-                for (ModelAttrib attrib : getInputModel().getEntityById(srcParentEntity).getModelAttributes()) {
+                for (ModelAttrib attrib : ((RelationalModel)getInputModel()).getEntityById(srcParentEntity).getModelAttributes()) {
                     if (attrib.isPk()) {
                         String targetAttrib = findTargetAttribBasedOnSource(attrib.getId());
                         if (targetAttrib != null) {
@@ -290,17 +293,18 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
     protected void processByQueryInputRows(ISendMessageCallback callback) {
         
         ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();        
-    	    Model outModel = getOutputModel();
-		ModelEntity rootEntity = outModel.getRootElement();
-        String sourceStepId = determineSourceStepForOutputEntity(rootEntity);
-        ArrayList<EntityData> rootDatas = byQueryRowData.get(sourceStepId);
-        
-        while (rootDatas != null && rootDatas.size() > currentInputRowMap.get(sourceStepId)) {
-            outputPayload.add(processByQueryEntity(null, rootEntity));
-        } 
-        
-        callback.sendEntityDataMessage(null, outputPayload);
-        currentInputRowMap.clear();
+    	    HierarchicalModel outModel = (HierarchicalModel) getOutputModel();
+//TODO: FIX THIS FOR HIERARCHICAL MODEL
+//    	    ModelEntity rootEntity = outModel.getRootElement();
+//        String sourceStepId = determineSourceStepForOutputEntity(rootEntity);
+//        ArrayList<EntityData> rootDatas = byQueryRowData.get(sourceStepId);
+//        
+//        while (rootDatas != null && rootDatas.size() > currentInputRowMap.get(sourceStepId)) {
+//            outputPayload.add(processByQueryEntity(null, rootEntity));
+//        } 
+//        
+//        callback.sendEntityDataMessage(null, outputPayload);
+//        currentInputRowMap.clear();
     }
     
     protected EntityData processByQueryEntity(ModelEntity parent, ModelEntity entity) {
@@ -312,11 +316,11 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
     		    EntityData entityData = new EntityData();
             for (ModelAttrib attrib:entity.getModelAttributes()) {
                 if (attrib.getDataType().equals(DataType.ARRAY)) {
-                    ModelEntity childEntity = getOutputModel().getEntityById(attrib.getTypeEntityId());
-                    entityData.put(attrib.getId(), processByQueryEntityArray(entity, childEntity));
+//                    ModelEntity childEntity = getOutputModel().getEntityById(attrib.getTypeEntityId());
+//                    entityData.put(attrib.getId(), processByQueryEntityArray(entity, childEntity));
                 } else if (attrib.getDataType().equals(DataType.REF)) {
-                    ModelEntity childEntity = getOutputModel().getEntityById(attrib.getTypeEntityId());
-                    entityData.put(attrib.getId(), processByQueryEntity(entity, childEntity));
+//                    ModelEntity childEntity = getOutputModel().getEntityById(attrib.getTypeEntityId());
+//                    entityData.put(attrib.getId(), processByQueryEntity(entity, childEntity));
                 } else {
                     entityData.put(attrib.getId(),mapValueFromInputToOutput(attrib.getId(), inboundRow));
                 }

@@ -33,12 +33,13 @@ import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FolderName;
-import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelName;
+import org.jumpmind.metl.core.model.HierarchicalModelName;
 import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
+import org.jumpmind.metl.core.model.RelationalModel;
+import org.jumpmind.metl.core.model.RelationalModelName;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
@@ -115,10 +116,10 @@ public class DesignNavigator extends VerticalLayout {
     IConfigurationService configurationService;
 
     CutCopyPasteManager cutCopyPasteManager;
-    
+
     BeanItemContainer<AbstractNamedObject> treeTblContainer = new BeanItemContainer<AbstractNamedObject>(AbstractNamedObject.class);
-    
-    String tagFilterText=null;
+
+    String tagFilterText = null;
 
     public DesignNavigator(ApplicationContext context, TabbedPanel tabs) {
         this.context = context;
@@ -163,13 +164,13 @@ public class DesignNavigator extends VerticalLayout {
         filterField.addTextChangeListener(new TextChangeListener() {
             public void textChange(TextChangeEvent event) {
                 if (!event.getText().isEmpty()) {
-                    tagFilterText=event.getText();
+                    tagFilterText = event.getText();
                 } else {
                     tagFilterText = null;
                 }
                 refreshProjects();
             }
-        });        
+        });
         return filterField;
     }
 
@@ -465,8 +466,8 @@ public class DesignNavigator extends VerticalLayout {
                     if (type.equals(FlowName.class.getSimpleName())) {
                         object = new FlowName();
                         object.setId(id);
-                    } else if (type.equals(ModelName.class.getSimpleName())) {
-                        object = new ModelName();
+                    } else if (type.equals(RelationalModelName.class.getSimpleName())) {
+                        object = new RelationalModelName();
                         object.setId(id);
                     } else if (type.equals(ResourceName.class.getSimpleName())) {
                         object = new ResourceName();
@@ -478,13 +479,13 @@ public class DesignNavigator extends VerticalLayout {
                         object = new ProjectVersionDepends();
                         object.setId(id);
                     }
-                    
+
                     if (object != null) {
                         expand(object);
                     }
                 }
             }
-            
+
             if (selected != null) {
                 expand(selected);
                 treeTable.setValue(selected);
@@ -543,7 +544,7 @@ public class DesignNavigator extends VerticalLayout {
             } else if ("MailSession".equals(resource.getType())) {
                 this.treeTable.setItemIcon(resource, Icons.EMAIL);
             } else if (resource.getType().contains("JMS")) {
-                this.treeTable.setItemIcon(resource, Icons.QUEUE);                
+                this.treeTable.setItemIcon(resource, Icons.QUEUE);
             } else {
                 this.treeTable.setItemIcon(resource, Icons.FILE_SYSTEM);
             }
@@ -587,18 +588,30 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     protected void addModelsToFolder(String folderName, ProjectVersion projectVersion) {
-        List<ModelName> models = context.getUiCache().findModelsInProject(projectVersion.getId());
+        List<RelationalModelName> relationalModels = context.getUiCache().findRelationalModelsInProject(projectVersion.getId());
         FolderName folder = null;
-        for (ModelName model : models) {
+        for (RelationalModelName relationalModel : relationalModels) {
             if (folder == null) {
                 folder = addVirtualFolder(folderName, projectVersion);
             }
             this.treeTable.setChildrenAllowed(folder, true);
-            this.treeTable.addItem(model);
-            this.treeTable.setItemIcon(model, Icons.MODEL);
-            this.treeTable.setParent(model, folder);
-            this.treeTable.setChildrenAllowed(model, false);
+            this.treeTable.addItem(relationalModel);
+            this.treeTable.setItemIcon(relationalModel, Icons.MODEL);
+            this.treeTable.setParent(relationalModel, folder);
+            this.treeTable.setChildrenAllowed(relationalModel, false);
         }
+        
+        List<HierarchicalModelName> hierarchicalModels = context.getUiCache().findHierarchicalModelsInProject(projectVersion.getId());
+        for (HierarchicalModelName hierarchicalModel : hierarchicalModels) {
+            if (folder == null) {
+                folder = addVirtualFolder(folderName, projectVersion);
+            }
+            this.treeTable.setChildrenAllowed(folder, true);
+            this.treeTable.addItem(hierarchicalModel);
+            this.treeTable.setItemIcon(hierarchicalModel, Icons.MODEL);
+            this.treeTable.setParent(hierarchicalModel, folder);
+            this.treeTable.setChildrenAllowed(hierarchicalModel, false);
+        }        
     }
 
     protected void expand(Object value) {
@@ -654,17 +667,18 @@ public class DesignNavigator extends VerticalLayout {
             EditFlowPanel flowLayout = new EditFlowPanel(context, flow.getId(), this, tabs);
             log.debug("It took {}ms to create the edit flow panel", (System.currentTimeMillis() - ts));
             tabs.addCloseableTab(flow.getId(), flow.getName(), Icons.FLOW, flowLayout);
-        } else if (item instanceof ModelName) {
-            ModelName modelName = (ModelName) item;
+        } else if (item instanceof RelationalModelName) {
+            RelationalModelName modelName = (RelationalModelName) item;
             ProjectVersion projectVersion = findProjectVersion(modelName);
-            Model model = configurationService.findModel(modelName.getId());
-            if (model.getType().equalsIgnoreCase(Model.TYPE_RELATIONAL)) {
-	            EditRelationalModelPanel editModel = new EditRelationalModelPanel(context, modelName.getId(), context.isReadOnly(projectVersion, Privilege.DESIGN));
-	            tabs.addCloseableTab(modelName.getId(), modelName.getName(), Icons.MODEL, editModel);
-            } else {
-            		EditHierarchicalModelPanel editModel = new EditHierarchicalModelPanel(context, modelName.getId(), context.isReadOnly(projectVersion, Privilege.DESIGN));
-	            tabs.addCloseableTab(modelName.getId(), modelName.getName(), Icons.MODEL, editModel);
-            }
+            EditRelationalModelPanel editModel = new EditRelationalModelPanel(context, modelName.getId(),
+                    context.isReadOnly(projectVersion, Privilege.DESIGN));
+            tabs.addCloseableTab(modelName.getId(), modelName.getName(), Icons.MODEL, editModel);        
+        } else if (item instanceof HierarchicalModelName){
+            HierarchicalModelName modelName = (HierarchicalModelName) item;
+            ProjectVersion projectVersion = findProjectVersion(modelName);
+            EditHierarchicalModelPanel editModel = new EditHierarchicalModelPanel(context, modelName.getId(),
+                    context.isReadOnly(projectVersion, Privilege.DESIGN));
+            tabs.addCloseableTab(modelName.getId(), modelName.getName(), Icons.MODEL, editModel);
         } else if (item instanceof ResourceName) {
             ResourceName resource = (ResourceName) item;
             ProjectVersion projectVersion = findProjectVersion(resource);
@@ -682,7 +696,7 @@ public class DesignNavigator extends VerticalLayout {
     public void doExport() {
         ExportDialog.show(context, treeTable.getValue());
     }
-    
+
     public void doTag() {
         TagDialog.show(context, treeTable.getValue());
     }
@@ -742,8 +756,8 @@ public class DesignNavigator extends VerticalLayout {
         } else if (object instanceof ResourceName) {
             ResourceName resourceName = (ResourceName) object;
             newProjectVersionId = resourceName.getProjectVersionId();
-        } else if (object instanceof ModelName) {
-            ModelName modelName = (ModelName) object;
+        } else if (object instanceof RelationalModelName) {
+            RelationalModelName modelName = (RelationalModelName) object;
             newProjectVersionId = modelName.getProjectVersionId();
         } else if (object instanceof FlowName) {
             FlowName flowName = (FlowName) object;
@@ -755,7 +769,7 @@ public class DesignNavigator extends VerticalLayout {
 
         if (newProjectVersionId != null) {
             if (context.getClipboard().containsKey(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE)) {
-                if (context.getClipboard().get(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE).equals(Model.class)) {
+                if (context.getClipboard().get(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE).equals(RelationalModel.class)) {
                     cutCopyPasteManager.pasteModels(newProjectVersionId);
                 } else if (context.getClipboard().get(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE).equals(Resource.class)) {
                     cutCopyPasteManager.pasteResources(newProjectVersionId);
@@ -778,8 +792,8 @@ public class DesignNavigator extends VerticalLayout {
             ConfirmDialog.show("Delete Resource?", "Are you sure you want to delete the '" + resource.getName() + "' resource?",
                     new DeleteResourceConfirmationListener(resource));
 
-        } else if (object instanceof ModelName) {
-            ModelName model = (ModelName) object;
+        } else if (object instanceof RelationalModelName) {
+            RelationalModelName model = (RelationalModelName) object;
             if (!configurationService.isModelUsed(model.getId())) {
                 ConfirmDialog.show("Delete Model?", "Are you sure you want to delete the '" + model.getName() + "' model?",
                         new DeleteModelConfirmationListener(model));
@@ -912,10 +926,10 @@ public class DesignNavigator extends VerticalLayout {
     public void addNewFtpFileSystem() {
         addNewResource("Ftp", "FTP Directory", Icons.FILE_SYSTEM);
     }
-    
+
     public void addNewJmsSubscribe() {
         addNewResource("JMS Subscribe", "JMS Subscribe", Icons.QUEUE);
-    }    
+    }
 
     public void addNewLocalFileSystem() {
         addNewResource("Local File System", "Directory", Icons.FILE_SYSTEM);
@@ -965,7 +979,7 @@ public class DesignNavigator extends VerticalLayout {
         startEditingItem(resource);
     }
 
-    public void addNewModel(String type) {
+    public void addNewHierarhicalModel() {
         ProjectVersion projectVersion = findProjectVersion();
         FolderName folder = findFolderWithName(LABEL_MODELS);
         if (folder == null) {
@@ -973,11 +987,34 @@ public class DesignNavigator extends VerticalLayout {
         }
         treeTable.setChildrenAllowed(folder, true);
 
-        ModelName model = new ModelName();
+        HierarchicalModelName model = new HierarchicalModelName();
         model.setName("New Model");
         model.setProjectVersionId(projectVersion.getId());
-        model.setType(type);
-        
+
+        configurationService.save(model);
+
+        treeTable.addItem(model);
+        treeTable.setItemIcon(model, Icons.MODEL);
+        treeTable.setParent(model, folder);
+        treeTable.setChildrenAllowed(model, false);
+
+        treeTable.setCollapsed(folder, false);
+
+        startEditingItem(model);
+    }
+
+    public void addNewRelationalModel() {
+        ProjectVersion projectVersion = findProjectVersion();
+        FolderName folder = findFolderWithName(LABEL_MODELS);
+        if (folder == null) {
+            folder = addVirtualFolder(LABEL_MODELS, projectVersion);
+        }
+        treeTable.setChildrenAllowed(folder, true);
+
+        RelationalModelName model = new RelationalModelName();
+        model.setName("New Model");
+        model.setProjectVersionId(projectVersion.getId());
+
         configurationService.save(model);
 
         treeTable.addItem(model);
@@ -1053,17 +1090,17 @@ public class DesignNavigator extends VerticalLayout {
 
     class DeleteModelConfirmationListener implements IConfirmListener {
 
-        ModelName toDelete;
+        RelationalModelName toDelete;
 
         private static final long serialVersionUID = 1L;
 
-        public DeleteModelConfirmationListener(ModelName toDelete) {
+        public DeleteModelConfirmationListener(RelationalModelName toDelete) {
             this.toDelete = toDelete;
         }
 
         @Override
         public boolean onOk() {
-            configurationService.delete(configurationService.findModel(toDelete.getId()));
+            configurationService.delete(configurationService.findRelationalModel(toDelete.getId()));
             tabs.closeTab(toDelete.getId());
             Object parent = treeTable.getParent(toDelete);
             refresh();

@@ -48,7 +48,7 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 
 import org.jumpmind.exception.IoException;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
@@ -230,7 +230,7 @@ public class EmailWriter extends AbstractComponentRuntime {
             } else if (inputMessage instanceof EntityDataMessage) {
                 List<EntityData> payload = ((EntityDataMessage) inputMessage).getPayload();
                 for (EntityData entityData : payload) {
-                    Model model = getInputModel();
+                    RelationalModel model = (RelationalModel) getInputModel();
                     Map<String, String> row = null;
                     if (model != null) {
                         row = model.toStringMap(entityData, true);

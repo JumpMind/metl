@@ -23,7 +23,7 @@
 <definitions>
   <component category='WRITER'
              id='RDBMS Writer'
-             inputMessageType='entity'
+             inputMessageType='relational'
              inputOutputModelsMatch='false'
              outputMessageType='text'
              resourceCategory='datasource'

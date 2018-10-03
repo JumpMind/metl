@@ -20,16 +20,14 @@
  */
 package org.jumpmind.metl.core.model;
 
-public class ModelName extends AbstractName {
+public class RelationalModelName extends AbstractName {
 
     private static final long serialVersionUID = 1L;
     
-    private String type;
-
-    public ModelName() {
+    public RelationalModelName() {
     }
 
-    public ModelName(Model obj) {
+    public RelationalModelName(RelationalModel obj) {
         this.name = obj.getName();
         this.setId(obj.getId());
         this.rowId = obj.getRowId();
@@ -38,16 +36,6 @@ public class ModelName extends AbstractName {
         this.lastUpdateBy = obj.getLastUpdateBy();
         this.lastUpdateTime = obj.getLastUpdateTime();
         this.projectVersionId = obj.getProjectVersionId();
-        this.type = obj.getType();
         this.deleted = obj.isDeleted();
     }
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
 }

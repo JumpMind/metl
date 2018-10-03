@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jumpmind.db.sql.SqlException;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.ContentMessage;
@@ -292,7 +292,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     private List<String> getAttributeIds(String columnName) {
         List<String> attributeIds = new ArrayList<String>();
         if (getOutputModel() != null) {
-            List<ModelAttrib> attributes = getOutputModel().getAttributesByName(columnName);
+            List<ModelAttrib> attributes = ((RelationalModel)getOutputModel()).getAttributesByName(columnName);
             if (attributes.size() == 0) {
                 throw new SqlException("Column not found in output model and not specified via hint.  Column Name = " + columnName);
             } else {
@@ -308,7 +308,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
     private String getAttributeId(String tableName, String columnName) {
         if (getOutputModel() != null) {
-            ModelAttrib modelAttribute = getOutputModel().getAttributeByName(tableName, columnName);
+            ModelAttrib modelAttribute = ((RelationalModel)getOutputModel()).getAttributeByName(tableName, columnName);
             if (modelAttribute != null) {
                 return modelAttribute.getId();
             } else {
@@ -412,7 +412,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
     protected Set<ModelEntity> getModelEntities(EntityData rowData) {
         Set<ModelEntity> entities = new LinkedHashSet<ModelEntity>();
-        Model model = getOutputModel();
+        RelationalModel model = (RelationalModel) getOutputModel();
         for (String attributeId : rowData.keySet()) {
             ModelAttrib attribute = model.getAttributeById(attributeId);
             if (attribute != null) {

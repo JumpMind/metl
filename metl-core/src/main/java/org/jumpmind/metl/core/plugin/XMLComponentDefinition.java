@@ -37,12 +37,13 @@ public class XMLComponentDefinition extends XMLAbstractDefinition {
     @XmlType
     @XmlEnum(String.class)
     public enum MessageType {
-        @XmlEnumValue("none")
-        NONE(null), @XmlEnumValue("entity")
-        ENTITY("E"), @XmlEnumValue("text")
-        TEXT("T"), @XmlEnumValue("binary")
-        BINARY("B"), @XmlEnumValue("any")
-        ANY("*");
+        @XmlEnumValue("none") NONE(null), 
+        @XmlEnumValue("relational") RELATIONAL("R"), 
+        @XmlEnumValue("hierarchical") HIERARCHICAL("H"),
+        @XmlEnumValue("model") MODEL("M"),
+        @XmlEnumValue("text") TEXT("T"), 
+        @XmlEnumValue("binary") BINARY("B"), 
+        @XmlEnumValue("any") ANY("*");
 
         private String letter;
 

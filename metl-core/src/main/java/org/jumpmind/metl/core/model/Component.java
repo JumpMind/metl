@@ -40,9 +40,9 @@ public class Component extends AbstractObjectWithSettings implements IAuditable 
 
     Resource resource;
 
-    Model inputModel;
+    IModel inputModel;
 
-    Model outputModel;
+    IModel outputModel;
 
     String projectVersionId;
 
@@ -64,7 +64,7 @@ public class Component extends AbstractObjectWithSettings implements IAuditable 
         setId(id);
     }
 
-    public Component(Resource resource, Model inputModel, Model outputModel,
+    public Component(Resource resource, IModel inputModel, IModel outputModel,
             List<ComponentEntitySetting> entitySettings,
             List<ComponentAttribSetting> attributeSettings, Setting... settings) {
         super(settings);
@@ -99,11 +99,11 @@ public class Component extends AbstractObjectWithSettings implements IAuditable 
         return name;
     }
 
-    public void setInputModel(Model inputModel) {
+    public void setInputModel(IModel inputModel) {
         this.inputModel = inputModel;
     }
 
-    public void setOutputModel(Model outputModel) {
+    public void setOutputModel(IModel outputModel) {
         this.outputModel = outputModel;
     }
 
@@ -121,7 +121,7 @@ public class Component extends AbstractObjectWithSettings implements IAuditable 
 
     public void setInputModelId(String inputModeldId) {
         if (inputModeldId != null) {
-            this.inputModel = new Model(inputModeldId);
+            this.inputModel = new RelationalModel(inputModeldId);
         } else {
             this.inputModel = null;
         }
@@ -133,7 +133,7 @@ public class Component extends AbstractObjectWithSettings implements IAuditable 
 
     public void setOutputModelId(String outputModelId) {
         if (outputModelId != null) {
-            this.outputModel = new Model(outputModelId);
+            this.outputModel = new RelationalModel(outputModelId);
         } else {
             this.outputModel = null;
         }
@@ -151,11 +151,11 @@ public class Component extends AbstractObjectWithSettings implements IAuditable 
         }
     }
 
-    public Model getInputModel() {
+    public IModel getInputModel() {
         return inputModel;
     }
 
-    public Model getOutputModel() {
+    public IModel getOutputModel() {
         return outputModel;
     }
 
@@ -200,15 +200,17 @@ public class Component extends AbstractObjectWithSettings implements IAuditable 
         List<ComponentAttribSetting> settings = new ArrayList<ComponentAttribSetting>();
         for (ComponentAttribSetting setting : attributeSettings) {
             String attributeId = setting.getAttributeId();
-            if (inputModel != null) {
-                ModelAttrib attribute = inputModel.getAttributeById(attributeId);
+            if (inputModel != null && inputModel instanceof RelationalModel) {
+                RelationalModel inRelationalModel = (RelationalModel) inputModel;
+                ModelAttrib attribute = inRelationalModel.getAttributeById(attributeId);
                 if (attribute != null && attribute.getEntityId().equals(entityId)) {
                     settings.add(setting);
                 }
             }
 
-            if (outputModel != null) {
-                ModelAttrib attribute = outputModel.getAttributeById(attributeId);
+            if (outputModel != null && outputModel instanceof RelationalModel) {
+                RelationalModel outRelationalModel = (RelationalModel) outputModel;
+                ModelAttrib attribute = outRelationalModel.getAttributeById(attributeId);
                 if (attribute != null && attribute.getEntityId().equals(entityId)
                         && !settings.contains(setting)) {
                     settings.add(setting);
@@ -217,6 +219,8 @@ public class Component extends AbstractObjectWithSettings implements IAuditable 
         }
         return settings;
     }
+    
+    //TODO: DO SOMETHING SIMILAR HERE FOR HIERARCHICAL MODEL
 
     public void setAttributeSettings(List<ComponentAttribSetting> attributeSettings) {
         this.attributeSettings = attributeSettings;
@@ -294,11 +298,13 @@ public class Component extends AbstractObjectWithSettings implements IAuditable 
                 return LogUtils.toJson(data.getChangeType().name(), this);
             }
         };
-        Model model = input ? inputModel : outputModel;
+        IModel model = input ? inputModel : outputModel;
         if (model != null) {
-            return model.toRow(data, qualifyWithEntityName);
+            RelationalModel relationalModel = (RelationalModel) model;
+            return relationalModel.toRow(data, qualifyWithEntityName);
         }
         return row;
     }
-    
+	
+	//TODO: WILL WE NEED A TOROW FOR HIERARCHICAL MODEL
 }

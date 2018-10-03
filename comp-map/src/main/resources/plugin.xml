@@ -23,9 +23,9 @@
 <definitions>
   <component category='PROCESSOR'
              id='Mapping'
-             inputMessageType='entity'
+             inputMessageType='relational'
              inputOutputModelsMatch='false'
-             outputMessageType='entity'
+             outputMessageType='relational'
              resourceCategory='none'>
     <name>Mapping</name>
     <className>org.jumpmind.metl.core.runtime.component.Mapping</className>
@@ -48,9 +48,9 @@
   </component>
   <component category='PROCESSOR'
              id='83433db0-9ac5-4257-a9c3-1ba75106bf65'
-             inputMessageType='entity'
+             inputMessageType='relational'
              inputOutputModelsMatch='false'
-             outputMessageType='entity'
+             outputMessageType='hierarchical'
              resourceCategory='none'>
     <name>Rel/Hier Map</name>
     <className>org.jumpmind.metl.core.runtime.component.RelationalHierarchicalMapping</className>

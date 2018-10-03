@@ -23,9 +23,9 @@
 <definitions>
   <component category='PROCESSOR'
              id='Sorter'
-             inputMessageType='entity'
+             inputMessageType='relational'
              inputOutputModelsMatch='true'
-             outputMessageType='entity'
+             outputMessageType='relational'
              resourceCategory='none'>
     <name>Sorter</name>
     <className>org.jumpmind.metl.core.runtime.component.Sorter</className>

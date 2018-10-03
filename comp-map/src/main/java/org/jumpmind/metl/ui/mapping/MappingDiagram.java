@@ -30,6 +30,7 @@ import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelEntitySorter;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.component.Mapping;
 import org.jumpmind.metl.ui.common.ApplicationContext;
@@ -71,17 +72,18 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
 		state.component = component;
 		state.readOnly = readOnly;
 
-		state.inputModel = component.getInputModel();
+		state.inputModel = (RelationalModel) component.getInputModel();
 		if (state.inputModel != null) {
 			context.getConfigurationService().refresh(state.inputModel);
 			Collections.sort(state.inputModel.getModelEntities(), new ModelEntitySorter());
 			state.inputModel.sortAttributes();
 		}
 
-		state.outputModel = component.getOutputModel();
+		state.outputModel = (RelationalModel) component.getOutputModel();
 		if (state.outputModel != null) {
 			context.getConfigurationService().refresh(state.outputModel);
-			state.outputRootNode = state.outputModel.getRootElement();
+//TODO: FIX FOR HIERARCHICAL MODEL			
+//			state.outputRootNode = state.outputModel.getRootElement();
 			Collections.sort(state.outputModel.getModelEntities(), new ModelEntitySorter());
 			state.outputModel.sortAttributes();
 		}
@@ -96,8 +98,8 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
 		while (iter.hasNext()) {
 			ComponentAttribSetting setting = iter.next();
 			if (Mapping.ATTRIBUTE_MAPS_TO.equals(setting.getName())) {
-				ModelAttrib srcAttribute = c.getInputModel().getAttributeById(setting.getAttributeId());
-				ModelAttrib dstAttribute = c.getOutputModel().getAttributeById(setting.getValue());
+				ModelAttrib srcAttribute = ((RelationalModel)c.getInputModel()).getAttributeById(setting.getAttributeId());
+				ModelAttrib dstAttribute = ((RelationalModel)c.getOutputModel()).getAttributeById(setting.getValue());
 				if (srcAttribute == null || dstAttribute == null) {
 					// Remove link setting if source or target can't be found.
 					iter.remove();
@@ -186,7 +188,7 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
 	
 	protected boolean isEntity(String id) {
 		boolean isEntity = false;
-		List<ModelEntity> entities = component.getInputModel().getModelEntities();
+		List<ModelEntity> entities = ((RelationalModel)component.getInputModel()).getModelEntities();
 		for (ModelEntity entity:entities) {
 			if (entity.getId().equalsIgnoreCase(id)) {
 				return true;

@@ -28,7 +28,7 @@ import java.util.Map;
 
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
@@ -48,7 +48,7 @@ public class Merger extends AbstractComponentRuntime {
     @Override
     public void start() {
         Component component = getComponent();
-        Model inputModel = component.getInputModel();
+        RelationalModel inputModel = (RelationalModel) component.getInputModel();
         if (inputModel == null) {
             throw new MisconfiguredException("The input model is required and has not yet been set");
         }

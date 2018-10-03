@@ -34,7 +34,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.DataDiff;
@@ -165,7 +165,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
             @Override
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 EntitySettings setting = (EntitySettings) itemId;
-                Model model = component.getInputModel();
+                RelationalModel model = (RelationalModel) component.getInputModel();
                 ModelEntity entity = model.getEntityById(setting.getEntityId());
                 return UiUtils.getName(entityFilterField.getValue(), entity.getName());
             }
@@ -198,7 +198,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
     protected void fillEntityContainer() {
         if (component.getInputModel() != null) {
 
-            for (ModelEntity entity : component.getInputModel().getModelEntities()) {
+            for (ModelEntity entity : ((RelationalModel)component.getInputModel()).getModelEntities()) {
                 ComponentEntitySetting insert = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_ADD_ENABLED);
                 ComponentEntitySetting update = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_CHG_ENABLED);
                 ComponentEntitySetting delete = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_DEL_ENABLED);
@@ -223,7 +223,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
         entityFilterField.setValue(filter);
         entityTable.removeAllItems();
         for (EntitySettings entitySetting : entitySettings) {
-            Model model = component.getInputModel();
+            RelationalModel model = (RelationalModel) component.getInputModel();
             ModelEntity entity = model.getEntityById(entitySetting.getEntityId());
             if (isBlank(filter) || entity.getName().toLowerCase().contains(filter)) {
                 entityTable.addItem(entitySetting);
@@ -434,7 +434,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
                 @Override
                 public Object generateCell(Table source, Object itemId, Object columnId) {
                     AttributeSettings setting = (AttributeSettings) itemId;
-                    Model model = component.getInputModel();
+                    RelationalModel model = (RelationalModel) component.getInputModel();
                     ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
                     return UiUtils.getName(entityFilterField.getValue(), attribute.getName());
                 }
@@ -452,7 +452,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
 
     private void refreshAttributeContainer(EntitySettings selectedRow) {
         attributeSettings.clear();
-        ModelEntity entity = component.getInputModel().getEntityById(selectedRow.getEntityId());
+        ModelEntity entity = ((RelationalModel)component.getInputModel()).getEntityById(selectedRow.getEntityId());
         for (ModelAttrib attribute : entity.getModelAttributes()) {
 
             ComponentAttribSetting compare = component.getSingleAttributeSetting(attribute.getId(), DataDiff.ATTRIBUTE_COMPARE_ENABLED);

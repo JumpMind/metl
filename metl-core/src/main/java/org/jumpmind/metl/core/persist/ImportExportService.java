@@ -52,8 +52,8 @@ import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AuditEvent;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
-import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelName;
+import org.jumpmind.metl.core.model.RelationalModel;
+import org.jumpmind.metl.core.model.RelationalModelName;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
@@ -168,7 +168,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         importsToAudit.add(tableName(Project.class).toUpperCase());
         importsToAudit.add(tableName(ProjectVersion.class).toUpperCase());
         importsToAudit.add(tableName(Flow.class).toUpperCase());
-        importsToAudit.add(tableName(Model.class).toUpperCase());
+        importsToAudit.add(tableName(RelationalModel.class).toUpperCase());
         importsToAudit.add(tableName(Resource.class).toUpperCase());
         setColumnsToExclude();
     }
@@ -197,9 +197,9 @@ public class ImportExportService extends AbstractService implements IImportExpor
             flowIds.add(flowName.getId());
         }
 
-        List<ModelName> models = configurationService.findModelsInProject(projectVersionId);
+        List<RelationalModelName> models = configurationService.findRelationalModelsInProject(projectVersionId);
         List<String> modelIds = new ArrayList<>();
-        for (ModelName modelName : models) {
+        for (RelationalModelName modelName : models) {
             modelIds.add(modelName.getId());
         }
 

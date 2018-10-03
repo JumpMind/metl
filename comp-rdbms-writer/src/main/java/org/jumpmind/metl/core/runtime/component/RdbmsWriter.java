@@ -45,7 +45,7 @@ import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.sql.UniqueKeyException;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.DataType;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -172,7 +172,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                             quoteIdentifiers, false);
                 }
                 if (targetTables == null) {
-                    Model model = getInputModel();
+                    RelationalModel model = (RelationalModel) getInputModel();
                     targetTables = new ArrayList<TargetTableDefintion>();
                     for (ModelEntity entity : model.getModelEntities()) {
                         String tableName = tablePrefix + entity.getName() + tableSuffix;
@@ -313,7 +313,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
             
             String entityNameToBeProcessed="Not Found";
             if (!processedRow) {
-                Model inputModel = getInputModel();
+                RelationalModel inputModel = (RelationalModel) getInputModel();
                 for (ModelEntity entity : inputModel.getModelEntities()) {
                     for (ModelAttrib attribute : entity.getModelAttributes()) {
                         if (inputRow.containsKey(attribute.getId())) {

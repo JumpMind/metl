@@ -55,7 +55,7 @@ public class EntityTable implements Serializable {
         this.rows = rows;
     }
     
-    public EntityData toEntityData(Model model) {
+    public EntityData toEntityData(RelationalModel model) {
         
         EntityData entityData = new EntityData();
         ModelEntity entity = model.getEntityByName(name);

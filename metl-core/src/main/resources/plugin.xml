@@ -40,9 +40,9 @@
   </component>
   <component category='PROCESSOR'
              id='Deduper'
-             inputMessageType='entity'
+             inputMessageType='relational'
              inputOutputModelsMatch='true'
-             outputMessageType='entity'
+             outputMessageType='relational'
              resourceCategory='none'>
     <name>Deduper</name>
     <className>org.jumpmind.metl.core.runtime.component.Deduper</className>
@@ -79,9 +79,9 @@
   </component>
   <component category='PROCESSOR'
              id='Merger'
-             inputMessageType='entity'
+             inputMessageType='relational'
              inputOutputModelsMatch='true'
-             outputMessageType='entity'
+             outputMessageType='relational'
              resourceCategory='none'>
     <name>Merger</name>
     <className>org.jumpmind.metl.core.runtime.component.Merger</className>
@@ -101,7 +101,7 @@
              inputMessageType='any'
              inputOutputModelsMatch='true'
              showInputModel='true'
-             outputMessageType='entity'
+             outputMessageType='relational'
              resourceCategory='none'
              shareable='false'>
     <name>Lookup</name>
@@ -116,22 +116,22 @@
       </setting>
       <setting id='lookup.key.attribute'
                required='true'
-               type='entity_column'>
+               type='model_column'>
         <name>Lookup Key Attribute</name>
       </setting>
       <setting id='lookup.value.attribute'
                required='true'
-               type='entity_column'>
+               type='model_column'>
         <name>Lookup Value Attribute</name>
       </setting>
       <setting id='replacement.key.attribute'
                required='true'
-               type='entity_column'>
+               type='model_column'>
         <name>Replacement Key Attribute</name>
       </setting>
       <setting id='replacement.value.attribute'
                required='true'
-               type='entity_column'>
+               type='model_column'>
         <name>Replacement Value Attribute</name>
       </setting>
     </settings>
@@ -158,9 +158,9 @@
   </component>
   <component category='PROCESSOR'
              id='Multiplier'
-             inputMessageType='entity'
+             inputMessageType='relational'
              inputOutputModelsMatch='true'
-             outputMessageType='entity'
+             outputMessageType='relational'
              resourceCategory='none'
              shareable='false'>
     <name>Multiplier</name>
@@ -196,9 +196,9 @@
   </component>
   <component category='PROCESSOR'
              id='Union'
-             inputMessageType='entity'
+             inputMessageType='relational'
              inputOutputModelsMatch='true'
-             outputMessageType='entity'
+             outputMessageType='relational'
              resourceCategory='none'>
     <name>Union</name>
     <className>org.jumpmind.metl.core.runtime.component.Union</className>

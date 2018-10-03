@@ -26,7 +26,7 @@ import java.util.Comparator;
 
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.ExcelFileReader;
@@ -199,7 +199,7 @@ public class EditExcelReaderPanel extends AbstractComponentEditPanel {
     }
     
     protected void refresh() {
-        Model model = component.getOutputModel();
+        RelationalModel model = (RelationalModel) component.getOutputModel();
         if (model != null) {
             Collections.sort(model.getModelEntities(), new Comparator<ModelEntity>() {
                 public int compare(ModelEntity entity1, ModelEntity entity2) {
