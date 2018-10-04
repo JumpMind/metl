@@ -146,7 +146,7 @@
       }
     } ],
     "modelData" : [ {
-      "tableName" : "METL_model",
+      "tableName" : "METL_relational_model",
       "tableData" : {
         "e323d201-1741-4675-badd-5fd7b24e3b11" : {
           "ID" : "e323d201-1741-4675-badd-5fd7b24e3b11",
@@ -155,7 +155,6 @@
           "DELETED" : 0,
           "NAME" : "Genders",
           "SHARED" : 0,
-          "TYPE" : "RELATIONAL",
           "FOLDER_ID" : null
         },
         "678f4d12-beb7-441d-9a35-5de63b7f9e06" : {
@@ -165,7 +164,6 @@
           "DELETED" : 0,
           "NAME" : "Person",
           "SHARED" : 0,
-          "TYPE" : "RELATIONAL",
           "FOLDER_ID" : null
         },
         "8de36042-6f97-47a5-943c-7f6e6fe6e67b" : {
@@ -175,7 +173,6 @@
           "DELETED" : 0,
           "NAME" : "Denormalized Person",
           "SHARED" : 0,
-          "TYPE" : "RELATIONAL",
           "FOLDER_ID" : null
         },
         "69a49073-92ad-49ea-9e2d-cee30ae5b648" : {
@@ -185,7 +182,6 @@
           "DELETED" : 0,
           "NAME" : "Weather",
           "SHARED" : 0,
-          "TYPE" : "RELATIONAL",
           "FOLDER_ID" : null
         },
         "047fdc83-4b43-4553-aed6-070c8598b1a2" : {
@@ -195,7 +191,6 @@
           "DELETED" : 0,
           "NAME" : "Zip",
           "SHARED" : 0,
-          "TYPE" : "RELATIONAL",
           "FOLDER_ID" : null
         },
         "f9b59934-07d8-45d5-ac44-ad04bd1f1633" : {
@@ -205,7 +200,6 @@
           "DELETED" : 0,
           "NAME" : "Person Model",
           "SHARED" : 0,
-          "TYPE" : "RELATIONAL",
           "FOLDER_ID" : null
         }
       }

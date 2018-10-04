@@ -103,11 +103,11 @@ public class ImportExportService extends AbstractService implements IImportExpor
     };
     
     final String[][] MODEL_SQL = {
-            {"_model","select * from %1$s_model where project_version_id='%2$s' and id='%3$s' order by id","id"},
+            {"_relational_model","select * from %1$s_relational_model where project_version_id='%2$s' and id='%3$s' order by id","id"},
             {"_model_entity","select * from %1$s_model_entity where model_id='%3$s' order by id","id"},
             {"_model_attrib","select * from %1$s_model_attrib where entity_id in "
             + "(select id from %1$s_model_entity where model_id in "
-            + "(select id from %1$s_model where project_version_id='%2$s' and id='%3$s')) order by id","id"}
+            + "(select id from %1$s_relational_model where project_version_id='%2$s' and id='%3$s')) order by id","id"}
     };
     
     final String[][] RESOURCE_SQL = {
