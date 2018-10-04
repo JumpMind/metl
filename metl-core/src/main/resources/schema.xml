@@ -355,16 +355,16 @@
             name="last_update_time"
             type="TIMESTAMP" />
     <foreign-key foreignTable="folder"
-                 name="fk_m_2_fldr">
+                 name="fk_rm_2_fldr">
       <reference foreign="id"
                  local="folder_id" />
     </foreign-key>
     <foreign-key foreignTable="project_version"
-                 name="fk_m_2_v">
+                 name="fk_rm_2_v">
       <reference foreign="id"
                  local="project_version_id" />
     </foreign-key>
-    <index name="idx_model_pv">
+    <index name="idx_rel_model_pv">
       <index-column name="deleted" />
       <index-column name="project_version_id" />
     </index>
