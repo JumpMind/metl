@@ -29,6 +29,7 @@ import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.KeySpec;
 
@@ -187,6 +188,7 @@ public class SecurityService implements ISecurityService {
     }
 
     protected SecretKey getSecretKey() throws Exception {
+    	cleanupProviders();
         String password = getKeyStorePassword();
         KeyStore.ProtectionParameter param = new KeyStore.PasswordProtection(
                 password.toCharArray());
@@ -265,6 +267,12 @@ public class SecurityService implements ISecurityService {
         FileOutputStream os = new FileOutputStream(getKeyStoreFile());
         ks.store(os, password.toCharArray());
         os.close();
+    }
+    
+    private void cleanupProviders() {
+    	// The bouncycastle provider is pulled in when running within eclipse regardless of 
+    	// avoiding transitive dependencies from comp-pgp. BC breaks inserting entries in the keystore.
+    	Security.removeProvider("BC");
     }
 
 }
