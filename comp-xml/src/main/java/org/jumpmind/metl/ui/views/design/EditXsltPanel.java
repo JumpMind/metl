@@ -86,7 +86,8 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements TextCha
         editor.setSizeFull();
         editor.setHighlightActiveLine(true);
         editor.setShowPrintMargin(false);
-        editor.addTextChangeListener(new StylesheetChangeListener());
+        // VaadinUpdate:
+//        editor.addTextChangeListener(new StylesheetChangeListener());
         editor.setValue(component.findSetting(XsltProcessor.XSLT_PROCESSOR_STYLESHEET).getValue());
         leftLayout.addComponent(new Label("XSLT Stylesheet"));
         leftLayout.addComponent(editor);

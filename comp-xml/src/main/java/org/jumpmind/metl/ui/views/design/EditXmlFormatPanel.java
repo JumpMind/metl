@@ -101,7 +101,8 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
 
     protected void export() {
         String fileNamePrefix = component.getName().toLowerCase().replace(' ', '-');
-        ExportDialog dialog = new ExportDialog(grid, fileNamePrefix, component.getName());
+        // VaadinUpdate - send null to get it to compile.
+        ExportDialog dialog = new ExportDialog(/*grid*/null, fileNamePrefix, component.getName());
         UI.getCurrent().addWindow(dialog);
     }
 
@@ -312,7 +313,8 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
             content.setMargin(true);
 
             editor = new AceEditor();
-            editor.setImmediate(true);
+            // VaadinUpdate missing method?
+//            editor.setImmediate(true);
             editor.setMode(AceMode.xml);
             editor.setSizeFull();
             editor.setHighlightActiveLine(true);

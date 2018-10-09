@@ -41,10 +41,11 @@ sourceSets.main.compileClasspath += [configurations.provided]
 
 dependencies {
     compile project(":metl-ui")
-    provided ("com.vaadin:vaadin-compatibility-client-compiled:$vaadinVersion")  {
-       exclude group:'org.eclipse.jetty'
-    }    
-    executableWar project(":metl-server")    
+    compile group: 'com.vaadin', name: 'vaadin-compatibility-client', version: "$vaadinVersion"
+    //provided ("com.vaadin:'vaadin-compatibility-client':"$vaadinVersion")  {
+    //   exclude group:'org.eclipse.jetty'
+    //}    
+    executableWar project(":metl-server")
 }
 
 task copyJavaDocsToWebapp(type: Copy) {    
@@ -60,7 +61,7 @@ task copyPluginsForDevelopment (type:Copy) {
    rootProject.allprojects.findAll { it.name.startsWith('comp') || it.name.startsWith('resource') }.each {
        dependsOn ":$it.name:publishMavenJavaPublicationToMavenRepository"
    }
-    
+   
    from ('build/plugins')
    destinationDir file('../metl-develop/working/plugins')
    rename 'maven-metadata.xml(.*)', 'maven-metadata-local.xml$1'
