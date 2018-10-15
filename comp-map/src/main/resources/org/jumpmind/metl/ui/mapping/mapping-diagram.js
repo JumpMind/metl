@@ -206,15 +206,15 @@ function rebuildAll() {
     removeConnections();
     removeNodes();
     appendNodes(mappingDiv, state.inputModel.modelEntities, "src", 10, 10, inputModelFilter, inputFilterPopulated, true);
-    if (state.outputModel.type == "RELATIONAL") {
+//    if (state.outputModel instanceof RelationalModel) {
 	    appendNodes(mappingDiv, state.outputModel.modelEntities, "dst", (mappingDiv.clientWidth / 2) + 12, 10,
 	            outputModelFilter, outputFilterPopulated, false);
-    } else {
-    		xycoord.left = (mappingDiv.clientWidth / 2) + 12;
-    		xycoord.top = 10;
-    		appendHierarchicalNodes(mappingDiv, state.outputModel.modelEntities, state.outputRootNode, "dst", xycoord,
-    				outputModelFilter, outputFilterPopulated, false);
-    }
+//    } else {
+//    		xycoord.left = (mappingDiv.clientWidth / 2) + 12;
+//    		xycoord.top = 10;
+//    		appendHierarchicalNodes(mappingDiv, state.outputModel.modelEntities, state.outputRootNode, "dst", xycoord,
+//    				outputModelFilter, outputFilterPopulated, false);
+//    }
 
     var srcNodes = jsPlumb.getSelector(".mapping-diagram .src");
     if (srcNodes.length > 0) {

@@ -71,7 +71,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class EditMappingPanel extends AbstractFlowStepAwareComponentEditPanel {
+public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareComponentEditPanel {
 
     MappingDiagram diagram;
 

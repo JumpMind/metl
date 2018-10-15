@@ -23,10 +23,10 @@
 <ui>
     <component-ui id="Mapping UI" componentId="Mapping">
         <iconImage>org/jumpmind/metl/core/runtime/component/metl-mapping-48x48-color.png</iconImage>
-        <className>org.jumpmind.metl.ui.mapping.EditMappingPanel</className>
+        <className>org.jumpmind.metl.ui.mapping.RelationalMappingPanel</className>
     </component-ui>
     <component-ui id="Mapping UI" componentId="83433db0-9ac5-4257-a9c3-1ba75106bf65">
         <iconImage>org/jumpmind/metl/core/runtime/component/metl-mapping-48x48-color.png</iconImage>
-        <className>org.jumpmind.metl.ui.mapping.EditMappingPanel</className>
+        <className>org.jumpmind.metl.ui.mapping.RelationalHierarchicalMappingPanel</className>
     </component-ui>    
 </ui>
