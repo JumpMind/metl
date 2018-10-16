@@ -28,6 +28,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -548,7 +549,7 @@ public class ConfigurationService extends AbstractService
         ModelSchemaObject root = this.getHierarchicalModelRoot(model.getId());
         if (root != null) {
             model.setRootObject(root);
-            this.refreshModelSchemaObject(root);
+            this.refresh(root);
         }
     }
     
@@ -1834,11 +1835,7 @@ public class ConfigurationService extends AbstractService
                 "      on hm.id = so.model_id " + 
                 "where " +
                 "   hm.id = '%2$s' " +
-                "   and not exists " + 
-                "   ( " + 
-                "      select * from %1$s_model_schema_object_rel sor " + 
-                "      where sor.child_id = so.id " + 
-                "   ) ";
+                "   and so.parent_id is null "; 
 
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         List<Row> ids = template.query(String.format(ROOT_OF_HIERARCHY_MODEL_SQL, tablePrefix, modelId));
@@ -1849,32 +1846,51 @@ public class ConfigurationService extends AbstractService
             params.put("id", ids.get(0).getString("id"));
             ModelSchemaObject root = this.findOne(ModelSchemaObject.class, params);
             if (root != null) {                
-                refreshModelSchemaObject(root);
+                refresh(root);
             }
             return root;
         }        
     }
     
-    private void refreshModelSchemaObject(ModelSchemaObject object) {
+    public void refresh(ModelSchemaObject object) {
 
         final String CHILD_NODES_HIERARCHY_MODEL_SQL = 
                 "select " + 
-                "   child_id " + 
+                "   id " + 
                 "from " + 
-                "   %1$s_model_schema_object_rel " + 
+                "   %1$s_model_schema_object " + 
                 "where " +
                 "   model_id = '%2$s' " +
-                "   and parent_id = '%3$s' ";
+                "   and parent_id = '%3$s' ";        
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         List<Row> ids = template.query(String.format(CHILD_NODES_HIERARCHY_MODEL_SQL, tablePrefix,
                 object.getModelId(), object.getId()));
         for (Row row : ids) {
             Map<String, Object> params = new HashMap<String, Object>();
-            params.put("id", row.getString("child_id"));
+            params.put("id", row.getString("id"));
             ModelSchemaObject childObject = this.findOne(ModelSchemaObject.class, params);
             object.getChildObjects().add(childObject);
-            refreshModelSchemaObject(childObject);            
+            refresh(childObject);            
+        }
+    }
+
+    public void delete(ModelSchemaObject schemaObject) {
+        //can't be sure the schema object passed in was refreshed. clear children and refresh
+        schemaObject.getChildObjects().clear();
+        refresh(schemaObject);
+        ArrayList<ModelSchemaObject> objectsToDelete = new ArrayList<ModelSchemaObject>();
+        findSchemaObjectsToDelete(schemaObject,objectsToDelete);
+        ListIterator<ModelSchemaObject> ri = objectsToDelete.listIterator(objectsToDelete.size());
+        //delete in reverse order from the leaf nodes up
+        while (ri.hasPrevious()) {
+            delete((AbstractObject) ri.previous());
         }
     }
     
+    private void findSchemaObjectsToDelete(ModelSchemaObject schemaObject, ArrayList<ModelSchemaObject> objectsToDelete) {
+        objectsToDelete.add(schemaObject);
+        for (ModelSchemaObject childObject:schemaObject.getChildObjects()) {
+            findSchemaObjectsToDelete(childObject,objectsToDelete);            
+        }
+    }
 }

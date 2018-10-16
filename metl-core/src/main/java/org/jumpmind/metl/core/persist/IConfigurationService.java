@@ -240,4 +240,8 @@ public interface IConfigurationService {
     public List<Tag> findTagsForEntity(String entityType, String entityId);
     
     public ModelSchemaObject getHierarchicalModelRoot(String modelId);
+    
+    public void refresh(ModelSchemaObject schemaObject);
+    
+    public void delete(ModelSchemaObject schemaObject);
 }

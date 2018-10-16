@@ -22,25 +22,17 @@ package org.jumpmind.metl.ui.views.design;
 
 import static org.apache.commons.lang.StringUtils.trim;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.HierarchicalModel;
-import org.jumpmind.metl.core.model.ModelAttrib;
-import org.jumpmind.metl.core.model.ModelEntity;
-import org.jumpmind.metl.core.model.ModelEntitySorter;
 import org.jumpmind.metl.core.model.ModelSchemaObject;
-import org.jumpmind.metl.core.model.ModelSchemaObjectRel;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.metl.ui.common.UiUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
@@ -63,9 +55,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.TreeTable;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPanel {
@@ -87,8 +77,6 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
     Button editButton;
 
     Button removeButton;
-
-    Button importButton;
 
     ShortcutListener enterKeyListener;
 
@@ -113,11 +101,6 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         removeButton = buttonBar1.addButton("Remove", FontAwesome.TRASH_O);
         removeButton.addClickListener(new RemoveClickListener());
 
-        importButton = buttonBar1.addButtonRight("Import ...", FontAwesome.UPLOAD,
-                new ImportClickListener());
-
-        buttonBar1.addButtonRight("Export...", FontAwesome.DOWNLOAD, (e) -> export());
-
         treeTable.setSizeFull();
         treeTable.setCacheRate(100);
         treeTable.setPageLength(100);
@@ -131,7 +114,6 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
                     ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
                         protected void save(String text) {
                             String newName = trim(text);
-                            boolean unique = true;
                             obj.setName(newName);
                             EditHierarchicalModelPanel.this.context.getConfigurationService().save(obj);                            
                         };
@@ -248,18 +230,6 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         HorizontalLayout hlayout = new HorizontalLayout();
         addComponent(hlayout);
 
-        Button collapseAll = new Button("Collapse All");
-        collapseAll.addStyleName(ValoTheme.BUTTON_LINK);
-        collapseAll.addStyleName(ValoTheme.BUTTON_SMALL);
-        hlayout.addComponent(collapseAll);
-        collapseAll.addClickListener(e -> collapseAll());
-
-        Button expandAll = new Button("Expand All");
-        expandAll.addStyleName(ValoTheme.BUTTON_LINK);
-        expandAll.addStyleName(ValoTheme.BUTTON_SMALL);
-        hlayout.addComponent(expandAll);
-        expandAll.addClickListener(e -> expandAll());
-
         addAll(model);
 
         setButtonsEnabled();
@@ -270,6 +240,7 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         table.setColumnHeaders(
                 new String[] { "name", "Description", "Type"});
 
+        expandAll(null);
     }
 
     protected void collapseAll() {
@@ -278,19 +249,22 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         }
     }
 
-    protected void expandAll() {
-        for (Object itemId : treeTable.getItemIds()) {
-            treeTable.setCollapsed(itemId, false);
-        }
-    }
+    protected void expandAll(ModelSchemaObject parentObject) {
 
-    protected void export() {
-        //TODO: deal with export of hierarchical models
-//        table.removeAllItems();
-//        updateExportTable(null, model.getModelEntities());
-//        String fileNamePrefix = model.getName().toLowerCase().replace(' ', '-');
-//        ExportDialog dialog = new ExportDialog(table, fileNamePrefix, model.getName());
-//        UI.getCurrent().addWindow(dialog);
+        ModelSchemaObject schemaObject=null;
+        if (parentObject == null) {
+            for (Object itemId : treeTable.getItemIds()) {
+                schemaObject = (ModelSchemaObject) itemId;
+            }
+        } else {
+            schemaObject = parentObject;
+        }
+        if (schemaObject != null) {
+            treeTable.setCollapsed(schemaObject, false);
+            for (ModelSchemaObject childObject : schemaObject.getChildObjects()) {
+                expandAll(childObject);
+            }
+        }
     }
 
     public void setButtonsEnabled() {
@@ -302,7 +276,6 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
             addSchemaObjectButton.setEnabled(false);
             removeButton.setEnabled(false);
             editButton.setEnabled(false);
-            importButton.setEnabled(false);
         }
     }
 
@@ -360,29 +333,6 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         }
     }    
     
-    protected void updateExportTable(String filter, Collection<ModelEntity> modelEntityList) {
-        filter = filter != null ? filter.toLowerCase() : null;
-        ArrayList<ModelEntity> filteredModelEntityList = new ArrayList<ModelEntity>();
-        for (ModelEntity modelEntity : modelEntityList) {
-            boolean add = UiUtils.filterMatches(filter, modelEntity.getName());
-            if (!add) {
-                for (ModelAttrib modelAttribute : modelEntity.getModelAttributes()) {
-                    add |= UiUtils.filterMatches(filter, modelAttribute.getName());
-                }
-            }
-            if (add) {
-                filteredModelEntityList.add(modelEntity);
-            }
-        }
-
-        Collections.sort(filteredModelEntityList, new ModelEntitySorter());
-        for (ModelEntity modelEntity : filteredModelEntityList) {
-            for (ModelAttrib modelAttribute : modelEntity.getModelAttributes()) {
-//                table.addItem(new Record(modelEntity, modelAttribute));
-            }
-        }
-    }
-
     protected void editSelectedItem() {
         lastEditItemIds = getSelectedItems();
         treeTable.refreshRowCache();
@@ -411,15 +361,19 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
             		newObject.setModelId(model.getId());
             		newObject.setName("New Schema Object");
             		newObject.setId(UUID.randomUUID().toString());
+            		if (parentSchemaObject != null) {
+            		    newObject.setParentId(parentSchemaObject.getId());
+            		}
             		context.getConfigurationService().save(newObject);
             		if (model.getRootObject() == null) {
             		    model.setRootObject(newObject);
             		} else {
             		    parentSchemaObject.getChildObjects().add(newObject);
-            		    ModelSchemaObjectRel relationship = new ModelSchemaObjectRel(model.getId(),parentSchemaObject.getId(),newObject.getId());
-            		    context.getConfigurationService().save(relationship);
             		}
                 addSchemaObject(newObject,parentSchemaObject,null);
+                treeTable.setCollapsed(parentSchemaObject, false);
+                selectOnly(newObject);
+                editSelectedItem();
             }
         }
     }
@@ -437,30 +391,14 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
             ConfirmDialog.show("Delete?",
                     "Are you sure you want to delete the " + selectedItems.size() + " selected items and their children?",
                     ()->{
-                    		deleteSelectedItems(selectedItems);
+                        for (Object itemToDelete : selectedItems) {
+                    		    context.getConfigurationService().delete((ModelSchemaObject) itemToDelete);
+                    		    context.getConfigurationService().refresh(model);
+                    		    treeTable.removeAllItems();
+                    		    addAll(model);
+                        }
                     		return true;                    	
                     });
-        }
-        
-        private void deleteSelectedItems(Set<Object> selectedItems) {
-            for (Object itemToDelete : selectedItems) {
-                deleteSchemaObject((ModelSchemaObject) itemToDelete);
-            }
-        }
-    }
-
-    private void deleteSchemaObject(ModelSchemaObject object) {
-        ModelSchemaObject schemaObject = model.getObjectById(object.getId());
-        context.getConfigurationService().delete(schemaObject);
-    }
-        
-    class ImportClickListener implements ClickListener, TableColumnSelectListener {
-        public void buttonClick(ClickEvent event) {
-            //TODO:
-        }
-
-        public void selected(Collection<ModelEntity> modelEntityCollection) {
-            //TODO:
         }
     }
 

@@ -35,6 +35,10 @@ public class ModelSchemaObject extends AbstractNamedObject implements IAuditable
 
     String type;
     
+    String refModelId;
+    
+    String parentId;
+    
     String pattern;
     
     int minLength;
@@ -145,6 +149,22 @@ public class ModelSchemaObject extends AbstractNamedObject implements IAuditable
 
     public void setChildObjects(List<ModelSchemaObject> childObjects) {
         this.childObjects = childObjects;
+    }
+
+    public String getRefModelId() {
+        return refModelId;
+    }
+
+    public void setRefModelId(String refModelId) {
+        this.refModelId = refModelId;
+    }
+
+    public String getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
     }
 
 }

@@ -557,6 +557,14 @@
             name="type"
             size="50"
             type="VARCHAR" />
+    <column description="The parent schema object for this schema object"
+            name="parent_id"
+            size="36"
+            type="VARCHAR" />
+    <column description="The ref model id if type=REF"
+            name="ref_model_id"
+            size="36"
+            type="VARCHAR" />            
     <column description="Pattern for type=string"
             name="pattern"
             size="500"
@@ -598,35 +606,15 @@
       <reference foreign="id"
                  local="model_id" />
     </foreign-key>
-  </table>  
-  <table description=""
-         name="model_schema_object_rel">
-    <column name="id"
-            primaryKey="true"
-            required="true"
-            size="36"
-            type="CHAR" />
-    <column name="model_id"
-            required="true"
-            size="36"
-            type="CHAR" />
-    <column name="parent_id"
-            required="true"
-            size="36"
-            type="CHAR" />
-    <column name="child_id"
-            required="true"
-            size="36"
-            type="CHAR" />
     <foreign-key foreignTable="model_schema_object"
-                 name="fk_msorp_2_mso">
+                 name="fk_so_2_pso">
       <reference foreign="id"
                  local="parent_id" />
     </foreign-key>
-    <foreign-key foreignTable="model_schema_object"
-                 name="fk_msorc_2_mso">
+    <foreign-key foreignTable="hierarchical_model"
+                 name="fk_so_2_refso">
       <reference foreign="id"
-                 local="child_id" />
+                 local="ref_model_id" />
     </foreign-key>
   </table>  
   <table description=""
