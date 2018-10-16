@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.jumpmind.metl.core.model.AbstractNamedObject;
-import org.jumpmind.metl.core.model.DataType;
+import org.jumpmind.metl.core.model.HierarchicalDataType;
 import org.jumpmind.metl.core.model.HierarchicalModel;
 import org.jumpmind.metl.core.model.ModelSchemaObject;
 import org.jumpmind.metl.ui.common.ApplicationContext;
@@ -157,13 +157,8 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
                 if (lastEditItemIds.contains(itemId) && !readOnly) {
                     final ComboBox cbox = new ComboBox();
                     cbox.setNullSelectionAllowed(false);
-                    if (obj.getType() == null) {
-                        for (DataType dataType : DataType.values()) {
-                            cbox.addItem(dataType.name());
-                        }
-                    } else {
-                        cbox.addItem(DataType.ARRAY.name());
-                        cbox.addItem(DataType.REF.name());                            
+                    for (HierarchicalDataType dataType : HierarchicalDataType.values()) {
+                        cbox.addItem(dataType.name());
                     }
                     cbox.setValue(obj.getType());
                     cbox.addValueChangeListener(new ValueChangeListener() {
