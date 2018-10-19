@@ -755,6 +755,36 @@ public class PropertySheet extends AbsoluteLayout {
                     area.setReadOnly(readOnly);
                     formLayout.addComponent(area);
                     break;
+                case TARGET_STEP:
+                    step = getSingleFlowStep();
+                    if (step != null) {
+                        Flow flow = context.getConfigurationService().findFlow(step.getFlowId());
+                        final AbstractSelect targetStepsCombo = new ComboBox(definition.getName());
+                        targetStepsCombo.setImmediate(true);
+
+                        List<FlowStepLink> targetSteps = flow.findFlowStepLinksWithSource(step.getId());
+                        for (FlowStepLink flowStepLink : targetSteps) {
+                            FlowStep targetStep = flow.findFlowStepWithId(flowStepLink.getTargetStepId());
+                            targetStepsCombo.addItem(targetStep.getId());
+                            targetStepsCombo.setItemCaption(targetStep.getId(), targetStep.getName());
+                        }
+                        targetStepsCombo.setValue(obj.get(definition.getId()));
+                        targetStepsCombo.setDescription(description);
+                        targetStepsCombo.setNullSelectionAllowed(true);
+                        targetStepsCombo.setRequired(definition.isRequired());
+                        targetStepsCombo.addValueChangeListener(new ValueChangeListener() {
+
+                            private static final long serialVersionUID = 1L;
+
+                            @Override
+                            public void valueChange(ValueChangeEvent event) {
+                                saveSetting(definition.getId(), (String) targetStepsCombo.getValue(), obj);
+                            }
+                        });
+                        targetStepsCombo.setReadOnly(readOnly);
+                        formLayout.addComponent(targetStepsCombo);
+                    }
+                    break;
                 default:
                     break;
 
