@@ -188,8 +188,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
                             break;
                         }
                     }
-                    if (!found && !attr.getDataType().equals(DataType.REF)
-                    		& !attr.getDataType().equals(DataType.ARRAY)) {
+                    if (!found) {
                         componentAttributes
                                 .add(new ComponentAttribSetting(attr.getId(), component.getId(), Transformer.TRANSFORM_EXPRESSION, null));
                     }

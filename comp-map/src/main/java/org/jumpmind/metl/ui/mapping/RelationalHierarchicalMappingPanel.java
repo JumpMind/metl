@@ -24,15 +24,17 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.HierarchicalModel;
-import org.jumpmind.metl.core.model.ModelAttrib;
-import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.model.ModelSchemaObject;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.runtime.component.Mapping;
 import org.jumpmind.metl.core.runtime.component.RelationalHierarchicalMapping;
 import org.jumpmind.metl.ui.common.ButtonBar;
@@ -83,6 +85,10 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
 
     TextField dstTextFilter;    
     
+    RelationalModel inputModel;
+    
+    HierarchicalModel outputModel;
+    
     Table queryMappingTable = new Table();
     BeanItemContainer<EntitySettings> entitySettingsContainer = new BeanItemContainer<EntitySettings>(EntitySettings.class);
     List<EntitySettings> entitySettings = new ArrayList<EntitySettings>();
@@ -90,15 +96,16 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
     EditByQueryMappingWindow queryMappingWindow;
 
     protected void buildUI() {
+        this.inputModel = (RelationalModel) component.getInputModel();
+        this.outputModel = (HierarchicalModel) component.getOutputModel();
+        
         ButtonBar buttonBar = new ButtonBar();
         if (!readOnly) {
             addComponent(buttonBar);
-            Button autoMapButton = buttonBar.addButton("Auto Map", FontAwesome.FLASH);
             Button byQueryMapButton = buttonBar.addButton("By Query Map", FontAwesome.MAP);
             removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
             removeButton.setEnabled(false);
             byQueryMapButton.addClickListener(new ByQueryMapListener());            
-            autoMapButton.addClickListener(new AutoMapListener());
             String queryMethod = component.get(RelationalHierarchicalMapping.HIERARCHICAL_QUERY_METHOD,RelationalHierarchicalMapping.QUERY_METHOD_BY_JOIN);
             if(queryMethod.equalsIgnoreCase(RelationalHierarchicalMapping.QUERY_METHOD_BY_JOIN)) {
                 byQueryMapButton.setEnabled(false);
@@ -192,55 +199,6 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
             diagram.filterOutputModel(dstTextFilter.getValue().trim(), dstMapFilter.getValue());
         }
     }
-
-    //TODO: THIS SHOULD PROBABLY GO AWAY FOR THE HIERARCHICAL RELATIONAL MAPPER
-    protected void autoMap(boolean fuzzy) {
-//        for (ModelEntity entity1 : component.getInputModel().getModelEntities()) {
-//            for (ModelAttrib attr : entity1.getModelAttributes()) {
-//                /* look for exact match first */
-//                for (ModelEntity entity2 : component.getOutputModel().getModelEntities()) {
-//                    boolean foundExactMatch = false;
-//                    for (ModelAttrib attr2 : entity2.getModelAttributes()) {
-//                        foundExactMatch |= autoMap(entity1, entity2, attr, attr2, fuzzy, true);
-//                    }
-//
-//                    if (!foundExactMatch) {
-//                        for (ModelAttrib attr2 : entity2.getModelAttributes()) {
-//                            autoMap(entity1, entity2, attr, attr2, fuzzy, false);
-//                        }
-//                    }
-//
-//                }
-//
-//            }
-//        }
-    }
-
-    protected boolean autoMap(ModelEntity entity1, ModelEntity entity2, ModelAttrib attr, ModelAttrib attr2, boolean fuzzy,
-            boolean exact) {
-        boolean isMapped = false;
-        boolean exactMatch = exact && attr.getName().equalsIgnoreCase(attr2.getName()) && entity1.getName().equals(entity2.getName());
-        for (ComponentAttribSetting setting : component.getAttributeSettings()) {
-            if (setting.getName().equals(Mapping.ATTRIBUTE_MAPS_TO) && setting.getValue().equals(attr2.getId())) {
-                isMapped = true;
-                break;
-            }
-        }
-        if (!isMapped && ((fuzzy && fuzzyMatches(attr.getName(), attr2.getName()))
-                || ((!exact && attr.getName().equalsIgnoreCase(attr2.getName())) || exactMatch))) {
-            ComponentAttribSetting setting = new ComponentAttribSetting();
-            setting.setAttributeId(attr.getId());
-            setting.setComponentId(component.getId());
-            setting.setName(Mapping.ATTRIBUTE_MAPS_TO);
-            setting.setValue(attr2.getId());
-            component.addAttributeSetting(setting);
-            context.getConfigurationService().save(setting);
-            diagram.markAsDirty();
-        }
-
-        return exact;
-    }
-
     protected boolean fuzzyMatches(String str1, String str2) {
         int x = computeLevenshteinDistance(str1, str2);
         return x < 3;
@@ -274,8 +232,7 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
         Table table = new Table();
         table.addContainerProperty("Source Entity", String.class, null);
         table.addContainerProperty("Source Attribute",  String.class, null);
-        table.addContainerProperty("Destination Entity", String.class, null);
-        table.addContainerProperty("Destination Attribute",  String.class, null);
+        table.addContainerProperty("Destination Schema Object", String.class, null);
         
         int itemId = 0;
         for (ComponentAttribSetting setting : component.getAttributeSettings()) {
@@ -310,13 +267,6 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
         }
     }
 
-    class AutoMapListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
-            autoMap(false);
-            autoMap(true);
-        }
-    }
-    
     class ByQueryMapListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
             //TODO:
@@ -377,9 +327,8 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
                 public Object generateCell(Table source, Object itemId, Object columnId) {
                     EntitySettings setting = (EntitySettings) itemId;
                     HierarchicalModel model = (HierarchicalModel) component.getOutputModel();
-//                    ModelEntity entity = model.getEntityById(setting.getEntityId());
-//                    return entity.getName(); 
-                    return null;
+                    ModelSchemaObject object = model.getObjectById(setting.getEntityId());
+                    return object.getName();
                 }
             });
             queryMappingTable.setVisibleColumns(new Object[] { "entityName", "sourceStep" });
@@ -394,6 +343,27 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
     
     private void refreshEntitySettingsContainer() {
         entitySettings.clear();
+        ModelSchemaObject root = outputModel.getRootObject();
+        List<ComponentEntitySetting> compEntitySettings = component.getEntitySettings();
+        Set<String> existingEntitySettings = new HashSet<String>();
+        for (ComponentEntitySetting compEntitySetting : compEntitySettings) {
+            if (RelationalHierarchicalMapping.ENTITY_TO_ORGINATING_STEP_ID.equalsIgnoreCase(compEntitySetting.getName())) {
+                entitySettings.add(new EntitySettings(compEntitySetting.getEntityId(), compEntitySetting.getValue()));
+                existingEntitySettings.add(compEntitySetting.getEntityId());
+            }
+        }
+        addEntitySettings(root, existingEntitySettings);
+    }
+    
+    private void addEntitySettings(ModelSchemaObject object, Set<String> existingEntitySettings) {
+        if (!existingEntitySettings.contains(object.getId())) {
+            entitySettings.add(new EntitySettings(object.getId(),null));
+        }
+        for (ModelSchemaObject childObject : object.getChildObjects()) {
+            addEntitySettings(childObject, existingEntitySettings);
+        }
+    }
+    
 //        List<ModelEntity> entities = component.getOutputModel().getModelEntities();
 //        List<ComponentEntitySetting> compEntitySettings = component.getEntitySettings();
 //        Set<String> existingEntitySettings = new HashSet<String>();
@@ -408,7 +378,7 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
 //                entitySettings.add(new EntitySettings(entity.getId(),null));
 //            }
 //        }        
-    }
+
 
     protected void updateQueryMappingTable() {
         queryMappingTable.removeAllItems();

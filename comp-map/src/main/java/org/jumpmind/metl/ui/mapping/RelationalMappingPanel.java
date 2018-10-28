@@ -22,27 +22,17 @@ package org.jumpmind.metl.ui.mapping;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
-import org.jumpmind.metl.core.model.ComponentEntitySetting;
-import org.jumpmind.metl.core.model.FlowStep;
-import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.runtime.component.Mapping;
-import org.jumpmind.metl.core.runtime.component.RelationalHierarchicalMapping;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.views.design.AbstractFlowStepAwareComponentEditPanel;
 import org.jumpmind.vaadin.ui.common.ExportDialog;
 
-import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.server.FontAwesome;
@@ -54,13 +44,10 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Field;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
-import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -81,9 +68,6 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
 
     TextField dstTextFilter;    
     
-    BeanItemContainer<EntitySettings> entitySettingsContainer = new BeanItemContainer<EntitySettings>(EntitySettings.class);
-    List<EntitySettings> entitySettings = new ArrayList<EntitySettings>();
-
     RelationalModel inputModel;
     
     RelationalModel outputModel;
@@ -328,94 +312,5 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
         public void valueChange(ValueChangeEvent event) {
             diagram.filterOutputModel(dstTextFilter.getValue(), (boolean) event.getProperty().getValue());
         }
-    }
-        
-    class EditSourceStepFieldFactory implements TableFieldFactory {
-        private static final long serialVersionUID = 1L;
-
-        public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId,
-                com.vaadin.ui.Component uiContext) {
-            final EntitySettings settings = (EntitySettings) itemId;
-            if (propertyId.equals("sourceStep")) {
-                return createSourceStepComboBox(settings, RelationalHierarchicalMapping.ENTITY_TO_ORGINATING_STEP_ID);
-            } else {
-                return null;
-            }
-        }
-    }
-    
-    protected ComboBox createSourceStepComboBox(final EntitySettings settings, final String key) {
-        final ComboBox comboBox = new ComboBox();
-        comboBox.setImmediate(true);
-        flow = context.getConfigurationService().findFlow(flow.getId());
-        List<FlowStepLink> stepLinks = flow.findFlowStepLinksWithTarget(flowStep.getId());
-        for (FlowStepLink flowStepLink : stepLinks) {
-            FlowStep comboStep = flow.findFlowStepWithId(flowStepLink.getSourceStepId());
-            comboBox.addItem(comboStep.getId());
-            comboBox.setItemCaption(comboStep.getId(), comboStep.getName());
-        }
-
-        comboBox.addValueChangeListener(new ValueChangeListener() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void valueChange(ValueChangeEvent event) {
-                ComponentEntitySetting setting = component.getSingleEntitySetting(settings.getEntityId(), key);
-
-                String oldValue = setting == null ? null : setting.getValue();
-                if (setting == null) {
-                    setting = new ComponentEntitySetting(settings.getEntityId(), component.getId(), key, null);
-                    component.addEntitySetting(setting);
-                }
-                if (comboBox.getValue() != null) {
-                    setting.setValue(comboBox.getValue().toString());
-                } else {
-                    setting.setValue(null);
-                }
-                if (oldValue == null || !oldValue.equals(setting.getValue())) {
-                    context.getConfigurationService().save(setting);
-                }
-            }
-        });
-        comboBox.setReadOnly(readOnly);
-        comboBox.setWidth("100%");
-        return comboBox;
-    }
-
-    
-    public static class EntitySettings implements Serializable {
-        private static final long serialVersionUID = 1L;
-        String entityId;
-        String sourceStep;
-
-        public EntitySettings(String entityId, String sourceStep) {
-            this.entityId = entityId;
-            this.sourceStep = sourceStep;
-        }
-
-        public String getEntityId() {
-            return entityId;
-        }
-
-        public void setEntityId(String entityId) {
-            this.entityId = entityId;
-        }
-
-        public String getSourceStep() {
-            return sourceStep;
-        }
-
-        public void setSourceStep(String sourceStep) {
-            this.sourceStep = sourceStep;
-        }
-        
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof EntitySettings) {
-                return entityId.equals(((EntitySettings) obj).getEntityId());
-            } else {
-                return super.equals(obj);
-            }
-        }
-    }
+    }        
 }

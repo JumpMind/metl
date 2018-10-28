@@ -6,11 +6,13 @@ import org.jumpmind.metl.core.runtime.EntityData;
 public class HierarchicalModel extends AbstractModel implements IModel {
 
     private static final long serialVersionUID = 1L;
-    
+
+    public static final String TYPE = "HIERARCHICAL";
+
     ModelSchemaObject rootObject;
     
-    public HierarchicalModel(String modelId) {
-        super(modelId);
+    public HierarchicalModel(String id) {
+        super(id);
     }
     
     public Row toRow(EntityData data) {
@@ -44,5 +46,10 @@ public class HierarchicalModel extends AbstractModel implements IModel {
         }
         return objectToReturn;
     }
-    
+
+    @Override
+    public String getType() {
+        return TYPE;
+    }
+
 }

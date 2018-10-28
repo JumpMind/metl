@@ -32,17 +32,17 @@ public class RelationalHierarchicalMappingTest {
 
     @Test
     public void testTreeSetIterator() {
-    		Set<Relationship> rels = new HashSet<Relationship>();
-    		rels.add(new Relationship("xyz","store",DataType.REF));
-    		rels.add(new Relationship("store","dma",DataType.REF));
-    		rels.add(new Relationship("store","location",DataType.ARRAY));
-    		TreeSet<Relationship> relTree = new TreeSet(rels);
-    		Iterator<Relationship> itr = relTree.descendingIterator();
-    		while (itr.hasNext()) {
-    			Relationship rel = itr.next();
-    			System.out.println(rel.parent + "," + rel.child);
-    		}
-    		
+//    		Set<Relationship> rels = new HashSet<Relationship>();
+//    		rels.add(new Relationship("xyz","store",DataType.REF));
+//    		rels.add(new Relationship("store","dma",DataType.REF));
+//    		rels.add(new Relationship("store","location",DataType.ARRAY));
+//    		TreeSet<Relationship> relTree = new TreeSet(rels);
+//    		Iterator<Relationship> itr = relTree.descendingIterator();
+//    		while (itr.hasNext()) {
+//    			Relationship rel = itr.next();
+//    			System.out.println(rel.parent + "," + rel.child);
+//    		}
+//    		
     }
         
 	class Relationship implements Comparable<Relationship> {

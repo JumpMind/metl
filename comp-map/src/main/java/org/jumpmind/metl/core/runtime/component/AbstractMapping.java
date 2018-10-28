@@ -26,24 +26,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jumpmind.metl.core.model.ComponentAttribSetting;
+import org.jumpmind.metl.core.model.ComponentModelSetting;
 
 public abstract class AbstractMapping extends AbstractComponentRuntime {
 
-    public final static String ATTRIBUTE_MAPS_TO = "mapping.processor.attribute.maps.to";
-    public final static String ENTITY_MAPS_TO = "mapping.processor.entity.maps.to";
+    public final static String MODEL_OBJECT_MAPS_TO = "mapping.processor.model.object.maps.to";
 
     protected Map<String, Set<String>> getAttribToAttribMap() {
     		Map<String, Set<String>>attrToAttrMap = new HashMap<String, Set<String>>();
-        List<ComponentAttribSetting> attributeSettings = getComponent().getAttributeSettings();
-        for (ComponentAttribSetting attributeSetting : attributeSettings) {
-            if (attributeSetting.getName().equalsIgnoreCase(ATTRIBUTE_MAPS_TO)) {
-                Set<String> targets = attrToAttrMap.get(attributeSetting.getAttributeId());
+        List<ComponentModelSetting> modelSettings = getComponent().getModelSettings();
+        for (ComponentModelSetting modelSetting : modelSettings) {
+            if (modelSetting.getName().equalsIgnoreCase(MODEL_OBJECT_MAPS_TO)) {
+                Set<String> targets = attrToAttrMap.get(modelSetting.getModelObjectId());
                 if (targets == null) {
                     targets = new HashSet<String>(2);
-                    attrToAttrMap.put(attributeSetting.getAttributeId(), targets);
+                    attrToAttrMap.put(modelSetting.getModelObjectId(), targets);
                 }
-                targets.add(attributeSetting.getValue());
+                targets.add(modelSetting.getValue());
             }
         }
         return attrToAttrMap;

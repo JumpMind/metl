@@ -33,5 +33,7 @@ public interface IModel {
     public boolean isDeleted();
     
     public String getId();
+    
+    public String getType();
 
 }

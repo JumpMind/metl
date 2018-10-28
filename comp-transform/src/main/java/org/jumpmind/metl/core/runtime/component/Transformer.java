@@ -34,10 +34,9 @@ import javax.script.ScriptException;
 import org.apache.commons.collections.CollectionUtils;
 import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
-import org.jumpmind.metl.core.model.DataType;
-import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
@@ -125,7 +124,7 @@ public class Transformer extends AbstractComponentRuntime {
 		        callback.sendControlMessage();
 		}
 	}
-    
+
     @SuppressWarnings("unchecked")
     protected EntityData processEntity(EntityData inData, Message inputMessage, RelationalModel inputModel,
     		boolean isRoot) {
@@ -143,15 +142,16 @@ public class Transformer extends AbstractComponentRuntime {
 		return outData;
     }
 
-    protected ArrayList<EntityData> processEntityArray(ArrayList<EntityData> inDatas, Message inputMessage, RelationalModel inputModel,
-            boolean isRoot) {
-
-        ArrayList<EntityData> outDatas = new ArrayList<EntityData>();
-        for (EntityData inData:inDatas) {
-            outDatas.add(processEntity(inData, inputMessage, inputModel, isRoot));
-        }
-        return outDatas;
-    }    
+//TODO: Look at this when adding hierarchical model back into the transformer
+//    protected ArrayList<EntityData> processEntityArray(ArrayList<EntityData> inDatas, Message inputMessage, RelationalModel inputModel,
+//            boolean isRoot) {
+//
+//        ArrayList<EntityData> outDatas = new ArrayList<EntityData>();
+//        for (EntityData inData:inDatas) {
+//            outDatas.add(processEntity(inData, inputMessage, inputModel, isRoot));
+//        }
+//        return outDatas;
+//    }    
 
     @SuppressWarnings("unchecked")
     protected void processAttribute(String attributeId, EntityData inData, EntityData outData, Message inputMessage, RelationalModel inputModel) {
@@ -159,11 +159,12 @@ public class Transformer extends AbstractComponentRuntime {
         Object value = inData.get(attributeId);
         ModelAttrib attribute = inputModel.getAttributeById(attributeId);
 
-        if (value != null && attribute.getDataType().equals(DataType.ARRAY)) {
-            outData.put(attributeId, processEntityArray((ArrayList<EntityData>) value, inputMessage, inputModel, false));
-        } else if (value != null && attribute.getDataType().equals(DataType.REF)) {
-            outData.put(attributeId, processEntity((EntityData) value, inputMessage, inputModel, false));
-        } else {
+// TODO: deal with new hierarchical model
+//        if (value != null && attribute.getDataType().equals(DataType.ARRAY)) {
+//            outData.put(attributeId, processEntityArray((ArrayList<EntityData>) value, inputMessage, inputModel, false));
+//        } else if (value != null && attribute.getDataType().equals(DataType.REF)) {
+//            outData.put(attributeId, processEntity((EntityData) value, inputMessage, inputModel, false));
+//        } else {
             if (isNotBlank(transform)) {
                 ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
                 ModelAttributeScriptHelper helper = helpers.get(attribute.getId());
@@ -203,6 +204,6 @@ public class Transformer extends AbstractComponentRuntime {
             if (value != ModelAttributeScriptHelper.REMOVE_ATTRIBUTE) {
                 outData.put(attributeId, value);
             }
-        }
+//        }
     }
 }

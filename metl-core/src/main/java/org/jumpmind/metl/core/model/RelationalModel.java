@@ -33,6 +33,8 @@ import org.jumpmind.metl.core.util.LogUtils;
 public class RelationalModel extends AbstractModel implements IModel, IAuditable {
 
     private static final long serialVersionUID = 1L;
+    
+    public static final String TYPE = "RELATIONAL";
 
     List<ModelEntity> modelEntities;
     
@@ -197,6 +199,11 @@ public class RelationalModel extends AbstractModel implements IModel, IAuditable
             }
         }
         return null;
+    }
+
+    @Override
+    public String getType() {
+        return TYPE;
     }
     
 }

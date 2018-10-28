@@ -317,7 +317,7 @@ public class PropertySheet extends AbsoluteLayout {
                 if (models != null) {
                     for (AbstractName model : models) {
                         combo.addItem(model);
-                        if (isNotBlank(component.getInputModelId()) && component.getInputModelId().equals(model.getId())) {
+                        if (isNotBlank(component.getOutputModelId()) && component.getOutputModelId().equals(model.getId())) {
                             combo.setValue(model);
                         }
                     }
@@ -327,12 +327,8 @@ public class PropertySheet extends AbsoluteLayout {
 
                     @Override
                     public void valueChange(ValueChangeEvent event) {
-                        RelationalModelName model = (RelationalModelName) combo.getValue();
-                        if (model != null) {
-                            component.setOutputModel(configurationService.findRelationalModel(model.getId()));
-                        } else {
-                            component.setOutputModel(null);
-                        }
+                        AbstractName model = (AbstractName) combo.getValue();
+                        component.setOutputModel(configurationService.findModel(model.getId()));
                         configurationService.save((AbstractObject) component);
                         setSource(value);
                     }
@@ -405,7 +401,7 @@ public class PropertySheet extends AbsoluteLayout {
 
                     @Override
                     public void valueChange(ValueChangeEvent event) {
-                        RelationalModelName model = (RelationalModelName) combo.getValue();
+                        AbstractName model = (AbstractName) combo.getValue();
                         if (model != null) {
                             component.setInputModel(configurationService.findRelationalModel(model.getId()));
                         } else {

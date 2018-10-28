@@ -36,6 +36,7 @@ import org.jumpmind.metl.core.model.FolderName;
 import org.jumpmind.metl.core.model.FolderType;
 import org.jumpmind.metl.core.model.HierarchicalModel;
 import org.jumpmind.metl.core.model.HierarchicalModelName;
+import org.jumpmind.metl.core.model.IModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelRelation;
@@ -124,6 +125,8 @@ public interface IConfigurationService {
     public RelationalModel findRelationalModel(String id);
     
     public HierarchicalModel findHierarchicalModel(String id);
+    
+    public IModel findModel(String id);
     
     public List<ProjectVersionDepends> findProjectDependencies(String projectVersionId);
     

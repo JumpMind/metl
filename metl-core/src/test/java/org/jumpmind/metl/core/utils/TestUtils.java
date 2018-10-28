@@ -140,9 +140,12 @@ public class TestUtils {
     public static Component createComponent(String type, boolean shared, Resource resource,
             RelationalModel inputModelVersion, RelationalModel outputModelVersion,
             List<ComponentEntitySetting> entitySettings,
-            List<ComponentAttribSetting> attributeSettings, Setting... settings) {
+            List<ComponentAttribSetting> attributeSettings, 
+            Setting... settings) {
+
+        //TODO: deal with ComponentModelSettings
         Component component = new Component(resource,
-                inputModelVersion, outputModelVersion, entitySettings, attributeSettings, settings);
+                inputModelVersion, outputModelVersion, entitySettings, attributeSettings, null, settings);
         component.setType(type);
         component.setShared(shared);
         component.setCreateBy("Test");

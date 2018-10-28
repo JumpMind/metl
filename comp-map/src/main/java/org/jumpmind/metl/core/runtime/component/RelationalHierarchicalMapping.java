@@ -95,15 +95,14 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
             message = message + "input model must be configured and be a relational model ";
         }
 
-//TODO: FIX THIS FOR HIERARCHICAL MODEL
-//        if (getComponent().getOutputModel() == null ||
-//        		!(getComponent().getOutputModel() instanceof HierarchicalModel)) {
-//        	
-//            if (!message.equalsIgnoreCase("The ")) {
-//                message = message + " and the ";
-//            }
-//            message = message + " output model must be configured and be a hierarchical model";
-//        }
+        if (getComponent().getOutputModel() == null ||
+        		!(getComponent().getOutputModel() instanceof HierarchicalModel)) {
+        	
+            if (!message.equalsIgnoreCase("The ")) {
+                message = message + " and the ";
+            }
+            message = message + " output model must be configured and be a hierarchical model";
+        }
 
         if (!message.equals("The ")) {
             throw new MisconfiguredException(message);
@@ -154,18 +153,18 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
     private EntityData processByJoinEntity(ArrayList<EntityData> inputRows, ModelEntity entity) {
 		EntityData entityData = new EntityData();
 
-		for (ModelAttrib attrib:entity.getModelAttributes()) {
-    			if (attrib.getDataType().equals(DataType.ARRAY)) {
+//		for (ModelAttrib attrib:entity.getModelAttributes()) {
+//    			if (attrib.getDataType().equals(DataType.ARRAY)) {
 //    				ModelEntity childEntity = getOutputModel().getEntityById(attrib.getTypeEntityId());
 //    				entityData.put(attrib.getId(), processByJoinEntityArray(inputRows, entity, childEntity, currentInputRow));    				
-    			} else if (attrib.getDataType().equals(DataType.REF)) {
+//    			} else if (attrib.getDataType().equals(DataType.REF)) {
 //    				ModelEntity childEntity = getOutputModel().getEntityById(attrib.getTypeEntityId());
 //    				entityData.put(attrib.getId(), processByJoinEntity(inputRows, childEntity));
-    			} else {
-    				//TODO: if this has multiple sources mapped to a single target, can we automatically create a new entity here?
-    				entityData.put(attrib.getId(),mapValueFromInputToOutput(attrib.getId(), inputRows.get(currentInputRow)));
-    			}
-		}		
+//    			} else {
+//    				//TODO: if this has multiple sources mapped to a single target, can we automatically create a new entity here?
+//    				entityData.put(attrib.getId(),mapValueFromInputToOutput(attrib.getId(), inputRows.get(currentInputRow)));
+//    			}
+//		}		
     		return entityData;
     }
 
@@ -175,23 +174,23 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
 
     private Map<String, String> getTargetAttribToAttribMap() {
 		Map<String, String>attrToAttrMap = new HashMap<String, String>();
-        List<ComponentAttribSetting> attributeSettings = getComponent().getAttributeSettings();
-        for (ComponentAttribSetting attributeSetting : attributeSettings) {
-            if (attributeSetting.getName().equalsIgnoreCase(ATTRIBUTE_MAPS_TO)) {
-            		attrToAttrMap.put(attributeSetting.getValue(), attributeSetting.getAttributeId());
-            }
-        }
+//        List<ComponentAttribSetting> attributeSettings = getComponent().getAttributeSettings();
+//        for (ComponentAttribSetting attributeSetting : attributeSettings) {
+//            if (attributeSetting.getName().equalsIgnoreCase(ATTRIBUTE_MAPS_TO)) {
+//            		attrToAttrMap.put(attributeSetting.getValue(), attributeSetting.getAttributeId());
+//            }
+//        }
         return attrToAttrMap;
     }
     
     private Map<String, String> getTargetEntityToEntityMap() {
 		Map<String, String>entityToEntityMap = new HashMap<String, String>();
-        List<ComponentEntitySetting> entitySettings = getComponent().getEntitySettings();
-        for (ComponentEntitySetting entitySetting : entitySettings) {
-            if (entitySetting.getName().equalsIgnoreCase(ENTITY_MAPS_TO)) {
-            		entityToEntityMap.put(entitySetting.getValue(), entitySetting.getEntityId());
-            }
-        }
+//        List<ComponentEntitySetting> entitySettings = getComponent().getEntitySettings();
+//        for (ComponentEntitySetting entitySetting : entitySettings) {
+//            if (entitySetting.getName().equalsIgnoreCase(ENTITY_MAPS_TO)) {
+//            		entityToEntityMap.put(entitySetting.getValue(), entitySetting.getEntityId());
+//            }
+//        }
         return entityToEntityMap;
     }
     
@@ -309,27 +308,27 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
     
     protected EntityData processByQueryEntity(ModelEntity parent, ModelEntity entity) {
     		
-        String sourceStepId = determineSourceStepForOutputEntity(entity);
-        ArrayList<EntityData> inputRows = byQueryRowData.get(sourceStepId);
-        if (inputRows != null && inputRows.size() > 0) {
-            EntityData inboundRow = byQueryRowData.get(sourceStepId).get(currentInputRowMap.get(sourceStepId));
-    		    EntityData entityData = new EntityData();
-            for (ModelAttrib attrib:entity.getModelAttributes()) {
-                if (attrib.getDataType().equals(DataType.ARRAY)) {
+//        String sourceStepId = determineSourceStepForOutputEntity(entity);
+//        ArrayList<EntityData> inputRows = byQueryRowData.get(sourceStepId);
+//        if (inputRows != null && inputRows.size() > 0) {
+//            EntityData inboundRow = byQueryRowData.get(sourceStepId).get(currentInputRowMap.get(sourceStepId));
+//    		    EntityData entityData = new EntityData();
+//            for (ModelAttrib attrib:entity.getModelAttributes()) {
+//                if (attrib.getDataType().equals(DataType.ARRAY)) {
 //                    ModelEntity childEntity = getOutputModel().getEntityById(attrib.getTypeEntityId());
 //                    entityData.put(attrib.getId(), processByQueryEntityArray(entity, childEntity));
-                } else if (attrib.getDataType().equals(DataType.REF)) {
+//                } else if (attrib.getDataType().equals(DataType.REF)) {
 //                    ModelEntity childEntity = getOutputModel().getEntityById(attrib.getTypeEntityId());
 //                    entityData.put(attrib.getId(), processByQueryEntity(entity, childEntity));
-                } else {
-                    entityData.put(attrib.getId(),mapValueFromInputToOutput(attrib.getId(), inboundRow));
-                }
-    		    }
-            if (parent == null || !sourceStepId.equalsIgnoreCase(determineSourceStepForOutputEntity(parent))) {
-                currentInputRowMap.put(sourceStepId, currentInputRowMap.get(sourceStepId).intValue()+1);
-            }
-        		return entityData;
-        }
+//                } else {
+//                    entityData.put(attrib.getId(),mapValueFromInputToOutput(attrib.getId(), inboundRow));
+//                }
+//    		    }
+//            if (parent == null || !sourceStepId.equalsIgnoreCase(determineSourceStepForOutputEntity(parent))) {
+//                currentInputRowMap.put(sourceStepId, currentInputRowMap.get(sourceStepId).intValue()+1);
+//            }
+//        		return entityData;
+//        }
         return null;
     }
     

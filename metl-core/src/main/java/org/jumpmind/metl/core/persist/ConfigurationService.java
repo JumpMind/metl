@@ -47,6 +47,7 @@ import org.jumpmind.metl.core.model.AuditEvent;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
+import org.jumpmind.metl.core.model.ComponentModelSetting;
 import org.jumpmind.metl.core.model.ComponentName;
 import org.jumpmind.metl.core.model.ComponentSetting;
 import org.jumpmind.metl.core.model.EntityTag;
@@ -60,6 +61,7 @@ import org.jumpmind.metl.core.model.FolderName;
 import org.jumpmind.metl.core.model.FolderType;
 import org.jumpmind.metl.core.model.HierarchicalModel;
 import org.jumpmind.metl.core.model.HierarchicalModelName;
+import org.jumpmind.metl.core.model.IModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelRelation;
@@ -468,10 +470,10 @@ public class ConfigurationService extends AbstractService
 
         if (readRelations) {
             if (isNotBlank(component.getInputModelId())) {
-                component.setInputModel(findRelationalModel(component.getInputModelId()));
+                component.setInputModel(findModel(component.getInputModelId()));
             }
             if (isNotBlank(component.getOutputModelId())) {
-                component.setOutputModel(findRelationalModel(component.getOutputModelId()));
+                component.setOutputModel(findModel(component.getOutputModelId()));
             }
         }
 
@@ -490,6 +492,11 @@ public class ConfigurationService extends AbstractService
                 ComponentAttribSetting.class, new NameValue("componentId", component.getId()));
         component.setAttributeSettings(attributeSettings);
 
+        @SuppressWarnings("unchecked")
+        List<ComponentModelSetting> modelSettings = (List<ComponentModelSetting>) findSettings(
+                ComponentModelSetting.class, new NameValue("componentId", component.getId()));
+        component.setModelSettings(modelSettings);        
+        
         if (readRelations) {
             component.setResource(findResource(component.getResourceId()));
         }
@@ -498,6 +505,7 @@ public class ConfigurationService extends AbstractService
 
     @Override
     public RelationalModel findRelationalModel(String id) {
+                
         RelationalModel model = new RelationalModel(id);
         refresh(model);
         return model;
@@ -507,6 +515,21 @@ public class ConfigurationService extends AbstractService
     public HierarchicalModel findHierarchicalModel(String id) {
         HierarchicalModel model = new HierarchicalModel(id);
         refresh(model);
+        return model;
+    }
+    
+    public IModel findModel(String id) {        
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("id", id);
+        List<RelationalModel> relModel = persistenceManager.find(RelationalModel.class, params, null, null,
+                tableName(RelationalModel.class));
+        
+        IModel model = null;
+        if (relModel.size() > 0) {
+            model = findRelationalModel(id);
+        } else {
+            model = findHierarchicalModel(id);
+        }
         return model;
     }
 
@@ -549,7 +572,6 @@ public class ConfigurationService extends AbstractService
         ModelSchemaObject root = this.getHierarchicalModelRoot(model.getId());
         if (root != null) {
             model.setRootObject(root);
-            this.refresh(root);
         }
     }
     
@@ -672,6 +694,8 @@ public class ConfigurationService extends AbstractService
         refreshFlowRelations(flow);
     }
 
+
+    
     private void refreshFlowRelations(Flow flow) {
         flow.setFlowSteps(new ArrayList<>());
         flow.setFlowStepLinks(new ArrayList<>());
@@ -691,7 +715,7 @@ public class ConfigurationService extends AbstractService
             }
         });
 
-        Map<String, RelationalModel> models = new HashMap<>();
+        Map<String, IModel> models = new HashMap<>();
         Map<String, Resource> resources = new HashMap<>();
 
         for (FlowStep step : steps) {
@@ -700,25 +724,30 @@ public class ConfigurationService extends AbstractService
             flow.getFlowSteps().add(step);
 
             String modelId = component.getOutputModelId();
+            IModel model=null;            
             if (isNotBlank(modelId)) {
-                RelationalModel model = models.get(modelId);
-                if (model == null) {
-                    model = findRelationalModel(modelId);
-                    models.put(modelId, model);
-                }
-                component.setOutputModel(model);
+                model = models.get(modelId);
             }
-
+            if (model == null) {
+                model = this.findModel(modelId);
+            }
+            if (model != null) {
+                models.put(modelId, model);
+            }
+            component.setOutputModel(model);
+            
             modelId = component.getInputModelId();
             if (isNotBlank(modelId)) {
-                RelationalModel model = models.get(modelId);
-                if (model == null) {
-                    model = findRelationalModel(modelId);
-                    models.put(modelId, model);
-                }
-                component.setInputModel(model);
+                model = models.get(modelId);
             }
-
+            if (model == null) {
+                model = this.findModel(modelId);
+            }
+            if (model != null) {
+                models.put(modelId, model);
+            }
+            component.setInputModel(model);
+            
             String resourceId = component.getResourceId();
             if (isNotBlank(resourceId)) {
                 Resource resource = resources.get(resourceId);

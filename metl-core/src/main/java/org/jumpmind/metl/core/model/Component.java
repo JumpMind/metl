@@ -40,8 +40,12 @@ public class Component extends AbstractObjectWithSettings implements IAuditable 
 
     Resource resource;
 
+    String inputModelId;
+    
     IModel inputModel;
 
+    String outputModelId;
+    
     IModel outputModel;
 
     String projectVersionId;
@@ -55,6 +59,8 @@ public class Component extends AbstractObjectWithSettings implements IAuditable 
     List<ComponentEntitySetting> entitySettings;
 
     List<ComponentAttribSetting> attributeSettings;
+    
+    List<ComponentModelSetting> modelSettings;
 
     public Component() {
     }
@@ -66,13 +72,15 @@ public class Component extends AbstractObjectWithSettings implements IAuditable 
 
     public Component(Resource resource, IModel inputModel, IModel outputModel,
             List<ComponentEntitySetting> entitySettings,
-            List<ComponentAttribSetting> attributeSettings, Setting... settings) {
+            List<ComponentAttribSetting> attributeSettings, 
+            List<ComponentModelSetting> modelSettings, Setting... settings) {
         super(settings);
         this.resource = resource;
         this.inputModel = inputModel;
         this.outputModel = outputModel;
         this.entitySettings = entitySettings;
         this.attributeSettings = attributeSettings;
+        this.modelSettings = modelSettings;
     }
 
     public String getType() {
@@ -116,27 +124,19 @@ public class Component extends AbstractObjectWithSettings implements IAuditable 
     }
 
     public String getInputModelId() {
-        return inputModel != null ? inputModel.getId() : null;
+        return inputModelId;
     }
 
-    public void setInputModelId(String inputModeldId) {
-        if (inputModeldId != null) {
-            this.inputModel = new RelationalModel(inputModeldId);
-        } else {
-            this.inputModel = null;
-        }
+    public void setInputModelId(String inputModelId) {
+        this.inputModelId = inputModelId;
     }
 
     public String getOutputModelId() {
-        return outputModel != null ? outputModel.getId() : null;
+        return outputModelId;
     }
-
+    
     public void setOutputModelId(String outputModelId) {
-        if (outputModelId != null) {
-            this.outputModel = new RelationalModel(outputModelId);
-        } else {
-            this.outputModel = null;
-        }
+        this.outputModelId = outputModelId;
     }
 
     public String getResourceId() {
@@ -252,6 +252,32 @@ public class Component extends AbstractObjectWithSettings implements IAuditable 
         return list;
     }
 
+    public List<ComponentModelSetting> getModelSetting(String modelObjectId, String name) {
+        List<ComponentModelSetting> list = new ArrayList<ComponentModelSetting>();
+        for (ComponentModelSetting setting : modelSettings) {
+            if (setting.getModelObjectId().equals(modelObjectId)
+                    && setting.getName().equalsIgnoreCase(name)) {
+                list.add(setting);
+            }
+        }
+        return list;
+    }
+
+    public List<ComponentModelSetting> getModelSettings() {
+        return modelSettings;
+    }
+
+    public void setModelSettings(List<ComponentModelSetting> modelSettings) {
+        this.modelSettings = modelSettings;
+    }
+
+    public void addModelSetting(ComponentModelSetting modelSetting) {
+        if (modelSettings == null) {
+            modelSettings = new ArrayList<ComponentModelSetting>();
+        }
+        modelSettings.add(modelSetting);
+    }    
+    
     @Override
     protected Setting createSettingData() {
         return new ComponentSetting(getId());
