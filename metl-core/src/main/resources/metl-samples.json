@@ -3249,6 +3249,9 @@
         }
       }
     }, {
+      "tableName" : "METL_component_model_setting",
+      "tableData" : { }
+    }, {
       "tableName" : "METL_component_attrib_setting",
       "tableData" : {
         "065883e0-3562-4322-9b6e-c956cc6cfac2" : {
