@@ -82,7 +82,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
     final static Integer PROJECT_VERSION_IDX = new Integer(1);
     final static Integer MODEL_IDX = new Integer(0);
     final static Integer RESOURCE_IDX = new Integer(0);
-    final static Integer FLOW_IDX = new Integer(4);
+    final static Integer FLOW_IDX = new Integer(5);
     final static Integer AGENT_IDX = new Integer(0);
     
     final static Integer CREATE_TIME_IDX = new Integer(0);
@@ -129,6 +129,8 @@ public class ImportExportService extends AbstractService implements IImportExpor
             {"_component_setting","select * from %1$s_component_setting where component_id in "
                     + "(select distinct component_id from %1$s_flow_step where flow_id='%3$s') order by id", "id"},
             {"_component_entity_setting","select * from %1$s_component_entity_setting where component_id in "
+                    + "(select distinct component_id from %1$s_flow_step where flow_id='%3$s') order by id", "id"},
+            {"_component_model_setting","select * from %1$s_component_model_setting where component_id in "
                     + "(select distinct component_id from %1$s_flow_step where flow_id='%3$s') order by id", "id"},
             {"_component_attrib_setting","select * from %1$s_component_attrib_setting where component_id in "
                     + "(select distinct component_id from %1$s_flow_step where flow_id='%3$s') order by id", "id"},
