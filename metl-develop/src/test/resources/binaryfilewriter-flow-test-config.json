@@ -103,7 +103,7 @@
       }
     } ],
     "modelData" : [ {
-      "tableName" : "METL_MODEL",
+      "tableName" : "METL_RELATIONAL_MODEL",
       "tableData" : {
         "7d66e4dd-9434-4e43-9554-6ea871352e23" : {
           "ID" : "7d66e4dd-9434-4e43-9554-6ea871352e23",

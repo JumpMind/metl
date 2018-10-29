@@ -723,30 +723,30 @@ public class ConfigurationService extends AbstractService
             step.setComponent(component);
             flow.getFlowSteps().add(step);
 
+            IModel model=null;   
             String modelId = component.getOutputModelId();
-            IModel model=null;            
-            if (isNotBlank(modelId)) {
+            if (isNotBlank(modelId)) {         
                 model = models.get(modelId);
+                if (model == null) {
+                    model = this.findModel(modelId);
+                }
+                if (model != null) {
+                    models.put(modelId, model);
+                    component.setOutputModel(model);
+                }
             }
-            if (model == null) {
-                model = this.findModel(modelId);
-            }
-            if (model != null) {
-                models.put(modelId, model);
-            }
-            component.setOutputModel(model);
             
             modelId = component.getInputModelId();
             if (isNotBlank(modelId)) {
                 model = models.get(modelId);
+                if (model == null) {
+                    model = this.findModel(modelId);
+                }
+                if (model != null) {
+                    models.put(modelId, model);
+                    component.setInputModel(model);
+                }
             }
-            if (model == null) {
-                model = this.findModel(modelId);
-            }
-            if (model != null) {
-                models.put(modelId, model);
-            }
-            component.setInputModel(model);
             
             String resourceId = component.getResourceId();
             if (isNotBlank(resourceId)) {
