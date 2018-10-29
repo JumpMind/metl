@@ -1,6 +1,5 @@
 {
   "versionNumber" : "3.2.3",
-  "hostName" : "Gregs-MacBook.local",
   "releasePackageData" : [ ],
   "projectVersionData" : [ {
     "projectVersionId" : "67f0f4b4-b8fb-448e-91e5-d7cdf8b3586b",
@@ -459,17 +458,43 @@
       "tableData" : { }
     }, {
       "tableName" : "METL_component_model_setting",
-      "tableData" : { }
+      "tableData" : {
+        "4c9dcf2c-d2d1-494f-aea8-66e1f9769450" : {
+          "ID" : "4c9dcf2c-d2d1-494f-aea8-66e1f9769450",
+          "TYPE" : "ATTRIBUTE",
+          "COMPONENT_ID" : "d00e9b18-457d-4a51-9835-b203442304f7",
+          "MODEL_OBJECT_ID" : "69a2d0da-6467-4553-b399-6e1f3524ae13",
+          "NAME" : "mapping.processor.model.object.maps.to",
+          "VALUE" : "bfcaab54-240d-4f07-a583-67e369dbd94f"
+        },
+        "e00e2a12-9c19-4781-82f1-bf2e2df3f507" : {
+          "ID" : "e00e2a12-9c19-4781-82f1-bf2e2df3f507",
+          "TYPE" : "ATTRIBUTE",
+          "COMPONENT_ID" : "d00e9b18-457d-4a51-9835-b203442304f7",
+          "MODEL_OBJECT_ID" : "210448d5-9b1a-4b59-8acb-a5af004bd03b",
+          "NAME" : "mapping.processor.model.object.maps.to",
+          "VALUE" : "7b717640-060d-48cc-bef3-a75020f67fdb"
+        },
+        "aa791249-bbe1-423e-9ec9-cab97388fe62" : {
+          "ID" : "aa791249-bbe1-423e-9ec9-cab97388fe62",
+          "TYPE" : "ATTRIBUTE",
+          "COMPONENT_ID" : "d00e9b18-457d-4a51-9835-b203442304f7",
+          "MODEL_OBJECT_ID" : "5e2e5cb5-864f-4007-b9b7-930a1251a3bf",
+          "NAME" : "mapping.processor.model.object.maps.to",
+          "VALUE" : "5a789d83-b9be-4acd-a46c-1311627d7d55"
+        },
+        "c7d2aad0-0062-461a-b248-5d995f8d5f20" : {
+          "ID" : "c7d2aad0-0062-461a-b248-5d995f8d5f20",
+          "TYPE" : "ATTRIBUTE",
+          "COMPONENT_ID" : "d00e9b18-457d-4a51-9835-b203442304f7",
+          "MODEL_OBJECT_ID" : "41dce6de-81ba-451e-83be-241d760034e1",
+          "NAME" : "mapping.processor.model.object.maps.to",
+          "VALUE" : "4f44583c-a977-4f6e-8715-63ab2f18ec92"
+        }
+      }
     }, {
       "tableName" : "METL_component_attrib_setting",
       "tableData" : {
-        "5aa15b96-3671-4d3a-95a4-5542531e6bbe" : {
-          "ID" : "5aa15b96-3671-4d3a-95a4-5542531e6bbe",
-          "COMPONENT_ID" : "93b9b439-8a44-4cb4-9fe3-3c1cf6c0a951",
-          "ATTRIBUTE_ID" : "69a2d0da-6467-4553-b399-6e1f3524ae13",
-          "NAME" : "delimited.formatter.attribute.format.function",
-          "VALUE" : ""
-        },
         "58483808-d96d-4c50-a9b7-29c6da15bd0f" : {
           "ID" : "58483808-d96d-4c50-a9b7-29c6da15bd0f",
           "COMPONENT_ID" : "93b9b439-8a44-4cb4-9fe3-3c1cf6c0a951",
@@ -505,13 +530,6 @@
           "NAME" : "delimited.formatter.attribute.ordinal",
           "VALUE" : "15"
         },
-        "d1a3ba28-2882-4bac-9110-49f4cbd358bf" : {
-          "ID" : "d1a3ba28-2882-4bac-9110-49f4cbd358bf",
-          "COMPONENT_ID" : "93b9b439-8a44-4cb4-9fe3-3c1cf6c0a951",
-          "ATTRIBUTE_ID" : "210448d5-9b1a-4b59-8acb-a5af004bd03b",
-          "NAME" : "delimited.formatter.attribute.ordinal",
-          "VALUE" : "4"
-        },
         "450bb469-f542-4630-82e0-429ce3b96ea5" : {
           "ID" : "450bb469-f542-4630-82e0-429ce3b96ea5",
           "COMPONENT_ID" : "93b9b439-8a44-4cb4-9fe3-3c1cf6c0a951",
@@ -525,6 +543,13 @@
           "ATTRIBUTE_ID" : "4f44583c-a977-4f6e-8715-63ab2f18ec92",
           "NAME" : "transform.expression",
           "VALUE" : null
+        },
+        "599a9c0a-a134-4563-894b-a73e1b370e78" : {
+          "ID" : "599a9c0a-a134-4563-894b-a73e1b370e78",
+          "COMPONENT_ID" : "d00e9b18-457d-4a51-9835-b203442304f7",
+          "ATTRIBUTE_ID" : "210448d5-9b1a-4b59-8acb-a5af004bd03b",
+          "NAME" : "mapping.processor.attribute.maps.to",
+          "VALUE" : "7b717640-060d-48cc-bef3-a75020f67fdb"
         },
         "e26cbc27-c392-454a-81ad-58884a0a0a8e" : {
           "ID" : "e26cbc27-c392-454a-81ad-58884a0a0a8e",
@@ -553,13 +578,6 @@
           "ATTRIBUTE_ID" : "2c336574-14a9-4188-9698-9d77369b11a9",
           "NAME" : "delimited.formatter.attribute.format.function",
           "VALUE" : ""
-        },
-        "55f39541-a1c4-4b04-9ba6-19ea7f5f718f" : {
-          "ID" : "55f39541-a1c4-4b04-9ba6-19ea7f5f718f",
-          "COMPONENT_ID" : "93b9b439-8a44-4cb4-9fe3-3c1cf6c0a951",
-          "ATTRIBUTE_ID" : "41dce6de-81ba-451e-83be-241d760034e1",
-          "NAME" : "delimited.formatter.attribute.ordinal",
-          "VALUE" : "2"
         },
         "2f75081b-ccdb-48bc-9013-aaeeddef5bc1" : {
           "ID" : "2f75081b-ccdb-48bc-9013-aaeeddef5bc1",
@@ -603,13 +621,6 @@
           "NAME" : "delimited.formatter.attribute.format.function",
           "VALUE" : ""
         },
-        "46ab4821-1a3c-46d9-89cf-366952ba3df2" : {
-          "ID" : "46ab4821-1a3c-46d9-89cf-366952ba3df2",
-          "COMPONENT_ID" : "93b9b439-8a44-4cb4-9fe3-3c1cf6c0a951",
-          "ATTRIBUTE_ID" : "41dce6de-81ba-451e-83be-241d760034e1",
-          "NAME" : "delimited.formatter.attribute.format.function",
-          "VALUE" : ""
-        },
         "d0c3e2a8-aed1-4cca-b501-aabfe236def4" : {
           "ID" : "d0c3e2a8-aed1-4cca-b501-aabfe236def4",
           "COMPONENT_ID" : "93b9b439-8a44-4cb4-9fe3-3c1cf6c0a951",
@@ -645,12 +656,12 @@
           "NAME" : "transform.expression",
           "VALUE" : null
         },
-        "2cc97796-4b5a-46af-a506-75d50833ad04" : {
-          "ID" : "2cc97796-4b5a-46af-a506-75d50833ad04",
-          "COMPONENT_ID" : "93b9b439-8a44-4cb4-9fe3-3c1cf6c0a951",
+        "202fb9a5-dfd5-4dde-9fb0-ce3508d4eea1" : {
+          "ID" : "202fb9a5-dfd5-4dde-9fb0-ce3508d4eea1",
+          "COMPONENT_ID" : "d00e9b18-457d-4a51-9835-b203442304f7",
           "ATTRIBUTE_ID" : "5e2e5cb5-864f-4007-b9b7-930a1251a3bf",
-          "NAME" : "delimited.formatter.attribute.format.function",
-          "VALUE" : ""
+          "NAME" : "mapping.processor.attribute.maps.to",
+          "VALUE" : "5a789d83-b9be-4acd-a46c-1311627d7d55"
         },
         "9244bba2-1406-402f-90ed-927b7e404f49" : {
           "ID" : "9244bba2-1406-402f-90ed-927b7e404f49",
@@ -691,13 +702,6 @@
           "ID" : "9ee8fcff-7115-434a-9a2b-574cb9720d09",
           "COMPONENT_ID" : "93b9b439-8a44-4cb4-9fe3-3c1cf6c0a951",
           "ATTRIBUTE_ID" : "4f44583c-a977-4f6e-8715-63ab2f18ec92",
-          "NAME" : "delimited.formatter.attribute.ordinal",
-          "VALUE" : "1"
-        },
-        "c930beda-2880-4e4e-acc1-4843a6119ae1" : {
-          "ID" : "c930beda-2880-4e4e-acc1-4843a6119ae1",
-          "COMPONENT_ID" : "93b9b439-8a44-4cb4-9fe3-3c1cf6c0a951",
-          "ATTRIBUTE_ID" : "5e2e5cb5-864f-4007-b9b7-930a1251a3bf",
           "NAME" : "delimited.formatter.attribute.ordinal",
           "VALUE" : "1"
         },
@@ -778,13 +782,6 @@
           "NAME" : "transform.expression",
           "VALUE" : null
         },
-        "504802e0-0709-4a67-81c3-4385b3ae738e" : {
-          "ID" : "504802e0-0709-4a67-81c3-4385b3ae738e",
-          "COMPONENT_ID" : "93b9b439-8a44-4cb4-9fe3-3c1cf6c0a951",
-          "ATTRIBUTE_ID" : "69a2d0da-6467-4553-b399-6e1f3524ae13",
-          "NAME" : "delimited.formatter.attribute.ordinal",
-          "VALUE" : "3"
-        },
         "1a3b9374-dbb7-4d4a-a628-4f78814b3831" : {
           "ID" : "1a3b9374-dbb7-4d4a-a628-4f78814b3831",
           "COMPONENT_ID" : "93b9b439-8a44-4cb4-9fe3-3c1cf6c0a951",
@@ -834,13 +831,6 @@
           "NAME" : "delimited.formatter.attribute.format.function",
           "VALUE" : ""
         },
-        "0e933003-1ba2-4b91-8907-f35e7ac79415" : {
-          "ID" : "0e933003-1ba2-4b91-8907-f35e7ac79415",
-          "COMPONENT_ID" : "93b9b439-8a44-4cb4-9fe3-3c1cf6c0a951",
-          "ATTRIBUTE_ID" : "210448d5-9b1a-4b59-8acb-a5af004bd03b",
-          "NAME" : "delimited.formatter.attribute.format.function",
-          "VALUE" : ""
-        },
         "7e354b15-a746-47f2-bd3a-ac86f8946bb4" : {
           "ID" : "7e354b15-a746-47f2-bd3a-ac86f8946bb4",
           "COMPONENT_ID" : "8f63a056-ecb5-4f4c-b774-3ab9fd453d2b",
@@ -854,42 +844,20 @@
           "ATTRIBUTE_ID" : "7d0cba58-101a-4818-b645-2339f6b6d8b3",
           "NAME" : "delimited.formatter.attribute.ordinal",
           "VALUE" : "9"
-        }
-      }
-    }, {
-      "tableName" : "METL_component_model_setting",
-      "tableData" : {
-        "4c9dcf2c-d2d1-494f-aea8-66e1f9769450" : {
-          "ID" : "4c9dcf2c-d2d1-494f-aea8-66e1f9769450",
-          "TYPE" : "ATTRIBUTE",
-          "COMPONENT_ID" : "d00e9b18-457d-4a51-9835-b203442304f7",
-          "MODEL_OBJECT_ID" : "69a2d0da-6467-4553-b399-6e1f3524ae13",
-          "NAME" : "mapping.processor.model.object.maps.to",
-          "VALUE" : "bfcaab54-240d-4f07-a583-67e369dbd94f"
         },
-        "e00e2a12-9c19-4781-82f1-bf2e2df3f507" : {
-          "ID" : "e00e2a12-9c19-4781-82f1-bf2e2df3f507",
-          "TYPE" : "ATTRIBUTE",
+        "9e8ef573-cb2d-4816-b95f-1b1e84976978" : {
+          "ID" : "9e8ef573-cb2d-4816-b95f-1b1e84976978",
           "COMPONENT_ID" : "d00e9b18-457d-4a51-9835-b203442304f7",
-          "MODEL_OBJECT_ID" : "210448d5-9b1a-4b59-8acb-a5af004bd03b",
-          "NAME" : "mapping.processor.model.object.maps.to",
-          "VALUE" : "7b717640-060d-48cc-bef3-a75020f67fdb"
-        },
-        "aa791249-bbe1-423e-9ec9-cab97388fe62" : {
-          "ID" : "aa791249-bbe1-423e-9ec9-cab97388fe62",
-          "TYPE" : "ATTRIBUTE",
-          "COMPONENT_ID" : "d00e9b18-457d-4a51-9835-b203442304f7",
-          "MODEL_OBJECT_ID" : "5e2e5cb5-864f-4007-b9b7-930a1251a3bf",
-          "NAME" : "mapping.processor.model.object.maps.to",
-          "VALUE" : "5a789d83-b9be-4acd-a46c-1311627d7d55"
-        },
-        "c7d2aad0-0062-461a-b248-5d995f8d5f20" : {
-          "ID" : "c7d2aad0-0062-461a-b248-5d995f8d5f20",
-          "TYPE" : "ATTRIBUTE",
-          "COMPONENT_ID" : "d00e9b18-457d-4a51-9835-b203442304f7",
-          "MODEL_OBJECT_ID" : "41dce6de-81ba-451e-83be-241d760034e1",
-          "NAME" : "mapping.processor.model.object.maps.to",
+          "ATTRIBUTE_ID" : "41dce6de-81ba-451e-83be-241d760034e1",
+          "NAME" : "mapping.processor.attribute.maps.to",
           "VALUE" : "4f44583c-a977-4f6e-8715-63ab2f18ec92"
+        },
+        "b0fc0a9b-af0f-4b18-8943-fbc495eeb50d" : {
+          "ID" : "b0fc0a9b-af0f-4b18-8943-fbc495eeb50d",
+          "COMPONENT_ID" : "d00e9b18-457d-4a51-9835-b203442304f7",
+          "ATTRIBUTE_ID" : "69a2d0da-6467-4553-b399-6e1f3524ae13",
+          "NAME" : "mapping.processor.attribute.maps.to",
+          "VALUE" : "bfcaab54-240d-4f07-a583-67e369dbd94f"
         }
       }
     }, {
@@ -925,7 +893,7 @@
           "ID" : "9f7bb89e-dcd3-446f-bc0c-b53539fcf5f2",
           "FLOW_ID" : "95f6c895-1f34-470a-af3f-674315bd8cd4",
           "COMPONENT_ID" : "93b9b439-8a44-4cb4-9fe3-3c1cf6c0a951",
-          "X" : 170,
+          "X" : 180,
           "Y" : 50,
           "APPROXIMATE_ORDER" : 1
         },
@@ -949,7 +917,7 @@
           "ID" : "88e8ef94-fbd7-4f8f-b587-086229e07985",
           "FLOW_ID" : "95f6c895-1f34-470a-af3f-674315bd8cd4",
           "COMPONENT_ID" : "d00e9b18-457d-4a51-9835-b203442304f7",
-          "X" : 310,
+          "X" : 330,
           "Y" : 50,
           "APPROXIMATE_ORDER" : 2
         }
