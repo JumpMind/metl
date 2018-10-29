@@ -474,6 +474,9 @@
       "tableName" : "METL_COMPONENT_ENTITY_SETTING",
       "tableData" : { }
     }, {
+      "tableName" : "METL_component_model_setting",
+      "tableData" : { }
+    }, {
       "tableName" : "METL_COMPONENT_ATTRIB_SETTING",
       "tableData" : { }
     }, {
