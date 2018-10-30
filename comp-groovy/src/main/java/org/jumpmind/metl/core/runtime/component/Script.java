@@ -154,13 +154,6 @@ public class Script extends AbstractComponentRuntime {
         log.info("It took {}ms to start the script component", (System.currentTimeMillis() - ts));
     }
     
-    @Override
-    public void stop() {
-        if (engineCache != null) {
-            engineCache.offer(engine);
-        }
-    }
-
     private void handleScriptException(ScriptException e) {
         Throwable rootCause = ExceptionUtils.getRootCause(e);
         if (rootCause != null) {
@@ -190,11 +183,17 @@ public class Script extends AbstractComponentRuntime {
     @Override
     public void flowCompletedWithErrors(Throwable myError) {
         invoke("onError", myError);
+        if (engineCache != null) {
+            engineCache.offer(engine);
+        }
     }
 
     @Override
     public void flowCompleted(boolean cancelled) {
         invoke("onSuccess");
+        if (engineCache != null) {
+            engineCache.offer(engine);
+        }
     }
 
     protected void invoke(String method, Object... args) {
