@@ -8,15 +8,15 @@ DELETE FROM METL_COMPONENT_SETTING WHERE COMPONENT_ID IN (SELECT ID FROM METL_CO
 DELETE FROM METL_COMPONENT WHERE PROJECT_VERSION_ID='c1de9907-a913-41ff-8c7f-7bd67dae90ad' ;
 DELETE FROM METL_RESOURCE_SETTING WHERE RESOURCE_ID IN (SELECT ID FROM METL_RESOURCE WHERE PROJECT_VERSION_ID='c1de9907-a913-41ff-8c7f-7bd67dae90ad' );
 DELETE FROM METL_RESOURCE WHERE PROJECT_VERSION_ID='c1de9907-a913-41ff-8c7f-7bd67dae90ad' ;
-DELETE FROM METL_MODEL_ATTRIB WHERE ENTITY_ID IN (SELECT ID FROM METL_MODEL_ENTITY WHERE MODEL_ID in (SELECT ID FROM METL_MODEL WHERE PROJECT_VERSION_ID='c1de9907-a913-41ff-8c7f-7bd67dae90ad' ));
-DELETE FROM METL_MODEL_ENTITY WHERE MODEL_ID in (SELECT ID FROM METL_MODEL WHERE PROJECT_VERSION_ID='c1de9907-a913-41ff-8c7f-7bd67dae90ad' );
-DELETE FROM METL_MODEL WHERE PROJECT_VERSION_ID='c1de9907-a913-41ff-8c7f-7bd67dae90ad' ;
+DELETE FROM METL_MODEL_ATTRIB WHERE ENTITY_ID IN (SELECT ID FROM METL_MODEL_ENTITY WHERE MODEL_ID in (SELECT ID FROM METL_RELATIONAL_MODEL WHERE PROJECT_VERSION_ID='c1de9907-a913-41ff-8c7f-7bd67dae90ad' ));
+DELETE FROM METL_MODEL_ENTITY WHERE MODEL_ID in (SELECT ID FROM METL_RELATIONAL_MODEL WHERE PROJECT_VERSION_ID='c1de9907-a913-41ff-8c7f-7bd67dae90ad' );
+DELETE FROM METL_RELATIONAL_MODEL WHERE PROJECT_VERSION_ID='c1de9907-a913-41ff-8c7f-7bd67dae90ad' ;
 DELETE FROM METL_FOLDER WHERE PROJECT_VERSION_ID='c1de9907-a913-41ff-8c7f-7bd67dae90ad';
 DELETE FROM METL_PROJECT_VERSION WHERE ID='c1de9907-a913-41ff-8c7f-7bd67dae90ad';
 DELETE FROM METL_PROJECT WHERE ID='bcbd73f9-ea7a-49f0-abf4-d150320e8887';
 insert into METL_PROJECT (ID, NAME, DESCRIPTION, DELETED, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('bcbd73f9-ea7a-49f0-abf4-d150320e8887','Deduper Flow Test',null,0,{ts '2016-02-09 14:16:28.181'},null,null,{ts '2016-02-09 14:17:18.652'});
 insert into METL_PROJECT_VERSION (ID, VERSION_LABEL, PROJECT_ID, ORIG_VERSION_ID, DESCRIPTION, ARCHIVED, DELETED, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('c1de9907-a913-41ff-8c7f-7bd67dae90ad','1.0','bcbd73f9-ea7a-49f0-abf4-d150320e8887',null,'',0,0,{ts '2016-02-09 14:16:28.181'},null,null,{ts '2016-02-09 14:17:18.644'});
-insert into METL_MODEL (ID, ROW_ID, PROJECT_VERSION_ID, DELETED, NAME, SHARED, FOLDER_ID, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('bda155f9-a28c-432e-b7de-0d0b8366d934','69708c0e-b37c-4e4f-a8cb-e326d246f48c','c1de9907-a913-41ff-8c7f-7bd67dae90ad',0,'Deduper Model',0,null,{ts '2016-02-09 16:01:07.217'},null,null,{ts '2016-02-09 16:01:13.505'});
+insert into METL_RELATIONAL_MODEL (ID, ROW_ID, PROJECT_VERSION_ID, DELETED, NAME, SHARED, FOLDER_ID, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('bda155f9-a28c-432e-b7de-0d0b8366d934','69708c0e-b37c-4e4f-a8cb-e326d246f48c','c1de9907-a913-41ff-8c7f-7bd67dae90ad',0,'Deduper Model',0,null,{ts '2016-02-09 16:01:07.217'},null,null,{ts '2016-02-09 16:01:13.505'});
 insert into METL_MODEL_ENTITY (ID, MODEL_ID, NAME, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('a36ef883-c427-4fc5-ba63-8bf99f6578a0','bda155f9-a28c-432e-b7de-0d0b8366d934','Deduper_Entity',{ts '2016-02-09 16:01:18.943'},null,null,{ts '2016-02-09 16:28:13.821'});
 insert into METL_MODEL_ATTRIB (ID, ENTITY_ID, NAME, TYPE, TYPE_ENTITY_ID, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME, PK) values ('5bc78280-10c0-43cf-8ff0-b4144aef5746','a36ef883-c427-4fc5-ba63-8bf99f6578a0','deduper_value','VARCHAR',null,{ts '2016-02-09 16:01:44.291'},null,null,{ts '2016-02-09 16:01:48.529'},0);
 insert into METL_MODEL_ATTRIB (ID, ENTITY_ID, NAME, TYPE, TYPE_ENTITY_ID, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME, PK) values ('8895e148-7ebf-46a3-8262-61e2bb41886b','a36ef883-c427-4fc5-ba63-8bf99f6578a0','deduper_cde','VARCHAR',null,{ts '2016-02-09 16:01:39.453'},null,null,{ts '2016-02-09 16:01:42.696'},0);
@@ -70,7 +70,7 @@ if (!(inputMessage instanceof ControlMessage)) {
 
     info("compare to list: " + compareToList.toString());
     // check the actual content of the data received
-    Model inputModel = flowStep.getComponent().getInputModel();
+    RelationalModel inputModel = flowStep.getComponent().getInputModel();
 
     if (inputModel != null) {
         ModelEntity deduperEntity = inputModel.getEntityByName("Deduper_Entity");
@@ -178,7 +178,7 @@ if (!(inputMessage instanceof ControlMessage)) {
 
     info("compare to list: " + compareToList.toString());
     // check the actual content of the data received
-    Model inputModel = flowStep.getComponent().getInputModel();
+    RelationalModel inputModel = flowStep.getComponent().getInputModel();
 
     if (inputModel != null) {
         ModelEntity deduperEntity = inputModel.getEntityByName("Deduper_Entity");

@@ -51,7 +51,8 @@ public class XMLSetting implements Serializable {
         @XmlEnumValue("flow")FLOW,
         @XmlEnumValue("streamable_resource")STREAMABLE_RESOURCE,
         @XmlEnumValue("datasource_resource")DATASOURCE_RESOURCE,
-        @XmlEnumValue("entity_column")ENTITY_COLUMN
+        @XmlEnumValue("model_column")MODEL_COLUMN,
+        @XmlEnumValue("target_step")TARGET_STEP
     };
     
     @XmlElement(required = false)

@@ -31,7 +31,7 @@ import java.util.UUID;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.h2.Driver;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.ControlMessage;
@@ -88,7 +88,7 @@ public class Sorter extends AbstractComponentRuntime {
         TypedProperties properties = getTypedProperties();
         rowsPerMessage = properties.getInt(ROWS_PER_MESSAGE);
         String sortAttribute = properties.get(SORT_ATTRIBUTE);
-        Model inputModel = this.getComponent().getInputModel();
+        RelationalModel inputModel = (RelationalModel) this.getComponent().getInputModel();
         Component component = context.getFlowStep().getComponent();
     	entities = new ArrayList<>(inputModel.getModelEntities());
 
@@ -312,7 +312,7 @@ public class Sorter extends AbstractComponentRuntime {
 			databasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(ds,
 					new SqlTemplateSettings(), true, false);
 			
-			Model inputModel = context.getFlowStep().getComponent().getInputModel();
+			RelationalModel inputModel = (RelationalModel) context.getFlowStep().getComponent().getInputModel();
 			List<ModelEntity> entities = inputModel.getModelEntities();
 			for (ModelEntity entity : entities) {
 				Table table = new Table();

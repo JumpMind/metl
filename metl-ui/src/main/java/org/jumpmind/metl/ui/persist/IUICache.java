@@ -23,8 +23,9 @@ package org.jumpmind.metl.ui.persist;
 import java.util.List;
 
 import org.jumpmind.metl.core.model.FlowName;
-import org.jumpmind.metl.core.model.ModelName;
+import org.jumpmind.metl.core.model.HierarchicalModelName;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
+import org.jumpmind.metl.core.model.RelationalModelName;
 import org.jumpmind.metl.core.model.ResourceName;
 
 public interface IUICache {
@@ -35,7 +36,9 @@ public interface IUICache {
 
     public List<FlowName> findFlowsInProject(String projectVersionId);
 
-    public List<ModelName> findModelsInProject(String projectVersionId);
+    public List<RelationalModelName> findRelationalModelsInProject(String projectVersionId);
+    
+    public List<HierarchicalModelName> findHierarchicalModelsInProject(String projectVersionId);
 
     public List<ResourceName> findResourcesInProject(String projectVersionId);
 

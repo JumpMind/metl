@@ -25,7 +25,7 @@
              id='10887396-9d14-4a42-8212-66b4ce53cef2'
              inputMessageType='text'
              inputOutputModelsMatch='false'
-             outputMessageType='entity'
+             outputMessageType='model'
              resourceCategory='none'>
     <name>Deserializer</name>
     <className>org.jumpmind.metl.core.runtime.component.Deserializer</className>
@@ -56,7 +56,7 @@
   </component>
   <component category='SERVICE'
              id='4e810250-d937-4223-9d50-6322b35c0527'
-             inputMessageType='entity'
+             inputMessageType='model'
              inputOutputModelsMatch='false'
              outputMessageType='text'
              resourceCategory='none'>

@@ -37,7 +37,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -105,7 +105,7 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
                 CsvWriter csvWriter = getCsvWriter(writer);
                 try {
                 	if (attributes.size() == 0) {
-                        Model inputModel = getInputModel();
+                        RelationalModel inputModel = (RelationalModel) getInputModel();
                         boolean found = false;
 
                     	for (EntityData inputData : inputRows) {
@@ -158,7 +158,8 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
                 for (AttributeFormat attribute : attributes) {
                     Object object = inputRow.get(attribute.getAttributeId());
                     if (isNotBlank(attribute.getFormatFunction())) {
-                        object = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), object, getInputModel(),
+                        object = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), object, 
+                                (RelationalModel) getInputModel(),
                                 attribute.getEntity(), inputRow, attribute.getFormatFunction());
                     }
 
@@ -201,7 +202,7 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
         for (ComponentAttribSetting attributeSetting : attributeSettings) {
             AttributeFormat format = formats.get(attributeSetting.getAttributeId());
             if (format == null) {
-                Model inputModel = getComponent().getInputModel();
+                RelationalModel inputModel = (RelationalModel) getComponent().getInputModel();
                 ModelAttrib attribute = inputModel.getAttributeById(attributeSetting.getAttributeId());
                 if (attribute != null) {
                     ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());

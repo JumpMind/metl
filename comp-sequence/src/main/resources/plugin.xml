@@ -23,9 +23,9 @@
 <definitions>
   <component category='PROCESSOR'
              id='Sequence'
-             inputMessageType='entity'
+             inputMessageType='relational'
              inputOutputModelsMatch='true'
-             outputMessageType='entity'
+             outputMessageType='relational'
              resourceCategory='datasource'>
     <name>Sequence</name>
     <className>org.jumpmind.metl.core.runtime.component.SequenceGenerator</className>
@@ -65,7 +65,7 @@
       </setting>
       <setting id='reset.attribute'
                required='false'
-               type='entity_column'>
+               type='model_column'>
         <name>Reset Attribute Name</name>
       </setting>      
     </settings>

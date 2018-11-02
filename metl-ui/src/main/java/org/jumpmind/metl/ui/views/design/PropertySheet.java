@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.jumpmind.metl.core.model.AbstractName;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.AbstractObjectWithSettings;
@@ -39,12 +40,12 @@ import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
-import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
-import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
+import org.jumpmind.metl.core.model.RelationalModel;
+import org.jumpmind.metl.core.model.RelationalModelName;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.persist.IConfigurationService;
@@ -284,25 +285,37 @@ public class PropertySheet extends AbsoluteLayout {
         }
     }
 
-    protected void addOutputModelCombo(XMLComponentDefinition componentDefintion, FormLayout formLayout, final Component component) {
+    protected void addOutputModelCombo(XMLComponentDefinition componentDefinition, FormLayout formLayout, final Component component) {
         FlowStep step = getSingleFlowStep();
         if (step != null) {
             IConfigurationService configurationService = context.getConfigurationService();
             String projectVersionId = step.getComponent().getProjectVersionId();
-            if ((componentDefintion.getOutputMessageType() == MessageType.ENTITY
-                    || (componentDefintion.getOutputMessageType() == MessageType.ANY && componentDefintion.isShowOutputModel()))
-                    && !componentDefintion.isInputOutputModelsMatch()) {
+            if (((componentDefinition.getOutputMessageType() == MessageType.RELATIONAL || componentDefinition.getOutputMessageType() == MessageType.HIERARCHICAL ||
+                    componentDefinition.getOutputMessageType() == MessageType.MODEL)
+                    || (componentDefinition.getOutputMessageType() == MessageType.ANY && componentDefinition.isShowOutputModel()))
+                    && !componentDefinition.isInputOutputModelsMatch()) {
                 final AbstractSelect combo = new ComboBox("Output Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
-                List<ModelName> models = new ArrayList<>(configurationService.findModelsInProject(projectVersionId));
+                
+                List<AbstractName> models = new ArrayList<AbstractName>();
+                if (componentDefinition.getOutputMessageType() == MessageType.RELATIONAL || componentDefinition.getOutputMessageType() == MessageType.MODEL) {
+                    models.addAll(configurationService.findRelationalModelsInProject(projectVersionId));
+                } else if (componentDefinition.getOutputMessageType() == MessageType.HIERARCHICAL || componentDefinition.getOutputMessageType() == MessageType.MODEL) { 
+                    models.addAll(configurationService.findHierarchicalModelsInProject(projectVersionId));
+                }
+                
                 List<ProjectVersionDepends> dependencies = configurationService.findProjectDependencies(projectVersionId);
                 for (ProjectVersionDepends projectVersionDependency : dependencies) {
-                    models.addAll(configurationService.findModelsInProject(projectVersionDependency.getTargetProjectVersionId()));
+                    if (componentDefinition.getOutputMessageType() == MessageType.RELATIONAL || componentDefinition.getOutputMessageType() == MessageType.MODEL) {
+                        models.addAll(configurationService.findRelationalModelsInProject(projectVersionId));
+                    } else if (componentDefinition.getOutputMessageType() == MessageType.HIERARCHICAL || componentDefinition.getOutputMessageType() == MessageType.MODEL) { 
+                        models.addAll(configurationService.findHierarchicalModelsInProject(projectVersionDependency.getTargetProjectVersionId()));
+                    }
                 }
 
                 if (models != null) {
-                    for (ModelName model : models) {
+                    for (AbstractName model : models) {
                         combo.addItem(model);
                         if (isNotBlank(component.getOutputModelId()) && component.getOutputModelId().equals(model.getId())) {
                             combo.setValue(model);
@@ -314,12 +327,8 @@ public class PropertySheet extends AbsoluteLayout {
 
                     @Override
                     public void valueChange(ValueChangeEvent event) {
-                        ModelName model = (ModelName) combo.getValue();
-                        if (model != null) {
-                            component.setOutputModel(configurationService.findModel(model.getId()));
-                        } else {
-                            component.setOutputModel(null);
-                        }
+                        AbstractName model = (AbstractName) combo.getValue();
+                        component.setOutputModel(configurationService.findModel(model.getId()));
                         configurationService.save((AbstractObject) component);
                         setSource(value);
                     }
@@ -351,24 +360,36 @@ public class PropertySheet extends AbsoluteLayout {
         formLayout.addComponent(textField);
     }
 
-    protected void addInputModelCombo(XMLComponentDefinition componentDefintion, FormLayout formLayout, final Component component) {
+    protected void addInputModelCombo(XMLComponentDefinition componentDefinition, FormLayout formLayout, final Component component) {
         FlowStep step = getSingleFlowStep();
         if (step != null) {
             IConfigurationService configurationService = context.getConfigurationService();
             String projectVersionId = step.getComponent().getProjectVersionId();
-            if (componentDefintion.getInputMessageType() == MessageType.ENTITY
-                    || (componentDefintion.getInputMessageType() == MessageType.ANY && componentDefintion.isShowInputModel())) {
+            if ((componentDefinition.getInputMessageType() == MessageType.RELATIONAL || componentDefinition.getInputMessageType() == MessageType.HIERARCHICAL ||
+                    componentDefinition.getInputMessageType() == MessageType.MODEL)
+                    || (componentDefinition.getInputMessageType() == MessageType.ANY && componentDefinition.isShowInputModel())) {
                 final AbstractSelect combo = new ComboBox("Input Model");
-                combo.setImmediate(true);
+                combo.setImmediate(true);                
                 combo.setNullSelectionAllowed(true);
-                List<ModelName> models = new ArrayList<>(configurationService.findModelsInProject(projectVersionId));
+
+                List<AbstractName> models = new ArrayList<AbstractName>();
+                if (componentDefinition.getInputMessageType() == MessageType.RELATIONAL || componentDefinition.getInputMessageType() == MessageType.MODEL) {
+                    models.addAll(configurationService.findRelationalModelsInProject(projectVersionId));
+                } else if (componentDefinition.getInputMessageType() == MessageType.HIERARCHICAL || componentDefinition.getInputMessageType() == MessageType.MODEL) { 
+                    models.addAll(configurationService.findHierarchicalModelsInProject(projectVersionId));
+                }
+                
                 List<ProjectVersionDepends> dependencies = configurationService.findProjectDependencies(projectVersionId);
                 for (ProjectVersionDepends projectVersionDependency : dependencies) {
-                    models.addAll(configurationService.findModelsInProject(projectVersionDependency.getTargetProjectVersionId()));
+                    if (componentDefinition.getInputMessageType() == MessageType.RELATIONAL || componentDefinition.getInputMessageType() == MessageType.MODEL) {
+                        models.addAll(configurationService.findRelationalModelsInProject(projectVersionId));
+                    } else if (componentDefinition.getInputMessageType() == MessageType.HIERARCHICAL || componentDefinition.getInputMessageType() == MessageType.MODEL) { 
+                        models.addAll(configurationService.findHierarchicalModelsInProject(projectVersionDependency.getTargetProjectVersionId()));
+                    }
                 }
 
                 if (models != null) {
-                    for (ModelName model : models) {
+                    for (AbstractName model : models) {
                         combo.addItem(model);
                         if (isNotBlank(component.getInputModelId()) && component.getInputModelId().equals(model.getId())) {
                             combo.setValue(model);
@@ -380,13 +401,13 @@ public class PropertySheet extends AbsoluteLayout {
 
                     @Override
                     public void valueChange(ValueChangeEvent event) {
-                        ModelName model = (ModelName) combo.getValue();
+                        AbstractName model = (AbstractName) combo.getValue();
                         if (model != null) {
-                            component.setInputModel(configurationService.findModel(model.getId()));
+                            component.setInputModel(configurationService.findRelationalModel(model.getId()));
                         } else {
                             component.setInputModel(null);
                         }
-                        if (componentDefintion.isInputOutputModelsMatch()) {
+                        if (componentDefinition.isInputOutputModelsMatch()) {
                             component.setOutputModel(component.getInputModel());
                         }
                         configurationService.save((AbstractObject) component);
@@ -645,48 +666,52 @@ public class PropertySheet extends AbsoluteLayout {
                 case DATASOURCE_RESOURCE:
                     formLayout.addComponent(createResourceCombo(definition, obj, ResourceCategory.DATASOURCE));
                     break;
-                case ENTITY_COLUMN:
+                case MODEL_COLUMN:
                     if (component != null) {
-                        List<ModelEntity> entities = new ArrayList<ModelEntity>();
-                        Model model = component.getInputModel();
-                        if (model != null) {
-                            model.sortAttributes();
-                            entities.addAll(model.getModelEntities());
-                        }
-                        model = component.getOutputModel();
-                        if (model != null) {
-                            model.sortAttributes();
-                            entities.addAll(model.getModelEntities());
-                        }
-                        AbstractObjectNameBasedSorter.sort(entities);
-
-                        final AbstractSelect entityColumnCombo = new ComboBox(definition.getName());
-                        entityColumnCombo.setImmediate(true);
-
-                        for (ModelEntity modelEntity : entities) {
-                            for (ModelAttrib attribute : modelEntity.getModelAttributes()) {
-                                entityColumnCombo.addItem(attribute.getId());
-                                entityColumnCombo.setItemCaption(attribute.getId(), modelEntity.getName() + "." + attribute.getName());
+                        final AbstractSelect modelColumnCombo = new ComboBox(definition.getName());                        
+                        if (component.getInputModel() instanceof RelationalModel) {
+                            List<ModelEntity> entities = new ArrayList<ModelEntity>();
+                            RelationalModel model = (RelationalModel) component.getInputModel();
+                            if (model != null) {
+                                model.sortAttributes();
+                                entities.addAll(model.getModelEntities());
                             }
+                            model = (RelationalModel) component.getOutputModel();
+                            if (model != null) {
+                                model.sortAttributes();
+                                entities.addAll(model.getModelEntities());
+                            }
+                            AbstractObjectNameBasedSorter.sort(entities);
+    
+                            modelColumnCombo.setImmediate(true);
+    
+                            for (ModelEntity modelEntity : entities) {
+                                for (ModelAttrib attribute : modelEntity.getModelAttributes()) {
+                                    modelColumnCombo.addItem(attribute.getId());
+                                    modelColumnCombo.setItemCaption(attribute.getId(), modelEntity.getName() + "." + attribute.getName());
+                                }
+                            }
+                        } else {
+                            //TODO: HIERARCHICAL MODEL
                         }
                         String currentValue = obj.get(definition.getId());
                         if (currentValue != null) {
-                            entityColumnCombo.setValue(obj.get(definition.getId()));
+                            modelColumnCombo.setValue(obj.get(definition.getId()));
                         }
-                        entityColumnCombo.setDescription(description);
-                        entityColumnCombo.setNullSelectionAllowed(definition.isRequired());
-                        entityColumnCombo.setRequired(definition.isRequired());
-                        entityColumnCombo.addValueChangeListener(new ValueChangeListener() {
+                        modelColumnCombo.setDescription(description);
+                        modelColumnCombo.setNullSelectionAllowed(definition.isRequired());
+                        modelColumnCombo.setRequired(definition.isRequired());
+                        modelColumnCombo.addValueChangeListener(new ValueChangeListener() {
 
                             private static final long serialVersionUID = 1L;
 
                             @Override
                             public void valueChange(ValueChangeEvent event) {
-                                saveSetting(definition.getId(), (String) entityColumnCombo.getValue(), obj);
+                                saveSetting(definition.getId(), (String) modelColumnCombo.getValue(), obj);
                             }
                         });
-                        entityColumnCombo.setReadOnly(readOnly);
-                        formLayout.addComponent(entityColumnCombo);
+                        modelColumnCombo.setReadOnly(readOnly);
+                        formLayout.addComponent(modelColumnCombo);
                     }
                     break;
                 case SCRIPT:
@@ -725,6 +750,36 @@ public class PropertySheet extends AbsoluteLayout {
                     area.setDescription(description);
                     area.setReadOnly(readOnly);
                     formLayout.addComponent(area);
+                    break;
+                case TARGET_STEP:
+                    step = getSingleFlowStep();
+                    if (step != null) {
+                        Flow flow = context.getConfigurationService().findFlow(step.getFlowId());
+                        final AbstractSelect targetStepsCombo = new ComboBox(definition.getName());
+                        targetStepsCombo.setImmediate(true);
+
+                        List<FlowStepLink> targetSteps = flow.findFlowStepLinksWithSource(step.getId());
+                        for (FlowStepLink flowStepLink : targetSteps) {
+                            FlowStep targetStep = flow.findFlowStepWithId(flowStepLink.getTargetStepId());
+                            targetStepsCombo.addItem(targetStep.getId());
+                            targetStepsCombo.setItemCaption(targetStep.getId(), targetStep.getName());
+                        }
+                        targetStepsCombo.setValue(obj.get(definition.getId()));
+                        targetStepsCombo.setDescription(description);
+                        targetStepsCombo.setNullSelectionAllowed(true);
+                        targetStepsCombo.setRequired(definition.isRequired());
+                        targetStepsCombo.addValueChangeListener(new ValueChangeListener() {
+
+                            private static final long serialVersionUID = 1L;
+
+                            @Override
+                            public void valueChange(ValueChangeEvent event) {
+                                saveSetting(definition.getId(), (String) targetStepsCombo.getValue(), obj);
+                            }
+                        });
+                        targetStepsCombo.setReadOnly(readOnly);
+                        formLayout.addComponent(targetStepsCombo);
+                    }
                     break;
                 default:
                     break;

@@ -39,15 +39,13 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
-
-import net.sf.saxon.value.DecimalValue;
 
 public class ExcelFileReader extends AbstractFileReader {
 
@@ -69,7 +67,7 @@ public class ExcelFileReader extends AbstractFileReader {
 
     boolean ignoreError = false;
     
-    Model outputModel;
+    RelationalModel outputModel;
 
     Set<String> worsheetsToRead;
 
@@ -78,7 +76,7 @@ public class ExcelFileReader extends AbstractFileReader {
     @Override
     public void start() {
         init();
-        outputModel = this.getOutputModel();
+        outputModel = (RelationalModel) this.getOutputModel();
         TypedProperties properties = getTypedProperties();
         rowsPerMessage = properties.getInt(SETTING_ROWS_PER_MESSAGE, rowsPerMessage);
         headerLinesToSkip = properties.getInt(SETTING_HEADER_LINES_TO_SKIP, headerLinesToSkip);

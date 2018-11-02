@@ -33,6 +33,11 @@
     <keywords>invoke,rest,http</keywords>
     <description></description>
     <settings>
+      <setting id='error.target.step'
+               required='false'
+               type='target_step'>
+        <name>Error Target Step</name>
+      </setting>
       <setting id='run.when'
                required='false'
                type='choice'>

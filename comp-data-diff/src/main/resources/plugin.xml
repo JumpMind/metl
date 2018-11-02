@@ -23,9 +23,9 @@
 <definitions>
   <component category='PROCESSOR'
              id='DataDiff'
-             inputMessageType='entity'
+             inputMessageType='relational'
              inputOutputModelsMatch='true'
-             outputMessageType='entity'
+             outputMessageType='relational'
              resourceCategory='none'>
     <name>Model Data Diff</name>
     <className>org.jumpmind.metl.core.runtime.component.DataDiff</className>

@@ -43,7 +43,7 @@
 	    "tableData" : { }
 	  } ],
 	  "modelData" : [ {
-	    "tableName" : "METL_MODEL",
+	    "tableName" : "METL_RELATIONAL_MODEL",
 	    "tableData" : {
 	      "e873ad3b-01d3-4f91-9155-cb030dde9019" : {
 	        "ID" : "e873ad3b-01d3-4f91-9155-cb030dde9019",
@@ -208,7 +208,10 @@
 	  }, {
 	    "tableName" : "METL_COMPONENT_ENTITY_SETTING",
 	    "tableData" : { }
-	  }, {
+    }, {
+      "tableName" : "METL_component_model_setting",
+      "tableData" : { }
+    }, {
 	    "tableName" : "METL_COMPONENT_ATTRIB_SETTING",
 	    "tableData" : { }
 	  }, {

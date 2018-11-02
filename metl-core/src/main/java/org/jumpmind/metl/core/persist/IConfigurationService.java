@@ -34,15 +34,19 @@ import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.FolderName;
 import org.jumpmind.metl.core.model.FolderType;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.HierarchicalModel;
+import org.jumpmind.metl.core.model.HierarchicalModelName;
+import org.jumpmind.metl.core.model.IModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
-import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.ModelRelation;
+import org.jumpmind.metl.core.model.ModelSchemaObject;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.model.ProjectVersionPlugin;
+import org.jumpmind.metl.core.model.RelationalModel;
+import org.jumpmind.metl.core.model.RelationalModelName;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
@@ -82,7 +86,7 @@ public interface IConfigurationService {
 
     public void delete(AbstractObject obj);
 
-    public void delete(Model model);
+    public void delete(RelationalModel model);
 
     public void delete(ModelEntity modelEntity);
 
@@ -92,7 +96,7 @@ public interface IConfigurationService {
 
     public List<Flow> findDependentFlows(String projectVersionId);
 
-    public List<Model> findDependentModels(String flowId);
+    public List<RelationalModel> findDependentModels(String flowId);
 
     public List<Resource> findDependentResources(String flowId);
 
@@ -108,7 +112,9 @@ public interface IConfigurationService {
     
     public List<ResourceName> findResources();
     
-    public List<ModelName> findModels();
+    public List<RelationalModelName> findRelationalModels();
+    
+    public List<HierarchicalModelName> findHierarchicalModels();
     
     public List<ProjectVersionDepends> findProjectVersionDependencies();
 
@@ -116,13 +122,19 @@ public interface IConfigurationService {
 
     public List<FolderName> findFoldersInProject(String projectVersionId);
 
-    public Model findModel(String id);
+    public RelationalModel findRelationalModel(String id);
+    
+    public HierarchicalModel findHierarchicalModel(String id);
+    
+    public IModel findModel(String id);
     
     public List<ProjectVersionDepends> findProjectDependencies(String projectVersionId);
     
     public List<FlowName> findFlowsInProject(String projectVersionId, boolean testFlows);
 
-    public List<ModelName> findModelsInProject(String projectVersionId);
+    public List<RelationalModelName> findRelationalModelsInProject(String projectVersionId);
+    
+    public List<HierarchicalModelName> findHierarchicalModelsInProject(String projectVersionId);
     
     public List<ResourceName> findResourcesInProject(String projectVersionId);
 
@@ -136,7 +148,7 @@ public interface IConfigurationService {
     
     public List<Resource> findResourcesByName(String projectVersionId, String resourceName);
 
-    public List<Model> findModelsByName(String projectVersionId, String modelName);
+    public List<RelationalModel> findModelsByName(String projectVersionId, String modelName);
 
     public List<Resource> findResourcesByTypes(String projectVersionId, boolean includeDependencies, String... types);
 
@@ -152,7 +164,9 @@ public interface IConfigurationService {
 
     public void refresh(Component component, boolean readRelations);
 
-    public void refresh(Model model);
+    public void refresh(RelationalModel model);
+    
+    public void refresh(HierarchicalModel model);
 
     public void refresh(Project project);
 
@@ -168,7 +182,7 @@ public interface IConfigurationService {
 
     public void save(FlowStep flowStep);
 
-    public void save(Model model);
+    public void save(RelationalModel model);
 
     public void save(ModelEntity modelEntity);
 
@@ -186,9 +200,9 @@ public interface IConfigurationService {
 
     public Flow copy(Map<String, AbstractObject> oldToNewUUIDMapping, Flow original, boolean newProjectVersion);
 
-    public Model copy(Model original);
+    public RelationalModel copy(RelationalModel original);
     
-    public Model copy(Map<String, AbstractObject> oldToNewUUIDMapping, Model original);
+    public RelationalModel copy(Map<String, AbstractObject> oldToNewUUIDMapping, RelationalModel original);
     
     public Resource copy(Resource original);
     
@@ -227,4 +241,10 @@ public interface IConfigurationService {
     public Project findProject(String id);
     
     public List<Tag> findTagsForEntity(String entityType, String entityId);
+    
+    public ModelSchemaObject getHierarchicalModelRoot(String modelId);
+    
+    public void refresh(ModelSchemaObject schemaObject);
+    
+    public void delete(ModelSchemaObject schemaObject);
 }

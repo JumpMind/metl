@@ -25,96 +25,38 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.UUID;
 
 import org.jumpmind.db.sql.Row;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.util.LogUtils;
 
-public class Model extends AbstractNamedObject implements IAuditable {
+public class RelationalModel extends AbstractModel implements IModel, IAuditable {
 
     private static final long serialVersionUID = 1L;
-
-    public static final String TYPE_RELATIONAL = "RELATIONAL";
-
-    public static final String TYPE_HIERARCHICAL = "HIERARCHICAL";
-
-    Folder folder;
-
-    String name;
-
-    String folderId;
-
-    String projectVersionId;
     
-    String type;
-
-    String rowId = UUID.randomUUID().toString();
+    public static final String TYPE = "RELATIONAL";
 
     List<ModelEntity> modelEntities;
     
     List<ModelRelation> modelRelations;
+
+    public RelationalModel() {
+        initializeModel();
+    }
     
-    boolean shared;
+    public RelationalModel(String id) {        
+        super(id);
+        initializeModel();
+    }    
+    
+    public RelationalModel(Folder folder) {
+        super(folder);
+    }
 
-    boolean deleted = false;
-
-    public Model() {
+    private void initializeModel() {
         this.modelEntities = new ArrayList<ModelEntity>();
         this.modelRelations = new ArrayList<ModelRelation>();
     }
-
-    public Model(String id) {
-        this();
-        this.setId(id);
-    }
-
-    public Model(Folder folder) {
-        this();
-        this.folder = folder;
-        this.folderId = folder.getId();
-    }
-
-    public Folder getFolder() {
-        return folder;
-    }
-
-    public void setFolder(Folder folder) {
-        this.folder = folder;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getFolderId() {
-        return folderId;
-    }
-
-    public void setFolderId(String folderId) {
-        this.folderId = folderId;
-    }
-
-    public boolean isShared() {
-        return shared;
-    }
-
-    public void setShared(boolean shared) {
-        this.shared = shared;
-    }
-
-    public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
 
 	public ModelEntity getEntityById(String entityId) {
         for (ModelEntity entity : modelEntities) {
@@ -185,35 +127,6 @@ public class Model extends AbstractNamedObject implements IAuditable {
 		this.modelRelations = modelRelations;
 	}
 
-	public void setProjectVersionId(String projectVersionId) {
-        this.projectVersionId = projectVersionId;
-    }
-
-    public String getProjectVersionId() {
-        return projectVersionId;
-    }
-
-    public void setRowId(String rowId) {
-        this.rowId = rowId;
-    }
-
-    public String getRowId() {
-        return rowId;
-    }
-
-    @Override
-    public boolean isSettingNameAllowed() {
-        return true;
-    }
-
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
-    }
-
-    public boolean isDeleted() {
-        return deleted;
-    }
-
     public void sortAttributes() {
         for (ModelEntity modelEntity : modelEntities) {
             AbstractObjectNameBasedSorter.sort(modelEntity.getModelAttributes());
@@ -261,20 +174,21 @@ public class Model extends AbstractNamedObject implements IAuditable {
         }
         return row;
     }
-    
-    public ModelEntity getRootElement() {
-    	
-    		if (this.type.equalsIgnoreCase(TYPE_HIERARCHICAL) && getModelEntities().size()>0) {
-    			return getEntityTree().first();
-    		}
-    		else {
-    			return null;    			
-    		}
-    }
-    
-    public TreeSet<ModelEntity> getEntityTree() {
-		return new TreeSet<ModelEntity>(this.getModelEntities());
-    }
+
+// TODO: move to hierarchical model class
+//    public ModelEntity getRootElement() {
+//    	
+//    		if (this.type.equalsIgnoreCase(TYPE_HIERARCHICAL) && getModelEntities().size()>0) {
+//    			return getEntityTree().first();
+//    		}
+//    		else {
+//    			return null;    			
+//    		}
+//    }
+//    
+//    public TreeSet<ModelEntity> getEntityTree() {
+//		return new TreeSet<ModelEntity>(this.getModelEntities());
+//    }
     
     public ModelAttrib getModelAttribByTypeEntityId(String typeEntityId) {
         for (ModelEntity entity:this.getModelEntities()) {
@@ -285,6 +199,11 @@ public class Model extends AbstractNamedObject implements IAuditable {
             }
         }
         return null;
+    }
+
+    @Override
+    public String getType() {
+        return TYPE;
     }
     
 }

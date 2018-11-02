@@ -21,7 +21,6 @@
 package org.jumpmind.metl.ui.views.design.menu;
 
 import org.jumpmind.metl.core.model.AbstractNamedObject;
-import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.ui.common.AbstractSelectedValueMenuManager;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
@@ -57,10 +56,10 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
                 navigator.addNewFlow(true);
                 return true;
             } else if ("File|New|Model|Hierarchical".equals(menuSelected)) {
-                navigator.addNewModel(Model.TYPE_HIERARCHICAL);
+                navigator.addNewHierarhicalModel();
                 return true;
             } else if ("File|New|Model|Relational".equals(menuSelected)) {
-                navigator.addNewModel(Model.TYPE_RELATIONAL);
+                navigator.addNewRelationalModel();
                 return true;
             } else if ("File|New|Resource|Database".equals(menuSelected)) {
                 navigator.addNewDatabase();

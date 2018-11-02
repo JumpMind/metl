@@ -26,7 +26,7 @@ import java.util.List;
 
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -70,7 +70,7 @@ public class Deduper extends AbstractComponentRuntime {
         rowsPerMessage = getComponent().getInt(ROWS_PER_MESSAGE, rowsPerMessage);
         dedupeType = properties.get(DEDUPE_TYPE);
         preserveRecord = properties.get(PRESERVE_RECORD);
-        Model inputModel = this.getComponent().getInputModel();
+        RelationalModel inputModel = (RelationalModel) this.getComponent().getInputModel();
         if (inputModel == null) {
             throw new MisconfiguredException("The input model is not set and it is required");
         }

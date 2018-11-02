@@ -32,7 +32,7 @@ import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Setting;
@@ -124,7 +124,7 @@ public class ContentRouterTest {
         return target;
     }
 
-    private static Model createInputModel() {
+    private static RelationalModel createInputModel() {
         ModelEntity tt1 = new ModelEntity("tt1", "TEST_TABLE_1");
         tt1.addModelAttribute(new ModelAttrib("tt1col1", tt1.getId(), "COL1"));
         tt1.addModelAttribute(new ModelAttrib("tt1col2", tt1.getId(), "COL2"));
@@ -135,7 +135,7 @@ public class ContentRouterTest {
         tt2.addModelAttribute(new ModelAttrib("tt2coly", tt2.getId(), "COLY"));
         tt2.addModelAttribute(new ModelAttrib("tt2colz", tt2.getId(), "COLZ"));
 
-        Model modelVersion = new Model();
+        RelationalModel modelVersion = new RelationalModel();
         modelVersion.getModelEntities().add(tt1);
         modelVersion.getModelEntities().add(tt2);
 

@@ -23,7 +23,7 @@
 <definitions>
   <component category='PROCESSOR'
              id='Format XML'
-             inputMessageType='entity'
+             inputMessageType='relational'
              inputOutputModelsMatch='false'
              outputMessageType='text'
              resourceCategory='none'>
@@ -76,7 +76,7 @@
              id='Parse XML'
              inputMessageType='text'
              inputOutputModelsMatch='false'
-             outputMessageType='entity'
+             outputMessageType='relational'
              resourceCategory='none'
              supportsMultipleThreads='true'>
     <name>Simple XML Parser</name>
@@ -108,7 +108,7 @@
              id='XPath XML Parser'
              inputMessageType='text'
              inputOutputModelsMatch='false'
-             outputMessageType='entity'
+             outputMessageType='relational'
              resourceCategory='none'
              supportsMultipleThreads='true'>
     <name>XPath XML Parser</name>
@@ -132,7 +132,7 @@
   </component>
   <component category='PROCESSOR'
              id='XSLT Processor'
-             inputMessageType='entity'
+             inputMessageType='relational'
              inputOutputModelsMatch='false'
              outputMessageType='text'
              resourceCategory='none'>

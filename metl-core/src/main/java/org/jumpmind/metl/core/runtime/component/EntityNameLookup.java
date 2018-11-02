@@ -28,7 +28,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -37,9 +37,9 @@ public class EntityNameLookup {
     
     Map<String, String> cache = new HashMap<>();
     
-    Model model;
+    RelationalModel model;
     
-    public EntityNameLookup(Model model) {
+    public EntityNameLookup(RelationalModel model) {
         this.model = model;
     }
 

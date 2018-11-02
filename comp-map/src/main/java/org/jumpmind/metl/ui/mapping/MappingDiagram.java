@@ -25,12 +25,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.jumpmind.metl.core.model.Component;
-import org.jumpmind.metl.core.model.ComponentAttribSetting;
-import org.jumpmind.metl.core.model.ComponentEntitySetting;
-import org.jumpmind.metl.core.model.ModelAttrib;
-import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.model.ComponentModelSetting;
+import org.jumpmind.metl.core.model.HierarchicalModel;
 import org.jumpmind.metl.core.model.ModelEntitySorter;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.Setting;
+import org.jumpmind.metl.core.model.ComponentModelSetting.Type;
 import org.jumpmind.metl.core.runtime.component.Mapping;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 
@@ -64,49 +64,80 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
 		setPrimaryStyleName("mapping-diagram");
 		setId("mapping-diagram");
 
-		cleanupAttributes(component);
-		//TODO: create a cleanupEntities
+		cleanAbandonedLinks(component);
 
 		MappingDiagramState state = getState();
 		state.component = component;
 		state.readOnly = readOnly;
 
-		state.inputModel = component.getInputModel();
-		if (state.inputModel != null) {
-			context.getConfigurationService().refresh(state.inputModel);
-			Collections.sort(state.inputModel.getModelEntities(), new ModelEntitySorter());
-			state.inputModel.sortAttributes();
-		}
+        if (component.getInputModel() instanceof RelationalModel) {
+            state.relationalInputModel = (RelationalModel) component.getInputModel();
+            context.getConfigurationService().refresh((RelationalModel) state.relationalInputModel);
+            Collections.sort(((RelationalModel) state.relationalInputModel).getModelEntities(), new ModelEntitySorter());
+            ((RelationalModel) state.relationalInputModel).sortAttributes();
+        } else {
+            state.hierarchicalInputModel = (HierarchicalModel) component.getInputModel();
+            context.getConfigurationService().refresh((HierarchicalModel) state.hierarchicalInputModel);
+        }
 
-		state.outputModel = component.getOutputModel();
-		if (state.outputModel != null) {
-			context.getConfigurationService().refresh(state.outputModel);
-			state.outputRootNode = state.outputModel.getRootElement();
-			Collections.sort(state.outputModel.getModelEntities(), new ModelEntitySorter());
-			state.outputModel.sortAttributes();
-		}
-
+        if (component.getOutputModel() instanceof RelationalModel) {
+            state.relationalOutputModel = (RelationalModel) component.getOutputModel();
+            if (state.relationalOutputModel != null) {
+                context.getConfigurationService().refresh((RelationalModel) state.relationalOutputModel);
+                Collections.sort(((RelationalModel) state.relationalOutputModel).getModelEntities(), new ModelEntitySorter());
+                ((RelationalModel) state.relationalOutputModel).sortAttributes();
+            }
+        } else {
+            state.hierarchicalOutputModel = (HierarchicalModel) component.getOutputModel();     
+            context.getConfigurationService().refresh((HierarchicalModel) state.hierarchicalOutputModel);            
+        }		
 		addFunction("onSelect", new OnSelectFunction());
 		addFunction("onConnection", new OnConnectionFunction());
 	}
 
-	protected void cleanupAttributes(Component c) {
-		// Look for any broken links.
-		Iterator<ComponentAttribSetting> iter = c.getAttributeSettings().iterator();
-		while (iter.hasNext()) {
-			ComponentAttribSetting setting = iter.next();
-			if (Mapping.ATTRIBUTE_MAPS_TO.equals(setting.getName())) {
-				ModelAttrib srcAttribute = c.getInputModel().getAttributeById(setting.getAttributeId());
-				ModelAttrib dstAttribute = c.getOutputModel().getAttributeById(setting.getValue());
-				if (srcAttribute == null || dstAttribute == null) {
-					// Remove link setting if source or target can't be found.
-					iter.remove();
-					context.getConfigurationService().delete(setting);
-				}
-			}
-		}
-	}
-
+    protected void cleanAbandonedLinks(Component c) {
+        if (c.getModelSettings() != null) {
+            Iterator<ComponentModelSetting> iter = c.getModelSettings().iterator();
+            boolean elementsExist = true;
+            while (iter.hasNext()) {
+                ComponentModelSetting setting = iter.next();
+                if (Mapping.MODEL_OBJECT_MAPS_TO.equals(setting.getName())) {
+                    if (c.getInputModel() instanceof RelationalModel) {
+                        RelationalModel inputModel = (RelationalModel) c.getInputModel();
+                        if (inputModel.getAttributeById(setting.getModelObjectId()) == null &&
+                                inputModel.getEntityById(setting.getModelObjectId()) == null) {
+                            elementsExist = false;
+                        }
+                    } else {
+                        HierarchicalModel inputModel = (HierarchicalModel) c.getInputModel();
+                        if (inputModel.getObjectById(setting.getModelObjectId()) == null) {
+                            elementsExist = false;
+                        }
+                    }
+                    
+                    if (elementsExist) {
+                        if (c.getOutputModel() instanceof RelationalModel) {
+                            RelationalModel outputModel = (RelationalModel) c.getOutputModel();
+                            if (outputModel.getAttributeById(setting.getValue()) == null &&
+                                    outputModel.getEntityById(setting.getValue()) == null) {
+                                elementsExist = false;
+                            }
+                        } else {
+                            HierarchicalModel outputModel = (HierarchicalModel) c.getOutputModel();
+                            if (outputModel.getObjectById(setting.getModelObjectId()) == null) {
+                                elementsExist = false;
+                            }                        
+                        }
+                    }
+                    if (!elementsExist) {
+                        iter.remove();
+                        context.getConfigurationService().delete(setting);
+                    }
+                }
+            }
+        }
+    }
+	
 	@Override
 	protected MappingDiagramState getState() {
 		return (MappingDiagramState) super.getState();
@@ -127,73 +158,37 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
 	}
 
 	protected void removeConnection(String sourceId, String targetId) {
-		if (isEntity(sourceId)) {
-			removeEntityConnection(sourceId, targetId);
-		} else {
-			removeAttribConnection(sourceId, targetId);
-		}
+		removeModelObjectConnection(sourceId, targetId);
 		if (sourceId.equals(selectedSourceId) && targetId.equals(selectedTargetId)) {
 			selectedSourceId = selectedTargetId = null;
 			fireEvent(new SelectEvent(MappingDiagram.this, selectedSourceId, selectedTargetId));
 		}			
 	}
 	
-	protected void removeAttribConnection(String sourceId, String targetId) {
-		List<ComponentAttribSetting> settings = component.getAttributeSetting(sourceId, Mapping.ATTRIBUTE_MAPS_TO);
-		for (ComponentAttribSetting setting : settings) {
+	protected void removeModelObjectConnection(String sourceId, String targetId) {
+		List<ComponentModelSetting> settings = component.getModelSetting(sourceId, Mapping.MODEL_OBJECT_MAPS_TO);
+		for (ComponentModelSetting setting : settings) {
 			if (setting.getValue().equals(targetId)) {
-				component.getAttributeSettings().remove(setting);
+				component.getModelSettings().remove(setting);
 				context.getConfigurationService().delete(setting);
 				markAsDirty();
 			}
 		}
 	}
 	
-	protected void removeEntityConnection(String sourceId, String targetId) {
-		List<ComponentEntitySetting> settings = component.getEntitySetting(sourceId, Mapping.ENTITY_MAPS_TO);
-		for (ComponentEntitySetting setting : settings) {
-			if (setting.getValue().equals(targetId)) {
-				component.getEntitySettings().remove(setting);
-				context.getConfigurationService().delete(setting);
-				markAsDirty();
-			}
-		}
-	}
-
 	protected void addConnection(String sourceId, String targetId) {
 		Setting setting;
-		if (isEntity(sourceId)) {
-			//TODO: For now we assume they map an entity to an entity.  We should error check 
-			//		throw appropriate errors here
-			setting = new ComponentEntitySetting();
-			ComponentEntitySetting entitySetting = (ComponentEntitySetting)setting;
-			entitySetting.setEntityId(sourceId);
-			entitySetting.setComponentId(component.getId());
-			entitySetting.setName(Mapping.ENTITY_MAPS_TO);
-			component.addEntitySetting(entitySetting);
-		} else {
-			setting = new ComponentAttribSetting();
-			ComponentAttribSetting attribSetting = (ComponentAttribSetting)setting;			
-			attribSetting.setAttributeId(sourceId);
-			attribSetting.setComponentId(component.getId());
-			setting.setName(Mapping.ATTRIBUTE_MAPS_TO);
-			component.addAttributeSetting(attribSetting);
-		}
-		setting.setValue(targetId);
+		setting = new ComponentModelSetting();
+		ComponentModelSetting modelSetting = (ComponentModelSetting)setting;
+		modelSetting.setComponentId(component.getId());
+		modelSetting.setName(Mapping.MODEL_OBJECT_MAPS_TO);
+		modelSetting.setModelObjectId(sourceId);
+		modelSetting.setValue(targetId);
+		modelSetting.setType(Type.ATTRIBUTE.toString());
+		component.addModelSetting(modelSetting);		
 		context.getConfigurationService().save(setting);			
 		markAsDirty();
 	}	
-	
-	protected boolean isEntity(String id) {
-		boolean isEntity = false;
-		List<ModelEntity> entities = component.getInputModel().getModelEntities();
-		for (ModelEntity entity:entities) {
-			if (entity.getId().equalsIgnoreCase(id)) {
-				return true;
-			}
-		}
-		return isEntity;
-	}
 	
 	class OnSelectFunction implements JavaScriptFunction {
 		public void call(JsonArray arguments) {

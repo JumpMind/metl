@@ -39,7 +39,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -59,7 +59,7 @@ public class ModelAttributeScriptHelper {
 
     protected ModelEntity entity;
 
-    protected Model model;
+    protected RelationalModel model;
 
     protected ComponentContext context;
 
@@ -69,7 +69,7 @@ public class ModelAttributeScriptHelper {
 
     static private ThreadLocal<ScriptEngine> scriptEngine = new ThreadLocal<ScriptEngine>();
 
-    public ModelAttributeScriptHelper(Message message, ComponentContext context, ModelAttrib attribute, ModelEntity entity, Model model,
+    public ModelAttributeScriptHelper(Message message, ComponentContext context, ModelAttrib attribute, ModelEntity entity, RelationalModel model,
             EntityData data, Object value) {
         this(context, attribute, entity, model);
         this.value = value;
@@ -77,7 +77,7 @@ public class ModelAttributeScriptHelper {
         this.message = message;
     }
 
-    public ModelAttributeScriptHelper(ComponentContext context, ModelAttrib attribute, ModelEntity entity, Model model) {
+    public ModelAttributeScriptHelper(ComponentContext context, ModelAttrib attribute, ModelEntity entity, RelationalModel model) {
         this.context = context;
         this.attribute = attribute;
         this.entity = entity;
@@ -463,7 +463,7 @@ public class ModelAttributeScriptHelper {
         return signatures.toArray(new String[signatures.size()]);
     }
 
-    public static Object eval(Message message, ComponentContext context, ModelAttrib attribute, Object value, Model model, ModelEntity entity,
+    public static Object eval(Message message, ComponentContext context, ModelAttrib attribute, Object value, RelationalModel model, ModelEntity entity,
             EntityData data, String expression) {
         ScriptEngine engine = scriptEngine.get();
         if (engine == null) {

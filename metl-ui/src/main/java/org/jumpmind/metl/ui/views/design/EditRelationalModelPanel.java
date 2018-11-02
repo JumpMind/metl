@@ -32,7 +32,7 @@ import java.util.Set;
 
 import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.DataType;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelEntitySorter;
@@ -83,7 +83,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
 
     Table table = new Table();
 
-    Model model;
+    RelationalModel model;
 
     Set<Object> lastEditItemIds = Collections.emptySet();
 
@@ -117,7 +117,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
 
     public EditRelationalModelPanel(ApplicationContext context, String modelId, boolean readOnly) {
         this.context = context;
-        this.model = new Model(modelId);
+        this.model = new RelationalModel(modelId);
         this.readOnly = readOnly;
         context.getConfigurationService().refresh(model);
 

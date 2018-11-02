@@ -39,7 +39,7 @@ import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Folder;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
@@ -138,11 +138,14 @@ public class TestUtils {
     }
 
     public static Component createComponent(String type, boolean shared, Resource resource,
-            Model inputModelVersion, Model outputModelVersion,
+            RelationalModel inputModelVersion, RelationalModel outputModelVersion,
             List<ComponentEntitySetting> entitySettings,
-            List<ComponentAttribSetting> attributeSettings, Setting... settings) {
+            List<ComponentAttribSetting> attributeSettings, 
+            Setting... settings) {
+
+        //TODO: deal with ComponentModelSettings
         Component component = new Component(resource,
-                inputModelVersion, outputModelVersion, entitySettings, attributeSettings, settings);
+                inputModelVersion, outputModelVersion, entitySettings, attributeSettings, null, settings);
         component.setType(type);
         component.setShared(shared);
         component.setCreateBy("Test");

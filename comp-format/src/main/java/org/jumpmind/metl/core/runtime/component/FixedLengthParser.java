@@ -32,7 +32,7 @@ import java.util.Map;
 
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -118,7 +118,8 @@ public class FixedLengthParser extends AbstractComponentRuntime {
 
                 inputRow = inputRow.substring(length);
                 if (isNotBlank(attribute.getFormatFunction())) {
-                    value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), value, getOutputModel(), attribute.getEntity(), data,
+                    value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), value, 
+                            (RelationalModel) getOutputModel(), attribute.getEntity(), data,
                             attribute.getFormatFunction());
                 }
 
@@ -137,7 +138,7 @@ public class FixedLengthParser extends AbstractComponentRuntime {
         List<ComponentAttribSetting> attributeSettings = getComponent().getAttributeSettings();
         for (ComponentAttribSetting attributeSetting : attributeSettings) {
             if (!attributesMap.containsKey(attributeSetting.getAttributeId())) {
-                Model model = getComponent().getOutputModel();
+                RelationalModel model = (RelationalModel) getComponent().getOutputModel();
                 ModelAttrib attribute = model.getAttributeById(attributeSetting.getAttributeId());
                 ModelEntity entity = model.getEntityById(attribute.getEntityId());
                 attributesMap.put(attributeSetting.getAttributeId(), new AttributeFormat(attribute, entity));

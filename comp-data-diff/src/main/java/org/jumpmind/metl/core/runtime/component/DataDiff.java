@@ -50,7 +50,7 @@ import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.DataType;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.ControlMessage;
@@ -114,7 +114,7 @@ public class DataDiff extends AbstractComponentRuntime {
         this.rowsPerMessage = properties.getInt(ROWS_PER_MESSAGE);
         Component comp = context.getFlowStep().getComponent();
         comp.setOutputModel(comp.getInputModel());
-        Model inputModel = context.getFlowStep().getComponent().getInputModel();
+        RelationalModel inputModel = (RelationalModel) context.getFlowStep().getComponent().getInputModel();
         if (inputModel == null) {
             throw new MisconfiguredException("The input model is not set and it is required");
         }
@@ -381,7 +381,7 @@ public class DataDiff extends AbstractComponentRuntime {
             databasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(ds,
                     new SqlTemplateSettings(), true, false);
 
-            Model inputModel = context.getFlowStep().getComponent().getInputModel();
+            RelationalModel inputModel = (RelationalModel) context.getFlowStep().getComponent().getInputModel();
             List<ModelEntity> entities = inputModel.getModelEntities();
             for (ModelEntity entity : entities) {
                 Table table = new Table();

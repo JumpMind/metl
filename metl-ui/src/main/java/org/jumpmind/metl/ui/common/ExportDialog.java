@@ -34,8 +34,8 @@ import java.util.Set;
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
-import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelName;
+import org.jumpmind.metl.core.model.RelationalModel;
+import org.jumpmind.metl.core.model.RelationalModelName;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
@@ -153,7 +153,7 @@ public class ExportDialog extends ResizableWindow {
     private void addSelectedAndDependentObjects(VerticalLayout layout, Object selected) {
         IConfigurationService configurationService = context.getConfigurationService();
         FlowName selectedFlow = null;
-        ModelName selectedModel = null;
+        RelationalModelName selectedModel = null;
         ResourceName selectedResource = null;
         boolean allChecked = false;
         if (selected instanceof ProjectVersion) {
@@ -163,8 +163,8 @@ public class ExportDialog extends ResizableWindow {
         } else if (selected instanceof FlowName) {
             selectedFlow = (FlowName) selected;
             projectVersionId = selectedFlow.getProjectVersionId();
-        } else if (selected instanceof ModelName) {
-            selectedModel = (ModelName) selected;
+        } else if (selected instanceof RelationalModelName) {
+            selectedModel = (RelationalModelName) selected;
             projectVersionId = selectedModel.getProjectVersionId();
         } else if (selected instanceof ResourceName) {
             selectedResource = (ResourceName) selected;
@@ -189,12 +189,12 @@ public class ExportDialog extends ResizableWindow {
         layout.addComponent(exportFlowGroup);
 
         // models
-        List<ModelName> models = configurationService.findModelsInProject(projectVersionId);
+        List<RelationalModelName> models = configurationService.findRelationalModelsInProject(projectVersionId);
         AbstractObjectNameBasedSorter.sort(models);
         exportModelGroup = new OptionGroup("Models");
         exportModelGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         exportModelGroup.setMultiSelect(true);
-        for (ModelName key : models) {
+        for (RelationalModelName key : models) {
             exportModelGroup.addItem(key.getId());
             exportModelGroup.setItemCaption(key.getId(), key.getName());
             if (allChecked || key.equals(selectedModel)) {
@@ -228,8 +228,8 @@ public class ExportDialog extends ResizableWindow {
     }
 
     private void addDependentModels(String flowId) {
-        List<Model> models = context.getConfigurationService().findDependentModels(flowId);
-        for (Model model : models) {
+        List<RelationalModel> models = context.getConfigurationService().findDependentModels(flowId);
+        for (RelationalModel model : models) {
             exportModelGroup.addItem(model.getId());
             exportModelGroup.setItemCaption(model.getId(), model.getName());
             exportModelGroup.select(model.getId());

@@ -57,7 +57,7 @@ public class EntityRow implements Serializable {
         this.data = row;
     }
     
-    public EntityData toEntityData(Model model) {
+    public EntityData toEntityData(RelationalModel model) {
         EntityData entityData = null;
         for (ModelEntity entity : model.getModelEntities()) {
             for (ModelAttrib attribute : entity.getModelAttributes()) {

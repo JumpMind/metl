@@ -52,8 +52,8 @@ import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AuditEvent;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
-import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelName;
+import org.jumpmind.metl.core.model.RelationalModel;
+import org.jumpmind.metl.core.model.RelationalModelName;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
@@ -82,7 +82,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
     final static Integer PROJECT_VERSION_IDX = new Integer(1);
     final static Integer MODEL_IDX = new Integer(0);
     final static Integer RESOURCE_IDX = new Integer(0);
-    final static Integer FLOW_IDX = new Integer(4);
+    final static Integer FLOW_IDX = new Integer(5);
     final static Integer AGENT_IDX = new Integer(0);
     
     final static Integer CREATE_TIME_IDX = new Integer(0);
@@ -103,11 +103,11 @@ public class ImportExportService extends AbstractService implements IImportExpor
     };
     
     final String[][] MODEL_SQL = {
-            {"_model","select * from %1$s_model where project_version_id='%2$s' and id='%3$s' order by id","id"},
+            {"_relational_model","select * from %1$s_relational_model where project_version_id='%2$s' and id='%3$s' order by id","id"},
             {"_model_entity","select * from %1$s_model_entity where model_id='%3$s' order by id","id"},
             {"_model_attrib","select * from %1$s_model_attrib where entity_id in "
             + "(select id from %1$s_model_entity where model_id in "
-            + "(select id from %1$s_model where project_version_id='%2$s' and id='%3$s')) order by id","id"}
+            + "(select id from %1$s_relational_model where project_version_id='%2$s' and id='%3$s')) order by id","id"}
     };
     
     final String[][] RESOURCE_SQL = {
@@ -129,6 +129,8 @@ public class ImportExportService extends AbstractService implements IImportExpor
             {"_component_setting","select * from %1$s_component_setting where component_id in "
                     + "(select distinct component_id from %1$s_flow_step where flow_id='%3$s') order by id", "id"},
             {"_component_entity_setting","select * from %1$s_component_entity_setting where component_id in "
+                    + "(select distinct component_id from %1$s_flow_step where flow_id='%3$s') order by id", "id"},
+            {"_component_model_setting","select * from %1$s_component_model_setting where component_id in "
                     + "(select distinct component_id from %1$s_flow_step where flow_id='%3$s') order by id", "id"},
             {"_component_attrib_setting","select * from %1$s_component_attrib_setting where component_id in "
                     + "(select distinct component_id from %1$s_flow_step where flow_id='%3$s') order by id", "id"},
@@ -168,7 +170,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         importsToAudit.add(tableName(Project.class).toUpperCase());
         importsToAudit.add(tableName(ProjectVersion.class).toUpperCase());
         importsToAudit.add(tableName(Flow.class).toUpperCase());
-        importsToAudit.add(tableName(Model.class).toUpperCase());
+        importsToAudit.add(tableName(RelationalModel.class).toUpperCase());
         importsToAudit.add(tableName(Resource.class).toUpperCase());
         setColumnsToExclude();
     }
@@ -197,9 +199,9 @@ public class ImportExportService extends AbstractService implements IImportExpor
             flowIds.add(flowName.getId());
         }
 
-        List<ModelName> models = configurationService.findModelsInProject(projectVersionId);
+        List<RelationalModelName> models = configurationService.findRelationalModelsInProject(projectVersionId);
         List<String> modelIds = new ArrayList<>();
-        for (ModelName modelName : models) {
+        for (RelationalModelName modelName : models) {
             modelIds.add(modelName.getId());
         }
 
@@ -248,6 +250,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         save(new AuditEvent(AuditEvent.EventType.EXPORT, String.format("%s, flows: %d, models %d, resources: %d", 
                 version.getName(), flowIds.size(), modelIds.size(), resourceIds.size()), userId));
         ConfigData exportData = initExport();
+        initExtraConfigData(exportData);
         initProjectVersionExport(exportData, projectVersionId);
         addProjectVersionToConfigData(projectVersionId, exportData, new HashSet<String>(flowIds), new HashSet<String>(modelIds), new HashSet<String>(resourceIds));
         

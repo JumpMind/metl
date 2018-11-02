@@ -306,7 +306,7 @@
     </foreign-key>
   </table>
   <table description=""
-         name="model">
+         name="relational_model">
     <column description="A unique identifier"
             name="id"
             primaryKey="true"
@@ -337,12 +337,6 @@
             name="shared"
             size="1"
             type="BOOLEANINT" />
-    <column default="RELATIONAL"
-            description="RELATIONAL or HIERARCHICAL"
-            name="type"
-            required="true"
-            size="50"
-            type="VARCHAR" />
     <column name="folder_id"
             size="36"
             type="CHAR" />
@@ -361,16 +355,16 @@
             name="last_update_time"
             type="TIMESTAMP" />
     <foreign-key foreignTable="folder"
-                 name="fk_m_2_fldr">
+                 name="fk_rm_2_fldr">
       <reference foreign="id"
                  local="folder_id" />
     </foreign-key>
     <foreign-key foreignTable="project_version"
-                 name="fk_m_2_v">
+                 name="fk_rm_2_v">
       <reference foreign="id"
                  local="project_version_id" />
     </foreign-key>
-    <index name="idx_model_pv">
+    <index name="idx_rel_model_pv">
       <index-column name="deleted" />
       <index-column name="project_version_id" />
     </index>
@@ -409,7 +403,7 @@
     <column description="Timestamp when a user last updated this entry."
             name="last_update_time"
             type="TIMESTAMP" />
-    <foreign-key foreignTable="model"
+    <foreign-key foreignTable="relational_model"
                  name="fk_me_2_m">
       <reference foreign="id"
                  local="model_id" />
@@ -478,6 +472,152 @@
     </foreign-key>
   </table>
   <table description=""
+         name="hierarchical_model">
+    <column description="A unique identifier"
+            name="id"
+            primaryKey="true"
+            required="true"
+            size="36"
+            type="CHAR" />
+    <column description="A unique identifier for this row across different versions"
+            name="row_id"
+            required="true"
+            size="36"
+            type="CHAR" />
+    <column description="A unique identifier for the version this row belongs to"
+            name="project_version_id"
+            size="36"
+            type="CHAR" />
+    <column default="0"
+            description="Indicates whether this row has been deleted."
+            name="deleted"
+            required="true"
+            size="1"
+            type="BOOLEANINT" />
+    <column description=""
+            name="name"
+            size="255"
+            type="VARCHAR" />
+    <column default="0"
+            description="Indicator as to whether this is a shared model."
+            name="shared"
+            size="1"
+            type="BOOLEANINT" />
+    <column name="folder_id"
+            size="36"
+            type="CHAR" />
+    <column description="Timestamp when this entry was created."
+            name="create_time"
+            type="TIMESTAMP" />
+    <column description="The user who last updated this entry."
+            name="create_by"
+            size="50"
+            type="VARCHAR" />
+    <column description="The user who created this entry."
+            name="last_update_by"
+            size="50"
+            type="VARCHAR" />
+    <column description="Timestamp when a user last updated this entry."
+            name="last_update_time"
+            type="TIMESTAMP" />
+    <foreign-key foreignTable="folder"
+                 name="fk_hm_2_fldr">
+      <reference foreign="id"
+                 local="folder_id" />
+    </foreign-key>
+    <foreign-key foreignTable="project_version"
+                 name="fk_hm_2_v">
+      <reference foreign="id"
+                 local="project_version_id" />
+    </foreign-key>
+    <index name="idx_hier_model_pv">
+      <index-column name="deleted" />
+      <index-column name="project_version_id" />
+    </index>
+  </table>
+  <table description=""
+         name="model_schema_object">
+    <column name="id"
+            primaryKey="true"
+            required="true"
+            size="36"
+            type="CHAR" />
+    <column name="model_id"
+            required="true"
+            size="36"
+            type="CHAR" />
+    <column name="name"
+            required="true"
+            size="255"
+            type="VARCHAR" />
+    <column DESCRIPTION=""
+            name="description"
+            type="LONGVARCHAR" />
+    <column description="NUMBER, STRING, BOOLEAN, REF, ARRAY"
+            name="type"
+            size="50"
+            type="VARCHAR" />
+    <column description="The parent schema object for this schema object"
+            name="parent_id"
+            size="36"
+            type="VARCHAR" />
+    <column description="The ref model id if type=REF"
+            name="ref_model_id"
+            size="36"
+            type="VARCHAR" />            
+    <column description="Pattern for type=string"
+            name="pattern"
+            size="500"
+            type="VARCHAR" />            
+    <column description="min length"
+            name="min_length"
+            type="INTEGER" />
+    <column description="max length"
+            name="max_length"
+            type="INTEGER" />
+    <column description="minimum elements"
+            name="minimum"
+            type="INTEGER" />
+    <column description="maximum elements"
+            name="maximum"
+            type="INTEGER" />            
+    <column default="0"
+            description="Indicates whether this element is required."
+            name="required"
+            required="true"
+            size="1"
+            type="BOOLEANINT" />            
+    <column description="Timestamp when this entry was created."
+            name="create_time"
+            type="TIMESTAMP" />
+    <column description="The user who last updated this entry."
+            name="create_by"
+            size="50"
+            type="VARCHAR" />
+    <column description="The user who created this entry."
+            name="last_update_by"
+            size="50"
+            type="VARCHAR" />
+    <column description="Timestamp when a user last updated this entry."
+            name="last_update_time"
+            type="TIMESTAMP" />
+    <foreign-key foreignTable="hierarchical_model"
+                 name="fk_so_2_m">
+      <reference foreign="id"
+                 local="model_id" />
+    </foreign-key>
+    <foreign-key foreignTable="model_schema_object"
+                 name="fk_so_2_pso">
+      <reference foreign="id"
+                 local="parent_id" />
+    </foreign-key>
+    <foreign-key foreignTable="hierarchical_model"
+                 name="fk_so_2_refso">
+      <reference foreign="id"
+                 local="ref_model_id" />
+    </foreign-key>
+  </table>  
+  <table description=""
          name="model_relation">
     <column description="A unique identifier"
             name="id"
@@ -508,7 +648,7 @@
     <column description="Timestamp when a user last updated this entry."
             name="last_update_time"
             type="TIMESTAMP" />
-    <foreign-key foreignTable="model"
+    <foreign-key foreignTable="relational_model"
                  name="fk_mr_2_m">
       <reference foreign="id"
                  local="model_id" />
@@ -739,16 +879,6 @@
                  name="fk_cmp_2_fldr">
       <reference foreign="id"
                  local="folder_id" />
-    </foreign-key>
-    <foreign-key foreignTable="model"
-                 name="fk_cmpv_2_m_1">
-      <reference foreign="id"
-                 local="input_model_id" />
-    </foreign-key>
-    <foreign-key foreignTable="model"
-                 name="fk_cmpv_2_m_2">
-      <reference foreign="id"
-                 local="output_model_id" />
     </foreign-key>
     <foreign-key foreignTable="resource"
                  name="fk_cmpv_2_res">
@@ -2065,6 +2195,57 @@
                  local="tag_id" />
     </foreign-key>
   </table>
+  <table description=""
+         name="component_model_setting">
+    <column description="A unique identifier"
+            name="id"
+            primaryKey="true"
+            required="true"
+            size="36"
+            type="CHAR" />
+    <column description="Type of model setting (ENTITY, ATTRIBUTE, SCHEMA_OBJECT)"
+            name="type"
+            required="true"
+            size="50"
+            type="VARCHAR" />
+    <column description="A unique identifier"
+            name="component_id"
+            required="true"
+            size="36"
+            type="CHAR" />
+    <column description="A unique identifier"
+            name="model_object_id"
+            required="true"
+            size="36"
+            type="CHAR" />
+    <column description=""
+            name="name"
+            required="true"
+            size="255"
+            type="VARCHAR" />
+    <column description=""
+            name="value"
+            type="LONGVARCHAR" />
+    <column description="Timestamp when this entry was created."
+            name="create_time"
+            type="TIMESTAMP" />
+    <column description="The user who last updated this entry."
+            name="create_by"
+            size="50"
+            type="VARCHAR" />
+    <column description="The user who created this entry."
+            name="last_update_by"
+            size="50"
+            type="VARCHAR" />
+    <column description="Timestamp when a user last updated this entry."
+            name="last_update_time"
+            type="TIMESTAMP" />
+    <foreign-key foreignTable="component"
+                 name="fk_cms_2_c">
+      <reference foreign="id"
+                 local="component_id" />
+    </foreign-key>
+  </table>  
   <table description="License Key."
          name="license_key">
     <column description="A unique identifier."
@@ -2092,5 +2273,5 @@
     <column description="Timestamp when a user last updated this entry."
             name="last_update_time"
             type="TIMESTAMP" />
-  </table>
+  </table>  
 </database>

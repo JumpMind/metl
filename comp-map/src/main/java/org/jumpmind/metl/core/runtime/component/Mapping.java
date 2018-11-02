@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -109,7 +109,7 @@ public class Mapping extends AbstractMapping {
     protected ArrayList<EntityData> mapInputToOutputByEntity(EntityData inputRow) {
         ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
 
-        Model outputModel = getOutputModel();
+        RelationalModel outputModel = (RelationalModel) getOutputModel();
         String entityName = null;
         HashMap<String, EntityData> outputRows = new HashMap<String, EntityData>();
 
@@ -176,7 +176,7 @@ public class Mapping extends AbstractMapping {
         }
 
         if (setUnmappedAttributesToNull) {
-            for (ModelEntity entity : getComponent().getOutputModel().getModelEntities()) {
+            for (ModelEntity entity : ((RelationalModel)getComponent().getOutputModel()).getModelEntities()) {
                 for (ModelAttrib attr : entity.getModelAttributes()) {
                     if (!outputRow.containsKey(attr.getId())) {
                         outputRow.put(attr.getId(), null);

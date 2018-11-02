@@ -25,7 +25,7 @@
              id='RDBMS Reader'
              inputMessageType='any'
              showInputModel='true'
-             outputMessageType='entity'
+             outputMessageType='relational'
              resourceCategory='datasource'>
     <name>RDBMS Reader</name>
     <className>org.jumpmind.metl.core.runtime.component.RdbmsReader</className>

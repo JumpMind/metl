@@ -20,34 +20,8 @@
  */
 package org.jumpmind.metl.core.model;
 
-public class ModelName extends AbstractName {
+public enum HierarchicalDataType {
 
-    private static final long serialVersionUID = 1L;
-    
-    private String type;
-
-    public ModelName() {
-    }
-
-    public ModelName(Model obj) {
-        this.name = obj.getName();
-        this.setId(obj.getId());
-        this.rowId = obj.getRowId();
-        this.createTime = obj.getCreateTime();
-        this.createBy = obj.getCreateBy();
-        this.lastUpdateBy = obj.getLastUpdateBy();
-        this.lastUpdateTime = obj.getLastUpdateTime();
-        this.projectVersionId = obj.getProjectVersionId();
-        this.type = obj.getType();
-        this.deleted = obj.isDeleted();
-    }
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
+    STRING, NUMBER, OBJECT, ARRAY, BOOLEAN, DATE, TIME;
 
 }
