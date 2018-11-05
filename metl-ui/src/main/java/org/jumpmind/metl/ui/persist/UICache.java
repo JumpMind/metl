@@ -30,6 +30,7 @@ import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
+import org.jumpmind.metl.core.model.HierarchicalModel;
 import org.jumpmind.metl.core.model.HierarchicalModelName;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
@@ -206,6 +207,8 @@ public class UICache implements IUICache {
                 object = new ResourceName((Resource) object);
             } else if (object instanceof RelationalModel) {
                 object = new RelationalModelName((RelationalModel) object);
+            } else if (object instanceof HierarchicalModel) {
+                object = new HierarchicalModelName((HierarchicalModel) object);
             }
             return object;
         }
@@ -234,6 +237,12 @@ public class UICache implements IUICache {
             } else if (object instanceof RelationalModelName) {
                 RelationalModelName named = (RelationalModelName) object;
                 List<RelationalModelName> names = relationalModelsByProjectVersion.get(named.getProjectVersionId());
+                if (names != null) {
+                    names.remove(named);
+                }
+            } else if (object instanceof HierarchicalModelName) {
+                HierarchicalModelName named = (HierarchicalModelName) object;
+                List<HierarchicalModelName> names = hierarchicalModelsByProjectVersion.get(named.getProjectVersionId());
                 if (names != null) {
                     names.remove(named);
                 }
@@ -287,6 +296,20 @@ public class UICache implements IUICache {
                 } else {
                     projectVersionsById.put(named.getId(), named.getProjectVersionId());
                     List<RelationalModelName> names = relationalModelsByProjectVersion.get(named.getProjectVersionId());
+                    if (names != null) {
+                        removeOldModelPvEntryIfNeeded(oldProjectVersionId, named.getProjectVersionId(), named.getId());
+                        names.remove(named);
+                        names.add(named);
+                        AbstractObjectNameBasedSorter.sort(names);
+                    }
+                }
+            } else if (object instanceof HierarchicalModelName) {
+                HierarchicalModelName named = (HierarchicalModelName) object;
+                if (named.isDeleted()) {
+                    onDelete(named);
+                } else {
+                    projectVersionsById.put(named.getId(), named.getProjectVersionId());
+                    List<HierarchicalModelName> names = hierarchicalModelsByProjectVersion.get(named.getProjectVersionId());
                     if (names != null) {
                         removeOldModelPvEntryIfNeeded(oldProjectVersionId, named.getProjectVersionId(), named.getId());
                         names.remove(named);

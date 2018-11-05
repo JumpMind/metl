@@ -469,6 +469,9 @@ public class DesignNavigator extends VerticalLayout {
                     } else if (type.equals(RelationalModelName.class.getSimpleName())) {
                         object = new RelationalModelName();
                         object.setId(id);
+                    } else if (type.equals(HierarchicalModelName.class.getSimpleName())) {
+                        object = new HierarchicalModelName();
+                        object.setId(id);
                     } else if (type.equals(ResourceName.class.getSimpleName())) {
                         object = new ResourceName();
                         object.setId(id);
