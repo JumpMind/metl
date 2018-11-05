@@ -287,8 +287,10 @@ public class OperationsService extends AbstractService implements IOperationsSer
     
     @Override
     public void delete(Agent agent) {
-        agent.setDeleted(true);
-        save((AbstractObject) agent);
+        for (AgentDeploy agentDeployment : agent.getAgentDeployments()) {
+            delete(agentDeployment);
+        }
+        delete((AbstractObject) agent);
     }
 
 
