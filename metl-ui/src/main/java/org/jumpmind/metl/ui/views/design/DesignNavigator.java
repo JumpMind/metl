@@ -33,6 +33,7 @@ import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FolderName;
+import org.jumpmind.metl.core.model.HierarchicalModel;
 import org.jumpmind.metl.core.model.HierarchicalModelName;
 import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.model.Project;
@@ -772,7 +773,8 @@ public class DesignNavigator extends VerticalLayout {
 
         if (newProjectVersionId != null) {
             if (context.getClipboard().containsKey(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE)) {
-                if (context.getClipboard().get(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE).equals(RelationalModel.class)) {
+                if (context.getClipboard().get(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE).equals(RelationalModel.class) ||
+                        context.getClipboard().get(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE).equals(HierarchicalModel.class)) {
                     cutCopyPasteManager.pasteModels(newProjectVersionId);
                 } else if (context.getClipboard().get(CutCopyPasteManager.CLIPBOARD_OBJECT_TYPE).equals(Resource.class)) {
                     cutCopyPasteManager.pasteResources(newProjectVersionId);

@@ -334,12 +334,14 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public List<RelationalModel> findModelsByName(String projectVersionId, String name) {
+    public List<IModel> findModelsByName(String projectVersionId, String name) {
+        List<IModel> models = new ArrayList<IModel>();
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("deleted", 0);
         params.put("name", name);
         params.put("projectVersionId", projectVersionId);
-        List<RelationalModel> models = find(RelationalModel.class, params);
+        models.addAll(find(RelationalModel.class, params));
+        models.addAll(find(HierarchicalModel.class, params));
         return models;
     }
 
@@ -902,12 +904,32 @@ public class ConfigurationService extends AbstractService
     }
     
     @Override
-    public void save(RelationalModel model) {
+    public void save(IModel model) {
+        if (model instanceof RelationalModel) {
+            save((RelationalModel) model);
+        } else {
+            save((HierarchicalModel) model);
+        }
+    }    
+
+    private void save(RelationalModel model) {
         save((AbstractObject) model);
         for (ModelEntity modelEntity : model.getModelEntities()) {
             save(modelEntity);
         }
     }    
+
+    private void save(HierarchicalModel model) {
+        save((AbstractObject) model);
+        save(model.getRootObject());
+    }
+    
+    private void save(ModelSchemaObject object) {
+        save((AbstractObject) object);
+        for (ModelSchemaObject child : object.getChildObjects()) {
+            save(child);
+        }
+    }
     
     @Override
     public void save(ModelEntity modelEntity) {
@@ -1077,7 +1099,7 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public RelationalModel copy(RelationalModel original) {
+    public IModel copy(IModel original) {
         return copy(new HashMap<>(), original);
     }
 
@@ -1100,13 +1122,21 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public RelationalModel copy(Map<String, AbstractObject> oldToNewUUIDMapping, RelationalModel original) {
+    public IModel copy(Map<String, AbstractObject> oldToNewUUIDMapping, IModel original) {
+        IModel newModel;
+        if (original instanceof RelationalModel) {
+            newModel = copy(oldToNewUUIDMapping, (RelationalModel) original);
+        } else {
+            newModel = copy(oldToNewUUIDMapping, (HierarchicalModel) original);
+        }
+        return newModel;
+    }
+
+    protected RelationalModel copy(Map<String, AbstractObject> oldToNewUUIDMapping, RelationalModel original) {
         RelationalModel newModel = copyWithNewUUID(oldToNewUUIDMapping, original);
         newModel.setModelEntities(new ArrayList<>());
         for (ModelEntity originalModelEntity : original.getModelEntities()) {
             ModelEntity newModelEntity = copyWithNewUUID(oldToNewUUIDMapping, originalModelEntity);
-            // TODO: do we really need this put here as it should be done with
-            // the copyWithNewUUID above...
             oldToNewUUIDMapping.put(originalModelEntity.getId(), newModelEntity);
             newModelEntity.setModelId(newModel.getId());
             newModelEntity.setModelAttributes(new ArrayList<>());
@@ -1128,9 +1158,29 @@ public class ConfigurationService extends AbstractService
                 }
             }
         }
+        return newModel;        
+    }
+    
+    protected HierarchicalModel copy(Map<String, AbstractObject> oldToNewUUIDMapping, HierarchicalModel original) {
+        HierarchicalModel newModel = copyWithNewUUID(oldToNewUUIDMapping, original);
+        ModelSchemaObject newRoot = copy(oldToNewUUIDMapping, original.getRootObject(), newModel.getId(),null);
+        newRoot.setModelId(newModel.getId());
+        newModel.setRootObject(newRoot);        
         return newModel;
     }
-
+    
+    protected ModelSchemaObject copy(Map<String, AbstractObject> oldToNewUUIDMapping, ModelSchemaObject original, 
+            String newModelId, String parentId) {
+        ModelSchemaObject newObject = copyWithNewUUID(oldToNewUUIDMapping, original);
+        newObject.setModelId(newModelId);
+        newObject.setParentId(parentId);
+        newObject.setChildObjects(new ArrayList<ModelSchemaObject>());
+        for (ModelSchemaObject child : original.getChildObjects()) {
+            newObject.getChildObjects().add(copy(oldToNewUUIDMapping, child, newModelId, newObject.getId()));
+        }        
+        return newObject;        
+    }
+    
     protected void massageValues(Map<String, AbstractObject> oldToNewUUIDMapping,
             List<? extends Setting> settings) {
         Map<String, String> tokens = toStringTokens(oldToNewUUIDMapping);

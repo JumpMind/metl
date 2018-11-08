@@ -11,6 +11,10 @@ public class HierarchicalModel extends AbstractModel implements IModel {
 
     ModelSchemaObject rootObject;
     
+    public HierarchicalModel() {
+        
+    }
+    
     public HierarchicalModel(String id) {
         super(id);
     }

@@ -148,7 +148,7 @@ public interface IConfigurationService {
     
     public List<Resource> findResourcesByName(String projectVersionId, String resourceName);
 
-    public List<RelationalModel> findModelsByName(String projectVersionId, String modelName);
+    public List<IModel> findModelsByName(String projectVersionId, String modelName);
 
     public List<Resource> findResourcesByTypes(String projectVersionId, boolean includeDependencies, String... types);
 
@@ -182,7 +182,7 @@ public interface IConfigurationService {
 
     public void save(FlowStep flowStep);
 
-    public void save(RelationalModel model);
+    public void save(IModel model);
 
     public void save(ModelEntity modelEntity);
 
@@ -200,9 +200,9 @@ public interface IConfigurationService {
 
     public Flow copy(Map<String, AbstractObject> oldToNewUUIDMapping, Flow original, boolean newProjectVersion);
 
-    public RelationalModel copy(RelationalModel original);
+    public IModel copy(IModel original);
     
-    public RelationalModel copy(Map<String, AbstractObject> oldToNewUUIDMapping, RelationalModel original);
+    public IModel copy(Map<String, AbstractObject> oldToNewUUIDMapping, IModel original);
     
     public Resource copy(Resource original);
     

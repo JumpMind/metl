@@ -22,6 +22,7 @@ package org.jumpmind.metl.ui.views.design.menu;
 
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FolderName;
+import org.jumpmind.metl.core.model.HierarchicalModelName;
 import org.jumpmind.metl.core.model.RelationalModelName;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
@@ -43,6 +44,7 @@ public class DesignMenuBar extends AbstractMenuBar {
         addMenuManager(FlowName.class, new FlowMenuManager(navigator));
         addMenuManager(ResourceName.class, new ResourceMenuManager(navigator));
         addMenuManager(RelationalModelName.class, new ModelMenuManager(navigator));
+        addMenuManager(HierarchicalModelName.class, new ModelMenuManager(navigator));
         addMenuManager(ProjectVersionDepends.class, new ProjectDependencyMenuManager(navigator));
         addMenuManager(FolderName.class, new FolderMenuManager(navigator));
     }
