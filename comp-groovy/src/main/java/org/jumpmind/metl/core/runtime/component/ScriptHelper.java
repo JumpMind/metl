@@ -53,6 +53,7 @@ import org.jumpmind.metl.core.runtime.resource.FileInfo;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.util.ComponentUtils;
+import org.jumpmind.metl.core.util.ModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -428,7 +429,13 @@ public class ScriptHelper {
      */
     protected Object getAttributeValue(String entityName, String attributeName, EntityData data) {
         RelationalModel model = (RelationalModel) flowStep.getComponent().getInputModel();
-        return ComponentUtils.getAttributeValue(model, data, entityName, attributeName);
+        Object obj = null;
+        try {
+        	obj = ComponentUtils.getAttributeValue(model, data, entityName, attributeName);
+        } catch (ModelException ex) {
+        	warn(ex.getMessage());
+        }
+        return obj;
     }
 
     /**

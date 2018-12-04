@@ -47,9 +47,12 @@ final public class ComponentUtils {
             ModelAttrib attribute = modelEntity.getModelAttributeByName(attributeName);
             if (attribute != null) {
                return data.get(attribute.getId());
+            } else {
+            	throw new ModelAttributeException("Model Attribute Name '" + attributeName + "' cannot be found in entity '" + entityName + "'.");
             }
+        } else {
+        	throw new ModelEntityException("Model Entity Name '" + entityName + "' cannot be found in model '" + model.getName() + "'.");
         }
-        return null;
     }
     
     public static void setAttributeValue(RelationalModel model, EntityData data, String entityName, String attributeName, Object value) {
