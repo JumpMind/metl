@@ -290,18 +290,25 @@ public class PropertySheet extends AbsoluteLayout {
         if (step != null) {
             IConfigurationService configurationService = context.getConfigurationService();
             String projectVersionId = step.getComponent().getProjectVersionId();
-            if (((componentDefinition.getOutputMessageType() == MessageType.RELATIONAL || componentDefinition.getOutputMessageType() == MessageType.HIERARCHICAL ||
-                    componentDefinition.getOutputMessageType() == MessageType.MODEL)
-                    || (componentDefinition.getOutputMessageType() == MessageType.ANY && componentDefinition.isShowOutputModel()))
+            if ((
+            		(componentDefinition.getOutputMessageType() == MessageType.RELATIONAL 
+	            		|| componentDefinition.getOutputMessageType() == MessageType.HIERARCHICAL 
+	            		|| componentDefinition.getOutputMessageType() == MessageType.MODEL)
+	                    	|| (componentDefinition.getOutputMessageType() == MessageType.ANY && componentDefinition.isShowOutputModel()))
                     && !componentDefinition.isInputOutputModelsMatch()) {
                 final AbstractSelect combo = new ComboBox("Output Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
                 
                 List<AbstractName> models = new ArrayList<AbstractName>();
-                if (componentDefinition.getOutputMessageType() == MessageType.RELATIONAL || componentDefinition.getOutputMessageType() == MessageType.MODEL) {
+                if (componentDefinition.getOutputMessageType() == MessageType.ANY
+                		|| componentDefinition.getOutputMessageType() == MessageType.MODEL
+                		||	componentDefinition.getOutputMessageType() == MessageType.RELATIONAL) {
                     models.addAll(configurationService.findRelationalModelsInProject(projectVersionId));
-                } else if (componentDefinition.getOutputMessageType() == MessageType.HIERARCHICAL || componentDefinition.getOutputMessageType() == MessageType.MODEL) { 
+                }
+                if (componentDefinition.getOutputMessageType() == MessageType.ANY
+                		|| componentDefinition.getOutputMessageType() == MessageType.MODEL
+                		|| componentDefinition.getOutputMessageType() == MessageType.HIERARCHICAL) { 
                     models.addAll(configurationService.findHierarchicalModelsInProject(projectVersionId));
                 }
                 
@@ -366,17 +373,23 @@ public class PropertySheet extends AbsoluteLayout {
         if (step != null) {
             IConfigurationService configurationService = context.getConfigurationService();
             String projectVersionId = step.getComponent().getProjectVersionId();
-            if ((componentDefinition.getInputMessageType() == MessageType.RELATIONAL || componentDefinition.getInputMessageType() == MessageType.HIERARCHICAL ||
-                    componentDefinition.getInputMessageType() == MessageType.MODEL)
+            if ((componentDefinition.getInputMessageType() == MessageType.RELATIONAL 
+            		|| componentDefinition.getInputMessageType() == MessageType.HIERARCHICAL 
+            		|| componentDefinition.getInputMessageType() == MessageType.MODEL)
                     || (componentDefinition.getInputMessageType() == MessageType.ANY && componentDefinition.isShowInputModel())) {
                 final AbstractSelect combo = new ComboBox("Input Model");
                 combo.setImmediate(true);                
                 combo.setNullSelectionAllowed(true);
 
                 List<AbstractName> models = new ArrayList<AbstractName>();
-                if (componentDefinition.getInputMessageType() == MessageType.RELATIONAL || componentDefinition.getInputMessageType() == MessageType.MODEL) {
+                if (componentDefinition.getInputMessageType() == MessageType.ANY
+                		|| componentDefinition.getInputMessageType() == MessageType.MODEL
+                		|| componentDefinition.getInputMessageType() == MessageType.RELATIONAL) {
                     models.addAll(configurationService.findRelationalModelsInProject(projectVersionId));
-                } else if (componentDefinition.getInputMessageType() == MessageType.HIERARCHICAL || componentDefinition.getInputMessageType() == MessageType.MODEL) { 
+                } 
+                if (componentDefinition.getInputMessageType() == MessageType.ANY
+                		|| componentDefinition.getInputMessageType() == MessageType.MODEL
+                		|| componentDefinition.getInputMessageType() == MessageType.HIERARCHICAL ) { 
                     models.addAll(configurationService.findHierarchicalModelsInProject(projectVersionId));
                 }
                 
