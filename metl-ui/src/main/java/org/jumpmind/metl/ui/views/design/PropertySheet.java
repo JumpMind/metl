@@ -314,9 +314,14 @@ public class PropertySheet extends AbsoluteLayout {
                 
                 List<ProjectVersionDepends> dependencies = configurationService.findProjectDependencies(projectVersionId);
                 for (ProjectVersionDepends projectVersionDependency : dependencies) {
-                    if (componentDefinition.getOutputMessageType() == MessageType.RELATIONAL || componentDefinition.getOutputMessageType() == MessageType.MODEL) {
-                        models.addAll(configurationService.findRelationalModelsInProject(projectVersionId));
-                    } else if (componentDefinition.getOutputMessageType() == MessageType.HIERARCHICAL || componentDefinition.getOutputMessageType() == MessageType.MODEL) { 
+                    if (componentDefinition.getOutputMessageType() == MessageType.ANY
+                    		|| componentDefinition.getOutputMessageType() == MessageType.MODEL
+                    		|| componentDefinition.getOutputMessageType() == MessageType.RELATIONAL) {
+                        models.addAll(configurationService.findRelationalModelsInProject(projectVersionDependency.getTargetProjectVersionId()));
+                    }
+                    if (componentDefinition.getOutputMessageType() == MessageType.ANY
+                    		|| componentDefinition.getOutputMessageType() == MessageType.MODEL
+                    		|| componentDefinition.getOutputMessageType() == MessageType.HIERARCHICAL) { 
                         models.addAll(configurationService.findHierarchicalModelsInProject(projectVersionDependency.getTargetProjectVersionId()));
                     }
                 }
@@ -395,9 +400,14 @@ public class PropertySheet extends AbsoluteLayout {
                 
                 List<ProjectVersionDepends> dependencies = configurationService.findProjectDependencies(projectVersionId);
                 for (ProjectVersionDepends projectVersionDependency : dependencies) {
-                    if (componentDefinition.getInputMessageType() == MessageType.RELATIONAL || componentDefinition.getInputMessageType() == MessageType.MODEL) {
-                        models.addAll(configurationService.findRelationalModelsInProject(projectVersionId));
-                    } else if (componentDefinition.getInputMessageType() == MessageType.HIERARCHICAL || componentDefinition.getInputMessageType() == MessageType.MODEL) { 
+                    if (componentDefinition.getInputMessageType() == MessageType.ANY 
+                    		|| componentDefinition.getInputMessageType() == MessageType.MODEL 
+                    		|| componentDefinition.getInputMessageType() == MessageType.RELATIONAL) {
+                        models.addAll(configurationService.findRelationalModelsInProject(projectVersionDependency.getTargetProjectVersionId()));
+                    }
+                    if (componentDefinition.getInputMessageType() == MessageType.ANY 
+                    		|| componentDefinition.getInputMessageType() == MessageType.MODEL 
+                    		|| componentDefinition.getInputMessageType() == MessageType.HIERARCHICAL) { 
                         models.addAll(configurationService.findHierarchicalModelsInProject(projectVersionDependency.getTargetProjectVersionId()));
                     }
                 }
