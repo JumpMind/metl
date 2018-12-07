@@ -638,33 +638,41 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                     if (targetComp.getInputModel() == null) {
                         if (sourceComp.getOutputModel() != null) {
                             targetComp.setInputModel(sourceComp.getOutputModel());
+                            targetComp.setInputModelId(sourceComp.getOutputModelId());
                         } else if (sourceDefn.isInputOutputModelsMatch() && sourceComp.getInputModel() != null) {
                             targetComp.setInputModel(sourceComp.getInputModel());
+                            targetComp.setInputModelId(sourceComp.getInputModelId());
                         }
                         
                         if (targetDefn.isInputOutputModelsMatch()) {
                             targetComp.setOutputModel(targetComp.getInputModel());
+                            targetComp.setOutputModelId(targetComp.getInputModelId());
                         }
                     }
 
                     if (sourceComp.getOutputModel() == null) {
                         if (targetComp.getInputModel() != null) {
                             sourceComp.setOutputModel(targetComp.getInputModel());
+                            sourceComp.setOutputModelId(targetComp.getInputModelId());
                         }
                         
                         if (sourceDefn.isInputOutputModelsMatch()) {
                             sourceComp.setInputModel(sourceComp.getOutputModel());
+                            sourceComp.setInputModelId(sourceComp.getOutputModelId());
                         }
                     }
 
                     if (sourceComp.getInputModel() == null && sourceDefn.isInputOutputModelsMatch()) {
                         if (targetComp.getInputModel() != null) {
                             sourceComp.setInputModel(targetComp.getInputModel());
+                            sourceComp.setInputModelId(targetComp.getInputModelId());
                             sourceComp.setOutputModel(targetComp.getInputModel());
+                            sourceComp.setOutputModelId(targetComp.getInputModelId());
                         }
                     }
 
                     configurationService.save(flow);
+                    propertySheet.setSource(propertySheet.getValue());
                 } else {
                     FlowStepLink link = flow.removeFlowStepLink(event.getSourceNodeId(), event.getTargetNodeId());
                     if (link != null) {
