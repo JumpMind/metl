@@ -411,7 +411,7 @@ public class ScriptHelper {
      *            The value of the attribute
      */
     protected void putAttributeValue(String entityName, String attributeName, EntityData data, Object value) {
-        RelationalModel model = (RelationalModel) flowStep.getComponent().getInputModel();
+        RelationalModel model = (RelationalModel) flowStep.getComponent().getOutputModel();
         ModelAttrib attribute = model.getAttributeByName(entityName, attributeName);
         data.put(attribute.getId(), value);
     }
