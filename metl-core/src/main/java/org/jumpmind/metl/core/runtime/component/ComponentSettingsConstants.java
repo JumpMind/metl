@@ -39,6 +39,8 @@ final public class ComponentSettingsConstants {
     
     public final static String RUN_WHEN = "run.when";
     
+    public final static String ERROR_HANDLER = "error.handler";
+    
     public static final String PER_UNIT_OF_WORK = "PER UNIT OF WORK";
 
     public static final String PER_MESSAGE = "PER MESSAGE";

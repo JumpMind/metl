@@ -47,7 +47,7 @@ public class Component extends AbstractObjectWithSettings implements IAuditable 
     String outputModelId;
     
     IModel outputModel;
-
+    
     String projectVersionId;
 
     boolean deleted = false;

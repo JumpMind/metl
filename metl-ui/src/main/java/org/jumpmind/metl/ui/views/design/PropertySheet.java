@@ -45,7 +45,6 @@ import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.model.RelationalModel;
-import org.jumpmind.metl.core.model.RelationalModelName;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.persist.IConfigurationService;
@@ -56,6 +55,7 @@ import org.jumpmind.metl.core.plugin.XMLResourceDefinition;
 import org.jumpmind.metl.core.plugin.XMLSetting;
 import org.jumpmind.metl.core.plugin.XMLSetting.Type;
 import org.jumpmind.metl.core.runtime.AgentRuntime;
+import org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants;
 import org.jumpmind.metl.core.runtime.flow.StepRuntime;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.ui.common.ApplicationContext;
@@ -276,6 +276,7 @@ public class PropertySheet extends AbsoluteLayout {
         addResourceCombo(componentDefintion, formLayout, component);
         addInputModelCombo(componentDefintion, formLayout, component);
         addOutputModelCombo(componentDefintion, formLayout, component);
+        addErrorHandlerCombo(componentDefintion, formLayout, component);
     }
 
     protected void addThreadCount(XMLComponentDefinition componentDefintion, FormLayout formLayout, final Component component) {
@@ -285,6 +286,40 @@ public class PropertySheet extends AbsoluteLayout {
         }
     }
 
+    protected void addErrorHandlerCombo(XMLComponentDefinition componentDefinition, FormLayout formLayout, final Component component) {
+        FlowStep step = getSingleFlowStep();
+        if (step != null) {
+            final AbstractSelect combo = new ComboBox("Error Suspense Step");
+            combo.setImmediate(true);
+            combo.setNullSelectionAllowed(true);
+            IConfigurationService configurationService = context.getConfigurationService();
+            Flow flow = configurationService.findFlow(step.getFlowId());
+            List<FlowStepLink> stepLinks = flow.findFlowStepLinksWithSource(step.getId());
+            for (FlowStepLink flowStepLink : stepLinks) {
+                FlowStep comboStep = flow.findFlowStepWithId(flowStepLink.getTargetStepId());
+                combo.addItem(comboStep.getId());
+                combo.setItemCaption(comboStep.getId(), comboStep.getName());
+            }
+            String currentErrorHandlerId = component.get(ComponentSettingsConstants.ERROR_HANDLER);
+            if (currentErrorHandlerId != null) {
+                combo.setValue(currentErrorHandlerId);
+            }            
+            combo.addValueChangeListener(new ValueChangeListener() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public void valueChange(ValueChangeEvent event) {
+                    Setting setting = step.getComponent().findSetting(ComponentSettingsConstants.ERROR_HANDLER);
+                    setting.setValue((String) event.getProperty().getValue());
+                    context.getConfigurationService().save(setting);
+                }
+            });
+            combo.setReadOnly(readOnly);
+            formLayout.addComponent(combo);
+        }
+    }
+
+    
     protected void addOutputModelCombo(XMLComponentDefinition componentDefinition, FormLayout formLayout, final Component component) {
         FlowStep step = getSingleFlowStep();
         if (step != null) {

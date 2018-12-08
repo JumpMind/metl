@@ -74,6 +74,8 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
     
     public final static String RUN_WHEN = ComponentSettingsConstants.RUN_WHEN;
     
+    public final static String ERROR_HANDLER = ComponentSettingsConstants.ERROR_HANDLER;
+    
     public static final String PER_UNIT_OF_WORK = ComponentSettingsConstants.PER_UNIT_OF_WORK;
 
     public static final String PER_MESSAGE = ComponentSettingsConstants.PER_MESSAGE;
