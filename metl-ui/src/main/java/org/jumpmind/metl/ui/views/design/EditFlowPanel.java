@@ -21,8 +21,10 @@
 package org.jumpmind.metl.ui.views.design;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jumpmind.metl.core.model.AbstractObject;
@@ -297,7 +299,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     }
 
     protected void copySelected() {
-        List<AbstractObject> copies = new ArrayList<AbstractObject>(selected.size());
+    	// Clone components
+        Map<AbstractObject,AbstractObject> oldNew = new HashMap<AbstractObject,AbstractObject>(selected.size());
         for (AbstractObject s : selected) {
             if (s instanceof FlowStep) {
                 FlowStep copy = configurationService.copy((FlowStep) s);
@@ -307,12 +310,29 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
                 flow.getFlowSteps().add(copy);
                 configurationService.save(copy);
-                copies.add(copy);
+                oldNew.put(s,copy);
             }
         }
         
-        setSelectedNodes(copies);
-        
+        // Clone links between selected components
+        List<FlowStepLink> links = flow.getFlowStepLinks();
+        List<FlowStepLink> newLinks = new ArrayList<FlowStepLink>();
+        for (AbstractObject o : oldNew.keySet()) {
+        	FlowStep old = (FlowStep) o;
+        	for (FlowStepLink link : links) {
+        		if (link.getSourceStepId().equals(old.getId())) {
+        			FlowStep oldLinkTarget = (FlowStep) selected.stream()
+        					.filter(l->l.getId().equals(link.getTargetStepId())).findFirst().orElse(null);
+        			if (oldLinkTarget != null) {
+	        			FlowStepLink newLink = new FlowStepLink(oldNew.get(o).getId(), oldNew.get(oldLinkTarget).getId());
+	        			newLinks.add(newLink);
+        			}
+        		}
+        	}
+        }
+		flow.getFlowStepLinks().addAll(newLinks);
+		configurationService.save(flow);
+        setSelectedNodes(new ArrayList<AbstractObject>(oldNew.values()));
         redrawFlow();
     }
 
