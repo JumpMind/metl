@@ -84,8 +84,6 @@ public class Web extends AbstractComponentRuntime {
     public static final String PARAMETER_REPLACEMENT = "parameter.replacement";
 
     public static final String SETTING_ENCODING = "encoding";
-
-    public static final String ERROR_TARGET_STEP = "error.target.step";
     
     String runWhen;
 
@@ -108,8 +106,6 @@ public class Web extends AbstractComponentRuntime {
     String encoding = "UTF-8";
 
     IHttpDirectory httpDirectory;
-    
-    String errorTargetStep;
 
     @Override
     public void start() {
@@ -133,7 +129,6 @@ public class Web extends AbstractComponentRuntime {
         relativePath = component.get(RELATIVE_PATH);
         httpClient = HttpClients.createDefault();
         encoding = properties.get(SETTING_ENCODING, encoding);
-        errorTargetStep = component.get(ERROR_TARGET_STEP);
     }
 
     @Override
@@ -212,37 +207,15 @@ public class Web extends AbstractComponentRuntime {
         byte[] outputBinaryPayload = null;
         CloseableHttpResponse httpResponse = null;
         boolean isBinary = false;
-        boolean sendError = false;
+
         try {
             httpResponse = httpClient.execute(httpRequest);
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (responseCode / 100 != 2) {
-            	if (isNotBlank(errorTargetStep)) {
-            		byte[] binaryMessage = null;
-            		ArrayList<String> stringMessage = new ArrayList<String>();
-            		
-            		outputMessageHeaders.putAll(inputMessage.getHeader());
-            		outputPayload.add(String.format("Error calling http method.  HTTP Status: %d, HTTP Status Description: %s, HTTP Result: %s", responseCode,
-                            httpResponse.getStatusLine().getReasonPhrase(), 
-                            IOUtils.toString(httpResponse.getEntity().getContent())).replace("%", "%%"));
-            		
-            		if (inputMessage instanceof BinaryMessage) {
-						binaryMessage = ((BinaryMessage) inputMessage).getPayload();
-						outputPayload.add("Binary Input request: " + binaryMessage.toString());
-            		} else {
-            			stringMessage.addAll(getInputPayload(inputMessage));
-            			outputPayload.add("Input request: " + stringMessage);
-            		}
-            		
-            		callback.sendTextMessage(outputMessageHeaders, outputPayload, errorTargetStep);
-            		sendError = true;
-            		log.info("Web service call failed, by-passing request.");
-            	} else {
-	                throw new IoException(
-	                        String.format("Error calling http method.  HTTP Status %d, HTTP Status Description %s, HTTP Result %s", responseCode,
-	                                httpResponse.getStatusLine().getReasonPhrase(), 
-	                                IOUtils.toString(httpResponse.getEntity().getContent())).replace("%", "%%"));
-            	}
+                throw new IoException(
+                        String.format("Error calling http method.  HTTP Status %d, HTTP Status Description %s, HTTP Result %s", responseCode,
+                                httpResponse.getStatusLine().getReasonPhrase(), 
+                                IOUtils.toString(httpResponse.getEntity().getContent())).replace("%", "%%"));
             } else {
                 HttpEntity resultEntity = httpResponse.getEntity();
 
@@ -287,12 +260,10 @@ public class Web extends AbstractComponentRuntime {
                 log.info(String.format("Unable to close http session %s", iox.getMessage()));
             }
         }
-        if (!sendError) {
-	    	if (isBinary) {
-	    		callback.sendBinaryMessage(outputMessageHeaders, outputBinaryPayload);
-	        } else {
-	        	callback.sendTextMessage(outputMessageHeaders, outputPayload);
-	        }
+    	if (isBinary) {
+    		callback.sendBinaryMessage(outputMessageHeaders, outputBinaryPayload);
+        } else {
+        	callback.sendTextMessage(outputMessageHeaders, outputPayload);
         }
     }
 
