@@ -362,6 +362,7 @@ public class StepRuntime implements Runnable {
                 log.info("Handle was interrupted by cancellation for {}", componentContext.getFlowStep().getName());
             } catch (RuntimeException re) {
                 if (StringUtils.isNotEmpty(component.get(ComponentSettingsConstants.ERROR_HANDLER))) {
+                	   inputMessage.getHeader().put("Exception", re);
                    callback.forwardMessageToErrorSuspense(inputMessage);
                 } else {
                     throw re;
