@@ -375,8 +375,13 @@ public class PropertySheet extends AbsoluteLayout {
                     @Override
                     public void valueChange(ValueChangeEvent event) {
                         AbstractName model = (AbstractName) combo.getValue();
-                        component.setOutputModelId(model.getId());
-                        component.setOutputModel(configurationService.findModel(model.getId()));
+                        if (model != null) {
+	                        component.setOutputModelId(model.getId());
+	                        component.setOutputModel(configurationService.findModel(model.getId()));
+                        } else {
+	                        component.setOutputModelId(null);
+	                        component.setOutputModel(null);
+                        }
                         configurationService.save((AbstractObject) component);
                         setSource(value);
                     }
@@ -466,9 +471,11 @@ public class PropertySheet extends AbsoluteLayout {
                             component.setInputModel(configurationService.findRelationalModel(model.getId()));
                         } else {
                             component.setInputModel(null);
+                            component.setInputModelId(null);
                         }
                         if (componentDefinition.isInputOutputModelsMatch()) {
                             component.setOutputModel(component.getInputModel());
+                            component.setOutputModelId(component.getInputModelId());
                         }
                         configurationService.save((AbstractObject) component);
                         setSource(value);
