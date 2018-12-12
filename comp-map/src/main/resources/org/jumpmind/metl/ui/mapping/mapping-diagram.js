@@ -372,7 +372,7 @@ function hasMap(attribute, src) {
         if (setting.name == state.mapsToSchemaObjectName) {
             // If evaluating source, compare setting id
             // If evaluating target, compare setting value
-            if ((src && attribute.id == setting.attributeId) || (!src && attribute.id == setting.value)) {
+            if ((src && attribute.id == setting.modelObjectId) || (!src && attribute.id == setting.value)) {
                 return true;
             }
         }
