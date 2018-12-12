@@ -466,9 +466,11 @@ public class PropertySheet extends AbsoluteLayout {
                             component.setInputModel(configurationService.findRelationalModel(model.getId()));
                         } else {
                             component.setInputModel(null);
+                            component.setInputModelId(null);
                         }
                         if (componentDefinition.isInputOutputModelsMatch()) {
                             component.setOutputModel(component.getInputModel());
+                            component.setOutputModelId(component.getInputModelId());
                         }
                         configurationService.save((AbstractObject) component);
                         setSource(value);
