@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.jumpmind.metl.core.model.AbstractModel;
 import org.jumpmind.metl.core.model.AbstractName;
 import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.AbstractObject;
@@ -797,8 +798,9 @@ public class DesignNavigator extends VerticalLayout {
             ConfirmDialog.show("Delete Resource?", "Are you sure you want to delete the '" + resource.getName() + "' resource?",
                     new DeleteResourceConfirmationListener(resource));
 
-        } else if (object instanceof RelationalModelName) {
-            RelationalModelName model = (RelationalModelName) object;
+        } else if (object instanceof RelationalModelName
+        		|| object instanceof HierarchicalModelName) {
+        	AbstractName model = (AbstractName) object;
             if (!configurationService.isModelUsed(model.getId())) {
                 ConfirmDialog.show("Delete Model?", "Are you sure you want to delete the '" + model.getName() + "' model?",
                         new DeleteModelConfirmationListener(model));
@@ -1095,17 +1097,25 @@ public class DesignNavigator extends VerticalLayout {
 
     class DeleteModelConfirmationListener implements IConfirmListener {
 
-        RelationalModelName toDelete;
+    	AbstractName toDelete;
 
         private static final long serialVersionUID = 1L;
 
-        public DeleteModelConfirmationListener(RelationalModelName toDelete) {
+        public DeleteModelConfirmationListener(AbstractName toDelete) {
             this.toDelete = toDelete;
         }
 
         @Override
         public boolean onOk() {
-            configurationService.delete(configurationService.findRelationalModel(toDelete.getId()));
+        	AbstractModel model = null;
+        	if (toDelete instanceof HierarchicalModelName) {
+                model = configurationService.findHierarchicalModel(toDelete.getId());
+        	} else if (toDelete instanceof RelationalModelName) {
+                model = configurationService.findRelationalModel(toDelete.getId());
+        	} else {
+        		throw new RuntimeException("Request to delete an unknown model type could not be handled.");
+        	}
+        	configurationService.delete(model);
             tabs.closeTab(toDelete.getId());
             Object parent = treeTable.getParent(toDelete);
             refresh();
