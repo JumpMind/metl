@@ -51,7 +51,7 @@
       </setting>      
       <setting id='entity.column'
                required='false'
-               type='entity_column'>
+               type='model_column'>
         <name>Entity Attribute to Use</name>
         <defaultValue>false</defaultValue>
       </setting>
