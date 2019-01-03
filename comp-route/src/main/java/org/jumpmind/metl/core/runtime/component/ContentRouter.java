@@ -78,7 +78,7 @@ public class ContentRouter extends AbstractComponentRuntime {
         TypedProperties properties = getTypedProperties();
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
         String json = getComponent().get(SETTING_CONFIG);
-        sendControlMessagesToAllNodes = getComponent().getBoolean(SEND_CONTROL_MESSAGES_TO_ALL_NODES, true);
+        sendControlMessagesToAllNodes = getComponent().getBoolean(SEND_CONTROL_MESSAGES_TO_ALL_NODES, false);
         onlyRouteFirstMatch = getComponent().getBoolean(ONLY_ROUTE_FIRST_MATCH, false);
         if (isNotBlank(json)) {
             try {
