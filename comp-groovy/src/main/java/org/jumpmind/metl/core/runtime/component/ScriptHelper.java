@@ -413,7 +413,12 @@ public class ScriptHelper {
     protected void putAttributeValue(String entityName, String attributeName, EntityData data, Object value) {
         RelationalModel model = (RelationalModel) flowStep.getComponent().getOutputModel();
         ModelAttrib attribute = model.getAttributeByName(entityName, attributeName);
-        data.put(attribute.getId(), value);
+        if (attribute != null) {
+        	data.put(attribute.getId(), value);
+        } else {
+        	error("The output model, %s, is missing the entity.attribute, '%s.%s'", model.getName(), entityName, attributeName);
+        }
+        
     }
 
     /**
