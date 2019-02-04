@@ -1,0 +1,9 @@
+apply from: '../metl-assemble/common.gradle'
+
+version = '3.4.0.' + pluginBuildNumber
+
+dependencies {
+    provided project(':metl-ui')   
+    compile project(':comp-abstract')
+    testCompile project(path: ':metl-core', configuration: 'testArtifacts')     
+}
