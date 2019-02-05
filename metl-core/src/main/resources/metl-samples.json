@@ -3259,14 +3259,6 @@
           "NAME" : "mapping.processor.model.object.maps.to",
           "VALUE" : "40c56640-2371-46d8-bf14-e86a418a5d18"
         },
-        "6e659d26-af3b-4b6b-9875-caa221447390" : {
-          "ID" : "6e659d26-af3b-4b6b-9875-caa221447390",
-          "TYPE" : "ATTRIBUTE",
-          "COMPONENT_ID" : "bdd446f2-3edf-4017-8f3a-c7213d5e0638",
-          "MODEL_OBJECT_ID" : "9e1ff189-28b6-4119-9f98-50919bcddf97",
-          "NAME" : "mapping.processor.model.object.maps.to",
-          "VALUE" : "40c56640-2371-46d8-bf14-e86a418a5d18"
-        },
         "8d330875-2ac3-45d6-8bfe-96d4ca13b92a" : {
           "ID" : "8d330875-2ac3-45d6-8bfe-96d4ca13b92a",
           "TYPE" : "ATTRIBUTE",
