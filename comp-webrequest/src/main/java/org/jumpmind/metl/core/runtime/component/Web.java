@@ -367,8 +367,14 @@ public class Web extends AbstractComponentRuntime {
             String[] parameters = parametersText.split("\\r?\\n");
             for (String parameter : parameters) {
                 String[] pair = parameter.split(":");
-                if (pair != null && pair.length > 1) {
+                if (pair != null && pair.length == 2) {
                     parsedMap.put(pair[0], pair[1]);
+                } else if (pair != null && pair.length > 2) {
+                	String value = pair[1];
+                	for (int i = 2; i < pair.length; i++) {
+            			value += ":" + pair[i];
+                	}
+                    parsedMap.put(pair[0], value);
                 }
             }
         }
