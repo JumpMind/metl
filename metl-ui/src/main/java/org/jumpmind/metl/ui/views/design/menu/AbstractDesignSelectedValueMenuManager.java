@@ -97,6 +97,9 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
             } else if ("File|Open".equals(menuSelected)) {
                 navigator.doOpen();
                 return true;
+            } else if ("File|Where Used".equals(menuSelected)) {
+                navigator.doWhereUsed();
+                return true;
             } else if ("Edit|Remove".equals(menuSelected)) {
                 navigator.doRemove();
                 return true;

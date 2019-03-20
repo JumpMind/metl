@@ -71,6 +71,7 @@ public class DesignMenuBar extends AbstractMenuBar {
         addSeparator("File");
         add("File|Import...");        
         add("File|Export...");
+        add("File|Where Used");
         
         add("Edit|Rename");
         add("Edit|Cut");

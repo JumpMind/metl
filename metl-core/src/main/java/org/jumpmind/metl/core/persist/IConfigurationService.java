@@ -51,6 +51,7 @@ import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.Tag;
+import org.jumpmind.metl.core.model.WhereUsed;
 
 public interface IConfigurationService {
 
@@ -247,4 +248,13 @@ public interface IConfigurationService {
     public void refresh(ModelSchemaObject schemaObject);
     
     public void delete(ModelSchemaObject schemaObject);
+
+    public List<WhereUsed> findModelWhereUsed(String modelId);
+
+    public List<WhereUsed> findResourceWhereUsed(String resourceId);
+
+    public List<WhereUsed> findFlowWhereUsed(String flowId);
+
+    public List<WhereUsed> findProjectVersionWhereUsed(String projectVersionId);
+
 }

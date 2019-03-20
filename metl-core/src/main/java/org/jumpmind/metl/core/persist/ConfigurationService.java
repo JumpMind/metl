@@ -79,6 +79,7 @@ import org.jumpmind.metl.core.model.ResourceSetting;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.Tag;
 import org.jumpmind.metl.core.model.Version;
+import org.jumpmind.metl.core.model.WhereUsed;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.util.AppConstants;
 import org.jumpmind.metl.core.util.NameValue;
@@ -1768,9 +1769,9 @@ public class ConfigurationService extends AbstractService
                 "select "
                 + "  distinct model_relation_id "
                 + "from %1$s_model_relation_mapping mrm "
-                + "   inner join %1$s_model_attribute sma "
+                + "   inner join %1$s_model_attrib sma "
                 + "      on sma.id = mrm.source_entity_id "
-                + "   inner join %1$s_model_attribute ma "
+                + "   inner join %1$s_model_attrib ma "
                 + "      on tma.id = mrm.target_entity_id "
                 + "where "
                 + "   sma.entity_id = '%2$s' and "
@@ -1969,7 +1970,144 @@ public class ConfigurationService extends AbstractService
     private void findSchemaObjectsToDelete(ModelSchemaObject schemaObject, ArrayList<ModelSchemaObject> objectsToDelete) {
         objectsToDelete.add(schemaObject);
         for (ModelSchemaObject childObject:schemaObject.getChildObjects()) {
-            findSchemaObjectsToDelete(childObject,objectsToDelete);            
+            findSchemaObjectsToDelete(childObject,objectsToDelete);
         }
     }
+
+	@Override
+	public List<WhereUsed> findModelWhereUsed(String modelId) {
+		List<WhereUsed> whereUsedList = new ArrayList<WhereUsed>();
+        final String WHERE_USED_SQL = 
+                "select distinct f.id as object_id "
+                + "     , p.name as project_name "
+                + "     , f.name as flow_name "
+                + "     , c.name as component_name "
+                + "from %1$s_project p "
+                + "inner join %1$s_project_version pv "
+                + "   on p.id = pv.project_id "
+                + "inner join %1$s_flow f "
+                + "   on pv.id = f.project_version_id "
+                + "inner join %1$s_flow_step fs "
+                + "   on f.id = fs.flow_id "
+                + "inner join %1$s_component c "
+                + "   on fs.component_id = c.id "
+                + "left outer join %1$s_relational_model rm "
+                + "   on c.input_model_id = rm.id "
+                + "   or c.output_model_id = rm.id "
+                + "left outer join %1$s_hierarchical_model hm "
+                + "   on c.input_model_id = hm.id "
+                + "   or c.output_model_id = hm.id "
+                + "where p.deleted = 0 "
+                + "  and pv.deleted = 0 "
+                + "  and f.deleted = 0 "
+                + "  and c.deleted = 0 "
+                + "  and (rm.id = '%2$s' "
+                + "    or hm.id = '%2$s') "
+                + "order by p.name, f.name, c.name ";
+
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> whereUsedRows = template.query(String.format(WHERE_USED_SQL, tablePrefix, modelId));
+        for (Row row : whereUsedRows) {
+        	WhereUsed whereUsed = new WhereUsed(row.getString("object_id"), row.getString("project_name"), row.getString("flow_name"), row.getString("component_name"));
+        	whereUsedList.add(whereUsed);
+        }
+        return whereUsedList;
+	}
+
+	@Override
+	public List<WhereUsed> findResourceWhereUsed(String resourceId) {
+		List<WhereUsed> whereUsedList = new ArrayList<WhereUsed>();
+        final String WHERE_USED_SQL = 
+                "select distinct f.id as object_id "
+                + "     , p.name as project_name "
+                + "     , f.name as flow_name "
+                + "     , c.name as component_name "
+                + "from %1$s_project p "
+                + "inner join %1$s_project_version pv "
+                + "   on p.id = pv.project_id "
+                + "inner join %1$s_flow f "
+                + "   on pv.id = f.project_version_id "
+                + "inner join %1$s_flow_step fs "
+                + "   on f.id = fs.flow_id "
+                + "inner join %1$s_component c "
+                + "   on fs.component_id = c.id "
+                + "left outer join %1$s_resource r "
+                + "   on c.resource_id = r.id "
+                + "where p.deleted = 0 "
+                + "  and pv.deleted = 0 "
+                + "  and f.deleted = 0 "
+                + "  and c.deleted = 0 "
+                + "  and (r.id = '%2$s') "
+                + "order by p.name, f.name, c.name ";
+
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> whereUsedRows = template.query(String.format(WHERE_USED_SQL, tablePrefix, resourceId));
+        for (Row row : whereUsedRows) {
+        	WhereUsed whereUsed = new WhereUsed(row.getString("object_id"), row.getString("project_name"), row.getString("flow_name"), row.getString("component_name"));
+        	whereUsedList.add(whereUsed);
+        }
+        return whereUsedList;
+	}
+
+	@Override
+	public List<WhereUsed> findFlowWhereUsed(String flowId) {
+		List<WhereUsed> whereUsedList = new ArrayList<WhereUsed>();
+        final String WHERE_USED_SQL = 
+                "select distinct f.id as object_id "
+                + "     , p.name as project_name "
+                + "     , f.name as flow_name "
+                + "     , c.name as component_name "
+                + "from %1$s_project p "
+                + "inner join %1$s_project_version pv "
+                + "   on p.id = pv.project_id "
+                + "inner join %1$s_flow f "
+                + "   on pv.id = f.project_version_id "
+                + "inner join %1$s_flow_step fs "
+                + "   on f.id = fs.flow_id "
+                + "inner join %1$s_component c "
+                + "   on fs.component_id = c.id "
+                + "left outer join %1$s_component_setting cs "
+                + "   on c.id = cs.component_id "
+                + "  and cs.name = 'flow.id' "
+                + "where p.deleted = 0 "
+                + "  and pv.deleted = 0 "
+                + "  and f.deleted = 0 "
+                + "  and c.deleted = 0 "
+                + "  and (cs.value = '%2$s') "
+                + "order by p.name, f.name, c.name ";
+
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> whereUsedRows = template.query(String.format(WHERE_USED_SQL, tablePrefix, flowId));
+        for (Row row : whereUsedRows) {
+        	WhereUsed whereUsed = new WhereUsed(row.getString("object_id"), row.getString("project_name"), row.getString("flow_name"), row.getString("component_name"));
+        	whereUsedList.add(whereUsed);
+        }
+        return whereUsedList;
+	}
+
+	@Override
+	public List<WhereUsed> findProjectVersionWhereUsed(String projectVersionId) {
+		List<WhereUsed> whereUsedList = new ArrayList<WhereUsed>();
+        final String WHERE_USED_SQL = 
+                "select distinct p.id as object_id "
+                + "     , p.name as project_name "
+                + "     , '' as flow_name "
+                + "     , '' as component_name "
+                + "from %1$s_project p "
+                + "inner join %1$s_project_version pv "
+                + "   on p.id = pv.project_id "
+                + "inner join %1$s_project_version_depends pvd "
+                + "   on pv.id = pvd.project_version_id "
+                + "where p.deleted = 0 "
+                + "  and pvd.target_project_version_id = '%2$s' "
+                + "order by p.name ";
+
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> whereUsedRows = template.query(String.format(WHERE_USED_SQL, tablePrefix, projectVersionId));
+        for (Row row : whereUsedRows) {
+        	WhereUsed whereUsed = new WhereUsed(row.getString("object_id"), row.getString("project_name"), row.getString("flow_name"), row.getString("component_name"));
+        	whereUsedList.add(whereUsed);
+        }
+        return whereUsedList;
+	}
 }

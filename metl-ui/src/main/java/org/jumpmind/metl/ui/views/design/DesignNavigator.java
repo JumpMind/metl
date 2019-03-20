@@ -698,6 +698,39 @@ public class DesignNavigator extends VerticalLayout {
         }
     }
 
+    public void doWhereUsed() {
+        whereUsed(treeTable.getValue());
+    }
+    
+    protected void whereUsed(Object item) {
+    	if (item instanceof RelationalModelName) {
+            RelationalModelName modelName = (RelationalModelName) item;
+            WhereUsedPanel panel = new WhereUsedPanel("Model", modelName.getId(), modelName.getName(), context, this);
+            tabs.addCloseableTab(modelName.getId(),
+                    String.format("%s (Where Used)", modelName.getName()), Icons.MODEL, panel);
+    	} else if (item instanceof HierarchicalModelName) {
+            HierarchicalModelName modelName = (HierarchicalModelName) item;
+            WhereUsedPanel panel = new WhereUsedPanel("Model", modelName.getId(), modelName.getName(), context, this);
+            tabs.addCloseableTab(modelName.getId(),
+                    String.format("%s (Where Used)", modelName.getName()), Icons.MODEL, panel);
+    	} else if (item instanceof ResourceName) {
+    		ResourceName resource = (ResourceName) item;
+            WhereUsedPanel panel = new WhereUsedPanel("Resource", resource.getId(), resource.getName(), context, this);
+            tabs.addCloseableTab(resource.getId(),
+                    String.format("%s (Where Used)", resource.getName()), treeTable.getItemIcon(item), panel);
+    	} else if (item instanceof FlowName) {
+    		FlowName flow = (FlowName) item;
+            WhereUsedPanel panel = new WhereUsedPanel("Flow", flow.getId(), flow.getName(), context, this);
+            tabs.addCloseableTab(flow.getId(),
+                    String.format("%s (Where Used)", flow.getName()), Icons.FLOW, panel);
+        } else if (item instanceof ProjectVersion) {
+            ProjectVersion projectVersion = (ProjectVersion) item;
+            WhereUsedPanel panel = new WhereUsedPanel("ProjectVersion", projectVersion.getId(), String.format("%s-%s", projectVersion.getProject().getName(), projectVersion.getName()), context, this);
+            tabs.addCloseableTab(projectVersion.getId(),
+                    String.format("%s (%s - Where Used)", projectVersion.getProject().getName(), projectVersion.getName()), Icons.PROJECT_VERSION, panel);
+    	}
+    }
+
     public void doExport() {
         ExportDialog.show(context, treeTable.getValue());
     }
