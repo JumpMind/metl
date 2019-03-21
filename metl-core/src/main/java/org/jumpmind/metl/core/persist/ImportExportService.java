@@ -101,18 +101,21 @@ public class ImportExportService extends AbstractService implements IImportExpor
                     "        on pv.PROJECT_ID = p.ID\n" + 
                     "where project_version_id='%2$s' order by pv.id","id"}
     };
-    
+
     final String[][] MODEL_SQL = {
             {"_relational_model","select * from %1$s_relational_model where project_version_id='%2$s' and id='%3$s' order by id","id"},
-            {"_model_entity","select * from %1$s_model_entity where model_id='%3$s' order by id","id"},
+            {"_hierarchical_model","select * from %1$s_hierarchical_model where project_version_id='%2$s' and id='%3$s' order by id","id"},
+            {"_model_entity","select * from %1$s_model_entity where model_id='%3$s' and (model_id in (select id from %1$s_relational_model where project_version_id='%2$s' and id='%3$s') or \n" +
+                     "model_id in (select id from %1$s_hierarchical_model where project_version_id='%2$s' and id='%3$s')) order by id","id"},
             {"_model_attrib","select * from %1$s_model_attrib where entity_id in "
             + "(select id from %1$s_model_entity where model_id in "
-            + "(select id from %1$s_relational_model where project_version_id='%2$s' and id='%3$s')) order by id","id"}
+            + "(select id from %1$s_relational_model where project_version_id='%2$s' and id='%3$s') "
+            + "or model_id in (select id from %1$s_hierarchical_model where project_version_id='%2$s' and id='%3$s')) order by id","id"}
     };
     
     final String[][] RESOURCE_SQL = {
             {"_resource","select * from %1$s_resource where project_version_id = '%2$s' and id='%3$s' order by id","id"},
-            {"_resource_setting","select * from %1$s_resource_setting where resource_id='%3$s' order by resource_id, name","resource_id,name"}
+            {"_resource_setting","select * from %1$s_resource_setting where resource_id='%3$s' and resource_id in (select id from %1$s_resource where project_version_id='%2$s') order by resource_id, name","resource_id,name"}
     };
     
     final String[][] FLOW_SQL = {
@@ -459,12 +462,11 @@ public class ImportExportService extends AbstractService implements IImportExpor
                 transaction);
         processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_flow_parameter"),
                 transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_flow"), transaction);
-        processTableDeletes(
-                importData.deletesToProcess.get(tablePrefix + "_component_attrib_setting"),
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_flow"),
                 transaction);
-        processTableDeletes(
-                importData.deletesToProcess.get(tablePrefix + "_component_entity_setting"),
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_component_attrib_setting"),
+                transaction);
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_component_entity_setting"),
                 transaction);
         processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_component_setting"),
                 transaction);
@@ -478,7 +480,10 @@ public class ImportExportService extends AbstractService implements IImportExpor
                 transaction);
         processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_model_entity"),
                 transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_model"), transaction);
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_relational_model"),
+                transaction);
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_hierarchical_model"),
+                transaction);
     }
 
     protected void importExtraConfiguration(ImportConfigData importData, ISqlTransaction transaction, String userId) {        
