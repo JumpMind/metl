@@ -706,27 +706,27 @@ public class DesignNavigator extends VerticalLayout {
     	if (item instanceof RelationalModelName) {
             RelationalModelName modelName = (RelationalModelName) item;
             WhereUsedPanel panel = new WhereUsedPanel("Model", modelName.getId(), modelName.getName(), context, this);
-            tabs.addCloseableTab(modelName.getId(),
+            tabs.addCloseableTab(modelName.getId()+"WU",
                     String.format("%s (Where Used)", modelName.getName()), Icons.MODEL, panel);
     	} else if (item instanceof HierarchicalModelName) {
             HierarchicalModelName modelName = (HierarchicalModelName) item;
             WhereUsedPanel panel = new WhereUsedPanel("Model", modelName.getId(), modelName.getName(), context, this);
-            tabs.addCloseableTab(modelName.getId(),
+            tabs.addCloseableTab(modelName.getId()+"WU",
                     String.format("%s (Where Used)", modelName.getName()), Icons.MODEL, panel);
     	} else if (item instanceof ResourceName) {
     		ResourceName resource = (ResourceName) item;
             WhereUsedPanel panel = new WhereUsedPanel("Resource", resource.getId(), resource.getName(), context, this);
-            tabs.addCloseableTab(resource.getId(),
+            tabs.addCloseableTab(resource.getId()+"WU",
                     String.format("%s (Where Used)", resource.getName()), treeTable.getItemIcon(item), panel);
     	} else if (item instanceof FlowName) {
     		FlowName flow = (FlowName) item;
             WhereUsedPanel panel = new WhereUsedPanel("Flow", flow.getId(), flow.getName(), context, this);
-            tabs.addCloseableTab(flow.getId(),
+            tabs.addCloseableTab(flow.getId()+"WU",
                     String.format("%s (Where Used)", flow.getName()), Icons.FLOW, panel);
         } else if (item instanceof ProjectVersion) {
             ProjectVersion projectVersion = (ProjectVersion) item;
             WhereUsedPanel panel = new WhereUsedPanel("ProjectVersion", projectVersion.getId(), String.format("%s-%s", projectVersion.getProject().getName(), projectVersion.getName()), context, this);
-            tabs.addCloseableTab(projectVersion.getId(),
+            tabs.addCloseableTab(projectVersion.getId()+"WU",
                     String.format("%s (%s - Where Used)", projectVersion.getProject().getName(), projectVersion.getName()), Icons.PROJECT_VERSION, panel);
     	}
     }
@@ -796,6 +796,9 @@ public class DesignNavigator extends VerticalLayout {
             newProjectVersionId = resourceName.getProjectVersionId();
         } else if (object instanceof RelationalModelName) {
             RelationalModelName modelName = (RelationalModelName) object;
+            newProjectVersionId = modelName.getProjectVersionId();
+        } else if (object instanceof HierarchicalModelName) {
+        	HierarchicalModelName modelName = (HierarchicalModelName) object;
             newProjectVersionId = modelName.getProjectVersionId();
         } else if (object instanceof FlowName) {
             FlowName flowName = (FlowName) object;
