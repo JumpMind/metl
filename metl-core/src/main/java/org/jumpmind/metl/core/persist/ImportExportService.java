@@ -574,9 +574,11 @@ public class ImportExportService extends AbstractService implements IImportExpor
         }       
         
         for (int i = 0; i <= RESOURCE_SQL.length - 1; i++) {
-            TableData importResourceData = data.resourceData.get(i);
-            processConfigTableData(importData, existingResourceData.get(i), importResourceData,
-                    RESOURCE_SQL[i][KEY_COLUMNS], transaction, userId);
+        	if (data.resourceData.size() > i) {
+	            TableData importResourceData = data.resourceData.get(i);
+	            processConfigTableData(importData, existingResourceData.get(i), importResourceData,
+	                    RESOURCE_SQL[i][KEY_COLUMNS], transaction, userId);
+        	}
         }
     }
 
@@ -596,9 +598,11 @@ public class ImportExportService extends AbstractService implements IImportExpor
         }
         
         for (int i = 0; i <= MODEL_SQL.length - 1; i++) {
-            TableData importModelData = data.modelData.get(i);
-            processConfigTableData(importData, existingModelData.get(i), importModelData,
-                    MODEL_SQL[i][KEY_COLUMNS], transaction, userId);
+        	if (data.modelData.size() > i) {
+        		TableData importModelData = data.modelData.get(i);
+                processConfigTableData(importData, existingModelData.get(i), importModelData,
+                        MODEL_SQL[i][KEY_COLUMNS], transaction, userId);
+        	}
         }
     }
 
