@@ -4,5 +4,6 @@ version = '3.4.1.' + pluginBuildNumber
 
 dependencies {
     provided project(':metl-core')   
+	compile "org.bouncycastle:bcprov-jdk15on:1.61"
     testCompile project(path: ':metl-core', configuration: 'testArtifacts')     
 }
