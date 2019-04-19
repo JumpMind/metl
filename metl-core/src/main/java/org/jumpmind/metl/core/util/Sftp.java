@@ -17,9 +17,9 @@ import javax.swing.*;
 public class Sftp{
 	public static void main(String[] arg){
 		// Automatically calculates whether you have a windowing system or not, and will popup windows or command line.
-		// java -cp .:/Users/philipmarzullo/metl/metl-3.3.0.r.84/WEB-INF/lib/jsch-0.1.54.jar org.jumpmind.metl.core.util.Sftp
+		// java -cp metl-core-3.4.2.jar:/Users/philipmarzullo/metl/metl-3.3.0.r.84/WEB-INF/lib/jsch-0.1.54.jar org.jumpmind.metl.core.util.Sftp
 		// Force to use command line only.
-		// java -cp .:/Users/philipmarzullo/metl/metl-3.3.0.r.84/WEB-INF/lib/jsch-0.1.54.jar -Djava.awt.headless=true org.jumpmind.metl.core.util.Sftp
+		// java -cp metl-core-3.4.2.jar:/Users/philipmarzullo/metl/metl-3.3.0.r.84/WEB-INF/lib/jsch-0.1.54.jar -Djava.awt.headless=true org.jumpmind.metl.core.util.Sftp
 		try{
 			JSch jsch=new JSch();
 
