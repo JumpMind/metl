@@ -385,7 +385,7 @@
             <setting id='mail.host' required='true' type='text'>
                 <name>Hostname</name>
             </setting>
-            <setting id='mail.port' required='faltruese' type='integer'>
+            <setting id='mail.smtp.port' required='false' type='integer'>
                 <name>Port Number</name>
                 <defaultValue>25</defaultValue>
             </setting>
