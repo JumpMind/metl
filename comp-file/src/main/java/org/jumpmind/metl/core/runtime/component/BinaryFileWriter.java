@@ -79,7 +79,9 @@ public class BinaryFileWriter extends AbstractFileWriter {
     
     @Override
     public void stop() {
-        streamable.close();
+    	if (streamable != null) {
+    		streamable.close();
+    	}
     }
 
 }
