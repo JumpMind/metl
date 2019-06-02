@@ -116,5 +116,11 @@ class SendMessageCallback<T> implements ISendMessageCallback {
         return sentStartup;
     }
 
+    @Override
+    public void forwardMessageToErrorSuspense(Message message) {
+        // TODO Auto-generated method stub
+        
+    }
+
 
 }

@@ -151,6 +151,10 @@ public class AgentRuntime {
         return cancelled;
     }
 
+    public Agent getAgent() {
+        return this.agent;
+    }
+
     public void setAgent(Agent agent) {
         this.agent = agent;
     }
@@ -203,6 +207,27 @@ public class AgentRuntime {
             started = true;
             starting = false;
             log.info("Agent '{}' has been started", agent);
+            
+            // loop through the deployed agents and start those that are set to run on startup
+            for (AgentDeploy deployment : deployments) {
+                Flow flow = configurationService.findFlow(deployment.getFlowId());
+                ProjectVersion projectVersion = configurationService.findProjectVersion(flow.getProjectVersionId());
+                if (!projectVersion.isDeleted()) {
+                	DeploymentStatus status = deployment.getDeploymentStatus();
+                    if (!status.equals(DeploymentStatus.DISABLED) && !status.equals(DeploymentStatus.REQUEST_DISABLE)
+                            && !status.equals(DeploymentStatus.REQUEST_REMOVE)) {
+                        try {
+            	            if (deployment.asStartType() == StartType.ON_STARTUP) {
+            	            	scheduleNow("system startup", deployment);
+            	            }
+                        } catch (Exception e) {
+                            log.warn("Failed to start '{}'", deployment.getName(), e);
+                            deployment.setStatus(DeploymentStatus.ERROR.name());
+                            deployment.setMessage(ExceptionUtils.getRootCauseMessage(e));
+                        }
+                    }
+                } 
+            }
         }
     }
 
@@ -409,7 +434,7 @@ public class AgentRuntime {
     }
 
     @SuppressWarnings("unchecked")
-    private IResourceRuntime create(XMLResourceDefinition definition, Resource resource, TypedProperties agentOverrides) {
+    public static IResourceRuntime create(XMLResourceDefinition definition, Resource resource, TypedProperties agentOverrides) { // ADB
         try {
             String resourceType = resource.getType();
             Class<? extends IResourceRuntime> clazz = (Class<? extends IResourceRuntime>) definition.getClassLoader()

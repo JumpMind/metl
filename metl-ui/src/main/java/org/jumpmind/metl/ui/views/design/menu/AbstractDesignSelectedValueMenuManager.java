@@ -1,7 +1,26 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.ui.views.design.menu;
 
 import org.jumpmind.metl.core.model.AbstractNamedObject;
-import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.ui.common.AbstractSelectedValueMenuManager;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
@@ -37,10 +56,10 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
                 navigator.addNewFlow(true);
                 return true;
             } else if ("File|New|Model|Hierarchical".equals(menuSelected)) {
-                navigator.addNewModel(Model.TYPE_HIERARCHICAL);
+                navigator.addNewHierarhicalModel();
                 return true;
             } else if ("File|New|Model|Relational".equals(menuSelected)) {
-                navigator.addNewModel(Model.TYPE_RELATIONAL);
+                navigator.addNewRelationalModel();
                 return true;
             } else if ("File|New|Resource|Database".equals(menuSelected)) {
                 navigator.addNewDatabase();
@@ -78,6 +97,9 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
             } else if ("File|Open".equals(menuSelected)) {
                 navigator.doOpen();
                 return true;
+            } else if ("File|Where Used".equals(menuSelected)) {
+                navigator.doWhereUsed();
+                return true;
             } else if ("Edit|Remove".equals(menuSelected)) {
                 navigator.doRemove();
                 return true;
@@ -91,6 +113,8 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
                 navigator.doPaste();
             } else if ("Edit|Change Dependency Version".equals(menuSelected)) {
                 navigator.doChangeDependencyVersion();
+            } else if ("Tag".equals(menuSelected)) {
+                navigator.doTag();
             }
         }
         return handled;
@@ -111,7 +135,8 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
                     "File|New|Model|Hierarchical", "File|New|Model|Relational",
                     "File|New|Resource|Database", "File|New|Resource|Directory|FTP", "File|New|Resource|Directory|File System",
                     "File|New|Resource|Directory|JMS", "File|New|Resource|Directory|SFTP", "File|New|Resource|Directory|SMB",
-                    "File|New|Resource|HTTP", "File|New|Resource|Mail Session", "File|New|Resource|Subscribe|JMS", "Edit|Rename" };
+                    "File|New|Resource|HTTP", "File|New|Resource|Mail Session", "File|New|Resource|Subscribe|JMS", 
+                    "Edit|Cut", "Edit|Paste", "Edit|Rename", "Tag" };
         } else {
             return null;
         }

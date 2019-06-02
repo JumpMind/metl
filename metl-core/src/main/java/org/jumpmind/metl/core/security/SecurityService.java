@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.security;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -9,6 +29,7 @@ import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.KeySpec;
 
@@ -167,6 +188,7 @@ public class SecurityService implements ISecurityService {
     }
 
     protected SecretKey getSecretKey() throws Exception {
+    	cleanupProviders();
         String password = getKeyStorePassword();
         KeyStore.ProtectionParameter param = new KeyStore.PasswordProtection(
                 password.toCharArray());
@@ -245,6 +267,12 @@ public class SecurityService implements ISecurityService {
         FileOutputStream os = new FileOutputStream(getKeyStoreFile());
         ks.store(os, password.toCharArray());
         os.close();
+    }
+    
+    private void cleanupProviders() {
+    	// The bouncycastle provider is pulled in when running within eclipse regardless of 
+    	// avoiding transitive dependencies from comp-pgp. BC breaks inserting entries in the keystore.
+    	Security.removeProvider("BC");
     }
 
 }

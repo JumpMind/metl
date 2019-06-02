@@ -28,7 +28,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jumpmind.metl.core.model.DataType;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Setting;
@@ -137,7 +137,7 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements TextCha
 
 
     protected String getSampleXml() {
-        Model model = component.getInputModel();
+        RelationalModel model = (RelationalModel) component.getInputModel();
         String batchXml = "";
         if (model != null) {
             ArrayList<EntityData> inputRows = new ArrayList<EntityData>();
@@ -168,10 +168,10 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements TextCha
         List<ModelEntity> entities = new ArrayList<ModelEntity>();
         if (component.getInputModel() != null) {
             if (StringUtils.isEmpty(filter)) {
-                entities.addAll(component.getInputModel().getModelEntities());
+                entities.addAll(((RelationalModel)component.getInputModel()).getModelEntities());
             } else {
                 String filterText = filter.toUpperCase();
-                for (ModelEntity entity : component.getInputModel().getModelEntities()) {
+                for (ModelEntity entity : ((RelationalModel)component.getInputModel()).getModelEntities()) {
                     if (entity.getName().toUpperCase().indexOf(filterText) != -1) {
                         entities.add(entity);
                         continue;

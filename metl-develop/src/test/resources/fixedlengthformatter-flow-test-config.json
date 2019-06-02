@@ -43,7 +43,7 @@
 	    "tableData" : { }
 	  } ],
 	  "modelData" : [ {
-	    "tableName" : "METL_MODEL",
+	    "tableName" : "METL_RELATIONAL_MODEL",
 	    "tableData" : {
 	      "eefcaefc-301a-4cb0-a019-6913d5551054" : {
 	        "ID" : "eefcaefc-301a-4cb0-a019-6913d5551054",
@@ -269,7 +269,10 @@
 	  }, {
 	    "tableName" : "METL_COMPONENT_ENTITY_SETTING",
 	    "tableData" : { }
-	  }, {
+    }, {
+      "tableName" : "METL_component_model_setting",
+      "tableData" : { }
+    }, {
 	    "tableName" : "METL_COMPONENT_ATTRIB_SETTING",
 	    "tableData" : {
 	      "09b7cea9-937d-413e-b5d0-7597e3ff7564" : {

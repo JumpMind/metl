@@ -42,7 +42,7 @@ import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.ResettableBasicDataSource;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.DataType;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.ControlMessage;
@@ -98,8 +98,8 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
         this.continueOnError = properties.is(CONTINUE_ON_ERROR);
         this.batchMode = properties.is(BATCH_MODE);
         Component comp = context.getFlowStep().getComponent();
-        Model inputModel = context.getFlowStep().getComponent().getInputModel();
-        Model outputModel = context.getFlowStep().getComponent().getOutputModel();
+        RelationalModel inputModel = (RelationalModel) context.getFlowStep().getComponent().getInputModel();
+        RelationalModel outputModel = (RelationalModel) context.getFlowStep().getComponent().getOutputModel();
         comp.setOutputModel(outputModel);
         if (inputModel == null) {
             throw new MisconfiguredException("The input model is not set and it is required");
@@ -184,7 +184,7 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
             }
             databasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(ds, new SqlTemplateSettings(), true, false);
 
-            Model inputModel = context.getFlowStep().getComponent().getInputModel();
+            RelationalModel inputModel = (RelationalModel) context.getFlowStep().getComponent().getInputModel();
             List<ModelEntity> entities = inputModel.getModelEntities();
             for (ModelEntity entity : entities) {
                 Table table = new Table();

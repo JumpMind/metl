@@ -32,6 +32,8 @@ public class Project extends AbstractNamedObject {
     String description;
 
     List<ProjectVersion> projectVersions;
+    
+    List<Tag> tags;
 
     boolean deleted;
 
@@ -71,8 +73,16 @@ public class Project extends AbstractNamedObject {
 
     public boolean isDeleted() {
         return deleted;
-    }
+    }    
     
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
+
     public ProjectVersion getMasterVersion() {
         ProjectVersion version = null;
         for (ProjectVersion projectVersion : projectVersions) {

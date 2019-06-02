@@ -20,14 +20,13 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,20 +34,34 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.net.util.Base64;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Component;
+import org.jumpmind.metl.core.runtime.BinaryMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
-import org.jumpmind.metl.core.runtime.resource.IDirectory;
-import org.jumpmind.metl.core.runtime.resource.IInputStreamWithConnection;
-import org.jumpmind.metl.core.runtime.resource.IOutputStreamWithResponse;
-//import org.jumpmind.metl.core.runtime.resource.Http;
-//import org.jumpmind.metl.core.runtime.resource.HttpDirectory;
-//import org.jumpmind.metl.core.runtime.resource.HttpOutputStream;
+import org.jumpmind.metl.core.runtime.resource.HttpDirectory;
+import org.jumpmind.metl.core.runtime.resource.IHttpDirectory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.util.FormatUtils;
 
 public class Web extends AbstractComponentRuntime {
 
@@ -57,45 +70,67 @@ public class Web extends AbstractComponentRuntime {
     public static final String DEFAULT_CHARSET = "UTF-8";
 
     public static final String RELATIVE_PATH = "relative.path";
-    
+
     public static final String BODY_FROM = "body.from";
-    
+
     public static final String BODY_TEXT = "body.text";
-    
+
+    public static final String HTTP_METHOD = "http.method";
+
     public static final String HTTP_HEADERS = "http.headers";
-    
+
     public static final String HTTP_PARAMETERS = "http.parameters";
-    
+
     public static final String PARAMETER_REPLACEMENT = "parameter.replacement";
+
+    public static final String SETTING_ENCODING = "encoding";
     
     String runWhen;
-    
+
     String relativePath;
-    
+
+    String httpMethod;
+
     String bodyFrom;
-    
+
     String bodyText;
-    
-    Map<String,String> httpHeaders;
-    
-    Map<String,String> httpParameters;
-    
+
+    Map<String, String> httpHeaders;
+
+    Map<String, String> httpParameters;
+
     boolean parameterReplacement;
-    
+
+    CloseableHttpClient httpClient;
+
+    String encoding = "UTF-8";
+
+    IHttpDirectory httpDirectory;
+
     @Override
     public void start() {
         IResourceRuntime httpResource = getResourceRuntime();
         if (httpResource == null) {
             throw new IllegalStateException("An HTTP resource must be configured");
         }
+        httpDirectory = (IHttpDirectory) getResourceReference();
         Component component = getComponent();
         bodyFrom = component.get(BODY_FROM, "Message");
         bodyText = component.get(BODY_TEXT);
-        runWhen = getComponent().get(RUN_WHEN, PER_MESSAGE);
+        runWhen = component.get(RUN_WHEN, PER_MESSAGE);
+        httpMethod = component.get(HTTP_METHOD);
+        if (isBlank(httpMethod)) {
+            httpMethod = httpDirectory.getHttpMethod();
+        }
+        if (isBlank(httpMethod)) {
+            throw new IllegalStateException("HTTP Method must be set in Web component or Http resource");
+        }
         parameterReplacement = component.getBoolean(PARAMETER_REPLACEMENT, false);
-        
+        relativePath = component.get(RELATIVE_PATH);
+        httpClient = HttpClients.createDefault();
+        encoding = properties.get(SETTING_ENCODING, encoding);
     }
-    
+
     @Override
     public boolean supportsStartupMessages() {
         return true;
@@ -107,89 +142,215 @@ public class Web extends AbstractComponentRuntime {
             httpHeaders.put(hdr.getKey(), newValue);
         }
     }
-    
-	@Override
-	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {	    
-		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
-				|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
-			IDirectory streamable = getResourceReference();
-	        Map<String, Serializable> outputMessageHeaders = new HashMap<String, Serializable>();
-			httpHeaders = getHttpHeaderConfigEntries(inputMessage);
-			httpParameters = getHttpParameterConfigEntries(inputMessage);
-			assembleRelativePathPlusParameters();
-			ArrayList<String> outputPayload = new ArrayList<String>();
-			ArrayList<String> inputPayload = new ArrayList<String>();
-			if (bodyFrom.equals("Message") && inputMessage instanceof TextMessage) {
-				inputPayload = ((TextMessage)inputMessage).getPayload();
-			} else {
-    		    inputPayload.add(bodyText);
-			}
 
-			if (inputPayload != null) {
-				try {
-				    String path = resolveParamsAndHeaders(relativePath,inputMessage);
-					for (String requestContent : inputPayload) {
-						getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-						if (parameterReplacement) {
-						    resolveHttpHeaderVars(httpHeaders, inputMessage);
-							requestContent = resolveParamsAndHeaders(requestContent, inputMessage);
-						}
-						
-                        if (isNotBlank(requestContent)) {
-                            info("sending content to %s", path);
-                            OutputStream os = streamable
-                                    .getOutputStream(path, false, false, false, httpHeaders, httpParameters);
-                            BufferedWriter writer = new BufferedWriter(
-                                    new OutputStreamWriter(os, DEFAULT_CHARSET));
-                            try {
-                                writer.write(requestContent);
-                            } finally {
-                                writer.close();
-                                if (os instanceof IOutputStreamWithResponse) {
-                                    String response = ((IOutputStreamWithResponse) os).getResponse();
-                                    if (response != null) {
-                                        outputPayload.add(response);
-                                    }
-                                }
-                            }
-                        } else {
-                            info("getting content from %s", path);
-                            IInputStreamWithConnection isc = (IInputStreamWithConnection) streamable.getInputStream(path, false, false, httpHeaders, httpParameters);
-                            Map<String, List<String>> responseHdrs = isc.getHttpConnection().getHeaderFields();
-                            outputMessageHeaders.putAll(convertResponseHdrsToMsgHeaders(responseHdrs));
-                            try {
-                                String response = IOUtils.toString(isc.getInputStream());                                
-                                if (response != null) {
-                                    outputPayload.add(response);
-                                }
-                            } finally {
-                                IOUtils.closeQuietly(isc.getInputStream());
-                            }
-                        }
-					}
-
-					if (outputPayload.size() > 0) {
-						callback.sendTextMessage(outputMessageHeaders, outputPayload);
-					}
-				} catch (IOException e) {
-					throw new IoException(String.format("Error writing to %s ", streamable), e);
-				}
-			}
-		} else if (context.getManipulatedFlow().findStartSteps().contains(context.getFlowStep()) && !PER_UNIT_OF_WORK.equals(runWhen)) {
-            warn("This component is configured as a start step but the run when is set to %s.  You might want to switch the run when to %s", runWhen, PER_UNIT_OF_WORK);            
+    @Override
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+        if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
+                || (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
+            handleInput(inputMessage, callback);
+        } else if (context.getManipulatedFlow().findStartSteps().contains(context.getFlowStep()) && !PER_UNIT_OF_WORK.equals(runWhen)) {
+            warn("This component is configured as a start step but the run when is set to %s.  You might want to switch the run when to %s",
+                    runWhen, PER_UNIT_OF_WORK);
         }
-	}
-	
-	private Map<String,String> convertResponseHdrsToMsgHeaders(Map<String, List<String>> responseHeaders) {
-	    Map<String, String> msgHeaders = new HashMap<String, String>();
-	    responseHeaders.forEach((k,v)->{
-	        if (v.size()>0) {
-	            msgHeaders.put(k, v.get(0));
-	        }
-	    });
-	    return msgHeaders;
-	}
-	
+    }
+
+    private void handleInput(Message inputMessage, ISendMessageCallback callback) {
+        String path = assemblePath(httpDirectory.getUrl(), inputMessage);
+        httpHeaders = getHttpHeaderConfigEntries(inputMessage);
+        httpParameters = getHttpParameterConfigEntries(inputMessage);
+        if (inputMessage instanceof BinaryMessage) {
+            handleBinaryInput(path, inputMessage, callback);
+        } else {
+            handleTextInput(path, inputMessage, callback);
+        }    
+    }
+    
+    private void handleBinaryInput(String path, Message inputMessage, ISendMessageCallback callback) {
+        info("sending content to %s", path);                
+        getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+        byte[] requestContent = ((BinaryMessage) inputMessage).getPayload();
+        HttpRequestBase httpRequest = buildHttpRequest(path, httpHeaders, httpParameters, httpDirectory, requestContent.length > 0);        
+        HttpEntityEnclosingRequestBase encHttpRequest = (HttpEntityEnclosingRequestBase) httpRequest;
+        ByteArrayEntity requestEntity = new ByteArrayEntity(requestContent);
+        encHttpRequest.setEntity(requestEntity);
+        executeRequestAndSendOutputMessage(encHttpRequest, callback, inputMessage);
+    }
+
+    private void handleTextInput(String path, Message inputMessage, ISendMessageCallback callback) {
+        ArrayList<String> inputPayload = new ArrayList<String>();
+        inputPayload.addAll(getInputPayload(inputMessage));
+        if (inputPayload != null) {
+            for (String requestContent : inputPayload) {
+                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+                requestContent = replaceParameters(inputMessage, requestContent);
+                boolean hasContent = isNotBlank(requestContent);
+                HttpRequestBase httpRequest = buildHttpRequest(path, httpHeaders, httpParameters, httpDirectory, hasContent);
+                if (isNotBlank(requestContent)) {
+                    info("sending content to %s", path);
+                    HttpEntityEnclosingRequestBase encHttpRequest = (HttpEntityEnclosingRequestBase) httpRequest;
+                    StringEntity requestEntity;
+                    requestEntity = new StringEntity(requestContent, DEFAULT_CHARSET);
+                    encHttpRequest.setEntity(requestEntity);
+                    executeRequestAndSendOutputMessage(encHttpRequest, callback, inputMessage);
+                } else {
+                    info("getting content from %s", path);
+                    executeRequestAndSendOutputMessage(httpRequest, callback, inputMessage);
+                }
+            }
+        }
+    }
+    
+    private void executeRequestAndSendOutputMessage(HttpRequestBase httpRequest, ISendMessageCallback callback, Message inputMessage) {
+        Map<String, Serializable> outputMessageHeaders = new HashMap<String, Serializable>();
+        
+        ArrayList<String> outputPayload = new ArrayList<String>();
+        byte[] outputBinaryPayload = null;
+        CloseableHttpResponse httpResponse = null;
+        boolean isBinary = false;
+
+        try {
+            httpResponse = httpClient.execute(httpRequest);
+            int responseCode = httpResponse.getStatusLine().getStatusCode();
+            if (responseCode / 100 != 2) {
+                throw new IoException(
+                        String.format("Error calling http method.  HTTP Status %d, HTTP Status Description %s, HTTP Result %s", responseCode,
+                                httpResponse.getStatusLine().getReasonPhrase(), 
+                                IOUtils.toString(httpResponse.getEntity().getContent())).replace("%", "%%"));
+            } else {
+                HttpEntity resultEntity = httpResponse.getEntity();
+
+                if (resultEntity != null) {
+                    int cnt = 0;
+                    outputBinaryPayload = IOUtils.toByteArray(resultEntity.getContent());
+                	for (byte b : outputBinaryPayload) {
+                		int n = b & 0xFF;
+                		if ((Integer.parseInt(Integer.toHexString(n), 16) >= Integer.parseInt("00",16) 
+                		  && Integer.parseInt(Integer.toHexString(n), 16) <= Integer.parseInt("08",16)) ||
+                	 	    (Integer.parseInt(Integer.toHexString(n), 16) >= Integer.parseInt("0E",16) 
+                       	  && Integer.parseInt(Integer.toHexString(n), 16) <= Integer.parseInt("1A",16)) ||
+                	 	    (Integer.parseInt(Integer.toHexString(n), 16) >= Integer.parseInt("1C",16) 
+                          && Integer.parseInt(Integer.toHexString(n), 16) <= Integer.parseInt("1F",16))) {
+                			// value in range to be application/octet-stream type (ie binary)
+                			isBinary = true;
+                			break;
+                		}
+                		cnt++;
+                		if (cnt > 512) {
+                			break;
+                		}
+                	}
+
+	                if (!isBinary) {
+	                	outputPayload.add(IOUtils.toString(outputBinaryPayload, null));
+	                }
+                }
+                outputMessageHeaders.putAll(inputMessage.getHeader());
+                outputMessageHeaders.putAll(responseHeadersToMap(httpResponse.getAllHeaders()));
+                EntityUtils.consume(resultEntity);
+            }
+        } catch (IOException ex) {
+            throw new IoException(String.format("Error calling service %s.  Error: %s", httpRequest.getURI().getPath(), ex.getMessage()));
+        } finally {
+            try {
+                if (httpResponse != null) {
+                    httpResponse.close();
+                }
+            } catch (IOException iox) {
+                // close quietly
+                log.info(String.format("Unable to close http session %s", iox.getMessage()));
+            }
+        }
+    	if (isBinary) {
+    		callback.sendBinaryMessage(outputMessageHeaders, outputBinaryPayload);
+        } else {
+        	callback.sendTextMessage(outputMessageHeaders, outputPayload);
+        }
+    }
+
+    private Map<String, Serializable> responseHeadersToMap(Header[] headers) {
+        Map<String, Serializable> responseHeaders = new HashMap<String, Serializable>();
+
+        for (Header header : headers) {
+            responseHeaders.put(header.getName(), header.getValue());
+        }
+        return responseHeaders;
+    }
+
+    @Override
+    public void stop() {
+        try {
+            httpClient.close();
+        } catch (IOException e) {
+            // close quietly
+            log.info(String.format("Unable to properly close httpClient connetion.  Reason: %s", e.getMessage()));
+        }
+    }
+
+    private List<String> getInputPayload(Message inputMessage) {
+        if (bodyFrom.equals("Message") && inputMessage instanceof TextMessage) {
+            return ((TextMessage) inputMessage).getPayload();
+        } else {
+            List<String> payload = new ArrayList<String>();
+            payload.add(bodyText);
+            return payload;
+        }
+    }
+
+    private String replaceParameters(Message inputMessage, String requestContent) {
+        if (parameterReplacement) {
+            resolveHttpHeaderVars(httpHeaders, inputMessage);
+            requestContent = resolveParamsAndHeaders(requestContent, inputMessage);
+        }
+        return requestContent;
+    }
+
+    protected HttpRequestBase buildHttpRequest(String path, Map<String, String> headers, Map<String,String> parameters, IHttpDirectory httpDirectory,
+            boolean hasRequestContent) {
+        HttpRequestBase request = null;
+        if (httpMethod.equalsIgnoreCase(HttpDirectory.HTTP_METHOD_GET)) {
+            if (hasRequestContent) {
+                request = new HttpGetWithEntity();
+            } else {
+                request = new HttpGet();
+            }
+        } else if (httpMethod.equalsIgnoreCase(HttpDirectory.HTTP_METHOD_PUT)) {
+            request = new HttpPut();
+        } else if (httpMethod.equalsIgnoreCase(HttpDirectory.HTTP_METHOD_PATCH)) {
+            request = new HttpPatch();
+        } else if (httpMethod.equalsIgnoreCase(HttpDirectory.HTTP_METHOD_POST)) {
+            request = new HttpPost();
+        } else if (httpMethod.equalsIgnoreCase(HttpDirectory.HTTP_METHOD_DELETE)) {
+            request = new HttpDelete();
+        }
+        try {
+            URIBuilder builder = new URIBuilder(path);
+            if (parameters != null) {
+                for (String key : parameters.keySet()) {
+                    builder.setParameter(key, parameters.get(key));
+                }
+            }
+            request.setURI(builder.build());
+        } catch (URISyntaxException ex) {
+            throw new IoException(ex);
+        }
+        if (headers != null) {
+            for (String key : headers.keySet()) {
+                request.setHeader(key, headers.get(key));
+            }
+        }
+        if (headers.get("Content-Type") == null && isNotBlank(httpDirectory.getContentType())) {
+            request.setHeader("Content-Type", httpDirectory.getContentType());
+        }
+        RequestConfig.Builder requestConfig = RequestConfig.custom();
+        requestConfig.setConnectTimeout(httpDirectory.getTimeout());
+        requestConfig.setConnectionRequestTimeout(httpDirectory.getTimeout());
+        requestConfig.setSocketTimeout(httpDirectory.getTimeout());
+        request.setConfig(requestConfig.build());
+        setAuthIfNeeded(request, httpDirectory);
+
+        return request;
+    }
+
     private Map<String, String> getHttpHeaderConfigEntries(Message inputMessage) {
         String headersText = resolveParamsAndHeaders(properties.get(HTTP_HEADERS), inputMessage);
         return parseDelimitedMultiLineParamsToMap(headersText, inputMessage);
@@ -198,41 +359,74 @@ public class Web extends AbstractComponentRuntime {
     private Map<String, String> getHttpParameterConfigEntries(Message inputMessage) {
         String parametersText = resolveParamsAndHeaders(properties.get(HTTP_PARAMETERS), inputMessage);
         return parseDelimitedMultiLineParamsToMap(parametersText, inputMessage);
-    }   
-    
+    }
+
     private Map<String, String> parseDelimitedMultiLineParamsToMap(String parametersText, Message inputMessage) {
         Map<String, String> parsedMap = new HashMap<>();
         if (parametersText != null) {
             String[] parameters = parametersText.split("\\r?\\n");
             for (String parameter : parameters) {
                 String[] pair = parameter.split(":");
-                if (pair != null && pair.length > 1) {
+                if (pair != null && pair.length == 2) {
                     parsedMap.put(pair[0], pair[1]);
+                } else if (pair != null && pair.length > 2) {
+                	String value = pair[1];
+                	for (int i = 2; i < pair.length; i++) {
+            			value += ":" + pair[i];
+                	}
+                    parsedMap.put(pair[0], value);
                 }
             }
         }
         return parsedMap;
     }
-    
-    private void assembleRelativePathPlusParameters() {
+
+    protected void setAuthIfNeeded(HttpRequestBase request, IHttpDirectory httpDirectory) {
+        if (HttpDirectory.SECURITY_BASIC.equals(httpDirectory.getSecurity())) {
+            String userpassword = String.format("%s:%s", httpDirectory.getUsername(), httpDirectory.getPassword());
+            String encodedAuthorization = new String(Base64.encodeBase64(userpassword.getBytes()));
+            request.setHeader("Authorization", "Basic " + encodedAuthorization);
+        } else if (HttpDirectory.SECURITY_TOKEN.equals(httpDirectory.getSecurity())) {
+            request.setHeader("Authorization", "Bearer " + httpDirectory.getToken());
+        } else if (HttpDirectory.SECURITY_OAUTH_10.equals(httpDirectory.getSecurity())) {
+            // TODO: We should really put this back in
+            throw new UnsupportedOperationException("OAuth 1.0 support has been removed from Metl.");
+        }
+    }
+
+    private String assemblePath(String basePath, Message inputMessage) {
         Component component = getComponent();
-        String basePath = FormatUtils.replaceTokens(component.get(RELATIVE_PATH),
-                context.getFlowParameters(), true);
-        relativePath = basePath;
-        int parmCount = 0;
-        for (Map.Entry<String, String> entry : httpParameters.entrySet()) {
-            parmCount++;
-            if (parmCount == 1) {
-                relativePath = relativePath + "?"; 
-            } else {
-                relativePath = relativePath + "&";
+        if (isNotBlank(relativePath)) {
+            String path = resolveParamsAndHeaders(basePath + component.get(RELATIVE_PATH), inputMessage);
+            int parmCount = 0;
+            if (httpParameters != null) {
+                for (Map.Entry<String, String> entry : httpParameters.entrySet()) {
+                    parmCount++;
+                    if (parmCount == 1) {
+                        path = path + "?";
+                    } else {
+                        path = path + "&";
+                    }
+                    try {
+                        path = path + entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), DEFAULT_CHARSET);
+                    } catch (UnsupportedEncodingException e) {
+                        log.error("Error URL Encoding parameters");
+                        throw new RuntimeException(e);
+                    }
+                }
             }
-            try {
-                relativePath = relativePath + entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), DEFAULT_CHARSET);
-            } catch(UnsupportedEncodingException e) {
-                log.error("Error URL Encoding parameters");
-                throw new RuntimeException(e);
-            }
+            return path;
+        } else {
+            return resolveParamsAndHeaders(basePath, inputMessage);
+        }
+    }
+
+    private class HttpGetWithEntity extends HttpEntityEnclosingRequestBase {
+        public final static String METHOD_NAME = "GET";
+
+        @Override
+        public String getMethod() {
+            return METHOD_NAME;
         }
     }
 }

@@ -56,6 +56,7 @@ import org.jumpmind.db.sql.SqlPersistenceManager;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
+import org.jumpmind.metl.core.persist.ConfigurationService;
 import org.jumpmind.metl.core.persist.ExecutionService;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
@@ -78,13 +79,11 @@ import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.security.SecurityConstants;
 import org.jumpmind.metl.core.security.SecurityService;
-import org.jumpmind.metl.core.util.AppConstants;
 import org.jumpmind.metl.core.util.EnvConstants;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.MockJdbcDriver;
 import org.jumpmind.metl.ui.definition.DefinitionPlusUIFactory;
 import org.jumpmind.metl.ui.definition.IDefinitionPlusUIFactory;
-import org.jumpmind.metl.ui.persist.AuditableConfigurationService;
 import org.jumpmind.metl.ui.persist.IUICache;
 import org.jumpmind.metl.ui.persist.UICache;
 import org.jumpmind.persist.IPersistenceManager;
@@ -353,7 +352,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Bean
     @Scope(value = "singleton")
     public String configDir() {
-        return env.getProperty(EnvConstants.CONFIG_DIR);
+        return AppUtils.getConfigDir();
     }
 
     @Bean
@@ -411,7 +410,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IConfigurationService configurationService() {
         if (configurationService == null) {
-            configurationService = new AuditableConfigurationService(operationsService(), securityService(), configDatabasePlatform(),
+            configurationService = new ConfigurationService(operationsService(), securityService(), configDatabasePlatform(),
                     persistenceManager(), tablePrefix());
         }
         return configurationService;
@@ -450,8 +449,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IPluginManager pluginManager() {
         if (pluginManager == null) {
-            String localPluginDir = String.format("%s/%s", env.getProperty(AppConstants.PROP_CONFIG_DIR), AppConstants.PLUGINS_DIR);
-            pluginManager = new PluginManager(localPluginDir, pluginServive());
+            pluginManager = new PluginManager(AppUtils.getPluginsDir(), pluginServive());
         }
         return pluginManager;
     }
@@ -499,7 +497,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
                 securityService = (ISecurityService) Class
                         .forName(System.getProperty(SecurityConstants.CLASS_NAME_SECURITY_SERVICE, SecurityService.class.getName()))
                         .newInstance();
-                securityService.setConfigDir(configDir());
+                securityService.setConfigDir(AppUtils.getBaseDir());
             } catch (RuntimeException e) {
                 throw e;
             } catch (Exception e) {
@@ -550,4 +548,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         return new UIScope();
     }
 
+    public Environment getEnv() {
+        return this.env;
+    }
 }

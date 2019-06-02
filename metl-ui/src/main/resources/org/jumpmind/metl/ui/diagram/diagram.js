@@ -193,7 +193,7 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
             instance.bind("beforeDrop", function(info) {
                 var source = info.connection.endpoints[0].getOverlay("label").label;
                 var target = info.dropEndpoint.getOverlay("label").label;
-                return source === target || source === '*' || target == '*';
+                return source === target || source === '*' || target == '*' || (source === 'M' && (target === 'R' || target === 'H')) || ((source === 'R' || source === 'H') && target === 'M');
             });
             instance.bind("connection", function(info, originalEvent) {
                 self.onConnection({

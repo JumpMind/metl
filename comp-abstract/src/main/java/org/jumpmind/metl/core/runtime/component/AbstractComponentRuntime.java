@@ -35,9 +35,10 @@ import javax.script.ScriptEngine;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.IModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.plugin.XMLComponentDefinition;
 import org.jumpmind.metl.core.plugin.XMLSetting;
@@ -198,6 +199,9 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
         Map<String,String> parms = new HashMap<>(getComponentContext().getFlowParameters());
         parms.putAll(inputMessage.getHeader().getAsStrings());
         parms.put("_sequence", Long.toString(paramFlowSequence++));
+        if (context.getFlowVariables() != null) {
+            parms.putAll(context.getFlowVariables());
+        }
         return FormatUtils.replaceTokens(text, parms, true);
     }
     
@@ -215,11 +219,11 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
         }
     }
     
-    protected Model getOutputModel() {
+    protected IModel getOutputModel() {
         return context.getFlowStep().getComponent().getOutputModel();
     }
     
-    protected Model getInputModel() {
+    protected IModel getInputModel() {
         return context.getFlowStep().getComponent().getInputModel();
     }
 
@@ -271,7 +275,7 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
     }
     
     protected void bindModelEntities(Bindings bindings) {
-        Model model = context.getFlowStep().getComponent().getInputModel();
+        RelationalModel model = (RelationalModel) context.getFlowStep().getComponent().getInputModel();
         if (model != null) {
             List<ModelEntity> entities = model.getModelEntities();
             for (ModelEntity modelEntity : entities) {
@@ -286,13 +290,15 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
         }
     }
     
+    //TODO: BIND MODEL SCHEMAOBJECTS FOR HIERARHCIAL MODEL
+    
     protected Bindings bindEntityData(ScriptEngine scriptEngine, Message inputMessage, EntityData entityData) {
         if (entityNameLookup == null) {
-            entityNameLookup = new EntityNameLookup(context.getFlowStep().getComponent().getInputModel());
+            entityNameLookup = new EntityNameLookup((RelationalModel) context.getFlowStep().getComponent().getInputModel());
         }
         Bindings bindings = scriptEngine.createBindings();       
         bindHeadersAndFlowParameters(bindings, inputMessage);
-        Model model = getInputModel();
+        RelationalModel model = (RelationalModel) getInputModel();
         bindings.put("CHANGE_TYPE", entityData.getChangeType().name());
         bindings.put("ENTITY_NAMES", entityNameLookup.getEntityNames(entityData));                
         Set<String> attributeIds = entityData.keySet();
@@ -325,14 +331,16 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
         return bindings;
     }
 
+    //TODO: GET SCHEMAOBJECT VALUE FOR HIERARCHICAL MODELS
+    
     protected Object getAttributeValue(EntityDataMessage inputMessage, String entityName, String attributeName) {
         ArrayList<EntityData> rows = inputMessage.getPayload();
-        return ComponentUtils.getAttributeValue(getInputModel(), rows, entityName, attributeName);
+        return ComponentUtils.getAttributeValue((RelationalModel) getInputModel(), rows, entityName, attributeName);
     }
 
     protected List<Object> getAttributeValues(EntityDataMessage inputMessage, String entityName, String attributeName) {
         ArrayList<EntityData> rows = inputMessage.getPayload();
-        return ComponentUtils.getAttributeValues(getInputModel(), rows, entityName, attributeName);
+        return ComponentUtils.getAttributeValues((RelationalModel) getInputModel(), rows, entityName, attributeName);
     }
     
     public void setComponentDefinition(XMLComponentDefinition componentDefinition) {

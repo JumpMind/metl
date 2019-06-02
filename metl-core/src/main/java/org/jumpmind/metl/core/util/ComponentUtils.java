@@ -23,7 +23,7 @@ package org.jumpmind.metl.core.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -33,7 +33,7 @@ final public class ComponentUtils {
     private ComponentUtils() {
     }
 
-    public static Object getAttributeValue(Model model, List<EntityData> rows, String entityName, String attributeName) {
+    public static Object getAttributeValue(RelationalModel model, List<EntityData> rows, String entityName, String attributeName) {
         List<Object> values = getAttributeValues(model, rows, entityName, attributeName);
         if (values.size() > 0) {
             return values.get(0);
@@ -41,18 +41,21 @@ final public class ComponentUtils {
         return null;
     }
     
-    public static Object getAttributeValue(Model model, EntityData data, String entityName, String attributeName) {
+    public static Object getAttributeValue(RelationalModel model, EntityData data, String entityName, String attributeName) {
         ModelEntity modelEntity = model.getEntityByName(entityName);
         if (modelEntity != null) {
             ModelAttrib attribute = modelEntity.getModelAttributeByName(attributeName);
             if (attribute != null) {
                return data.get(attribute.getId());
+            } else {
+            	throw new ModelAttributeException("Model Attribute Name '" + attributeName + "' cannot be found in entity '" + entityName + "'.");
             }
+        } else {
+        	throw new ModelEntityException("Model Entity Name '" + entityName + "' cannot be found in model '" + model.getName() + "'.");
         }
-        return null;
     }
     
-    public static void setAttributeValue(Model model, EntityData data, String entityName, String attributeName, Object value) {
+    public static void setAttributeValue(RelationalModel model, EntityData data, String entityName, String attributeName, Object value) {
         ModelEntity modelEntity = model.getEntityByName(entityName);
         if (modelEntity != null) {
             ModelAttrib attribute = modelEntity.getModelAttributeByName(attributeName);
@@ -62,7 +65,7 @@ final public class ComponentUtils {
         }
     }    
     
-    public static boolean containsEntity(Model model, EntityData data, String entityName) {
+    public static boolean containsEntity(RelationalModel model, EntityData data, String entityName) {
         ModelEntity modelEntity = model.getEntityByName(entityName);
         if (modelEntity != null) {
             List<ModelAttrib> attributes = modelEntity.getModelAttributes();
@@ -75,7 +78,7 @@ final public class ComponentUtils {
         return false;
     }
 
-    public static Object getAttributeValue(Model model, EntityData data, String attributeName) {
+    public static Object getAttributeValue(RelationalModel model, EntityData data, String attributeName) {
         List<ModelEntity> entites = model.getModelEntities();
         for (ModelEntity modelEntity : entites) {
             ModelAttrib attribute = modelEntity.getModelAttributeByName(attributeName);
@@ -86,7 +89,7 @@ final public class ComponentUtils {
         return null;
     }
 
-    public static List<Object> getAttributeValues(Model model, List<EntityData> rows, String entityName, String attributeName) {
+    public static List<Object> getAttributeValues(RelationalModel model, List<EntityData> rows, String entityName, String attributeName) {
         List<Object> values = new ArrayList<Object>();
         if (model != null && rows != null) {
             ModelAttrib attribute = model.getAttributeByName(entityName, attributeName);

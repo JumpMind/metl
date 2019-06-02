@@ -28,6 +28,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -46,8 +47,10 @@ import org.jumpmind.metl.core.model.AuditEvent;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
+import org.jumpmind.metl.core.model.ComponentModelSetting;
 import org.jumpmind.metl.core.model.ComponentName;
 import org.jumpmind.metl.core.model.ComponentSetting;
+import org.jumpmind.metl.core.model.EntityTag;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FlowParameter;
@@ -56,23 +59,27 @@ import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.FolderName;
 import org.jumpmind.metl.core.model.FolderType;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.HierarchicalModel;
+import org.jumpmind.metl.core.model.HierarchicalModelName;
+import org.jumpmind.metl.core.model.IModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
-import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.ModelRelation;
 import org.jumpmind.metl.core.model.ModelRelationMapping;
+import org.jumpmind.metl.core.model.ModelSchemaObject;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.model.ProjectVersionPlugin;
-import org.jumpmind.metl.core.model.ReleasePackage;
+import org.jumpmind.metl.core.model.RelationalModel;
+import org.jumpmind.metl.core.model.RelationalModelName;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.ResourceSetting;
-import org.jumpmind.metl.core.model.Rppv;
 import org.jumpmind.metl.core.model.Setting;
+import org.jumpmind.metl.core.model.Tag;
 import org.jumpmind.metl.core.model.Version;
+import org.jumpmind.metl.core.model.WhereUsed;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.util.AppConstants;
 import org.jumpmind.metl.core.util.NameValue;
@@ -152,11 +159,19 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public List<ModelName> findModelsInProject(String projectVersionId) {
+    public List<RelationalModelName> findRelationalModelsInProject(String projectVersionId) {
         Map<String, Object> params = new TreeMap<String, Object>();
         params.put("deleted", 0);
         params.put("projectVersionId", projectVersionId);
-        return find(ModelName.class, params, Model.class);
+        return find(RelationalModelName.class, params, RelationalModel.class);
+    }
+
+    @Override
+    public List<HierarchicalModelName> findHierarchicalModelsInProject(String projectVersionId) {
+        Map<String, Object> params = new TreeMap<String, Object>();
+        params.put("deleted", 0);
+        params.put("projectVersionId", projectVersionId);
+        return find(HierarchicalModelName.class, params, HierarchicalModel.class);
     }
 
     @Override
@@ -253,10 +268,19 @@ public class ConfigurationService extends AbstractService
     }
     
     @Override
-    public List<ModelName> findModels() {
+    public List<RelationalModelName> findRelationalModels() {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("deleted", 0);
-        List<ModelName> objects = find(ModelName.class, params);
+        List<RelationalModelName> objects = find(RelationalModelName.class, params);
+        AbstractObjectNameBasedSorter.sort(objects);
+        return objects;
+    }
+    
+    @Override
+    public List<HierarchicalModelName> findHierarchicalModels() {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("deleted", 0);
+        List<HierarchicalModelName> objects = find(HierarchicalModelName.class, params);
         AbstractObjectNameBasedSorter.sort(objects);
         return objects;
     }
@@ -311,12 +335,14 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public List<Model> findModelsByName(String projectVersionId, String name) {
+    public List<IModel> findModelsByName(String projectVersionId, String name) {
+        List<IModel> models = new ArrayList<IModel>();
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("deleted", 0);
         params.put("name", name);
         params.put("projectVersionId", projectVersionId);
-        List<Model> models = find(Model.class, params);
+        models.addAll(find(RelationalModel.class, params));
+        models.addAll(find(HierarchicalModel.class, params));
         return models;
     }
 
@@ -374,6 +400,8 @@ public class ConfigurationService extends AbstractService
         for (ProjectVersion projectVersion : versions) {
             projectVersion.setProject(project);
         }
+        List<Tag> tags = this.findTagsForEntity(Project.class.getName(), project.getId());
+        project.setTags(tags);
     }
 
     @Override
@@ -400,7 +428,7 @@ public class ConfigurationService extends AbstractService
         }
         return list;
     }
-
+    
     @Override
     public Resource findResource(String id) {
         Resource resource = findOne(Resource.class, new NameValue("id", id));
@@ -467,6 +495,11 @@ public class ConfigurationService extends AbstractService
                 ComponentAttribSetting.class, new NameValue("componentId", component.getId()));
         component.setAttributeSettings(attributeSettings);
 
+        @SuppressWarnings("unchecked")
+        List<ComponentModelSetting> modelSettings = (List<ComponentModelSetting>) findSettings(
+                ComponentModelSetting.class, new NameValue("componentId", component.getId()));
+        component.setModelSettings(modelSettings);        
+        
         if (readRelations) {
             component.setResource(findResource(component.getResourceId()));
         }
@@ -474,13 +507,36 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public Model findModel(String id) {
-        Model model = new Model(id);
+    public RelationalModel findRelationalModel(String id) {
+                
+        RelationalModel model = new RelationalModel(id);
         refresh(model);
         return model;
     }
 
-    protected Model refreshModelRelations(Model model) {
+    @Override
+    public HierarchicalModel findHierarchicalModel(String id) {
+        HierarchicalModel model = new HierarchicalModel(id);
+        refresh(model);
+        return model;
+    }
+    
+    public IModel findModel(String id) {        
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("id", id);
+        List<RelationalModel> relModel = persistenceManager.find(RelationalModel.class, params, null, null,
+                tableName(RelationalModel.class));
+        
+        IModel model = null;
+        if (relModel.size() > 0) {
+            model = findRelationalModel(id);
+        } else {
+            model = findHierarchicalModel(id);
+        }
+        return model;
+    }
+
+    protected void refreshRelationalModel(RelationalModel model) {
         model.setModelEntities(new ArrayList<>());
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("modelId", model.getId());
@@ -513,7 +569,13 @@ public class ConfigurationService extends AbstractService
         		
         }
         AbstractObjectNameBasedSorter.sort(entities);
-        return model;
+    }
+    
+    protected void refreshHierarchicalModel(HierarchicalModel model) {
+        ModelSchemaObject root = this.getHierarchicalModelRoot(model.getId());
+        if (root != null) {
+            model.setRootObject(root);
+        }
     }
     
     protected void refresh(ModelRelationMapping relationMapping) {
@@ -543,8 +605,6 @@ public class ConfigurationService extends AbstractService
         }
         return list;
     }
-
-
 
     @Override
     public void delete(Flow flow, FlowStep flowStep) {
@@ -584,8 +644,8 @@ public class ConfigurationService extends AbstractService
             delete(component);
         }
 
-        List<Model> models = find(Model.class, params);
-        for (Model model : models) {
+        List<RelationalModel> models = find(RelationalModel.class, params);
+        for (RelationalModel model : models) {
             delete(model);
         }
 
@@ -637,6 +697,8 @@ public class ConfigurationService extends AbstractService
         refreshFlowRelations(flow);
     }
 
+
+    
     private void refreshFlowRelations(Flow flow) {
         flow.setFlowSteps(new ArrayList<>());
         flow.setFlowStepLinks(new ArrayList<>());
@@ -656,7 +718,7 @@ public class ConfigurationService extends AbstractService
             }
         });
 
-        Map<String, Model> models = new HashMap<>();
+        Map<String, IModel> models = new HashMap<>();
         Map<String, Resource> resources = new HashMap<>();
 
         for (FlowStep step : steps) {
@@ -664,26 +726,31 @@ public class ConfigurationService extends AbstractService
             step.setComponent(component);
             flow.getFlowSteps().add(step);
 
+            IModel model=null;   
             String modelId = component.getOutputModelId();
-            if (isNotBlank(modelId)) {
-                Model model = models.get(modelId);
+            if (isNotBlank(modelId)) {         
+                model = models.get(modelId);
                 if (model == null) {
-                    model = findModel(modelId);
-                    models.put(modelId, model);
+                    model = this.findModel(modelId);
                 }
-                component.setOutputModel(model);
+                if (model != null) {
+                    models.put(modelId, model);
+                    component.setOutputModel(model);
+                }
             }
-
+            
             modelId = component.getInputModelId();
             if (isNotBlank(modelId)) {
-                Model model = models.get(modelId);
+                model = models.get(modelId);
                 if (model == null) {
-                    model = findModel(modelId);
-                    models.put(modelId, model);
+                    model = this.findModel(modelId);
                 }
-                component.setInputModel(model);
+                if (model != null) {
+                    models.put(modelId, model);
+                    component.setInputModel(model);
+                }
             }
-
+            
             String resourceId = component.getResourceId();
             if (isNotBlank(resourceId)) {
                 Resource resource = resources.get(resourceId);
@@ -793,7 +860,7 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public void delete(Model model) {
+    public void delete(RelationalModel model) {
         model.setDeleted(true);
         save((AbstractObject) model);
     }
@@ -827,23 +894,43 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public void refresh(Model model) {
+    public void refresh(RelationalModel model) {
         refresh((AbstractObject) model);
 
         Map<String, Object> folderParams = new HashMap<String, Object>();
         folderParams.put("id", model.getFolderId());
         model.setFolder(findOne(Folder.class, folderParams));
 
-        refreshModelRelations(model);
+        refreshRelationalModel(model);
     }
-
+    
     @Override
-    public void save(Model model) {
+    public void save(IModel model) {
+        if (model instanceof RelationalModel) {
+            save((RelationalModel) model);
+        } else {
+            save((HierarchicalModel) model);
+        }
+    }    
+
+    private void save(RelationalModel model) {
         save((AbstractObject) model);
         for (ModelEntity modelEntity : model.getModelEntities()) {
             save(modelEntity);
         }
     }    
+
+    private void save(HierarchicalModel model) {
+        save((AbstractObject) model);
+        save(model.getRootObject());
+    }
+    
+    private void save(ModelSchemaObject object) {
+        save((AbstractObject) object);
+        for (ModelSchemaObject child : object.getChildObjects()) {
+            save(child);
+        }
+    }
     
     @Override
     public void save(ModelEntity modelEntity) {
@@ -852,7 +939,18 @@ public class ConfigurationService extends AbstractService
             save(modelAttribute);
         }
     }
+    
+    @Override
+    public void refresh(HierarchicalModel model) {
+        refresh((AbstractObject) model);
 
+        Map<String, Object> folderParams = new HashMap<String, Object>();
+        folderParams.put("id", model.getFolderId());
+        model.setFolder(findOne(Folder.class, folderParams));
+
+        refreshHierarchicalModel(model);
+    }    
+    
     @Override
     public String getLastKnownVersion() {
         if (doesTableExist(Version.class)) {
@@ -885,9 +983,9 @@ public class ConfigurationService extends AbstractService
             save(newDependency);
         }
 
-        List<ModelName> models = findModelsInProject(original.getId());
-        for (ModelName modelName : models) {
-            Model newModel = copy(oldToNewUUIDMapping, findModel(modelName.getId()));
+        List<RelationalModelName> models = findRelationalModelsInProject(original.getId());
+        for (RelationalModelName modelName : models) {
+            RelationalModel newModel = copy(oldToNewUUIDMapping, findRelationalModel(modelName.getId()));
             newModel.setProjectVersionId(newVersion.getId());
             save(newModel);
         }
@@ -1002,7 +1100,7 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public Model copy(Model original) {
+    public IModel copy(IModel original) {
         return copy(new HashMap<>(), original);
     }
 
@@ -1025,13 +1123,21 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public Model copy(Map<String, AbstractObject> oldToNewUUIDMapping, Model original) {
-        Model newModel = copyWithNewUUID(oldToNewUUIDMapping, original);
+    public IModel copy(Map<String, AbstractObject> oldToNewUUIDMapping, IModel original) {
+        IModel newModel;
+        if (original instanceof RelationalModel) {
+            newModel = copy(oldToNewUUIDMapping, (RelationalModel) original);
+        } else {
+            newModel = copy(oldToNewUUIDMapping, (HierarchicalModel) original);
+        }
+        return newModel;
+    }
+
+    protected RelationalModel copy(Map<String, AbstractObject> oldToNewUUIDMapping, RelationalModel original) {
+        RelationalModel newModel = copyWithNewUUID(oldToNewUUIDMapping, original);
         newModel.setModelEntities(new ArrayList<>());
         for (ModelEntity originalModelEntity : original.getModelEntities()) {
             ModelEntity newModelEntity = copyWithNewUUID(oldToNewUUIDMapping, originalModelEntity);
-            // TODO: do we really need this put here as it should be done with
-            // the copyWithNewUUID above...
             oldToNewUUIDMapping.put(originalModelEntity.getId(), newModelEntity);
             newModelEntity.setModelId(newModel.getId());
             newModelEntity.setModelAttributes(new ArrayList<>());
@@ -1053,9 +1159,29 @@ public class ConfigurationService extends AbstractService
                 }
             }
         }
+        return newModel;        
+    }
+    
+    protected HierarchicalModel copy(Map<String, AbstractObject> oldToNewUUIDMapping, HierarchicalModel original) {
+        HierarchicalModel newModel = copyWithNewUUID(oldToNewUUIDMapping, original);
+        ModelSchemaObject newRoot = copy(oldToNewUUIDMapping, original.getRootObject(), newModel.getId(),null);
+        newRoot.setModelId(newModel.getId());
+        newModel.setRootObject(newRoot);        
         return newModel;
     }
-
+    
+    protected ModelSchemaObject copy(Map<String, AbstractObject> oldToNewUUIDMapping, ModelSchemaObject original, 
+            String newModelId, String parentId) {
+        ModelSchemaObject newObject = copyWithNewUUID(oldToNewUUIDMapping, original);
+        newObject.setModelId(newModelId);
+        newObject.setParentId(parentId);
+        newObject.setChildObjects(new ArrayList<ModelSchemaObject>());
+        for (ModelSchemaObject child : original.getChildObjects()) {
+            newObject.getChildObjects().add(copy(oldToNewUUIDMapping, child, newModelId, newObject.getId()));
+        }        
+        return newObject;        
+    }
+    
     protected void massageValues(Map<String, AbstractObject> oldToNewUUIDMapping,
             List<? extends Setting> settings) {
         Map<String, String> tokens = toStringTokens(oldToNewUUIDMapping);
@@ -1157,42 +1283,6 @@ public class ConfigurationService extends AbstractService
         }
         return previousResource;
     }
-
-    @Override
-    public List<ReleasePackage> findReleasePackages() {
-        // TODO this should really be ReleasePackageName as it won't be fully
-        // refreshed with ReleasePackageProjectVersion
-        Map<String, Object> params = new HashMap<String, Object>();
-        List<ReleasePackage> releasePackages = find(ReleasePackage.class, params);
-        AbstractObjectNameBasedSorter.sort(releasePackages);
-        return releasePackages;
-    }
-
-    @Override
-    public ReleasePackage findReleasePackage(String releasePackageId) {
-        ReleasePackage releasePackage = findOne(ReleasePackage.class,
-                new NameValue("id", releasePackageId));
-        releasePackage.setProjectVersions(findReleasePackageProjectVersions(releasePackageId));
-        return releasePackage;
-    }
-
-    @Override
-    public List<Rppv> findReleasePackageProjectVersions(
-            String releasePackageId) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("releasePackageId", releasePackageId);
-        List<Rppv> rppvs = persistenceManager.find(
-                Rppv.class, params, null, null,
-                tableName(Rppv.class));
-        return rppvs;
-    }
-
-    @Override
-    public void refresh(ReleasePackage releasePackage) {
-        refresh((AbstractObject) releasePackage);
-        releasePackage
-                .setProjectVersions(findReleasePackageProjectVersions(releasePackage.getId()));
-    }
     
     @Override
     public void doInBackground() {
@@ -1291,15 +1381,15 @@ public class ConfigurationService extends AbstractService
     }
 
     @Override
-    public List<Model> findDependentModels(String flowId) {
-        List<Model> models = new ArrayList<Model>();
+    public List<RelationalModel> findDependentModels(String flowId) {
+        List<RelationalModel> models = new ArrayList<RelationalModel>();
         final String MODELS_BY_FLOW_SQL = "select distinct dt.model_id from  "
                 + "(select distinct output_model_id as model_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s' and output_model_id is not null union "
                 + " select distinct input_model_id as model_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s' and input_model_id is not null) dt";
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         List<Row> ids = template.query(String.format(MODELS_BY_FLOW_SQL, tablePrefix, flowId));
         for (Row row : ids) {
-            models.add(this.findModel(row.getString("model_id")));
+            models.add(this.findRelationalModel(row.getString("model_id")));
         }
         return models;
     }
@@ -1369,14 +1459,6 @@ public class ConfigurationService extends AbstractService
             flows.add(this.findFlow(row.getString("flow_id")));
         }
         return flows;
-    }
-
-    @Override
-    public void deleteReleasePackageProjectVersionsForReleasePackage(String releasePackageId) {
-        final String DELETE_RELEASE_PACKAGE_VERSIONS_FOR_RELEASE_PACKAGE = "delete from %1$s_rppv " +
-                "where release_package_id = '%2$s'";
-        ISqlTemplate template = databasePlatform.getSqlTemplate();
-        template.update(String.format(DELETE_RELEASE_PACKAGE_VERSIONS_FOR_RELEASE_PACKAGE, tablePrefix, releasePackageId));                
     }
 
     @Override
@@ -1687,9 +1769,9 @@ public class ConfigurationService extends AbstractService
                 "select "
                 + "  distinct model_relation_id "
                 + "from %1$s_model_relation_mapping mrm "
-                + "   inner join %1$s_model_attribute sma "
+                + "   inner join %1$s_model_attrib sma "
                 + "      on sma.id = mrm.source_entity_id "
-                + "   inner join %1$s_model_attribute ma "
+                + "   inner join %1$s_model_attrib ma "
                 + "      on tma.id = mrm.target_entity_id "
                 + "where "
                 + "   sma.entity_id = '%2$s' and "
@@ -1705,4 +1787,344 @@ public class ConfigurationService extends AbstractService
         return modelRelations;
 	}
 
+    @Override
+    public List<Tag> findTags() {
+        return persistenceManager.find(Tag.class, null, null, null, tableName(Tag.class));
+    }
+
+    @Override
+    public void refresh(Tag tag) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params = new HashMap<String, Object>();
+        params.put("tagId", tag.getId());
+
+        List<EntityTag> taggedItems = persistenceManager.find(EntityTag.class,
+                params, null, null, tableName(EntityTag.class));
+        tag.setTaggedItems(taggedItems);
+    }
+
+    @Override
+    public void delete(Tag tag) {
+//TODO: do we want to allow them to delete tags
+//        refresh(user);
+//        for (Setting setting : user.getSettings()) {
+//            persistenceManager.delete(setting, null, null, tableName(UserSetting.class));
+//        }
+//        for (Group group : user.getGroups()) {
+//            persistenceManager.delete(new UserGroup(user.getId(), group.getId()), null, null,
+//                    tableName(UserGroup.class));
+//        }
+//
+//        List<UserHist> history = findUserHist(user.getId());
+//        for (UserHist userHist : history) {
+//            persistenceManager.delete(userHist, null, null, tableName(UserHist.class));
+//        }
+//
+        persistenceManager.delete(tag, null, null, tableName(Tag.class));
+    }
+    
+    @Override
+    public List<EntityTag> findEntityTagsForEntity(String entityId) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("entityId", entityId);
+        return find(EntityTag.class, params,EntityTag.class);
+    }
+    
+    @Override
+    public void delete(EntityTag entityTag) {
+        persistenceManager.delete(entityTag, null, null, tableName(EntityTag.class));
+    }
+
+    @Override
+    public void deleteEntityTags(String entityId) {
+        String sql = "delete from %1$s_entity_tag where entity_id='%2$s'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        template.update(String.format(sql, tablePrefix, entityId));
+    }
+
+    @Override
+    public List<Project> findProjectsWithTagLike(String tagFilterText) {
+        List<Project> projects = new ArrayList<Project>();
+        final String PROJECTS_WITH_TAG_LIKE_SQL = 
+                "select "
+                + "  distinct p.id "
+                + "from %1$s_project p "
+                + "   inner join %1$s_entity_tag et "
+                + "      on p.id = et.entity_id "
+                + "   inner join %1$s_tag t "
+                + "      on et.tag_id = t.id "
+                + "where "
+                + "   p.deleted=0 and "
+                + "   t.name like '%%" + tagFilterText + "%%'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(PROJECTS_WITH_TAG_LIKE_SQL, tablePrefix));
+        for (Row row : ids) {
+            projects.add(this.findProject(row.getString("id")));
+        }
+        return projects;
+    }
+    
+    @Override
+    public Project findProject(String id) {
+        Project project = new Project();
+        project.setId(id);
+        refresh(project);
+        return project;
+    }
+
+    public List<Tag> findTagsForEntity(String entityType, String entityId) {
+        List<Tag> tags = new ArrayList<Tag>();        
+        String sql;
+        
+        if (entityType.equals(Project.class.getName())) {
+                sql =                
+                        "select "
+                        + "  t.id, t.name, t.color "
+                        + "from %1$s_tag t "
+                        + "   inner join %1$s_entity_tag et "
+                        + "      on t.id = et.tag_id "
+                        + "where "
+                        + "   et.entity_id='%2$s' ";
+        } else {
+            throw new UnsupportedOperationException();
+        }
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(sql, tablePrefix, entityId));
+        for (Row row : ids) {
+            Tag tag = new Tag(row.getString("id"), row.getString("name"), row.getInt("color"));
+            tags.add(tag);
+        }
+        return tags;
+    }
+
+    @Override
+    public void deleteEntityTagsForTag(Tag tag) {
+        String sql = "delete from %1$s_entity_tag where tag_id='%2$s'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        template.update(String.format(sql, tablePrefix, tag.getId()));        
+    }
+    
+    public ModelSchemaObject getHierarchicalModelRoot(String modelId) {
+        
+        final String ROOT_OF_HIERARCHY_MODEL_SQL = 
+                "select " + 
+                "   so.id " + 
+                "from " + 
+                "   %1$s_hierarchical_model hm " + 
+                "   inner join %1$s_model_schema_object so " + 
+                "      on hm.id = so.model_id " + 
+                "where " +
+                "   hm.id = '%2$s' " +
+                "   and so.parent_id is null "; 
+
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(ROOT_OF_HIERARCHY_MODEL_SQL, tablePrefix, modelId));
+        if (ids.size() == 0) {
+            return null;
+        } else {
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("id", ids.get(0).getString("id"));
+            ModelSchemaObject root = this.findOne(ModelSchemaObject.class, params);
+            if (root != null) {                
+                refresh(root);
+            }
+            return root;
+        }        
+    }
+    
+    public void refresh(ModelSchemaObject object) {
+
+        final String CHILD_NODES_HIERARCHY_MODEL_SQL = 
+                "select " + 
+                "   id " + 
+                "from " + 
+                "   %1$s_model_schema_object " + 
+                "where " +
+                "   model_id = '%2$s' " +
+                "   and parent_id = '%3$s' ";        
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(CHILD_NODES_HIERARCHY_MODEL_SQL, tablePrefix,
+                object.getModelId(), object.getId()));
+        for (Row row : ids) {
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("id", row.getString("id"));
+            ModelSchemaObject childObject = this.findOne(ModelSchemaObject.class, params);
+            object.getChildObjects().add(childObject);
+            refresh(childObject);            
+        }
+    }
+
+    public void delete(ModelSchemaObject schemaObject) {
+        //can't be sure the schema object passed in was refreshed. clear children and refresh
+        schemaObject.getChildObjects().clear();
+        refresh(schemaObject);
+        ArrayList<ModelSchemaObject> objectsToDelete = new ArrayList<ModelSchemaObject>();
+        findSchemaObjectsToDelete(schemaObject,objectsToDelete);
+        ListIterator<ModelSchemaObject> ri = objectsToDelete.listIterator(objectsToDelete.size());
+        //delete in reverse order from the leaf nodes up
+        while (ri.hasPrevious()) {
+            delete((AbstractObject) ri.previous());
+        }
+    }
+    
+    private void findSchemaObjectsToDelete(ModelSchemaObject schemaObject, ArrayList<ModelSchemaObject> objectsToDelete) {
+        objectsToDelete.add(schemaObject);
+        for (ModelSchemaObject childObject:schemaObject.getChildObjects()) {
+            findSchemaObjectsToDelete(childObject,objectsToDelete);
+        }
+    }
+
+	@Override
+	public List<WhereUsed> findModelWhereUsed(String modelId) {
+		List<WhereUsed> whereUsedList = new ArrayList<WhereUsed>();
+        final String WHERE_USED_SQL = 
+                "select distinct f.id as object_id "
+                + "     , p.name as project_name "
+                + "     , f.name as flow_name "
+                + "     , c.name as component_name "
+                + "from %1$s_project p "
+                + "inner join %1$s_project_version pv "
+                + "   on p.id = pv.project_id "
+                + "inner join %1$s_flow f "
+                + "   on pv.id = f.project_version_id "
+                + "inner join %1$s_flow_step fs "
+                + "   on f.id = fs.flow_id "
+                + "inner join %1$s_component c "
+                + "   on fs.component_id = c.id "
+                + "left outer join %1$s_relational_model rm "
+                + "   on c.input_model_id = rm.id "
+                + "   or c.output_model_id = rm.id "
+                + "left outer join %1$s_hierarchical_model hm "
+                + "   on c.input_model_id = hm.id "
+                + "   or c.output_model_id = hm.id "
+                + "where p.deleted = 0 "
+                + "  and pv.deleted = 0 "
+                + "  and f.deleted = 0 "
+                + "  and c.deleted = 0 "
+                + "  and (rm.id = '%2$s' "
+                + "    or hm.id = '%2$s') "
+                + "order by p.name, f.name, c.name ";
+
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> whereUsedRows = template.query(String.format(WHERE_USED_SQL, tablePrefix, modelId));
+        for (Row row : whereUsedRows) {
+        	WhereUsed whereUsed = new WhereUsed(row.getString("object_id"), row.getString("project_name"), row.getString("flow_name"), row.getString("component_name"));
+        	whereUsedList.add(whereUsed);
+        }
+        return whereUsedList;
+	}
+
+	@Override
+	public List<WhereUsed> findResourceWhereUsed(String resourceId) {
+		List<WhereUsed> whereUsedList = new ArrayList<WhereUsed>();
+        final String WHERE_USED_SQL = 
+                "select distinct f.id as object_id "
+                + "     , p.name as project_name "
+                + "     , f.name as flow_name "
+                + "     , c.name as component_name "
+                + "from %1$s_project p "
+                + "inner join %1$s_project_version pv "
+                + "   on p.id = pv.project_id "
+                + "inner join %1$s_flow f "
+                + "   on pv.id = f.project_version_id "
+                + "inner join %1$s_flow_step fs "
+                + "   on f.id = fs.flow_id "
+                + "inner join "
+                + "   (select id "
+                + "         , resource_id "
+                + "         , name "
+                + "    from "
+                + "       (select id "
+                + "             , resource_id "
+                + "             , name "
+                + "        from %1$s_component "
+                + "        where deleted = 0 "
+                + "       union "
+                + "        select co.id "
+                + "             , s.value as resource_id "
+                + "             , co.name "
+                + "        from %1$s_component_setting s "
+                + "        inner join %1$s_component co "
+                + "          on s.component_id = co.id "
+                + "        where s.name like '%%resource%%' "
+                + "          and co.deleted = 0)) c "
+                + "   on fs.component_id = c.id "
+                + "left outer join %1$s_resource r "
+                + "   on c.resource_id = r.id "
+                + "where p.deleted = 0 "
+                + "  and pv.deleted = 0 "
+                + "  and f.deleted = 0 "
+                + "  and (r.id = '%2$s') "
+                + "order by p.name, f.name, c.name ";
+
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> whereUsedRows = template.query(String.format(WHERE_USED_SQL, tablePrefix, resourceId));
+        for (Row row : whereUsedRows) {
+        	WhereUsed whereUsed = new WhereUsed(row.getString("object_id"), row.getString("project_name"), row.getString("flow_name"), row.getString("component_name"));
+        	whereUsedList.add(whereUsed);
+        }
+        return whereUsedList;
+	}
+
+	@Override
+	public List<WhereUsed> findFlowWhereUsed(String flowId) {
+		List<WhereUsed> whereUsedList = new ArrayList<WhereUsed>();
+        final String WHERE_USED_SQL = 
+                "select distinct f.id as object_id "
+                + "     , p.name as project_name "
+                + "     , f.name as flow_name "
+                + "     , c.name as component_name "
+                + "from %1$s_project p "
+                + "inner join %1$s_project_version pv "
+                + "   on p.id = pv.project_id "
+                + "inner join %1$s_flow f "
+                + "   on pv.id = f.project_version_id "
+                + "inner join %1$s_flow_step fs "
+                + "   on f.id = fs.flow_id "
+                + "inner join %1$s_component c "
+                + "   on fs.component_id = c.id "
+                + "left outer join %1$s_component_setting cs "
+                + "   on c.id = cs.component_id "
+                + "  and cs.name = 'flow.id' "
+                + "where p.deleted = 0 "
+                + "  and pv.deleted = 0 "
+                + "  and f.deleted = 0 "
+                + "  and c.deleted = 0 "
+                + "  and (cs.value = '%2$s') "
+                + "order by p.name, f.name, c.name ";
+
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> whereUsedRows = template.query(String.format(WHERE_USED_SQL, tablePrefix, flowId));
+        for (Row row : whereUsedRows) {
+        	WhereUsed whereUsed = new WhereUsed(row.getString("object_id"), row.getString("project_name"), row.getString("flow_name"), row.getString("component_name"));
+        	whereUsedList.add(whereUsed);
+        }
+        return whereUsedList;
+	}
+
+	@Override
+	public List<WhereUsed> findProjectVersionWhereUsed(String projectVersionId) {
+		List<WhereUsed> whereUsedList = new ArrayList<WhereUsed>();
+        final String WHERE_USED_SQL = 
+                "select distinct p.id as object_id "
+                + "     , p.name as project_name "
+                + "     , '' as flow_name "
+                + "     , '' as component_name "
+                + "from %1$s_project p "
+                + "inner join %1$s_project_version pv "
+                + "   on p.id = pv.project_id "
+                + "inner join %1$s_project_version_depends pvd "
+                + "   on pv.id = pvd.project_version_id "
+                + "where p.deleted = 0 "
+                + "  and pvd.target_project_version_id = '%2$s' "
+                + "order by p.name ";
+
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> whereUsedRows = template.query(String.format(WHERE_USED_SQL, tablePrefix, projectVersionId));
+        for (Row row : whereUsedRows) {
+        	WhereUsed whereUsed = new WhereUsed(row.getString("object_id"), row.getString("project_name"), row.getString("flow_name"), row.getString("component_name"));
+        	whereUsedList.add(whereUsed);
+        }
+        return whereUsedList;
+	}
 }

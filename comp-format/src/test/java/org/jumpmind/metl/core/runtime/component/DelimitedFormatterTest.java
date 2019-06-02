@@ -31,7 +31,7 @@ import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Folder;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Setting;
@@ -60,7 +60,7 @@ public class DelimitedFormatterTest {
     @Test
     public void testDelimitedFormatterFromSingleContentMsg() throws Exception {
         DelimitedFormatter delimitedFormatter = new DelimitedFormatter();
-        delimitedFormatter.setContext(new ComponentContext(null, delimitedFormatterFlowStep, null, new ExecutionTrackerNoOp(), null, null, null));
+        delimitedFormatter.setContext(new ComponentContext(null, delimitedFormatterFlowStep, null, new ExecutionTrackerNoOp(), null, null, null,null));
         delimitedFormatter.start();
         Message message = createInboundMessage();        
         SendMessageCallback<ArrayList<EntityData>> msgTarget = new SendMessageCallback<ArrayList<EntityData>>();
@@ -132,7 +132,7 @@ public class DelimitedFormatterTest {
         
     }
     
-    private static Model createInputModel() {
+    private static RelationalModel createInputModel() {
 
         ModelEntity tt1 = new ModelEntity("tt1", "TEST_TABLE_1");
         tt1.addModelAttribute(new ModelAttrib("tt1col1", tt1.getId(), "COL1"));
@@ -144,7 +144,7 @@ public class DelimitedFormatterTest {
         tt2.addModelAttribute(new ModelAttrib("tt2col2", tt1.getId(), "COLY"));
         tt2.addModelAttribute(new ModelAttrib("tt2col3", tt1.getId(), "COLZ"));
 
-        Model model = new Model();
+        RelationalModel model = new RelationalModel();
         model.getModelEntities().add(tt1);
         model.getModelEntities().add(tt2);
 

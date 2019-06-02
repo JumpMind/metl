@@ -20,8 +20,6 @@
  */
 package org.jumpmind.metl.core.model;
 
-import org.jumpmind.metl.core.security.SecurityConstants;
-
 public class UserHist extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
@@ -30,7 +28,7 @@ public class UserHist extends AbstractObject {
 
     String password;
 
-    String authMethod = SecurityConstants.PASSWORD_AUTH_METHOD_SHASH;
+    String authMethod = User.AUTH_METHOD_INTERNAL;
 
     String salt;
 

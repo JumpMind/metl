@@ -27,7 +27,7 @@ import java.util.List;
 
 import org.jumpmind.metl.core.model.EntityRow;
 import org.jumpmind.metl.core.model.EntityTable;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.TextMessage;
@@ -43,7 +43,8 @@ public class Deserializer extends AbstractSerializer {
         try {
             if (inputMessage instanceof TextMessage) {
                 TextMessage textMessage = (TextMessage) inputMessage;
-                Model outputModel = getOutputModel();
+                //TODO: WORK THROUGH THIS FOR RELATIONAL VS HIERARHICAL
+                RelationalModel outputModel = (RelationalModel) getOutputModel();
                 if (outputModel != null) {
                     List<String> textList = textMessage.getPayload();
                     for (String text : textList) {

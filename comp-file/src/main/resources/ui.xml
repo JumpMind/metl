@@ -25,13 +25,13 @@
         <iconImage>org/jumpmind/metl/core/runtime/component/metl-text-file-48x48-color.png</iconImage>
     </component-ui> 
     <component-ui id="Binary File Reader UI" componentId="Binary File Reader">
-        <iconImage>org/jumpmind/metl/core/runtime/component/metl-text-file-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-binary-reader-48x48-color.png</iconImage>
     </component-ui> 
     <component-ui id="Text File Writer UI" componentId="Text File Writer">
         <iconImage>org/jumpmind/metl/core/runtime/component/metl-text-writer-48x48-color.png</iconImage>
     </component-ui>    
     <component-ui id="Binary File Writer UI" componentId="Binary File Writer">
-        <iconImage>org/jumpmind/metl/core/runtime/component/metl-text-writer-48x48-color.png</iconImage>
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-binary-writer-48x48-color.png</iconImage>
     </component-ui>    
     <component-ui id="File Poller UI" componentId="File Poller">
         <iconImage>org/jumpmind/metl/core/runtime/component/metl-file-poller-48x48-color.png</iconImage>

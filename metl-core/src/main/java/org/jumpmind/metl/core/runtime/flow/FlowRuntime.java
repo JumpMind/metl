@@ -26,6 +26,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -55,8 +56,6 @@ import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.core.plugin.IDefinitionFactory;
 import org.jumpmind.metl.core.plugin.XMLComponentDefinition;
 import org.jumpmind.metl.core.runtime.ControlMessage;
-import org.jumpmind.metl.core.runtime.ExecutionTrackerLogger;
-import org.jumpmind.metl.core.runtime.ExecutionTrackerRecorder;
 import org.jumpmind.metl.core.runtime.IExecutionTracker;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
@@ -100,6 +99,8 @@ public class FlowRuntime {
     Agent agent;
 
     Map<String, String> flowParameters;
+    
+    Map<String, String> flowVariables;
 
     List<Notification> notifications;
 
@@ -158,13 +159,10 @@ public class FlowRuntime {
         if (runtimeParameters != null) {
             this.flowParameters.putAll(runtimeParameters);
         }
+        this.flowVariables = Collections.synchronizedMap(new HashMap<>());
         
-        if (threadService != null && executionService != null) {
-            this.executionTracker = new ExecutionTrackerRecorder(agent, deployment, threadService,
-                    executionService, userId, flowParameters.toString());
-        } else {
-            this.executionTracker = new ExecutionTrackerLogger(deployment);
-        }
+        this.executionTracker = executionService.getExecutionTracker(this.threadService, this.executionService, agent, deployment, userId, flowParameters);
+                
         this.stepRuntimes = new HashMap<String, StepRuntime>();
 
         manipulatedFlow = manipulateFlow(deployment.getFlow());
@@ -176,7 +174,7 @@ public class FlowRuntime {
             if (enabled) {
                 ComponentContext context = new ComponentContext(deployment.getAgentDeployment(), flowStep,
                         manipulatedFlow, executionTracker, deployedResources, flowParameters,
-                        globalSettings);
+                        globalSettings, flowVariables);
                 StepRuntime stepRuntime = new StepRuntime(componentRuntimeFactory,
                         definitionFactory, context, this);
                 stepRuntimes.put(flowStep.getId(), stepRuntime);

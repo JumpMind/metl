@@ -23,9 +23,9 @@
 <definitions>
   <component category='PROCESSOR'
              id='Web'
-             inputMessageType='text'
+             inputMessageType='any'
              inputOutputModelsMatch='false'
-             outputMessageType='text'
+             outputMessageType='any'
              resourceCategory='http'
              supportsMultipleThreads='true'>
     <name>Web Request</name>
@@ -43,6 +43,17 @@
           <choice>PER MESSAGE</choice>
         </choices>
       </setting>
+      <setting id='http.method' required='false' type='choice'>
+          <name>HTTP Method</name>
+          <defaultValue>GET</defaultValue>
+          <choices>
+              <choice>GET</choice>
+              <choice>PUT</choice>
+              <choice>PATCH</choice>
+              <choice>POST</choice>
+              <choice>DELETE</choice>
+          </choices>
+      </setting>  
       <setting id='relative.path'
                required='false'
                type='text'>
@@ -73,12 +84,16 @@
          required='false'
          type='multiline_text'>
          <name>Http Parameters</name>
-      </setting>                  
+      </setting>
       <setting id='parameter.replacement'
                required='false'
                type='boolean'>
         <name>Parameter replacement</name>
         <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='encoding' required='false' type='text'>
+          <name>Encoding</name>
+          <defaultValue>UTF-8</defaultValue>
       </setting>
     </settings>
   </component>  

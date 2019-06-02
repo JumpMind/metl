@@ -1,8 +1,29 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.ui.views.design.menu;
 
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FolderName;
-import org.jumpmind.metl.core.model.ModelName;
+import org.jumpmind.metl.core.model.HierarchicalModelName;
+import org.jumpmind.metl.core.model.RelationalModelName;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
@@ -22,7 +43,8 @@ public class DesignMenuBar extends AbstractMenuBar {
         addMenuManager(Project.class, new ProjectMenuManager(navigator));
         addMenuManager(FlowName.class, new FlowMenuManager(navigator));
         addMenuManager(ResourceName.class, new ResourceMenuManager(navigator));
-        addMenuManager(ModelName.class, new ModelMenuManager(navigator));
+        addMenuManager(RelationalModelName.class, new ModelMenuManager(navigator));
+        addMenuManager(HierarchicalModelName.class, new ModelMenuManager(navigator));
         addMenuManager(ProjectVersionDepends.class, new ProjectDependencyMenuManager(navigator));
         addMenuManager(FolderName.class, new FolderMenuManager(navigator));
     }
@@ -49,6 +71,7 @@ public class DesignMenuBar extends AbstractMenuBar {
         addSeparator("File");
         add("File|Import...");        
         add("File|Export...");
+        add("File|Where Used");
         
         add("Edit|Rename");
         add("Edit|Cut");
@@ -58,6 +81,8 @@ public class DesignMenuBar extends AbstractMenuBar {
         add("Edit|Change Dependency Version");
         addSeparator("Edit");
         add("Edit|Remove");
+        
+        add("Tag");
     }
 
     static class NothingSelectAction extends AbstractDesignSelectedValueMenuManager {

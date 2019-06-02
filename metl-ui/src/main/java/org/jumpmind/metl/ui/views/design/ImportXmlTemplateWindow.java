@@ -48,7 +48,6 @@ import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaders;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Resource;
-import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.plugin.XMLComponentDefinition.ResourceCategory;
 import org.jumpmind.metl.core.plugin.XMLResourceDefinition;

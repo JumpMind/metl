@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.persist;
 
 import java.util.ArrayList;
@@ -267,8 +287,10 @@ public class OperationsService extends AbstractService implements IOperationsSer
     
     @Override
     public void delete(Agent agent) {
-        agent.setDeleted(true);
-        save((AbstractObject) agent);
+        for (AgentDeploy agentDeployment : agent.getAgentDeployments()) {
+            delete(agentDeployment);
+        }
+        delete((AbstractObject) agent);
     }
 
 
@@ -301,44 +323,21 @@ public class OperationsService extends AbstractService implements IOperationsSer
     
     @Override
     public List<Notification> findNotifications() {
-        return persistenceManager.find(Notification.class, null, null, null,
-                tableName(Notification.class));
+        return null;
     }
 
     @Override
     public List<Notification> findNotificationsForAgent(String agentId) {
-        Map<String, Object> param = new HashMap<String, Object>();
-        param.put("notificationLevel", Notification.NotificationLevel.AGENT.toString());
-        param.put("linkId", agentId);
-        param.put("enabled", 1);
-        List<Notification> agentNotifications = persistenceManager.find(Notification.class, param,
-                null, null, tableName(Notification.class));
-
-        param = new HashMap<String, Object>();
-        param.put("notificationLevel", Notification.NotificationLevel.GLOBAL.toString());
-        param.put("enabled", 1);
-        List<Notification> notifications = persistenceManager.find(Notification.class, param, null,
-                null, tableName(Notification.class));
-        notifications.addAll(agentNotifications);
-        return notifications;
+        return null;
     }
 
     @Override
     public List<Notification> findNotificationsForDeployment(AgentDeploy deployment) {
-        List<Notification> notifications = findNotificationsForAgent(deployment.getAgentId());
-        Map<String, Object> param = new HashMap<String, Object>();
-        param.put("notificationLevel", Notification.NotificationLevel.DEPLOYMENT.toString());
-        param.put("linkId", deployment.getId());
-        param.put("enabled", 1);
-        List<Notification> agentNotifications = persistenceManager.find(Notification.class, param,
-                null, null, tableName(Notification.class));
-        notifications.addAll(agentNotifications);
-        return notifications;
+        return null;
     }
 
     @Override
     public void refresh(Notification notification) {
-        refresh((AbstractObject) notification);
     }
 
     @SuppressWarnings("unchecked")
@@ -358,6 +357,17 @@ public class OperationsService extends AbstractService implements IOperationsSer
             return settings.get(0);
         }
         return null;
+    }
+
+    @Override
+    public GlobalSetting findGlobalSetting(String name, String defaultValue) {
+        GlobalSetting setting = findGlobalSetting(name);
+        if (setting == null) {
+            setting = new GlobalSetting();
+            setting.setName(name);
+            setting.setValue(defaultValue);
+        }
+        return setting;
     }
 
     @Override
@@ -402,6 +412,7 @@ public class OperationsService extends AbstractService implements IOperationsSer
         user.setSalt(securityService.nextSecureHexString(10));
         user.setLastPasswordTime(new Date());
         user.setPassword(securityService.hash(user.getSalt(), newPassword));
+        user.setFailedLogins(0);
         save(user);
     }
     
@@ -409,6 +420,20 @@ public class OperationsService extends AbstractService implements IOperationsSer
     public boolean isUserLoginEnabled() {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         return template.queryForInt(String.format("select count(*) from %1$s_user where password is not null", tablePrefix)) > 0;
+    }
+
+    public boolean isUserLocked(User user) {
+    	GlobalSetting failedAttemptLimitSetting = findGlobalSetting(GlobalSetting.PASSWORD_FAILED_ATTEMPTS, 
+                Integer.toString(GlobalSetting.PASSWORD_FAILED_ATTEMPTS_DEFAULT));
+        int failedAttempts = Integer.parseInt(failedAttemptLimitSetting.getValue());
+     
+        boolean result = false;
+        if (failedAttempts > 0) {
+            if (user.getFailedLogins() >= failedAttempts) {
+                result = true;
+            }
+        }
+        return result;
     }
 
     @Override

@@ -20,14 +20,18 @@
  */
 package org.jumpmind.metl.ui.views.admin;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
-import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
-import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.TopBarLink;
+import org.jumpmind.metl.ui.common.UIConstants;
+import org.jumpmind.metl.ui.init.AppUI;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,10 +64,15 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
     @Autowired
     ApplicationContext context;
 
+    @Autowired 
+    List<AdminSideView> sideMenu;
+    
     TabbedPanel tabbedPanel;
     
     TreeTable table;
 
+    Map<String, Component> sideMenuById = new HashMap<String, Component>();
+    
     @PostConstruct
     protected void init() {
         setSizeFull();
@@ -95,19 +104,15 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         table.addContainerProperty("id", String.class, null);
         table.setVisibleColumns(new Object[] { "id" });
         table.setColumnExpandRatio("id", 1);
-        addItem("Users", Icons.USER);
-        addItem("Groups", Icons.GROUP);
-        addItem("REST", Icons.REST);
-        addItem("General Settings", Icons.SETTINGS);
-        addItem("Plugin Repositories", Icons.DATABASE);
-        addItem("Plugins", Icons.COMPONENT);
-        addItem("Mail Server", Icons.EMAIL);
-        addItem("Notifications", Icons.NOTIFICATION);
-        addItem("Active Users", FontAwesome.USERS);
-        addItem("Audit Events", FontAwesome.BARS);
-        addItem("Logging", Icons.LOGGING);        
-        addItem("About", FontAwesome.QUESTION);
         
+        for (AdminSideView sideView : sideMenu) {
+            AdminMenuLink link = (AdminMenuLink) sideView.getClass().getAnnotation(AdminMenuLink.class);
+            sideView.setAdminView(this);
+                if (link != null && link.uiClass().equals(AppUI.class) && sideView.isAccessible()) {
+                    addItem(link.id(), link.icon());
+                    sideMenuById.put(link.id(), sideView.getView());
+                }
+        }
         VerticalLayout navigator = new VerticalLayout();
         navigator.addStyleName(ValoTheme.MENU_ROOT);
         navigator.setSizeFull();
@@ -139,32 +144,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
             Object value = event.getItemId();
             if (value != null) {
                 String id = value.toString();
-                Component panel = null;
-                if (id.equals("Users")) {
-                    panel = new UserPanel(context, tabbedPanel);
-                } else if (id.equals("Groups")) {
-                    panel = new GroupPanel(context, tabbedPanel);
-                } else if (id.equals("REST")) {
-                    panel = new ApiPanel(context, tabbedPanel);
-                } else if (id.equals("General Settings")) {
-                    panel = new GeneralSettingsPanel(context, tabbedPanel);
-                } else if (id.equals("Mail Server")) {
-                    panel = new MailServerPanel(context, tabbedPanel);
-                } else if (id.equals("Notifications")) {
-                    panel = new NotificationPanel(context, tabbedPanel);
-                } else if (id.equals("Logging")) {
-                    panel = new LoggingPanel(context, tabbedPanel);
-                } else if (id.equals("Plugin Repositories")) {
-                    panel = new PluginRepositoriesPanel(context, tabbedPanel);                    
-                } else if (id.equals("About")) {
-                    panel = new AboutPanel(context, tabbedPanel);
-                } else if (id.equals("Plugins")) {
-                    panel = new PluginsPanel(context, tabbedPanel);
-                } else if (id.equals("Active Users")) {
-                    panel = new ActiveUsersPanel(context, tabbedPanel);
-                } else if (id.equals("Audit Events")) {
-                    panel = new AuditEventPanel(context, tabbedPanel);
-                }
+                Component panel = sideMenuById.get(id);
                 tabbedPanel.addCloseableTab(id, id, table.getItemIcon(id), panel);
             }
         }
@@ -186,4 +166,18 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
     @Override
     public void selected() {        
     }
+
+    protected ApplicationContext getContext() {
+        return context;
+    }
+
+    public TabbedPanel getTabbedPanel() {
+        return tabbedPanel;
+    }
+
+    protected TreeTable getTable() {
+        return table;
+    }
+
+
 }

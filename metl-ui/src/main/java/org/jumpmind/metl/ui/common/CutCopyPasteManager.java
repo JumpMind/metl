@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.ui.common;
 
 import java.util.ArrayList;
@@ -10,12 +30,16 @@ import java.util.UUID;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.HierarchicalModel;
+import org.jumpmind.metl.core.model.HierarchicalModelName;
+import org.jumpmind.metl.core.model.IModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
-import org.jumpmind.metl.core.model.ModelName;
+import org.jumpmind.metl.core.model.ModelSchemaObject;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
+import org.jumpmind.metl.core.model.RelationalModel;
+import org.jumpmind.metl.core.model.RelationalModelName;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
@@ -66,9 +90,12 @@ public class CutCopyPasteManager {
         if (object instanceof FlowName) {
             Flow flow = configurationService.findFlow(((FlowName) object).getId());
             saveToClipboard(flow);
-        } else if (object instanceof ModelName) {
-            Model model = configurationService.findModel(((ModelName) object).getId());
+        } else if (object instanceof RelationalModelName || object instanceof HierarchicalModelName) {
+            IModel model = configurationService.findModel(((AbstractObject)object).getId());
             saveToClipboard(model);
+        } else if (object instanceof HierarchicalModelName) {
+            HierarchicalModel model = configurationService.findHierarchicalModel(((HierarchicalModelName) object).getId());
+            saveToClipboard(model);            
         } else if (object instanceof ResourceName) {
             Resource resource = configurationService.findResource(((ResourceName) object).getId());
             saveToClipboard(resource);
@@ -216,8 +243,8 @@ public class CutCopyPasteManager {
         }
     }
     
-    private void restampAllSourceProjectFlows(String existingModelId, Model newModel) {
-        Model existingModel = configurationService.findModel(existingModelId);
+    private void restampAllSourceProjectFlows(String existingModelId, IModel newModel) {
+        IModel existingModel = configurationService.findModel(existingModelId);
         mapModelOldToNewUUID(oldToNewUUIDMapping, newModel, existingModel);
         Map<String, String> oldToNewUUIDStringMapping = new HashMap<String, String>();
         for (Map.Entry<String, AbstractObject> entry : oldToNewUUIDMapping.entrySet()) {
@@ -280,11 +307,11 @@ public class CutCopyPasteManager {
     }
 
     @SuppressWarnings("unchecked")
-    private boolean modelInCutBuffer(Model model, int nbrDependentFlows) {
+    private boolean modelInCutBuffer(IModel model, int nbrDependentFlows) {
         if (clipboard.containsKey(CLIPBOARD_ACTION)
                 && ((String) clipboard.get(CLIPBOARD_ACTION)).equalsIgnoreCase(CLIPBOARD_CUT)) {            
-            HashSet<Model> bufferModels = (HashSet<Model>) clipboard.get(CLIPBOARD_MODELS);
-            for (Model bufferModel : bufferModels) {
+            HashSet<IModel> bufferModels = (HashSet<IModel>) clipboard.get(CLIPBOARD_MODELS);
+            for (IModel bufferModel : bufferModels) {
                 if (model.getId().equalsIgnoreCase(bufferModel.getId()) &&
                         model.getProjectVersionId().equalsIgnoreCase(bufferModel.getProjectVersionId()) &&
                         nbrDependentFlows <=1) {
@@ -341,13 +368,13 @@ public class CutCopyPasteManager {
         return name;
     }
 
-    private String calculateModelName(Model model) {
+    private String calculateModelName(IModel model) {
         // this has the new project version id and the old name
         String name = model.getName();
         boolean calculatedName = false;
         int copyNumber = 1;
         do {
-            List<Model> existingModels = configurationService
+            List<IModel> existingModels = configurationService
                     .findModelsByName(model.getProjectVersionId(), name);
             if (existingModels.size() == 0) {
                 calculatedName = true;
@@ -390,8 +417,8 @@ public class CutCopyPasteManager {
     protected void pasteModels(Map<String, AbstractObject> oldToNewUUIDMapping,
             String newProjectVersionId) {
 
-        HashSet<Model> origModels = (HashSet<Model>) clipboard.get(CLIPBOARD_MODELS);
-        HashSet<Model> newModels = new HashSet<Model>();
+        HashSet<IModel> origModels = (HashSet<IModel>) clipboard.get(CLIPBOARD_MODELS);
+        HashSet<IModel> newModels = new HashSet<IModel>();
             
         String cutCopyOrigin;
         if (clipboard.get(CLIPBOARD_FLOW) == null) {
@@ -401,8 +428,8 @@ public class CutCopyPasteManager {
         }
         String action = (String) clipboard.get(CLIPBOARD_ACTION);
         
-        Model newModel;
-        for (Model model : origModels) {
+        IModel newModel;
+        for (IModel model : origModels) {
             int nbrAffectedFlows = configurationService.findAffectedFlowsByModel(model.getId()).size();
             String existingModelId = destinationHasModel(model, newProjectVersionId, nbrAffectedFlows);
             boolean targetProjectHasModel = existingModelId != null ? true : false;
@@ -444,7 +471,7 @@ public class CutCopyPasteManager {
                             (action.equalsIgnoreCase(CLIPBOARD_CUT) && targetProjectHasModel) ||
                             (action.equalsIgnoreCase(CLIPBOARD_COPY) && targetProjectHasModel) ||
                             (action.equalsIgnoreCase(CLIPBOARD_COPY) && !targetProjectHasModel && nbrAffectedFlows > 1))) {
-                Model modelToRestampTo;
+                IModel modelToRestampTo;
                 if (existingModelId != null) {
                     modelToRestampTo = configurationService.findModel(existingModelId);
                 } else {
@@ -463,14 +490,28 @@ public class CutCopyPasteManager {
             }
         }
         
-        for (Model model : newModels) {
+        for (IModel model : newModels) {
             model.setProjectVersionId(newProjectVersionId);
             configurationService.save(model);
         }
     }
 
     private void mapModelOldToNewUUID(Map<String, AbstractObject> oldToNewUUIDMapping,
-            Model oldModel, Model newModel) {
+            IModel oldModel, IModel newModel) {
+        if (oldModel instanceof RelationalModel) {
+            mapModelOldToNewUUID(oldToNewUUIDMapping, (RelationalModel)oldModel, (RelationalModel)newModel);
+        } else {
+            mapModelOldToNewUUID(oldToNewUUIDMapping, (HierarchicalModel)oldModel, (HierarchicalModel)newModel);
+        }
+    }
+    
+    private void mapModelOldToNewUUID(Map<String, AbstractObject> oldToNewUUIDMapping,
+            HierarchicalModel oldModel, HierarchicalModel newModel) {
+        //TODO:
+    }
+    
+    private void mapModelOldToNewUUID(Map<String, AbstractObject> oldToNewUUIDMapping,
+            RelationalModel oldModel, RelationalModel newModel) {
         oldToNewUUIDMapping.put(oldModel.getId(), newModel);
         for (ModelEntity oldEntity : oldModel.getModelEntities()) {
             ModelEntity newEntity = newModel.getEntityByName(oldEntity.getName());
@@ -483,16 +524,16 @@ public class CutCopyPasteManager {
         }
     }
 
-    private String destinationHasModel(Model model, String newProjectVersionId, int nbrAffectedFlows) {
+    private String destinationHasModel(IModel model, String newProjectVersionId, int nbrAffectedFlows) {
 
         List<String> projectVersionIds = new ArrayList<String>();
         projectVersionIds.add(newProjectVersionId);
         projectVersionIds.addAll(getDependentProjectVersionIds(newProjectVersionId));
 
         for (String projectVersionId : projectVersionIds) {
-            List<Model> existingModels = configurationService.findModelsByName(projectVersionId,
+            List<IModel> existingModels = configurationService.findModelsByName(projectVersionId,
                     model.getName());
-            for (Model existingModel : existingModels) {
+            for (IModel existingModel : existingModels) {
                 // findByName doesn't do deep fetch
                 existingModel = configurationService.findModel(existingModel.getId());
                 if (modelsMatchAcrossProjects(model, existingModel) &&
@@ -504,7 +545,49 @@ public class CutCopyPasteManager {
         return null;
     }
 
-    private boolean modelsMatchAcrossProjects(Model model1, Model model2) {
+    private boolean modelsMatchAcrossProjects(IModel model1, IModel model2) {
+        if (model1 instanceof RelationalModel) {
+            return relationalModelsMatchAcrossProjects((RelationalModel)model1, (RelationalModel)model2);
+        } else {
+            return hierarchicalModelsMatchAcrossProjects((HierarchicalModel)model1, (HierarchicalModel)model2);
+        }
+    }
+
+    private boolean hierarchicalModelsMatchAcrossProjects(HierarchicalModel model1, HierarchicalModel model2) {
+        boolean matches = true;
+        ModelSchemaObject rootObject1 = model1.getRootObject();
+        ModelSchemaObject rootObject2 = model2.getRootObject();
+        if (!modelSchemaObjectsMatch(rootObject1,rootObject2)) {
+            matches = false;
+        }
+        return matches;
+    }
+    
+    private boolean modelSchemaObjectsMatch(ModelSchemaObject object1, ModelSchemaObject object2) {
+        boolean matches = true;
+        if (!object1.getName().equalsIgnoreCase(object2.getName())) {
+            return false;
+        } else {
+            List<ModelSchemaObject> children1 = object1.getChildObjects();
+            List<ModelSchemaObject> children2 = object2.getChildObjects();
+            for (ModelSchemaObject child1 : children1) {
+                boolean foundMatch = false;
+                for (ModelSchemaObject child2 : children2) {
+                    if (child1.getName().equalsIgnoreCase(child2.getName())) {
+                        foundMatch = modelSchemaObjectsMatch(child1, child2);
+                        break;
+                    }
+                }                
+                if (!foundMatch) {
+                    matches = false;
+                    break;
+                }                
+            }
+        }
+        return matches;
+    }
+    
+    private boolean relationalModelsMatchAcrossProjects(RelationalModel model1, RelationalModel model2) {
         boolean matches = true;
         List<ModelEntity> entities1 = model1.getModelEntities();
         List<ModelEntity> entities2 = model2.getModelEntities();
@@ -523,9 +606,10 @@ public class CutCopyPasteManager {
                 break;
             }
         }
-        return matches;
+        return matches;        
     }
-
+    
+    
     private boolean modelAttributesMatchAcrossEntities(ModelEntity entity1, ModelEntity entity2) {
         boolean matches = true;
         List<ModelAttrib> attributes1 = entity1.getModelAttributes();
@@ -550,8 +634,8 @@ public class CutCopyPasteManager {
         clipboard.clear();
         clipboard.put(CLIPBOARD_ACTION, CLIPBOARD_COPY);
         oldToNewUUIDMapping.clear();
-        if (object instanceof ModelName) {
-            Model model = configurationService.findModel(((ModelName) object).getId());
+        if (object instanceof RelationalModelName  || object instanceof HierarchicalModelName) {
+            IModel model = configurationService.findModel(((AbstractObject) object).getId());
             saveToClipboard(model);
         } else if (object instanceof ResourceName) {
             Resource resource = configurationService.findResource(((ResourceName) object).getId());
@@ -562,9 +646,24 @@ public class CutCopyPasteManager {
         }
     }
 
-    private void saveToClipboard(Model model) {
-        clipboard.put(CLIPBOARD_OBJECT_TYPE, Model.class);
-        HashSet<Model> models = new HashSet<Model>();
+    private void saveToClipboard(IModel model) {
+        if (model instanceof RelationalModel) {
+            saveToClipboard((RelationalModel) model);
+        } else {
+            saveToClipboard((HierarchicalModel) model);
+        }
+    }
+    
+    private void saveToClipboard(RelationalModel model) {
+        clipboard.put(CLIPBOARD_OBJECT_TYPE, RelationalModel.class);
+        HashSet<RelationalModel> models = new HashSet<RelationalModel>();
+        models.add(model);
+        clipboard.put(CLIPBOARD_MODELS, models);
+    }
+
+    private void saveToClipboard(HierarchicalModel model) {
+        clipboard.put(CLIPBOARD_OBJECT_TYPE, HierarchicalModel.class);
+        HashSet<HierarchicalModel> models = new HashSet<HierarchicalModel>();
         models.add(model);
         clipboard.put(CLIPBOARD_MODELS, models);
     }
@@ -580,7 +679,7 @@ public class CutCopyPasteManager {
         clipboard.put(CLIPBOARD_OBJECT_TYPE, Flow.class);
         clipboard.put(CLIPBOARD_FLOW, flow);
         clipboard.put(CLIPBOARD_MODELS,
-                new HashSet<Model>(configurationService.findDependentModels(flow.getId())));
+                new HashSet<RelationalModel>(configurationService.findDependentModels(flow.getId())));
         clipboard.put(CLIPBOARD_RESOURCES,
                 new HashSet<Resource>(configurationService.findDependentResources(flow.getId())));
     }

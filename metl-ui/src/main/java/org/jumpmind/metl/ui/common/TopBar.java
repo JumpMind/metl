@@ -21,7 +21,6 @@
 package org.jumpmind.metl.ui.common;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -30,8 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jumpmind.metl.core.model.GlobalSetting;
-import org.jumpmind.metl.ui.init.ChangePasswordDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +37,6 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
@@ -75,20 +71,9 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
         addComponent(menuBar);
         setExpandRatio(menuBar, 1.0f);
 
-        String systemText = getGlobalSetting(GlobalSetting.SYSTEM_TEXT, "").getValue();
-        if (isNotBlank(systemText)) {
-            Button systemLabel = new Button(systemText, FontAwesome.WARNING);
-            systemLabel.setHtmlContentAllowed(true);
-            addComponent(systemLabel);
+        for (TopBarButton topBarButton : viewManager.getTopBarButtons()) {
+            addComponent(topBarButton);
         }
-
-        Button helpButton = new Button("Help", FontAwesome.QUESTION_CIRCLE);
-        helpButton.addClickListener(event -> openHelp(event));
-        addComponent(helpButton);
-
-        Button settingsButton = new Button(context.getUser().getLoginId(), FontAwesome.GEAR);
-        settingsButton.addClickListener((e) -> ChangePasswordDialog.show(context));
-        addComponent(settingsButton);
 
         Button logoutButton = new Button("Logout", FontAwesome.SIGN_OUT);
         logoutButton.addClickListener(event -> logout());
@@ -138,26 +123,10 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
         viewManager.navigateTo(Page.getCurrent().getUriFragment());
     }
 
-    protected GlobalSetting getGlobalSetting(String name, String defaultValue) {
-        GlobalSetting setting = context.getOperationsSerivce().findGlobalSetting(name);
-        if (setting == null) {
-            setting = new GlobalSetting();
-            setting.setName(name);
-            setting.setValue(defaultValue);
-        }
-        return setting;
-    }
-
     protected void logout() {
         URI uri = Page.getCurrent().getLocation();
         VaadinSession.getCurrent().close();
         Page.getCurrent().setLocation(uri.getPath());
-    }
-
-    protected void openHelp(ClickEvent event) {
-        String docUrl = Page.getCurrent().getLocation().toString();
-        docUrl = docUrl.substring(0, docUrl.lastIndexOf("/"));
-        Page.getCurrent().open(docUrl + "/doc/html/user-guide.html", "doc");
     }
 
     protected void uncheckAll() {

@@ -122,6 +122,12 @@
         <name>Delete Source File</name>
         <defaultValue>true</defaultValue>
       </setting>
+      <setting id='convert.slash.to.directory'
+               required='false'
+               type='boolean'>
+        <name>Convert "\" to Directory</name>
+        <defaultValue>false</defaultValue>
+      </setting>
     </settings>
   </component>
 </definitions>

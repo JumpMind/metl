@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -12,18 +32,18 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.WorkbookUtil;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
-import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.runtime.ContentMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -124,7 +144,7 @@ public class ExcelFileWriter extends AbstractFileWriter {
         if (attributes.size() == 0) {
             log(LogLevel.INFO, "There is no attribute ordering configured.  Writing all entity fields to the output as defined in model");
 
-        	Model inputModel = this.getComponent().getInputModel();
+        	RelationalModel inputModel = (RelationalModel) this.getComponent().getInputModel();
         	List<ModelEntity> entities = new ArrayList<>(inputModel.getModelEntities());
             Map<String, AttributeFormat> formats = new HashMap<String, AttributeFormat>();
             for (ModelEntity entity : entities) {
@@ -251,7 +271,7 @@ public class ExcelFileWriter extends AbstractFileWriter {
         for (ComponentAttribSetting attributeSetting : attributeSettings) {
             AttributeFormat format = formats.get(attributeSetting.getAttributeId());
             if (format == null) {
-                Model inputModel = getComponent().getInputModel();
+                RelationalModel inputModel = (RelationalModel) getComponent().getInputModel();
                 ModelAttrib attribute = inputModel.getAttributeById(attributeSetting.getAttributeId());
                 if (attribute != null) {
                     ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());

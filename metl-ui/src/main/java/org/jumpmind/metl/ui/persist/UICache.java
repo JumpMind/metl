@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.ui.persist;
 
 import java.util.ArrayList;
@@ -10,11 +30,13 @@ import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
-import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelName;
+import org.jumpmind.metl.core.model.HierarchicalModel;
+import org.jumpmind.metl.core.model.HierarchicalModelName;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
+import org.jumpmind.metl.core.model.RelationalModel;
+import org.jumpmind.metl.core.model.RelationalModelName;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.persist.IConfigurationChangedListener;
@@ -39,8 +61,10 @@ public class UICache implements IUICache {
     
     Map<String, List<ResourceName>> resourcesByProjectVersion;
     
-    Map<String, List<ModelName>> modelsByProjectVersion;
+    Map<String, List<RelationalModelName>> relationalModelsByProjectVersion;
     
+    Map<String, List<HierarchicalModelName>> hierarchicalModelsByProjectVersion;
+
     public UICache(IImportExportService importExportService, IConfigurationService configurationService) {
         this.configurationService = configurationService;
         this.importExportService = importExportService;
@@ -72,11 +96,21 @@ public class UICache implements IUICache {
 
     }
 
-    public List<ModelName> findModelsInProject(String projectVersionId) {
-        List<ModelName> list = modelsByProjectVersion.get(projectVersionId);
+    public List<RelationalModelName> findRelationalModelsInProject(String projectVersionId) {
+        List<RelationalModelName> list = relationalModelsByProjectVersion.get(projectVersionId);
         if (list == null) {
             list = Collections.synchronizedList(new ArrayList<>());
-            modelsByProjectVersion.put(projectVersionId, list);
+            relationalModelsByProjectVersion.put(projectVersionId, list);
+        }
+        return list;
+
+    }
+
+    public List<HierarchicalModelName> findHierarchicalModelsInProject(String projectVersionId) {
+        List<HierarchicalModelName> list = hierarchicalModelsByProjectVersion.get(projectVersionId);
+        if (list == null) {
+            list = Collections.synchronizedList(new ArrayList<>());
+            hierarchicalModelsByProjectVersion.put(projectVersionId, list);
         }
         return list;
 
@@ -121,18 +155,31 @@ public class UICache implements IUICache {
         }
         resourcesByProjectVersion = Collections.synchronizedMap(resourcesByProjectVersionTemp);
 
-        List<ModelName> models = configurationService.findModels();
-        Map<String, List<ModelName>> modelsByProjectVersionTemp = new HashMap<>();
-        for (ModelName obj : models) {
+        List<RelationalModelName> relationalModels = configurationService.findRelationalModels();
+        Map<String, List<RelationalModelName>> relationalModelsByProjectVersionTemp = new HashMap<>();
+        for (RelationalModelName obj : relationalModels) {
             projectVersionsByIdTemp.put(obj.getId(), obj.getProjectVersionId());
-            List<ModelName> names = modelsByProjectVersionTemp.get(obj.getProjectVersionId());
+            List<RelationalModelName> names = relationalModelsByProjectVersionTemp.get(obj.getProjectVersionId());
             if (names == null) {
                 names = Collections.synchronizedList(new ArrayList<>());
-                modelsByProjectVersionTemp.put(obj.getProjectVersionId(), names);
+                relationalModelsByProjectVersionTemp.put(obj.getProjectVersionId(), names);
             }
             names.add(obj);
         }
-        modelsByProjectVersion = Collections.synchronizedMap(modelsByProjectVersionTemp);
+        relationalModelsByProjectVersion = Collections.synchronizedMap(relationalModelsByProjectVersionTemp);
+
+        List<HierarchicalModelName> hierarchicalModels = configurationService.findHierarchicalModels();
+        Map<String, List<HierarchicalModelName>> hierarchicalModelsByProjectVersionTemp = new HashMap<>();
+        for (HierarchicalModelName obj : hierarchicalModels) {
+            projectVersionsByIdTemp.put(obj.getId(), obj.getProjectVersionId());
+            List<HierarchicalModelName> names = hierarchicalModelsByProjectVersionTemp.get(obj.getProjectVersionId());
+            if (names == null) {
+                names = Collections.synchronizedList(new ArrayList<>());
+                hierarchicalModelsByProjectVersionTemp.put(obj.getProjectVersionId(), names);
+            }
+            names.add(obj);
+        }
+        hierarchicalModelsByProjectVersion = Collections.synchronizedMap(hierarchicalModelsByProjectVersionTemp);
 
         List<ProjectVersionDepends> dependencies = configurationService.findProjectVersionDependencies();
         Map<String, List<ProjectVersionDepends>> dependenciesByProjectVersionTemp = new HashMap<>();
@@ -158,8 +205,10 @@ public class UICache implements IUICache {
                 object = new FlowName((Flow) object);
             } else if (object instanceof Resource) {
                 object = new ResourceName((Resource) object);
-            } else if (object instanceof Model) {
-                object = new ModelName((Model) object);
+            } else if (object instanceof RelationalModel) {
+                object = new RelationalModelName((RelationalModel) object);
+            } else if (object instanceof HierarchicalModel) {
+                object = new HierarchicalModelName((HierarchicalModel) object);
             }
             return object;
         }
@@ -185,9 +234,15 @@ public class UICache implements IUICache {
                 if (names != null) {
                     names.remove(named);
                 }
-            } else if (object instanceof ModelName) {
-                ModelName named = (ModelName) object;
-                List<ModelName> names = modelsByProjectVersion.get(named.getProjectVersionId());
+            } else if (object instanceof RelationalModelName) {
+                RelationalModelName named = (RelationalModelName) object;
+                List<RelationalModelName> names = relationalModelsByProjectVersion.get(named.getProjectVersionId());
+                if (names != null) {
+                    names.remove(named);
+                }
+            } else if (object instanceof HierarchicalModelName) {
+                HierarchicalModelName named = (HierarchicalModelName) object;
+                List<HierarchicalModelName> names = hierarchicalModelsByProjectVersion.get(named.getProjectVersionId());
                 if (names != null) {
                     names.remove(named);
                 }
@@ -234,13 +289,27 @@ public class UICache implements IUICache {
                         AbstractObjectNameBasedSorter.sort(names);
                     }
                 }
-            } else if (object instanceof ModelName) {
-                ModelName named = (ModelName) object;
+            } else if (object instanceof RelationalModelName) {
+                RelationalModelName named = (RelationalModelName) object;
                 if (named.isDeleted()) {
                     onDelete(named);
                 } else {
                     projectVersionsById.put(named.getId(), named.getProjectVersionId());
-                    List<ModelName> names = modelsByProjectVersion.get(named.getProjectVersionId());
+                    List<RelationalModelName> names = relationalModelsByProjectVersion.get(named.getProjectVersionId());
+                    if (names != null) {
+                        removeOldModelPvEntryIfNeeded(oldProjectVersionId, named.getProjectVersionId(), named.getId());
+                        names.remove(named);
+                        names.add(named);
+                        AbstractObjectNameBasedSorter.sort(names);
+                    }
+                }
+            } else if (object instanceof HierarchicalModelName) {
+                HierarchicalModelName named = (HierarchicalModelName) object;
+                if (named.isDeleted()) {
+                    onDelete(named);
+                } else {
+                    projectVersionsById.put(named.getId(), named.getProjectVersionId());
+                    List<HierarchicalModelName> names = hierarchicalModelsByProjectVersion.get(named.getProjectVersionId());
                     if (names != null) {
                         removeOldModelPvEntryIfNeeded(oldProjectVersionId, named.getProjectVersionId(), named.getId());
                         names.remove(named);
@@ -281,9 +350,9 @@ public class UICache implements IUICache {
     protected void removeOldModelPvEntryIfNeeded(String oldProjectVersionId, String newProjectVersionId, String id) {
         
         if (oldProjectVersionId != null && !oldProjectVersionId.equalsIgnoreCase(newProjectVersionId)) {
-            List<ModelName> oldPvNames = modelsByProjectVersion.get(oldProjectVersionId);
-            ModelName objectToRemove=null;
-            for (ModelName oldPvName: oldPvNames) {
+            List<RelationalModelName> oldPvNames = relationalModelsByProjectVersion.get(oldProjectVersionId);
+            RelationalModelName objectToRemove=null;
+            for (RelationalModelName oldPvName: oldPvNames) {
                 if (oldPvName.getId().equalsIgnoreCase(id)) {
                     objectToRemove = oldPvName;
                     break;

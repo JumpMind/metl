@@ -38,7 +38,7 @@ import org.jumpmind.db.sql.Row;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.ControlMessage;
@@ -53,6 +53,7 @@ import org.jumpmind.metl.core.runtime.resource.FileInfo;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.util.ComponentUtils;
+import org.jumpmind.metl.core.util.ModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -391,7 +392,7 @@ public class ScriptHelper {
      */
     protected boolean containsEntity(String entityName, EntityData data) {
         if (entityNameLookup == null) {
-            entityNameLookup = new EntityNameLookup(context.getFlowStep().getComponent().getInputModel());
+            entityNameLookup = new EntityNameLookup((RelationalModel) context.getFlowStep().getComponent().getInputModel());
         }
         return entityNameLookup.getEntityNames(data).contains(entityName);
     }
@@ -410,8 +411,14 @@ public class ScriptHelper {
      *            The value of the attribute
      */
     protected void putAttributeValue(String entityName, String attributeName, EntityData data, Object value) {
-        ModelAttrib attribute = flowStep.getComponent().getInputModel().getAttributeByName(entityName, attributeName);
-        data.put(attribute.getId(), value);
+        RelationalModel model = (RelationalModel) flowStep.getComponent().getOutputModel();
+        ModelAttrib attribute = model.getAttributeByName(entityName, attributeName);
+        if (attribute != null) {
+        	data.put(attribute.getId(), value);
+        } else {
+        	error("The output model, %s, is missing the entity.attribute, '%s.%s'", model.getName(), entityName, attributeName);
+        }
+        
     }
 
     /**
@@ -426,8 +433,14 @@ public class ScriptHelper {
      * @return The value of the attribute
      */
     protected Object getAttributeValue(String entityName, String attributeName, EntityData data) {
-        Model model = flowStep.getComponent().getInputModel();
-        return ComponentUtils.getAttributeValue(model, data, entityName, attributeName);
+        RelationalModel model = (RelationalModel) flowStep.getComponent().getInputModel();
+        Object obj = null;
+        try {
+        	obj = ComponentUtils.getAttributeValue(model, data, entityName, attributeName);
+        } catch (ModelException ex) {
+        	warn(ex.getMessage());
+        }
+        return obj;
     }
 
     /**
@@ -441,7 +454,7 @@ public class ScriptHelper {
      * @return The value of the attribute
      */
     protected Object getAttributeValue(String entityName, String attributeName) {
-        Model model = flowStep.getComponent().getInputModel();
+        RelationalModel model = (RelationalModel) flowStep.getComponent().getInputModel();
         ArrayList<EntityData> rows = ((EntityDataMessage) inputMessage).getPayload();
         return ComponentUtils.getAttributeValue(model, rows, entityName, attributeName);
     }
@@ -457,7 +470,7 @@ public class ScriptHelper {
      * @return The value of the attribute
      */
     protected Object getAttributeValue(String attributeName, EntityData data) {
-        Model model = flowStep.getComponent().getInputModel();
+        RelationalModel model = (RelationalModel) flowStep.getComponent().getInputModel();
         return ComponentUtils.getAttributeValue(model, data, attributeName);
     }
 
@@ -472,13 +485,13 @@ public class ScriptHelper {
      * @return A list of attribute values
      */
     protected List<Object> getAttributeValues(String entityName, String attributeName) {
-        Model model = flowStep.getComponent().getInputModel();
+        RelationalModel model = (RelationalModel) flowStep.getComponent().getInputModel();
         ArrayList<EntityData> rows = ((EntityDataMessage) inputMessage).getPayload();
         return ComponentUtils.getAttributeValues(model, rows, entityName, attributeName);
     }
     
     protected void setAttributeValue(String entityName, String attributeName, EntityData data, Object value) {
-        Model model = flowStep.getComponent().getInputModel();
+        RelationalModel model = (RelationalModel) flowStep.getComponent().getInputModel();
         ComponentUtils.setAttributeValue(model, data, entityName, attributeName, value);
     }
 

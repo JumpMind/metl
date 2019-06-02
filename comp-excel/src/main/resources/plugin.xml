@@ -25,7 +25,7 @@
              id='2b1aa706-9ec7-11e6-80f5-76304dec7eb7'
              inputMessageType='text'
              inputOutputModelsMatch='false'
-             outputMessageType='entity'
+             outputMessageType='relational'
              resourceCategory='streamable'>
     <name>Excel File Reader</name>
     <className>org.jumpmind.metl.core.runtime.component.ExcelFileReader</className>
@@ -74,7 +74,7 @@
       <setting id='action.on.success'
                required='false'
                type='choice'>
-        <name>Action on Success</name>
+        <name>Action on Flow Success</name>
         <defaultValue>NONE</defaultValue>
         <choices>
           <choice>None</choice>
@@ -117,7 +117,7 @@
   </component>
   <component category='WRITER'
              id='Excel File Writer'
-             inputMessageType='entity'
+             inputMessageType='relational'
              inputOutputModelsMatch='false'
              outputMessageType='text'
              resourceCategory='streamable'>

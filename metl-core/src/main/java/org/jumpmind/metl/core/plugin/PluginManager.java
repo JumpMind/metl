@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.plugin;
 
 import java.io.File;
@@ -87,15 +107,16 @@ public class PluginManager implements IPluginManager {
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-map", 160));
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-transform", 170));
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-xml", 180));
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-format", 190));
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-email", 200));
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-execute", 210));
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-webrequest", 220));
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-test", 230));
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-text", 240));
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "resource-core", 250));
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-stamp", 250));
-
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-json", 190));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-format", 200));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-email", 210));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-execute", 220));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-webrequest", 230));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-test", 240));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-text", 250));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "resource-core", 260));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-stamp", 270));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-pgp", 280));
     }
 
     @Override
@@ -338,14 +359,17 @@ public class PluginManager implements IPluginManager {
     public String getLatestLocalVersion(String artifactGroup, String artifactName) {
         String latestVersion = null;
         try {
+            logger.info(String.format("Getting latest local version for artifact group %s and name %s", artifactGroup, artifactName));
             VersionRangeRequest rangeRequest = new VersionRangeRequest();
             rangeRequest.setArtifact(new DefaultArtifact(artifactGroup, artifactName, "jar", "[0,)"));
             VersionRangeResult rangeResult = repositorySystem.resolveVersionRange(repositorySystemSession, rangeRequest);
+            logger.info(String.format("rangeresult %s", rangeResult.toString()));
             if (rangeResult != null && rangeResult.getHighestVersion() != null) {
                 latestVersion = rangeResult.getHighestVersion().toString();
+                logger.info(String.format("Found version %s for artifact %s", latestVersion, artifactName));
             }
         } catch (VersionRangeResolutionException e) {
-            logger.error("", e);
+            logger.error("Error getting latest local version of plugin from local repository.", e);
         }
         return latestVersion;
     }

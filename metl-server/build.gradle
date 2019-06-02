@@ -1,4 +1,5 @@
 apply from: '../metl-assemble/common.gradle'
+version = origVersion
 
 dependencies {
     compile "javax.servlet:javax.servlet-api:$servletVersion"

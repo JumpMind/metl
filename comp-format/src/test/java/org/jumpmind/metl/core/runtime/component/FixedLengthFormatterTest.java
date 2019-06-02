@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.runtime.component;
 
 import static org.junit.Assert.assertEquals;
@@ -11,7 +31,7 @@ import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Folder;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Setting;
@@ -40,7 +60,7 @@ public class FixedLengthFormatterTest {
     @Test
     public void testDelimitedFormatterFromSingleContentMsg() throws Exception {
         FixedLengthFormatter fixLengthFormatter = new FixedLengthFormatter();
-        fixLengthFormatter.setContext(new ComponentContext(null, fixLengthFormatterFlowStep, null, new ExecutionTrackerNoOp(), null, null, null));
+        fixLengthFormatter.setContext(new ComponentContext(null, fixLengthFormatterFlowStep, null, new ExecutionTrackerNoOp(), null, null, null,null));
         fixLengthFormatter.start();
         Message message = createInboundMessage();        
         SendMessageCallback<ArrayList<EntityData>> msgTarget = new SendMessageCallback<ArrayList<EntityData>>();
@@ -123,7 +143,7 @@ public class FixedLengthFormatterTest {
         
     }
     
-    private static Model createInputModel() {
+    private static RelationalModel createInputModel() {
 
         ModelEntity tt1 = new ModelEntity("tt1", "TEST_TABLE_1");
         tt1.addModelAttribute(new ModelAttrib("tt1col1", tt1.getId(), "COL1"));
@@ -135,7 +155,7 @@ public class FixedLengthFormatterTest {
         tt2.addModelAttribute(new ModelAttrib("tt2col2", tt1.getId(), "COLY"));
         tt2.addModelAttribute(new ModelAttrib("tt2col3", tt1.getId(), "COLZ"));
 
-        Model model = new Model();
+        RelationalModel model = new RelationalModel();
         model.getModelEntities().add(tt1);
         model.getModelEntities().add(tt2);
 

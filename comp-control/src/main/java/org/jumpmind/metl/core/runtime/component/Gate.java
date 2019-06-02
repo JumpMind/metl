@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -56,7 +57,13 @@ public class Gate extends AbstractComponentRuntime {
         gateControlSourceStepId = typedProperties.get(SOURCE_STEP); 
         forceGateOpen = typedProperties.is(SETTING_FORCE_GATE_OPEN, forceGateOpen);
         
-        if (isBlank(gateControlSourceStepId) || getFlow().findFlowStepWithId(gateControlSourceStepId) == null) {
+        if (isBlank(gateControlSourceStepId) 
+        		|| getFlow().findFlowStepWithId(gateControlSourceStepId) == null
+        		// A bad control source can be cloned from another gate. 
+        		// Validate that the source step is valid on this step.
+        		|| getFlow().getFlowStepLinks().stream()
+        			.noneMatch(s -> s.getSourceStepId().equals(gateControlSourceStepId) 
+        					&& s.getTargetStepId().equals(this.getFlowStepId()))) {
             throw new IllegalStateException("The gate control source must be specified");
         }
     }
@@ -73,7 +80,7 @@ public class Gate extends AbstractComponentRuntime {
                 while (messages.hasNext()) {
                     Message message = messages.next();
                     getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                    callback.forward(message);
+                    callback.forward(message.getHeader(), message);
                 }
             }
         } else if (!gateOpened && !(inputMessage instanceof ControlMessage)) {
@@ -86,10 +93,10 @@ public class Gate extends AbstractComponentRuntime {
             while (messages.hasNext()) {
                 Message message = messages.next();
                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                callback.forward(message);
+                callback.forward(message.getHeader(), message);
             }
         } else if (unitOfWorkBoundaryReached && (inputMessage instanceof ControlMessage)) {
-            callback.forward(inputMessage);
+            callback.forward(inputMessage.getHeader(), inputMessage);
         }
     }
     

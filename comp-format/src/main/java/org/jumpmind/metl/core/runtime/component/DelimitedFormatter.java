@@ -37,7 +37,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -104,11 +104,35 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
                 Writer writer = new StringWriter();
                 CsvWriter csvWriter = getCsvWriter(writer);
                 try {
-                    for (AttributeFormat attr : attributes) {
-                        if (attr.getAttribute() != null) {
-                            csvWriter.write(attr.getAttribute().getName(), !trimColumns);
+                	if (attributes.size() == 0) {
+                        RelationalModel inputModel = (RelationalModel) getInputModel();
+                        boolean found = false;
+
+                    	for (EntityData inputData : inputRows) {
+                            for (String inputKey : inputData.keySet()) {
+	                    		for (ModelEntity entity : inputModel.getModelEntities()) {
+	                                for (ModelAttrib attr : entity.getModelAttributes()) {
+	                                	if (inputKey.equals(attr.getId())) {
+	                                		csvWriter.write(attr.getName(), !trimColumns);
+	                                		found = true;
+	                                		break;
+	                                	}
+	                                }
+	                                if (found) {
+	                                	break;
+	                                }
+	                    		}
+	                    		found = false;
+                        	}
+                    		break;
                         }
-                    }
+                	} else {
+	                    for (AttributeFormat attr : attributes) {
+	                        if (attr.getAttribute() != null) {
+	                            csvWriter.write(attr.getAttribute().getName(), !trimColumns);
+	                        }
+	                    }
+                	}
                 } catch (IOException e) {
                     throw new IoException("Error writing to stream for formatted output. " + e.getMessage());
                 }
@@ -134,7 +158,8 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
                 for (AttributeFormat attribute : attributes) {
                     Object object = inputRow.get(attribute.getAttributeId());
                     if (isNotBlank(attribute.getFormatFunction())) {
-                        object = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), object, getInputModel(),
+                        object = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), object, 
+                                (RelationalModel) getInputModel(),
                                 attribute.getEntity(), inputRow, attribute.getFormatFunction());
                     }
 
@@ -177,7 +202,7 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
         for (ComponentAttribSetting attributeSetting : attributeSettings) {
             AttributeFormat format = formats.get(attributeSetting.getAttributeId());
             if (format == null) {
-                Model inputModel = getComponent().getInputModel();
+                RelationalModel inputModel = (RelationalModel) getComponent().getInputModel();
                 ModelAttrib attribute = inputModel.getAttributeById(attributeSetting.getAttributeId());
                 if (attribute != null) {
                     ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());

@@ -50,4 +50,4 @@ cd metl-assemble
 ./gradlew develop
 ~~~~~
 
-To run in Eclipse, use the "Run Metl" launch shortcut.
+To run in Eclipse, use the "Show Your Metl" launch shortcut.

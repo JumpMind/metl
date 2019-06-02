@@ -23,18 +23,18 @@ package org.jumpmind.metl.core.runtime.component.helpers;
 import java.util.ArrayList;
 
 import org.jumpmind.metl.core.model.Folder;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelEntity;
 
 public class ModelBuilder {
-	Model model;
+	RelationalModel model;
 	
 	public ModelBuilder() {
-		model = new Model();
+		model = new RelationalModel();
 		model.setModelEntities(new ArrayList<ModelEntity>());
 	}
 	
-	public ModelBuilder(Model m) {
+	public ModelBuilder(RelationalModel m) {
 		model = m;
 		if (model.getModelEntities() == null) {
 			model.setModelEntities(new ArrayList<ModelEntity>());
@@ -75,7 +75,7 @@ public class ModelBuilder {
 		return this;
 	}
 	
-	public Model build() {
+	public RelationalModel build() {
 		return this.model;
 	}
 	

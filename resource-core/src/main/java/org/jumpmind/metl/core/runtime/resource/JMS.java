@@ -79,7 +79,9 @@ public class JMS extends AbstractResourceRuntime implements ISubscribe {
     public static final String SETTING_ACK_TYPE = "ack.type";
     
     public static final String SETTING_WAIT_FOR_MESSAGE_TIMEOUT_MS = "wait.for.message.timeout.ms";
-
+    
+    public static final String RESOURCE_TYPE_SUBSCRIBE = "JMS Subscribe";
+    
     @SuppressWarnings("unchecked")
     @Override
     public <T> T reference() {
@@ -89,7 +91,7 @@ public class JMS extends AbstractResourceRuntime implements ISubscribe {
             if (CREATE_MODE_JNDI.equals(createMode)) {
                 String type = resourceRuntimeSettings.get(SETTING_TYPE);
                 if (TYPE_TOPIC.equals(type)) {
-                    streamableResource = new JMSJndiTopicDirectory(resourceRuntimeSettings);
+                    streamableResource = new JMSJndiTopicDirectory(resourceRuntimeSettings, this.getResource().getType());
                 } else if (TYPE_QUEUE.equals(type)) {
                     streamableResource = new JMSJndiQueueDirectory(resourceRuntimeSettings);
                 }
@@ -107,9 +109,11 @@ public class JMS extends AbstractResourceRuntime implements ISubscribe {
     @Override
     public void start(MessageListener listener) {
         AbstractJMSJndiDirectory directory = reference();
-        log.info("About to register JMS listener");
-        directory.register(listener);
-        listeners.put(listener, directory);
+        if (this.getResource().getType().equalsIgnoreCase(RESOURCE_TYPE_SUBSCRIBE)) {
+            log.info("About to register JMS listener");
+            directory.register(listener);
+            listeners.put(listener, directory);
+        }
     }
     
     @Override

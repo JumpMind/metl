@@ -5,7 +5,7 @@ if (inputMessage instanceof EntityDataMessage) {
         def id = new Integer(getAttributeValue("SOME_ENTITY", "SOME_ATTRIBUTE", data))
         def alreadySent = scriptContext.get(id)
         if (alreadySent == null) {
-            scriptContext.put(itemId, Boolean.TRUE)
+            scriptContext.put(id, Boolean.TRUE)
             callback.sendEntityDataMessage(null, [data]);
         }
     }

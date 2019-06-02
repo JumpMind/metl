@@ -41,6 +41,12 @@
         <name>Rows/Msg</name>
         <defaultValue>1000</defaultValue>
       </setting>
+      <setting id='send.control.messages.to.all.nodes'
+               required='false'
+               type='boolean'>
+        <name>Send Control Messages To All Nodes</name>
+        <defaultValue>true</defaultValue>
+      </setting>      
       <setting id='only.route.first.match'
                required='false'
                type='boolean'>

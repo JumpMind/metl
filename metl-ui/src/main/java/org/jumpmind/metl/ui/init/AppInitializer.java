@@ -86,19 +86,18 @@ import org.springframework.web.servlet.DispatcherServlet;
 
 public class AppInitializer implements WebApplicationInitializer, ServletContextListener {
 
-    protected static final String SYS_CONFIG_DIR = "org.jumpmind.metl.ui.init.config.dir";
-
     public static ThreadLocal<AnnotationConfigWebApplicationContext> applicationContextRef = new ThreadLocal<>();
     
     ThreadPoolTaskScheduler jobScheduler;
     
     Properties properties;
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
         System.out.println("Version: " + VersionUtils.getCurrentVersion());
         properties = loadProperties();
-        LogUtils.initLogging(getConfigDir(false), (TypedProperties) properties);
+        LogUtils.initLogging(AppUtils.getBaseDir(), (TypedProperties) properties);
         AnnotationConfigWebApplicationContext applicationContext = new AnnotationConfigWebApplicationContext();
         applicationContext.scan("org.jumpmind.metl");
         MutablePropertySources sources = applicationContext.getEnvironment().getPropertySources();
@@ -117,7 +116,17 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         ServletRegistration.Dynamic apidocs = servletContext.addServlet("docs", DefaultServlet.class);
         apidocs.addMapping("/api.html", "/ws-api.html", "/doc/*", "/ace/*");
         
-        ServletRegistration.Dynamic vaadin = servletContext.addServlet("vaadin", AppServlet.class);
+        Class appServletClazz = AppServlet.class;
+        String appServletString = System.getProperty(AppConstants.METL_APP_SERVLET);
+        try {
+            if (appServletString != null) {
+                appServletClazz = Class.forName(appServletString);
+                applicationContext.scan("com.jumpmind.metl");
+            }
+        } catch (ClassNotFoundException cnfe) {
+            System.out.println("Unable to load app servlet " + appServletString);
+        }
+        ServletRegistration.Dynamic vaadin = servletContext.addServlet("vaadin", appServletClazz);
         vaadin.setAsyncSupported(true);
         vaadin.setInitParameter("org.atmosphere.cpr.asyncSupport", JSR356AsyncSupport.class.getName());
         vaadin.setInitParameter("beanName", "appUI");
@@ -132,7 +141,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
             try {
                 zip = new ZipInputStream(is);
                 ZipEntry entry = null;
-                File dir = new File(getConfigDir(false), AppConstants.PLUGINS_DIR);                
+                File dir = new File(AppUtils.getPluginsDir());                
                 for (entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
                     File f = new File(dir, entry.getName());
                     if (!f.exists() || (f.getName().startsWith("maven-metadata") && newPluginsUnzipped)) {
@@ -183,9 +192,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         initAgentRuntime(ctx);
         initBackgroundJobs(ctx);
     }
-    
-    
-    
+
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         if (jobScheduler != null) {
@@ -211,13 +218,13 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
 
             TypedProperties properties = operationsService.findGlobalSetttingsAsProperties();
             if (properties.is(CONFIG_BACKUP_ENABLED, DEFAULT_CONFIG_BACKUP_ENABLED)) {
-                jobScheduler.schedule(new BackupJob(importExportService, configurationService, operationsService, getConfigDir(false)),
+                jobScheduler.schedule(new BackupJob(importExportService, configurationService, operationsService, AppUtils.getBaseDir()),
                         new CronTrigger(
                                 properties.get(CONFIG_BACKUP_CRON, DEFAULT_CONFIG_BACKUP_CRON)));
             }
             jobScheduler.scheduleAtFixedRate(() -> configurationService.doInBackground(), 600000);
         } catch (Exception e) {
-            LoggerFactory.getLogger(getClass()).info("Failed to schedule  the backup job", e);
+            LoggerFactory.getLogger(getClass()).info("Failed to schedule the backup job", e);
         }
     }
     
@@ -250,6 +257,11 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
     }
 
     protected void initDatabase(WebApplicationContext ctx) {
+        if (isBlank(System.getProperty("h2.baseDir"))) {
+            System.setProperty("h2.baseDir", AppUtils.getDatabaseDir());
+            System.out.println("Setting H2 directory: " + AppUtils.getDatabaseDir());
+        }
+
         IDatabasePlatform platform = ctx.getBean("configDatabasePlatform", IDatabasePlatform.class);
         IConfigurationService configurationService = ctx.getBean(IConfigurationService.class);
         boolean isInstalled = configurationService.isInstalled();
@@ -281,32 +293,13 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
             
             configurationService.save(new PluginRepository("default", "http://maven.jumpmind.com/repo"));
             configurationService.save(new PluginRepository("central", "http://repo1.maven.org/maven2"));
-            
-            
         }
         getLogger().info("The configuration database has been initialized");
     }
 
-    protected String getConfigDir(boolean printInstructions) {
-        String configDir = System.getProperty(SYS_CONFIG_DIR);
-        if (isBlank(configDir)) {
-            configDir = System.getProperty("user.dir");
-        }
-
-        if (isBlank(System.getProperty("h2.baseDir"))) {
-            System.setProperty("h2.baseDir", configDir);
-        }
-
-        if (printInstructions) {
-            System.out.println();
-            System.out.println("The current config directory is " + configDir);
-        }
-        return configDir;
-    }
-
     protected Properties loadProperties() {
         Properties properties = new Properties();
-        String configDir = getConfigDir(true);
+        String configDir = AppUtils.getConfigDir();
         File configFile = new File(configDir, "metl.properties");
         if (configFile.exists()) {
             properties = new TypedProperties(configFile);
@@ -314,6 +307,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
             try {
                 System.out.println(
                         "Could not find the " + configFile.getAbsolutePath() + " configuration file.  A default version will be written.");
+                configFile.getParentFile().mkdirs();
                 String propContent = IOUtils.toString(getClass().getResourceAsStream("/" + configFile.getName()));
                 propContent = FormatUtils.replaceToken(propContent, "configDir", configDir, true);
                 properties = new TypedProperties(new ByteArrayInputStream(propContent.getBytes()));
@@ -325,7 +319,6 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
                 throw new IoException(e);
             }
         }
-        properties.put(AppConstants.PROP_CONFIG_DIR, configDir);
         return properties;
     }
 

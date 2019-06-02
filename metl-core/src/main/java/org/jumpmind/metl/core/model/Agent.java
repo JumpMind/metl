@@ -59,7 +59,7 @@ public class Agent extends AbstractNamedObject {
     
     boolean showResourcesInExploreView;
     
-    int execThreadCount = 10;
+    int execThreadCount = 1;
 
     public Agent(String name) {
         this();

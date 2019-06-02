@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.util;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -11,10 +31,10 @@ import java.util.Properties;
 
 import org.jumpmind.db.sql.LogSqlBuilder;
 import org.jumpmind.metl.core.model.DataType;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
-import org.jumpmind.metl.core.model.ModelName;
+import org.jumpmind.metl.core.model.RelationalModelName;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.slf4j.Logger;
@@ -97,9 +117,9 @@ public class MockJdbcDriver extends com.mockrunner.mock.jdbc.MockDriver {
                 columns.addColumn("DATA_TYPE");
                 String projectVersionId = ComponentContext.projectVersionId.get();
                 if (isNotBlank(projectVersionId)) {
-                    List<ModelName> models = configurationService.findModelsInProject(projectVersionId);
-                    for (ModelName modelName : models) {
-                        Model model = configurationService.findModel(modelName.getId());
+                    List<RelationalModelName> models = configurationService.findRelationalModelsInProject(projectVersionId);
+                    for (RelationalModelName modelName : models) {
+                        RelationalModel model = configurationService.findRelationalModel(modelName.getId());
                         List<ModelEntity> entities = model.getModelEntities();
                         for (ModelEntity modelEntity : entities) {
                             if (modelEntity.getName().equals(tableNamePattern)) {
@@ -135,9 +155,9 @@ public class MockJdbcDriver extends com.mockrunner.mock.jdbc.MockDriver {
                 columns.addColumn("PK_NAME");
                 String projectVersionId = ComponentContext.projectVersionId.get();
                 if (isNotBlank(projectVersionId)) {
-                    List<ModelName> models = configurationService.findModelsInProject(projectVersionId);
-                    for (ModelName modelName : models) {
-                        Model model = configurationService.findModel(modelName.getId());
+                    List<RelationalModelName> models = configurationService.findRelationalModelsInProject(projectVersionId);
+                    for (RelationalModelName modelName : models) {
+                        RelationalModel model = configurationService.findRelationalModel(modelName.getId());
                         List<ModelEntity> entities = model.getModelEntities();
                         for (ModelEntity modelEntity : entities) {
                             if (modelEntity.getName().equals(table)) {

@@ -35,7 +35,7 @@ import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaders;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
-import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Setting;
@@ -136,17 +136,17 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
     }
 
     protected void refresh() {
-        Model model = null;
+        RelationalModel model = null;
         // View is used by multiple components.
         // What model does the component use?
         if (component.getType().equals(XmlParser.TYPE)) {
-            model = component.getOutputModel();
+            model = (RelationalModel) component.getOutputModel();
         } else if (component.getType().equals(XPathXmlParser.TYPE)) {
-            model = component.getOutputModel();
+            model = (RelationalModel) component.getOutputModel();
         } else if (component.getType().equals(XmlFormatter.TYPE)){
-            model = component.getInputModel();
+            model = (RelationalModel) component.getInputModel();
         } else {
-            model = component.getInputModel();
+            model = (RelationalModel) component.getInputModel();
         }
         
         if (model != null) {

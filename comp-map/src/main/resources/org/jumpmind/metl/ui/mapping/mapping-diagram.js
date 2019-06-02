@@ -134,17 +134,16 @@ window.org_jumpmind_metl_ui_mapping_MappingDiagram = function() {
     }
 
     addConnections = function() {
-    		addAttribConnections();
-    		addEntityConnections();
+    		addModelConnections();
     }
     
-    addAttribConnections = function() {
-        var settings = state.component.attributeSettings;
+    addModelConnections = function() {
+        var settings = state.component.modelSettings;
         for (var i = 0; i < settings.length; i++) {
             var setting = settings[i];
-            if (setting.name == state.mapsToAttrName) {
+            if (setting.name == state.mapsToSchemaObjectName) {
                 instance.connect({
-                    source : "src" + setting.attributeId,
+                    source : "src" + setting.modelObjectId,
                     target : "dst" + setting.value,
                     fireEvent : false
                 });
@@ -152,20 +151,6 @@ window.org_jumpmind_metl_ui_mapping_MappingDiagram = function() {
         }    	
     }
     
-    addEntityConnections = function() {
-        var settings = state.component.entitySettings;
-        for (var i = 0; i < settings.length; i++) {
-            var setting = settings[i];
-            if (setting.name == state.mapsToEntityName) {
-                instance.connect({
-                    source : "src" + setting.entityId,
-                    target : "dst" + setting.value,
-                    fireEvent : false
-                });
-            }
-        }    	
-    }    
-
     removeConnections = function() {
         var connections = instance.getAllConnections();
         while (connections.length > 0) {
@@ -205,15 +190,21 @@ function rebuildAll() {
 	var xycoord = {left:0,top:0};
     removeConnections();
     removeNodes();
-    appendNodes(mappingDiv, state.inputModel.modelEntities, "src", 10, 10, inputModelFilter, inputFilterPopulated, true);
-    if (state.outputModel.type == "RELATIONAL") {
-	    appendNodes(mappingDiv, state.outputModel.modelEntities, "dst", (mappingDiv.clientWidth / 2) + 12, 10,
-	            outputModelFilter, outputFilterPopulated, false);
+    if (state.relationalInputModel !== null) {
+		appendRelationalNodes(mappingDiv, state.relationalInputModel.modelEntities, "src", 10, 10, inputModelFilter, inputFilterPopulated, true);    	
     } else {
-    		xycoord.left = (mappingDiv.clientWidth / 2) + 12;
-    		xycoord.top = 10;
-    		appendHierarchicalNodes(mappingDiv, state.outputModel.modelEntities, state.outputRootNode, "dst", xycoord,
-    				outputModelFilter, outputFilterPopulated, false);
+    		//TODO: deal with this when we have a component that needs it
+    }
+    
+    if (typeof state.relationalOutputModel !== 'undefined') {
+	    appendRelationalNodes(mappingDiv, state.relationalOutputModel.modelEntities, "dst", (mappingDiv.clientWidth / 2) + 12, 10,
+	            outputModelFilter, outputFilterPopulated, false);	
+    } else {
+		xycoord.left = (mappingDiv.clientWidth / 2) + 12;
+		xycoord.top = 10;
+		appendHierarchicalNodes(mappingDiv, state.hierarchicalOutputModel, "dst", xycoord,
+				outputModelFilter, outputFilterPopulated, false);
+    	
     }
 
     var srcNodes = jsPlumb.getSelector(".mapping-diagram .src");
@@ -240,30 +231,25 @@ function removeNodes() {
     }
 }
 
-function appendHierarchicalNodes(parentDiv, entities, outputRootNode, prefix, xycoord, filterText, filterMapped, src) {
-	var rootNode=outputRootNode;
-	addEntity(parentDiv, entities, rootNode, prefix, xycoord);
+function appendHierarchicalNodes(parentDiv, hierarchicalOutputModel, prefix, xycoord, filterText, filterMapped, src) {
+	var rootNode=hierarchicalOutputModel.rootObject;
+	addSchemaObject(parentDiv, rootNode, prefix, xycoord);
 }
 
-function addEntity(parentDiv, entities, parentEntity, prefix, xycoord) {
+function addSchemaObject(parentDiv, parentSchemaObject, prefix, xycoord) {
     var lineHeight = 23;
     var key = "";
     var column = "";
     var table = "";
 
-	createNode(parentDiv, prefix + parentEntity.id, parentEntity.name, "entity " + prefix, xycoord.left, xycoord.top, table);
+	createNode(parentDiv, prefix + parentSchemaObject.id, parentSchemaObject.name, "entity " + prefix, xycoord.left, xycoord.top, table);    
     xycoord.top += lineHeight
     xycoord.left += 10;
-	var attrs = parentEntity.modelAttributes;
-	for (var i=0; i< attrs.length; i++) {
-		var attr = attrs[i];
-		if (attr.type == "REF" || attr.type == "ARRAY") {
-			childNode = getEntityById(entities, attr.typeEntityId);
-			addEntity(parentDiv, entities, childNode, prefix, xycoord);
-		} else {
-            createNode(parentDiv, prefix + attr.id, attr.name, "entity " + prefix, xycoord.left, xycoord.top, column);
-			xycoord.top += lineHeight;
-		}
+	var childObjects = parentSchemaObject.childObjects;
+	for (var i=0; i< childObjects.length; i++) {
+		var childObject = childObjects[i];
+		addSchemaObject(parentDiv, childObject, prefix, xycoord)
+		//xycoord.top += lineHeight;
 	}
 	xycoord.left -= 10;
 }
@@ -277,7 +263,7 @@ function getEntityById(entities, entityId) {
 	return null;
 }
 
-function appendNodes(parentDiv, entities, prefix, left, top, filterText, filterMapped, src) {
+function appendRelationalNodes(parentDiv, entities, prefix, left, top, filterText, filterMapped, src) {
     var lineHeight = 23;
     var filteredEntities = [];
     var key = "";
@@ -308,7 +294,7 @@ function appendNodes(parentDiv, entities, prefix, left, top, filterText, filterM
     for (var i = 0; i < filteredEntities.length; i++, top += lineHeight) {
         var entity = filteredEntities[i];
         var attrs = entity.modelAttributes;
-        if (state.outputModel.type == "RELATIONAL") {
+        if (state.relationalOutputModel !== null) {
         		createNode(parentDiv, prefix + entity.id, entity.name, "entity", left, top, table);
         } else {
     			createNode(parentDiv, prefix + entity.id, entity.name, "entity " + prefix, left, top, table);        	
@@ -380,13 +366,13 @@ function unselectNodes(className) {
 }
 
 function hasMap(attribute, src) {
-    var settings = state.component.attributeSettings;
+    var settings = state.component.modelSettings;
     for (var i = 0; i < settings.length; i++) {
         var setting = settings[i];
-        if (setting.name == state.mapsToAttrName) {
+        if (setting.name == state.mapsToSchemaObjectName) {
             // If evaluating source, compare setting id
             // If evaluating target, compare setting value
-            if ((src && attribute.id == setting.attributeId) || (!src && attribute.id == setting.value)) {
+            if ((src && attribute.id == setting.modelObjectId) || (!src && attribute.id == setting.value)) {
                 return true;
             }
         }

@@ -23,9 +23,9 @@
 <definitions>
   <component category='PROCESSOR'
              id='Transformer'
-             inputMessageType='entity'
+             inputMessageType='relational'
              inputOutputModelsMatch='true'
-             outputMessageType='entity'
+             outputMessageType='relational'
              resourceCategory='none'>
     <name>Transformer</name>
     <className>org.jumpmind.metl.core.runtime.component.Transformer</className>

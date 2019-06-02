@@ -22,28 +22,20 @@ package org.jumpmind.metl.ui.views.design;
 
 import static org.apache.commons.lang.StringUtils.trim;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import org.jumpmind.metl.core.model.AbstractNamedObject;
-import org.jumpmind.metl.core.model.DataType;
-import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttrib;
-import org.jumpmind.metl.core.model.ModelEntity;
-import org.jumpmind.metl.core.model.ModelEntitySorter;
+import org.jumpmind.metl.core.model.HierarchicalDataType;
+import org.jumpmind.metl.core.model.HierarchicalModel;
+import org.jumpmind.metl.core.model.ModelSchemaObject;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.metl.ui.common.UiUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
-import org.jumpmind.vaadin.ui.common.ExportDialog;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
-import org.jumpmind.vaadin.ui.common.NotifyDialog;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -60,13 +52,10 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.TreeTable;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPanel {
@@ -77,21 +66,17 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
 
     Table table = new Table();
 
-    Model model;
+    HierarchicalModel model;
 
     Set<Object> lastEditItemIds = Collections.emptySet();
 
     TableColumnSelectWindow tableColumnSelectWindow;
 
-    Button addEntityButton;
-
-    Button addAttributeButton;
+    Button addSchemaObjectButton;
 
     Button editButton;
 
     Button removeButton;
-
-    Button importButton;
 
     ShortcutListener enterKeyListener;
 
@@ -101,29 +86,20 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
 
     public EditHierarchicalModelPanel(ApplicationContext context, String modelId, boolean readOnly) {
         this.context = context;
-        this.model = new Model(modelId);
+        this.model = new HierarchicalModel(modelId);
         this.readOnly = readOnly;
         context.getConfigurationService().refresh(model);
-
         ButtonBar buttonBar1 = new ButtonBar();
         addComponent(buttonBar1);
-
-        addEntityButton = buttonBar1.addButton("Add Entity", FontAwesome.TABLE);
-        addEntityButton.addClickListener(new AddEntityClickListener());
-
-        addAttributeButton = buttonBar1.addButton("Add Attr", FontAwesome.COLUMNS);
-        addAttributeButton.addClickListener(new AddAttributeClickListener());
-
+        
+        addSchemaObjectButton = buttonBar1.addButton("Add SchemaObject", FontAwesome.PLUS);
+        addSchemaObjectButton.addClickListener(new AddSchemaObjectClickListener());
+        
         editButton = buttonBar1.addButton("Edit", FontAwesome.EDIT);
         editButton.addClickListener(new EditClickListener());
-
+        
         removeButton = buttonBar1.addButton("Remove", FontAwesome.TRASH_O);
         removeButton.addClickListener(new RemoveClickListener());
-
-        importButton = buttonBar1.addButtonRight("Import ...", FontAwesome.UPLOAD,
-                new ImportClickListener());
-
-        buttonBar1.addButtonRight("Export...", FontAwesome.DOWNLOAD, (e) -> export());
 
         treeTable.setSizeFull();
         treeTable.setCacheRate(100);
@@ -138,28 +114,8 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
                     ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
                         protected void save(String text) {
                             String newName = trim(text);
-                            boolean unique = true;
-                            if (obj instanceof ModelEntity) {
-                                List<ModelEntity> entities = model.getModelEntities();
-                                for (ModelEntity entity : entities) {
-                                    if (!entity.equals(obj) && entity.getName().equals(newName)) {
-                                        unique = false;
-                                    }
-                                }
-                            } else if (obj instanceof ModelAttrib) {
-                                List<ModelAttrib> attributes = model.getEntityById(((ModelAttrib)obj).getEntityId()).getModelAttributes();
-                                for (ModelAttrib attribute : attributes) {
-                                    if (!attribute.equals(obj) && attribute.getName().equals(newName)) {
-                                        unique = false;
-                                    }
-                                }
-                            }
-                            if (unique) {
-                                obj.setName(newName);
-                                EditHierarchicalModelPanel.this.context.getConfigurationService().save(obj);
-                            } else {
-                                NotifyDialog.show("Name needs to be unique", "Name needs to be unique", null, Type.WARNING_MESSAGE);
-                            }
+                            obj.setName(newName);
+                            EditHierarchicalModelPanel.this.context.getConfigurationService().save(obj);                            
                         };
                     };
                     t.setWidth(100, Unit.PERCENTAGE);
@@ -176,87 +132,84 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
 
         treeTable.addGeneratedColumn("description", new ColumnGenerator() {
             public Object generateCell(Table source, Object itemId, Object columnId) {
-                if (itemId instanceof ModelAttrib) {
-                    final ModelAttrib obj = (ModelAttrib) itemId;
-                    if (lastEditItemIds.contains(itemId) && !readOnly) {
-                        ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
-                            protected void save(String text) {
-                                obj.setDescription(trim(text));
-                                EditHierarchicalModelPanel.this.context.getConfigurationService().save(obj);
-                            };
+                final ModelSchemaObject obj = (ModelSchemaObject) itemId;
+                if (lastEditItemIds.contains(itemId) && !readOnly) {
+                    ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
+                        protected void save(String text) {
+                            obj.setDescription(trim(text));
+                            EditHierarchicalModelPanel.this.context.getConfigurationService().save(obj);
                         };
-                        t.setWidth(100, Unit.PERCENTAGE);
-                        t.setValue(obj.getDescription());
-                        return t;
-                    } else {
-                        return obj.getDescription();
-                    }
+                    };
+                    t.setWidth(100, Unit.PERCENTAGE);
+                    t.setValue(obj.getDescription());
+                    return t;
+                } else {
+                    return obj.getDescription();
                 }
-                if (itemId instanceof ModelEntity) {
-                    final ModelEntity obj = (ModelEntity) itemId;
-                    if (lastEditItemIds.contains(itemId) && !readOnly) {
-                        ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
-                            protected void save(String text) {                                
-                                obj.setDescription(trim(text));
-                                EditHierarchicalModelPanel.this.context.getConfigurationService().save(obj);
-                            };
-                        };
-                        t.setWidth(100, Unit.PERCENTAGE);
-                        t.setValue(obj.getDescription());
-                        return t;
-                    } else {
-                        return obj.getDescription();
-                    }
-                } else
-                    return null;
             }
         });
         treeTable.setColumnHeader("description", "Description");
 
         treeTable.addGeneratedColumn("type", new ColumnGenerator() {
             public Object generateCell(Table source, Object itemId, Object columnId) {
-                if (itemId instanceof ModelAttrib) {
-                    final ModelAttrib obj = (ModelAttrib) itemId;
-                    if (lastEditItemIds.contains(itemId) && !readOnly) {
-                        final ComboBox cbox = new ComboBox();
-                        cbox.setNullSelectionAllowed(false);
-                        for (DataType dataType : DataType.values()) {
-                            cbox.addItem(dataType.name());
+
+                final ModelSchemaObject obj = (ModelSchemaObject) itemId;
+                if (lastEditItemIds.contains(itemId) && !readOnly) {
+                    final ComboBox cbox = new ComboBox();
+                    cbox.setNullSelectionAllowed(false);
+                    for (HierarchicalDataType dataType : HierarchicalDataType.values()) {
+                        cbox.addItem(dataType.name());
+                    }
+                    cbox.setValue(obj.getType());
+                    cbox.addValueChangeListener(new ValueChangeListener() {
+                        public void valueChange(ValueChangeEvent event) {
+                            obj.setType((String) cbox.getValue());
+                            EditHierarchicalModelPanel.this.context.getConfigurationService().save(obj);
                         }
-                        cbox.setValue(obj.getType());
-                        cbox.addValueChangeListener(new ValueChangeListener() {
-                            public void valueChange(ValueChangeEvent event) {
-                                obj.setType((String) cbox.getValue());
-                                EditHierarchicalModelPanel.this.context.getConfigurationService().save(obj);
-                            }
-                        });
-                        cbox.addBlurListener(new BlurListener() {
-                            public void blur(BlurEvent event) {
-                                Collection<?> items = treeTable.getItemIds();
-                                boolean found = false;
-                                for (Object item : items) {
-                                    if (item.equals(obj)) {
-                                        found = true;
-                                    } else if (found) {
-                                        selectOnly(item);
-                                        editSelectedItem();
-                                        break;
-                                    }
+                    });
+                    cbox.addBlurListener(new BlurListener() {
+                        public void blur(BlurEvent event) {
+                            Collection<?> items = treeTable.getItemIds();
+                            boolean found = false;
+                            for (Object item : items) {
+                                if (item.equals(obj)) {
+                                    found = true;
+                                } else if (found) {
+                                    selectOnly(item);
+                                    editSelectedItem();
+                                    break;
                                 }
                             }
-                        });
-
-                        return cbox;
-                    } else {
-                        return obj.getType();
-                    }
+                        }
+                    });
+                    return cbox;
                 } else {
-                    return null;
+                    return obj.getType();
                 }
             }
         });
         treeTable.setColumnHeader("type", "Type");
 
+        treeTable.addGeneratedColumn("pattern", new ColumnGenerator() {
+            public Object generateCell(Table source, Object itemId, Object columnId) {
+                final ModelSchemaObject obj = (ModelSchemaObject) itemId;
+                if (lastEditItemIds.contains(itemId) && !readOnly) {
+                    ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
+                        protected void save(String text) {
+                            obj.setPattern(trim(text));
+                            EditHierarchicalModelPanel.this.context.getConfigurationService().save(obj);
+                        };
+                    };
+                    t.setWidth(100, Unit.PERCENTAGE);
+                    t.setValue(obj.getPattern());
+                    return t;
+                } else {
+                    return obj.getPattern();
+                }
+            }
+        });
+        treeTable.setColumnHeader("pattern", "Pattern");
+        
         treeTable.addItemClickListener(new TreeTableItemClickListener());
         treeTable.addValueChangeListener(new TreeTableValueChangeListener());
         enterKeyListener = new ShortcutListener("Enter", KeyCode.ENTER, null) {
@@ -272,31 +225,17 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         HorizontalLayout hlayout = new HorizontalLayout();
         addComponent(hlayout);
 
-        Button collapseAll = new Button("Collapse All");
-        collapseAll.addStyleName(ValoTheme.BUTTON_LINK);
-        collapseAll.addStyleName(ValoTheme.BUTTON_SMALL);
-        hlayout.addComponent(collapseAll);
-        collapseAll.addClickListener(e -> collapseAll());
-
-        Button expandAll = new Button("Expand All");
-        expandAll.addStyleName(ValoTheme.BUTTON_LINK);
-        expandAll.addStyleName(ValoTheme.BUTTON_SMALL);
-        hlayout.addComponent(expandAll);
-        expandAll.addClickListener(e -> expandAll());
-
         addAll(model);
 
         setButtonsEnabled();
 
         table.setContainerDataSource(container);
         table.setVisibleColumns(
-                new Object[] { "entityName", "attributeName", "description", "type"});
+                new Object[] { "name","description", "type"});
         table.setColumnHeaders(
-                new String[] { "Entity Name", "Attribute Name", "Description", "Type"});
+                new String[] { "name", "Description", "Type"});
 
-        if (model.getModelEntities().size() > 10) {
-            collapseAll();
-        }
+        expandAll(null);
     }
 
     protected void collapseAll() {
@@ -305,37 +244,33 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         }
     }
 
-    protected void expandAll() {
-        for (Object itemId : treeTable.getItemIds()) {
-            treeTable.setCollapsed(itemId, false);
+    protected void expandAll(ModelSchemaObject parentObject) {
+
+        ModelSchemaObject schemaObject=null;
+        if (parentObject == null) {
+            for (Object itemId : treeTable.getItemIds()) {
+                schemaObject = (ModelSchemaObject) itemId;
+            }
+        } else {
+            schemaObject = parentObject;
         }
-    }
-
-    protected void export() {
-        table.removeAllItems();
-        updateExportTable(null, model.getModelEntities());
-        String fileNamePrefix = model.getName().toLowerCase().replace(' ', '-');
-        ExportDialog dialog = new ExportDialog(table, fileNamePrefix, model.getName());
-        UI.getCurrent().addWindow(dialog);
-    }
-
-    protected void togglePk(ModelAttrib a) {
-        a.setPk(!a.isPk());
-        context.getConfigurationService().save(a);
+        if (schemaObject != null) {
+            treeTable.setCollapsed(schemaObject, false);
+            for (ModelSchemaObject childObject : schemaObject.getChildObjects()) {
+                expandAll(childObject);
+            }
+        }
     }
 
     public void setButtonsEnabled() {
         if (!readOnly) {
             Set<Object> selected = getSelectedItems();
-            addAttributeButton.setEnabled(selected.size() > 0);
             removeButton.setEnabled(selected.size() > 0);
             editButton.setEnabled(selected.size() > 0);
         } else {
-            addEntityButton.setEnabled(false);
-            addAttributeButton.setEnabled(false);
+            addSchemaObjectButton.setEnabled(false);
             removeButton.setEnabled(false);
             editButton.setEnabled(false);
-            importButton.setEnabled(false);
         }
     }
 
@@ -374,146 +309,66 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         treeTable.select(itemId);
     }
 
-    protected void addAll(Model model) {
-		ModelEntity rootEntity = model.getRootElement();
-		if (rootEntity != null) {
-			addEntity(rootEntity, null, false);
+    protected void addAll(HierarchicalModel model) {
+		ModelSchemaObject rootObject = model.getRootObject();
+		if (rootObject != null) {
+			addSchemaObject(rootObject, null, null);
 		}
     }
 
-    protected void addEntity(ModelEntity entity, ModelEntity parentEntity, boolean list) {
-		treeTable.addItem(entity);
-		treeTable.setChildrenAllowed(entity, true);
-		if (list == true) {
-			treeTable.setItemIcon(entity, FontAwesome.LIST);
-		} else {
-			treeTable.setItemIcon(entity, FontAwesome.TABLE);			
-		}
-        if (parentEntity != null) {
-        		treeTable.setParent(entity, parentEntity);        		
+    protected void addSchemaObject(ModelSchemaObject schemaObject, ModelSchemaObject parent, ModelSchemaObject refObject) {
+        treeTable.addItem(schemaObject);
+        treeTable.setChildrenAllowed(schemaObject, true);
+        treeTable.setItemIcon(schemaObject, FontAwesome.CUBE);
+        if (parent != null) {
+            treeTable.setParent(schemaObject, parent);
         }
-
-        for (ModelAttrib attrib:entity.getModelAttributes()) {
-        		if (attrib.getTypeEntityId() != null) {
-        			if (attrib.getDataType().equals(DataType.ARRAY)) {
-        				addEntity(model.getEntityById(attrib.getTypeEntityId()), entity, true);
-        			} else {
-        				addEntity(model.getEntityById(attrib.getTypeEntityId()), entity, false);        				
-        			}
-        		} else {
-        			addAttribute(entity, attrib);
-        		}
+        for (ModelSchemaObject childObject : schemaObject.getChildObjects()) {
+            addSchemaObject(childObject, schemaObject, null);
         }
-    }
-
-    protected void addAttribute(ModelEntity entity, ModelAttrib attribute) {
-        treeTable.addItem(attribute);
-        treeTable.setItemIcon(attribute, FontAwesome.COLUMNS);
-        treeTable.setChildrenAllowed(entity, true);
-        treeTable.setParent(attribute, entity);
-        treeTable.setChildrenAllowed(attribute, false);
-    }
-        
-    protected void updateExportTable(String filter, Collection<ModelEntity> modelEntityList) {
-        filter = filter != null ? filter.toLowerCase() : null;
-        ArrayList<ModelEntity> filteredModelEntityList = new ArrayList<ModelEntity>();
-        for (ModelEntity modelEntity : modelEntityList) {
-            boolean add = UiUtils.filterMatches(filter, modelEntity.getName());
-            if (!add) {
-                for (ModelAttrib modelAttribute : modelEntity.getModelAttributes()) {
-                    add |= UiUtils.filterMatches(filter, modelAttribute.getName());
-                }
-            }
-            if (add) {
-                filteredModelEntityList.add(modelEntity);
-            }
-        }
-
-        Collections.sort(filteredModelEntityList, new ModelEntitySorter());
-        for (ModelEntity modelEntity : filteredModelEntityList) {
-            for (ModelAttrib modelAttribute : modelEntity.getModelAttributes()) {
-                table.addItem(new Record(modelEntity, modelAttribute));
-            }
-        }
-    }
-
+    }    
+    
     protected void editSelectedItem() {
         lastEditItemIds = getSelectedItems();
         treeTable.refreshRowCache();
         table.refreshRowCache();
     }
 
-    class AddEntityClickListener implements ClickListener {
+    class AddSchemaObjectClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
         		
             Set<Object> selectedIds = getSelectedItems();
             if (selectedIds.size() > 1) {
             		//TODO: pop up a message and throw an error
             		// 		that 0 or 1 items must be selected to add an entity
-            } else if (selectedIds.size() == 0 && model.getModelEntities().size() != 0) {
+            } else if (selectedIds.size() == 0 && model.getRootObject() != null && 
+                model.getRootObject().getChildObjects().size() != 0) {
             		//TODO: pop up a message and throw an error
             		//		that if an entity already exists (root entity), the subsequent entities must be attached somewhere            		
             } else {
-            		//need to create a model attribute that references a new entity as well as a new entity
-            		ModelEntity parentEntity=null;
+                ModelSchemaObject parentSchemaObject=null;
             		if (selectedIds.size()!=0) {
             			Object itemId = selectedIds.iterator().next();
-                    if (itemId instanceof ModelEntity) {
-                        parentEntity = (ModelEntity) itemId;
-                    } else if (itemId instanceof ModelAttrib) {
-                        parentEntity = (ModelEntity) treeTable.getParent(itemId);
-                    }            			
-            		}            		
-            		//add the entity
-            		ModelEntity childEntity = new ModelEntity();
-            		childEntity.setModelId(model.getId());
-            		childEntity.setName("New Entity");
-            		childEntity.setId(UUID.randomUUID().toString());
-            		model.getModelEntities().add(childEntity);
-            		context.getConfigurationService().save(childEntity);
-            		addEntity(childEntity, parentEntity, false);
-            		//add the attribute that references the entity
-            		if (parentEntity != null) {
-	            		ModelAttrib attrib = new ModelAttrib();
-	            		attrib.setEntityId(parentEntity.getId());
-	            		attrib.setDataType(DataType.REF);
-	            		attrib.setTypeEntityId(childEntity.getId());
-	            		attrib.setName("entity ref");
-	            		parentEntity.getModelAttributes().add(attrib);
-	            		context.getConfigurationService().save(attrib);   
+            			parentSchemaObject = (ModelSchemaObject) itemId;
             		}
-            		if (parentEntity != null) {
-            			treeTable.setCollapsed(parentEntity, false);
+            		//add the schema object
+            		ModelSchemaObject newObject = new ModelSchemaObject();
+            		newObject.setModelId(model.getId());
+            		newObject.setName("New Schema Object");
+            		newObject.setId(UUID.randomUUID().toString());
+            		if (parentSchemaObject != null) {
+            		    newObject.setParentId(parentSchemaObject.getId());
             		}
-            		selectOnly(childEntity);
-            		editSelectedItem();
-            }
-        }
-    }
-
-    class AddAttributeClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
-            Set<Object> itemIds = getSelectedItems();
-            if (itemIds.size() > 0) {
-                ModelAttrib a = new ModelAttrib();
-                a.setName("New Attribute");
-                a.setDataType(DataType.VARCHAR);
-                Object itemId = itemIds.iterator().next();
-                ModelEntity entity = null;
-                if (itemId instanceof ModelEntity) {
-                    entity = (ModelEntity) itemId;
-                } else if (itemId instanceof ModelAttrib) {
-                    entity = (ModelEntity) treeTable.getParent(itemId);
-                }
-                if (entity != null) {
-                    a.setEntityId(entity.getId());
-                    entity.addModelAttribute(a);
-                    context.getConfigurationService().save(a);
-                    addAttribute(entity, a);
-                    treeTable.setCollapsed(entity, false);
-                    selectOnly(a);
-                    editSelectedItem();
-                }
+            		context.getConfigurationService().save(newObject);
+            		if (model.getRootObject() == null) {
+            		    model.setRootObject(newObject);
+            		} else {
+            		    parentSchemaObject.getChildObjects().add(newObject);
+            		}
+                addSchemaObject(newObject,parentSchemaObject,null);
+                treeTable.setCollapsed(parentSchemaObject, false);
+                selectOnly(newObject);
+                editSelectedItem();
             }
         }
     }
@@ -529,101 +384,16 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
 
             Set<Object> selectedItems = getSelectedItems();
             ConfirmDialog.show("Delete?",
-                    "Are you sure you want to delete the " + selectedItems.size() + " selected items?",
+                    "Are you sure you want to delete the " + selectedItems.size() + " selected items and their children?",
                     ()->{
-                    		deleteSelectedItems(selectedItems);
+                        for (Object itemToDelete : selectedItems) {
+                    		    context.getConfigurationService().delete((ModelSchemaObject) itemToDelete);
+                    		    context.getConfigurationService().refresh(model);
+                    		    treeTable.removeAllItems();
+                    		    addAll(model);
+                        }
                     		return true;                    	
                     });
-        }
-        
-        private void deleteSelectedItems(Set<Object> selectedItems) {
-            for (Object itemToDelete : selectedItems) {
-            		if (itemToDelete instanceof ModelAttrib) {
-            			deleteAttribute((ModelAttrib)itemToDelete);
-            		} else {
-            			deleteEntity((ModelEntity)itemToDelete);
-            		}
-            }
-        }
-
-        private void deleteEntity(ModelEntity entity) {
-        		if (model.getModelEntities().contains(entity)) {
-        			List<ModelAttrib> attribs = new ArrayList<ModelAttrib>();
-        			attribs.addAll(entity.getModelAttributes());
-	        		for (ModelAttrib attrib:attribs) {
-	        			if (attrib.getDataType().equals(DataType.ARRAY) || 
-	        					attrib.getDataType().equals(DataType.REF)) {
-	        				ModelEntity childEntity = model.getEntityById(attrib.getTypeEntityId());
-	        				context.getConfigurationService().delete(attrib);
-	        				entity.removeModelAttribute(attrib);
-	        				deleteEntity(childEntity);
-	        			} else {
-	        				deleteAttribute(attrib);
-	        			}
-	        		}
-	        		//if this entity has a parent, then we have to delete
-	        		//both this entity as well as the attribute used to link
-	        		//this entity
-	        		ModelEntity parentEntity = (ModelEntity) treeTable.getParent(entity);
-	        		if (parentEntity != null) {	        			
-	        			ModelAttrib linkedAttrib = parentEntity.getModelAttributeByTypeEntityId(entity.getId());
-	        			if (linkedAttrib != null) {
-	        				deleteAttribute(linkedAttrib);
-	        			}
-	        		}
-	        		context.getConfigurationService().delete(entity);
-	            treeTable.removeItem(entity);
-	            model.getModelEntities().remove(entity);
-	        }
-        }
-    }
-
-    private void deleteAttribute(ModelAttrib attribute) {
-		//ModelEntity entity = (ModelEntity) treeTable.getParent(attribute);
-		ModelEntity entity = model.getEntityById(attribute.getEntityId());
-		if (entity.getModelAttributes().contains(attribute)) {
-			context.getConfigurationService().delete(attribute);
-			entity.removeModelAttribute(attribute);
-			treeTable.removeItem(attribute);
-		}
-    }
-    
-    class ImportClickListener implements ClickListener, TableColumnSelectListener {
-        public void buttonClick(ClickEvent event) {
-            if (tableColumnSelectWindow == null) {
-                tableColumnSelectWindow = new TableColumnSelectWindow(context, model);
-                tableColumnSelectWindow.setTableColumnSelectListener(this);
-            }
-            UI.getCurrent().addWindow(tableColumnSelectWindow);
-        }
-
-        public void selected(Collection<ModelEntity> modelEntityCollection) {
-            HashMap<String, ModelEntity> existingModelEntities = new HashMap<String, ModelEntity>();
-            for (Object itemId : treeTable.getItemIds()) {
-                if (itemId instanceof ModelEntity) {
-                    ModelEntity modelEntity = (ModelEntity) itemId;
-                    existingModelEntities.put(modelEntity.getName().toUpperCase(), modelEntity);
-                }
-            }
-
-            for (ModelEntity e : modelEntityCollection) {
-                ModelEntity modelEntity = existingModelEntities.get(e.getName().toUpperCase());
-                if (modelEntity == null) {
-                    context.getConfigurationService().save(e);
-                    existingModelEntities.put(e.getName().toUpperCase(), e);
-//TODO:                    add(e);
-                    model.getModelEntities().add(e);
-                } else {
-                    for (ModelAttrib a : e.getModelAttributes()) {
-                        if (modelEntity.getModelAttributeByName(a.getName()) == null) {
-                            a.setEntityId(modelEntity.getId());
-                            context.getConfigurationService().save(a);
-                            modelEntity.addModelAttribute(a);
-//TODO:                            addModelAttribute(modelEntity, a);
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -650,43 +420,41 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
     }
 
     public class Record {
-        ModelEntity modelEntity;
+        
+        ModelSchemaObject modelSchemaObject;
 
-        ModelAttrib modelAttribute;
-
-        String entityName = "";
-
-        String attributeName = "";
+        String name = "";
 
         String description = "";
+        
+        String type = "";       
+        
+        String pattern = "";
+        
+        boolean required = false;
 
-        String type = "";
-
-        public Record(ModelEntity modelEntity, ModelAttrib modelAttribute) {
-            this.modelEntity = modelEntity;
-            this.modelAttribute = modelAttribute;
-
-            if (modelEntity != null) {
-                this.entityName = modelEntity.getName();
-            }
-
-            if (modelAttribute != null) {
-                this.attributeName = modelAttribute.getName();
-                this.description = modelAttribute.getDescription();
-                this.type = modelAttribute.getType();
+        public Record(ModelSchemaObject modelSchemaObject) {
+            this.modelSchemaObject = modelSchemaObject;
+            
+            if (modelSchemaObject != null) {
+                this.name = modelSchemaObject.getName();
+                this.description = modelSchemaObject.getDescription();
+                this.type = modelSchemaObject.getType();
+                this.pattern = modelSchemaObject.getPattern();
+                this.required = modelSchemaObject.isRequired();
             }
         }
 
         public int hashCode() {
-            return modelEntity.hashCode() + modelAttribute.hashCode();
+            return modelSchemaObject.hashCode();
+        }
+        
+        public String getName() {
+            return name;
         }
 
-        public String getEntityName() {
-            return modelEntity.getName();
-        }
-
-        public String getAttributeName() {
-            return modelAttribute.getName();
+        public void setName(String name) {
+            this.name = name;
         }
 
         public String getDescription() {
@@ -704,5 +472,21 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         public void setType(String type) {
             this.type = type;
         }
+
+        public String getPattern() {
+            return pattern;
+        }
+
+        public void setPattern(String pattern) {
+            this.pattern = pattern;
+        }
+
+        public boolean isRequired() {
+            return required;
+        }
+
+        public void setRequired(boolean required) {
+            this.required = required;
+        } 
     }
 }

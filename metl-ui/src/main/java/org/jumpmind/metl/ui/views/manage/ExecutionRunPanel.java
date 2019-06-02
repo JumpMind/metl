@@ -416,7 +416,22 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
     }
 
     protected void download() {
-        String stepId = (String) stepTable.getSelectedRow();
+        String stepId = null;
+        if (showDiagramCheckbox.getValue()) {
+            if (diagram.getSelectedNodeIds().size()>0) {
+                String flowStepId = diagram.getSelectedNodeIds().get(0);
+                ExecutionData data = getExecutionData();
+                if (data != null) {
+                    ExecutionStep executionStep = data.findExecutionStep(flowStepId);
+                    if (executionStep != null) {
+                        stepId = executionStep.getId();
+                    }
+                }
+            }
+        } else {
+            stepId = (String) stepTable.getSelectedRow();
+        }
+        
         if (stepId != null) {
             final File file = executionService.getExecutionStepLog(stepId);
             StreamSource ss = new StreamSource() {

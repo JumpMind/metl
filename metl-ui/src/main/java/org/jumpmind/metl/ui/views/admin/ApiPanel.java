@@ -22,22 +22,27 @@ package org.jumpmind.metl.ui.views.admin;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jumpmind.metl.ui.common.ApplicationContext;
-import org.jumpmind.metl.ui.common.TabbedPanel;
-import org.jumpmind.vaadin.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.UiComponent;
+import org.springframework.context.annotation.Scope;
+import org.springframework.core.annotation.Order;
 
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.ui.BrowserFrame;
-import com.vaadin.ui.VerticalLayout;
 
-public class ApiPanel extends VerticalLayout implements IUiPanel {
+@UiComponent
+@Scope(value = "ui")
+@Order(400)
+@AdminMenuLink(name = "REST", id = "REST", icon = FontAwesome.WRENCH)
+public class ApiPanel extends AbstractAdminPanel {
 
     final Log logger = LogFactory.getLog(getClass());
 
     private static final long serialVersionUID = 1L;
 
-    public ApiPanel(ApplicationContext context, TabbedPanel tabbedPanel) {   
+    public ApiPanel() {   
         setSizeFull();
         String url = Page.getCurrent()
                 .getLocation().getPath();
@@ -57,6 +62,14 @@ public class ApiPanel extends VerticalLayout implements IUiPanel {
 
     @Override
     public void selected() {
+    }
+
+    @Override
+    public void enter(ViewChangeEvent event) {
+    }
+
+    @Override
+    protected void refresh() {
     }
 
 }

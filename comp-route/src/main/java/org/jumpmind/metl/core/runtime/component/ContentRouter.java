@@ -57,12 +57,16 @@ public class ContentRouter extends AbstractComponentRuntime {
     public static final String SETTING_CONFIG = "config";
 
     public final static String ONLY_ROUTE_FIRST_MATCH = "only.route.first.match";
+    
+    public final static String SEND_CONTROL_MESSAGES_TO_ALL_NODES = "send.control.messages.to.all.nodes";
 
     List<Route> routes;
 
     ScriptEngine scriptEngine;
 
     boolean onlyRouteFirstMatch;
+    
+    boolean sendControlMessagesToAllNodes;
 
     long rowsPerMessage = 1000;
     
@@ -74,6 +78,7 @@ public class ContentRouter extends AbstractComponentRuntime {
         TypedProperties properties = getTypedProperties();
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
         String json = getComponent().get(SETTING_CONFIG);
+        sendControlMessagesToAllNodes = getComponent().getBoolean(SEND_CONTROL_MESSAGES_TO_ALL_NODES, false);
         onlyRouteFirstMatch = getComponent().getBoolean(ONLY_ROUTE_FIRST_MATCH, false);
         if (isNotBlank(json)) {
             try {
@@ -109,9 +114,13 @@ public class ContentRouter extends AbstractComponentRuntime {
         }
         
         if (unitOfWorkBoundaryReached) {
-            for (String targetStepId : targetStepsThatNeedControlMessages) {
-                callback.sendControlMessage(null, targetStepId);
-            }
+        		if (sendControlMessagesToAllNodes) {
+        			callback.sendControlMessage();
+        		} else {
+	            for (String targetStepId : targetStepsThatNeedControlMessages) {
+	                callback.sendControlMessage(null, targetStepId);
+	            }
+        		}
         }
     }
 

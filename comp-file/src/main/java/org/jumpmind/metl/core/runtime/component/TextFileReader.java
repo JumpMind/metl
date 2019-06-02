@@ -35,6 +35,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.ControlMessage;
+import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
@@ -69,6 +70,10 @@ public class TextFileReader extends AbstractFileReader {
         textRowsPerMessage = properties.getInt(SETTING_ROWS_PER_MESSAGE, textRowsPerMessage);
         numberOfTimesToReadFile = properties.getInt(SETTING_NUMBER_OF_TIMES_TO_READ_FILE, numberOfTimesToReadFile);
         encoding = properties.get(SETTING_ENCODING, encoding);
+        if ("".equals(encoding)) {
+        	encoding = "UTF-8";
+        	log(LogLevel.INFO, "File Encoding has not been set, using the default of UTF-8.");
+        }
     }
 
     @Override
@@ -88,6 +93,7 @@ public class TextFileReader extends AbstractFileReader {
 
         for (String file : files) {
             Map<String, Serializable> headers = new HashMap<>(1);
+            headers.putAll(inputMessage.getHeader());
             headers.put("source.file.path", file);
             int currentFileLinesRead = 0;
             String currentLine;

@@ -47,4 +47,6 @@ public interface ISendMessageCallback {
     
     public void forward(Map<String, Serializable> messageHeaders, Message message);
     
+    public void forwardMessageToErrorSuspense(Message message);
+    
 }

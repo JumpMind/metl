@@ -20,6 +20,9 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
+import java.security.Security;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jumpmind.properties.TypedProperties;
 
 public class Sftp extends AbstractResourceRuntime {
@@ -48,6 +51,8 @@ public class Sftp extends AbstractResourceRuntime {
 
     @Override
     protected void start(TypedProperties properties) {
+    		Security.insertProviderAt(new BouncyCastleProvider(), 1);
+    		log.info("Using BouncyCastleProvider");
         streamableResource = new SftpDirectory(resource,
                 properties.getProperty(SFTP_SERVER), 
                 properties.getInt(SFTP_PORT),

@@ -23,7 +23,7 @@
 <definitions>
   <component category='PROCESSOR'
              id='Format Delimited'
-             inputMessageType='entity'
+             inputMessageType='relational'
              inputOutputModelsMatch='false'
              outputMessageType='text'
              resourceCategory='none'>
@@ -60,7 +60,7 @@
   </component>
   <component category='PROCESSOR'
              id='Format Fixed'
-             inputMessageType='entity'
+             inputMessageType='relational'
              inputOutputModelsMatch='false'
              outputMessageType='text'
              resourceCategory='none'>
@@ -81,7 +81,7 @@
              id='Parse Delimited'
              inputMessageType='text'
              inputOutputModelsMatch='false'
-             outputMessageType='entity'
+             outputMessageType='relational'
              resourceCategory='none'
              supportsMultipleThreads='true'>
     <name>Parse Delimited</name>
@@ -124,7 +124,7 @@
   <component category='PROCESSOR'
              id='Parse Fixed'
              inputMessageType='text'
-             outputMessageType='entity'>
+             outputMessageType='relational'>
     <name>Parse Fixed Length</name>
     <className>org.jumpmind.metl.core.runtime.component.FixedLengthParser</className>
     <keywords>parse,file,files</keywords>
@@ -141,6 +141,12 @@
                type='integer'>
         <name>Number of Footer Lines to Skip</name>
         <defaultValue>0</defaultValue>
+      </setting>
+      <setting id='trim.parsed.column'
+               required='false'
+               type='boolean'>
+        <name>Trim Parsed Columns</name>
+        <defaultValue>true</defaultValue>
       </setting>
     </settings>
   </component>

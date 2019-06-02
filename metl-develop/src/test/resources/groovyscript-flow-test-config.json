@@ -1,17 +1,11 @@
 {
-  "versionNumber" : "2.0.1",
-  "hostName" : "chenson42.loc",
-  "releasePackageData" : [ {
-    "tableName" : "METL_RELEASE_PACKAGE",
-    "tableData" : { }
-  }, {
-    "tableName" : "METL_RPPV",
-    "tableData" : { }
-  } ],
+  "versionNumber" : "3.4.0",
+  "hostName" : "Gregs-MacBook.loc",
+  "releasePackageData" : [ ],
   "projectVersionData" : [ {
     "projectVersionId" : "2ed67c42-628b-4d4b-929d-b3ddd8fc83c9",
     "projectData" : [ {
-      "tableName" : "METL_PROJECT",
+      "tableName" : "METL_project",
       "tableData" : {
         "02dcf426-7646-46ed-8ae4-a313038c57cc" : {
           "ID" : "02dcf426-7646-46ed-8ae4-a313038c57cc",
@@ -22,49 +16,49 @@
         }
       }
     }, {
-      "tableName" : "METL_PROJECT_VERSION",
+      "tableName" : "METL_project_version",
       "tableData" : {
         "2ed67c42-628b-4d4b-929d-b3ddd8fc83c9" : {
           "ID" : "2ed67c42-628b-4d4b-929d-b3ddd8fc83c9",
+          "VERSION_TYPE" : "MASTER",
           "VERSION_LABEL" : "master",
           "PROJECT_ID" : "02dcf426-7646-46ed-8ae4-a313038c57cc",
           "ORIG_VERSION_ID" : null,
           "DESCRIPTION" : "",
+          "RELEASE_DATE" : null,
           "ARCHIVED" : 0,
-          "DELETED" : 0,
-          "VERSION_TYPE" : "MASTER",
-          "RELEASE_DATE" : null
+          "DELETED" : 0
         }
       }
     }, {
-      "tableName" : "METL_PROJECT_VERSION_PLUGIN",
+      "tableName" : "METL_project_version_plugin",
       "tableData" : {
         "2ed67c42-628b-4d4b-929d-b3ddd8fc83c9null" : {
           "PROJECT_VERSION_ID" : "2ed67c42-628b-4d4b-929d-b3ddd8fc83c9",
           "DEFINITION_TYPE" : "Resource",
           "DEFINITION_TYPE_ID" : "Sftp",
           "DEFINITION_NAME" : "SFTP",
-          "ARTIFACT_NAME" : "resource-core",
+          "ARTIFACT_NAME" : "comp-rdbms-writer",
           "ARTIFACT_GROUP" : "org.jumpmind.metl",
-          "ARTIFACT_VERSION" : "2.0.1.a.201703310747",
-          "LATEST_ARTIFACT_VERSION" : "2.0.1.a.201703310747",
+          "ARTIFACT_VERSION" : "3.4.0.a.201812120957",
+          "LATEST_ARTIFACT_VERSION" : "3.4.0.a.201812120957",
           "ENABLED" : 1,
           "PIN_VERSION" : 0
         }
       }
     }, {
-      "tableName" : "METL_PROJECT_VERSION_DEPENDS",
+      "tableName" : "METL_project_version_depends",
       "tableData" : { }
     } ],
     "resourceData" : [ {
-      "tableName" : "METL_RESOURCE",
+      "tableName" : "METL_resource",
       "tableData" : { }
     }, {
-      "tableName" : "METL_RESOURCE_SETTING",
+      "tableName" : "METL_resource_setting",
       "tableData" : { }
     } ],
     "modelData" : [ {
-      "tableName" : "METL_MODEL",
+      "tableName" : "METL_relational_model",
       "tableData" : {
         "8d5cce9d-da9f-400d-b57a-5ee973a81df2" : {
           "ID" : "8d5cce9d-da9f-400d-b57a-5ee973a81df2",
@@ -77,7 +71,7 @@
         }
       }
     }, {
-      "tableName" : "METL_MODEL_ENTITY",
+      "tableName" : "METL_model_entity",
       "tableData" : {
         "4ee71970-7cec-4464-b913-a86e0da6563c" : {
           "ID" : "4ee71970-7cec-4464-b913-a86e0da6563c",
@@ -87,32 +81,32 @@
         }
       }
     }, {
-      "tableName" : "METL_MODEL_ATTRIB",
+      "tableName" : "METL_model_attrib",
       "tableData" : {
         "88801b56-a576-4228-b187-058758eeb572" : {
           "ID" : "88801b56-a576-4228-b187-058758eeb572",
           "ENTITY_ID" : "4ee71970-7cec-4464-b913-a86e0da6563c",
+          "ATTRIBUTE_ORDER" : 1,
           "NAME" : "NOTE",
+          "DESCRIPTION" : null,
           "TYPE" : "VARCHAR",
           "TYPE_ENTITY_ID" : null,
-          "PK" : 0,
-          "ATTRIBUTE_ORDER" : 1,
-          "DESCRIPTION" : null
+          "PK" : 0
         },
         "f9e9e47f-064d-4be6-8ee3-fd8e00209438" : {
           "ID" : "f9e9e47f-064d-4be6-8ee3-fd8e00209438",
           "ENTITY_ID" : "4ee71970-7cec-4464-b913-a86e0da6563c",
+          "ATTRIBUTE_ORDER" : 0,
           "NAME" : "ID",
+          "DESCRIPTION" : null,
           "TYPE" : "INTEGER",
           "TYPE_ENTITY_ID" : null,
-          "PK" : 1,
-          "ATTRIBUTE_ORDER" : 0,
-          "DESCRIPTION" : null
+          "PK" : 1
         }
       }
     } ],
     "flowData" : [ {
-      "tableName" : "METL_COMPONENT",
+      "tableName" : "METL_component",
       "tableData" : {
         "ebbd6352-ae98-4ff0-b227-630991991142" : {
           "ID" : "ebbd6352-ae98-4ff0-b227-630991991142",
@@ -125,7 +119,10 @@
           "SHARED" : 0,
           "INPUT_MODEL_ID" : null,
           "OUTPUT_MODEL_ID" : null,
-          "RESOURCE_ID" : null
+          "RESOURCE_ID" : null,
+          "RESOURCE_NAME" : null,
+          "RESOURCE_PROJECT_NAME" : null,
+          "RESOURCE_PROJECT_VERSION" : null
         },
         "6448e956-44ad-4150-94fb-5e364894cb0a" : {
           "ID" : "6448e956-44ad-4150-94fb-5e364894cb0a",
@@ -137,12 +134,15 @@
           "FOLDER_ID" : null,
           "SHARED" : 0,
           "INPUT_MODEL_ID" : "8d5cce9d-da9f-400d-b57a-5ee973a81df2",
-          "OUTPUT_MODEL_ID" : null,
-          "RESOURCE_ID" : null
+          "OUTPUT_MODEL_ID" : "8d5cce9d-da9f-400d-b57a-5ee973a81df2",
+          "RESOURCE_ID" : null,
+          "RESOURCE_NAME" : null,
+          "RESOURCE_PROJECT_NAME" : null,
+          "RESOURCE_PROJECT_VERSION" : null
         }
       }
     }, {
-      "tableName" : "METL_COMPONENT_SETTING",
+      "tableName" : "METL_component_setting",
       "tableData" : {
         "c39dc520-75f8-459e-a290-36b277eb273e" : {
           "ID" : "c39dc520-75f8-459e-a290-36b277eb273e",
@@ -170,13 +170,16 @@
         }
       }
     }, {
-      "tableName" : "METL_COMPONENT_ENTITY_SETTING",
+      "tableName" : "METL_component_entity_setting",
       "tableData" : { }
     }, {
-      "tableName" : "METL_COMPONENT_ATTRIB_SETTING",
+      "tableName" : "METL_component_model_setting",
       "tableData" : { }
     }, {
-      "tableName" : "METL_FLOW",
+      "tableName" : "METL_component_attrib_setting",
+      "tableData" : { }
+    }, {
+      "tableName" : "METL_flow",
       "tableData" : {
         "8e1a76f5-cd04-4862-a499-a150bbdb0d1b" : {
           "ID" : "8e1a76f5-cd04-4862-a499-a150bbdb0d1b",
@@ -184,17 +187,17 @@
           "PROJECT_VERSION_ID" : "2ed67c42-628b-4d4b-929d-b3ddd8fc83c9",
           "DELETED" : 0,
           "TEST" : 1,
-          "NAME" : "Simple Test",
-          "FOLDER_ID" : null,
           "WEB_SERVICE" : 0,
-          "NOTES" : null
+          "NAME" : "Simple Test",
+          "NOTES" : null,
+          "FOLDER_ID" : null
         }
       }
     }, {
-      "tableName" : "METL_FLOW_PARAMETER",
+      "tableName" : "METL_flow_parameter",
       "tableData" : { }
     }, {
-      "tableName" : "METL_FLOW_STEP",
+      "tableName" : "METL_flow_step",
       "tableData" : {
         "7340d86f-61a4-4dcb-9615-409ba6b54739" : {
           "ID" : "7340d86f-61a4-4dcb-9615-409ba6b54739",
@@ -214,7 +217,7 @@
         }
       }
     }, {
-      "tableName" : "METL_FLOW_STEP_LINK",
+      "tableName" : "METL_flow_step_link",
       "tableData" : {
         "7340d86f-61a4-4dcb-9615-409ba6b5473953eeb979-bade-49a9-9806-455931132f56" : {
           "SOURCE_STEP_ID" : "7340d86f-61a4-4dcb-9615-409ba6b54739",
@@ -222,5 +225,6 @@
         }
       }
     } ]
-  } ]
+  } ],
+  "agentData" : [ ]
 }
