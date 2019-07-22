@@ -9,8 +9,8 @@ buildscript {
     }
 
     dependencies {
-    	classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.3'
-        classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.6'
+    	classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.6.1'
+        classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.18'
         classpath 'com.devsoap.plugin:gradle-vaadin-plugin:1.2.2'
         classpath 'com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2'
         classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'      
