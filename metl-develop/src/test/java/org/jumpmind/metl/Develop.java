@@ -60,7 +60,7 @@ public class Develop {
         webapp.setWar(pathPrefix + "metl-war/src/main/webapp");
         webapp.setResourceBase(pathPrefix + "metl-war/src/main/webapp");
 
-        ConcurrentHashMap<String, ConcurrentHashSet<String>> map = new ClassInheritanceMap();
+        ConcurrentHashMap map = new ClassInheritanceMap();
         ConcurrentHashSet<String> set = new ConcurrentHashSet<>();
         set.add("org.jumpmind.metl.ui.init.AppInitializer");
         map.put("org.springframework.web.WebApplicationInitializer", set);

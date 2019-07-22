@@ -25,14 +25,14 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.GlobalSetting;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.vaadin.server.FontAwesome;
+import com.vaadin.spring.annotation.UIScope;
 
 @Component
-@Scope(value="ui")
+@UIScope
 @Order(value=10)
 public class TopBarButtonSystem extends TopBarButton {
 

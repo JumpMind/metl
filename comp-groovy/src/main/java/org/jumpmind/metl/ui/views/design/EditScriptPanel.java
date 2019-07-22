@@ -26,13 +26,14 @@ import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
+import com.vaadin.data.HasValue;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
-import com.vaadin.ui.ComboBox;
+import com.vaadin.v7.data.Property.ValueChangeEvent;
+import com.vaadin.v7.data.Property.ValueChangeListener;
+import com.vaadin.v7.event.FieldEvents.TextChangeEvent;
+import com.vaadin.v7.event.FieldEvents.TextChangeListener;
+import com.vaadin.v7.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.v7.ui.ComboBox;
 
 public class EditScriptPanel extends AbstractComponentEditPanel {
 
@@ -59,8 +60,6 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
                         .showAtSize(.75));
 
         editor = CommonUiUtils.createAceEditor();
-        editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        editor.setTextChangeTimeout(200);
 
         editor.setMode(AceMode.java);
 
@@ -94,16 +93,15 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
         buttonBar.addLeft(select);
 
         if (!readOnly) {
-            editor.addTextChangeListener(new TextChangeListener() {
+        	editor.addValueChangeListener(new HasValue.ValueChangeListener<String>() {
 
-                @Override
-                public void textChange(TextChangeEvent event) {
-                    String key = (String) select.getValue();
-                    EditScriptPanel.this.component.put(key, event.getText());
-                    EditScriptPanel.this.context.getConfigurationService()
-                            .save(EditScriptPanel.this.component.findSetting(key));
-                }
-            });
+    			@Override
+    			public void valueChange(HasValue.ValueChangeEvent<String> event) {
+    				String key = (String) select.getValue();
+    				EditScriptPanel.this.component.put(key, event.getValue());
+    				EditScriptPanel.this.context.getConfigurationService().save(EditScriptPanel.this.component.findSetting(key));
+    			}
+        	});
         }
 
         addComponent(editor);

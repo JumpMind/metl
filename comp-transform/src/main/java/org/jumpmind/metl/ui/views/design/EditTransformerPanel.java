@@ -30,13 +30,13 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
-import org.jumpmind.metl.core.model.DataType;
-import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.runtime.component.ModelAttributeScriptHelper;
 import org.jumpmind.metl.core.runtime.component.Transformer;
 import org.jumpmind.metl.ui.common.ButtonBar;
+import org.jumpmind.metl.ui.common.TableV7DataProvider;
 import org.jumpmind.metl.ui.common.UiUtils;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ExportDialog;
@@ -44,25 +44,26 @@ import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
+import com.vaadin.data.HasValue;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.AbstractSelect;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.ColumnGenerator;
-import com.vaadin.ui.TableFieldFactory;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
+import com.vaadin.v7.data.Container;
+import com.vaadin.v7.data.Property.ValueChangeEvent;
+import com.vaadin.v7.data.Property.ValueChangeListener;
+import com.vaadin.v7.data.util.BeanItemContainer;
+import com.vaadin.v7.event.FieldEvents.TextChangeEvent;
+import com.vaadin.v7.event.FieldEvents.TextChangeListener;
+import com.vaadin.v7.ui.AbstractSelect;
+import com.vaadin.v7.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.v7.ui.Field;
+import com.vaadin.v7.ui.Table;
+import com.vaadin.v7.ui.Table.ColumnGenerator;
+import com.vaadin.v7.ui.TableFieldFactory;
+import com.vaadin.v7.ui.TextField;
 
 @SuppressWarnings("serial")
 public class EditTransformerPanel extends AbstractComponentEditPanel {
@@ -295,7 +296,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         exportTable.removeAllItems();
         updateExportTable(filterField.getValue());
         String fileNamePrefix = component.getName().toLowerCase().replace(' ', '-');
-        ExportDialog dialog = new ExportDialog(exportTable, fileNamePrefix, component.getName());
+        ExportDialog dialog = new ExportDialog(new TableV7DataProvider(exportTable), fileNamePrefix, component.getName());
         UI.getCurrent().addWindow(dialog);
     }
 
@@ -467,18 +468,15 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             
             
             editor = CommonUiUtils.createAceEditor();
-            editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
-            editor.setTextChangeTimeout(200);
             editor.setMode(AceMode.java);
             
-            editor.addTextChangeListener(new TextChangeListener() {
+            editor.addValueChangeListener(new HasValue.ValueChangeListener<String>() {
 
-                @Override
-                public void textChange(TextChangeEvent event) {
-                    setting.setValue(event.getText());
-                    EditTransformerPanel.this.context.getConfigurationService()
-                            .save(setting);
-                }
+    			@Override
+    			public void valueChange(HasValue.ValueChangeEvent<String> event) {
+    				setting.setValue(event.getValue());
+    				EditTransformerPanel.this.context.getConfigurationService().save(setting);
+    			}
             });
             editor.setValue(setting.getValue());
             

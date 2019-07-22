@@ -23,17 +23,17 @@ package org.jumpmind.metl.ui.views.admin;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jumpmind.vaadin.ui.common.UiComponent;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.BrowserFrame;
 
 @UiComponent
-@Scope(value = "ui")
+@UIScope
 @Order(400)
 @AdminMenuLink(name = "REST", id = "REST", icon = FontAwesome.WRENCH)
 public class ApiPanel extends AbstractAdminPanel {

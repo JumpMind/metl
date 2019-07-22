@@ -99,6 +99,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         properties = loadProperties();
         LogUtils.initLogging(AppUtils.getBaseDir(), (TypedProperties) properties);
         AnnotationConfigWebApplicationContext applicationContext = new AnnotationConfigWebApplicationContext();
+        applicationContext.scan("com.vaadin.spring");
         applicationContext.scan("org.jumpmind.metl");
         MutablePropertySources sources = applicationContext.getEnvironment().getPropertySources();
         sources.addLast(new PropertiesPropertySource("passed in properties", properties));

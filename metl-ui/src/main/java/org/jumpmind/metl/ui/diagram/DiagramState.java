@@ -33,4 +33,6 @@ public class DiagramState extends JavaScriptComponentState {
     
     public List<String> selectedNodeIds = new ArrayList<String>();
     
+    public boolean readOnly = false;
+    
 }

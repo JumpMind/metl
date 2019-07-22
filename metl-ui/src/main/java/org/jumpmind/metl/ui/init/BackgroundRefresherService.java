@@ -31,12 +31,13 @@ import java.util.concurrent.Future;
 import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
+import com.vaadin.spring.annotation.UIScope;
+
 @Component
-@Scope(value = "ui")
+@UIScope
 public class BackgroundRefresherService implements Serializable {
 
     private static final long serialVersionUID = 1L;

@@ -22,23 +22,23 @@ package org.jumpmind.metl.ui.views.explore;
 
 import javax.annotation.PostConstruct;
 
-import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.DbProvider;
 import org.jumpmind.metl.ui.common.TopBarLink;
+import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.jumpmind.vaadin.ui.sqlexplorer.SqlExplorer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
-@Scope("ui")
+@UIScope
 @TopBarLink(id = "exploreDataSources", category = Category.Explore, menuOrder = 10, name = "DataSource", icon = FontAwesome.DATABASE)
 public class ExploreDataSourceView extends VerticalLayout implements View {
 

@@ -27,16 +27,16 @@ import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 
 import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.v7.ui.AbstractSelect.ItemCaptionMode;
+import com.vaadin.v7.ui.Label;
+import com.vaadin.v7.ui.Tree;
+import com.vaadin.v7.ui.VerticalLayout;
 
 public class SelectProjectVersionDialog extends ResizableWindow {
 

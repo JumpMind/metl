@@ -34,16 +34,16 @@ import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
-@Scope(value = "ui")
+@UIScope
 @Order(1400)
 @AdminMenuLink(name = "About", id = "About", icon = FontAwesome.QUESTION)
 public class AboutPanel extends AbstractAdminPanel implements IBackgroundRefreshable<Object> {

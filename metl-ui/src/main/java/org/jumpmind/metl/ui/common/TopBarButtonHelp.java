@@ -20,15 +20,15 @@
  */
 package org.jumpmind.metl.ui.common;
 
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
+import com.vaadin.spring.annotation.UIScope;
 
 @Component
-@Scope(value="ui")
+@UIScope
 @Order(value=20)
 public class TopBarButtonHelp extends TopBarButton {
 

@@ -32,16 +32,16 @@ import java.util.Map;
 
 import org.jumpmind.metl.ui.init.AppUI;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.ComponentContainer;
 
 @Component
-@Scope(value="ui")
+@UIScope
 public class ViewManager implements Serializable {
 
     private static final long serialVersionUID = 1L;

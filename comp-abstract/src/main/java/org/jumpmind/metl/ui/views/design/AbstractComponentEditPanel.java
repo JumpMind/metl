@@ -24,7 +24,7 @@ import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.plugin.XMLComponentDefinition;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.v7.ui.VerticalLayout;
 
 public abstract class AbstractComponentEditPanel extends VerticalLayout implements IComponentEditPanel {
 

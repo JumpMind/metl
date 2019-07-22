@@ -42,5 +42,7 @@ public class MappingDiagramState extends JavaScriptComponentState {
     public HierarchicalModel hierarchicalInputModel;
 
     public HierarchicalModel hierarchicalOutputModel;
+    
+    public boolean readOnly = false;
 
 }

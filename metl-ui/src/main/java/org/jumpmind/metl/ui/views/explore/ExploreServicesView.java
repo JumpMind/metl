@@ -27,18 +27,18 @@ import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
-@Scope("ui")
+@UIScope
 @TopBarLink(id = "exploreServices", category = Category.Explore, menuOrder = 30, name = "Services", icon = FontAwesome.GLOBE)
 public class ExploreServicesView extends VerticalLayout implements View {
 

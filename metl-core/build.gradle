@@ -69,6 +69,8 @@ dependencies {
         exclude group: 'xerces'
     }
     compile "org.jgrapht:jgrapht-core:1.0.1"
+    compile "javax.xml.bind:jaxb-api:2.4.0-b180830.0359"
+    compile "org.glassfish.jaxb:jaxb-runtime:2.4.0-b180830.0438"
     testCompile "org.mockito:mockito-all:$mockitoVersion"
     testCompile "org.powermock:powermock-api-mockito:$powerMockVersion"
     testCompile "org.powermock:powermock-module-junit4:$powerMockVersion"    

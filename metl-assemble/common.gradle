@@ -78,6 +78,7 @@ import java.util.Date
         maven { url "http://www.soapui.org/repository/maven2" }
         maven { url "https://github.com/santhosh-tekuri/maven-repository/raw/master" }
         jcenter()        
+        maven { url "https://plugins.gradle.org/m2/" }
     }     
      
     
@@ -91,7 +92,7 @@ import java.util.Date
         }    
     }
     
-    sourceSets.main.compileClasspath += [configurations.provided]
+    sourceSets.main.compileClasspath += configurations.provided
     
     uploadArchives {
         repositories.mavenDeployer {
@@ -124,7 +125,7 @@ import java.util.Date
         tasks.withType(Javadoc) {
           options.addStringOption('Xdoclint:none', '-quiet')
           options.addStringOption("sourcepath", "")
-          classpath += [configurations.provided]
+          classpath += configurations.provided
         }
       }
     }       
