@@ -121,6 +121,7 @@ public class FileUtil extends AbstractComponentRuntime {
 			ArrayList<String> filesProcessed = new ArrayList<>();
 			if (files != null) {
 				for (String fileName : files) {
+					fileName = resolveParamsAndHeaders(fileName, inputMessage);
 					try {
 						if (fileName != null) {
 							String targetFile = null;
