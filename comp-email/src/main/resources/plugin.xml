@@ -119,4 +119,66 @@
       </setting>
     </settings>
   </component>
+    <component category='READER'
+             id='Email Reader'
+             inputMessageType='any'
+             showInputModel='false'
+             inputOutputModelsMatch='false'
+             outputMessageType='text'
+             resourceCategory='mailsession'>
+    <name>Email Reader</name>    
+    <keywords>read,email,smtp</keywords>
+    <className>org.jumpmind.metl.core.runtime.component.EmailReader</className>
+    <description></description>
+    <settings>    
+      <setting id='email.source.folder'
+               required='true'
+               type='text'>
+        <name>Email Source Folder</name>
+      </setting>
+      <setting id='email.target.folder'
+               required='false'
+               type='text'>
+        <name>Move Emails To Folder</name>
+      </setting>
+      <setting id='file.attachment.target.path'
+               required='false'
+               type='text'>
+        <name>Path to Save Email Attachments</name>
+      </setting>    
+      <setting id='email.from.search'
+               required='false'
+               type='text'>
+        <name>Email From to Search For</name>
+      </setting>  
+      <setting id='subject.search'
+               required='false'
+               type='text'>
+        <name>Subject to Search For</name>
+      </setting>
+      <setting id='read.only.unread.messages'
+               required='false'
+               type='boolean'>
+        <name>Search Only Un-read Messages</name>
+        <defaultValue>true</defaultValue>
+      </setting>
+      <setting id='mark.all.as.read'
+               required='false'
+               type='boolean'>
+        <name>Mark All Messages as Read</name>
+        <defaultValue>false</defaultValue>
+      </setting>          
+      <setting id='run.when'
+               required='false'
+               type='choice'>
+        <name>Run When</name>
+        <defaultValue>PER UNIT OF WORK</defaultValue>
+        <choices>
+          <choice>PER UNIT OF WORK</choice>
+          <choice>PER MESSAGE</choice>
+          <choice>PER ENTITY</choice>
+        </choices>
+      </setting>
+    </settings>
+  </component>
 </definitions>

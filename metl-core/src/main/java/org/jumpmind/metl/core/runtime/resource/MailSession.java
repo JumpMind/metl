@@ -26,6 +26,7 @@ import java.util.Properties;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
+import javax.mail.Store;
 
 public class MailSession {
 
@@ -46,7 +47,8 @@ public class MailSession {
     public static final String SETTING_USE_AUTH = "mail.smtp.auth";
 
     Session session;
-    ThreadLocal<Transport> transport = new ThreadLocal<Transport>();
+    ThreadLocal<Transport> transport = new ThreadLocal<Transport>();    
+    ThreadLocal<Store> store = new ThreadLocal<Store>();
     
     Map<String, String> globalSettings;
     
@@ -96,6 +98,19 @@ public class MailSession {
             value = defaultValue;
         }
         return value;
+    }
+    
+    public Store getStore() throws MessagingException {
+        if (store.get() == null || !store.get().isConnected()) {
+            store.set(session.getStore(getGlobalSetting(SETTING_TRANSPORT, "imaps")));
+    
+            if (Boolean.parseBoolean(getGlobalSetting(SETTING_USE_AUTH, "false"))) {
+            	store.get().connect(globalSettings.get(SETTING_USERNAME), globalSettings.get(SETTING_PASSWORD));
+            } else {
+            	store.get().connect();
+            }
+        }
+        return store.get();
     }
 
 }

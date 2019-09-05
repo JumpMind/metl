@@ -380,6 +380,7 @@
                     <choice>smtp</choice>
                     <choice>smtps</choice>
                     <choice>mock_smtp</choice>
+                    <choice>imaps</choice>
                 </choices>
             </setting>
             <setting id='mail.host' required='true' type='text'>

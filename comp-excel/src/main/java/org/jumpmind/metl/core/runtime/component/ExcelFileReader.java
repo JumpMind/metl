@@ -30,7 +30,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
@@ -135,11 +137,15 @@ public class ExcelFileReader extends AbstractFileReader {
     private void processFiles(List<String> files, Message inputMessage,
             ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
 
+    	boolean oldExcelFormat = false;
         filesRead.addAll(files);
 
         for (String file : files) {
             Map<String, Serializable> headers = new HashMap<>(1);
             headers.put("source.file.path", file);
+            if ("xls".equals(FilenameUtils.getExtension(file))) {
+            	oldExcelFormat = true;
+            }
 
             InputStream inStream = null;
             try {
@@ -147,7 +153,7 @@ public class ExcelFileReader extends AbstractFileReader {
                 String filePath = resolveParamsAndHeaders(file, inputMessage);
                 inStream = directory.getInputStream(filePath, mustExist);
                 if (inStream != null) {
-                    readWorkbook(headers, inStream, callback);
+                    readWorkbook(headers, inStream, callback, oldExcelFormat);
                 }
             } catch (IOException e) {
                 throw new IoException("Error reading from file " + e.getMessage());
@@ -162,13 +168,19 @@ public class ExcelFileReader extends AbstractFileReader {
 
     @SuppressWarnings("deprecation")
     private void readWorkbook(Map<String, Serializable> headers, InputStream inStream,
-            ISendMessageCallback callback) throws IOException {
+            ISendMessageCallback callback, boolean oldExcelFormat) throws IOException {
 
         int linesInMessage = 0;
         ArrayList<EntityData> outboundPayload = new ArrayList<EntityData>();
         int currentFileLinesRead = 1;
 
-        Workbook wb = new XSSFWorkbook(inStream);
+        Workbook wb = null;
+        if (oldExcelFormat) {
+        	wb = new HSSFWorkbook(inStream);
+        } else {
+        	wb = new XSSFWorkbook(inStream);
+        }
+        
         try {
         for (int i = 0; i < wb.getNumberOfSheets(); i++) {
             Sheet sheet = wb.getSheetAt(i);

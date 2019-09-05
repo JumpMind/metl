@@ -24,4 +24,7 @@
     <component-ui id="Email UI" componentId="35c4c0ae-b040-4f93-b212-5b92619c4064">
         <iconImage>org/jumpmind/metl/core/runtime/component/metl-email-48x48-color.png</iconImage>
     </component-ui>
+    <component-ui id="Email Reader UI" componentId="Email Reader">
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-openemail-48x48-color.png</iconImage>
+    </component-ui>
 </ui>
