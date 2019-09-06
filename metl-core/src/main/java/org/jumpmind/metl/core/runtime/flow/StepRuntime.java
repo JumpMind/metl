@@ -164,7 +164,8 @@ public class StepRuntime implements Runnable {
         this.targetStepRuntimes = targetStepRuntimes;
         for (StepRuntime stepRuntime : targetStepRuntimes) {
             if (stepRuntime.getComponentContext().getFlowStep().getId().equals(
-                    componentContext.getFlowStep().getComponent().get(ComponentSettingsConstants.ERROR_HANDLER))) {
+                    componentContext.getFlowStep().getComponent().get(ComponentSettingsConstants.ERROR_HANDLER))
+            		&& stepRuntime.getComponentContext().getFlowStep().getComponent().getBoolean(AbstractComponentRuntime.ENABLED, true)) {
                 this.errorRuntime = stepRuntime;
             }
         }
@@ -361,10 +362,17 @@ public class StepRuntime implements Runnable {
             } catch (CancellationException e) {
                 log.info("Handle was interrupted by cancellation for {}", componentContext.getFlowStep().getName());
             } catch (RuntimeException re) {
-                if (StringUtils.isNotEmpty(component.get(ComponentSettingsConstants.ERROR_HANDLER))) {
-                	   inputMessage.getHeader().put("Exception", re);
-                   callback.forwardMessageToErrorSuspense(inputMessage);
-                } else {
+            	boolean targetFound = false;
+            	for (StepRuntime stepRuntime : targetStepRuntimes) {
+                    if (stepRuntime.getComponentContext().getFlowStep().getId().equals(
+                            componentContext.getFlowStep().getComponent().get(ComponentSettingsConstants.ERROR_HANDLER))
+                    		&& stepRuntime.getComponentContext().getFlowStep().getComponent().getBoolean(AbstractComponentRuntime.ENABLED, true)) {
+                    	targetFound = true;
+                    	inputMessage.getHeader().put("Exception", re);
+                    	callback.forwardMessageToErrorSuspense(inputMessage);
+                    }
+                }
+                if (!targetFound) {
                     throw re;
                 }
             }
@@ -753,6 +761,9 @@ public class StepRuntime implements Runnable {
                         component.get(ComponentSettingsConstants.ERROR_HANDLER).equalsIgnoreCase(
                         targetRuntime.getComponentContext().getFlowStep().getId())) {
                     forward = false;
+                    if (message instanceof ControlMessage && calculateUnitOfWorkLastMessage(message)) {
+                    	forwardMessageToErrorSuspense(message);
+                    }
                 }
                 if (forward) {
                     try {
@@ -873,9 +884,11 @@ public class StepRuntime implements Runnable {
                     log.debug("Sending " + message.getClass().getSimpleName() + " to "
                             + errorRuntime.getComponentContext().getFlowStep().getName());
                 }
-                errorRuntime.queue(message);
-                if (message instanceof ControlMessage) {
-                    targetStepRuntimeUnitOfWorkSent.add(errorRuntime.getComponentContext().getFlowStep().getId());
+                if (errorRuntime != null) {
+	                errorRuntime.queue(message);
+	                if (message instanceof ControlMessage) {
+	                    targetStepRuntimeUnitOfWorkSent.add(errorRuntime.getComponentContext().getFlowStep().getId());
+	                }
                 }
             } catch (Exception e) {
                 if (e instanceof RuntimeException) {
