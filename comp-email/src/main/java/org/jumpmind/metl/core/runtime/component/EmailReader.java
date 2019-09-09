@@ -182,6 +182,12 @@ public class EmailReader extends AbstractComponentRuntime {
 		            				if (!attachmentTargetPath.endsWith("/")) {
 		            					attachmentTargetPath += "/";
 		            				}
+		            				File newFile = new File(attachmentTargetPath);
+		            				if (!newFile.exists()) {
+		            					if (!newFile.mkdirs()) {
+		            						throw new RuntimeException("The target path did not exist and could not be created. May want to create the target path manually.");
+		            					}
+		            				}
 		            				bodyPart.saveFile(attachmentTargetPath + fileName);
 		            			}
 		            		}
