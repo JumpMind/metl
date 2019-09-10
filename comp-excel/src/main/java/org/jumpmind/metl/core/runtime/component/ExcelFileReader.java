@@ -142,15 +142,15 @@ public class ExcelFileReader extends AbstractFileReader {
 
         for (String file : files) {
             Map<String, Serializable> headers = new HashMap<>(1);
-            headers.put("source.file.path", file);
-            if ("xls".equals(FilenameUtils.getExtension(file))) {
-            	oldExcelFormat = true;
-            }
 
             InputStream inStream = null;
             try {
-                info("Reading file: %s", file);
                 String filePath = resolveParamsAndHeaders(file, inputMessage);
+                if ("xls".equals(FilenameUtils.getExtension(filePath))) {
+                    oldExcelFormat = true;
+                }
+                info("Reading file: %s", filePath);
+                headers.put("source.file.path", filePath);
                 inStream = directory.getInputStream(filePath, mustExist);
                 if (inStream != null) {
                     readWorkbook(headers, inStream, callback, oldExcelFormat);
