@@ -23,6 +23,8 @@ package org.jumpmind.metl.ui.mapping;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
+import org.jumpmind.metl.core.model.ComponentModelSetting;
+import org.jumpmind.metl.core.model.ComponentModelSetting.Type;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.RelationalModel;
@@ -194,20 +196,21 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
             boolean exact) {
         boolean isMapped = false;
         boolean exactMatch = exact && attr.getName().equalsIgnoreCase(attr2.getName()) && entity1.getName().equals(entity2.getName());
-        for (ComponentAttribSetting setting : component.getAttributeSettings()) {
-            if (setting.getName().equals(Mapping.ATTRIBUTE_MAPS_TO) && setting.getValue().equals(attr2.getId())) {
+        for (ComponentModelSetting setting : component.getModelSettings()) {
+            if (setting.getName().equals(Mapping.MODEL_OBJECT_MAPS_TO) && setting.getValue().equals(attr2.getId())) {
                 isMapped = true;
                 break;
             }
         }
         if (!isMapped && ((fuzzy && fuzzyMatches(attr.getName(), attr2.getName()))
                 || ((!exact && attr.getName().equalsIgnoreCase(attr2.getName())) || exactMatch))) {
-            ComponentAttribSetting setting = new ComponentAttribSetting();
-            setting.setAttributeId(attr.getId());
+            ComponentModelSetting setting = new ComponentModelSetting();
             setting.setComponentId(component.getId());
-            setting.setName(Mapping.ATTRIBUTE_MAPS_TO);
+            setting.setName(Mapping.MODEL_OBJECT_MAPS_TO);
             setting.setValue(attr2.getId());
-            component.addAttributeSetting(setting);
+            setting.setModelObjectId(attr.getId());
+            setting.setType(Type.ATTRIBUTE.toString());
+            component.addModelSetting(setting);
             context.getConfigurationService().save(setting);
             diagram.markAsDirty();
         }
