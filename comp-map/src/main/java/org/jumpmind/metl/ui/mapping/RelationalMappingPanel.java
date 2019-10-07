@@ -22,6 +22,7 @@ package org.jumpmind.metl.ui.mapping;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.util.HashMap;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentModelSetting;
 import org.jumpmind.metl.core.model.ComponentModelSetting.Type;
@@ -173,36 +174,174 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
     }
 
     protected void autoMap(boolean fuzzy) {
-        for (ModelEntity entity1 : inputModel.getModelEntities()) {
-            for (ModelAttrib attr : entity1.getModelAttributes()) {
-                /* look for exact match first */
-                for (ModelEntity entity2 : outputModel.getModelEntities()) {
-                    boolean foundExactMatch = false;
-                    for (ModelAttrib attr2 : entity2.getModelAttributes()) {
-                        foundExactMatch |= autoMap(entity1, entity2, attr, attr2, fuzzy, true);
-                    }
-
-                    if (!foundExactMatch) {
-                        for (ModelAttrib attr2 : entity2.getModelAttributes()) {
-                            autoMap(entity1, entity2, attr, attr2, fuzzy, false);
-                        }
-                    }
-                }
+    	HashMap<ModelEntity, String> inputEntityMap = new HashMap<ModelEntity, String>();
+    	HashMap<ModelEntity, String> outputEntityMap = new HashMap<ModelEntity, String>();
+    	
+    	// check if there are filters, then only auto-map the filtered entities
+    	if (isNotBlank(srcTextFilter.getValue()) && srcMapFilter.getValue()) {
+            for (ModelEntity ent : inputModel.getModelEntities()) {
+            	if (isNotBlank(srcTextFilter.getValue()) && ent.getName().toUpperCase().indexOf(srcTextFilter.getValue().toUpperCase()) != -1) {
+            		for (ModelAttrib attr : ent.getModelAttributes()) {
+            			boolean isMapped = false;
+            	    	for (ComponentModelSetting setting : component.getModelSettings()) {
+            	            if (setting.getName().equals(Mapping.MODEL_OBJECT_MAPS_TO) && setting.getModelObjectId().equals(attr.getId())) {
+            	            	inputEntityMap.put(ent,"found");
+            	            	isMapped = true;
+            	            	break;
+            	            }
+            	        }
+            	    	if (isMapped) {
+            	    		break;
+            	    	}
+            		}
+            	} else {
+            		for (ModelAttrib attr : ent.getModelAttributes()) {
+            			if (isNotBlank(srcTextFilter.getValue()) && attr.getName().toUpperCase().indexOf(srcTextFilter.getValue().toUpperCase()) != -1) {
+	            			boolean isMapped = false;
+	            	    	for (ComponentModelSetting setting : component.getModelSettings()) {
+	            	            if (setting.getName().equals(Mapping.MODEL_OBJECT_MAPS_TO) && setting.getModelObjectId().equals(attr.getId())) {
+	            	            	inputEntityMap.put(ent,"found");
+	            	                isMapped = true;
+	            	            	break;
+	            	            }
+	            	        }
+	            	    	if (isMapped) {
+	            	    		break;
+	            	    	}
+            			}
+            		}
+            	}
             }
+    	} else if (isNotBlank(srcTextFilter.getValue()) || srcMapFilter.getValue()) {
+            for (ModelEntity ent : inputModel.getModelEntities()) {
+            	if (isNotBlank(srcTextFilter.getValue()) && ent.getName().toUpperCase().indexOf(srcTextFilter.getValue().toUpperCase()) != -1) {
+            		inputEntityMap.put(ent,"found");
+            		continue;
+            	} else {
+            		for (ModelAttrib attr : ent.getModelAttributes()) {
+            			if (isNotBlank(srcTextFilter.getValue()) && attr.getName().toUpperCase().indexOf(srcTextFilter.getValue().toUpperCase()) != -1) {
+            				inputEntityMap.put(ent,"found");
+                    		break;
+            			}
+            			if (srcMapFilter.getValue()) {
+	            			boolean isMapped = false;
+	            	    	for (ComponentModelSetting setting : component.getModelSettings()) {
+	            	            if (setting.getName().equals(Mapping.MODEL_OBJECT_MAPS_TO) && setting.getModelObjectId().equals(attr.getId())) {
+	            	            	inputEntityMap.put(ent,"found");
+	            	                isMapped = true;
+	            	            	break;
+	            	            }
+	            	        }
+	            	    	if (isMapped) {
+	            	    		break;
+	            	    	}
+            			}
+            		}
+            	}
+            }
+    	}
+    	if (isNotBlank(dstTextFilter.getValue()) && dstMapFilter.getValue()) {
+            for (ModelEntity ent : outputModel.getModelEntities()) {
+            	if (isNotBlank(dstTextFilter.getValue()) && ent.getName().toUpperCase().indexOf(dstTextFilter.getValue().toUpperCase()) != -1) {
+            		for (ModelAttrib attr : ent.getModelAttributes()) {
+            			boolean isMapped = false;
+            	    	for (ComponentModelSetting setting : component.getModelSettings()) {
+            	            if (setting.getName().equals(Mapping.MODEL_OBJECT_MAPS_TO) && setting.getValue().equals(attr.getId())) {
+            	            	outputEntityMap.put(ent,"found");
+            	            	isMapped = true;
+            	            	break;
+            	            }
+            	        }
+            	    	if (isMapped) {
+            	    		break;
+            	    	}
+            		}
+            	} else {
+            		for (ModelAttrib attr : ent.getModelAttributes()) {
+            			if (isNotBlank(dstTextFilter.getValue()) && attr.getName().toUpperCase().indexOf(dstTextFilter.getValue().toUpperCase()) != -1) {
+	            			boolean isMapped = false;
+	            	    	for (ComponentModelSetting setting : component.getModelSettings()) {
+	            	            if (setting.getName().equals(Mapping.MODEL_OBJECT_MAPS_TO) && setting.getValue().equals(attr.getId())) {
+	            	            	outputEntityMap.put(ent,"found");
+	            	                isMapped = true;
+	            	            	break;
+	            	            }
+	            	        }
+	            	    	if (isMapped) {
+	            	    		break;
+	            	    	}
+            			}
+            		}
+            	}
+            }
+    	} else if (isNotBlank(dstTextFilter.getValue()) || dstMapFilter.getValue()) {
+            for (ModelEntity ent : outputModel.getModelEntities()) {
+            	if (isNotBlank(dstTextFilter.getValue()) && ent.getName().toUpperCase().indexOf(dstTextFilter.getValue().toUpperCase()) != -1) {
+            		outputEntityMap.put(ent,"found");
+            		continue;
+            	} else {
+            		for (ModelAttrib attr : ent.getModelAttributes()) {
+            			if (isNotBlank(dstTextFilter.getValue()) && attr.getName().toUpperCase().indexOf(dstTextFilter.getValue().toUpperCase()) != -1) {
+            				outputEntityMap.put(ent,"found");
+                    		break;
+            			}
+            			if (dstMapFilter.getValue()) {
+	            			boolean isMapped = false;
+	            	    	for (ComponentModelSetting setting : component.getModelSettings()) {
+	            	            if (setting.getName().equals(Mapping.MODEL_OBJECT_MAPS_TO) && setting.getValue().equals(attr.getId())) {
+	            	            	outputEntityMap.put(ent,"found");
+	            	                isMapped = true;
+	            	            	break;
+	            	            }
+	            	        }
+	            	    	if (isMapped) {
+	            	    		break;
+	            	    	}
+            			}
+            		}
+            	}
+            }
+    	}
+        for (ModelEntity entity1 : inputModel.getModelEntities()) {
+        	if ((srcTextFilter.getValue().isEmpty() && !srcMapFilter.getValue()) || inputEntityMap.containsKey(entity1)) {
+	            for (ModelAttrib attr : entity1.getModelAttributes()) {
+	                /* look for exact match first */
+	                for (ModelEntity entity2 : outputModel.getModelEntities()) {
+	                	if ((dstTextFilter.getValue().isEmpty() && !dstMapFilter.getValue()) || outputEntityMap.containsKey(entity2)) {
+		                    boolean foundExactMatch = false;
+		                    for (ModelAttrib attr2 : entity2.getModelAttributes()) {
+		                    	foundExactMatch = autoMap(entity1, entity2, attr, attr2, fuzzy, true);
+		                    	if (foundExactMatch) {
+		                    		break;
+		                    	}
+		                    }
+		
+		                    if (!foundExactMatch && fuzzy) {
+		                        for (ModelAttrib attr2 : entity2.getModelAttributes()) {
+		                            if (autoMap(entity1, entity2, attr, attr2, fuzzy, false)) {
+		                            	break;
+		                            }
+		                        }
+		                    }
+	                	}
+	                }
+	            }
+        	}
         }
     }
 
     protected boolean autoMap(ModelEntity entity1, ModelEntity entity2, ModelAttrib attr, ModelAttrib attr2, boolean fuzzy,
             boolean exact) {
         boolean isMapped = false;
+        boolean isFound = false;
         boolean exactMatch = exact && attr.getName().equalsIgnoreCase(attr2.getName()) && entity1.getName().equals(entity2.getName());
         for (ComponentModelSetting setting : component.getModelSettings()) {
             if (setting.getName().equals(Mapping.MODEL_OBJECT_MAPS_TO) && setting.getValue().equals(attr2.getId())) {
-                isMapped = true;
+            	isFound = true;
                 break;
             }
         }
-        if (!isMapped && ((fuzzy && fuzzyMatches(attr.getName(), attr2.getName()))
+        if (!isFound && ((fuzzy && fuzzyMatches(attr.getName(), attr2.getName()))
                 || ((!exact && attr.getName().equalsIgnoreCase(attr2.getName())) || exactMatch))) {
             ComponentModelSetting setting = new ComponentModelSetting();
             setting.setComponentId(component.getId());
@@ -213,9 +352,10 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
             component.addModelSetting(setting);
             context.getConfigurationService().save(setting);
             diagram.markAsDirty();
+            isMapped = true;
         }
 
-        return exact;
+        return isMapped;
     }
 
     protected boolean fuzzyMatches(String str1, String str2) {
