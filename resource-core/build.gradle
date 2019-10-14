@@ -3,7 +3,7 @@ apply from: '../metl-assemble/common.gradle'
 version = '3.4.3.' + pluginBuildNumber
 
 dependencies {
-    provided project(':metl-core')   
+    compileOnly project(':metl-core')
 	compile "org.bouncycastle:bcprov-jdk15on:1.61"
     testCompile project(path: ':metl-core', configuration: 'testArtifacts')     
 }

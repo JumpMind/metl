@@ -9,6 +9,7 @@ import java.util.Date
         
     apply plugin: 'eclipse-wtp'
     apply plugin: 'java'
+    apply plugin: 'idea'
     apply plugin: 'license-report'
 	apply plugin: 'jacoco'
 	apply plugin: 'license'
@@ -84,15 +85,12 @@ import java.util.Date
     
     configurations { 
         deployerJars
-        provided 
         testArtifacts.extendsFrom testRuntime
         all {
             // check for updates every build
             resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
         }    
     }
-    
-    sourceSets.main.compileClasspath += configurations.provided
     
     uploadArchives {
         repositories.mavenDeployer {
@@ -125,7 +123,6 @@ import java.util.Date
         tasks.withType(Javadoc) {
           options.addStringOption('Xdoclint:none', '-quiet')
           options.addStringOption("sourcepath", "")
-          classpath += configurations.provided
         }
       }
     }       
@@ -162,7 +159,6 @@ import java.util.Date
         classpath {
             downloadSources = true
             downloadJavadoc = false
-            plusConfigurations += [configurations.provided]
         }        
         
         project.file.whenMerged { project ->
@@ -196,10 +192,20 @@ import java.util.Date
         }
       }
     }    
+    
+    idea {
+        module {
+            testResourceDirs = []
+            testSourceDirs = [ file('src/test/java'), file('src/test/groovy')]
+            resourceDirs += file('src/test/resources')
+            downloadJavadoc = true
+            downloadSources = true
+        }
+    }    
        
     task develop {
         description 'Generates Eclipse artifacts and sets up your development environment'
-        dependsOn tasks.cleanEclipse, tasks.cleanEclipseWtp, tasks.eclipse, tasks.eclipseWtp
+        dependsOn tasks.cleanEclipse, tasks.cleanEclipseWtp, tasks.eclipse, tasks.eclipseWtp, tasks.cleanIdea, tasks.idea
     }
     
     task wrapper(type: Wrapper) {
