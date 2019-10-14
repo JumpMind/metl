@@ -3,3 +3,7 @@
 /bin/
 /.classpath
 /.project
+*.iml
+*.ipr
+*.iws
+**/out/*
