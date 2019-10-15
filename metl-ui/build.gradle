@@ -29,6 +29,7 @@ dependencies {
     	exclude group:'javax.validation'
     }
     compile "com.vaadin:vaadin-push:$vaadinVersion"    
+    compile "com.vaadin:vaadin-themes:$vaadinVersion" 
     compile(group:"com.vaadin", name:"vaadin-compatibility-themes", version:"$vaadinVersion") {
     	exclude group:'com.vaadin', module:'vaadin-themes'
     }
