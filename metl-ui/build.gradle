@@ -6,7 +6,6 @@ dependencies {
     compile(group:"org.jumpmind.symmetric", name:"symmetric-sqlexplorer", version:"$sqlExplorerVersion") {
     	exclude group:'org.jumpmind.symmetric'
     	exclude group:'com.vaadin'
-    	exclude group:'com.vaadin.addon' , module:'vaadin-context-menu'
     }
     compile "com.vaadin:vaadin-spring:3.1.1"
     compile "org.springframework:spring-webmvc:$springVersion"
