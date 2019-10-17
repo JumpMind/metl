@@ -30,6 +30,7 @@ import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.v7.event.ItemClickEvent.ItemClickNotifier;
 import com.vaadin.v7.ui.AbstractSelect;
+import static org.apache.commons.lang.StringUtils.*;
 
 abstract public class AbstractMenuBar extends MenuBar {
 
@@ -87,7 +88,7 @@ abstract public class AbstractMenuBar extends MenuBar {
         do {
             menuString.insert(0, item.getText());
             item = item.getParent();
-            if (item != null) {
+            if (item != null && isNotBlank(item.getText())) {
                 menuString.insert(0, "|");
             }
         } while (item != null);
