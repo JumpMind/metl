@@ -486,8 +486,9 @@ public class AgentRuntime {
 
     public FlowRuntime createFlowRuntime(String userId, AgentDeploy deployment, Map<String, String> runtimeParameters) throws Exception {
         String executionId = createExecutionId();
+        List<Notification> notifications = operationsService.findNotificationsForDeployment(deployment);
         return new FlowRuntime(executionId, userId, findDeployed(deployment), agent, componentRuntimeFactory, definitionFactory,
-                flowStepsExecutionThreads, operationsService, configurationService, executionService, deployedResources, null, globalSettings,
+                flowStepsExecutionThreads, operationsService, configurationService, executionService, deployedResources, notifications, globalSettings,
                 runtimeParameters);
     }
 
