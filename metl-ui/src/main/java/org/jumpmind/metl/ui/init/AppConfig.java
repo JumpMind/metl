@@ -56,6 +56,7 @@ import org.jumpmind.db.sql.SqlPersistenceManager;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
+import org.jumpmind.metl.core.model2.ModelToYamlConverter;
 import org.jumpmind.metl.core.persist.ConfigurationService;
 import org.jumpmind.metl.core.persist.ExecutionService;
 import org.jumpmind.metl.core.persist.IConfigurationService;
@@ -219,6 +220,11 @@ public class AppConfig extends WebMvcConfigurerAdapter {
             }
         }
         return mockDriver;
+    }
+
+    @Bean
+    ModelToYamlConverter modelToModel2Converter() {
+        return new ModelToYamlConverter();
     }
     
     @PostConstruct

@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.tools.ant.Project;
@@ -57,8 +58,7 @@ import org.jumpmind.metl.core.model.RelationalModelName;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
-import org.jumpmind.metl.core.model2.Config;
-import org.jumpmind.metl.core.model2.ModelToModel2Converter;
+import org.jumpmind.metl.core.model2.ModelToYamlConverter;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.security.SecurityConstants;
 import org.jumpmind.metl.core.util.MessageException;
@@ -68,17 +68,12 @@ import org.jumpmind.symmetric.io.data.DbExport;
 import org.jumpmind.symmetric.io.data.DbExport.Format;
 import org.jumpmind.util.AppUtils;
 import org.jumpmind.util.LinkedCaseInsensitiveMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.introspector.Property;
-import org.yaml.snakeyaml.nodes.NodeTuple;
-import org.yaml.snakeyaml.nodes.Tag;
-import org.yaml.snakeyaml.representer.Representer;
 
 public class ImportExportService extends AbstractService implements IImportExportService {
 
@@ -160,6 +155,8 @@ public class ImportExportService extends AbstractService implements IImportExpor
             {"_agent_parameter", "select * from %1$s_agent_parameter where agent_id='%2$s' order by id", "id"},
     };
 
+    @Autowired
+    protected ModelToYamlConverter modelToModel2Converter;
     protected IDatabasePlatform databasePlatform;
     protected IConfigurationService configurationService;
     protected IOperationsService operationsService;
@@ -265,29 +262,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         initProjectVersionExport(exportData, projectVersionId);
         addProjectVersionToConfigData(projectVersionId, exportData, new HashSet<String>(flowIds), new HashSet<String>(modelIds), new HashSet<String>(resourceIds));
 
-        List<Flow> flows = new ArrayList<>();
-        for (String flowId : flowIds) {
-            flows.add(configurationService.findFlow(flowId));
-        }
-
-        Representer representer = new Representer() {
-            @Override
-            protected NodeTuple representJavaBeanProperty(Object javaBean, Property property, Object propertyValue, Tag customTag) {
-                // if value of property is null, ignore it.
-                if (propertyValue == null) {
-                    return null;
-                } else {
-                    return super.representJavaBeanProperty(javaBean, property, propertyValue, customTag);
-                }
-            }
-        };
-        representer.addClassTag(Config.class, new Tag("!config"));
-        //representer.addClassTag(Wheel.class, Tag.MAP);;
-        DumperOptions options = new DumperOptions();
-        options.setPrettyFlow(true);
-        options.setDefaultScalarStyle(DumperOptions.ScalarStyle.SINGLE_QUOTED);
-        return new Yaml(representer, options).dump(ModelToModel2Converter.convert(version, flows));
-
+        return modelToModel2Converter.toYaml(projectVersionId, flowIds.stream().map((id) -> configurationService.findFlow(id)).collect(Collectors.toList()));
 //        return serializeExportToJson(exportData);
     }
 
