@@ -495,7 +495,7 @@ public class ExecutionApi {
                     }
                 }
 
-                throw new FailureException(result);
+//                throw new FailureException(result);
             }
             return result;
         } else {

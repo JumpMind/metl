@@ -419,6 +419,7 @@
             </setting>
             <setting id='sftp.port' required='false' type='integer'>
                 <name>Port</name>
+                <defaultValue>22</defaultValue>
             </setting>
             <setting id='sftp.user' required='false' type='text'>
                 <name>User</name>
