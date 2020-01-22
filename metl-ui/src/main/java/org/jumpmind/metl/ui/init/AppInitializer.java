@@ -292,7 +292,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
             }
             
             configurationService.save(new PluginRepository("default", "http://maven.jumpmind.com/repo"));
-            configurationService.save(new PluginRepository("central", "http://repo1.maven.org/maven2"));
+            configurationService.save(new PluginRepository("central", "https://repo1.maven.org/maven2"));
         }
         getLogger().info("The configuration database has been initialized");
     }
