@@ -2,4 +2,5 @@
 /.settings/
 /.classpath
 /.project
+/*.iml
 /build/

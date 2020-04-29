@@ -3,6 +3,7 @@
 /.settings/
 /.classpath
 /.project
+/*.iml
 /build/
 /.DS_Store
 /target/

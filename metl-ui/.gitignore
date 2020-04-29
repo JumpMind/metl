@@ -4,7 +4,7 @@
 /.settings
 /build
 .DS_Store
-
+/*.iml
 /src/main/webapp/
 /test_codb.h2.db
 /test_codb.lock.db

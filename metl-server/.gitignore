@@ -5,6 +5,7 @@
 /.settings/
 /.classpath
 /.project
+/*.iml
 /symmetricis-dev.trace.db
 /build/
 /as400.h2.db

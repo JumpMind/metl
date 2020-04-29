@@ -1,6 +1,7 @@
 /bin
 /.classpath
 /.project
+/*.iml
 /.settings
 /build
 .DS_Store

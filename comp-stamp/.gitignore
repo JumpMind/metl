@@ -1,5 +1,6 @@
 /bin/
 /.classpath
 /.project
+/*.iml
 /.settings/
 /build/

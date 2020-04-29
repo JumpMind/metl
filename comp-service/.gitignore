@@ -2,4 +2,5 @@
 /bin/
 /.classpath
 /.project
+/*.iml
 /build/
