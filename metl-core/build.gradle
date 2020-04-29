@@ -69,6 +69,7 @@ dependencies {
         exclude group: 'xerces'
     }
     compile "org.jgrapht:jgrapht-core:1.0.1"
+	compile "org.apache.kafka:kafka-clients:$apacheKafkaVersion"
     testCompile "org.mockito:mockito-all:$mockitoVersion"
     testCompile "org.powermock:powermock-api-mockito:$powerMockVersion"
     testCompile "org.powermock:powermock-module-junit4:$powerMockVersion"    

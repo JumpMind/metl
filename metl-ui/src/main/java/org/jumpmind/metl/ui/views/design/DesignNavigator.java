@@ -994,6 +994,10 @@ public class DesignNavigator extends VerticalLayout {
         addNewResource("Http", "Http", Icons.WEB);
     }
 
+    public void addNewKafkaProducer() {
+    	addNewResource("KafkaProducer", "Kafka Producer", Icons.QUEUE);
+    }
+    
     public void addNewMailSession() {
         addNewResource("MailSession", "Mail Session", Icons.EMAIL);
     }

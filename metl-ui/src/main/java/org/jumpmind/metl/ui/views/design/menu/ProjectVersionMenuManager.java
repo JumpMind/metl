@@ -57,6 +57,7 @@ public class ProjectVersionMenuManager extends AbstractDesignSelectedValueMenuMa
                 "File|New|Resource|HTTP",
                 "File|New|Resource|Mail Session",
                 "File|New|Resource|Subscribe|JMS",
+                "File|New|Resource|Publish|Kafka",
                 "File|Open",
                 "File|Import...",        
                 "File|Export...",        

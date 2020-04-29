@@ -463,4 +463,87 @@
         </settings>
     </resource>    
 
+    <resource id='KafkaProducer' resourceCategory='publish'>
+        <name>Kafka Producer</name>
+        <className>org.jumpmind.metl.core.runtime.resource.KafkaProducerResource</className>
+        <settings>
+            <setting id='bootstrap.servers' required='true' type='text'>
+                <name>Bootstrap Servers</name>
+            </setting>
+            <setting id='key.serializer' required='true' type='choice'>
+                <name>Key Serializer</name>
+                <defaultValue>StringSerializer</defaultValue>
+                <choices>
+                    <choice>StringSerializer</choice>
+                    <choice>DoubleSerializer</choice>
+                    <choice>FloatSerializer</choice>
+                    <choice>LongSerializer</choice>
+                    <choice>ShortSerializer</choice>
+                </choices>
+            </setting>
+            <setting id='value.serializer' required='true' type='choice'>
+                <name>Value Serializer</name>
+                <defaultValue>StringSerializer</defaultValue>
+                <choices>
+                    <choice>StringSerializer</choice>
+                    <choice>DoubleSerializer</choice>
+                    <choice>FloatSerializer</choice>
+                    <choice>LongSerializer</choice>
+                    <choice>ShortSerializer</choice>
+                </choices>
+            </setting>
+            <setting id='acks' required='true' type='choice'>
+                <name>Acknowledgments</name>
+                <defaultValue>all</defaultValue>
+                <choices>
+                    <choice>all</choice>
+                    <choice>-1</choice>
+                    <choice>0</choice>
+                    <choice>1</choice>
+                </choices>
+            </setting>
+            <setting id='buffer.memory' required='false' type='integer'>
+                <name>Buffer Memory (bytes)</name>
+                <defaultValue>33554432</defaultValue>
+            </setting>
+            <setting id='compression.type' required='true' type='choice'>
+                <name>Compression Type</name>
+                <defaultValue>none</defaultValue>
+                <choices>
+                    <choice>none</choice>
+                    <choice>gzip</choice>
+                    <choice>snappy</choice>
+                    <choice>lz4</choice>
+                    <choice>zstd</choice>
+                </choices>
+            </setting>
+            <setting id='retries' required='false' type='integer'>
+                <name>Retries</name>
+                <defaultValue>2147483647</defaultValue>
+            </setting>
+            <setting id='batch.size' required='false' type='integer'>
+                <name>Batch Size</name>
+                <defaultValue>16384</defaultValue>
+            </setting>
+             <setting id='client.id' required='false' type='text'>
+                <name>Client Id</name>
+            </setting>
+             <setting id='delivery.timeout.ms' required='false' type='integer'>
+                <name>Delivery Timeout (ms)</name>
+                <defaultValue>120000</defaultValue>                
+            </setting>
+             <setting id='linger.ms' required='false' type='integer'>
+                <name>Linger Timeout (ms)</name>
+                <defaultValue>0</defaultValue>                
+            </setting>
+             <setting id='max.request.size (bytes)' required='false' type='integer'>
+                <name>Max Request Size</name>
+                <defaultValue>1048576</defaultValue>                
+            </setting>
+             <setting id='request.timeout.ms' required='false' type='integer'>
+                <name>Request Timeout (ms)</name>
+                <defaultValue>30000</defaultValue>                
+            </setting>
+        </settings>
+    </resource>
 </definitions>
