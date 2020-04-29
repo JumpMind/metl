@@ -300,6 +300,7 @@ public class AppUI extends UI {
         
         appCtx.getConfigurationService().save(new AuditEvent(EventType.LOGIN, "Logged in", user.getLoginId()));
         user.setLastLoginTime(new Date());
+        user.setFailedLogins(0);
         appCtx.getOperationsService().save(user);
         getViewManager().init(this, contentArea);
 
