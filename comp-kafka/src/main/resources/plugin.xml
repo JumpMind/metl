@@ -52,11 +52,13 @@
                type='model_column'>
         <name>Partition Attribute</name>
       </setting>
+<!--      
       <setting id='kafka.producer.transaction.id.attribute'
                required='false'
                type='model_column'>
         <name>Transaction Id Attribute</name>
       </setting>
+-->      
     </settings>
   </component>
 </definitions>

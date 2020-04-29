@@ -36,7 +36,7 @@ public class KafkaProducer extends AbstractComponentRuntime {
     public final static String TYPE = "Kafka Producer";
 
     public final static String KAFKA_PRODUCER_TOPIC_ATTRIBUTE = "kafka.producer.topic.attribute";
-    public final static String KAFKA_PRODUCER_TRANSACTION_ID_ATTRIBUTE = "kafka.producer.transaction.id.attribute";
+//    public final static String KAFKA_PRODUCER_TRANSACTION_ID_ATTRIBUTE = "kafka.producer.transaction.id.attribute";
     public final static String KAFKA_PRODUCER_PARTITION_ATTRIBUTE = "kafka.producer.partition.attribute";    
     public final static String KAFKA_PRODUCER_KEY_ATTRIBUTE = "kafka.producer.key.attribute";
     public final static String KAFKA_PRODUCER_VALUE_ATTRIBUTE = "kafka.producer.value.attribute";
@@ -58,7 +58,7 @@ public class KafkaProducer extends AbstractComponentRuntime {
         }
         TypedProperties properties = getTypedProperties();
         topicAttribute = properties.get(KAFKA_PRODUCER_TOPIC_ATTRIBUTE);
-        transactionIdAttribute = properties.get(KAFKA_PRODUCER_TRANSACTION_ID_ATTRIBUTE);
+//        transactionIdAttribute = properties.get(KAFKA_PRODUCER_TRANSACTION_ID_ATTRIBUTE);
         partitionAttribute = properties.get(KAFKA_PRODUCER_PARTITION_ATTRIBUTE);
         keyAttribute = properties.get(KAFKA_PRODUCER_KEY_ATTRIBUTE);        
         messageAttribute = properties.get(KAFKA_PRODUCER_VALUE_ATTRIBUTE);
