@@ -279,7 +279,9 @@ public class FilePoller extends AbstractComponentRuntime {
             }
             
             if (onlyFilesOlderThan > 0) {
-                long ts = System.currentTimeMillis()-onlyFilesOlderThan*60*1000;
+		long olderThan = onlyFilesOlderThan;
+		olderThan = olderThan*60*1000;
+                long ts = System.currentTimeMillis()-olderThan;
                 Iterator<FileInfo> i = matches.iterator();
                 while (i.hasNext()) {
                     FileInfo fileInfo = i.next();
