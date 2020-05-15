@@ -52,6 +52,7 @@ public class KafkaProducerResource extends AbstractResourceRuntime {
 
 		setProperties(resourceRuntimeSettings);
 		if (properties.get(SETTING_BOOTSTRAP_SERVERS) != null) {
+			Thread.currentThread().setContextClassLoader(null);
 			producer = new KafkaProducer(properties);
 		}
 	}
