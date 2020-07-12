@@ -19,7 +19,8 @@ JAVA="${wrapper.java.command}"
 JARFILE="${wrapper.jarfile}"
 METL_HOME="${wrapper.home}"
 export METL_HOME
-RUN_AS_USER=""
+
+[ -r /etc/default/metl ] && . /etc/default/metl
 
 if [ "$RUN_AS_USER" != "" ]
 then
