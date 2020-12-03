@@ -73,7 +73,6 @@ import java.util.Date
         mavenCentral()        
         maven { url "http://maven.vaadin.com/vaadin-addons" }
         maven { url "http://maven.jumpmind.com/repo" }
-        maven { url "http://repo.reficio.org/maven" }
         maven { url "https://repository.jboss.org/nexus/content/repositories/deprecated" }
         maven { url "http://www.soapui.org/repository/maven2" }
         maven { url "https://github.com/santhosh-tekuri/maven-repository/raw/master" }

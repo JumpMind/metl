@@ -20,6 +20,13 @@ dependencies {
     compile ("org.reficio:soap-builder:$reficioSoapVersion") {
        exclude group:'com.googlecode.guava-osgi'
     }    
+    compile ("org.reficio:soap-common:$reficioSoapVersion") {
+
+       exclude group:'com.googlecode.guava-osgi'
+    }    
+    compile ("org.reficio:soap-legacy:$reficioSoapVersion") {
+       exclude group:'com.googlecode.guava-osgi'
+    }    
     compile "jlibs:jlibs-xml:1.0"
     compile "com.vaadin:vaadin-server:$vaadinVersion"    
     compile "com.vaadin:vaadin-push:$vaadinVersion"    
