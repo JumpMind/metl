@@ -70,6 +70,9 @@ dependencies {
     }
     compile "org.jgrapht:jgrapht-core:1.0.1"
 	compile "org.apache.kafka:kafka-clients:$apacheKafkaVersion"
+
+    compile group: 'software.amazon.awssdk', name: 'sqs', version: '2.15.14'
+
     testCompile "org.mockito:mockito-all:$mockitoVersion"
     testCompile "org.powermock:powermock-api-mockito:$powerMockVersion"
     testCompile "org.powermock:powermock-module-junit4:$powerMockVersion"    
