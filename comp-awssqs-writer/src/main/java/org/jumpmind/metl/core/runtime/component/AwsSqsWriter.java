@@ -45,15 +45,15 @@ public class AwsSqsWriter extends AbstractComponentRuntime {
     String messageGroupId;
 
     @Override
-    public void start() {    			
+    public void start() {
         TypedProperties properties = getTypedProperties();
 
         queueUrl = properties.get(AWSSQS_WRITER_QUEUEURL_ATTRIBUTE);
         messageGroupId = properties.get(AWSSQS_WRITER_MESSAGEGROUPID_ATTRIBUTE);
-        
-    	sqsClient = SqsClient.builder()
-    			.region(Region.of(properties.get(AWSSQS_WRITER_REGION_ATTRIBUTE)))
-    			.build();
+
+        sqsClient = SqsClient.builder()
+                .region(Region.of(properties.get(AWSSQS_WRITER_REGION_ATTRIBUTE)))
+                .build();
     }
 
     @Override
@@ -64,25 +64,25 @@ public class AwsSqsWriter extends AbstractComponentRuntime {
 	@Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (inputMessage instanceof TextMessage) {
-        	List<String> inputMessages = ((TextMessage) inputMessage).getPayload();
-        	ArrayList<String> outputMessages = new ArrayList<String>();
-            
-        	outputMessages.add("***********************");
-        	outputMessages.add("AWS SQS WRITER");
-        	outputMessages.add("***********************");
-        	outputMessages.add("Queue URL: " + queueUrl);
-        	outputMessages.add("Message Group ID: " + messageGroupId);
-        	outputMessages.add("***********************");
-        	outputMessages.addAll(inputMessages);
-        	outputMessages.add("***********************");
+            List<String> inputMessages = ((TextMessage) inputMessage).getPayload();
+            ArrayList<String> outputMessages = new ArrayList<String>();
 
-        	SendMessageRequest sendMessageRequest = SendMessageRequest.builder()
-        			.queueUrl(queueUrl)
-        			.messageGroupId(messageGroupId)
-        			.messageBody(inputMessages.get(0))
-        			.build();
-        	
-        	sqsClient.sendMessage(sendMessageRequest);
+            outputMessages.add("***********************");
+            outputMessages.add("AWS SQS WRITER");
+            outputMessages.add("***********************");
+            outputMessages.add("Queue URL: " + queueUrl);
+            outputMessages.add("Message Group ID: " + messageGroupId);
+            outputMessages.add("***********************");
+            outputMessages.addAll(inputMessages);
+            outputMessages.add("***********************");
+
+            SendMessageRequest sendMessageRequest = SendMessageRequest.builder()
+                    .queueUrl(queueUrl)
+                    .messageGroupId(messageGroupId)
+                    .messageBody(inputMessages.get(0))
+                    .build();
+
+            sqsClient.sendMessage(sendMessageRequest);
 
             callback.sendTextMessage(null, outputMessages);
         }

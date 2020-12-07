@@ -46,15 +46,15 @@ public class AwsSqsReader extends AbstractComponentRuntime {
     int numberOfMessages;
 
     @Override
-    public void start() {    			
+    public void start() {
         TypedProperties properties = getTypedProperties();
 
         queueUrl = properties.get(AWSSQS_READER_QUEUEURL_ATTRIBUTE);
         numberOfMessages = Integer.parseInt(properties.get(AWSSQS_READER_NUMBEROFMESSAGES_ATTRIBUTE));
-        
-    	sqsClient = SqsClient.builder()
-    			.region(Region.of(properties.get(AWSSQS_READER_REGION_ATTRIBUTE)))
-    			.build();
+
+        sqsClient = SqsClient.builder()
+                .region(Region.of(properties.get(AWSSQS_READER_REGION_ATTRIBUTE)))
+                .build();
     }
 
     @Override
@@ -65,23 +65,23 @@ public class AwsSqsReader extends AbstractComponentRuntime {
 	@Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (inputMessage instanceof TextMessage) {
-        	ArrayList<String> outputMessages = new ArrayList<String>();
+            ArrayList<String> outputMessages = new ArrayList<String>();
             
-        	outputMessages.add("***********************");
-        	outputMessages.add("AWS SQS READER");
-        	outputMessages.add("***********************");
-        	outputMessages.add("Queue URL: " + queueUrl);
-        	outputMessages.add("Number Of Messages: " + numberOfMessages);
-        	outputMessages.add("***********************");
+            outputMessages.add("***********************");
+            outputMessages.add("AWS SQS READER");
+            outputMessages.add("***********************");
+            outputMessages.add("Queue URL: " + queueUrl);
+            outputMessages.add("Number Of Messages: " + numberOfMessages);
+            outputMessages.add("***********************");
 
-        	for (int i = 0; i < numberOfMessages; i++) {
-        		ReceiveMessageRequest receiveRequest = ReceiveMessageRequest.builder()
-            			.queueUrl(queueUrl)
-            			.build();
-            	
-            	ReceiveMessageResponse response = sqsClient.receiveMessage(receiveRequest);
-            	
-            	for (software.amazon.awssdk.services.sqs.model.Message message : response.messages()) {
+            for (int i = 0; i < numberOfMessages; i++) {
+                ReceiveMessageRequest receiveRequest = ReceiveMessageRequest.builder()
+                        .queueUrl(queueUrl)
+                        .build();
+
+                ReceiveMessageResponse response = sqsClient.receiveMessage(receiveRequest);
+
+                for (software.amazon.awssdk.services.sqs.model.Message message : response.messages()) {
                     outputMessages.add(message.toString());
                     
                     DeleteMessageRequest deleteRequest = DeleteMessageRequest.builder()
@@ -90,8 +90,8 @@ public class AwsSqsReader extends AbstractComponentRuntime {
                             .build();
 
                     sqsClient.deleteMessage(deleteRequest);
-            	}
-        	}
+                }
+            }
 
             callback.sendTextMessage(null, outputMessages);
         }
