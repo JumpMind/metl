@@ -29,7 +29,8 @@ import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 
 import software.amazon.awssdk.services.sqs.SqsClient;
-import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest;
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequestEntry;
 
 public class SQSWriter extends AbstractComponentRuntime {
 
@@ -61,21 +62,23 @@ public class SQSWriter extends AbstractComponentRuntime {
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (inputMessage instanceof TextMessage) {
             SqsClient client = (SqsClient)getResourceReference();
-            List<String> inputMessages = ((TextMessage) inputMessage).getPayload();
+            List<SendMessageBatchRequestEntry> messageEntries = new ArrayList<>();
+            int batchRequestId = 0;
 
-            SendMessageRequest sendMessageRequest = SendMessageRequest.builder()
+            for (String input : ((TextMessage) inputMessage).getPayload()) { 
+                messageEntries.add(SendMessageBatchRequestEntry.builder()
+                        .messageGroupId(messageGroupId)
+                        .id(String.valueOf(++batchRequestId))
+                        .messageBody(input)
+                        .build());
+            };
+
+            SendMessageBatchRequest sendMessagesRequest = SendMessageBatchRequest.builder()
                     .queueUrl(queueUrl)
-                    .messageGroupId(messageGroupId)
-                    .messageBody(inputMessages.get(0))
+                    .entries(messageEntries)
                     .build();
 
-            client.sendMessage(sendMessageRequest);
-
-            ArrayList<String> outputMessages = new ArrayList<String>();
-            outputMessages.add("***********************");
-            outputMessages.add("AWS SQS WRITER");
-            outputMessages.add("***********************");
-            callback.sendTextMessage(null, outputMessages);
+            client.sendMessageBatch(sendMessagesRequest);
         }
     }
 }

@@ -1,7 +1,5 @@
 package org.jumpmind.metl.core.runtime.resource;
 
-import java.util.Properties;
-
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.properties.TypedProperties;
 
@@ -20,8 +18,6 @@ public class SQSQueue extends AbstractResourceRuntime {
 	public static final String SETTING_SECRET_ACCESS_KEY = "secret.access.key";
 	
 	public static final String SETTING_REGION = "region";
-
-	Properties properties = new Properties();
 	
     SqsClient sqsClient;
     
@@ -32,8 +28,8 @@ public class SQSQueue extends AbstractResourceRuntime {
 	}
 
 	public void start(Resource resource, TypedProperties resourceRuntimeSettings) {
-		if (properties.get(SETTING_ACCESS_KEY) != null &&
-				properties.get(SETTING_SECRET_ACCESS_KEY) != null)  {
+		if (resourceRuntimeSettings.get(SETTING_ACCESS_KEY) != null &&
+		        resourceRuntimeSettings.get(SETTING_SECRET_ACCESS_KEY) != null)  {
 			Thread.currentThread().setContextClassLoader(null);
 			sqsClient = createSqsClient(resourceRuntimeSettings);
 		}
