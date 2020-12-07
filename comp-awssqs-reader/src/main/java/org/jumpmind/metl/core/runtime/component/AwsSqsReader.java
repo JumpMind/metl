@@ -21,7 +21,6 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.TextMessage;
@@ -30,29 +29,31 @@ import org.jumpmind.properties.TypedProperties;
 
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
-import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
+import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
 
-public class AwsSqsWriter extends AbstractComponentRuntime {
+public class AwsSqsReader extends AbstractComponentRuntime {
 
-    public final static String AWSSQS_WRITER_REGION_ATTRIBUTE = "awssqs.writer.region.attribute";
-    public final static String AWSSQS_WRITER_QUEUEURL_ATTRIBUTE = "awssqs.writer.queueurl.attribute";
-    public final static String AWSSQS_WRITER_MESSAGEGROUPID_ATTRIBUTE = "awssqs.writer.messagegroupid.attribute";
+    public final static String AWSSQS_READER_REGION_ATTRIBUTE = "awssqs.reader.region.attribute";
+    public final static String AWSSQS_READER_QUEUEURL_ATTRIBUTE = "awssqs.reader.queueurl.attribute";
+    public final static String AWSSQS_READER_NUMBEROFMESSAGES_ATTRIBUTE = "awssqs.reader.numberofmessages.attribute";
     
     private SqsClient sqsClient;
     
     /* settings */
     String queueUrl;
-    String messageGroupId;
+    int numberOfMessages;
 
     @Override
     public void start() {    			
         TypedProperties properties = getTypedProperties();
 
-        queueUrl = properties.get(AWSSQS_WRITER_QUEUEURL_ATTRIBUTE);
-        messageGroupId = properties.get(AWSSQS_WRITER_MESSAGEGROUPID_ATTRIBUTE);
+        queueUrl = properties.get(AWSSQS_READER_QUEUEURL_ATTRIBUTE);
+        numberOfMessages = Integer.parseInt(properties.get(AWSSQS_READER_NUMBEROFMESSAGES_ATTRIBUTE));
         
     	sqsClient = SqsClient.builder()
-    			.region(Region.of(properties.get(AWSSQS_WRITER_REGION_ATTRIBUTE)))
+    			.region(Region.of(properties.get(AWSSQS_READER_REGION_ATTRIBUTE)))
     			.build();
     }
 
@@ -64,25 +65,33 @@ public class AwsSqsWriter extends AbstractComponentRuntime {
 	@Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (inputMessage instanceof TextMessage) {
-        	List<String> inputMessages = ((TextMessage) inputMessage).getPayload();
         	ArrayList<String> outputMessages = new ArrayList<String>();
             
         	outputMessages.add("***********************");
-        	outputMessages.add("AWS SQS WRITER");
+        	outputMessages.add("AWS SQS READER");
         	outputMessages.add("***********************");
         	outputMessages.add("Queue URL: " + queueUrl);
-        	outputMessages.add("Message Group ID: " + messageGroupId);
-        	outputMessages.add("***********************");
-        	outputMessages.addAll(inputMessages);
+        	outputMessages.add("Number Of Messages: " + numberOfMessages);
         	outputMessages.add("***********************");
 
-        	SendMessageRequest sendMessageRequest = SendMessageRequest.builder()
-        			.queueUrl(queueUrl)
-        			.messageGroupId(messageGroupId)
-        			.messageBody(inputMessages.get(0))
-        			.build();
-        	
-        	sqsClient.sendMessage(sendMessageRequest);
+        	for (int i = 0; i < numberOfMessages; i++) {
+        		ReceiveMessageRequest receiveRequest = ReceiveMessageRequest.builder()
+            			.queueUrl(queueUrl)
+            			.build();
+            	
+            	ReceiveMessageResponse response = sqsClient.receiveMessage(receiveRequest);
+            	
+            	for (software.amazon.awssdk.services.sqs.model.Message message : response.messages()) {
+                    outputMessages.add(message.toString());
+                    
+                    DeleteMessageRequest deleteRequest = DeleteMessageRequest.builder()
+                            .queueUrl(queueUrl)
+                            .receiptHandle(message.receiptHandle())
+                            .build();
+
+                    sqsClient.deleteMessage(deleteRequest);
+            	}
+        	}
 
             callback.sendTextMessage(null, outputMessages);
         }

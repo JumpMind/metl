@@ -21,7 +21,7 @@
 
 -->
 <ui>
-    <component-ui id="AWS SQS Writer UI" componentId="AWS SQS Writer">
-        <iconImage>org/jumpmind/metl/core/runtime/component/testtube-green-48.png</iconImage>
+    <component-ui id="AWS SQS Reader UI" componentId="AWS SQS Reader">
+        <iconImage>org/jumpmind/metl/core/runtime/component/testtube-orange-48.png</iconImage>
     </component-ui>
 </ui>
