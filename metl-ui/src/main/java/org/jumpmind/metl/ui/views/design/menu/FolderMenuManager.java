@@ -57,7 +57,8 @@ public class FolderMenuManager extends AbstractDesignSelectedValueMenuManager {
                 "File|New|Resource|HTTP",
                 "File|New|Resource|Mail Session",
                 "File|New|Resource|Subscribe|JMS",
-                "File|New|Resource|Publish|Kafka",
+                "File|New|Resource|Queue|Kafka Publisher",
+                "File|New|Resource|Queue|SQS",
                 "File|Import...",        
                 "File|Export..."
         });

@@ -1,11 +1,11 @@
 package org.jumpmind.metl.core.runtime.resource;
 
-import java.util.Properties;
-
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.properties.TypedProperties;
+
+import java.util.Properties;
 
 public class KafkaProducerResource extends AbstractResourceRuntime {
 

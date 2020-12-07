@@ -995,7 +995,11 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public void addNewKafkaProducer() {
-    	addNewResource("KafkaProducer", "Kafka Producer", Icons.QUEUE);
+    	addNewResource("KafkaProducer", "Kafka Publisher", Icons.QUEUE);
+    }
+    
+    public void addNewSqsQueue() {
+    	addNewResource("SQSQueue", "SQS Queue", Icons.QUEUE);
     }
     
     public void addNewMailSession() {

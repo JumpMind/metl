@@ -20,10 +20,10 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
-import java.security.Security;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jumpmind.properties.TypedProperties;
+
+import java.security.Security;
 
 public class Sftp extends AbstractResourceRuntime {
 

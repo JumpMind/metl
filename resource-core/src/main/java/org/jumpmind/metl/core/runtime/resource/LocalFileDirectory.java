@@ -20,21 +20,15 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Resource;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LocalFileDirectory extends AbstractDirectory {
 

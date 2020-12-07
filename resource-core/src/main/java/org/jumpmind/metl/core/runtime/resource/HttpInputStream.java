@@ -20,13 +20,13 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-
 import org.jumpmind.exception.IoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 
 public class HttpInputStream extends InputStream implements IInputStreamWithConnection {
 

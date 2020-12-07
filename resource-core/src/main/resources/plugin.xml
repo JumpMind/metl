@@ -462,8 +462,7 @@
             </setting>
         </settings>
     </resource>    
-
-    <resource id='KafkaProducer' resourceCategory='publish'>
+    <resource id='KafkaProducer' resourceCategory='queue'>
         <name>Kafka Producer</name>
         <className>org.jumpmind.metl.core.runtime.resource.KafkaProducerResource</className>
         <settings>
@@ -543,6 +542,29 @@
              <setting id='request.timeout.ms' required='false' type='integer'>
                 <name>Request Timeout (ms)</name>
                 <defaultValue>30000</defaultValue>                
+            </setting>
+        </settings>
+    </resource>
+    <resource id='SQSQueue' resourceCategory='queue'>
+        <name>SQS Queue</name>
+        <className>org.jumpmind.metl.core.runtime.resource.SQSQueue</className>
+        <settings>
+            <setting id='access.key' required='true' type='text'>
+                <name>Access Key</name>
+            </setting>
+            <setting id='secret.access.key' required='true' type='text'>
+                <name>Secret Access Key</name>
+            </setting>
+            <setting id='region' required='true' type='choice'>
+                <name>Region</name>
+                <defaultValue>none</defaultValue>
+                <choices>
+                    <choice>us-west-1</choice>
+                    <choice>us-west-2</choice>
+                    <choice>us-east-1</choice>
+                    <choice>us-east-2</choice>
+                    <choice>us-iso-east-1</choice>
+                </choices>
             </setting>
         </settings>
     </resource>

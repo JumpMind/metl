@@ -1,0 +1,93 @@
+<!--
+
+    Licensed to JumpMind Inc under one or more contributor
+    license agreements.  See the NOTICE file distributed
+    with this work for additional information regarding
+    copyright ownership.  JumpMind Inc licenses this file
+    to you under the GNU General Public License, version 3.0 (GPLv3)
+    (the "License"); you may not use this file except in compliance
+    with the License.
+
+    You should have received a copy of the GNU General Public License,
+    version 3.0 (GPLv3) along with this library; if not, see
+    <http://www.gnu.org/licenses/>.
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<definitions>
+  <component category='WRITER'
+             id='SQS Writer'
+             inputMessageType='text'
+             inputOutputModelsMatch='false'
+             outputMessageType='text'
+             resourceCategory='queue'>
+    <name>SQS Writer</name>
+    <className>org.jumpmind.metl.core.runtime.component.SQSWriter</className>
+    <keywords>sqs,writer</keywords>
+    <description></description>
+    <settings>
+      <setting id='sqs.writer.url'
+               required='true'
+               type='text'>
+        <name>Queue URL</name>
+      </setting>
+      <setting id='sqs.writer.message.group.id'
+               required='true'
+               type='string'>
+        <name>Message Group</name>
+      </setting>
+    </settings>
+  </component>
+  <component category='READER'
+             id='SQS Reader'
+             inputMessageType='text'
+             inputOutputModelsMatch='false'
+             outputMessageType='text'
+             resourceCategory='queue'>
+    <name>SQS Reader</name>
+    <className>org.jumpmind.metl.core.runtime.component.SQSReader</className>
+    <keywords>sqs,reader</keywords>
+    <description></description>
+    <settings>
+      <setting id='sqs.reader.queue.url'
+               required='true'
+               type='text'>
+        <name>Queue URL</name>
+      </setting>
+      <setting id='sqs.reader.max.messages.read.at.once'
+               required='true'
+               type='integer'>
+        <name>Max Messages to Read at Once</name>
+        <defaultValue>1</defaultValue>
+      </setting>
+      <setting id='sqs.reader.queue.messages.per.output.message'
+               required='true'
+               type='integer'>
+        <name>Queue Messages Per OutputMessage</name>
+        <defaultValue>1</defaultValue>
+      </setting>
+      <setting id='sqs.reader.read.until.queue.empty'
+               required='true'
+               type='booean'>
+        <name>Read until queue empty</name>
+        <defaultValue>false</defaultValue>        
+      </setting>    
+      <setting id='sqs.reader.run.when'
+               required='false'
+               type='choice'>
+        <name>Run When</name>
+        <defaultValue>PER UNIT OF WORK</defaultValue>
+        <choices>
+          <choice>PER UNIT OF WORK</choice>
+          <choice>PER MESSAGE</choice>
+        </choices>
+      </setting>
+    </settings>
+  </component>  
+</definitions>

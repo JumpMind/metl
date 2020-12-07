@@ -20,10 +20,10 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
+import org.jumpmind.properties.TypedProperties;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.jumpmind.properties.TypedProperties;
 
 public class MailSessionResource extends AbstractResourceRuntime {
 

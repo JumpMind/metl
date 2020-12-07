@@ -20,19 +20,18 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.jumpmind.exception.IoException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
 import jcifs.smb.SmbFileOutputStream;
+import org.jumpmind.exception.IoException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SMBDirectory extends AbstractDirectory {
     

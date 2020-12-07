@@ -20,12 +20,9 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
-import static org.jumpmind.metl.core.runtime.resource.HttpDirectory.HTTP_METHOD_GET;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
-
 import org.jumpmind.properties.TypedProperties;
+
+import static org.jumpmind.metl.core.runtime.resource.HttpDirectory.HTTP_METHOD_GET;
 
 public class Http extends AbstractResourceRuntime {
 

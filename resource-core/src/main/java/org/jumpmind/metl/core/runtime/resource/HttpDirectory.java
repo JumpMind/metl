@@ -20,8 +20,11 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import com.sun.jersey.oauth.signature.*;
+import org.apache.commons.codec.binary.Base64;
+import org.jumpmind.exception.IoException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,16 +37,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
-import org.apache.commons.codec.binary.Base64;
-import org.jumpmind.exception.IoException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.sun.jersey.oauth.signature.HMAC_SHA1;
-import com.sun.jersey.oauth.signature.OAuthParameters;
-import com.sun.jersey.oauth.signature.OAuthRequest;
-import com.sun.jersey.oauth.signature.OAuthSecrets;
-import com.sun.jersey.oauth.signature.OAuthSignature;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 public class HttpDirectory implements IHttpDirectory {
 
