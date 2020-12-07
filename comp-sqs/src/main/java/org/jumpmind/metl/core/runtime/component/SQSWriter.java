@@ -21,47 +21,35 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.KafkaException;
-import org.jumpmind.metl.core.runtime.EntityData;
-import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
+
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
 public class SQSWriter extends AbstractComponentRuntime {
 
     public final static String TYPE = "SQS Writer";
 
-    public final static String KAFKA_PRODUCER_TOPIC_ATTRIBUTE = "kafka.producer.topic.attribute";
-//    public final static String KAFKA_PRODUCER_TRANSACTION_ID_ATTRIBUTE = "kafka.producer.transaction.id.attribute";
-    public final static String KAFKA_PRODUCER_PARTITION_ATTRIBUTE = "kafka.producer.partition.attribute";    
-    public final static String KAFKA_PRODUCER_KEY_ATTRIBUTE = "kafka.producer.key.attribute";
-    public final static String KAFKA_PRODUCER_VALUE_ATTRIBUTE = "kafka.producer.value.attribute";
+    public final static String SQS_WRITER_QUEUE_URL = "sqs.writer.queue.url";
+    public final static String SQS_WRITER_MESSAGE_GROUP_ID = "sqs.writer.message.group.id";
     
     /* settings */
-    String transactionIdAttribute;
-    String partitionAttribute;
-    String topicAttribute;
-    String keyAttribute;
-    String messageAttribute;
+    String queueUrl;
+    String messageGroupId;
 
     @Override
     public void start() {
         if (getResourceRuntime() == null) {
-            throw new IllegalStateException("Kafka publish resource must be defined");
-        }
-        if (getInputModel() == null) {
-            throw new IllegalStateException("Input model must be defined");
+            throw new IllegalStateException("SQS queue resource must be defined");
         }
         TypedProperties properties = getTypedProperties();
-        topicAttribute = properties.get(KAFKA_PRODUCER_TOPIC_ATTRIBUTE);
-//        transactionIdAttribute = properties.get(KAFKA_PRODUCER_TRANSACTION_ID_ATTRIBUTE);
-        partitionAttribute = properties.get(KAFKA_PRODUCER_PARTITION_ATTRIBUTE);
-        keyAttribute = properties.get(KAFKA_PRODUCER_KEY_ATTRIBUTE);        
-        messageAttribute = properties.get(KAFKA_PRODUCER_VALUE_ATTRIBUTE);
+        queueUrl = properties.get(SQS_WRITER_QUEUE_URL);
+        messageGroupId = properties.get(SQS_WRITER_MESSAGE_GROUP_ID);
     }
 
     @Override
@@ -69,26 +57,25 @@ public class SQSWriter extends AbstractComponentRuntime {
         return false;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if (inputMessage instanceof EntityDataMessage) {
-        	Producer producer = (Producer)getResourceReference();
-        	try {
-//	        	producer.beginTransaction();
-	            ArrayList<EntityData> inputRows = ((EntityDataMessage) inputMessage).getPayload();
-	            for (EntityData inputRow:inputRows) {
-	            	String topic = (String) inputRow.get(topicAttribute);
-	            	
-	            	ProducerRecord rec = new ProducerRecord(topic, 
-	            			inputRow.get(keyAttribute), inputRow.get(messageAttribute));
-	            	producer.send(rec);
-	            }
-//	            producer.commitTransaction();
-        	} catch (KafkaException ex) {
-//        		producer.abortTransaction();
-        		throw (RuntimeException) ex;
-        	}
+        if (inputMessage instanceof TextMessage) {
+            SqsClient client = (SqsClient)getResourceReference();
+            List<String> inputMessages = ((TextMessage) inputMessage).getPayload();
+
+            SendMessageRequest sendMessageRequest = SendMessageRequest.builder()
+                    .queueUrl(queueUrl)
+                    .messageGroupId(messageGroupId)
+                    .messageBody(inputMessages.get(0))
+                    .build();
+
+            client.sendMessage(sendMessageRequest);
+
+            ArrayList<String> outputMessages = new ArrayList<String>();
+            outputMessages.add("***********************");
+            outputMessages.add("AWS SQS WRITER");
+            outputMessages.add("***********************");
+            callback.sendTextMessage(null, outputMessages);
         }
     }
 }

@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import java.util.ArrayList;
+
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
@@ -36,7 +38,8 @@ public class SQSReader extends AbstractComponentRuntime {
     public final static String SQS_READER_QUEUE_URL = "sqs.reader.queue.url";
     public final static String SQS_READER_MAX_MESSAGES_READ_AT_ONCE = "sqs.reader.max.messages.read.at.once";     
     public final static String SQS_READER_QUEUE_MESSAGES_PER_OUTPUT_MESSAGE = "sqs.reader.queue.messages.per.output.message";     
-    public final static String SQS_READER_READ_UNTIL_QUEUE_EMPTY = "sqs.reader.read.until.queue.empty";    
+    public final static String SQS_READER_READ_UNTIL_QUEUE_EMPTY = "sqs.reader.read.until.queue.empty";
+    public final static String SQS_READER_DELETE_AFTER_READ = "sqs.reader.delete.after.read";
     public final static String SQS_READER_RUN_WHEN = "sqs.reader.run.when";    
     
     /* settings */
@@ -50,11 +53,14 @@ public class SQSReader extends AbstractComponentRuntime {
         if (getResourceRuntime() == null) {
             throw new IllegalStateException("SQS queue resource must be defined");
         }
+        
         TypedProperties properties = getTypedProperties();
         queueUrl = properties.get(SQS_READER_QUEUE_URL);
         maxMsgsToReadAtOnce = properties.getInt(SQS_READER_MAX_MESSAGES_READ_AT_ONCE);
-        if (maxMsgsToReadAtOnce > 10) {
-        	throw new MisconfiguredException("This must be blah");
+        readUntilQueueEmpty = Boolean.valueOf(properties.getProperty(SQS_READER_READ_UNTIL_QUEUE_EMPTY));
+        
+        if (maxMsgsToReadAtOnce < 1 || maxMsgsToReadAtOnce  > 10) {
+            throw new MisconfiguredException("This must be blah");
         }
         //readUntilQueueEmpty = properties.getInt(SQS_READER_READ_UNTIL_QUEUE_EMPTY);
     }
@@ -75,8 +81,13 @@ public class SQSReader extends AbstractComponentRuntime {
                     .queueUrl(queueUrl)
                     .maxNumberOfMessages(maxMsgsToReadAtOnce)
                     .build();
-            
-        	
+
+            ArrayList<String> outputMessages = new ArrayList<String>();
+            outputMessages.add("***********************");
+            outputMessages.add("AWS SQS READER");
+            outputMessages.add("***********************");
+            callback.sendTextMessage(null, outputMessages);
+
         }
     }
 }

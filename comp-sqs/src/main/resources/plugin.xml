@@ -32,14 +32,14 @@
     <keywords>sqs,writer</keywords>
     <description></description>
     <settings>
-      <setting id='sqs.writer.url'
+      <setting id='sqs.writer.queue.url'
                required='true'
                type='text'>
         <name>Queue URL</name>
       </setting>
       <setting id='sqs.writer.message.group.id'
                required='true'
-               type='string'>
+               type='text'>
         <name>Message Group</name>
       </setting>
     </settings>
@@ -74,9 +74,9 @@
       </setting>
       <setting id='sqs.reader.read.until.queue.empty'
                required='true'
-               type='booean'>
+               type='boolean'>
         <name>Read until queue empty</name>
-        <defaultValue>false</defaultValue>        
+        <defaultValue>false</defaultValue>
       </setting>    
       <setting id='sqs.reader.run.when'
                required='false'
