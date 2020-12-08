@@ -72,18 +72,18 @@
         <name>Delete Messages After Read</name>
         <defaultValue>false</defaultValue>
       </setting>
-      <!-- <setting id='sqs.reader.queue.messages.per.output.message'
-               required='true'
-               type='integer'>
-        <name>Queue Messages Per OutputMessage</name>
-        <defaultValue>1</defaultValue>
-      </setting>
       <setting id='sqs.reader.read.until.queue.empty'
                required='true'
                type='boolean'>
         <name>Read until queue empty</name>
         <defaultValue>false</defaultValue>
-      </setting>  -->  
+      </setting>
+      <!-- <setting id='sqs.reader.queue.messages.per.output.message'
+               required='true'
+               type='integer'>
+        <name>Queue Messages Per OutputMessage</name>
+        <defaultValue>1</defaultValue>
+      </setting>  -->
       <setting id='run.when'
                required='false'
                type='choice'>

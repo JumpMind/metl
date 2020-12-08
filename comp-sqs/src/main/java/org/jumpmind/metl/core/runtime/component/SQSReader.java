@@ -40,15 +40,15 @@ public class SQSReader extends AbstractComponentRuntime {
     public final static String SQS_READER_QUEUE_URL = "sqs.reader.queue.url";
     public final static String SQS_READER_MAX_MESSAGES_READ_AT_ONCE = "sqs.reader.max.messages.read.at.once";
     public final static String SQS_READER_DELETE_AFTER_READ = "sqs.reader.delete.after.read";
+    public final static String SQS_READER_READ_UNTIL_QUEUE_EMPTY = "sqs.reader.read.until.queue.empty";
     //public final static String SQS_READER_QUEUE_MESSAGES_PER_OUTPUT_MESSAGE = "sqs.reader.queue.messages.per.output.message";
-    //public final static String SQS_READER_READ_UNTIL_QUEUE_EMPTY = "sqs.reader.read.until.queue.empty";
     
     /* settings */
     String runWhen;
     String queueUrl;
-    Integer maxMsgsToReadAtOnce;
+    int maxMsgsToReadAtOnce;
     boolean deleteAfterRead;
-    //boolean readUntilQueueEmpty;
+    boolean readUntilQueueEmpty;
 
     @Override
     public void start() {
@@ -61,8 +61,7 @@ public class SQSReader extends AbstractComponentRuntime {
         queueUrl = properties.get(SQS_READER_QUEUE_URL);
         maxMsgsToReadAtOnce = properties.getInt(SQS_READER_MAX_MESSAGES_READ_AT_ONCE);
         deleteAfterRead = Boolean.valueOf(properties.getProperty(SQS_READER_DELETE_AFTER_READ));
-
-        //readUntilQueueEmpty = Boolean.valueOf(properties.getProperty(SQS_READER_READ_UNTIL_QUEUE_EMPTY));
+        readUntilQueueEmpty = Boolean.valueOf(properties.getProperty(SQS_READER_READ_UNTIL_QUEUE_EMPTY));
 
         if (maxMsgsToReadAtOnce < 1 || maxMsgsToReadAtOnce  > 10) {
             throw new MisconfiguredException("\"Max Messages to Read at Once\" must be between 1 and 10");
@@ -80,34 +79,44 @@ public class SQSReader extends AbstractComponentRuntime {
                 || (PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)) {
 
             SqsClient client = (SqsClient)getResourceReference();
+            ArrayList<String> outputMessages = new ArrayList<>();
+            ArrayList<String> messagesRead = readMessages(client);
+            outputMessages.addAll(messagesRead);
 
-            ReceiveMessageRequest receiveRequest = ReceiveMessageRequest.builder()
-                    .queueUrl(queueUrl)
-                    .maxNumberOfMessages(maxMsgsToReadAtOnce)
-                    .build();
-
-            ArrayList<String> outputMessages = new ArrayList<String>();
-            ReceiveMessageResponse response = client.receiveMessage(receiveRequest);
-
-            response.messages().forEach(message -> {
-                outputMessages.add(message.body());
-
-                deleteMessage(client, message);
-            });
+            while (readUntilQueueEmpty && messagesRead.size() >= maxMsgsToReadAtOnce) {
+                messagesRead = readMessages(client);
+                outputMessages.addAll(messagesRead);
+            }
 
             callback.sendTextMessage(null, outputMessages);
         }
+    }
 
+    private ArrayList<String> readMessages(SqsClient client) {
+        ArrayList<String> messages = new ArrayList<>();
+        ReceiveMessageRequest request = ReceiveMessageRequest.builder()
+                .queueUrl(queueUrl)
+                .maxNumberOfMessages(maxMsgsToReadAtOnce)
+                .build();
+
+        ReceiveMessageResponse response = client.receiveMessage(request);
+
+        response.messages().forEach(message -> {
+            messages.add(message.body());
+            deleteMessage(client, message);
+        });
+
+        return messages;
     }
 
     private void deleteMessage(SqsClient client, software.amazon.awssdk.services.sqs.model.Message message) {
         if (deleteAfterRead) {
-            DeleteMessageRequest request1 = DeleteMessageRequest.builder()
+            DeleteMessageRequest request = DeleteMessageRequest.builder()
                     .queueUrl(queueUrl)
                     .receiptHandle(message.receiptHandle())
                     .build();
 
-            client.deleteMessage(request1);
+            client.deleteMessage(request);
         }
     }
 }
