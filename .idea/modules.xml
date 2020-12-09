@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/comp-abstract/comp-abstract.iml" filepath="$PROJECT_DIR$/comp-abstract/comp-abstract.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-control/comp-control.iml" filepath="$PROJECT_DIR$/comp-control/comp-control.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-data-diff/comp-data-diff.iml" filepath="$PROJECT_DIR$/comp-data-diff/comp-data-diff.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-email/comp-email.iml" filepath="$PROJECT_DIR$/comp-email/comp-email.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-excel/comp-excel.iml" filepath="$PROJECT_DIR$/comp-excel/comp-excel.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-execute/comp-execute.iml" filepath="$PROJECT_DIR$/comp-execute/comp-execute.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-file/comp-file.iml" filepath="$PROJECT_DIR$/comp-file/comp-file.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-format/comp-format.iml" filepath="$PROJECT_DIR$/comp-format/comp-format.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-groovy/comp-groovy.iml" filepath="$PROJECT_DIR$/comp-groovy/comp-groovy.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-json/comp-json.iml" filepath="$PROJECT_DIR$/comp-json/comp-json.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-kafka/comp-kafka.iml" filepath="$PROJECT_DIR$/comp-kafka/comp-kafka.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-map/comp-map.iml" filepath="$PROJECT_DIR$/comp-map/comp-map.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-pgp/comp-pgp.iml" filepath="$PROJECT_DIR$/comp-pgp/comp-pgp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-rdbms-reader/comp-rdbms-reader.iml" filepath="$PROJECT_DIR$/comp-rdbms-reader/comp-rdbms-reader.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-rdbms-writer/comp-rdbms-writer.iml" filepath="$PROJECT_DIR$/comp-rdbms-writer/comp-rdbms-writer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-route/comp-route.iml" filepath="$PROJECT_DIR$/comp-route/comp-route.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-sequence/comp-sequence.iml" filepath="$PROJECT_DIR$/comp-sequence/comp-sequence.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-serialize/comp-serialize.iml" filepath="$PROJECT_DIR$/comp-serialize/comp-serialize.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-service/comp-service.iml" filepath="$PROJECT_DIR$/comp-service/comp-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-sorter/comp-sorter.iml" filepath="$PROJECT_DIR$/comp-sorter/comp-sorter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-sql-execute/comp-sql-execute.iml" filepath="$PROJECT_DIR$/comp-sql-execute/comp-sql-execute.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-stamp/comp-stamp.iml" filepath="$PROJECT_DIR$/comp-stamp/comp-stamp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-subscribe/comp-subscribe.iml" filepath="$PROJECT_DIR$/comp-subscribe/comp-subscribe.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-temp-rdbms/comp-temp-rdbms.iml" filepath="$PROJECT_DIR$/comp-temp-rdbms/comp-temp-rdbms.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-test/comp-test.iml" filepath="$PROJECT_DIR$/comp-test/comp-test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-text/comp-text.iml" filepath="$PROJECT_DIR$/comp-text/comp-text.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-transform/comp-transform.iml" filepath="$PROJECT_DIR$/comp-transform/comp-transform.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-webrequest/comp-webrequest.iml" filepath="$PROJECT_DIR$/comp-webrequest/comp-webrequest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-xml/comp-xml.iml" filepath="$PROJECT_DIR$/comp-xml/comp-xml.iml" />
+      <module fileurl="file://$PROJECT_DIR$/comp-zip/comp-zip.iml" filepath="$PROJECT_DIR$/comp-zip/comp-zip.iml" />
+      <module fileurl="file://$PROJECT_DIR$/metl-core/metl-core.iml" filepath="$PROJECT_DIR$/metl-core/metl-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/metl-develop/metl-develop.iml" filepath="$PROJECT_DIR$/metl-develop/metl-develop.iml" />
+      <module fileurl="file://$PROJECT_DIR$/metl-server/metl-server.iml" filepath="$PROJECT_DIR$/metl-server/metl-server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/metl-ui/metl-ui.iml" filepath="$PROJECT_DIR$/metl-ui/metl-ui.iml" />
+      <module fileurl="file://$PROJECT_DIR$/metl-war/metl-war.iml" filepath="$PROJECT_DIR$/metl-war/metl-war.iml" />
+      <module fileurl="file://$PROJECT_DIR$/resource-core/resource-core.iml" filepath="$PROJECT_DIR$/resource-core/resource-core.iml" />
+    </modules>
+  </component>
+</project>

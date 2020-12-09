@@ -70,8 +70,11 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
             } else if ("File|New|Resource|Subscribe|JMS".equals(menuSelected)) {
                 navigator.addNewJmsSubscribe();
                 return true;          
-            } else if ("File|New|Resource|Publish|Kafka".equals(menuSelected)) {
+            } else if ("File|New|Resource|Queue|Kafka Publisher".equals(menuSelected)) {
                 navigator.addNewKafkaProducer();
+                return true;                          
+            } else if ("File|New|Resource|Queue|SQS".equals(menuSelected)) {
+                navigator.addNewSqsQueue();
                 return true;                          
             } else if ("File|New|Resource|Directory|File System".equals(menuSelected)) {
                 navigator.addNewLocalFileSystem();

@@ -20,18 +20,11 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
-import javax.jms.Connection;
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.QueueConnectionFactory;
-import javax.jms.QueueSession;
-import javax.jms.Session;
+import org.jumpmind.properties.TypedProperties;
+
+import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.NamingException;
-
-import org.jumpmind.properties.TypedProperties;
 
 public class JMSJndiQueueDirectory extends AbstractJMSJndiDirectory {
 

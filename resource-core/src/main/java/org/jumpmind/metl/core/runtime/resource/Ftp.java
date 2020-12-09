@@ -20,11 +20,9 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-
-import java.sql.Connection;
-
 import org.jumpmind.properties.TypedProperties;
+
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 public class Ftp extends AbstractResourceRuntime {
 

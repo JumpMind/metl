@@ -1,5 +1,5 @@
 /**
- * Licensed to JumpMind Inc under one or more contributor
+' * Licensed to JumpMind Inc under one or more contributor
  * license agreements.  See the NOTICE file distributed
  * with this work for additional information regarding
  * copyright ownership.  JumpMind Inc licenses this file
@@ -20,15 +20,14 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
-import java.sql.Connection;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.db.model.Table;
 import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ResettableBasicDataSource;
 import org.jumpmind.properties.TypedProperties;
+
+import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Datasource extends AbstractResourceRuntime implements IDatasourceRuntime {
 

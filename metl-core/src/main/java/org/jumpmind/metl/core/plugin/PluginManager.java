@@ -117,7 +117,8 @@ public class PluginManager implements IPluginManager {
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "resource-core", 260));
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-stamp", 270));
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-pgp", 280));
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-kafka", 290));        
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-kafka", 290));  
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-sqs", 300));  
     }
 
     @Override

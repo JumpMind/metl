@@ -38,6 +38,7 @@ dependencies {
     testCompile project(":comp-subscribe")   
     testCompile project(":comp-pgp")   
 	testCompile project(":comp-kafka")
+	testCompile project(":comp-sqs")
     testCompile project(path: ':metl-core', configuration: 'testArtifacts')    
     testCompile "javax.servlet:javax.servlet-api:$servletVersion"
     testCompile "org.eclipse.jetty:jetty-servlet:$jettyVersion"

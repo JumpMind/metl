@@ -20,11 +20,10 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.jms.MessageListener;
 import javax.naming.Context;
+import java.util.HashMap;
+import java.util.Map;
 
 public class JMS extends AbstractResourceRuntime implements ISubscribe {
 

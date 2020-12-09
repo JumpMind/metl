@@ -69,8 +69,8 @@ public class XMLComponentDefinition extends XMLAbstractDefinition {
         HTTP,
         @XmlEnumValue("subscribe")
         SUBSCRIBE,
-        @XmlEnumValue("publish")
-        PUBLISH,        
+        @XmlEnumValue("queue")
+        QUEUE,        
         @XmlEnumValue("none")
         NONE, 
         @XmlEnumValue("any")

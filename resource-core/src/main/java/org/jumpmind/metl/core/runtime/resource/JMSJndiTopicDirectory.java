@@ -20,21 +20,12 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
-import java.util.UUID;
+import org.jumpmind.properties.TypedProperties;
 
-import javax.jms.Connection;
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-import javax.jms.Topic;
-import javax.jms.TopicConnectionFactory;
-import javax.jms.TopicPublisher;
-import javax.jms.TopicSession;
+import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.NamingException;
-
-import org.jumpmind.properties.TypedProperties;
+import java.util.UUID;
 
 public class JMSJndiTopicDirectory extends AbstractJMSJndiDirectory {
 
