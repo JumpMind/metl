@@ -39,14 +39,15 @@ public class SQSReader extends AbstractComponentRuntime {
 
     public final static String SQS_READER_QUEUE_URL = "sqs.reader.queue.url";
     public final static String SQS_READER_MAX_MESSAGES_READ_AT_ONCE = "sqs.reader.max.messages.read.at.once";
+    public final static String SQS_READER_QUEUE_MESSAGES_PER_OUTPUT_MESSAGE = "sqs.reader.queue.messages.per.output.message";
     public final static String SQS_READER_DELETE_AFTER_READ = "sqs.reader.delete.after.read";
     public final static String SQS_READER_READ_UNTIL_QUEUE_EMPTY = "sqs.reader.read.until.queue.empty";
-    //public final static String SQS_READER_QUEUE_MESSAGES_PER_OUTPUT_MESSAGE = "sqs.reader.queue.messages.per.output.message";
     
     /* settings */
     String runWhen;
     String queueUrl;
     int maxMsgsToReadAtOnce;
+    int messagesPerOutputMessage;
     boolean deleteAfterRead;
     boolean readUntilQueueEmpty;
 
@@ -60,6 +61,7 @@ public class SQSReader extends AbstractComponentRuntime {
         runWhen = properties.get(RUN_WHEN);
         queueUrl = properties.get(SQS_READER_QUEUE_URL);
         maxMsgsToReadAtOnce = properties.getInt(SQS_READER_MAX_MESSAGES_READ_AT_ONCE);
+        messagesPerOutputMessage = properties.getInt(SQS_READER_QUEUE_MESSAGES_PER_OUTPUT_MESSAGE);
         deleteAfterRead = Boolean.valueOf(properties.getProperty(SQS_READER_DELETE_AFTER_READ));
         readUntilQueueEmpty = Boolean.valueOf(properties.getProperty(SQS_READER_READ_UNTIL_QUEUE_EMPTY));
 
@@ -87,8 +89,7 @@ public class SQSReader extends AbstractComponentRuntime {
                 messagesRead = readMessages(client);
                 outputMessages.addAll(messagesRead);
             }
-
-            callback.sendTextMessage(null, outputMessages);
+            callback.sendTextMessage(null, consolidateMessages(outputMessages));
         }
     }
 
@@ -118,5 +119,22 @@ public class SQSReader extends AbstractComponentRuntime {
 
             client.deleteMessage(request);
         }
+    }
+    private ArrayList<String> consolidateMessages(ArrayList<String> messages) {
+        ArrayList<String> result = new ArrayList<>();
+
+        for (int i = 0; i < messages.size(); i += messagesPerOutputMessage) {
+            String combinedMessages = "";
+
+            for (int j = 0; j < messagesPerOutputMessage; j++) {
+                if ((i+j >= 0) && i+j < messages.size()) {
+                    combinedMessages += messages.get(i + j);
+                }
+            }
+
+            result.add(combinedMessages);
+        }
+
+        return result;
     }
 }
