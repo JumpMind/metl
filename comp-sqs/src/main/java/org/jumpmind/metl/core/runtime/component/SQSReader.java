@@ -42,7 +42,7 @@ public class SQSReader extends AbstractComponentRuntime {
     public final static String SQS_READER_QUEUE_MESSAGES_PER_OUTPUT_MESSAGE = "sqs.reader.queue.messages.per.output.message";
     public final static String SQS_READER_DELETE_AFTER_READ = "sqs.reader.delete.after.read";
     public final static String SQS_READER_READ_UNTIL_QUEUE_EMPTY = "sqs.reader.read.until.queue.empty";
-
+    
     /* settings */
     String runWhen;
     String queueUrl;
@@ -89,7 +89,6 @@ public class SQSReader extends AbstractComponentRuntime {
                 messagesRead = readMessages(client);
                 outputMessages.addAll(messagesRead);
             }
-
             callback.sendTextMessage(null, consolidateMessages(outputMessages));
         }
     }
@@ -121,7 +120,6 @@ public class SQSReader extends AbstractComponentRuntime {
             client.deleteMessage(request);
         }
     }
-
     private ArrayList<String> consolidateMessages(ArrayList<String> messages) {
         ArrayList<String> result = new ArrayList<>();
 
