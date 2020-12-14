@@ -20,18 +20,13 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 
 import software.amazon.awssdk.services.sqs.SqsClient;
-import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest;
-import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequestEntry;
-import software.amazon.awssdk.services.sqs.model.SendMessageBatchResponse;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
 public class SQSWriter extends AbstractComponentRuntime {
 
@@ -39,7 +34,7 @@ public class SQSWriter extends AbstractComponentRuntime {
 
     public final static String SQS_WRITER_QUEUE_URL = "sqs.writer.queue.url";
     public final static String SQS_WRITER_MESSAGE_GROUP_ID = "sqs.writer.message.group.id";
-    
+
     /* settings */
     String queueUrl;
     String messageGroupId;
@@ -52,6 +47,10 @@ public class SQSWriter extends AbstractComponentRuntime {
         TypedProperties properties = getTypedProperties();
         queueUrl = properties.get(SQS_WRITER_QUEUE_URL);
         messageGroupId = properties.get(SQS_WRITER_MESSAGE_GROUP_ID);
+
+        if (queueUrl.endsWith(".fifo") && (messageGroupId == null || messageGroupId.isEmpty())) {
+            throw new IllegalStateException("Message Group ID is required for FIFO queue.");
+        }
     }
 
     @Override
@@ -59,38 +58,32 @@ public class SQSWriter extends AbstractComponentRuntime {
         return false;
     }
 
-	@Override
+    @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (inputMessage instanceof TextMessage) {
-            SqsClient client = (SqsClient)getResourceReference();
-            List<SendMessageBatchRequestEntry> messageEntries = new ArrayList<>();
-            int batchRequestId = 0;
-
             for (String input : ((TextMessage) inputMessage).getPayload()) { 
-            	if (messageGroupId.isEmpty()) {
-	                messageEntries.add(SendMessageBatchRequestEntry.builder()
-	                        .id(String.valueOf(++batchRequestId))
-	                        .messageBody(input)
-	                        .build());            		
-            	} else {            	
-	                messageEntries.add(SendMessageBatchRequestEntry.builder()
-	                        .messageGroupId(messageGroupId)
-	                        .id(String.valueOf(++batchRequestId))
-	                        .messageBody(input)
-	                        .build());
-            	}
+                if (messageGroupId == null || messageGroupId.isEmpty()) {
+                    sendMessage(SendMessageRequest.builder()
+                            .queueUrl(queueUrl)
+                            .messageBody(input)
+                            .build());
+                } else {
+                    sendMessage(SendMessageRequest.builder()
+                            .queueUrl(queueUrl)
+                            .messageGroupId(messageGroupId)
+                            .messageBody(input)
+                            .build());
+                }
             }
+        }
+    }
 
-            SendMessageBatchRequest sendMessagesRequest = SendMessageBatchRequest.builder()
-                    .queueUrl(queueUrl)
-                    .entries(messageEntries)
-                    .build();
-
-            SendMessageBatchResponse response = client.sendMessageBatch(sendMessagesRequest);
-            if (response.hasFailed()) {
-            	throw new RuntimeException("SQS Send Message failed");
-            }
-            
+    private void sendMessage(SendMessageRequest request) {
+        try {
+            SqsClient client = (SqsClient)getResourceReference();
+            client.sendMessage(request);
+        } catch (Exception e) {
+            throw new RuntimeException("SQS Send Message failed: " + e.getMessage());
         }
     }
 }
