@@ -31,6 +31,7 @@ import org.jumpmind.properties.TypedProperties;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequestEntry;
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchResponse;
 
 public class SQSWriter extends AbstractComponentRuntime {
 
@@ -66,19 +67,30 @@ public class SQSWriter extends AbstractComponentRuntime {
             int batchRequestId = 0;
 
             for (String input : ((TextMessage) inputMessage).getPayload()) { 
-                messageEntries.add(SendMessageBatchRequestEntry.builder()
-                        .messageGroupId(messageGroupId)
-                        .id(String.valueOf(++batchRequestId))
-                        .messageBody(input)
-                        .build());
-            };
+            	if (messageGroupId.isEmpty()) {
+	                messageEntries.add(SendMessageBatchRequestEntry.builder()
+	                        .id(String.valueOf(++batchRequestId))
+	                        .messageBody(input)
+	                        .build());            		
+            	} else {            	
+	                messageEntries.add(SendMessageBatchRequestEntry.builder()
+	                        .messageGroupId(messageGroupId)
+	                        .id(String.valueOf(++batchRequestId))
+	                        .messageBody(input)
+	                        .build());
+            	}
+            }
 
             SendMessageBatchRequest sendMessagesRequest = SendMessageBatchRequest.builder()
                     .queueUrl(queueUrl)
                     .entries(messageEntries)
                     .build();
 
-            client.sendMessageBatch(sendMessagesRequest);
+            SendMessageBatchResponse response = client.sendMessageBatch(sendMessagesRequest);
+            if (response.hasFailed()) {
+            	throw new RuntimeException("SQS Send Message failed");
+            }
+            
         }
     }
 }

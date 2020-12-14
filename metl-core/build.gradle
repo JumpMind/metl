@@ -70,8 +70,12 @@ dependencies {
     }
     compile "org.jgrapht:jgrapht-core:1.0.1"
 	compile "org.apache.kafka:kafka-clients:$apacheKafkaVersion"
-    compile "software.amazon.awssdk:bom:$awsVersion"
-    compile "software.amazon.awssdk:sqs:$awsVersion"
+//    compile (group: 'software.amazon.awssdk', name: 'bom', version: '2.15.40') {
+//		exclude group: 'org.apache.httpcomponents'
+//	}
+    compile (group: 'software.amazon.awssdk', name: 'sqs', version: '2.15.40') {
+		exclude group: 'com.fasterxml.jackson.core'
+	}
     testCompile "org.mockito:mockito-all:$mockitoVersion"
     testCompile "org.powermock:powermock-api-mockito:$powerMockVersion"
     testCompile "org.powermock:powermock-module-junit4:$powerMockVersion"    

@@ -38,9 +38,9 @@
         <name>Queue URL</name>
       </setting>
       <setting id='sqs.writer.message.group.id'
-               required='true'
+               required='false'
                type='text'>
-        <name>Message Group</name>
+        <name>Message Group (FIFO queues only)</name>
       </setting>
     </settings>
   </component>
