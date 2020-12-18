@@ -549,11 +549,19 @@
         <name>SQS Queue</name>
         <className>org.jumpmind.metl.core.runtime.resource.SQSQueue</className>
         <settings>
-            <setting id='access.key' required='true' type='text'>
-                <name>Access Key</name>
+            <setting id='credential.type' required='true' type='choice'>
+                <name>Credential Type</name>
+                <defaultValue>none</defaultValue>
+                <choices>
+                    <choice>AWS SDK</choice>
+                    <choice>System Environment Variables</choice>
+                </choices>
             </setting>
-            <setting id='secret.access.key' required='true' type='text'>
-                <name>Secret Access Key</name>
+            <setting id='access.key' type='text'>
+                <name>Access Key (Required for AWS SDK credential type)</name>
+            </setting>
+            <setting id='secret.access.key' type='text'>
+                <name>Secret Access Key (Required for AWS SDK credential type)</name>
             </setting>
             <setting id='region' required='true' type='choice'>
                 <name>Region</name>

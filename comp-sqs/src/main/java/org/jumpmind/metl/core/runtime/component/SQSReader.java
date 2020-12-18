@@ -100,7 +100,12 @@ public class SQSReader extends AbstractComponentRuntime {
                 .maxNumberOfMessages(maxMsgsToReadAtOnce)
                 .build();
 
-        ReceiveMessageResponse response = client.receiveMessage(request);
+        ReceiveMessageResponse response = null;
+        try {
+            response = client.receiveMessage(request);
+        } catch (Exception e) {
+            throw new RuntimeException("Could not receive message from SQS queue: " + e.getMessage());
+        }
 
         response.messages().forEach(message -> {
             messages.add(message.body());
@@ -117,7 +122,12 @@ public class SQSReader extends AbstractComponentRuntime {
                     .receiptHandle(message.receiptHandle())
                     .build();
 
-            client.deleteMessage(request);
+            try {
+                client.deleteMessage(request);
+            } catch (Exception e) {
+                throw new RuntimeException("Could not delete message from SQS queue: " + e.getMessage());
+            }
+
         }
     }
     private ArrayList<String> consolidateMessages(ArrayList<String> messages) {
