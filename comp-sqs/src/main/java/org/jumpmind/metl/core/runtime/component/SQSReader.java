@@ -23,6 +23,7 @@ package org.jumpmind.metl.core.runtime.component;
 import java.util.ArrayList;
 
 import org.jumpmind.metl.core.runtime.ControlMessage;
+import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -125,7 +126,7 @@ public class SQSReader extends AbstractComponentRuntime {
             try {
                 client.deleteMessage(request);
             } catch (Exception e) {
-                throw new RuntimeException("Could not delete message from SQS queue: " + e.getMessage());
+                log(LogLevel.WARN, "Failed to delete SQS message: %s", message);
             }
 
         }
