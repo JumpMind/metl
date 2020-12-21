@@ -3,6 +3,8 @@ package org.jumpmind.metl.core.runtime.resource;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.properties.TypedProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
@@ -30,6 +32,8 @@ public class SQSQueue extends AbstractResourceRuntime {
 
     SqsClient sqsClient;
 
+    protected static final Logger log = LoggerFactory.getLogger(SMBDirectory.class);
+
     @SuppressWarnings("unchecked")
     @Override
     public <T> T reference() {
@@ -43,7 +47,11 @@ public class SQSQueue extends AbstractResourceRuntime {
         region = resourceRuntimeSettings.get(SETTING_REGION);
 
         if (credentialType.equals("AWS SDK") && (accessKey == null || secretAccessKey == null)) {
-            throw new MisconfiguredException("Access Key and Secret Access Key are required for Credential Type AWS SDK");
+            throw new MisconfiguredException("Access Key and Secret Access Key are required for Credential Type 'AWS SDK'");
+        }
+
+        if (credentialType.equals("System") && (accessKey != null || secretAccessKey != null)) {
+            log.warn("AccessKey and SecretAccessKey provided will be ignored for Credential Type 'System'");
         }
 
         Thread.currentThread().setContextClassLoader(null);
@@ -52,7 +60,7 @@ public class SQSQueue extends AbstractResourceRuntime {
 
     private SqsClient createSqsClient() {
         try {
-            if (accessKey == null && secretAccessKey == null) {
+            if (credentialType.equals("System")) {
                return SqsClient.builder()
                        .region(Region.of(region))
                        .build();

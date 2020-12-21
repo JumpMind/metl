@@ -554,7 +554,7 @@
                 <defaultValue>none</defaultValue>
                 <choices>
                     <choice>AWS SDK</choice>
-                    <choice>System Environment Variables</choice>
+                    <choice>System</choice>
                 </choices>
             </setting>
             <setting id='access.key' type='text'>
