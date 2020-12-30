@@ -23,6 +23,7 @@ package org.jumpmind.metl.core.runtime.component;
 import java.util.ArrayList;
 
 import org.jumpmind.metl.core.runtime.ControlMessage;
+import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -100,7 +101,12 @@ public class SQSReader extends AbstractComponentRuntime {
                 .maxNumberOfMessages(maxMsgsToReadAtOnce)
                 .build();
 
-        ReceiveMessageResponse response = client.receiveMessage(request);
+        ReceiveMessageResponse response = null;
+        try {
+            response = client.receiveMessage(request);
+        } catch (Exception e) {
+            throw new RuntimeException("Could not receive message from SQS queue: " + e.getMessage());
+        }
 
         response.messages().forEach(message -> {
             messages.add(message.body());
@@ -117,7 +123,12 @@ public class SQSReader extends AbstractComponentRuntime {
                     .receiptHandle(message.receiptHandle())
                     .build();
 
-            client.deleteMessage(request);
+            try {
+                client.deleteMessage(request);
+            } catch (Exception e) {
+                log(LogLevel.WARN, "Failed to delete SQS message: %s", message);
+            }
+
         }
     }
     private ArrayList<String> consolidateMessages(ArrayList<String> messages) {
