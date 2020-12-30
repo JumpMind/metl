@@ -39,17 +39,17 @@ public class SQSReader extends AbstractComponentRuntime {
     public final static String TYPE = "SQS Reader";
 
     public final static String SQS_READER_QUEUE_URL = "sqs.reader.queue.url";
-    public final static String SQS_READER_MAX_MESSAGES_READ_AT_ONCE = "sqs.reader.max.messages.read.at.once";
+    public final static String SQS_READER_MAX_MESSAGES_TO_READ = "sqs.reader.max.messages.to.read";
     public final static String SQS_READER_QUEUE_MESSAGES_PER_OUTPUT_MESSAGE = "sqs.reader.queue.messages.per.output.message";
-    public final static String SQS_READER_DELETE_AFTER_READ = "sqs.reader.delete.after.read";
+    public final static String SQS_READER_DELETE = "sqs.reader.delete";
     public final static String SQS_READER_READ_UNTIL_QUEUE_EMPTY = "sqs.reader.read.until.queue.empty";
     
     /* settings */
     String runWhen;
     String queueUrl;
-    int maxMsgsToReadAtOnce;
+    String delete;
+    int maxMsgsToRead;
     int messagesPerOutputMessage;
-    boolean deleteAfterRead;
     boolean readUntilQueueEmpty;
 
     @Override
@@ -61,13 +61,13 @@ public class SQSReader extends AbstractComponentRuntime {
         TypedProperties properties = getTypedProperties();
         runWhen = properties.get(RUN_WHEN);
         queueUrl = properties.get(SQS_READER_QUEUE_URL);
-        maxMsgsToReadAtOnce = properties.getInt(SQS_READER_MAX_MESSAGES_READ_AT_ONCE);
+        maxMsgsToRead = properties.getInt(SQS_READER_MAX_MESSAGES_TO_READ);
         messagesPerOutputMessage = properties.getInt(SQS_READER_QUEUE_MESSAGES_PER_OUTPUT_MESSAGE);
-        deleteAfterRead = Boolean.valueOf(properties.getProperty(SQS_READER_DELETE_AFTER_READ));
+        delete = properties.getProperty(SQS_READER_DELETE);
         readUntilQueueEmpty = Boolean.valueOf(properties.getProperty(SQS_READER_READ_UNTIL_QUEUE_EMPTY));
 
-        if (maxMsgsToReadAtOnce < 1 || maxMsgsToReadAtOnce  > 10) {
-            throw new MisconfiguredException("\"Max Messages to Read at Once\" must be between 1 and 10");
+        if (maxMsgsToRead < 1) {
+            throw new MisconfiguredException("\"Max Messages to Read\" must be a positive number");
         }
     }
 
@@ -86,7 +86,7 @@ public class SQSReader extends AbstractComponentRuntime {
             ArrayList<String> messagesRead = readMessages(client);
             outputMessages.addAll(messagesRead);
 
-            while (readUntilQueueEmpty && messagesRead.size() >= maxMsgsToReadAtOnce) {
+            while (readUntilQueueEmpty && messagesRead.size() >= maxMsgsToRead) {
                 messagesRead = readMessages(client);
                 outputMessages.addAll(messagesRead);
             }
@@ -98,7 +98,7 @@ public class SQSReader extends AbstractComponentRuntime {
         ArrayList<String> messages = new ArrayList<>();
         ReceiveMessageRequest request = ReceiveMessageRequest.builder()
                 .queueUrl(queueUrl)
-                .maxNumberOfMessages(maxMsgsToReadAtOnce)
+                .maxNumberOfMessages(maxMsgsToRead)
                 .build();
 
         ReceiveMessageResponse response = null;
@@ -117,7 +117,7 @@ public class SQSReader extends AbstractComponentRuntime {
     }
 
     private void deleteMessage(SqsClient client, software.amazon.awssdk.services.sqs.model.Message message) {
-        if (deleteAfterRead) {
+        if (delete.equals("AFTER EVERY READ")) {
             DeleteMessageRequest request = DeleteMessageRequest.builder()
                     .queueUrl(queueUrl)
                     .receiptHandle(message.receiptHandle())
@@ -128,9 +128,9 @@ public class SQSReader extends AbstractComponentRuntime {
             } catch (Exception e) {
                 log(LogLevel.WARN, "Failed to delete SQS message: %s", message);
             }
-
         }
     }
+
     private ArrayList<String> consolidateMessages(ArrayList<String> messages) {
         ArrayList<String> result = new ArrayList<>();
 
