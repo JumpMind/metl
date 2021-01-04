@@ -41,13 +41,13 @@ public class SQSReader extends AbstractComponentRuntime {
     public final static String SQS_READER_QUEUE_URL = "sqs.reader.queue.url";
     public final static String SQS_READER_MAX_MESSAGES_TO_READ = "sqs.reader.max.messages.to.read";
     public final static String SQS_READER_QUEUE_MESSAGES_PER_OUTPUT_MESSAGE = "sqs.reader.queue.messages.per.output.message";
-    public final static String SQS_READER_DELETE = "sqs.reader.delete";
+    public final static String SQS_READER_DELETE_WHEN = "sqs.reader.delete.when";
     public final static String SQS_READER_READ_UNTIL_QUEUE_EMPTY = "sqs.reader.read.until.queue.empty";
-    
+
     /* settings */
     String runWhen;
     String queueUrl;
-    String delete;
+    String deleteWhen;
     int maxMsgsToRead;
     int messagesPerOutputMessage;
     boolean readUntilQueueEmpty;
@@ -63,11 +63,15 @@ public class SQSReader extends AbstractComponentRuntime {
         queueUrl = properties.get(SQS_READER_QUEUE_URL);
         maxMsgsToRead = properties.getInt(SQS_READER_MAX_MESSAGES_TO_READ);
         messagesPerOutputMessage = properties.getInt(SQS_READER_QUEUE_MESSAGES_PER_OUTPUT_MESSAGE);
-        delete = properties.getProperty(SQS_READER_DELETE);
+        deleteWhen = properties.getProperty(SQS_READER_DELETE_WHEN);
         readUntilQueueEmpty = Boolean.valueOf(properties.getProperty(SQS_READER_READ_UNTIL_QUEUE_EMPTY));
 
         if (maxMsgsToRead < 1) {
             throw new MisconfiguredException("\"Max Messages to Read\" must be a positive number");
+        }
+        
+        if (maxMsgsToRead > 0 && readUntilQueueEmpty) {
+            throw new MisconfiguredException("\"Max Messages to Read\" and \"Read Until Queue Empty\" cannot be set in conjunction.");
         }
     }
 
@@ -83,41 +87,45 @@ public class SQSReader extends AbstractComponentRuntime {
 
             SqsClient client = (SqsClient)getResourceReference();
             ArrayList<String> outputMessages = new ArrayList<>();
-            ArrayList<String> messagesRead = readMessages(client);
-            outputMessages.addAll(messagesRead);
+            int messagesRead = 0;
 
-            while (readUntilQueueEmpty && messagesRead.size() >= maxMsgsToRead) {
-                messagesRead = readMessages(client);
-                outputMessages.addAll(messagesRead);
+            String message = readMessage(client);
+            messagesRead++;
+            outputMessages.add(message);
+
+            while (readUntilQueueEmpty || messagesRead < maxMsgsToRead) {
+                message = readMessage(client);
+                messagesRead++;
+                outputMessages.add(message);
             }
+
             callback.sendTextMessage(null, consolidateMessages(outputMessages));
         }
     }
 
-    private ArrayList<String> readMessages(SqsClient client) {
-        ArrayList<String> messages = new ArrayList<>();
+    private String readMessage(SqsClient client) {
         ReceiveMessageRequest request = ReceiveMessageRequest.builder()
                 .queueUrl(queueUrl)
-                .maxNumberOfMessages(maxMsgsToRead)
+                .maxNumberOfMessages(1)
                 .build();
 
-        ReceiveMessageResponse response = null;
         try {
-            response = client.receiveMessage(request);
+            ReceiveMessageResponse response = client.receiveMessage(request);
+            String messageBody = "";
+
+            for (software.amazon.awssdk.services.sqs.model.Message message : response.messages()) {
+                deleteMessage(client, message);
+                messageBody = message.body();
+            }
+
+            return messageBody;
         } catch (Exception e) {
             throw new RuntimeException("Could not receive message from SQS queue: " + e.getMessage());
         }
-
-        response.messages().forEach(message -> {
-            messages.add(message.body());
-            deleteMessage(client, message);
-        });
-
-        return messages;
     }
 
     private void deleteMessage(SqsClient client, software.amazon.awssdk.services.sqs.model.Message message) {
-        if (delete.equals("AFTER EVERY READ")) {
+        if (deleteWhen.equals("AFTER EVERY READ")) {
             DeleteMessageRequest request = DeleteMessageRequest.builder()
                     .queueUrl(queueUrl)
                     .receiptHandle(message.receiptHandle())

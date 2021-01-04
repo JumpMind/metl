@@ -72,10 +72,10 @@
         <name>Queue Messages Per OutputMessage</name>
         <defaultValue>1</defaultValue>
       </setting>
-      <setting id='sqs.reader.delete'
+      <setting id='sqs.reader.delete.when'
                required='true'
                type='choice'>
-        <name>Delete</name>
+        <name>Delete When</name>
         <defaultValue>AFTER EVERY READ</defaultValue>
         <choices>
           <choice>AFTER EVERY READ</choice>
