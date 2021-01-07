@@ -26,5 +26,8 @@
     </component-ui>
     <component-ui id="SQS Writer UI" componentId="SQS Writer">
         <iconImage>org/jumpmind/metl/core/runtime/component/sqs-48x48-color.png</iconImage>
-    </component-ui>    
+    </component-ui>
+    <component-ui id="SQS Delete UI" componentId="SQS Delete">
+        <iconImage>org/jumpmind/metl/core/runtime/component/sqs-48x48-color.png</iconImage>
+    </component-ui>
 </ui>

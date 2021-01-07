@@ -100,5 +100,33 @@
         </choices>
       </setting>
     </settings>
-  </component>  
+  </component>
+    <component category='PROCESSOR'
+             id='SQS Delete'
+             inputMessageType='any'
+             inputOutputModelsMatch='false'
+             outputMessageType='text'
+             resourceCategory='queue'>
+    <name>SQS Delete</name>
+    <className>org.jumpmind.metl.core.runtime.component.SQSDelete</className>
+    <keywords>sqs,delete</keywords>
+    <description></description>
+    <settings>
+      <setting id='run.when'
+               required='false'
+               type='choice'>
+        <name>Run When</name>
+        <defaultValue>PER UNIT OF WORK</defaultValue>
+        <choices>
+          <choice>PER UNIT OF WORK</choice>
+          <choice>PER MESSAGE</choice>
+        </choices>
+      </setting>
+      <setting id='sqs.delete.queue.url'
+               required='true'
+               type='text'>
+        <name>Queue URL</name>
+      </setting>
+    </settings>
+  </component>
 </definitions>

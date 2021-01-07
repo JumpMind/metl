@@ -114,7 +114,7 @@ public class SQSReader extends AbstractComponentRuntime {
             String messageBody = "";
 
             for (software.amazon.awssdk.services.sqs.model.Message message : response.messages()) {
-                deleteMessage(client, message);
+                deleteMessage(client, message.receiptHandle());
                 messageBody = message.body();
             }
 
@@ -124,17 +124,17 @@ public class SQSReader extends AbstractComponentRuntime {
         }
     }
 
-    private void deleteMessage(SqsClient client, software.amazon.awssdk.services.sqs.model.Message message) {
+    private void deleteMessage(SqsClient client, String messageReceipt) {
         if (deleteWhen.equals("AFTER EVERY READ")) {
             DeleteMessageRequest request = DeleteMessageRequest.builder()
                     .queueUrl(queueUrl)
-                    .receiptHandle(message.receiptHandle())
+                    .receiptHandle(messageReceipt)
                     .build();
 
             try {
                 client.deleteMessage(request);
             } catch (Exception e) {
-                log(LogLevel.WARN, "Failed to delete SQS message: %s", message);
+                log(LogLevel.WARN, "Failed to delete SQS message with receipt: %s", messageReceipt);
             }
         }
     }
