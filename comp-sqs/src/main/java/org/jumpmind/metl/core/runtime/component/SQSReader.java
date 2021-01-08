@@ -20,7 +20,12 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
@@ -37,10 +42,10 @@ import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
 public class SQSReader extends AbstractComponentRuntime {
 
     public final static String TYPE = "SQS Reader";
+    public final static String MESSAGE_HEADER_KEY = "sqsMessageReceipt";
 
     public final static String SQS_READER_QUEUE_URL = "sqs.reader.queue.url";
     public final static String SQS_READER_MAX_MESSAGES_TO_READ = "sqs.reader.max.messages.to.read";
-    public final static String SQS_READER_QUEUE_MESSAGES_PER_OUTPUT_MESSAGE = "sqs.reader.queue.messages.per.output.message";
     public final static String SQS_READER_DELETE_WHEN = "sqs.reader.delete.when";
     public final static String SQS_READER_READ_UNTIL_QUEUE_EMPTY = "sqs.reader.read.until.queue.empty";
 
@@ -51,6 +56,7 @@ public class SQSReader extends AbstractComponentRuntime {
     int maxMsgsToRead;
     int messagesPerOutputMessage;
     boolean readUntilQueueEmpty;
+    List<String> messageReceipts;
 
     @Override
     public void start() {
@@ -62,12 +68,12 @@ public class SQSReader extends AbstractComponentRuntime {
         runWhen = properties.get(RUN_WHEN);
         queueUrl = properties.get(SQS_READER_QUEUE_URL);
         maxMsgsToRead = properties.getInt(SQS_READER_MAX_MESSAGES_TO_READ);
-        messagesPerOutputMessage = properties.getInt(SQS_READER_QUEUE_MESSAGES_PER_OUTPUT_MESSAGE);
         deleteWhen = properties.getProperty(SQS_READER_DELETE_WHEN);
         readUntilQueueEmpty = Boolean.valueOf(properties.getProperty(SQS_READER_READ_UNTIL_QUEUE_EMPTY));
+        messageReceipts = new ArrayList<String>();
 
-        if (maxMsgsToRead < 1) {
-            throw new MisconfiguredException("\"Max Messages to Read\" must be a positive number");
+        if (maxMsgsToRead < 0) {
+            throw new MisconfiguredException("\"Max Messages to Read\" must be a 0 or a positive number");
         }
         
         if (maxMsgsToRead > 0 && readUntilQueueEmpty) {
@@ -86,74 +92,67 @@ public class SQSReader extends AbstractComponentRuntime {
                 || (PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)) {
 
             SqsClient client = (SqsClient)getResourceReference();
-            ArrayList<String> outputMessages = new ArrayList<>();
             int messagesRead = 0;
 
-            String message = readMessage(client);
-            messagesRead++;
-            outputMessages.add(message);
-
             while (readUntilQueueEmpty || messagesRead < maxMsgsToRead) {
-                message = readMessage(client);
-                messagesRead++;
-                outputMessages.add(message);
-            }
+                software.amazon.awssdk.services.sqs.model.Message message = readMessage(client);
 
-            callback.sendTextMessage(null, consolidateMessages(outputMessages));
+                if (message == null) return;
+
+                messagesRead++;
+                Map<String,Serializable> header = new LinkedHashMap<>();
+                header.put(MESSAGE_HEADER_KEY, message.receiptHandle());
+                callback.sendTextMessage(header, message.body());
+            }
+        }
+    }
+    
+    @Override
+    public void flowCompleted(boolean cancelled) {
+        if ("ON FLOW COMPLETION".equals(deleteWhen) && !cancelled) {
+            SqsClient client = (SqsClient)getResourceReference();
+            
+            messageReceipts.forEach( messageReceipt -> {
+                deleteMessage(client, messageReceipt);
+            });
         }
     }
 
-    private String readMessage(SqsClient client) {
-        ReceiveMessageRequest request = ReceiveMessageRequest.builder()
-                .queueUrl(queueUrl)
-                .maxNumberOfMessages(1)
-                .build();
-
+    private software.amazon.awssdk.services.sqs.model.Message readMessage(SqsClient client) {
         try {
+            ReceiveMessageRequest request = ReceiveMessageRequest.builder()
+                    .queueUrl(queueUrl)
+                    .maxNumberOfMessages(1)
+                    .build();
+
             ReceiveMessageResponse response = client.receiveMessage(request);
-            String messageBody = "";
 
             for (software.amazon.awssdk.services.sqs.model.Message message : response.messages()) {
-                deleteMessage(client, message.receiptHandle());
-                messageBody = message.body();
+                if (message != null) {
+                    messageReceipts.add(message.receiptHandle());
+                    if ("ON READ".equals(deleteWhen)) {
+                        deleteMessage(client, message.receiptHandle());
+                    }
+                    return message;
+                }
             }
 
-            return messageBody;
+            return null;
         } catch (Exception e) {
             throw new RuntimeException("Could not receive message from SQS queue: " + e.getMessage());
         }
     }
 
     private void deleteMessage(SqsClient client, String messageReceipt) {
-        if (deleteWhen.equals("AFTER EVERY READ")) {
-            DeleteMessageRequest request = DeleteMessageRequest.builder()
-                    .queueUrl(queueUrl)
-                    .receiptHandle(messageReceipt)
-                    .build();
+        DeleteMessageRequest request = DeleteMessageRequest.builder()
+                .queueUrl(queueUrl)
+                .receiptHandle(messageReceipt)
+                .build();
 
-            try {
-                client.deleteMessage(request);
-            } catch (Exception e) {
-                log(LogLevel.WARN, "Failed to delete SQS message with receipt: %s", messageReceipt);
-            }
+        try {
+            client.deleteMessage(request);
+        } catch (Exception e) {
+            log(LogLevel.WARN, "Failed to delete SQS message with receipt: %s", messageReceipt);
         }
-    }
-
-    private ArrayList<String> consolidateMessages(ArrayList<String> messages) {
-        ArrayList<String> result = new ArrayList<>();
-
-        for (int i = 0; i < messages.size(); i += messagesPerOutputMessage) {
-            String combinedMessages = "";
-
-            for (int j = 0; j < messagesPerOutputMessage; j++) {
-                if ((i+j >= 0) && i+j < messages.size()) {
-                    combinedMessages += messages.get(i + j);
-                }
-            }
-
-            result.add(combinedMessages);
-        }
-
-        return result;
     }
 }

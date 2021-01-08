@@ -22,6 +22,7 @@ package org.jumpmind.metl.core.runtime.component;
 
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MessageHeader;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 
@@ -31,14 +32,12 @@ import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 public class SQSDelete extends AbstractComponentRuntime {
 
     public final static String TYPE = "SQS Delete";
-    
-    public final static String SQS_MESSAGE_HEADER_KEY = "sqsMessageReceipt";
+    public final static String MESSAGE_HEADER_KEY = "sqsMessageReceipt";
 
     public final static String SQS_DELETE_QUEUE_URL = "sqs.delete.queue.url";
 
     /* settings */
     String queueUrl;
-    String runWhen;
 
     @Override
     public void start() {
@@ -48,7 +47,6 @@ public class SQSDelete extends AbstractComponentRuntime {
 
         TypedProperties properties = getTypedProperties();
         queueUrl = properties.get(SQS_DELETE_QUEUE_URL);
-        runWhen = properties.get(RUN_WHEN);
     }
 
     @Override
@@ -58,18 +56,24 @@ public class SQSDelete extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if (PER_MESSAGE.equals(runWhen) && (!(inputMessage instanceof ControlMessage) || context.isStartStep())
-                || (PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)) {
+        if (!(inputMessage instanceof ControlMessage)) {
+            try {
+                SqsClient client = (SqsClient)getResourceReference();
 
-            SqsClient client = (SqsClient)getResourceReference();
+                MessageHeader receiptHandle = inputMessage.getHeader();
+                String receiptString = receiptHandle.get(MESSAGE_HEADER_KEY).toString();
 
-            String receiptHandle = inputMessage.getHeader().get(SQS_MESSAGE_HEADER_KEY).toString();
-            DeleteMessageRequest deleteMessageRequest = DeleteMessageRequest.builder()
-                    .queueUrl(queueUrl)
-                    .receiptHandle(receiptHandle)
-                    .build();
+                if (receiptString != null && receiptString != "") {
+                    DeleteMessageRequest deleteMessageRequest = DeleteMessageRequest.builder()
+                            .queueUrl(queueUrl)
+                            .receiptHandle(receiptString)
+                            .build();
 
-            client.deleteMessage(deleteMessageRequest);
+                    client.deleteMessage(deleteMessageRequest);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Could not delete message from SQS queue: " + e);
+            }
         }
     }
 }
