@@ -60,23 +60,22 @@
                type='text'>
         <name>Queue URL</name>
       </setting>
-      <setting id='sqs.reader.max.messages.read.at.once'
+      <setting id='sqs.reader.max.messages.to.read'
                required='true'
                type='integer'>
-        <name>Max Messages to Read at Once</name>
+        <name>Max Messages to Read</name>
         <defaultValue>1</defaultValue>
       </setting>
-      <setting id='sqs.reader.queue.messages.per.output.message'
+      <setting id='sqs.reader.delete.when'
                required='true'
-               type='integer'>
-        <name>Queue Messages Per OutputMessage</name>
-        <defaultValue>1</defaultValue>
-      </setting>
-      <setting id='sqs.reader.delete.after.read'
-               required='true'
-               type='boolean'>
-        <name>Delete Messages After Read</name>
-        <defaultValue>false</defaultValue>
+               type='choice'>
+        <name>Delete When</name>
+        <defaultValue>ON READ</defaultValue>
+        <choices>
+          <choice>ON READ</choice>
+          <choice>ON FLOW COMPLETION</choice>
+          <choice>DO NOT DELETE</choice>
+        </choices>
       </setting>
       <setting id='sqs.reader.read.until.queue.empty'
                required='true'
@@ -95,5 +94,33 @@
         </choices>
       </setting>
     </settings>
-  </component>  
+  </component>
+    <component category='PROCESSOR'
+             id='SQS Delete'
+             inputMessageType='any'
+             inputOutputModelsMatch='false'
+             outputMessageType='text'
+             resourceCategory='queue'>
+    <name>SQS Delete</name>
+    <className>org.jumpmind.metl.core.runtime.component.SQSDelete</className>
+    <keywords>sqs,delete</keywords>
+    <description></description>
+    <settings>
+      <setting id='run.when'
+               required='false'
+               type='choice'>
+        <name>Run When</name>
+        <defaultValue>PER UNIT OF WORK</defaultValue>
+        <choices>
+          <choice>PER UNIT OF WORK</choice>
+          <choice>PER MESSAGE</choice>
+        </choices>
+      </setting>
+      <setting id='sqs.delete.queue.url'
+               required='true'
+               type='text'>
+        <name>Queue URL</name>
+      </setting>
+    </settings>
+  </component>
 </definitions>
