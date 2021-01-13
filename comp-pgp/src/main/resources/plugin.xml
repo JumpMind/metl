@@ -53,10 +53,10 @@
           <choice>AES_128</choice>
           <choice>AES_192</choice>
           <choice>AES_256</choice>
-          <choice>TWOFISH</choice>          
-          <choice>CAMELLIA_128</choice>          
-          <choice>CAMELLIA_192</choice>          
-          <choice>CAMELLIA_256</choice>          
+          <choice>TWOFISH</choice>
+          <choice>CAMELLIA_128</choice>
+          <choice>CAMELLIA_192</choice>
+          <choice>CAMELLIA_256</choice>
         </choices>
       </setting>
       <setting id='pgp.compression.algorithm'
@@ -75,7 +75,64 @@
                type='boolean'>
         <name>Armored</name>
         <defaultValue>false</defaultValue>
-      </setting>            
+      </setting>
     </settings>
-  </component>  
+  </component>
+  <component category='PROCESSOR'
+             id='PGP Decrypt'
+             inputMessageType='binary'
+             inputOutputModelsMatch='false'
+             outputMessageType='text'
+             resourceCategory='none'>
+    <name>PGP Decrypt</name>
+    <className>org.jumpmind.metl.core.runtime.component.PgpDecrypt</className>
+    <keywords>decrypt,pgp</keywords>
+    <description></description>
+    <settings>
+      <setting id='pgp.public.key.location'
+               required='true'
+               type='text'>
+        <name>Public Key Location</name>
+      </setting>    
+      <setting id='pgp.key.algorithm'
+               required='true'
+               type='choice'>
+        <name>Key Algorithm</name>
+        <defaultValue>CAST5</defaultValue>
+        <choices>
+          <choice>CAST5</choice>
+          <choice>IDEA</choice>
+          <choice>TRIPLE_DES</choice>
+          <choice>BLOWFISH</choice>
+          <choice>SAFER</choice>
+          <choice>TRIPLE_DES</choice>
+          <choice>DES</choice>
+          <choice>AES_128</choice>
+          <choice>AES_192</choice>
+          <choice>AES_256</choice>
+          <choice>TWOFISH</choice>
+          <choice>CAMELLIA_128</choice>
+          <choice>CAMELLIA_192</choice>
+          <choice>CAMELLIA_256</choice>
+        </choices>
+      </setting>
+      <setting id='pgp.compression.algorithm'
+               required='true'
+               type='choice'>
+        <name>Compression Algorithm</name>
+        <defaultValue>ZIP</defaultValue>
+        <choices>
+          <choice>ZIP</choice>
+          <choice>ZLIB</choice>
+          <choice>BZIP2</choice>
+        </choices>
+      </setting>   
+      <setting id='pgp.armored'
+               required='true'
+               type='boolean'>
+        <name>Armored</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+    </settings>
+  </component>
 </definitions>
