@@ -126,12 +126,6 @@
           <choice>ZLIB</choice>
           <choice>BZIP2</choice>
         </choices>
-      </setting>   
-      <setting id='pgp.armored'
-               required='true'
-               type='boolean'>
-        <name>Armored</name>
-        <defaultValue>false</defaultValue>
       </setting>
     </settings>
   </component>

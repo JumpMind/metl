@@ -62,7 +62,6 @@ public class PgpDecrypt extends AbstractComponentRuntime {
     String publicKeyLocation;
     int keyAlgorithm;
     int compressionAlgorithm;
-    boolean armored;
     PGPPublicKey pubKey;
 
     @Override
@@ -72,7 +71,7 @@ public class PgpDecrypt extends AbstractComponentRuntime {
         publicKeyLocation = properties.get(PUBLIC_KEY_LOCATION);
         keyAlgorithm = mapKeyAlgorithm(properties.get(KEY_ALGORITHM));
         compressionAlgorithm = mapCompressionAlgorithm(properties.get(COMPRESSION_ALGORITHM));
-        armored = properties.is(ARMORED, false);
+
         try {
             pubKey = readPublicKey();
         } catch (IOException iox) {
@@ -88,9 +87,14 @@ public class PgpDecrypt extends AbstractComponentRuntime {
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {   
         if (inputMessage instanceof BinaryMessage) {
             byte[] inputPayload = ((BinaryMessage) inputMessage).getPayload();
-            byte[] outputPayload = encrypt(inputPayload);
-            callback.sendBinaryMessage(inputMessage.getHeader(), outputPayload);
+            String outputPayload = decrypt(inputPayload);
+            callback.sendTextMessage(inputMessage.getHeader(), outputPayload);
         }
+    }
+    
+    @Override
+    public boolean supportsStartupMessages() {
+        return false;
     }
 
     private PGPPublicKey readPublicKey() throws IOException, PGPException {
@@ -114,51 +118,9 @@ public class PgpDecrypt extends AbstractComponentRuntime {
         throw new IllegalArgumentException("Unable to find valid key in the key file.");
     }
 
-    private byte[] encrypt(byte[] inData) {
-
-        byte[] compressedData = compress(inData, PGPLiteralData.CONSOLE, keyAlgorithm);
-        ByteArrayOutputStream baOutputStream = new ByteArrayOutputStream();
-        PGPEncryptedDataGenerator encDataGen = new PGPEncryptedDataGenerator(new JcePGPDataEncryptorBuilder(keyAlgorithm).setProvider("BC"));        
-        encDataGen.addMethod(new JcePublicKeyKeyEncryptionMethodGenerator(pubKey));
-        OutputStream outputStream = baOutputStream;
-        if (armored) {
-            outputStream = new ArmoredOutputStream(outputStream);
-        }
-        try {
-            OutputStream encoudedOutputStream = encDataGen.open(outputStream, compressedData.length);
-            encoudedOutputStream.write(compressedData);
-            encoudedOutputStream.close();
-            if (armored) {
-                outputStream.close();
-            }
-        } catch(IOException iox) {
-            throw new IoException(iox);
-        } catch(PGPException pex) {
-            throw new IoException(pex);
-        }
-        return baOutputStream.toByteArray();
-    }
-    
-    private byte[] compress(byte[] inData, String fileName, int algorithm) {
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        PGPCompressedDataGenerator comDataGen = new PGPCompressedDataGenerator(algorithm);
-        PGPLiteralDataGenerator litDataGen = new PGPLiteralDataGenerator();
-        try {
-            OutputStream cos = comDataGen.open(bOut); 
-            OutputStream  pOut = litDataGen.open(cos, PGPLiteralData.BINARY, fileName,  
-                    inData.length, new Date());
-            pOut.write(inData);
-            pOut.close();
-            comDataGen.close();
-        } catch (IOException iox) {
-            throw new IoException(iox);
-        }
-        return bOut.toByteArray();
-    }
-    
-    @Override
-    public boolean supportsStartupMessages() {
-        return false;
+    private String decrypt(byte[] inData) {
+        // TODO: Decrypt here!
+        return "";
     }
 
     private int mapKeyAlgorithm(String keyAlgorithmName) {
