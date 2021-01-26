@@ -20,171 +20,185 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import java.io.BufferedInputStream;
+import static java.util.Objects.requireNonNull;
+import static org.jumpmind.metl.core.runtime.component.PgpConfiguration.PRIVATE_KEY_LOCATION;
+import static org.jumpmind.metl.core.runtime.component.PgpConfiguration.PRIVATE_KEY_PASSPHRASE;
+
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.NoSuchProviderException;
 import java.security.Security;
-import java.util.Date;
 import java.util.Iterator;
 
-import org.bouncycastle.bcpg.ArmoredOutputStream;
-import org.bouncycastle.bcpg.CompressionAlgorithmTags;
-import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
-import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
-import org.bouncycastle.openpgp.PGPEncryptedDataGenerator;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openpgp.PGPCompressedData;
+import org.bouncycastle.openpgp.PGPEncryptedDataList;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPLiteralData;
-import org.bouncycastle.openpgp.PGPLiteralDataGenerator;
-import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PGPPublicKeyRing;
-import org.bouncycastle.openpgp.PGPPublicKeyRingCollection;
+import org.bouncycastle.openpgp.PGPPrivateKey;
+import org.bouncycastle.openpgp.PGPPublicKeyEncryptedData;
+import org.bouncycastle.openpgp.PGPRuntimeOperationException;
+import org.bouncycastle.openpgp.PGPSecretKey;
+import org.bouncycastle.openpgp.PGPSecretKeyRingCollection;
 import org.bouncycastle.openpgp.PGPUtil;
+import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
+import org.bouncycastle.openpgp.operator.PublicKeyDataDecryptorFactory;
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
-import org.bouncycastle.openpgp.operator.jcajce.JcePGPDataEncryptorBuilder;
-import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyKeyEncryptionMethodGenerator;
-import org.jumpmind.exception.IoException;
+import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyDataDecryptorFactoryBuilder;
+import org.bouncycastle.util.io.Streams;
 import org.jumpmind.metl.core.runtime.BinaryMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 
-
 public class PgpDecrypt extends AbstractComponentRuntime {
+    private URL privateKeyUrl;
 
-    public final static String PUBLIC_KEY_LOCATION = "pgp.public.key.location";
-    public final static String KEY_ALGORITHM = "pgp.key.algorithm";
-    public final static String COMPRESSION_ALGORITHM = "pgp.compression.algorithm";
-    public final static String ARMORED = "pgp.armored";
-
-    String publicKeyLocation;
-    int keyAlgorithm;
-    int compressionAlgorithm;
-    PGPPublicKey pubKey;
+    private char[] privateKeyPassPhrase;
 
     @Override
     public void start() {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        super.start();
+
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null)
+            Security.addProvider(new BouncyCastleProvider());
+
         TypedProperties properties = getTypedProperties();
-        publicKeyLocation = properties.get(PUBLIC_KEY_LOCATION);
-        keyAlgorithm = mapKeyAlgorithm(properties.get(KEY_ALGORITHM));
-        compressionAlgorithm = mapCompressionAlgorithm(properties.get(COMPRESSION_ALGORITHM));
 
+        String privateKeyLocation = requireNonNull(properties.get(PRIVATE_KEY_LOCATION),
+                PRIVATE_KEY_LOCATION);
         try {
-            pubKey = readPublicKey();
-        } catch (IOException iox) {
-            log.error(String.format("Unable to read public key from keyfile.  Error %s",iox.getMessage()));
-            throw new IoException(iox);
-        } catch (PGPException pgx) {
-            log.error(String.format("Unable to read public key from keyfile.  Error %s",pgx.getMessage()));
-            throw new IoException(pgx);
+            privateKeyUrl = new File(privateKeyLocation).toURI().toURL();
+        } catch (MalformedURLException ex) {
+            /* unreachable (in theory) */
+            log.error("{} is not valid: {}", PRIVATE_KEY_LOCATION, ex.toString());
+            throw new UncheckedIOException(ex);
         }
+
+        /* TODO: this needs to be handled in a better way */
+        privateKeyPassPhrase = requireNonNull(properties.get(PRIVATE_KEY_PASSPHRASE),
+                PRIVATE_KEY_PASSPHRASE).toCharArray();
     }
 
-    @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {   
-        if (inputMessage instanceof BinaryMessage) {
-            byte[] inputPayload = ((BinaryMessage) inputMessage).getPayload();
-            String outputPayload = decrypt(inputPayload);
-            callback.sendTextMessage(inputMessage.getHeader(), outputPayload);
-        }
-    }
-    
     @Override
     public boolean supportsStartupMessages() {
         return false;
     }
 
-    private PGPPublicKey readPublicKey() throws IOException, PGPException {
-        InputStream inputStream = new BufferedInputStream(new FileInputStream(publicKeyLocation));
+    @Override
+    public void handle(final Message inputMessage, final ISendMessageCallback callback,
+            final boolean unitOfWorkBoundaryReached) {
+        if (inputMessage instanceof BinaryMessage) {
+            byte[] inputPayload = ((BinaryMessage) inputMessage).getPayload();
+            byte[] outputPayload;
+            try {
+                outputPayload = decrypt(inputPayload);
+            } catch (IOException ex) {
+                throw new UncheckedIOException(ex);
+            } catch (PGPException | NoSuchProviderException ex) {
+                throw new PGPRuntimeOperationException("decryption failed", ex);
+            }
+            callback.sendBinaryMessage(inputMessage.getHeader(), outputPayload);
+        }
+    }
 
-        PGPPublicKeyRingCollection pgpPub = new PGPPublicKeyRingCollection(
-            PGPUtil.getDecoderStream(inputStream), new JcaKeyFingerprintCalculator());
+    @SuppressWarnings("rawtypes")
+    private byte[] decrypt(byte[] sourceData)
+            throws IOException, PGPException, NoSuchProviderException {
+        InputStream dataDecoderStream = PGPUtil
+                .getDecoderStream(new ByteArrayInputStream(sourceData));
+        PGPEncryptedDataList encryptedDataList = findEncryptedDataList(dataDecoderStream);
+        if (encryptedDataList == null)
+            throw new IllegalArgumentException("input did not contain encrypted data");
 
-        Iterator<PGPPublicKeyRing> keyRingIter = pgpPub.getKeyRings();
-        while (keyRingIter.hasNext()) {
-            PGPPublicKeyRing keyRing = (PGPPublicKeyRing)keyRingIter.next();
-
-            Iterator<PGPPublicKey> keyIter = keyRing.getPublicKeys();
-            while (keyIter.hasNext()) {
-                PGPPublicKey key = (PGPPublicKey)keyIter.next();
-                if (key.isEncryptionKey()) {
-                    return key;
-                }
+        /*
+         * obtain the private key and the encrypted data; the encrypted data
+         * itself encapsulates the ID of the key that is needed such that if a
+         * matching key is not found, then _this_ message cannot be decrypted
+         * using _this_ private
+         */
+        PGPPrivateKey privateKey = null;
+        PGPPublicKeyEncryptedData encryptedData = null;
+        Iterator encryptedDataIter = encryptedDataList.iterator();
+        try (InputStream privateKeyStream = privateKeyUrl.openStream();
+                InputStream privateKeyDecoderStream = PGPUtil.getDecoderStream(privateKeyStream);) {
+            PGPSecretKeyRingCollection secretKeyRings = new PGPSecretKeyRingCollection(
+                    privateKeyDecoderStream, new JcaKeyFingerprintCalculator());
+            while (privateKey == null && encryptedDataIter.hasNext()) {
+                encryptedData = (PGPPublicKeyEncryptedData) encryptedDataIter.next();
+                privateKey = extractPrivateKeyById(secretKeyRings, encryptedData.getKeyID());
             }
         }
-        throw new IllegalArgumentException("Unable to find valid key in the key file.");
-    }
+        if (privateKey == null)
+            throw new PGPException("message can not be decrypted using configured private key");
 
-    private String decrypt(byte[] inData) {
-        // TODO: Decrypt here!
-        return "";
-    }
+        PublicKeyDataDecryptorFactory pkDecryptorFactory = new JcePublicKeyDataDecryptorFactoryBuilder()
+                .setProvider(BouncyCastleProvider.PROVIDER_NAME).build(privateKey);
 
-    private int mapKeyAlgorithm(String keyAlgorithmName) {
-        int keyAlgorithm = -1;
-        
-        switch(keyAlgorithmName) {
-            case "IDEA":
-                keyAlgorithm = SymmetricKeyAlgorithmTags.IDEA;
-                break;
-            case "TRIPLE_DES":
-                keyAlgorithm = SymmetricKeyAlgorithmTags.TRIPLE_DES;
-                break;
-            case "CAST5":
-                keyAlgorithm = SymmetricKeyAlgorithmTags.CAST5;
-                break;
-            case "BLOWFISH":
-                keyAlgorithm = SymmetricKeyAlgorithmTags.BLOWFISH;
-                break;
-            case "SAFER":
-                keyAlgorithm = SymmetricKeyAlgorithmTags.SAFER;
-                break;
-            case "DES":
-                keyAlgorithm = SymmetricKeyAlgorithmTags.DES;
-                break;
-            case "AES_128":
-                keyAlgorithm = SymmetricKeyAlgorithmTags.AES_128;
-                break;
-            case "AES_192":
-                keyAlgorithm = SymmetricKeyAlgorithmTags.AES_192;
-                break;
-            case "AES_256":
-                keyAlgorithm = SymmetricKeyAlgorithmTags.AES_256;
-                break;
-            case "TWOFISH":
-                keyAlgorithm = SymmetricKeyAlgorithmTags.TWOFISH;
-                break;
-            case "CAMELLIA_128":
-                keyAlgorithm = SymmetricKeyAlgorithmTags.CAMELLIA_128;
-                break;
-            case "CAMELLIA_192":
-                keyAlgorithm = SymmetricKeyAlgorithmTags.CAMELLIA_192;
-                break;
-            case "CAMELLIA_256":
-                keyAlgorithm = SymmetricKeyAlgorithmTags.CAMELLIA_256;
-                break;
+        InputStream encryptedDataStream = encryptedData.getDataStream(pkDecryptorFactory);
+        Object message = new JcaPGPObjectFactory(encryptedDataStream).nextObject();
+        if (message instanceof PGPCompressedData) {
+            InputStream compressedDataStream = ((PGPCompressedData) message).getDataStream();
+            message = new JcaPGPObjectFactory(compressedDataStream).nextObject();
         }
-        return keyAlgorithm;
-    }
 
-    private int mapCompressionAlgorithm(String compressionAlgorithmName) {
-        int compressionAlgorithm = -1;
-        
-        switch(compressionAlgorithmName) {
-            case "ZIP":
-                compressionAlgorithm = CompressionAlgorithmTags.ZIP;
-                break;
-            case "ZLIB":
-                compressionAlgorithm = CompressionAlgorithmTags.ZLIB;
-                break;
-            case "BZIP2":
-                compressionAlgorithm = CompressionAlgorithmTags.BZIP2;
-                break;
+        ByteArrayOutputStream sink = null;
+        if (message instanceof PGPLiteralData) {
+            sink = new ByteArrayOutputStream();
+            try (InputStream literalDataStream = ((PGPLiteralData) message).getInputStream()) {
+                Streams.pipeAll(literalDataStream, sink);
+            }
+        } else {
+            throw new PGPException(String.format(
+                    "expected to find PGPLiteralData in the encrypted data stream, but found {} instead",
+                    message.getClass().getSimpleName()));
         }
-        return compressionAlgorithm;
+
+        /* the HMAC can only be verified once all the data has been decrypted */
+        if (encryptedData.isIntegrityProtected() && encryptedData.verify()) {
+            return sink.toByteArray();
+        } else {
+            sink = null;
+            throw new PGPException("message failed integrity check");
+        }
     }
 
+    @SuppressWarnings("rawtypes")
+    private PGPEncryptedDataList findEncryptedDataList(final InputStream inStream) {
+        Object obj = null;
+        Iterator objIter = new JcaPGPObjectFactory(inStream).iterator();
+        while (objIter.hasNext()) {
+            obj = objIter.next();
+            if (obj instanceof PGPEncryptedDataList)
+                return (PGPEncryptedDataList) obj;
+        }
+
+        /* not found */
+        return null;
+    }
+
+    private PGPPrivateKey extractPrivateKeyById(final PGPSecretKeyRingCollection skRingCollection,
+            final long keyId) throws PGPException, NoSuchProviderException {
+        PGPSecretKey sKey = skRingCollection.getSecretKey(keyId);
+        if (sKey == null)
+            return null;
+
+        return sKey.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder()
+                .setProvider(BouncyCastleProvider.PROVIDER_NAME).build(privateKeyPassPhrase));
+    }
+
+    @Override
+    public void stop() {
+        privateKeyUrl = null;
+        privateKeyPassPhrase = null;
+
+        super.stop();
+    }
 }
