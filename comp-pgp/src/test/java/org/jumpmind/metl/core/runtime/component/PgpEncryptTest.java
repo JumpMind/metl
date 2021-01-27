@@ -180,6 +180,20 @@ public class PgpEncryptTest extends MetlTestSupport {
     }
 
     @Test
+    public void handle_refusesToNotEncrypt() {
+        PgpEncrypt runtime = createPgpEncryptWithTestKeyAndSettings(SYMMETRIC_KEY_ALGORITHM,
+                SymmetricKeyAlgorithm.NULL.toString());
+        byte[] inputPayload = TESTING_PLAINTEXT.getBytes(UTF_8);
+        BinaryMessage message = new BinaryMessage("test", inputPayload);
+
+        /* actually comes from BC JcePGPDataEncryptorBuilder */
+        thrown.expect(IllegalArgumentException.class);
+
+        runtime.start();
+        runtime.handle(message, null/* NPE if dereferenced */, false);
+    }
+
+    @Test
     public void handle_noCallbackOnControlMessage() {
         PgpEncrypt runtime = createPgpEncryptWithTestKeyAndSettings();
         Message message = new ControlMessage();

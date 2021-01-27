@@ -20,6 +20,10 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.zip.Deflater;
 
 import org.bouncycastle.bcpg.CompressionAlgorithmTags;
@@ -52,15 +56,15 @@ public interface PgpConfiguration {
      */
     String PRIVATE_KEY_LOCATION = "pgp.private.key.location";
 
-    /* TODO: this needs to be handled in a better way */
     /**
-     * The runtime property key identifying the OpenPGP private key pass phrase.
+     * The runtime property key identifying the location of the OpenPGP private
+     * key pass phrase.
      *
      * <p>
      * This property is only relevant for {@link PgpDecrypt}.
      * </p>
      */
-    String PRIVATE_KEY_PASSPHRASE = "pgp.private.key.passphrase";
+    String PRIVATE_KEY_PASSPHRASE_LOCATION = "pgp.private.key.passphrase.location";
 
     /**
      * The runtime property key identifying the OpenPGP
@@ -137,9 +141,9 @@ public interface PgpConfiguration {
      *
      * <p>
      * These algorithms identify those that the underlying crypto implementor
-     * (BouncyCastle) <em>supports</em>. The {@link PgpEncrypt} component, or a
-     * subclass thereof, is free to further restrict the <em>acceptable</em>
-     * algorithms when the component is initialized.
+     * (BouncyCastle) <em>supports</em>. The UI, {@link PgpEncrypt} component
+     * runtime, or a subclass thereof, is free to further restrict the
+     * <em>acceptable</em> algorithms.
      * </p>
      *
      * @see org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags
@@ -150,60 +154,101 @@ public interface PgpConfiguration {
      *      Recommendation for Key Management (SP 800-57 Part 1 Rev. 5)</a>.
      */
     enum SymmetricKeyAlgorithm {
-        /*
-         * explicitly disallowed by PgpOperation; has no practical usefulness
-         * outside of unit and/or integration testing but MUST be defined here
-         * for those usages
-         */
-        NULL(SymmetricKeyAlgorithmTags.NULL),
-        /* 128-bit block sizes (recommended): */
-        AES_128(SymmetricKeyAlgorithmTags.AES_128), /* default */
-        AES_192(SymmetricKeyAlgorithmTags.AES_192),
-        AES_256(SymmetricKeyAlgorithmTags.AES_256),
-        CAMELLIA_128(SymmetricKeyAlgorithmTags.CAMELLIA_128),
-        CAMELLIA_192(SymmetricKeyAlgorithmTags.CAMELLIA_192),
-        CAMELLIA_256(SymmetricKeyAlgorithmTags.CAMELLIA_256),
-        TWOFISH(SymmetricKeyAlgorithmTags.TWOFISH),
-        /* 64-bit block sizes: */
-        BLOWFISH(SymmetricKeyAlgorithmTags.BLOWFISH), /* prefer Twofish */
-        CAST5(SymmetricKeyAlgorithmTags.CAST5),
-        SAFER(SymmetricKeyAlgorithmTags.SAFER),
-        IDEA(SymmetricKeyAlgorithmTags.IDEA), /* PGP legacy interop only */
+        /** No practical usefulness beyond testing. */
+        NULL(SymmetricKeyAlgorithmTags.NULL, 0, 0, false),
+        /* 128-bit or higher key and block sizes (recommended): */
+        /** The current default. */
+        AES_128(SymmetricKeyAlgorithmTags.AES_128, 128, 128, true),
+        AES_192(SymmetricKeyAlgorithmTags.AES_192, 192, 128, true),
+        AES_256(SymmetricKeyAlgorithmTags.AES_256, 256, 128, true),
+        CAMELLIA_128(SymmetricKeyAlgorithmTags.CAMELLIA_128, 128, 128, true),
+        CAMELLIA_192(SymmetricKeyAlgorithmTags.CAMELLIA_192, 192, 128, true),
+        CAMELLIA_256(SymmetricKeyAlgorithmTags.CAMELLIA_256, 256, 128, true),
+        TWOFISH(SymmetricKeyAlgorithmTags.TWOFISH, 256, 128, true),
+        /* less than 128-bit key or block sizes (not recommended): */
+        BLOWFISH(SymmetricKeyAlgorithmTags.BLOWFISH, 128, 64, false),
+        CAST5(SymmetricKeyAlgorithmTags.CAST5, 128, 64, false),
+        SAFER(SymmetricKeyAlgorithmTags.SAFER, 128, 64, false),
+        /** For PGP legacy interoperability only. */
+        IDEA(SymmetricKeyAlgorithmTags.IDEA, 128, 64, false),
         /**
+         * SHOULD NOT USE!
+         *
          * <p>
-         * <strong>SHOULD NOT USE!</strong>
+         * TripleDES/3DES/DESede/TDEA encryption is deprecated (NIST 2018) and
+         * should not be used for new applications. <em>Decryption-only</em> is
+         * permitted as "legacy use" through 2023.
          * </p>
          * <p>
-         * TripleDES/3DES/TDEA encryption is deprecated and should not be used
-         * for new applications. <em>Decryption-only</em> is permitted as
-         * "legacy use." TripleDES will be disallowed altogether after 2023.
+         * TripleDES will be withdrawn by NIST after 2023.
          * </p>
+         * 
+         * @see <a href=
+         *      "https://csrc.nist.gov/publications/detail/sp/800-131a/rev-2/final">Transitioning
+         *      the Use of Cryptographic Algorithms and Key Lengths</a>
          */
         @Deprecated
-        TRIPLE_DES(SymmetricKeyAlgorithmTags.TRIPLE_DES), /* SHOULD NOT USE */
+        TRIPLE_DES(SymmetricKeyAlgorithmTags.TRIPLE_DES, 168, 64, false),
         /**
-         * <p>
          * <strong>DO NOT USE!</strong>
-         * </p>
+         * 
          * <p>
-         * DES has been officially withdrawn (NIST 2005). Keys can be
-         * brute-forced in seconds (best case) or <24 hours (worst case).
+         * DES has been officially withdrawn (NIST 2005).
          * </p>
          *
-         * @see <a href="https://crack.sh/">Crack.sh guarantees that it will
-         *      100% produce a working key for jobs submitted.</a>
+         * @see <a href=
+         *      "https://www.nist.gov/news-events/news/2005/06/nist-withdraws-outdated-data-encryption-standard">NIST
+         *      Withdraws Outdated Data Encryption Standard</a>
          */
         @Deprecated
-        DES(SymmetricKeyAlgorithmTags.DES); /* DO NOT USE */
+        DES(SymmetricKeyAlgorithmTags.DES, 64, 64, false);
+
+        public static Set<SymmetricKeyAlgorithm> allApproved() {
+            return ALL_APPROVED;
+        }
+
+        private static final Set<SymmetricKeyAlgorithm> ALL_APPROVED = Collections
+                .unmodifiableSet(Arrays.asList(values()).stream().filter(a -> a.isApproved())
+                        .collect(Collectors.toSet()));
 
         private final int id;
 
-        private SymmetricKeyAlgorithm(final int id) {
+        private final int keySize;
+
+        private final int blockSize;
+
+        /*
+         * this is an admittedly nebulous concept (approved by whom? NIST?
+         * BouncyCastle? JumpMind? John Doe?); for our purposes here, we
+         * generally say that any algorithm that has been officially
+         * deprecated/withdrawn by a recognized authority (e.g. NIST, NESSIE,
+         * CRYPTREC) -or- that has a key size or block size less than 128 is
+         * _not_ approved
+         */
+        private final boolean approved;
+
+        private SymmetricKeyAlgorithm(final int id, final int keySize, final int blockSize,
+                final boolean approved) {
             this.id = id;
+            this.keySize = keySize;
+            this.blockSize = blockSize;
+            this.approved = approved;
         }
 
         public int intValue() {
             return id;
+        }
+
+        public int keySize() {
+            return keySize;
+        }
+
+        public int blockSize() {
+            return blockSize;
+        }
+
+        public boolean isApproved() {
+            return approved;
         }
     };
 

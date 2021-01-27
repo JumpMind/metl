@@ -2,7 +2,7 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.jumpmind.metl.core.runtime.component.PgpConfiguration.PRIVATE_KEY_LOCATION;
-import static org.jumpmind.metl.core.runtime.component.PgpConfiguration.PRIVATE_KEY_PASSPHRASE;
+import static org.jumpmind.metl.core.runtime.component.PgpConfiguration.PRIVATE_KEY_PASSPHRASE_LOCATION;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -38,7 +38,7 @@ public class PgpDecryptTest extends MetlTestSupport {
      * src/test/resources/ciphertext.asc.txt files MUST be regenerated (see
      * PgpEncryptTest#TESTING_PLAINTEXT)
      */
-    private static final String TESTING_PASSPHRASE = "DoNotTrust!";
+    private static final String TESTING_PASSPHRASE_LOCATION = "privkey-pass-phrase.txt";
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
@@ -48,8 +48,8 @@ public class PgpDecryptTest extends MetlTestSupport {
         Setting[] settingsWithTestKey = Arrays.copyOf(settings, settings.length + 2);
         settingsWithTestKey[settings.length] = new Setting(PRIVATE_KEY_LOCATION,
                 getResourcePath("privkey.asc.txt").toString());
-        settingsWithTestKey[settings.length + 1] = new Setting(PRIVATE_KEY_PASSPHRASE,
-                TESTING_PASSPHRASE);
+        settingsWithTestKey[settings.length + 1] = new Setting(PRIVATE_KEY_PASSPHRASE_LOCATION,
+                getResourcePath(TESTING_PASSPHRASE_LOCATION).toString());
         return createComponentRuntime(PgpDecrypt.class, "PGP Decrypt", settingsWithTestKey);
     }
 
@@ -61,7 +61,7 @@ public class PgpDecryptTest extends MetlTestSupport {
     @Test
     public void start_failsIfKeyLocationNotConfigured() {
         PgpDecrypt runtime = createComponentRuntime(PgpDecrypt.class, "PGP Decrypt",
-                PRIVATE_KEY_PASSPHRASE, TESTING_PASSPHRASE);
+                PRIVATE_KEY_PASSPHRASE_LOCATION, TESTING_PASSPHRASE_LOCATION);
 
         thrown.expect(NullPointerException.class);
         thrown.expectMessage(PRIVATE_KEY_LOCATION);
@@ -75,7 +75,7 @@ public class PgpDecryptTest extends MetlTestSupport {
                 PRIVATE_KEY_LOCATION, getResourcePath("privkey.asc.txt").toString());
 
         thrown.expect(NullPointerException.class);
-        thrown.expectMessage(PRIVATE_KEY_PASSPHRASE);
+        thrown.expectMessage(PRIVATE_KEY_PASSPHRASE_LOCATION);
 
         runtime.start();
     }

@@ -49,21 +49,30 @@
 				<name>Key Algorithm</name>
 				<defaultValue>AES_128</defaultValue>
 				<choices>
-					<!-- 128-bit block sizes (preferred): -->
-					<choice>AES_128</choice>
-					<choice>AES_192</choice>
-					<choice>AES_256</choice>
+					<!--
+					    128-bit block sizes (recommended):
+					-->
+					<choice>AES_128</choice><!-- NIST approved -->
+					<choice>AES_192</choice><!-- NIST approved -->
+					<choice>AES_256</choice><!-- NIST approved -->
 					<choice>CAMELLIA_128</choice>
 					<choice>CAMELLIA_192</choice>
 					<choice>CAMELLIA_256</choice>
 					<choice>TWOFISH</choice>
-					<!-- 64-bit block sizes: -->
-					<choice>BLOWFISH</choice><!-- prefer Twofish -->
-					<choice>CAST5</choice>
-					<choice>SAFER</choice>
-					<choice>IDEA</choice><!-- PGP legacy interop only -->
-					<choice>TRIPLE_DES</choice><!-- SHOULD NOT USE: NIST deprecated 2018 -->
-					<choice>DES</choice><!-- DO NOT USE: NIST withdrawn 2005 -->
+					<!--
+					    64-bit block sizes:
+					    (By default, these are not available for encryption in
+					    Metl. They are still available for decryption as long as
+					    the underlying BC provider implements them. Individual
+					    algorithms in this list MAY be re-enabled for encryption
+					    on an as-needed basis.)
+					-->
+					<!--<choice>BLOWFISH</choice>--><!-- prefer Twofish -->
+					<!--<choice>CAST5</choice>-->
+					<!--<choice>SAFER</choice>-->
+					<!--<choice>IDEA</choice>--><!-- PGP legacy interop only -->
+					<!--<choice>TRIPLE_DES</choice>--><!-- SHOULD NOT USE: NIST deprecated 2018 -->
+					<!--<choice>DES</choice>--><!-- DO NOT USE: NIST withdrawn 2005 -->
 				</choices>
 			</setting>
 			<setting
@@ -125,11 +134,11 @@
 				<name>Private Key Location</name>
 			</setting>
 			<setting
-				id='pgp.private.key.passphrase'
+				id='pgp.private.key.passphrase.location'
 				required='true'
-				type='password'
+				type='text'
 			>
-				<name>Private Key Pass Phrase</name>
+				<name>Private Key Pass Phrase Location</name>
 			</setting>
 		</settings>
 	</component>

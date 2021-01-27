@@ -20,18 +20,20 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.util.Objects.requireNonNull;
 import static org.jumpmind.metl.core.runtime.component.PgpConfiguration.PRIVATE_KEY_LOCATION;
-import static org.jumpmind.metl.core.runtime.component.PgpConfiguration.PRIVATE_KEY_PASSPHRASE;
+import static org.jumpmind.metl.core.runtime.component.PgpConfiguration.PRIVATE_KEY_PASSPHRASE_LOCATION;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.file.Paths;
 import java.security.NoSuchProviderException;
 import java.security.Security;
 import java.util.Iterator;
@@ -75,16 +77,38 @@ public class PgpDecrypt extends AbstractComponentRuntime {
         String privateKeyLocation = requireNonNull(properties.get(PRIVATE_KEY_LOCATION),
                 PRIVATE_KEY_LOCATION);
         try {
-            privateKeyUrl = new File(privateKeyLocation).toURI().toURL();
+            privateKeyUrl = Paths.get(privateKeyLocation).toUri().toURL();
         } catch (MalformedURLException ex) {
             /* unreachable (in theory) */
             log.error("{} is not valid: {}", PRIVATE_KEY_LOCATION, ex.toString());
             throw new UncheckedIOException(ex);
         }
 
-        /* TODO: this needs to be handled in a better way */
-        privateKeyPassPhrase = requireNonNull(properties.get(PRIVATE_KEY_PASSPHRASE),
-                PRIVATE_KEY_PASSPHRASE).toCharArray();
+        String passPhraseLocation = requireNonNull(properties.get(PRIVATE_KEY_PASSPHRASE_LOCATION),
+                PRIVATE_KEY_PASSPHRASE_LOCATION);
+        URL passPhraseUrl;
+        try {
+            passPhraseUrl = Paths.get(passPhraseLocation).toUri().toURL();
+        } catch (MalformedURLException ex) {
+            /* unreachable (in theory) */
+            log.error("{} is not valid: {}", PRIVATE_KEY_PASSPHRASE_LOCATION, ex.toString());
+            throw new UncheckedIOException(ex);
+        }
+
+        /*
+         * crypto pass phrases should use a printable subset of ASCII; a
+         * 40-character ASCII pass phrase achieves bit strength equivalent to a
+         * 256-bit key, so that's as good an initial size estimate as any
+         */
+        try (InputStream passPhraseStream = passPhraseUrl.openStream();
+                ByteArrayOutputStream buf = new ByteArrayOutputStream(40)) {
+            Streams.pipeAll(passPhraseStream, buf);
+            privateKeyPassPhrase = US_ASCII.decode(ByteBuffer.wrap(buf.toByteArray())).array();
+        } catch (IOException ex) {
+            log.error("failed to acquire private key pass phrase from {}: {}",
+                    PRIVATE_KEY_PASSPHRASE_LOCATION, ex.toString());
+            throw new UncheckedIOException(ex);
+        }
     }
 
     @Override
