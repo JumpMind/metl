@@ -43,8 +43,10 @@ import org.junit.rules.ExpectedException;
 
 public class PgpEncryptTest extends MetlTestSupport {
     /*
-     * MUST regenerate src/test/resources/ciphertext.bin and
-     * src/test/resources/ciphertext.asc.txt if either this value or
+     * MUST regenerate src/test/resources/ciphertext.bin,
+     * src/test/resources/ciphertext.asc.txt,
+     * src/test/resources/ciphertext_uncompressed.bin and
+     * src/test/resources/ciphertext_no-compression.bin if either this value or
      * src/test/resources/privkey.asc.txt is modified!
      */
     static final String TESTING_PLAINTEXT = "The quick brown fox jumps over the lazy dog.";
@@ -269,6 +271,76 @@ public class PgpEncryptTest extends MetlTestSupport {
         assertFalse("callback (output) payload should NOT equal input payload",
                 Arrays.equals(inputPayload, outputPayload));
         assertTrue("callback (output) payload SHOULD be ASCII-armored",
+                new String(outputPayload, US_ASCII).startsWith("-----BEGIN PGP MESSAGE-----"));
+        assertArrayEquals(new String[0], callbackImpl.targetStepIds);
+    }
+
+    @Test
+    public void handle_encryptionWithCompressionAlgorithmUncompressed() {
+        PgpEncrypt runtime = createPgpEncryptWithTestKeyAndSettings(COMPRESSION_ALGORITHM,
+                CompressionAlgorithm.UNCOMPRESSED.toString());
+        byte[] inputPayload = TESTING_PLAINTEXT.getBytes(UTF_8);
+        BinaryMessage message = new BinaryMessage("test", inputPayload);
+        message.getHeader().put("UnitTest", "test");
+        ISendMessageCallback callback = new NoOpSendMessageCallback();
+
+        runtime.start();
+        runtime.handle(message, callback, false);
+
+        NoOpSendMessageCallback callbackImpl = (NoOpSendMessageCallback) callback;
+        assertEquals("sendBinaryMessage", callbackImpl.invokedMethodName);
+        assertEquals(message.getHeader(), callbackImpl.messageHeaders);
+        byte[] outputPayload = (byte[]) callbackImpl.payload;
+        assertFalse("callback (output) payload should NOT equal input payload",
+                Arrays.equals(inputPayload, outputPayload));
+        assertFalse("callback (output) payload should NOT be ASCII-armored",
+                new String(outputPayload, US_ASCII).startsWith("-----BEGIN PGP MESSAGE-----"));
+        assertArrayEquals(new String[0], callbackImpl.targetStepIds);
+    }
+
+    @Test
+    public void handle_encryptionWithCompressionLevelNoCompression() {
+        PgpEncrypt runtime = createPgpEncryptWithTestKeyAndSettings(COMPRESSION_LEVEL,
+                CompressionLevel.NO_COMPRESSION.toString());
+        byte[] inputPayload = TESTING_PLAINTEXT.getBytes(UTF_8);
+        BinaryMessage message = new BinaryMessage("test", inputPayload);
+        message.getHeader().put("UnitTest", "test");
+        ISendMessageCallback callback = new NoOpSendMessageCallback();
+
+        runtime.start();
+        runtime.handle(message, callback, false);
+
+        NoOpSendMessageCallback callbackImpl = (NoOpSendMessageCallback) callback;
+        assertEquals("sendBinaryMessage", callbackImpl.invokedMethodName);
+        assertEquals(message.getHeader(), callbackImpl.messageHeaders);
+        byte[] outputPayload = (byte[]) callbackImpl.payload;
+        assertFalse("callback (output) payload should NOT equal input payload",
+                Arrays.equals(inputPayload, outputPayload));
+        assertFalse("callback (output) payload should NOT be ASCII-armored",
+                new String(outputPayload, US_ASCII).startsWith("-----BEGIN PGP MESSAGE-----"));
+        assertArrayEquals(new String[0], callbackImpl.targetStepIds);
+    }
+
+    @Test
+    public void handle_encryptionWithUncompressedNoCompression() {
+        PgpEncrypt runtime = createPgpEncryptWithTestKeyAndSettings(COMPRESSION_ALGORITHM,
+                CompressionAlgorithm.UNCOMPRESSED.toString(), COMPRESSION_LEVEL,
+                CompressionLevel.NO_COMPRESSION.toString());
+        byte[] inputPayload = TESTING_PLAINTEXT.getBytes(UTF_8);
+        BinaryMessage message = new BinaryMessage("test", inputPayload);
+        message.getHeader().put("UnitTest", "test");
+        ISendMessageCallback callback = new NoOpSendMessageCallback();
+
+        runtime.start();
+        runtime.handle(message, callback, false);
+
+        NoOpSendMessageCallback callbackImpl = (NoOpSendMessageCallback) callback;
+        assertEquals("sendBinaryMessage", callbackImpl.invokedMethodName);
+        assertEquals(message.getHeader(), callbackImpl.messageHeaders);
+        byte[] outputPayload = (byte[]) callbackImpl.payload;
+        assertFalse("callback (output) payload should NOT equal input payload",
+                Arrays.equals(inputPayload, outputPayload));
+        assertFalse("callback (output) payload should NOT be ASCII-armored",
                 new String(outputPayload, US_ASCII).startsWith("-----BEGIN PGP MESSAGE-----"));
         assertArrayEquals(new String[0], callbackImpl.targetStepIds);
     }

@@ -34,9 +34,11 @@ public class PgpDecryptTest extends MetlTestSupport {
      * src/test/resources/sig-privkey.asc.txt
      * 
      * if a new key pair is generated for testing, then -- in addition to
-     * replacing the pub/priv files -- the src/test/resources/ciphertext.bin and
-     * src/test/resources/ciphertext.asc.txt files MUST be regenerated (see
-     * PgpEncryptTest#TESTING_PLAINTEXT)
+     * replacing the pub/priv files -- the src/test/resources/ciphertext.bin,
+     * src/test/resources/ciphertext.asc.txt,
+     * src/test/resources/ciphertext_uncompressed.bin and
+     * src/test/resources/ciphertext_no-compression.bin files MUST be
+     * regenerated (see PgpEncryptTest#TESTING_PLAINTEXT)
      */
     private static final String TESTING_PASSPHRASE_LOCATION = "privkey-pass-phrase.txt";
 
@@ -157,6 +159,81 @@ public class PgpDecryptTest extends MetlTestSupport {
     public void handle_binaryMessageFromNonDefaultEncryptionSettings() {
         PgpDecrypt runtime = createPgpDecryptWithTestKeyAndSettings();
         byte[] inputPayload = readResourceData("ciphertext.asc.txt");
+        BinaryMessage message = new BinaryMessage("test", inputPayload);
+        message.getHeader().put("UnitTest", "test");
+        ISendMessageCallback callback = new NoOpSendMessageCallback();
+
+        runtime.start();
+        runtime.handle(message, callback, false);
+
+        NoOpSendMessageCallback callbackImpl = (NoOpSendMessageCallback) callback;
+        assertEquals("sendBinaryMessage", callbackImpl.invokedMethodName);
+        assertEquals(message.getHeader(), callbackImpl.messageHeaders);
+        byte[] outputPayload = (byte[]) callbackImpl.payload;
+        assertFalse("callback (output) payload should NOT equal input payload",
+                Arrays.equals(inputPayload, outputPayload));
+        assertEquals(PgpEncryptTest.TESTING_PLAINTEXT, new String(outputPayload, UTF_8));
+        assertArrayEquals(new String[0], callbackImpl.targetStepIds);
+    }
+
+    /*
+     * contrast with
+     * PgpEncryptTest#handle_encryptionWithCompressionAlgorithmUncompressed()
+     */
+    @Test
+    public void handle_binaryMessageUncompressed() {
+        PgpDecrypt runtime = createPgpDecryptWithTestKeyAndSettings();
+        byte[] inputPayload = readResourceData("ciphertext_uncompressed.bin");
+        BinaryMessage message = new BinaryMessage("test", inputPayload);
+        message.getHeader().put("UnitTest", "test");
+        ISendMessageCallback callback = new NoOpSendMessageCallback();
+
+        runtime.start();
+        runtime.handle(message, callback, false);
+
+        NoOpSendMessageCallback callbackImpl = (NoOpSendMessageCallback) callback;
+        assertEquals("sendBinaryMessage", callbackImpl.invokedMethodName);
+        assertEquals(message.getHeader(), callbackImpl.messageHeaders);
+        byte[] outputPayload = (byte[]) callbackImpl.payload;
+        assertFalse("callback (output) payload should NOT equal input payload",
+                Arrays.equals(inputPayload, outputPayload));
+        assertEquals(PgpEncryptTest.TESTING_PLAINTEXT, new String(outputPayload, UTF_8));
+        assertArrayEquals(new String[0], callbackImpl.targetStepIds);
+    }
+
+    /*
+     * contrast with
+     * PgpEncryptTest#handle_encryptionWithCompressionLevelNoCompression()
+     */
+    @Test
+    public void handle_binaryMessageNoCompression() {
+        PgpDecrypt runtime = createPgpDecryptWithTestKeyAndSettings();
+        byte[] inputPayload = readResourceData("ciphertext_no-compression.bin");
+        BinaryMessage message = new BinaryMessage("test", inputPayload);
+        message.getHeader().put("UnitTest", "test");
+        ISendMessageCallback callback = new NoOpSendMessageCallback();
+
+        runtime.start();
+        runtime.handle(message, callback, false);
+
+        NoOpSendMessageCallback callbackImpl = (NoOpSendMessageCallback) callback;
+        assertEquals("sendBinaryMessage", callbackImpl.invokedMethodName);
+        assertEquals(message.getHeader(), callbackImpl.messageHeaders);
+        byte[] outputPayload = (byte[]) callbackImpl.payload;
+        assertFalse("callback (output) payload should NOT equal input payload",
+                Arrays.equals(inputPayload, outputPayload));
+        assertEquals(PgpEncryptTest.TESTING_PLAINTEXT, new String(outputPayload, UTF_8));
+        assertArrayEquals(new String[0], callbackImpl.targetStepIds);
+    }
+
+    /*
+     * contrast with
+     * PgpEncryptTest#handle_encryptionWithUncompressedNoCompression()
+     */
+    @Test
+    public void handle_binaryMessageUncompressedNoCompression() {
+        PgpDecrypt runtime = createPgpDecryptWithTestKeyAndSettings();
+        byte[] inputPayload = readResourceData("ciphertext_uncompressed_no-compression.bin");
         BinaryMessage message = new BinaryMessage("test", inputPayload);
         message.getHeader().put("UnitTest", "test");
         ISendMessageCallback callback = new NoOpSendMessageCallback();
