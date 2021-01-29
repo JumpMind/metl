@@ -23,5 +23,8 @@
 <ui>
     <component-ui id="PGP Encrypt" componentId="PGP Encrypt">
         <iconImage>org/jumpmind/metl/core/runtime/component/metl-pgp-encrypt-48x48-color.png</iconImage>
-    </component-ui> 
+    </component-ui>
+    <component-ui id="PGP Decrypt" componentId="PGP Decrypt">
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-pgp-decrypt-48x48-color.png</iconImage>
+    </component-ui>
 </ui>
