@@ -47,7 +47,7 @@ dependencies {
     compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion"  
     compile group: 'net.sf.saxon', name: 'saxon', version: '9.1.0.8'
     compile "com.jcraft:jsch:0.1.54"
-	//compile "org.bouncycastle:bcprov-jdk15on:1.61"
+    //compile "org.bouncycastle:bcprov-jdk15on:1.61"
     compile "oauth.signpost:oauth-signpost:1.2.1.2"    
     compile "org.apache.ant:ant:$antVersion"
     compile "javax.jms:javax.jms-api:2.0.1"    
@@ -69,17 +69,22 @@ dependencies {
         exclude group: 'xerces'
     }
     compile "org.jgrapht:jgrapht-core:1.0.1"
-	compile "org.apache.kafka:kafka-clients:$apacheKafkaVersion"
-//    compile (group: 'software.amazon.awssdk', name: 'bom', version: '2.15.40') {
-//		exclude group: 'org.apache.httpcomponents'
-//	}
-    compile (group: 'software.amazon.awssdk', name: 'sqs', version: '2.15.40') {
-		exclude group: 'com.fasterxml.jackson.core'
-	}
+    compile "org.apache.kafka:kafka-clients:$apacheKafkaVersion"
     testCompile "org.mockito:mockito-all:$mockitoVersion"
     testCompile "org.powermock:powermock-api-mockito:$powerMockVersion"
     testCompile "org.powermock:powermock-module-junit4:$powerMockVersion"    
     testCompile "xmlunit:xmlunit:$xmlunitVersion"
+
+    /* TODO: AWS SDK dependencies in resource-core instead? */
+    compile "com.amazonaws:aws-encryption-sdk-java:${awsEncryptionSdkVersion}"
+    /* required by aws-encryption-sdk-java: */
+    compile "com.amazonaws:aws-java-sdk-core:${awsSdkVersion1}"
+    compile "com.amazonaws:aws-java-sdk-kms:${awsSdkVersion1}"
+
+    compile "software.amazon.awssdk:s3:${awsSdkVersion2}"
+    compile ("software.amazon.awssdk:sqs:${awsSdkVersion2}") {
+        exclude group: 'com.fasterxml.jackson.core'
+    }
 }
 
 clean.doFirst {

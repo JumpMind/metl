@@ -576,4 +576,27 @@
             </setting>
         </settings>
     </resource>
+    <resource id='S3ClientResource' resourceCategory='streamable'>
+        <name>S3 Client</name>
+        <className>org.jumpmind.metl.core.runtime.resource.S3ClientResource</className>
+        <settings>
+            <!-- no default; delegate to SDK when not explicitly set -->
+            <setting id='aws.region' required='false' type='choice'>
+                <name>Region</name>
+                <choices>
+                    <choice>us-west-1</choice>
+                    <choice>us-west-2</choice>
+                    <choice>us-east-1</choice>
+                    <choice>us-east-2</choice>
+                    <choice>us-iso-east-1</choice>
+                    <!--
+                    <choice>us-isob-east-1</choice>
+                    <choice>us-gov-east-1</choice>
+                    <choice>us-gov-west-1</choice>
+                    <choice>aws-us-gov-global</choice>
+                    -->
+                </choices>
+            </setting>
+        </settings>
+    </resource>
 </definitions>
