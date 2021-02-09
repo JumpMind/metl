@@ -79,6 +79,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.HandlerMapping;
@@ -135,8 +136,12 @@ public class ExecutionApi {
     @ResponseBody
     public final ExecutionResults invoke(@ApiParam(value = "The name of the agent to use") @PathVariable("agentName") String agentName,
             @ApiParam(value = "The name of the flow deployment to invoke") @PathVariable("deploymentName") String deploymentName,
+            @ApiParam(value = "Wether to start the flow asynchronously and poll for status") @RequestParam(required = false) Boolean async,            
             HttpServletRequest req) {
-        return callFlow(agentName, deploymentName, null, req);
+    	if (async == null) {
+    		async=false;
+    	}    	    	
+        return callFlow(agentName, deploymentName, null, req, async);
     }
 
     @ApiOperation(
@@ -147,10 +152,25 @@ public class ExecutionApi {
     public final ExecutionResults invoke(@ApiParam(value = "The name of the agent to use") @PathVariable("agentName") String agentName,
             @ApiParam(value = "The name of the flow deployment to invoke") @PathVariable("deploymentName") String deploymentName,
             @ApiParam(value = "The version of the deployed flow to invoke") @PathVariable("versionName") String versionName,
-            HttpServletRequest req) {
-        return callFlow(agentName, deploymentName, versionName, req);
+            @ApiParam(value = "Wether to start the flow asynchronously and poll for status") @RequestParam(required = false) Boolean async,            
+            HttpServletRequest req) {    	
+    	if (async == null) {
+    		async=false;
+    	}    	
+        return callFlow(agentName, deploymentName, versionName, req, async);
     }
 
+    @ApiOperation(
+            value = "Check the status of a flow that has been invoked.  This is the way a non-webservice enabled flow that has been invoked asynchronously can have status checked")
+    @RequestMapping(value = "/executions/{executionId}/status", method = RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public final ExecutionResults status(@ApiParam(value = "The execution Id of the flow on which to check status") @PathVariable("executionId") String executionId,
+            HttpServletRequest req) {    	
+        return checkStatus(executionId);
+    }
+
+    
     @ApiIgnore
     @RequestMapping(value = WS + "/**", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
@@ -438,7 +458,7 @@ public class ExecutionApi {
         return userId;
     }
 
-    protected final ExecutionResults callFlow(String agentName, String deploymentName, String versionName, HttpServletRequest req) {
+    protected final ExecutionResults callFlow(String agentName, String deploymentName, String versionName, HttpServletRequest req, Boolean async) {
         agentName = decode(agentName);
         deploymentName = decode(deploymentName);
         Set<Agent> agents = agentManager.getAvailableAgents();
@@ -470,7 +490,7 @@ public class ExecutionApi {
                                 if (!done) {
                                     AppUtils.sleep(50);
                                 }
-                            } while (!done);
+                            } while (!done && !async);
                             break;
                         }
                     }
@@ -479,25 +499,15 @@ public class ExecutionApi {
         }
 
         if (execution != null) {
-            ExecutionResults result = new ExecutionResults(execution.getId(), execution.getStatus(), execution.getStartTime(),
-                    execution.getEndTime());
-            if (execution.getExecutionStatus() == ExecutionStatus.ERROR) {
-                List<ExecutionStep> steps = executionService.findExecutionSteps(execution.getId());
-                for (ExecutionStep executionStep : steps) {
-                    if (executionStep.getExecutionStatus() == ExecutionStatus.ERROR) {
-                        List<ExecutionStepLog> logs = executionService.findExecutionStepLogsInError(executionStep.getId());
-                        for (ExecutionStepLog executionStepLog : logs) {
-                            if (executionStepLog.getLogLevel() == LogLevel.ERROR) {
-                                result.setMessage(executionStepLog.getLogText());
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                throw new FailureException(result);
+            ExecutionResults result = checkStatus(execution.getId());
+            if (execution.getExecutionStatus() == ExecutionStatus.ERROR)  {
+            	//keep this the way it was for backwards compatibility
+            	//although i don't like an http error in this circumstance
+            	//because the flow was successfully kicked off, but failed
+            	throw new FailureException(result);
+            } else {
+            	return result;
             }
-            return result;
         } else {
             String msg = "Unexpected error";
             if (!foundAgent) {
@@ -511,6 +521,31 @@ public class ExecutionApi {
         }
     }
 
+    protected ExecutionResults checkStatus(String executionId) {
+        Execution execution = executionService.findExecution(executionId);
+        if (execution != null) {
+        	ExecutionResults result = new ExecutionResults(execution.getId(), execution.getStatus(), execution.getStartTime(),
+                execution.getEndTime());
+            if (execution.getExecutionStatus() == ExecutionStatus.ERROR) {
+                List<ExecutionStep> steps = executionService.findExecutionSteps(execution.getId());
+                for (ExecutionStep executionStep : steps) {
+                    if (executionStep.getExecutionStatus() == ExecutionStatus.ERROR) {
+                        List<ExecutionStepLog> logs = executionService.findExecutionStepLogsInError(executionStep.getId());
+                        for (ExecutionStepLog executionStepLog : logs) {
+                            if (executionStepLog.getLogLevel() == LogLevel.ERROR) {
+                                result.setMessage(executionStepLog.getLogText());
+                                break;
+                            }
+                        }
+                    }
+                }
+            }        	
+        	return result;
+        } else {
+        	throw new ExecutionNotFoundException(String.format("An execution with id %s was not found", executionId));
+        }
+    }
+    
     protected String decode(String value) {
         try {
             return URLDecoder.decode(value, "UTF-8");
