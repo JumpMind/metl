@@ -53,7 +53,7 @@ import com.amazonaws.encryptionsdk.kms.KmsMasterKeyProvider;
  *      encryption with KMS managed keys (CSE-KMS)</a>
  */
 public final class ClientSideCrypto {
-    public static class Settings {
+    public static final class Settings {
         public static final String ENABLED = "aws.crypto.cse.enabled";
 
         public static final String KMS_CMK_SPEC = "aws.kms.cmk.spec";
@@ -62,8 +62,8 @@ public final class ClientSideCrypto {
 
         public static final String RESTRICT_MODE = "aws.crypto.restrict.mode";
 
-        private Settings() {
-            /* never instantiated */
+        Settings() {
+            throw new UnsupportedOperationException("do not instantiate");
         }
     }
 

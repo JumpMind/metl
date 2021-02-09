@@ -1,62 +1,123 @@
 package org.jumpmind.metl.core.runtime.resource.aws;
 
-import java.io.InputStream;
-import java.util.Map;
+import java.io.File;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
 
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 
 import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.services.s3.model.DeleteObjectResponse;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
 public interface S3BucketOperations extends IDirectory {
-    /* S3 PutObject */
-
-    /* use the future returned here to wait for the response to be ready */
-    CompletableFuture<PutObjectResponse> putObject(String key, InputStream objectSource);
-
-    /* use the future returned here to wait for the response to be ready */
-    CompletableFuture<PutObjectResponse> putObject(String key, InputStream objectSource,
-            Map<String, String> suppliedAad);
-
-    /*
-     * use the future returned here to process the ready response (either
-     * success or failure)
+    /**
+     * Uploads an object to an S3 bucket.
+     * 
+     * @param objectKey
+     *            the S3 object key
+     * @param objectSource
+     *            the file representing the object to be uploaded
+     * @return the future that will indicate when the {@link PutObjectResponse}
+     *         is ready to be handled
      */
-    CompletableFuture<PutObjectResponse> putObject(String key, InputStream objectSource,
-            BiConsumer<? super PutObjectResponse, ? super Throwable> whenCompleteAction);
+    CompletableFuture<PutObjectResponse> putObject(String objectKey, File objectSource);
 
-    /*
-     * use the future returned here to process the ready response (either
-     * success or failure)
+    /**
+     * Downloads an object from an S3 bucket.
+     * 
+     * @param objectKey
+     *            the S3 object key
+     * @return the future that will indicate when the {@link GetObjectResponse}
+     *         is ready to be handled
      */
-    CompletableFuture<PutObjectResponse> putObject(String key, InputStream objectSource,
-            BiConsumer<? super PutObjectResponse, ? super Throwable> whenCompleteAction,
-            Map<String, String> suppliedAad);
+    CompletableFuture<ResponseBytes<GetObjectResponse>> getObject(String objectKey);
 
-    /* S3 GetObject */
-
-    /* use the future returned here to wait for the response to be ready */
-    CompletableFuture<ResponseBytes<GetObjectResponse>> getObject(String key);
-
-    /* use the future returned here to wait for the response to be ready */
-    CompletableFuture<ResponseBytes<GetObjectResponse>> getObject(String key,
-            Map<String, String> suppliedAad);
-
-    /*
-     * use the future returned here to process the ready response (either
-     * success or failure)
+    /**
+     * Downloads an object from an S3 bucket.
+     * 
+     * @param objectKey
+     *            the S3 object key
+     * @param objectSink
+     *            where (to which file) the object will be downloaded
+     * @return the future that will indicate when the {@link GetObjectResponse}
+     *         is ready to be handled
      */
-    CompletableFuture<GetObjectResponse> getObject(String key,
-            BiConsumer<? super GetObjectResponse, ? super Throwable> whenCompleteAction);
+    CompletableFuture<GetObjectResponse> getObject(String objectKey, File objectSink);
 
-    /*
-     * use the future returned here to process the ready response (either
-     * success or failure)
+    /**
+     * Deletes an object from an S3 bucket.
+     * 
+     * @param objectKey
+     *            the S3 object key
+     * @return the future that will indicate when the
+     *         {@link DeleteObjectResponse} is ready to be handled
      */
-    CompletableFuture<GetObjectResponse> getObject(String key,
-            BiConsumer<? super GetObjectResponse, ? super Throwable> whenCompleteAction,
-            Map<String, String> suppliedAad);
+    CompletableFuture<DeleteObjectResponse> deleteObject(String objectKey);
+
+    /**
+     * Returns metadata for all objects contained within an S3 bucket.
+     * 
+     * @return the future that will indicate when the
+     *         {@link ListObjectsV2Response} is ready to be handled
+     */
+    CompletableFuture<ListObjectsV2Response> listObjects();
+
+    /**
+     * Returns metadata for objects contained within an S3 bucket.
+     * 
+     * @param delimiter
+     *            the S3 object key delimiter used to limit the results
+     * @param prefix
+     *            the S3 object key prefix used to limit the results
+     * @return the future that will indicate when the
+     *         {@link ListObjectsV2Response} is ready to be handled
+     * 
+     * @see <a href=
+     *      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-prefixes.html">Organizing
+     *      objects using prefixes</a>
+     */
+    CompletableFuture<ListObjectsV2Response> listObjects(String delimiter, String prefix);
+
+    /**
+     * Returns metadata for objects contained within an S3 bucket.
+     * 
+     * @param delimiter
+     *            the S3 object key delimiter used to limit the results
+     * @param prefix
+     *            the S3 object key prefix used to limit the results
+     * @param maxKeys
+     *            the maximum number of results to return
+     * @return the future that will indicate when the
+     *         {@link ListObjectsV2Response} is ready to be handled
+     * 
+     * @see <a href=
+     *      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-prefixes.html">Organizing
+     *      objects using prefixes</a>
+     */
+    CompletableFuture<ListObjectsV2Response> listObjects(String delimiter, String prefix,
+            Integer maxKeys);
+
+    /**
+     * Returns metadata for objects contained within an S3 bucket.
+     * 
+     * @param delimiter
+     *            the S3 object key delimiter used to limit the results
+     * @param prefix
+     *            the S3 object key prefix used to limit the results
+     * @param maxKeys
+     *            the maximum number of results to return
+     * @param continuationToken
+     *            the continuation token from a prior call to one of the
+     *            <code>listObjects</code> overloads
+     * @return the future that will indicate when the
+     *         {@link ListObjectsV2Response} is ready to be handled
+     * 
+     * @see <a href=
+     *      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-prefixes.html">Organizing
+     *      objects using prefixes</a>
+     */
+    CompletableFuture<ListObjectsV2Response> listObjects(String delimiter, String prefix,
+            Integer maxKeys, String continuationToken);
 }
