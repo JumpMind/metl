@@ -4,10 +4,13 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
 
 import org.jumpmind.metl.core.model.Resource;
@@ -27,6 +30,8 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectResponse;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -34,6 +39,20 @@ import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 public class S3Directory implements S3BucketOperations {
+    public static final class Settings {
+        public static final String LIST_FILES_DELIMITER = "aws.s3.list.files.delimiter";
+
+        public static final String DEFAULT_LIST_FILES_DELIMITER = "/";
+
+        public static final String TRANSFER_WINDOW_SIZE = "aws.s3.transfer.window.size";
+
+        public static final int DEFAULT_TRANSFER_WINDOW_SIZE = 16384;
+
+        Settings() {
+            throw new UnsupportedOperationException("do not instantiate");
+        }
+    }
+
     public static final class ListFilesPartialResult extends RuntimeException {
         private static final long serialVersionUID = 1143701240959684134L;
 
@@ -55,13 +74,6 @@ public class S3Directory implements S3BucketOperations {
 
     private static final Map<String, String> EMPTY_MAP = Collections.emptyMap();
 
-    /*
-     * TODO: Although this conventionally makes S3 ListObjects behave like a
-     * file system directory listing, it assumes that the delimiter will ALWAYS
-     * be "/" (it might not be, and arguably should be configurable).
-     */
-    private static final String LIST_FILES_DELIMITER = "/";
-
     protected final Logger log = LoggerFactory.getLogger(getClass().getName());
 
     private final Region region;
@@ -72,6 +84,10 @@ public class S3Directory implements S3BucketOperations {
     private final ClientSideCrypto crypto;
 
     private final S3AsyncClient s3;
+
+    private final String listFilesDelimiter;
+
+    private final int transferWindowSize;
 
     /**
      * Creates an immutable "bucket view" (i.e. {@link IDirectory}) for an S3
@@ -89,7 +105,8 @@ public class S3Directory implements S3BucketOperations {
      *            how the S3 client acquires IAM authentication credentials
      */
     public S3Directory(final Resource resource, final Region region, final String bucketName,
-            final ClientSideCrypto crypto, final AwsCredentialsProvider credentialsProvider) {
+            final ClientSideCrypto crypto, final AwsCredentialsProvider credentialsProvider,
+            final String listFilesDelimiter, final int transferWindowSize) {
         this.region = region;
         this.bucketName = bucketName;
 
@@ -101,6 +118,19 @@ public class S3Directory implements S3BucketOperations {
 
         s3 = S3AsyncClient.builder().region(this.region).credentialsProvider(credentialsProvider)
                 .build();
+
+        this.listFilesDelimiter = listFilesDelimiter;
+        this.transferWindowSize = transferWindowSize;
+    }
+
+    @Override
+    public Region region() {
+        return region;
+    }
+
+    @Override
+    public String bucketName() {
+        return bucketName;
     }
 
     @Override
@@ -169,6 +199,18 @@ public class S3Directory implements S3BucketOperations {
         return PutObjectRequest.builder().bucket(bucketName).key(objectKey).build();
     }
 
+    /* S3 HeadObject */
+
+    @Override
+    public CompletableFuture<HeadObjectResponse> headObject(final String objectKey) {
+        HeadObjectRequest request = buildHeadObjectRequest(objectKey);
+        return s3.headObject(request);
+    }
+
+    private HeadObjectRequest buildHeadObjectRequest(final String objectKey) {
+        return HeadObjectRequest.builder().bucket(bucketName).key(objectKey).build();
+    }
+
     /* S3 GetObject */
 
     @Override
@@ -228,7 +270,9 @@ public class S3Directory implements S3BucketOperations {
     public boolean delete(final String objectKey, boolean closeClient) {
         boolean completedWithoutError = false;
         try {
-            return completedWithoutError;
+            deleteObject(objectKey).join();
+            completedWithoutError = true;
+            return true;
         } finally {
             if (closeClient) {
                 close(completedWithoutError);
@@ -249,79 +293,90 @@ public class S3Directory implements S3BucketOperations {
     /* S3 ListObjectsV2 */
 
     @Override
-    public List<FileInfo> listFiles(final String... relativePaths) {
-        return listFiles(false, relativePaths);
+    public List<FileInfo> listFiles(final String... prefixes) {
+        return listFiles(false, prefixes);
     }
 
     @Override
-    public List<FileInfo> listFiles(final boolean closeSession, final String... relativePaths) {
-        List<FileInfo> files = new ArrayList<>();
+    public List<FileInfo> listFiles(final boolean closeSession, final String... prefixes) {
+        List<FileInfo> backingFiles = new ArrayList<>();
+        /* need a synchronized view for collation */
+        List<FileInfo> files = Collections.synchronizedList(backingFiles);
+
+        /*
+         * either no prefixes or any normalized-null prefix means "all objects"
+         * 
+         * potential object matches for any NON-null effective prefix are
+         * naturally a subset of "all objects"
+         * 
+         * therefore, if ANY prefix is normalized to null then we'll have fewer
+         * "effective" prefixes, meaning we can make one single ListObjectsV2
+         * request for all objects to avoid unnecessary calls (and, more
+         * importantly, a cartesian result)
+         */
+        List<String> effectivePrefixes = Arrays.stream(prefixes).map(this::normalizePrefix)
+                .filter(Objects::nonNull).collect(Collectors.toList());
+        boolean listAll = prefixes.length == 0 || effectivePrefixes.size() < prefixes.length;
+
+        @SuppressWarnings("rawtypes")
+        CompletableFuture[] batch;
+        if (listAll) {
+            batch = new CompletableFuture[] { listObjects(listFilesDelimiter, null)
+                    .thenAccept(response -> collateWithContinuations(files, response)) };
+
+            if (effectivePrefixes.size() > 0) {
+                log.warn(
+                        "IGNORING prefix(es) {} and returning ALL matches "
+                                + "(at least 1 prefix normalizes to null - i.e. \"all objects\")",
+                        effectivePrefixes);
+            }
+        } else {
+            batch = effectivePrefixes.stream()
+                    .map(prefix -> listObjects(listFilesDelimiter, prefix)
+                            .thenAccept(response -> collateWithContinuations(files, response)))
+                    .toArray(CompletableFuture[]::new);
+        }
 
         boolean completedWithoutError = false;
-        String delimiter = LIST_FILES_DELIMITER;
-        String prefix = null;
         try {
-            if (relativePaths.length == 0) {
-                collateWithContinuations(files, listObjects(delimiter, prefix));
-                completedWithoutError = true;
+            CompletableFuture.allOf(batch).join();
+
+            completedWithoutError = true;
+            /* caller receives non-synchronized List */
+            return backingFiles;
+        } catch (CompletionException ex) {
+            if (files.size() > 0) {
+                throw new ListFilesPartialResult(backingFiles, ex);
             } else {
-                /*
-                 * XXX: This _could_ be made to be "concurrent" but at the
-                 * expense of a great deal of additional complexity for a use
-                 * case that is likely (?) to be very low frequency.
-                 */
-                for (String relativePath : relativePaths) {
-                    prefix = relativePath.endsWith("*")
-                            ? relativePath.substring(0, relativePath.length() - 1)
-                            : relativePath;
-                    if (prefix.isEmpty()) {
-                        prefix = null;
-                    }
-                    collateWithContinuations(files, listObjects(delimiter, prefix));
-                }
-                completedWithoutError = true;
+                throw ex;
             }
         } finally {
             if (closeSession) {
                 close(completedWithoutError);
             }
         }
+    }
 
-        return files;
+    private String normalizePrefix(final String rawPrefix) {
+        String prefix = rawPrefix.trim();
+        if (prefix.endsWith("*")) {
+            prefix = prefix.substring(0, prefix.length() - 1);
+        }
+        return !prefix.isEmpty() ? prefix : null;
     }
 
     private void collateWithContinuations(final List<FileInfo> files,
-            final CompletableFuture<ListObjectsV2Response> futureResponse) {
-        ListObjectsV2Response response = futureResponse.exceptionally(t -> {
-            log.error("S3 ListObjectsV2Request failed: {}", t.toString());
-            return null;
-        }).join();
-        if (response == null) {
-            throw new RuntimeException("S3 ListObjectsV2Request failed");
-        }
+            final ListObjectsV2Response response) {
+        files.addAll(response.commonPrefixes().stream().map(this::commonPrefixToFileInfo)
+                .collect(Collectors.toList()));
+        files.addAll(response.contents().stream().map(this::s3ObjectToFileInfo)
+                .collect(Collectors.toList()));
 
-        s3_continuation: while (response != null) {
-            files.addAll(response.commonPrefixes().stream().map(this::commonPrefixToFileInfo)
-                    .collect(Collectors.toList()));
-            files.addAll(response.contents().stream().map(this::s3ObjectToFileInfo)
-                    .collect(Collectors.toList()));
-            if (response.isTruncated()) {
-                response = listObjects(response.delimiter(), response.prefix(), null,
-                        response.nextContinuationToken()).exceptionally(t -> {
-                            log.warn("S3 ListObjectsV2Request (continuation) failed: {}",
-                                    t.toString());
-                            return null;
-                        }).join();
-                if (response == null) {
-                    if (files.size() > 0) {
-                        throw new ListFilesPartialResult(files);
-                    } else {
-                        throw new RuntimeException("S3 ListObjectsV2Request (continuation) failed");
-                    }
-                }
-            } else {
-                break s3_continuation;
-            }
+        if (response.isTruncated()) {
+            listObjects(response.delimiter(), response.prefix(), null,
+                    response.nextContinuationToken()).thenAccept(
+                            continuedResponse -> collateWithContinuations(files, continuedResponse))
+                            .join();
         }
     }
 
@@ -367,66 +422,93 @@ public class S3Directory implements S3BucketOperations {
     }
 
     @Override
-    public FileInfo listFile(final String relativePath) {
-        return listFile(relativePath, false);
+    public FileInfo listFile(final String objectKey) {
+        return listFile(objectKey, false);
+    }
+
+    /*
+     * XXX: this could be S3 HeadObject instead, but for the sake of consistency
+     * w/r/t SftpDirectory this impl maintains the possibility of returning a
+     * "directory" FileInfo
+     */
+    @Override
+    public FileInfo listFile(final String objectKey, final boolean closeSession) {
+        List<FileInfo> files = listFiles(closeSession, objectKey);
+        /*
+         * if there's an exact match, return it; otherwise return the last
+         * FileInfo matched
+         */
+        return files.stream().filter(fi -> fi.getName().equals(objectKey)).findFirst()
+                .orElse(files.size() != 0 ? files.get(files.size() - 1) : null);
+    }
+
+    /* S3 CopyObject? */
+
+    @Override
+    public void copyFile(final String fromFilePath, final String toFilePath) {
+        copyFile(fromFilePath, toFilePath, false);
     }
 
     @Override
-    public FileInfo listFile(final String relativePath, final boolean closeSession) {
-        throw new UnsupportedOperationException();
-    }
-
-    /* S3 CopyObject */
-
-    @Override
-    public void copyFile(String fromFilePath, String toFilePath) {
-        throw new UnsupportedOperationException();
+    public void copyFile(final String fromFilePath, final String toFilePath,
+            final boolean closeSession) {
+        throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
-    public void copyFile(String fromFilePath, String toFilePath, boolean closeSession) {
-        throw new UnsupportedOperationException();
+    public void copyToDir(final String fromFilePath, final String toDirPath) {
+        copyToDir(fromFilePath, toDirPath, false);
     }
 
     @Override
-    public void copyToDir(String fromFilePath, String toDirPath) {
-        throw new UnsupportedOperationException();
+    public void copyToDir(final String fromFilePath, final String toDirPath,
+            final boolean closeSession) {
+        throw new UnsupportedOperationException("not yet implemented");
+    }
+
+    /* S3 CopyObject,DeleteObject? */
+
+    @Override
+    public void moveFile(final String fromFilePath, final String toFilePath) {
+        moveFile(fromFilePath, toFilePath, false);
     }
 
     @Override
-    public void copyToDir(String fromFilePath, String toDirPath, boolean closeSession) {
-        throw new UnsupportedOperationException();
-    }
-
-    /* S3 CopyObject, DeleteObject */
-
-    @Override
-    public void moveFile(String fromFilePath, String toFilePath) {
-        throw new UnsupportedOperationException();
+    public void moveFile(final String fromFilePath, final String toFilePath,
+            final boolean closeSession) {
+        throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
-    public void moveFile(String fromFilePath, String toFilePath, boolean closeSession) {
-        throw new UnsupportedOperationException();
+    public void moveToDir(final String fromFilePath, final String toDirPath) {
+        moveToDir(fromFilePath, toDirPath, false);
     }
 
     @Override
-    public void moveToDir(String fromFilePath, String toDirPath) {
-        throw new UnsupportedOperationException();
+    public void moveToDir(final String fromFilePath, final String toDirPath,
+            final boolean closeSession) {
+        throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
-    public void moveToDir(String fromFilePath, String toDirPath, boolean closeSession) {
-        throw new UnsupportedOperationException();
+    public boolean renameFile(final String fromFilePath, final String toFilePath) {
+        return renameFile(fromFilePath, toFilePath, false);
     }
 
     @Override
-    public boolean renameFile(String fromFilePath, String toFilePath) {
-        return false;
-    }
-
-    @Override
-    public boolean renameFile(String fromFilePath, String toFilePath, boolean closeSession) {
-        return false;
+    public boolean renameFile(final String fromFilePath, final String toFilePath,
+            final boolean closeSession) {
+        boolean completedWithoutError = false;
+        try {
+            moveFile(fromFilePath, toFilePath);
+            completedWithoutError = true;
+            return true;
+        } catch (Exception ex) {
+            return false;
+        } finally {
+            if (closeSession) {
+                close(completedWithoutError);
+            }
+        }
     }
 }

@@ -56,11 +56,11 @@ public final class ClientSideCrypto {
     public static final class Settings {
         public static final String ENABLED = "aws.crypto.cse.enabled";
 
-        public static final String KMS_CMK_SPEC = "aws.kms.cmk.spec";
+        public static final String KMS_CMK_SPEC = "aws.crypto.cse.kms.cmk.spec";
 
         public static final String DEFAULT_REGION = "aws.crypto.cse.default.region";
 
-        public static final String RESTRICT_MODE = "aws.crypto.restrict.mode";
+        public static final String RESTRICT_MODE = "aws.crypto.cse.restrict.mode";
 
         Settings() {
             throw new UnsupportedOperationException("do not instantiate");

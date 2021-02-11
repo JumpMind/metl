@@ -24,12 +24,6 @@ public class S3 extends AbstractResourceRuntime {
         }
     }
 
-    /**
-     * Name of the setting that identifies whether or not AWS authentication
-     * credentials may be updated asynchronously.
-     */
-    public static final String ASYNC_CREDENTIALS_UPDATE_V2 = "aws.s3.async.credentials.update.enabled";
-
     private final AtomicReference<S3Directory> bucketReference = new AtomicReference<>();
 
     @SuppressWarnings("unchecked")
@@ -58,8 +52,14 @@ public class S3 extends AbstractResourceRuntime {
                 ? createClientSideCrypto(properties, regionId)
                 : null;
 
+        String listFilesDelimiter = properties.get(S3Directory.Settings.LIST_FILES_DELIMITER,
+                S3Directory.Settings.DEFAULT_LIST_FILES_DELIMITER);
+        int transferWindowSize = properties.getInt(S3Directory.Settings.TRANSFER_WINDOW_SIZE,
+                S3Directory.Settings.DEFAULT_TRANSFER_WINDOW_SIZE);
+
         return new S3Directory(getResource(), region, bucketName, crypto,
-                AwsCredentialsProviderChain.of(DefaultCredentialsProvider.builder().build()));
+                AwsCredentialsProviderChain.of(DefaultCredentialsProvider.builder().build()),
+                listFilesDelimiter, transferWindowSize);
     }
 
     private ClientSideCrypto createClientSideCrypto(final TypedProperties properties,

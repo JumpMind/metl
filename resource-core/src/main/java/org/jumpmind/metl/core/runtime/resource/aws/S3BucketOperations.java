@@ -6,12 +6,24 @@ import java.util.concurrent.CompletableFuture;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 
 import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.model.DeleteObjectResponse;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
 public interface S3BucketOperations extends IDirectory {
+    /**
+     * Returns the configured AWS S3 region.
+     */
+    Region region();
+
+    /**
+     * Returns the configured AWS S3 bucket name.
+     */
+    String bucketName();
+
     /**
      * Uploads an object to an S3 bucket.
      * 
@@ -23,6 +35,16 @@ public interface S3BucketOperations extends IDirectory {
      *         is ready to be handled
      */
     CompletableFuture<PutObjectResponse> putObject(String objectKey, File objectSource);
+
+    /**
+     * Returns the metadata for an object in an S3 bucket.
+     * 
+     * @param objectKey
+     *            the S3 object key
+     * @return the future that will indicate when the {@link HeadObjectResponse}
+     *         is ready to be handled
+     */
+    CompletableFuture<HeadObjectResponse> headObject(String objectKey);
 
     /**
      * Downloads an object from an S3 bucket.
