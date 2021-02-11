@@ -466,7 +466,6 @@ public class ClientSideCryptoTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void encryptionOnlyCannotDecryptData() {
-        /* there's no CMK, and estimating requires knowing the key algorithm */
         ClientSideCrypto crypto = ClientSideCrypto.forEncryptionOnly(
                 "arn:aws:kms:us-east-2:000000000000:key/7e92cdbb-5281-43ce-a8ea-b30957777b3d");
 
@@ -475,7 +474,6 @@ public class ClientSideCryptoTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void encryptionOnlyCannotCreateDecryptingOutputStream() {
-        /* there's no CMK, and estimating requires knowing the key algorithm */
         ClientSideCrypto crypto = ClientSideCrypto.forEncryptionOnly(
                 "arn:aws:kms:us-east-2:000000000000:key/7e92cdbb-5281-43ce-a8ea-b30957777b3d");
 
@@ -484,7 +482,6 @@ public class ClientSideCryptoTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void encryptionOnlyCannotCreateDecryptingInputStream() {
-        /* there's no CMK, and estimating requires knowing the key algorithm */
         ClientSideCrypto crypto = ClientSideCrypto.forEncryptionOnly(
                 "arn:aws:kms:us-east-2:000000000000:key/7e92cdbb-5281-43ce-a8ea-b30957777b3d");
 
