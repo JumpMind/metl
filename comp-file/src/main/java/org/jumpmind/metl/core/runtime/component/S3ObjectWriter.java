@@ -1,6 +1,8 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -36,16 +38,22 @@ public class S3ObjectWriter extends AbstractFileWriter {
         if (sourceFileName != null) {
             File file = new File(sourceFileName);
             String objectKey = getFileName(inputMessage);
-            bucket.putObject(objectKey, file).whenCompleteAsync(
-                    (response, throwable) -> logCompletion(file, objectKey, response, throwable))
-                    .join();
+
+            /*
+             * if the PutObject operation itself fails, a CompletionException
+             * wrapping the cause is thrown; if the source file cannot be
+             * deleted on successful completion of PutObject, the reason is
+             * logged at WARN level
+             */
+            bucket.putObject(objectKey, file).whenCompleteAsync((response,
+                    throwable) -> onPutObjectComplete(file, objectKey, response, throwable)).join();
         } else {
             log.debug("ignoring {}; {} header not defined or null", inputMessage,
                     HEADER_SOURCE_FILE);
         }
     }
 
-    private void logCompletion(final File sourceFile, final String objectKey,
+    private void onPutObjectComplete(final File sourceFile, final String objectKey,
             final PutObjectResponse response, final Throwable throwable) {
         String operationFullDescription = String.format("PutObject %s -> [%s]%s/%s", sourceFile,
                 bucket.region(), bucket.bucketName(), objectKey);
@@ -54,6 +62,12 @@ public class S3ObjectWriter extends AbstractFileWriter {
                 log.info("{}: HTTP {} {}", operationFullDescription,
                         response.sdkHttpResponse().statusCode(),
                         response.sdkHttpResponse().statusText().orElse("(reason not provided)"));
+            }
+
+            try {
+                Files.delete(sourceFile.toPath());
+            } catch (IOException ex) {
+                log.warn("unable to delete source file: {}", ex.toString());
             }
         } else {
             log.error("{}: {}", operationFullDescription, throwable.toString());
