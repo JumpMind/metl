@@ -358,4 +358,30 @@
             </setting>
         </settings>
     </component>
+    <component category='WRITER' id='S3 Object Writer' resourceCategory='streamable'>
+        <name>S3 Object Writer</name>
+        <className>org.jumpmind.metl.core.runtime.component.S3ObjectWriter</className>
+        <keywords>files,aws,s3</keywords>
+        <description></description>
+        <settings>
+            <setting id='relative.path' required='false' type='text'>
+                <name>Path and File</name>
+            </setting>
+            <setting id='must.exist' required='true' type='boolean'>
+                <name>Must Exist</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='append' required='true' type='boolean'>
+                <name>Append</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='get.file.name.from.message' required='false' type='boolean'>
+                <name>Get File Name (Object Key) From Message</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='filename.property' required='false' type='text'>
+                <name>Param Name For Msg Based File Name (Object Key)</name>
+            </setting>
+        </settings>
+    </component>
 </definitions>

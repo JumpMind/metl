@@ -576,4 +576,71 @@
             </setting>
         </settings>
     </resource>
+    <resource id='AWS S3' resourceCategory='streamable'>
+        <name>AWS S3</name>
+        <className>org.jumpmind.metl.core.runtime.resource.aws.S3</className>
+        <settings>
+            <!-- no default; delegate to SDK when not explicitly set -->
+            <setting id='aws.s3.region' required='false' type='choice'>
+                <name>Region (leave unselected to accept S3 default region)</name>
+                <choices>
+                    <choice>us-west-1</choice>
+                    <choice>us-west-2</choice>
+                    <choice>us-east-1</choice>
+                    <choice>us-east-2</choice>
+                    <choice>us-iso-east-1</choice>
+                    <!--
+                    <choice>us-isob-east-1</choice>
+                    <choice>us-gov-east-1</choice>
+                    <choice>us-gov-west-1</choice>
+                    <choice>aws-us-gov-global</choice>
+                    -->
+                </choices>
+            </setting>
+            <setting id='aws.s3.bucket.name' required='true' type='text'>
+                <name>S3 Bucket Name</name>
+            </setting>
+            <!--
+            <setting id='aws.s3.list.files.delimiter' required='false' type='text'>
+                <name>List Files Delimiter</name>
+                <defaultValue>/</defaultValue>
+            </setting>
+            <setting id='aws.s3.transfer.window.size' required='false' type='integer'>
+                <name>Streaming Transfer Window Size (bytes)</name>
+                <defaultValue>16384</defaultValue>
+            </setting>
+            <setting id='aws.crypto.cse.enabled' required='false' type='boolean'>
+                <name>Use CSE (client-side encryption)?</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='aws.crypto.cse.restrict.mode' required='true' type='choice'>
+                <name>AWS CSE mode</name>
+                <defaultValue>ENCRYPT_DECRYPT</defaultValue>
+                <choices>
+                    <choice>ENCRYPT_DECRYPT</choice>
+                    <choice>ENCRYPT_ONLY</choice>
+                    <choice>DECRYPT_ONLY</choice>
+                    <choice>DECRYPT_ONLY_DISCOVERY</choice>
+                </choices>
+            </setting>
+            <setting id='aws.crypto.cse.kms.cmk.spec' required='true' type='text'>
+                <name>AWS CSE KMS CMK specification (&quot;arn:...&quot; or Key ID or &quot;alias/...&quot;)</name>
+            </setting>
+            <setting id='aws.s3.region.as.crypto.default' required='false' type='boolean'>
+                <name>Use S3 Region as CSE default region?</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='aws.crypto.cse.default.region' required='false' type='choice'>
+                <name>CSE default region</name>
+                <choices>
+                    <choice>us-west-1</choice>
+                    <choice>us-west-2</choice>
+                    <choice>us-east-1</choice>
+                    <choice>us-east-2</choice>
+                    <choice>us-iso-east-1</choice>
+                </choices>
+            </setting>
+            -->
+        </settings>
+    </resource>
 </definitions>
