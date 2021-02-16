@@ -19,7 +19,6 @@ import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.core.async.AsyncResponseTransformer;
@@ -80,7 +79,6 @@ public class S3Directory implements S3BucketOperations {
 
     private final String bucketName;
 
-    @SuppressWarnings("unused")
     private final ClientSideCrypto crypto;
 
     private final S3AsyncClient s3;
@@ -105,8 +103,8 @@ public class S3Directory implements S3BucketOperations {
      *            how the S3 client acquires IAM authentication credentials
      */
     public S3Directory(final Resource resource, final Region region, final String bucketName,
-            final ClientSideCrypto crypto, final AwsCredentialsProvider credentialsProvider,
-            final String listFilesDelimiter, final int transferWindowSize) {
+            final S3AsyncClient s3, final ClientSideCrypto crypto, final String listFilesDelimiter,
+            final int transferWindowSize) {
         this.region = region;
         this.bucketName = bucketName;
 
@@ -116,8 +114,7 @@ public class S3Directory implements S3BucketOperations {
         }
         this.crypto = crypto;
 
-        s3 = S3AsyncClient.builder().region(this.region).credentialsProvider(credentialsProvider)
-                .build();
+        this.s3 = s3;
 
         this.listFilesDelimiter = listFilesDelimiter;
         this.transferWindowSize = transferWindowSize;

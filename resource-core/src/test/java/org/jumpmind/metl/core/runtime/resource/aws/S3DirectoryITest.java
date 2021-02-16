@@ -28,6 +28,7 @@ import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.SdkSystemSetting;
 import software.amazon.awssdk.http.SdkHttpResponse;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.CreateBucketResponse;
@@ -138,7 +139,8 @@ public class S3DirectoryITest {
     }
 
     private S3Directory s3Directory() {
-        return new S3Directory(null, null, BUCKET_NAME, null, awsCredentialsProvider(),
+        return new S3Directory(null, null, BUCKET_NAME,
+                S3AsyncClient.builder().credentialsProvider(awsCredentialsProvider()).build(), null,
                 S3Directory.Settings.DEFAULT_LIST_FILES_DELIMITER,
                 S3Directory.Settings.DEFAULT_TRANSFER_WINDOW_SIZE);
     }

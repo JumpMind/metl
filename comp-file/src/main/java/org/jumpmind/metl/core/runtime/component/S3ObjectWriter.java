@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
+import org.jumpmind.metl.core.runtime.ContentMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
@@ -14,14 +15,14 @@ import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 public class S3ObjectWriter extends AbstractFileWriter {
     public static final String HEADER_SOURCE_FILE = "S3ObjectSourceFileName";
 
-    private S3BucketOperations bucket;
+    private S3BucketOperations bucketOps;
 
     @Override
     public void start() {
         init();
 
-        bucket = (S3BucketOperations) getResourceReference();
-        if (bucket == null) {
+        bucketOps = (S3BucketOperations) getResourceReference();
+        if (bucketOps == null) {
             throw new IllegalStateException("S3 resource has not been configured.");
         }
     }
@@ -34,29 +35,33 @@ public class S3ObjectWriter extends AbstractFileWriter {
     @Override
     public void handle(final Message inputMessage, final ISendMessageCallback callback,
             final boolean unitOfWorkBoundaryReached) {
-        String sourceFileName = inputMessage.getHeader().getAsStrings().get(HEADER_SOURCE_FILE);
-        if (sourceFileName != null) {
-            File file = new File(sourceFileName);
-            String objectKey = getFileName(inputMessage);
+        if (inputMessage instanceof ContentMessage<?>) {
+            String sourceFileName = inputMessage.getHeader().getAsStrings().get(HEADER_SOURCE_FILE);
+            if (sourceFileName != null) {
+                File file = new File(sourceFileName);
+                String objectKey = getFileName(inputMessage);
 
-            /*
-             * if the PutObject operation itself fails, a CompletionException
-             * wrapping the cause is thrown; if the source file cannot be
-             * deleted on successful completion of PutObject, the reason is
-             * logged at WARN level
-             */
-            bucket.putObject(objectKey, file).whenCompleteAsync((response,
-                    throwable) -> onPutObjectComplete(file, objectKey, response, throwable)).join();
+                /*
+                 * if the PutObject operation itself fails, a
+                 * CompletionException wrapping the cause is thrown; if the
+                 * source file cannot be deleted on successful completion of
+                 * PutObject, the reason is logged at WARN level
+                 */
+                bucketOps.putObject(objectKey, file).whenCompleteAsync((response,
+                        throwable) -> onPutObjectComplete(file, objectKey, response, throwable))
+                        .join();
+            } else {
+                log.warn("nothing to do; {} header is not defined or null", HEADER_SOURCE_FILE);
+            }
         } else {
-            log.debug("ignoring {}; {} header not defined or null", inputMessage,
-                    HEADER_SOURCE_FILE);
+            log.debug("ignoring {}", inputMessage.getClass().getSimpleName());
         }
     }
 
     private void onPutObjectComplete(final File sourceFile, final String objectKey,
             final PutObjectResponse response, final Throwable throwable) {
         String operationFullDescription = String.format("PutObject %s -> [%s]%s/%s", sourceFile,
-                bucket.region(), bucket.bucketName(), objectKey);
+                bucketOps.region(), bucketOps.bucketName(), objectKey);
         if (response != null) {
             if (log.isInfoEnabled()) {
                 log.info("{}: HTTP {} {}", operationFullDescription,
@@ -85,9 +90,7 @@ public class S3ObjectWriter extends AbstractFileWriter {
 
     @Override
     public void stop() {
-        /* TODO: is this correct w/r/t lifecycle management? */
-        bucket = null;
-        getResourceRuntime().stop();
+        bucketOps = null;
         super.stop();
     }
 }
