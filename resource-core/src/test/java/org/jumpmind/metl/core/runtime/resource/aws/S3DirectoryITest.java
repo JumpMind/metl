@@ -153,7 +153,7 @@ public class S3DirectoryITest {
         assumeTrue("AWS credentials are not present", awsCredentialsArePresent());
 
         String key = "can-put-object-from-file/lorem-ipsum";
-        try (S3BucketOperations bucketOps = s3Directory()) {
+        try (IS3BucketOperations bucketOps = s3Directory()) {
             PutObjectResponse response = bucketOps.putObject(key, testFile()).get(3,
                     TimeUnit.SECONDS);
 
@@ -166,7 +166,7 @@ public class S3DirectoryITest {
         assumeTrue("AWS credentials are not present", awsCredentialsArePresent());
 
         String key = "can-head-object/lorem-ipsum";
-        try (S3BucketOperations bucketOps = s3Directory()) {
+        try (IS3BucketOperations bucketOps = s3Directory()) {
             PutObjectResponse r = bucketOps.putObject(key, testFile()).get(3, TimeUnit.SECONDS);
             assertSdkHttpSuccess(r.sdkHttpResponse());
 
@@ -182,7 +182,7 @@ public class S3DirectoryITest {
         assumeTrue("AWS credentials are not present", awsCredentialsArePresent());
 
         String key = "can-get-object-bytes/lorem-ipsum";
-        try (S3BucketOperations bucketOps = s3Directory()) {
+        try (IS3BucketOperations bucketOps = s3Directory()) {
             PutObjectResponse r = bucketOps.putObject(key, testFile()).get(3, TimeUnit.SECONDS);
             assertSdkHttpSuccess(r.sdkHttpResponse());
 
@@ -201,7 +201,7 @@ public class S3DirectoryITest {
         assumeTrue("AWS credentials are not present", awsCredentialsArePresent());
 
         String key = "can-get-object-to-file/lorem-ipsum";
-        try (S3BucketOperations bucketOps = s3Directory()) {
+        try (IS3BucketOperations bucketOps = s3Directory()) {
             PutObjectResponse r = bucketOps.putObject(key, testFile()).get(3, TimeUnit.SECONDS);
             assertSdkHttpSuccess(r.sdkHttpResponse());
 
@@ -241,7 +241,7 @@ public class S3DirectoryITest {
         assumeTrue("AWS credentials are not present", awsCredentialsArePresent());
 
         String key = "can-delete-object/lorem-ipsum";
-        try (S3BucketOperations bucketOps = s3Directory()) {
+        try (IS3BucketOperations bucketOps = s3Directory()) {
             PutObjectResponse r = bucketOps.putObject(key, testFile()).get(3, TimeUnit.SECONDS);
             assertSdkHttpSuccess(r.sdkHttpResponse());
 
@@ -257,7 +257,7 @@ public class S3DirectoryITest {
 
         String key1 = "can-list-objects/lorem-ipsum-1";
         String key2 = "can-list-objects/lorem-ipsum-2";
-        try (S3BucketOperations bucketOps = s3Directory()) {
+        try (IS3BucketOperations bucketOps = s3Directory()) {
             PutObjectResponse r = bucketOps.putObject(key1, testFile()).get(3, TimeUnit.SECONDS);
             assertSdkHttpSuccess(r.sdkHttpResponse());
             r = bucketOps.putObject(key2, testFile()).get(3, TimeUnit.SECONDS);
@@ -283,7 +283,7 @@ public class S3DirectoryITest {
 
         String key1 = "can-list-objects-with-continuation/lorem-ipsum-1";
         String key2 = "can-list-objects-with-continuation/lorem-ipsum-2";
-        try (S3BucketOperations bucketOps = s3Directory()) {
+        try (IS3BucketOperations bucketOps = s3Directory()) {
             PutObjectResponse r = bucketOps.putObject(key1, testFile()).get(3, TimeUnit.SECONDS);
             assertSdkHttpSuccess(r.sdkHttpResponse());
             r = bucketOps.putObject(key2, testFile()).get(3, TimeUnit.SECONDS);

@@ -37,7 +37,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
-public class S3Directory implements S3BucketOperations {
+public class S3Directory implements IS3BucketOperations {
     public static final class Settings {
         public static final String LIST_FILES_DELIMITER = "aws.s3.list.files.delimiter";
 

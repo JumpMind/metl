@@ -358,7 +358,7 @@
             </setting>
         </settings>
     </component>
-    <component category='WRITER' id='S3 Object Writer' inputMessageType='text' outputMessageType='text' resourceCategory='streamable'>
+    <component category='WRITER' id='S3 Object Writer' inputMessageType='any' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='s3'>
         <name>S3 Object Writer</name>
         <className>org.jumpmind.metl.core.runtime.component.S3ObjectWriter</className>
         <keywords>files,aws,s3</keywords>

@@ -8,20 +8,20 @@ import org.jumpmind.metl.core.runtime.ContentMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
-import org.jumpmind.metl.core.runtime.resource.aws.S3BucketOperations;
+import org.jumpmind.metl.core.runtime.resource.aws.IS3BucketOperations;
 
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
 public class S3ObjectWriter extends AbstractFileWriter {
     public static final String HEADER_SOURCE_FILE = "S3ObjectSourceFileName";
 
-    private S3BucketOperations bucketOps;
+    private IS3BucketOperations bucketOps;
 
     @Override
     public void start() {
         init();
 
-        bucketOps = (S3BucketOperations) getResourceReference();
+        bucketOps = (IS3BucketOperations) getResourceReference();
         if (bucketOps == null) {
             throw new IllegalStateException("S3 resource has not been configured.");
         }

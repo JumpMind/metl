@@ -13,7 +13,7 @@ import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
-public interface S3BucketOperations extends IDirectory, AutoCloseable {
+public interface IS3BucketOperations extends IDirectory, AutoCloseable {
     /**
      * Returns the configured AWS S3 region.
      */
