@@ -2,13 +2,14 @@ package org.jumpmind.metl.core.runtime.resource.aws;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.resource.AbstractResourceRuntime;
 import org.jumpmind.properties.TypedProperties;
 
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProviderChain;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
 
 public class S3 extends AbstractResourceRuntime {
     public static final class Settings {
@@ -24,42 +25,46 @@ public class S3 extends AbstractResourceRuntime {
         }
     }
 
-    private final AtomicReference<S3Directory> bucketReference = new AtomicReference<>();
+    private final AtomicReference<S3AsyncClient> clientReference = new AtomicReference<>();
+
+    private final AtomicReference<ClientSideCrypto> cseReference = new AtomicReference<>();
+
+    private final AwsCredentialsProvider credentialsProvider = AwsCredentialsProviderChain
+            .of(DefaultCredentialsProvider.builder().build());
+
+    private Region region;
+
+    private String bucketName;
+
+    private String listFilesDelimiter = S3Directory.Settings.DEFAULT_LIST_FILES_DELIMITER;
+
+    private int transferWindowSize = S3Directory.Settings.DEFAULT_TRANSFER_WINDOW_SIZE;
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T reference() {
-        return (T) bucketReference.get();
+        return (T) new S3Directory(getResource(), region, bucketName, clientReference.get(),
+                cseReference.get(), listFilesDelimiter, transferWindowSize);
     }
 
     @Override
     protected void start(final TypedProperties properties) {
         super.start(properties);
 
-        bucketReference.set(createS3Directory(properties));
-    }
-
-    private S3Directory createS3Directory(final TypedProperties properties) {
         String regionId = properties.get(S3.Settings.REGION);
-        Region region = (regionId != null) ? Region.of(regionId) : null;
+        region = (regionId != null) ? Region.of(regionId) : null;
 
-        String bucketName = properties.get(S3.Settings.BUCKET_NAME, "").trim();
-        if (bucketName == null || bucketName.isEmpty()) {
-            throw new MisconfiguredException(S3.Settings.BUCKET_NAME);
+        clientReference.set(S3AsyncClient.builder().region(region)
+                .credentialsProvider(credentialsProvider).build());
+
+        if (properties.is(ClientSideCrypto.Settings.ENABLED, false)) {
+            cseReference.set(createClientSideCrypto(properties, regionId));
         }
 
-        ClientSideCrypto crypto = properties.is(ClientSideCrypto.Settings.ENABLED, false)
-                ? createClientSideCrypto(properties, regionId)
-                : null;
-
-        String listFilesDelimiter = properties.get(S3Directory.Settings.LIST_FILES_DELIMITER,
+        listFilesDelimiter = properties.get(S3Directory.Settings.LIST_FILES_DELIMITER,
                 S3Directory.Settings.DEFAULT_LIST_FILES_DELIMITER);
-        int transferWindowSize = properties.getInt(S3Directory.Settings.TRANSFER_WINDOW_SIZE,
+        transferWindowSize = properties.getInt(S3Directory.Settings.TRANSFER_WINDOW_SIZE,
                 S3Directory.Settings.DEFAULT_TRANSFER_WINDOW_SIZE);
-
-        return new S3Directory(getResource(), region, bucketName, crypto,
-                AwsCredentialsProviderChain.of(DefaultCredentialsProvider.builder().build()),
-                listFilesDelimiter, transferWindowSize);
     }
 
     private ClientSideCrypto createClientSideCrypto(final TypedProperties properties,
@@ -81,9 +86,16 @@ public class S3 extends AbstractResourceRuntime {
 
     @Override
     public void stop() {
-        S3Directory s3Directory = bucketReference.getAndSet(null);
-        if (s3Directory != null) {
-            s3Directory.close();
+        region = null;
+        bucketName = null;
+        listFilesDelimiter = S3Directory.Settings.DEFAULT_LIST_FILES_DELIMITER;
+        transferWindowSize = S3Directory.Settings.DEFAULT_TRANSFER_WINDOW_SIZE;
+
+        cseReference.set(null);
+
+        S3AsyncClient client = clientReference.getAndSet(null);
+        if (client != null) {
+            client.close();
         }
 
         super.stop();
@@ -94,18 +106,20 @@ public class S3 extends AbstractResourceRuntime {
         return true;
     }
 
+    /*
+     * TODO: when is this called? if the properties aren't available yet then
+     * this will need to change
+     */
     @Override
     public boolean test() {
         try {
-            /*
-             * XXX: when is this called? if the properties aren't available yet
-             * then this will need to change
-             */
-            createS3Directory(getResourceRuntimeSettings());
+            start(getResourceRuntimeSettings());
             return true;
         } catch (Exception ex) {
             log.warn("test was unsuccessful: %s", ex.toString());
             return false;
+        } finally {
+            stop();
         }
     }
 }
