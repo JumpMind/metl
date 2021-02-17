@@ -37,6 +37,18 @@ public interface IS3BucketOperations extends IDirectory, AutoCloseable {
     CompletableFuture<PutObjectResponse> putObject(String objectKey, File objectSource);
 
     /**
+     * Uploads an object to an S3 bucket.
+     * 
+     * @param objectKey
+     *            the S3 object key
+     * @param objectSource
+     *            the object to be uploaded
+     * @return the future that will indicate when the {@link PutObjectResponse}
+     *         is ready to be handled
+     */
+    CompletableFuture<PutObjectResponse> putObject(String objectKey, byte[] objectSource);
+
+    /**
      * Returns the metadata for an object in an S3 bucket.
      * 
      * @param objectKey

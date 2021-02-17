@@ -192,6 +192,13 @@ public class S3Directory implements IS3BucketOperations {
         return s3.putObject(request, AsyncRequestBody.fromFile(objectSource));
     }
 
+    @Override
+    public CompletableFuture<PutObjectResponse> putObject(final String objectKey,
+            final byte[] objectSource) {
+        PutObjectRequest request = buildPutObjectRequest(objectKey);
+        return s3.putObject(request, AsyncRequestBody.fromBytes(objectSource));
+    }
+
     private PutObjectRequest buildPutObjectRequest(final String objectKey) {
         return PutObjectRequest.builder().bucket(bucketName).key(objectKey).build();
     }
