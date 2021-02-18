@@ -116,7 +116,7 @@ public class S3FileUtil extends AbstractComponentRuntime {
             handled.join();
             callback.sendTextMessage(null, namesProcessed);
         } else {
-            log.debug("ignoring {}; runWhen={}", inputMessage.getClass().getSimpleName(), runWhen);
+            log.warn("ignoring {}; runWhen={}", inputMessage.getClass().getSimpleName(), runWhen);
         }
     }
 
@@ -127,6 +127,7 @@ public class S3FileUtil extends AbstractComponentRuntime {
         String targetPath = String.format("%s/%s", bucketOps.bucketName(), targetKey);
         String actionDescription = String.format("PutObject byte[%d] -> %s in %s",
                 sourceBytes.length, targetPath, bucketOps.region());
+        log.debug("attempting {}", actionDescription);
         return bucketOps.putObject(targetKey, sourceBytes)
                 .whenComplete((response, throwable) -> onActionComplete(actionDescription,
                         response.sdkHttpResponse(), throwable))
@@ -143,7 +144,8 @@ public class S3FileUtil extends AbstractComponentRuntime {
 
         @SuppressWarnings("rawtypes")
         CompletableFuture[] futures = (CompletableFuture[]) sourceFileNames.stream()
-                .map(fn -> doPutObject(fn, message, namesProcessed)).toArray();
+                .map(fn -> doPutObject(fn, message, namesProcessed))
+                .toArray(CompletableFuture[]::new);
 
         return CompletableFuture.allOf(futures);
     }
@@ -156,6 +158,7 @@ public class S3FileUtil extends AbstractComponentRuntime {
         String targetPath = String.format("%s/%s", bucketOps.bucketName(), targetKey);
         String actionDescription = String.format("PutObject %s -> %s in %s", sourceFile, targetPath,
                 bucketOps.region());
+        log.debug("attempting {}", actionDescription);
         return bucketOps.putObject(targetKey, sourceFile)
                 .whenComplete((response, throwable) -> onActionComplete(actionDescription,
                         response.sdkHttpResponse(), throwable))
@@ -165,6 +168,7 @@ public class S3FileUtil extends AbstractComponentRuntime {
                     /* only delete successfully processed files */
                     try {
                         Files.delete(sourceFile.toPath());
+                        log.info("deleted {}", sourceFile);
                     } catch (IOException ex) {
                         log.warn("failed to delete {}: {}", sourceFile, ex.toString());
                     }
@@ -181,7 +185,8 @@ public class S3FileUtil extends AbstractComponentRuntime {
 
         @SuppressWarnings("rawtypes")
         CompletableFuture[] futures = (CompletableFuture[]) sourceObjectKeys.stream()
-                .map(k -> doGetObject(k, message, namesProcessed)).toArray();
+                .map(k -> doGetObject(k, message, namesProcessed))
+                .toArray(CompletableFuture[]::new);
 
         return CompletableFuture.allOf(futures);
     }
@@ -200,6 +205,7 @@ public class S3FileUtil extends AbstractComponentRuntime {
         }
         String actionDescription = String.format("GetObject %s in %s -> %s", sourcePath,
                 bucketOps.region(), targetFile);
+        log.debug("attempting {}", actionDescription);
         return bucketOps.getObject(sourceKey, targetFile)
                 .whenComplete((response, throwable) -> onActionComplete(actionDescription,
                         response.sdkHttpResponse(), throwable))
@@ -216,7 +222,8 @@ public class S3FileUtil extends AbstractComponentRuntime {
 
         @SuppressWarnings("rawtypes")
         CompletableFuture[] futures = (CompletableFuture[]) sourceObjectKeys.stream()
-                .map(k -> doDeleteObject(k, message, namesProcessed)).toArray();
+                .map(k -> doDeleteObject(k, message, namesProcessed))
+                .toArray(CompletableFuture[]::new);
 
         return CompletableFuture.allOf(futures);
     }
@@ -226,6 +233,7 @@ public class S3FileUtil extends AbstractComponentRuntime {
         String sourcePath = String.format("%s/%s", bucketOps.bucketName(), sourceKey);
         String actionDescription = String.format("DeleteObject %s in %s", sourcePath,
                 bucketOps.region());
+        log.debug("attempting {}", actionDescription);
         return bucketOps.deleteObject(sourceKey)
                 .whenComplete((response, throwable) -> onActionComplete(actionDescription,
                         response.sdkHttpResponse(), throwable))
