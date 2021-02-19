@@ -37,7 +37,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
-public class S3Directory implements S3BucketOperations {
+public class S3Directory implements IS3BucketOperations {
     public static final class Settings {
         public static final String LIST_FILES_DELIMITER = "aws.s3.list.files.delimiter";
 
@@ -190,6 +190,13 @@ public class S3Directory implements S3BucketOperations {
             final File objectSource) {
         PutObjectRequest request = buildPutObjectRequest(objectKey);
         return s3.putObject(request, AsyncRequestBody.fromFile(objectSource));
+    }
+
+    @Override
+    public CompletableFuture<PutObjectResponse> putObject(final String objectKey,
+            final byte[] objectSource) {
+        PutObjectRequest request = buildPutObjectRequest(objectKey);
+        return s3.putObject(request, AsyncRequestBody.fromBytes(objectSource));
     }
 
     private PutObjectRequest buildPutObjectRequest(final String objectKey) {

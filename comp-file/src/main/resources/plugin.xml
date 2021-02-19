@@ -358,29 +358,42 @@
             </setting>
         </settings>
     </component>
-    <component category='WRITER' id='S3 Object Writer' inputMessageType='text' outputMessageType='text' resourceCategory='streamable'>
-        <name>S3 Object Writer</name>
-        <className>org.jumpmind.metl.core.runtime.component.S3ObjectWriter</className>
+    <component category='WRITER' id='S3 File Util' inputMessageType='any' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='s3'>
+        <name>S3 File Util</name>
+        <className>org.jumpmind.metl.core.runtime.component.S3FileUtil</className>
         <keywords>files,aws,s3</keywords>
         <description></description>
         <settings>
-            <setting id='relative.path' required='false' type='text'>
+            <setting id='action' required='false' type='choice'>
+                <name>Action</name>
+                <defaultValue>Upload</defaultValue>
+                <choices>
+                    <choice>Upload</choice>
+                    <choice>Download</choice>
+                    <choice>Delete</choice>
+                </choices>
+            </setting>
+            <setting id='run.when' required='false' type='choice'>
+                <name>Run When</name>
+                <defaultValue>PER UNIT OF WORK</defaultValue>
+                <choices>
+                    <choice>PER UNIT OF WORK</choice>
+                    <choice>PER MESSAGE</choice>
+                </choices>
+            </setting>
+            <setting id='file.name' required='false' type='text'>
                 <name>Path and File</name>
             </setting>
-            <setting id='must.exist' required='true' type='boolean'>
-                <name>Must Exist</name>
-                <defaultValue>false</defaultValue>
-            </setting>
-            <setting id='append' required='true' type='boolean'>
-                <name>Append</name>
-                <defaultValue>false</defaultValue>
-            </setting>
             <setting id='get.file.name.from.message' required='false' type='boolean'>
-                <name>Get File Name (Object Key) From Message</name>
+                <name>Get File Name (i.e. Upload source or Download target) From Message</name>
                 <defaultValue>false</defaultValue>
             </setting>
-            <setting id='filename.property' required='false' type='text'>
-                <name>Param Name For Msg Based File Name (Object Key)</name>
+            <setting id='object.key' required='false' type='text'>
+                <name>Object Key</name>
+            </setting>
+            <setting id='get.object.key.from.message' required='false' type='boolean'>
+                <name>Get Object Key (i.e. Upload target or Download source) From Message</name>
+                <defaultValue>false</defaultValue>
             </setting>
         </settings>
     </component>

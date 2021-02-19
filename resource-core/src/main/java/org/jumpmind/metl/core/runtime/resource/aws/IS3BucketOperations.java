@@ -13,7 +13,7 @@ import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
-public interface S3BucketOperations extends IDirectory, AutoCloseable {
+public interface IS3BucketOperations extends IDirectory, AutoCloseable {
     /**
      * Returns the configured AWS S3 region.
      */
@@ -35,6 +35,18 @@ public interface S3BucketOperations extends IDirectory, AutoCloseable {
      *         is ready to be handled
      */
     CompletableFuture<PutObjectResponse> putObject(String objectKey, File objectSource);
+
+    /**
+     * Uploads an object to an S3 bucket.
+     * 
+     * @param objectKey
+     *            the S3 object key
+     * @param objectSource
+     *            the object to be uploaded
+     * @return the future that will indicate when the {@link PutObjectResponse}
+     *         is ready to be handled
+     */
+    CompletableFuture<PutObjectResponse> putObject(String objectKey, byte[] objectSource);
 
     /**
      * Returns the metadata for an object in an S3 bucket.
