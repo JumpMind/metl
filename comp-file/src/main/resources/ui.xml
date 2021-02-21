@@ -39,4 +39,7 @@
     <component-ui id="File Util UI" componentId="File Util">
         <iconImage>org/jumpmind/metl/core/runtime/component/metl-file-util-48x48-color.png</iconImage>
     </component-ui>
+    <component-ui id="S3 File Util UI" componentId="S3 File Util">
+        <iconImage>org/jumpmind/metl/core/runtime/component/metl-s3-file-util-48x48.png</iconImage>
+    </component-ui>    
 </ui>
