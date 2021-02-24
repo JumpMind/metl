@@ -94,6 +94,9 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
             } else if ("File|New|Resource|Mail Session".equals(menuSelected)) {
                 navigator.addNewMailSession();
                 return true;
+            } else if ("File|New|Resource|S3".equals(menuSelected)) {
+                navigator.addNewS3();
+                return true;
             } else if ("File|Import...".equals(menuSelected)) {
                 navigator.doImport();
                 return true;

@@ -66,6 +66,7 @@ public class ModelMenuManager extends AbstractDesignSelectedValueMenuManager {
                 "File|New|Resource|Directory|SMB",
                 "File|New|Resource|HTTP",
                 "File|New|Resource|Mail Session",
+                "File|New|Resource|S3",
                 "File|New|Resource|Subscribe|JMS",
                 "File|New|Resource|Queue|Kafka Publisher",
                 "File|New|Resource|Queue|SQS",

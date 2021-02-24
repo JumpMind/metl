@@ -1005,6 +1005,10 @@ public class DesignNavigator extends VerticalLayout {
     public void addNewMailSession() {
         addNewResource("MailSession", "Mail Session", Icons.EMAIL);
     }
+    
+    public void addNewS3() {
+        addNewResource("s3", "AWS S3", Icons.GENERAL_RESOURCE);
+    }
 
     protected void addNewResource(String type, String defaultName, FontAwesome icon) {
         ProjectVersion projectVersion = findProjectVersion();
