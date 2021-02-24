@@ -11,9 +11,9 @@ dependencies {
     compile "org.eclipse.jetty.websocket:javax-websocket-server-impl:$jettyVersion"    
     compile "commons-io:commons-io:$commonsIoVersion"
     compile "commons-lang:commons-lang:$commonsLangVersion"
- 	compile (group:"org.jumpmind.symmetric", name:"symmetric-wrapper", version:"$symmetricVersion", changing:true) {
-       exclude group:"bouncycastle"
-       exclude group:"log4j"
-       exclude group:"org.slf4j"
+    compile (group:"org.jumpmind.symmetric", name:"symmetric-wrapper", version:"$symmetricVersion", changing:true) {
+        exclude group:"org.bouncycastle"
+        exclude group:"log4j"
+        exclude group:"org.slf4j"
     }
 }
