@@ -94,9 +94,9 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
             } else if ("File|New|Resource|Mail Session".equals(menuSelected)) {
                 navigator.addNewMailSession();
                 return true;
-            } else if ("File|New|Resource|S3".equals(menuSelected)) {
-                navigator.addNewS3();
-                return true;
+            } else if ("File|New|Resource|Cloud Bucket|AWS S3".equals(menuSelected)) {
+            	navigator.addNewAWSS3();
+            	return true;
             } else if ("File|Import...".equals(menuSelected)) {
                 navigator.doImport();
                 return true;
@@ -145,7 +145,7 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
                     "File|New|Resource|Database", "File|New|Resource|Directory|FTP", "File|New|Resource|Directory|File System",
                     "File|New|Resource|Directory|JMS", "File|New|Resource|Directory|SFTP", "File|New|Resource|Directory|SMB",
                     "File|New|Resource|HTTP", "File|New|Resource|Mail Session", "File|New|Resource|Subscribe|JMS", 
-                    "Edit|Cut", "Edit|Paste", "Edit|Rename", "Tag" };
+                    "File|New|Resource|Cloud Bucket|AWS S3","Edit|Cut", "Edit|Paste", "Edit|Rename", "Tag" };
         } else {
             return null;
         }

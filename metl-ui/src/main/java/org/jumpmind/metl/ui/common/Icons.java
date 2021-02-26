@@ -99,4 +99,6 @@ final public class Icons {
     
     public static final FontAwesome LOCK = FontAwesome.LOCK;
     
+    public static final FontAwesome CLOUD = FontAwesome.CLOUD;
+    
 }

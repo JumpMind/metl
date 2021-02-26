@@ -53,7 +53,7 @@ public class XMLSetting implements Serializable {
         @XmlEnumValue("datasource_resource")DATASOURCE_RESOURCE,
         @XmlEnumValue("model_column")MODEL_COLUMN,
         @XmlEnumValue("target_step")TARGET_STEP,
-        @XmlEnumValue("s3")S3,
+        @XmlEnumValue("cloud_bucket")CLOUD_BUCKET,
     };
     
     @XmlElement(required = false)

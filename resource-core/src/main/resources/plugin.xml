@@ -560,7 +560,7 @@
             <setting id='access.key' type='text'>
                 <name>Access Key (Required for AWS SDK credential type)</name>
             </setting>
-            <setting id='secret.access.key' type='text'>
+            <setting id='secret.access.key' type='password'>
                 <name>Secret Access Key (Required for AWS SDK credential type)</name>
             </setting>
             <setting id='region' required='true' type='choice'>
@@ -576,7 +576,7 @@
             </setting>
         </settings>
     </resource>
-    <resource id='AWS S3' resourceCategory='s3'>
+    <resource id='AWS S3' resourceCategory='cloud_bucket'>
         <name>AWS S3</name>
         <className>org.jumpmind.metl.core.runtime.resource.aws.S3</className>
         <settings>
