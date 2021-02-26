@@ -551,6 +551,10 @@ public class DesignNavigator extends VerticalLayout {
                 this.treeTable.setItemIcon(resource, Icons.EMAIL);
             } else if (resource.getType().contains("JMS")) {
                 this.treeTable.setItemIcon(resource, Icons.QUEUE);
+            } else if (resource.getType().contains("SQS")) {
+                this.treeTable.setItemIcon(resource, Icons.QUEUE);
+            } else if (resource.getType().contains("S3")) {
+                this.treeTable.setItemIcon(resource, Icons.CLOUD);
             } else {
                 this.treeTable.setItemIcon(resource, Icons.FILE_SYSTEM);
             }

@@ -13,7 +13,9 @@ import software.amazon.awssdk.services.s3.S3AsyncClient;
 
 public class S3 extends AbstractResourceRuntime {
     public static final class Settings {
-        /** Name of the setting that identifies the AWS S3 region. */
+
+        public final static String TYPE = "AWS S3";
+        
         public static final String REGION = "aws.s3.region";
 
         public static final String USE_REGION_AS_CRYPTO_DEFAULT = "aws.s3.region.as.crypto.default";
@@ -32,17 +34,36 @@ public class S3 extends AbstractResourceRuntime {
     private final AwsCredentialsProvider credentialsProvider = AwsCredentialsProviderChain
             .of(DefaultCredentialsProvider.builder().build());
 
+    private String regionId;
+
     private Region region;
 
     private String bucketName;
+
+    private boolean clientSideCrypto;
 
     private String listFilesDelimiter = S3Directory.Settings.DEFAULT_LIST_FILES_DELIMITER;
 
     private int transferWindowSize = S3Directory.Settings.DEFAULT_TRANSFER_WINDOW_SIZE;
 
+    private String restrictModeName;
+
+    private String cmkSpec;
+
+    private boolean useRegionAsCryptoDefault;
+
+    private String defaultRegion;
+
     @SuppressWarnings("unchecked")
     @Override
     public <T> T reference() {
+        clientReference.set(S3AsyncClient.builder().region(region)
+                .credentialsProvider(credentialsProvider).build());
+
+        if (clientSideCrypto) {
+            cseReference.set(createClientSideCrypto());
+        }
+        
         return (T) new S3Directory(getResource(), region, bucketName, clientReference.get(),
                 cseReference.get(), listFilesDelimiter, transferWindowSize);
     }
@@ -50,41 +71,37 @@ public class S3 extends AbstractResourceRuntime {
     @Override
     protected void start(final TypedProperties properties) {
         super.start(properties);
+        retrieveSettings(properties);
+        retrieveClientSideCryptoSettings(properties);
+    }
 
-        String regionId = properties.get(S3.Settings.REGION);
-        region = (regionId != null) ? Region.of(regionId) : null;
+    private void retrieveSettings(final TypedProperties properties) {
+        regionId = properties.get(S3.Settings.REGION);
+        if (regionId != null && !regionId.isEmpty()) {
+            region = (regionId != null) ? Region.of(regionId) : null;
+        }
 
         bucketName = properties.get(S3.Settings.BUCKET_NAME);
-
-        if (regionId != null && !regionId.isEmpty()) {
-        	clientReference.set(S3AsyncClient.builder().region(region)
-                .credentialsProvider(credentialsProvider).build());
-        }
-        if (properties.is(ClientSideCrypto.Settings.ENABLED, false)) {
-            cseReference.set(createClientSideCrypto(properties, regionId));
-        }
+        clientSideCrypto = properties.is(ClientSideCrypto.Settings.ENABLED, false);
 
         listFilesDelimiter = properties.get(S3Directory.Settings.LIST_FILES_DELIMITER,
                 S3Directory.Settings.DEFAULT_LIST_FILES_DELIMITER);
         transferWindowSize = properties.getInt(S3Directory.Settings.TRANSFER_WINDOW_SIZE,
                 S3Directory.Settings.DEFAULT_TRANSFER_WINDOW_SIZE);
     }
-
-    private ClientSideCrypto createClientSideCrypto(final TypedProperties properties,
-            final String s3Region) {
+    
+    private void retrieveClientSideCryptoSettings(final TypedProperties properties) {
         String defaultRestrictModeName = ClientSideCrypto.RestrictMode.ENCRYPT_DECRYPT.name();
-        String restrictModeName = properties.get(ClientSideCrypto.Settings.RESTRICT_MODE,
-                defaultRestrictModeName);
-        ClientSideCrypto.RestrictMode restrictMode = ClientSideCrypto.RestrictMode
-                .valueOf(restrictModeName);
+        restrictModeName = properties.get(ClientSideCrypto.Settings.RESTRICT_MODE, defaultRestrictModeName);
+        cmkSpec = properties.get(ClientSideCrypto.Settings.KMS_CMK_SPEC);
+        useRegionAsCryptoDefault = properties.is(S3.Settings.USE_REGION_AS_CRYPTO_DEFAULT, false);
+        defaultRegion = properties.get(ClientSideCrypto.Settings.DEFAULT_REGION);
+    }
 
-        String cmkSpec = properties.get(ClientSideCrypto.Settings.KMS_CMK_SPEC);
-
-        String defaultRegion = properties.is(S3.Settings.USE_REGION_AS_CRYPTO_DEFAULT, false)
-                ? s3Region
-                : properties.get(ClientSideCrypto.Settings.DEFAULT_REGION);
-
-        return ClientSideCrypto.forRestrictMode(restrictMode, cmkSpec, defaultRegion);
+    private ClientSideCrypto createClientSideCrypto() {
+        ClientSideCrypto.RestrictMode restrictMode = ClientSideCrypto.RestrictMode.valueOf(restrictModeName);
+        String regionToUse = useRegionAsCryptoDefault ? regionId : defaultRegion;
+        return ClientSideCrypto.forRestrictMode(restrictMode, cmkSpec, regionToUse);
     }
 
     @Override

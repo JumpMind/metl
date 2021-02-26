@@ -848,9 +848,11 @@ public class PropertySheet extends AbsoluteLayout {
                         formLayout.addComponent(targetStepsCombo);
                     }
                     break;
+                case CLOUD_BUCKET:
+                    formLayout.addComponent(createResourceCombo(definition, obj, ResourceCategory.CLOUD_BUCKET));
+                    break;
                 default:
                     break;
-
             }
         }
     }

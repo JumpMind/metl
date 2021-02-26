@@ -37,15 +37,6 @@ public class SQSQueue extends AbstractResourceRuntime {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T reference() {
-        return (T) sqsClient;
-    }
-
-    public void start(Resource resource, TypedProperties resourceRuntimeSettings) {
-        credentialType = resourceRuntimeSettings.get(SETTING_CREDENTIAL_TYPE);
-        accessKey = resourceRuntimeSettings.get(SETTING_ACCESS_KEY);
-        secretAccessKey = resourceRuntimeSettings.get(SETTING_SECRET_ACCESS_KEY);
-        region = resourceRuntimeSettings.get(SETTING_REGION);
-
         if (credentialType.equals("AWS SDK") && (accessKey == null || secretAccessKey == null)) {
             throw new MisconfiguredException("Access Key and Secret Access Key are required for Credential Type 'AWS SDK'");
         }
@@ -54,8 +45,17 @@ public class SQSQueue extends AbstractResourceRuntime {
             log.warn("AccessKey and SecretAccessKey provided will be ignored for Credential Type 'System'");
         }
 
+        return (T) createSqsClient();
+    }
+
+    @Override
+    public void start(TypedProperties resourceRuntimeSettings) {
+        credentialType = resourceRuntimeSettings.get(SETTING_CREDENTIAL_TYPE);
+        accessKey = resourceRuntimeSettings.get(SETTING_ACCESS_KEY);
+        secretAccessKey = resourceRuntimeSettings.get(SETTING_SECRET_ACCESS_KEY);
+        region = resourceRuntimeSettings.get(SETTING_REGION);
+
         Thread.currentThread().setContextClassLoader(null);
-        sqsClient = createSqsClient();
     }
 
     private SqsClient createSqsClient() {

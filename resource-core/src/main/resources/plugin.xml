@@ -576,7 +576,7 @@
             </setting>
         </settings>
     </resource>
-    <resource id='AWS S3' resourceCategory='streamable'>
+    <resource id='AWS S3' resourceCategory='cloud_bucket'>
         <name>AWS S3</name>
         <className>org.jumpmind.metl.core.runtime.resource.aws.S3</className>
         <settings>
