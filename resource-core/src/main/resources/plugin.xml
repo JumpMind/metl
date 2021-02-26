@@ -560,7 +560,7 @@
             <setting id='access.key' type='text'>
                 <name>Access Key (Required for AWS SDK credential type)</name>
             </setting>
-            <setting id='secret.access.key' type='text'>
+            <setting id='secret.access.key' type='password'>
                 <name>Secret Access Key (Required for AWS SDK credential type)</name>
             </setting>
             <setting id='region' required='true' type='choice'>

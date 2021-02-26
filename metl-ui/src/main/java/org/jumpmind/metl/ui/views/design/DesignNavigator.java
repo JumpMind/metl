@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.IconMultiStateFormatting.IconSet;
 import org.jumpmind.metl.core.model.AbstractModel;
 import org.jumpmind.metl.core.model.AbstractName;
 import org.jumpmind.metl.core.model.AbstractNamedObject;
@@ -1004,6 +1005,10 @@ public class DesignNavigator extends VerticalLayout {
     
     public void addNewMailSession() {
         addNewResource("MailSession", "Mail Session", Icons.EMAIL);
+    }
+    
+    public void addNewAWSS3() {
+    	addNewResource("AWS S3", "AWS S3", Icons.CLOUD);
     }
 
     protected void addNewResource(String type, String defaultName, FontAwesome icon) {

@@ -68,6 +68,7 @@ public class ProjectDependencyMenuManager extends AbstractDesignSelectedValueMen
                 "File|New|Resource|HTTP",
                 "File|New|Resource|Mail Session",
                 "File|New|Resource|Subscribe|JMS",
+                "File|New|Resource|Cloud Bucket|AWS S3",
                 "Edit|Change Dependency Version",
                 "Edit|Remove",
         });

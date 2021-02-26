@@ -1,7 +1,5 @@
 package org.jumpmind.metl.core.runtime.resource.aws;
 
-import static java.util.Objects.requireNonNull;
-
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.jumpmind.metl.core.runtime.resource.AbstractResourceRuntime;
@@ -56,12 +54,12 @@ public class S3 extends AbstractResourceRuntime {
         String regionId = properties.get(S3.Settings.REGION);
         region = (regionId != null) ? Region.of(regionId) : null;
 
-        bucketName = requireNonNull(properties.get(S3.Settings.BUCKET_NAME),
-                S3.Settings.BUCKET_NAME);
+        bucketName = properties.get(S3.Settings.BUCKET_NAME);
 
-        clientReference.set(S3AsyncClient.builder().region(region)
+        if (regionId != null && !regionId.isEmpty()) {
+        	clientReference.set(S3AsyncClient.builder().region(region)
                 .credentialsProvider(credentialsProvider).build());
-
+        }
         if (properties.is(ClientSideCrypto.Settings.ENABLED, false)) {
             cseReference.set(createClientSideCrypto(properties, regionId));
         }
