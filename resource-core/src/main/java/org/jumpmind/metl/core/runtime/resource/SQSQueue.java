@@ -37,15 +37,6 @@ public class SQSQueue extends AbstractResourceRuntime {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T reference() {
-        return (T) sqsClient;
-        }
-
-    public void start(Resource resource, TypedProperties resourceRuntimeSettings) {
-        credentialType = resourceRuntimeSettings.get(SETTING_CREDENTIAL_TYPE);
-        accessKey = resourceRuntimeSettings.get(SETTING_ACCESS_KEY);
-        secretAccessKey = resourceRuntimeSettings.get(SETTING_SECRET_ACCESS_KEY);
-        region = resourceRuntimeSettings.get(SETTING_REGION);
-
         if (credentialType.equals("AWS SDK") && (accessKey == null || secretAccessKey == null)) {
             throw new MisconfiguredException("Access Key and Secret Access Key are required for Credential Type 'AWS SDK'");
         }
@@ -54,28 +45,32 @@ public class SQSQueue extends AbstractResourceRuntime {
             log.warn("AccessKey and SecretAccessKey provided will be ignored for Credential Type 'System'");
         }
 
-        Thread.currentThread().setContextClassLoader(null);
-        sqsClient = createSqsClient();
-    }
-
-    private SqsClient createSqsClient() {
         try {
             if (credentialType.equals("System")) {
-               return SqsClient.builder()
-                       .region(Region.of(region))
-                       .build();
-            }
+                return (T) SqsClient.builder()
+                        .region(Region.of(region))
+                        .build();
+             }
 
-            AwsCredentials credentials = AwsBasicCredentials.create(accessKey, secretAccessKey);
-            AwsCredentialsProvider provider = StaticCredentialsProvider.create(credentials);
+             AwsCredentials credentials = AwsBasicCredentials.create(accessKey, secretAccessKey);
+             AwsCredentialsProvider provider = StaticCredentialsProvider.create(credentials);
 
-            return SqsClient.builder()
-                    .region(Region.of(region))
-                    .credentialsProvider(provider)
-                    .build();
-        } catch (Exception e) {
-           throw new RuntimeException("Could not create SQS Client: " + e.getMessage());
+             return (T) SqsClient.builder()
+                     .region(Region.of(region))
+                     .credentialsProvider(provider)
+                     .build();
+         } catch (Exception e) {
+            throw new RuntimeException("Could not create SQS Client: " + e.getMessage());
+         }
         }
+
+    public void start(Resource resource, TypedProperties resourceRuntimeSettings) {
+        credentialType = resourceRuntimeSettings.get(SETTING_CREDENTIAL_TYPE);
+        accessKey = resourceRuntimeSettings.get(SETTING_ACCESS_KEY);
+        secretAccessKey = resourceRuntimeSettings.get(SETTING_SECRET_ACCESS_KEY);
+        region = resourceRuntimeSettings.get(SETTING_REGION);
+
+        Thread.currentThread().setContextClassLoader(null);
     }
 
     @Override
