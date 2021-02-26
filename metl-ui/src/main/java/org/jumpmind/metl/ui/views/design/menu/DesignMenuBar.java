@@ -68,7 +68,8 @@ public class DesignMenuBar extends AbstractMenuBar {
         add("File|New|Resource|Mail Session");
         add("File|New|Resource|Subscribe|JMS");
         add("File|New|Resource|Queue|Kafka Publisher");
-        add("File|New|Resource|Queue|SQS");        
+        add("File|New|Resource|Queue|SQS");      
+        add("File|New|Resource|Cloud Bucket|AWS S3");
         add("File|Open");
         addSeparator("File");
         add("File|Import...");        

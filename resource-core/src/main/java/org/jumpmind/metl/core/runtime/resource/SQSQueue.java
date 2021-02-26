@@ -38,7 +38,7 @@ public class SQSQueue extends AbstractResourceRuntime {
     @Override
     public <T> T reference() {
         return (T) sqsClient;
-        }
+    }
 
     public void start(Resource resource, TypedProperties resourceRuntimeSettings) {
         credentialType = resourceRuntimeSettings.get(SETTING_CREDENTIAL_TYPE);
@@ -80,7 +80,8 @@ public class SQSQueue extends AbstractResourceRuntime {
 
     @Override
     public void stop() {
-        sqsClient.close();
+    	if (sqsClient != null) {
+    		sqsClient.close();
+    	}
     }
-
 }
