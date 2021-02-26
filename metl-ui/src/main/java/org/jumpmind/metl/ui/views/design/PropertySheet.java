@@ -848,6 +848,9 @@ public class PropertySheet extends AbsoluteLayout {
                         formLayout.addComponent(targetStepsCombo);
                     }
                     break;
+                case S3:
+                    formLayout.addComponent(createResourceCombo(definition, obj, ResourceCategory.S3));
+                    break;
                 default:
                     break;
 

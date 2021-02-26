@@ -550,6 +550,10 @@ public class DesignNavigator extends VerticalLayout {
                 this.treeTable.setItemIcon(resource, Icons.EMAIL);
             } else if (resource.getType().contains("JMS")) {
                 this.treeTable.setItemIcon(resource, Icons.QUEUE);
+            } else if (resource.getType().contains("SQS")) {
+                this.treeTable.setItemIcon(resource, Icons.QUEUE);
+            } else if (resource.getType().contains("S3")) {
+                this.treeTable.setItemIcon(resource, Icons.LOCK);
             } else {
                 this.treeTable.setItemIcon(resource, Icons.FILE_SYSTEM);
             }
@@ -1007,7 +1011,7 @@ public class DesignNavigator extends VerticalLayout {
     }
     
     public void addNewS3() {
-        addNewResource("s3", "AWS S3", Icons.GENERAL_RESOURCE);
+        addNewResource("AWS S3", "AWS S3", Icons.LOCK);
     }
 
     protected void addNewResource(String type, String defaultName, FontAwesome icon) {

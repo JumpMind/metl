@@ -358,7 +358,7 @@
             </setting>
         </settings>
     </component>
-    <component category='WRITER' id='S3 File Util' inputMessageType='any' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='s3'>
+    <component category='WRITER' id='S3 File Util' inputMessageType='any' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='none'>
         <name>S3 File Util</name>
         <className>org.jumpmind.metl.core.runtime.component.S3FileUtil</className>
         <keywords>files,aws,s3</keywords>
@@ -380,6 +380,12 @@
                     <choice>PER UNIT OF WORK</choice>
                     <choice>PER MESSAGE</choice>
                 </choices>
+            </setting>
+            <setting id='source.directory.resource' required='false' type='streamable_resource'>
+                <name>Source Directory Resource</name>
+            </setting>
+            <setting id='target.s3.resource' required='true' type='s3'>
+                <name>Target S3 Resource</name>
             </setting>
             <setting id='file.name' required='false' type='text'>
                 <name>Path and File</name>
