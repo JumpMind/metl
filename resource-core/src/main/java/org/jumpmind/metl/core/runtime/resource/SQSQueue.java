@@ -45,7 +45,7 @@ public class SQSQueue extends AbstractResourceRuntime {
             log.warn("AccessKey and SecretAccessKey provided will be ignored for Credential Type 'System'");
         }
 
-        return (T) sqsClient;
+        return (T) createSqsClient();
     }
 
     @Override
@@ -56,7 +56,6 @@ public class SQSQueue extends AbstractResourceRuntime {
         region = resourceRuntimeSettings.get(SETTING_REGION);
 
         Thread.currentThread().setContextClassLoader(null);
-        sqsClient = createSqsClient();
     }
 
     private SqsClient createSqsClient() {
