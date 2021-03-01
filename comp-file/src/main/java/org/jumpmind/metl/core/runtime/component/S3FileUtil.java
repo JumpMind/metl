@@ -34,10 +34,6 @@ public class S3FileUtil extends AbstractComponentRuntime {
      * source of an Upload operation or the target of a Download operation if
      * using one of the S3 putObject/getObject java.io.File overloads
      */
-    public final static String SOURCE_DIRECTORY_RESOURCE = "source.directory.resource";
-
-    public final static String TARGET_S3_RESOURCE = "target.s3.resource";
-
     public final static String SETTING_FILE_NAME = "file.name";
 
     public final static String SETTING_GET_FILE_NAME_FROM_MESSAGE = "get.file.name.from.message";
