@@ -33,6 +33,7 @@ import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.services.s3.model.S3Object;
@@ -200,7 +201,8 @@ public class S3Directory implements IS3BucketOperations {
     }
 
     private PutObjectRequest buildPutObjectRequest(final String objectKey) {
-        return PutObjectRequest.builder().bucket(bucketName).key(objectKey).build();
+        return PutObjectRequest.builder().bucket(bucketName).key(objectKey)
+                .acl(ObjectCannedACL.BUCKET_OWNER_READ).build();
     }
 
     /* S3 HeadObject */
