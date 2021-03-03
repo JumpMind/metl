@@ -202,7 +202,7 @@ public class S3Directory implements IS3BucketOperations {
 
     private PutObjectRequest buildPutObjectRequest(final String objectKey) {
         return PutObjectRequest.builder().bucket(bucketName).key(objectKey)
-                .acl(ObjectCannedACL.BUCKET_OWNER_READ).build();
+                .acl(ObjectCannedACL.BUCKET_OWNER_FULL_CONTROL).build();
     }
 
     /* S3 HeadObject */
