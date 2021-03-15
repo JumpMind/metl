@@ -2,9 +2,8 @@ package org.jumpmind.metl.core.runtime.resource.aws;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.jumpmind.metl.core.runtime.resource.AbstractResourceRuntime;
+import org.jumpmind.metl.core.runtime.resource.IS3BucketOperations;
 import org.jumpmind.properties.TypedProperties;
 
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
@@ -27,18 +26,16 @@ public class S3 extends AbstractResourceRuntime {
         }
     }
 
-    private AtomicReference<IS3BucketOperations> bucketOpsReference = new AtomicReference<>();
+    private IS3BucketOperations bucketOps;
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T reference() {
-        return (T) bucketOpsReference.get();
+        return (T) bucketOps;
     }
 
     @Override
     protected void start(final TypedProperties properties) {
-        super.start(properties);
-
         String regionId = properties.get(S3.Settings.REGION);
         Region region = (regionId != null) ? Region.of(regionId) : null;
 
@@ -60,8 +57,8 @@ public class S3 extends AbstractResourceRuntime {
         int transferWindowSize = properties.getInt(S3Directory.Settings.TRANSFER_WINDOW_SIZE,
                 S3Directory.Settings.DEFAULT_TRANSFER_WINDOW_SIZE);
 
-        bucketOpsReference.set(new S3Directory(getResource(), region, bucketName, client, cse,
-                listFilesDelimiter, transferWindowSize));
+        bucketOps = new S3Directory(getResource(), region, bucketName, client, cse,
+                listFilesDelimiter, transferWindowSize);
     }
 
     private ClientSideCrypto createClientSideCrypto(final TypedProperties properties,
@@ -83,12 +80,7 @@ public class S3 extends AbstractResourceRuntime {
 
     @Override
     public void stop() {
-        IS3BucketOperations bucketOps = bucketOpsReference.getAndSet(null);
-        if (bucketOps != null) {
-            bucketOps.close();
-        }
-
-        super.stop();
+        bucketOps.close();
     }
 
     @Override

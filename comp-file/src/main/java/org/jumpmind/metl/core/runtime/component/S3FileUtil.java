@@ -15,7 +15,7 @@ import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
-import org.jumpmind.metl.core.runtime.resource.aws.IS3BucketOperations;
+import org.jumpmind.metl.core.runtime.resource.IS3BucketOperations;
 import org.jumpmind.properties.TypedProperties;
 
 import software.amazon.awssdk.http.SdkHttpResponse;

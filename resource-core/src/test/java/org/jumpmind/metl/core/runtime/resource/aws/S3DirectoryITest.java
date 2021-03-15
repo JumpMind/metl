@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.jumpmind.metl.core.runtime.resource.IS3BucketOperations;
 import org.junit.Test;
 
 import software.amazon.awssdk.core.ResponseBytes;
