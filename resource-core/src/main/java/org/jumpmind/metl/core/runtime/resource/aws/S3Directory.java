@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.runtime.resource.FileInfo;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
+import org.jumpmind.metl.core.runtime.resource.IS3BucketOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

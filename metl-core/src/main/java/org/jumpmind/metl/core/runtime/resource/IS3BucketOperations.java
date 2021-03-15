@@ -1,9 +1,7 @@
-package org.jumpmind.metl.core.runtime.resource.aws;
+package org.jumpmind.metl.core.runtime.resource;
 
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
-
-import org.jumpmind.metl.core.runtime.resource.IDirectory;
 
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.regions.Region;
