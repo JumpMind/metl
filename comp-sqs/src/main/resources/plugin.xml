@@ -66,6 +66,12 @@
         <name>Max Messages to Read</name>
         <defaultValue>1</defaultValue>
       </setting>
+      <setting id='sqs.reader.max.results.per.read'
+               required='true'
+               type='integer'>
+        <name>Max Results Per Read</name>
+        <defaultValue>1</defaultValue>
+      </setting>
       <setting id='sqs.reader.delete.when'
                required='true'
                type='choice'>

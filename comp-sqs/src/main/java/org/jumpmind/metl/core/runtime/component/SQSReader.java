@@ -48,12 +48,14 @@ public class SQSReader extends AbstractComponentRuntime {
     public final static String SQS_READER_MAX_MESSAGES_TO_READ = "sqs.reader.max.messages.to.read";
     public final static String SQS_READER_DELETE_WHEN = "sqs.reader.delete.when";
     public final static String SQS_READER_READ_UNTIL_QUEUE_EMPTY = "sqs.reader.read.until.queue.empty";
+    public final static String SQS_READER_MAX_RESULTS_PER_READ = "sqs.reader.max.results.per.read";
 
     /* settings */
     String runWhen;
     String queueUrl;
     String deleteWhen;
     int maxMsgsToRead;
+    int maxResultsPerRead;
     int messagesPerOutputMessage;
     boolean readUntilQueueEmpty;
     List<String> messageReceipts;
@@ -68,6 +70,7 @@ public class SQSReader extends AbstractComponentRuntime {
         runWhen = properties.get(RUN_WHEN);
         queueUrl = properties.get(SQS_READER_QUEUE_URL);
         maxMsgsToRead = properties.getInt(SQS_READER_MAX_MESSAGES_TO_READ);
+        maxResultsPerRead = properties.getInt(SQS_READER_MAX_RESULTS_PER_READ);
         deleteWhen = properties.getProperty(SQS_READER_DELETE_WHEN);
         readUntilQueueEmpty = Boolean.valueOf(properties.getProperty(SQS_READER_READ_UNTIL_QUEUE_EMPTY));
         messageReceipts = new ArrayList<String>();
@@ -78,6 +81,10 @@ public class SQSReader extends AbstractComponentRuntime {
         
         if (maxMsgsToRead > 0 && readUntilQueueEmpty) {
             throw new MisconfiguredException("\"Max Messages to Read\" and \"Read Until Queue Empty\" cannot be set in conjunction.");
+        }
+
+        if (maxResultsPerRead < 1 || maxResultsPerRead > 10) {
+            throw new MisconfiguredException("\"Max Results Per Read\" must be between 1 and 10.");
         }
     }
 
@@ -122,7 +129,7 @@ public class SQSReader extends AbstractComponentRuntime {
         try {
             ReceiveMessageRequest request = ReceiveMessageRequest.builder()
                     .queueUrl(queueUrl)
-                    .maxNumberOfMessages(1)
+                    .maxNumberOfMessages(maxResultsPerRead)
                     .build();
 
             ReceiveMessageResponse response = client.receiveMessage(request);
