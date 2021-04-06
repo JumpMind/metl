@@ -33,7 +33,6 @@ import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,43 +52,40 @@ final public class VersionUtils {
     }
 
     static {
-        InputStream is = null;
         try {
             Enumeration<URL> resources = VersionUtils.class.getClassLoader().getResources(
                     "META-INF/MANIFEST.MF");
             while (resources.hasMoreElements()) {
-                is = resources.nextElement().openStream();
-                Manifest manifest = new Manifest(is);
-                Attributes attributes = manifest.getMainAttributes();
-                String projectName = attributes.getValue("Project-Artifact");
-                if (isNotBlank(projectName) && projectName.toLowerCase().startsWith("metl-core")) {
-                    version = attributes.getValue("Build-Version");
-                    buildTime = attributes.getValue("Build-Time");
-                    scmVersion = attributes.getValue("Build-Scm-Version");
-                    scmBranch = attributes.getValue("Build-Scm-Branch");
+                try (InputStream is = resources.nextElement().openStream()) {
+                    Manifest manifest = new Manifest(is);
+                    Attributes attributes = manifest.getMainAttributes();
+                    String projectName = attributes.getValue("Project-Artifact");
+                    if (isNotBlank(projectName) && projectName.toLowerCase().startsWith("metl-core")) {
+                        version = attributes.getValue("Build-Version");
+                        buildTime = attributes.getValue("Build-Time");
+                        scmVersion = attributes.getValue("Build-Scm-Version");
+                        scmBranch = attributes.getValue("Build-Scm-Branch");
+                    }
                 }
             }
         } catch (IOException e) {
             // nothing to do, really
         } finally {
-            IOUtils.closeQuietly(is);
-            
             if (isBlank(version)) {
                 try {
                     Properties gradleProperties = new Properties();
-                    is = new FileInputStream(new File("../metl-assemble/gradle.properties"));
-                    gradleProperties.load(is);
+                    try (InputStream is = new FileInputStream("../metl-assemble/gradle.properties")) {
+                        gradleProperties.load(is);
+                    }
                     version = gradleProperties.getProperty("version");
                 } catch (Exception e) {
-                    IOUtils.closeQuietly(is);
-                    try {
-                        Properties gradleProperties = new Properties();
-                        is = new FileInputStream(new File("../metl-com-assemble/gradle.properties"));
+                    Properties gradleProperties = new Properties();
+                    try (InputStream is = new FileInputStream("../metl-com-assemble/gradle.properties")) {
                         gradleProperties.load(is);
-                        version = gradleProperties.getProperty("version");
                     } catch (Exception ee) {
-                        IOUtils.closeQuietly(is);
+                        // do nothing
                     }
+                    version = gradleProperties.getProperty("version");
                 }
             }
         }
