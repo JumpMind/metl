@@ -47,7 +47,6 @@ public class SQSReader extends AbstractComponentRuntime {
     public final static String SQS_READER_QUEUE_URL = "sqs.reader.queue.url";
     public final static String SQS_READER_MAX_MESSAGES_TO_READ = "sqs.reader.max.messages.to.read";
     public final static String SQS_READER_DELETE_WHEN = "sqs.reader.delete.when";
-    public final static String SQS_READER_READ_UNTIL_QUEUE_EMPTY = "sqs.reader.read.until.queue.empty";
     public final static String SQS_READER_MAX_RESULTS_PER_READ = "sqs.reader.max.results.per.read";
 
     /* settings */
