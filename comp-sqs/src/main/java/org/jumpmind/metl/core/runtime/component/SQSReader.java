@@ -47,15 +47,15 @@ public class SQSReader extends AbstractComponentRuntime {
     public final static String SQS_READER_QUEUE_URL = "sqs.reader.queue.url";
     public final static String SQS_READER_MAX_MESSAGES_TO_READ = "sqs.reader.max.messages.to.read";
     public final static String SQS_READER_DELETE_WHEN = "sqs.reader.delete.when";
-    public final static String SQS_READER_READ_UNTIL_QUEUE_EMPTY = "sqs.reader.read.until.queue.empty";
+    public final static String SQS_READER_MAX_RESULTS_PER_READ = "sqs.reader.max.results.per.read";
 
     /* settings */
     String runWhen;
     String queueUrl;
     String deleteWhen;
     int maxMsgsToRead;
+    int maxResultsPerRead;
     int messagesPerOutputMessage;
-    boolean readUntilQueueEmpty;
     List<String> messageReceipts;
 
     @Override
@@ -68,16 +68,16 @@ public class SQSReader extends AbstractComponentRuntime {
         runWhen = properties.get(RUN_WHEN);
         queueUrl = properties.get(SQS_READER_QUEUE_URL);
         maxMsgsToRead = properties.getInt(SQS_READER_MAX_MESSAGES_TO_READ);
+        maxResultsPerRead = properties.getInt(SQS_READER_MAX_RESULTS_PER_READ);
         deleteWhen = properties.getProperty(SQS_READER_DELETE_WHEN);
-        readUntilQueueEmpty = Boolean.valueOf(properties.getProperty(SQS_READER_READ_UNTIL_QUEUE_EMPTY));
         messageReceipts = new ArrayList<String>();
 
-        if (maxMsgsToRead < 0) {
+        if (maxMsgsToRead < 1) {
             throw new MisconfiguredException("\"Max Messages to Read\" must be a 0 or a positive number");
         }
-        
-        if (maxMsgsToRead > 0 && readUntilQueueEmpty) {
-            throw new MisconfiguredException("\"Max Messages to Read\" and \"Read Until Queue Empty\" cannot be set in conjunction.");
+
+        if (maxResultsPerRead < 1 || maxResultsPerRead > 10) {
+            throw new MisconfiguredException("\"Max Results Per Read\" must be between 1 and 10.");
         }
     }
 
@@ -94,15 +94,20 @@ public class SQSReader extends AbstractComponentRuntime {
             SqsClient client = (SqsClient)getResourceReference();
             int messagesRead = 0;
 
-            while (readUntilQueueEmpty || messagesRead < maxMsgsToRead) {
-                software.amazon.awssdk.services.sqs.model.Message message = readMessage(client);
-
-                if (message == null) return;
-
-                messagesRead++;
-                Map<String,Serializable> header = new LinkedHashMap<>();
-                header.put(MESSAGE_HEADER_KEY, message.receiptHandle());
-                callback.sendTextMessage(header, message.body());
+            while (messagesRead < maxMsgsToRead) {
+                checkForInterruption()
+                List<software.amazon.awssdk.services.sqs.model.Message> responseMessages = readMessage(client);
+                if (responseMessages.isEmpty()) {
+                    return;
+                }
+                for (software.amazon.awssdk.services.sqs.model.Message message : responseMessages) {
+                    if (message != null) {
+                        messagesRead++;
+                        Map<String,Serializable> header = new LinkedHashMap<>();
+                        header.put(MESSAGE_HEADER_KEY, message.receiptHandle());
+                        callback.sendTextMessage(header, message.body());
+                    }
+                }
             }
         }
     }
@@ -118,26 +123,25 @@ public class SQSReader extends AbstractComponentRuntime {
         }
     }
 
-    private software.amazon.awssdk.services.sqs.model.Message readMessage(SqsClient client) {
+    private List<software.amazon.awssdk.services.sqs.model.Message> readMessage(SqsClient client) {
         try {
             ReceiveMessageRequest request = ReceiveMessageRequest.builder()
                     .queueUrl(queueUrl)
-                    .maxNumberOfMessages(1)
+                        .maxNumberOfMessages(maxResultsPerRead)
                     .build();
 
             ReceiveMessageResponse response = client.receiveMessage(request);
-
-            for (software.amazon.awssdk.services.sqs.model.Message message : response.messages()) {
+            List<software.amazon.awssdk.services.sqs.model.Message> responseMessages = response.messages();
+            for (software.amazon.awssdk.services.sqs.model.Message message : responseMessages) {
                 if (message != null) {
                     messageReceipts.add(message.receiptHandle());
                     if ("ON READ".equals(deleteWhen)) {
                         deleteMessage(client, message.receiptHandle());
                     }
-                    return message;
                 }
             }
 
-            return null;
+            return responseMessages;
         } catch (Exception e) {
             throw new RuntimeException("Could not receive message from SQS queue: " + e.getMessage());
         }
