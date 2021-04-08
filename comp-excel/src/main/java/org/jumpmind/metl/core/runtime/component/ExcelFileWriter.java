@@ -205,24 +205,30 @@ public class ExcelFileWriter extends AbstractFileWriter {
 
     	try {
 	        if ((inputMessage instanceof ControlMessage || unitOfWorkBoundaryReached) && callback != null) {
-				if (fileOut != null) {
-					wb.write(fileOut);
-				}
+                writeWorkbook(wb, fileOut);
 	            closeDirectory();
 	            ArrayList<String> results = new ArrayList<>(1);
 	            results.add("{\"status\":\"success\"}");
 	            callback.sendTextMessage(null, results);
 	        } else if (inputMessage instanceof ContentMessage) {
-				if (fileOut != null) {
-					wb.write(fileOut);
-				}
+                writeWorkbook(wb, fileOut);
 	            closeFile();
 	        }
 		} catch (IOException e) {
 			throw new IoException(e);
 		}
     }
-    
+
+    /* TODO: need better overall handling of streams and cleanup */
+    @SuppressWarnings("try")
+    private void writeWorkbook(final Workbook workbook, final OutputStream targetStream) throws IOException {
+        try (OutputStream wbOut = targetStream) {
+            if (wbOut != null) {
+                workbook.write(wbOut);
+            }
+        }
+    }
+
     private void closeDirectory() {
         if (directory != null) {
             directory.close();
