@@ -67,27 +67,25 @@ public class BinaryFileReader extends AbstractFileReader {
             Map<String, Serializable> headers = new HashMap<>(1);
             headers.putAll(inputMessage.getHeader());
             headers.put("source.file.path", file);
-            InputStream inStream = null;
             try {
                 if (isNotBlank(file)) {
                     info("Reading file: %s", file);
                 }
                 String filePath = resolveParamsAndHeaders(file, inputMessage);
-                inStream = directory.getInputStream(filePath, mustExist);
-                //TODO: if the file is bigger than the allowable message size, this doesn't work
-                if (inStream != null) {
-                    byte[] payload = IOUtils.toByteArray(inStream);
-                    callback.sendBinaryMessage(headers, payload);
-                    getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);               
-                } else {
-                    if (isNotBlank(file)) {
-                        info("File %s didn't exist, but must exist setting was false.  Continuing", file);
+                try (InputStream inStream = directory.getInputStream(filePath, mustExist)) {
+                    //TODO: if the file is bigger than the allowable message size, this doesn't work
+                    if (inStream != null) {
+                        byte[] payload = IOUtils.toByteArray(inStream);
+                        callback.sendBinaryMessage(headers, payload);
+                        getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+                    } else {
+                        if (isNotBlank(file)) {
+                            info("File %s didn't exist, but must exist setting was false.  Continuing", file);
+                        }
                     }
                 }
             } catch (IOException e) {
                 throw new IoException("Error reading from file " + e.getMessage());
-            } finally {
-                IOUtils.closeQuietly(inStream);
             }
             
             if (controlMessageOnEof) {

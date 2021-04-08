@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
-import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.BinaryMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
@@ -54,14 +53,10 @@ public class BinaryFileWriter extends AbstractFileWriter {
                 streamable.delete(fileName, false);
             }
 
-            OutputStream fos = streamable.getOutputStream(fileName, mustExist, false, false);
-
-            try {
+            try (OutputStream fos = streamable.getOutputStream(fileName, mustExist, false, false)) {
                 fos.write(message.getPayload());
             } catch (IOException e) {
                 throw new IoException(e);
-            } finally {
-                IOUtils.closeQuietly(fos);
             }
         }
 

@@ -21,7 +21,6 @@
 package org.jumpmind.metl;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -29,7 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.websocket.server.ServerContainer;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.annotations.AnnotationConfiguration.ClassInheritanceMap;
 import org.eclipse.jetty.server.Server;

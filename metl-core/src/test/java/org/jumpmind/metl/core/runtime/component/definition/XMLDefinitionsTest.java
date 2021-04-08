@@ -39,8 +39,10 @@ public class XMLDefinitionsTest {
     public void testReadXml() throws Exception {
         JAXBContext jc = JAXBContext.newInstance(XMLDefinitions.class.getPackage().getName());
         Unmarshaller unmarshaller = jc.createUnmarshaller();
-        InputStreamReader reader = new InputStreamReader(getClass().getResourceAsStream("test-components.xml"));
-        JAXBElement<XMLDefinitions> root = (JAXBElement<XMLDefinitions>) unmarshaller.unmarshal(reader);
+        JAXBElement<XMLDefinitions> root;
+        try (InputStreamReader reader = new InputStreamReader(getClass().getResourceAsStream("test-components.xml"))) {
+            root = (JAXBElement<XMLDefinitions>) unmarshaller.unmarshal(reader);
+        }
         XMLDefinitions components = root.getValue();
         assertNotNull(components);
         assertEquals("test", components.getComponent().get(0).getName());
