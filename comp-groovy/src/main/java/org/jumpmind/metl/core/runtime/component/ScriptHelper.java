@@ -20,10 +20,14 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -33,14 +37,12 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp.BasicDataSource;
-import org.apache.commons.io.IOUtils;
 import org.jumpmind.db.sql.Row;
-import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
-import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
@@ -244,20 +246,17 @@ public class ScriptHelper {
      *            The file to extract as a file resource
      */
     protected void classpathToDirectory(String fileName) {
-        InputStream is = getClass().getResourceAsStream(fileName);
-        if (fileName.startsWith("/")) {
-            fileName = fileName.substring(1);
+        try (InputStream is = getClass().getResourceAsStream(fileName)) {
+            if (is != null) {
+                String targetFileName = fileName.startsWith("/") ? fileName.substring(1) : fileName;
+                Files.copy(is, Paths.get(targetFileName), StandardCopyOption.REPLACE_EXISTING);
+            } else {
+                throw new FileNotFoundException(fileName);
+            }
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
         }
-        OutputStream os = getDirectory().getOutputStream(fileName, false);
-        try {
-            IOUtils.copy(is, os);
-        } catch (IOException e) {
-            throw new IoException(e);
-        } finally {
-            IOUtils.closeQuietly(is);
-            IOUtils.closeQuietly(os);
-        }
-    }
+}
 
     /**
      * If the resource is a {@link DataSource} then return a reference to the

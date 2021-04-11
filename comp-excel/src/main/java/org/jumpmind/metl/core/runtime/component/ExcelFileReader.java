@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -141,24 +142,20 @@ public class ExcelFileReader extends AbstractFileReader {
         filesRead.addAll(files);
 
         for (String file : files) {
+            String filePath = resolveParamsAndHeaders(file, inputMessage);
+            if ("xls".equals(FilenameUtils.getExtension(filePath))) {
+                oldExcelFormat = true;
+            }
+            info("Reading file: %s", filePath);
             Map<String, Serializable> headers = new HashMap<>(1);
+            headers.put("source.file.path", filePath);
 
-            InputStream inStream = null;
-            try {
-                String filePath = resolveParamsAndHeaders(file, inputMessage);
-                if ("xls".equals(FilenameUtils.getExtension(filePath))) {
-                	oldExcelFormat = true;
-                }
-                info("Reading file: %s", filePath);
-                headers.put("source.file.path", filePath);
-                inStream = directory.getInputStream(filePath, mustExist);
+            try (InputStream inStream = directory.getInputStream(filePath, mustExist)) {
                 if (inStream != null) {
                     readWorkbook(headers, inStream, callback, oldExcelFormat);
                 }
             } catch (IOException e) {
                 throw new IoException("Error reading from file " + e.getMessage());
-            } finally {
-                IOUtils.closeQuietly(inStream);
             }
             if (controlMessageOnEof) {
                 callback.sendControlMessage(headers);
