@@ -81,9 +81,9 @@ public class SecurityService implements ISecurityService {
             File keyStoreFile = getKeyStoreFile();
             KeyStore ks = KeyStore.getInstance(keyStoreType);
             if (keyStoreFile.exists()) {
-                FileInputStream is = new FileInputStream(keyStoreFile);
-                ks.load(is, getKeyStorePassword().toCharArray());
-                is.close();
+                try (FileInputStream is = new FileInputStream(keyStoreFile)) {
+                    ks.load(is, getKeyStorePassword().toCharArray());
+                }
             } else {
                 ks.load(null, getKeyStorePassword().toCharArray());
             }
@@ -264,9 +264,9 @@ public class SecurityService implements ISecurityService {
     }
 
     protected void saveKeyStore(KeyStore ks, String password) throws Exception {
-        FileOutputStream os = new FileOutputStream(getKeyStoreFile());
-        ks.store(os, password.toCharArray());
-        os.close();
+        try (FileOutputStream os = new FileOutputStream(getKeyStoreFile())) {
+            ks.store(os, password.toCharArray());
+        }
     }
     
     private void cleanupProviders() {

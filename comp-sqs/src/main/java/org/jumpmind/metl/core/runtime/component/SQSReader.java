@@ -95,7 +95,7 @@ public class SQSReader extends AbstractComponentRuntime {
             int messagesRead = 0;
 
             while (messagesRead < maxMsgsToRead) {
-                checkForInterruption()
+                checkForInterruption();
                 List<software.amazon.awssdk.services.sqs.model.Message> responseMessages = readMessage(client);
                 if (responseMessages.isEmpty()) {
                     return;

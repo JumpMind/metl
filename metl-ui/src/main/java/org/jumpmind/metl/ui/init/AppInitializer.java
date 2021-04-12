@@ -34,6 +34,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Date;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
@@ -134,43 +136,31 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
     }
 
     protected void initPlugins(WebApplicationContext ctx) {
-        InputStream is = ctx.getServletContext().getResourceAsStream("/plugins.zip");
         boolean newPluginsUnzipped = false;
-        if (is != null) {
-            ZipInputStream zip = null;
-            try {
-                zip = new ZipInputStream(is);
-                ZipEntry entry = null;
-                File dir = new File(AppUtils.getPluginsDir());                
-                for (entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
-                    File f = new File(dir, entry.getName());
-                    if (!f.exists() || (f.getName().startsWith("maven-metadata") && newPluginsUnzipped)) {
-                        if (entry.isDirectory()) {
-                            f.mkdirs();
-                        } else {
-                            getLogger().info("Extracting: " + f.getAbsolutePath());
-                            newPluginsUnzipped = true;
-                            f.getParentFile().mkdirs();
-                            OutputStream os = new BufferedOutputStream(new FileOutputStream(f));
-                            try {
-                                final byte buffer[] = new byte[4096];
-                                int readCount;
-                                while ((readCount = zip.read(buffer)) > 0) {
-                                    os.write(buffer, 0, readCount);
-                                }
-                            } finally {
-                                os.close();
+        try (InputStream is = ctx.getServletContext().getResourceAsStream("/plugins.zip")) {
+            if (is != null) {
+                try (ZipInputStream zip = new ZipInputStream(is)) {
+                    ZipEntry entry = null;
+                    File dir = new File(AppUtils.getPluginsDir());                
+                    for (entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
+                        File f = new File(dir, entry.getName());
+                        if (!f.exists() || (f.getName().startsWith("maven-metadata") && newPluginsUnzipped)) {
+                            if (entry.isDirectory()) {
+                                f.mkdirs();
+                            } else {
+                                getLogger().info("Extracting: " + f.getAbsolutePath());
+                                newPluginsUnzipped = true;
+                                f.getParentFile().mkdirs();
+                                Files.copy(zip, f.toPath());
                             }
                         }
                     }
                 }
-            } catch (RuntimeException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            } finally {
-                IOUtils.closeQuietly(zip);
             }
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         
         ctx.getBean(IPluginManager.class).init();

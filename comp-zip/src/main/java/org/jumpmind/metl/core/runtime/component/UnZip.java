@@ -25,6 +25,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -133,10 +137,7 @@ public class UnZip extends AbstractComponentRuntime {
                     unzipDir.mkdirs();
 
                     File localZipFile = copyZipLocally(fileName, unzipDir);
-                    ZipFile zipFile = getNewZipFile(localZipFile);
-                    InputStream in = null;
-                    OutputStream out = null;
-                    try {
+                    try (ZipFile zipFile = new ZipFile(localZipFile)) {
                         String targetDirNameResolved = resolveParamsAndHeaders(targetRelativePath, inputMessage);
                         if (targetSubDir) {
                             targetDirNameResolved = targetDirNameResolved + "/" + FilenameUtils.removeExtension(new FileInfo(fileName, false, 0, 0).getName());
@@ -147,21 +148,18 @@ public class UnZip extends AbstractComponentRuntime {
                                 String relativePathToEntry = targetDirNameResolved + "/" + entry.getName();
                                 if (overwrite || targetDir.listFile(relativePathToEntry) == null) {
                                     info("Unzipping %s", entry.getName());
-                                    out = targetDir.getOutputStream(relativePathToEntry, false);
-                                    in = zipFile.getInputStream(entry);
-                                    IOUtils.copy(in, out);
+                                    try (InputStream in = zipFile.getInputStream(entry); OutputStream out = targetDir.getOutputStream(relativePathToEntry, false);) {
+                                        IOUtils.copy(in, out);
+                                    }
                                     filePaths.add(relativePathToEntry);
                                 } else if (!overwrite) {
                                     info("Not unzipping %s.  It already exists and the override property is not enabled", entry.getName());
                                 }
                             }
                         }
-                    } catch (IOException e) {
-                        throw new IoException(e);
+                    } catch (IOException ex) {
+                        throw new IoException(ex);
                     } finally {
-                        IOUtils.closeQuietly(in);
-                        IOUtils.closeQuietly(out);
-                        IOUtils.closeQuietly(zipFile);
                         FileUtils.deleteQuietly(localZipFile);
                     }
                     if (deleteOnComplete) {
@@ -179,27 +177,21 @@ public class UnZip extends AbstractComponentRuntime {
     }
 
     protected File copyZipLocally(String fileName, File unzipDir) {
-        InputStream is = null;
-        FileOutputStream os = null;
-        try {
-            is = sourceDir.getInputStream(fileName, true);
+        try (InputStream is = sourceDir.getInputStream(fileName, true)) {
             if (is != null) {
-                File localZipFile = new File(unzipDir, UUID.randomUUID().toString() + ".zip");
-                os = new FileOutputStream(localZipFile);
-                IOUtils.copy(is, os);
-                return localZipFile;
+                Path localZipFile = unzipDir.toPath().resolve(UUID.randomUUID().toString() + ".zip");
+                Files.copy(is, localZipFile, StandardCopyOption.REPLACE_EXISTING);
+                return localZipFile.toFile();
             } else {
                 String msg = String.format("Failed to open %s.", fileName);
                 throw new IoException(msg);
             }
         } catch (IOException e) {
             throw new IoException(e);
-        } finally {
-            IOUtils.closeQuietly(is);
-            IOUtils.closeQuietly(os);
         }
     }
 
+    @Deprecated
     protected ZipFile getNewZipFile(File file) {
         try {
             return new ZipFile(file);
