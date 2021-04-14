@@ -1,3 +1,4 @@
+enableFeaturePreview('STABLE_PUBLISHING')
 includeFlat 'metl-server', 'metl-core',  'metl-ui', 'resource-core',
 'comp-abstract', 'comp-rdbms-reader', 'comp-sorter', 
 'comp-data-diff', 'comp-temp-rdbms', 'comp-serialize',
