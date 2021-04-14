@@ -6,4 +6,5 @@ dependencies {
     provided project(':metl-ui')   
     compile project(':comp-abstract')
     testCompile project(path: ':metl-core', configuration: 'testArtifacts')     
+    testCompile project(path: ':resource-core', configuration: 'testArtifacts')
 }
