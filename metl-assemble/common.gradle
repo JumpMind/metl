@@ -83,15 +83,12 @@ import java.util.Date
     
     configurations { 
         deployerJars
-        provided 
         testArtifacts.extendsFrom testRuntime
         all {
             // check for updates every build
             resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
         }    
     }
-    
-    sourceSets.main.compileClasspath += files([configurations.provided])
     
     uploadArchives {
         repositories.mavenDeployer {
@@ -124,7 +121,6 @@ import java.util.Date
         tasks.withType(Javadoc) {
           options.addStringOption('Xdoclint:none', '-quiet')
           options.addStringOption("sourcepath", "")
-          classpath += files([configurations.provided])
         }
       }
     }       
@@ -163,7 +159,6 @@ import java.util.Date
         classpath {
             downloadSources = true
             downloadJavadoc = false
-            plusConfigurations += files([configurations.provided])
         }        
         
         project.file.whenMerged { project ->

@@ -3,7 +3,7 @@ apply from: '../metl-assemble/common.gradle'
 version = '3.8.7.' + pluginBuildNumber
 
 dependencies {
-    provided project(':metl-ui')   
+    compileOnly project(':metl-ui')   
     compile project(':comp-abstract')
     compile "org.bouncycastle:bcprov-jdk15on:${bouncycastleVersion}"
     compile "org.bouncycastle:bcpg-jdk15on:${bouncycastleVersion}"
