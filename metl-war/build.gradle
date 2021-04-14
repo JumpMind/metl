@@ -1,6 +1,6 @@
 apply from: '../metl-assemble/common.gradle'
 
-apply plugin: 'fi.jasoft.plugin.vaadin'
+apply plugin: 'com.devsoap.plugin.vaadin'
 
 configurations {
     executableWar
@@ -33,11 +33,11 @@ war {
 // Don't compress javascript
 // vaadin.gwt.style = "PRETTY"
 vaadin.version = vaadinVersion
-vaadin.widgetset = 'org.jumpmind.metl.ui.AppWidgetSet'
+vaadinCompile.widgetset = 'org.jumpmind.metl.ui.AppWidgetSet'
 vaadin.manageDependencies = true
 vaadin.manageRepositories = false
 vaadin.push = true
-sourceSets.main.compileClasspath += [configurations.provided]
+sourceSets.main.compileClasspath += files([configurations.provided])
 
 dependencies {
     compile project(":metl-ui")
