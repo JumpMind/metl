@@ -35,6 +35,7 @@ import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 
 import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchRequest;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
@@ -127,7 +128,7 @@ public class SQSReader extends AbstractComponentRuntime {
         try {
             ReceiveMessageRequest request = ReceiveMessageRequest.builder()
                     .queueUrl(queueUrl)
-                        .maxNumberOfMessages(maxResultsPerRead)
+                    .maxNumberOfMessages(maxResultsPerRead)
                     .build();
 
             ReceiveMessageResponse response = client.receiveMessage(request);
@@ -135,10 +136,14 @@ public class SQSReader extends AbstractComponentRuntime {
             for (software.amazon.awssdk.services.sqs.model.Message message : responseMessages) {
                 if (message != null) {
                     messageReceipts.add(message.receiptHandle());
-                    if ("ON READ".equals(deleteWhen)) {
+                    if ("ON READ".equals(deleteWhen) && maxResultsPerRead == 1) {
                         deleteMessage(client, message.receiptHandle());
                     }
                 }
+            }
+            
+            if ("ON READ".equals(deleteWhen) && maxResultsPerRead > 1) {
+               deleteMessageBatch(client, responseMessages);
             }
 
             return responseMessages;
@@ -158,5 +163,27 @@ public class SQSReader extends AbstractComponentRuntime {
         } catch (Exception e) {
             log(LogLevel.WARN, "Failed to delete SQS message with receipt: %s", messageReceipt);
         }
+    }
+
+    private void deleteMessageBatch(SqsClient client, List<software.amazon.awssdk.services.sqs.model.Message> responseMessages) {
+    	if (responseMessages == null || responseMessages.isEmpty()) {
+            return;
+        }
+    	
+        int id = 0;
+        List<software.amazon.awssdk.services.sqs.model.DeleteMessageBatchRequestEntry> entries = new ArrayList<software.amazon.awssdk.services.sqs.model.DeleteMessageBatchRequestEntry>(responseMessages.size());
+        for (software.amazon.awssdk.services.sqs.model.Message message : responseMessages) {
+            entries.add(software.amazon.awssdk.services.sqs.model.DeleteMessageBatchRequestEntry.builder()
+                            .id(String.valueOf(id++))
+                            .receiptHandle(message.receiptHandle())
+                            .build());
+        }
+
+        DeleteMessageBatchRequest batch = DeleteMessageBatchRequest.builder()
+        		.queueUrl(queueUrl)
+        		.entries(entries)
+        		.build();
+        
+    	client.deleteMessageBatch(batch);
     }
 }
