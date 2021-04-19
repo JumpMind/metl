@@ -6,12 +6,17 @@ configurations {
 }
  
 dependencies {
-    jaxbConfig 'org.glassfish.jaxb:jaxb-core:2.2.11'
-    jaxbConfig 'org.glassfish.jaxb:jaxb-jxc:2.2.11'
-    jaxbConfig 'org.glassfish.jaxb:jaxb-xjc:2.2.11'
+    jaxbConfig "org.glassfish.jaxb:jaxb-core:$jaxbVersion"
+    jaxbConfig "org.glassfish.jaxb:jaxb-runtime:$jaxbVersion"
+    jaxbConfig "org.glassfish.jaxb:jaxb-jxc:$jaxbVersion"
+    jaxbConfig "org.glassfish.jaxb:jaxb-xjc:$jaxbVersion"
 }
 
 dependencies {
+    compile "org.glassfish.jaxb:jaxb-core:$jaxbVersion"
+    compile "org.glassfish.jaxb:jaxb-runtime:$jaxbVersion"
+    compile "javax.annotation:javax.annotation-api:$javaxAnnotationVersion"
+
     compile "org.slf4j:slf4j-api:$slf4jVersion"
     compile "org.slf4j:jul-to-slf4j:$slf4jVersion"
     compile "org.slf4j:jcl-over-slf4j:$slf4jVersion"
@@ -69,10 +74,6 @@ dependencies {
     }
     compile "org.jgrapht:jgrapht-core:1.0.1"
     compile "org.apache.kafka:kafka-clients:$apacheKafkaVersion"
-    testCompile "org.mockito:mockito-all:$mockitoVersion"
-    testCompile "org.powermock:powermock-api-mockito:$powerMockVersion"
-    testCompile "org.powermock:powermock-module-junit4:$powerMockVersion"    
-    testCompile "xmlunit:xmlunit:$xmlunitVersion"
 
     /* TODO: AWS SDK dependencies in resource-core instead? */
     compile "com.amazonaws:aws-encryption-sdk-java:${awsEncryptionSdkVersion}"
