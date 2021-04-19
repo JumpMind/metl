@@ -24,6 +24,7 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.websocket.server.ServerContainer;
@@ -31,7 +32,6 @@ import javax.websocket.server.ServerContainer;
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.annotations.AnnotationConfiguration.ClassInheritanceMap;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.Configuration.ClassList;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -61,8 +61,8 @@ public class Develop {
         webapp.setWar(pathPrefix + "metl-war/src/main/webapp");
         webapp.setResourceBase(pathPrefix + "metl-war/src/main/webapp");
 
-        ConcurrentHashMap<String, ConcurrentHashSet<String>> map = new ClassInheritanceMap();
-        ConcurrentHashSet<String> set = new ConcurrentHashSet<>();
+        ConcurrentHashMap<String, Set<String>> map = new ClassInheritanceMap();
+        Set<String> set = ConcurrentHashMap.newKeySet();
         set.add("org.jumpmind.metl.ui.init.AppInitializer");
         map.put("org.springframework.web.WebApplicationInitializer", set);
         webapp.setAttribute(AnnotationConfiguration.CLASS_INHERITANCE_MAP, map);

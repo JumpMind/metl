@@ -11,8 +11,8 @@ repositories {
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
-sourceCompatibility=1.8
-targetCompatibility=1.8   
+sourceCompatibility=11
+targetCompatibility=11
 
 dependencies {
     compile "org.jumpmind.metl:metl-ui:1.6.0.dev201611081523"

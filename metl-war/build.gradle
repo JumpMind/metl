@@ -33,15 +33,26 @@ war {
 // vaadin.gwt.style = "PRETTY"
 vaadin.version = vaadinVersion
 vaadinCompile.widgetset = 'org.jumpmind.metl.ui.AppWidgetSet'
+// use supplied GWT (2.9.0) instead of Vaadin-bundled:
+vaadinCompile.gwtSdkFirstInClasspath = false
+vaadinCompile.extraArgs = ['-sourceLevel', '1.11']
 vaadin.manageDependencies = true
 vaadin.manageRepositories = false
 vaadin.push = true
 
 dependencies {
     compile project(":metl-ui")
-    compileOnly ("com.vaadin:vaadin-client-compiler:$vaadinVersion")  {
+    vaadinCompile ('com.google.gwt:gwt-dev:2.9.0') {
        exclude group:'org.eclipse.jetty'
-    }    
+    }
+    vaadinCompile 'com.google.gwt:gwt-user:2.9.0'
+    vaadinCompile 'com.google.gwt:gwt-elemental:2.9.0'
+    vaadinCompile ("com.vaadin:vaadin-client:$vaadinVersion")  {
+       exclude group: 'com.vaadin.external.gwt'
+    }
+    vaadinCompile ("com.vaadin:vaadin-client-compiler:$vaadinVersion")  {
+       exclude group: 'com.vaadin.external.gwt'
+    }
     executableWar project(":metl-server")    
 }
 
