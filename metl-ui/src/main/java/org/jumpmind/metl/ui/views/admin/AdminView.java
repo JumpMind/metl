@@ -37,21 +37,21 @@ import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
-import com.vaadin.data.Item;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.v7.data.Item;
+import com.vaadin.v7.event.ItemClickEvent;
+import com.vaadin.v7.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.v7.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.Table.ColumnHeaderMode;
-import com.vaadin.ui.TreeTable;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.v7.ui.Table.ColumnHeaderMode;
+import com.vaadin.v7.ui.TreeTable;
+import com.vaadin.v7.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
