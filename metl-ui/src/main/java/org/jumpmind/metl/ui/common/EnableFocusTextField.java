@@ -20,8 +20,8 @@
  */
 package org.jumpmind.metl.ui.common;
 
-import com.vaadin.data.Property;
-import com.vaadin.ui.TextField;
+import com.vaadin.v7.data.Property;
+import com.vaadin.v7.ui.TextField;
 
 @SuppressWarnings("serial")
 public class EnableFocusTextField extends TextField {
@@ -42,7 +42,7 @@ public class EnableFocusTextField extends TextField {
     }
     
     @Override
-    public void addValueChangeListener(com.vaadin.data.Property.ValueChangeListener listener) {
+    public void addValueChangeListener(com.vaadin.v7.data.Property.ValueChangeListener listener) {
         super.addValueChangeListener(listener);
         this.listener = listener;
     }

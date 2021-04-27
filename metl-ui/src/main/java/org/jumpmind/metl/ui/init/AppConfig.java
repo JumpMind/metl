@@ -104,7 +104,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import com.cybercom.vaadin.spring.UIScope;
+import org.jumpmind.metl.vaadin.spring.UIScope;
 
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;

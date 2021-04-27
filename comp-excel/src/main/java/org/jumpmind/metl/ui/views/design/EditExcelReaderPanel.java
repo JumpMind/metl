@@ -31,18 +31,18 @@ import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.ExcelFileReader;
 
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.filter.And;
-import com.vaadin.data.util.filter.Compare;
-import com.vaadin.data.util.filter.IsNull;
-import com.vaadin.data.util.filter.Not;
-import com.vaadin.data.util.filter.SimpleStringFilter;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.HeaderCell;
-import com.vaadin.ui.Grid.HeaderRow;
-import com.vaadin.ui.Grid.SelectionMode;
-import com.vaadin.ui.TextField;
+import com.vaadin.v7.data.util.BeanItemContainer;
+import com.vaadin.v7.data.util.filter.And;
+import com.vaadin.v7.data.util.filter.Compare;
+import com.vaadin.v7.data.util.filter.IsNull;
+import com.vaadin.v7.data.util.filter.Not;
+import com.vaadin.v7.data.util.filter.SimpleStringFilter;
+import com.vaadin.v7.ui.CheckBox;
+import com.vaadin.v7.ui.Grid;
+import com.vaadin.v7.ui.Grid.HeaderCell;
+import com.vaadin.v7.ui.Grid.HeaderRow;
+import com.vaadin.v7.ui.Grid.SelectionMode;
+import com.vaadin.v7.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class EditExcelReaderPanel extends AbstractComponentEditPanel {
