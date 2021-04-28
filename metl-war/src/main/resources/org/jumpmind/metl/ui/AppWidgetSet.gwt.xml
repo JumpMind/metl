@@ -3,6 +3,7 @@
 <!-- WS Compiler: manually edited -->
 <module>
         <inherits name="com.vaadin.v7.Vaadin7WidgetSet" />
+        <inherits name="org.jumpmind.metl.ui.AppWidgetSet" />
         <inherits name="org.vaadin.aceeditor.AceEditorWidgetSet" />
         <inherits name="com.vaadin.contextmenu.WidgetSet" />
         <set-configuration-property name="devModeRedirectEnabled" value="true" />
