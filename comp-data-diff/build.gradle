@@ -6,5 +6,5 @@ dependencies {
     compileOnly project(':metl-ui')
     compile project(':comp-rdbms-reader')
     compile project(':comp-rdbms-writer')
-    testCompile project(path: ':metl-core', configuration: 'testArtifacts') 
+    testCompile project(path: ':metl-core', configuration: 'testArtifacts')
 }
