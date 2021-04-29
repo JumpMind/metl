@@ -6,22 +6,22 @@ import java.util.Date
     apply from: metlAssembleDir + '/asciidoc.gradle'
 
     group = 'org.jumpmind.metl'
-        
+
     apply plugin: 'eclipse-wtp'
     apply plugin: 'java'
     apply plugin: 'license-report'
 	apply plugin: 'jacoco'
 	apply plugin: 'license'
 	apply plugin: 'maven'
-	
+
 	ext {
 	    origVersion = version
 	    pluginBuildNumber = buildNumber = 'a'.equals(buildNumber) ?  ('a.' + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())) : buildNumber
 	}
-	
+
 	buildNumber = 'a'.equals(buildNumber) ?  ('a.' + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())) : buildNumber
 	version = version + "." + buildNumber
-	
+
     compileJava {
         options.compilerArgs = ['--release', '11']
     }
@@ -54,43 +54,42 @@ import java.util.Date
                 }
             }
         }
-    }   
-    
+    }
+
     license {
         header rootProject.file('HEADER')
         strictCheck true
         includes(["**/*.java", "**/*.properties", "**/*.xml"])
         excludes(["**/AppWidgetSet.gwt.xml"])
-    }     
-    
+    }
+
     ext {
         majorMinorVersion = version.substring(0, version.indexOf(".", version.indexOf(".")+ 1))
-    }    
-    
+    }
+
     repositories {
         // uncomment this if you want to use your local maven repository to test undelivered
         /// changes (like symmetricds changes)
         //mavenLocal()
         mavenCentral()
-        maven { url "http://maven.vaadin.com/vaadin-addons" }
+        maven { url "https://maven.vaadin.com/vaadin-addons" }
         maven { url "https://plugins.gradle.org/m2" }
-        maven { url "http://maven.jumpmind.com/repo" }
+        maven { url "https://maven.jumpmind.com/repo" }
         maven { url "https://repository.jboss.org/nexus/content/repositories/deprecated" }
-        maven { url "http://www.soapui.org/repository/maven2" }
+        maven { url "https://www.soapui.org/repository/maven2" }
         maven { url "https://github.com/santhosh-tekuri/maven-repository/raw/master" }
-        jcenter()        
-    }     
-     
-    
-    configurations { 
+    }
+
+
+    configurations {
         deployerJars
         testArtifacts.extendsFrom testRuntime
         all {
             // check for updates every build
             resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-        }    
+        }
     }
-    
+
     uploadArchives {
         repositories.mavenDeployer {
             configuration = configurations.deployerJars
@@ -99,7 +98,7 @@ import java.util.Date
             }
         }
     }
-    
+
     dependencies {
         deployerJars "org.apache.maven.wagon:wagon-ssh:2.2"
     }
@@ -108,15 +107,15 @@ import java.util.Date
         classifier = 'sources'
         from sourceSets.main.allSource
     }
-    
+
     task testJar(type: Jar) {
         classifier "test"
         from sourceSets.test.output
-    }    
-    
-    artifacts { archives sourcesJar 
+    }
+
+    artifacts { archives sourcesJar
                 testArtifacts testJar  }
-    
+
     if (JavaVersion.current().isJava8Compatible()) {
       allprojects {
         tasks.withType(Javadoc) {
@@ -124,54 +123,54 @@ import java.util.Date
           options.addStringOption("sourcepath", "")
         }
       }
-    }       
+    }
 
     task deploy {
         description 'Shortcut for Maven users'
         dependsOn tasks.uploadArchives
-    }    
-    
+    }
+
     jar {
         manifest {
             attributes("Implementation-Title": project.name,
-                       "Implementation-Version": version,
-                       "Project-Artifact": project.name,                       
-                       "Build-Version": version,
+                       "Implementation-Version": project.version,
+                       "Project-Artifact": project.name,
+                       "Build-Version": project.version,
                        "Build-Time": new SimpleDateFormat("yyyyMMdd-HHmm").format(new Date()),
                        "Build-Scm-Version": gitVersion,
                        "Build-Scm-Branch": gitBranch)
-        }    
-    }    
-    
+        }
+    }
+
     test {
         ignoreFailures true
     }
-    
+
     dependencies {
         testCompile "org.hamcrest:hamcrest-core:1.3"
         testCompile "junit:junit:4.12"
         testCompile "org.mockito:mockito-core:$mockitoVersion"
         testCompile "org.powermock:powermock-api-mockito2:$powerMockVersion"
         testCompile "org.powermock:powermock-module-junit4:$powerMockVersion"
-        testCompile "xmlunit:xmlunit:$xmlunitVersion"   
-    }    
+        testCompile "xmlunit:xmlunit:$xmlunitVersion"
+    }
 
     eclipse {
         classpath {
             downloadSources = true
             downloadJavadoc = false
-        }        
-        
+        }
+
         project.file.whenMerged { project ->
             project.natures.remove('org.springsource.ide.eclipse.gradle.core.nature')
-            project.natures.remove('org.eclipse.buildship.core.gradleprojectnature')            
+            project.natures.remove('org.eclipse.buildship.core.gradleprojectnature')
         }
-    }   
-    
+    }
+
     eclipse.project.file.withXml { provider ->
       ignoreDerivedResources(provider.asNode())
     }
- 
+
     def ignoreDerivedResources(projectDescription, directories = ["target", "test-output"]) {
       def count = directories.count { file(it).exists() }
       if (count > 0) {
@@ -192,13 +191,13 @@ import java.util.Date
           }
         }
       }
-    }    
-       
+    }
+
     task develop {
         description 'Generates Eclipse artifacts and sets up your development environment'
         dependsOn tasks.cleanEclipse, tasks.cleanEclipseWtp, tasks.eclipse, tasks.eclipseWtp
     }
-    
+
     task wrapper(type: Wrapper) {
         gradleVersion = '2.8'
-    }    
+    }

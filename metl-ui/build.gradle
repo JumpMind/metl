@@ -9,31 +9,31 @@ dependencies {
     compile "org.springframework:spring-webmvc:$springVersion"
     compile (group:"org.vaadin", name:"viritin-v7-compatibility", version:"1.0") {
        exclude group:'com.vaadin'
-    }    
+    }
     compile "org.apache.poi:poi:3.11"
     compile "io.springfox:springfox-swagger2:$springfoxSwaggerVersion"
     compile "io.springfox:springfox-swagger-ui:$springfoxSwaggerVersion"
     compile "io.swagger:swagger-core:$swaggerVersion"
     compile ("org.reficio:soap-builder:$reficioSoapVersion") {
        exclude group:'com.googlecode.guava-osgi'
-    }    
+    }
     compile ("org.reficio:soap-common:$reficioSoapVersion") {
 
        exclude group:'com.googlecode.guava-osgi'
-    }    
+    }
     compile ("org.reficio:soap-legacy:$reficioSoapVersion") {
        exclude group:'com.googlecode.guava-osgi'
-    }    
+    }
     compile "jlibs:jlibs-xml:1.0"
     compile "com.vaadin:vaadin-compatibility-server:$vaadinVersion"
-    compile "com.vaadin:vaadin-compatibility-themes:$vaadinVersion"    
+    compile "com.vaadin:vaadin-compatibility-themes:$vaadinVersion"
     compile "com.vaadin:vaadin-push:$vaadinVersion"
     compile "javax.servlet:javax.servlet-api:$servletVersion"
     compile "org.eclipse.jetty:jetty-servlet:$jettyVersion"
     compile "com.vaadin:vaadin-context-menu:3.0.0"
     compile "org.vaadin.addons:aceeditor:0.8.15"
     compileOnly "javax.servlet.jsp:jsp-api:$jspVersion"
-    compileOnly "javax.websocket:javax.websocket-api:$webSocketVersion"     
+    compileOnly "javax.websocket:javax.websocket-api:$webSocketVersion"
     compileOnly  group: 'javax.portlet', name: 'portlet-api', version: '2.0'
-    
+
 }

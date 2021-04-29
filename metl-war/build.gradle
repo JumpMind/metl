@@ -15,7 +15,8 @@ eclipse {
 }
 
 war {
-    archiveName="metl.war"
+    duplicatesStrategy = DuplicatesStrategy.WARN
+    archiveFileName="metl.war"
     jar.enabled = true
     from {
         configurations.executableWar.collect {
@@ -24,10 +25,10 @@ war {
     }
     {
         exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
-    }    
+    }
     from ('build') { include 'plugins.zip' }
     manifest { attributes 'Main-Class': 'org.jumpmind.metl.Metl' }
-}    
+}
 
 // Don't compress javascript
 // vaadin.gwt.style = "PRETTY"
@@ -53,37 +54,40 @@ dependencies {
     vaadinCompile ("com.vaadin:vaadin-client-compiler:$vaadinVersion") {
        exclude group:'org.eclipse.jetty'
     }
-    executableWar project(":metl-server")    
+    executableWar project(":metl-server")
 }
 
-task copyJavaDocsToWebapp(type: Copy) {    
-    dependsOn javadoc    
+task copyJavaDocsToWebapp(type: Copy) {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+    dependsOn javadoc
     destinationDir = file("src/main/webapp/doc")
     into('javadoc') {
         from ('../metl-core/build/docs/javadoc') { include '**/*' }
         from ('../metl-ui/build/docs/javadoc') { include '**/*' }
-    }    
+    }
 }
 
 task copyPluginsForDevelopment (type:Copy) {
+   duplicatesStrategy = DuplicatesStrategy.WARN
    rootProject.allprojects.findAll { it.name.startsWith('comp') || it.name.startsWith('resource') }.each {
        dependsOn ":$it.name:publishMavenJavaPublicationToMavenRepository"
    }
-    
+
    from ('build/plugins')
    destinationDir file('../metl-develop/working/plugins')
    rename 'maven-metadata.xml(.*)', 'maven-metadata-local.xml$1'
 }
 
 task zipPlugins (type:Zip) {
+    duplicatesStrategy = DuplicatesStrategy.WARN
     rootProject.allprojects.findAll { it.name.startsWith('comp') || it.name.startsWith('resource') }.each {
         dependsOn ":$it.name:publishMavenJavaPublicationToMavenRepository"
     }
-    
+
     from ('build/plugins')
-    destinationDir file('build') 
+    destinationDirectory = file('build')
     rename 'maven-metadata.xml(.*)', 'maven-metadata-local.xml$1'
-    archiveName 'plugins.zip'
+    archiveFileName = 'plugins.zip'
 }
 
 

@@ -3,7 +3,7 @@ apply from: '../metl-assemble/common.gradle'
 version = '3.8.5.' + pluginBuildNumber
 
 dependencies {
-    compileOnly project(':metl-ui')   
+    compileOnly project(':metl-ui')
     compile project(':comp-abstract')
-    testCompile project(path: ':metl-core', configuration: 'testArtifacts')     
+    testCompile project(path: ':metl-core', configuration: 'testArtifacts')
 }

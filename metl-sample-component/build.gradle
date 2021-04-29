@@ -1,11 +1,10 @@
 repositories {
-    mavenCentral()        
-    maven { url "http://maven.vaadin.com/vaadin-addons" }
-    maven { url "http://maven.jumpmind.com/repo" }
+    mavenCentral()
+    maven { url "https://maven.vaadin.com/vaadin-addons" }
+    maven { url "https://maven.jumpmind.com/repo" }
     maven { url "https://repository.jboss.org/nexus/content/repositories/deprecated" }
-    maven { url "http://www.soapui.org/repository/maven2" }
+    maven { url "https://www.soapui.org/repository/maven2" }
     maven { url "https://github.com/santhosh-tekuri/maven-repository/raw/master" }
-    jcenter()        
 }
 
 apply plugin: 'java'
@@ -16,4 +15,4 @@ targetCompatibility=11
 
 dependencies {
     compile "org.jumpmind.metl:metl-ui:1.6.0.dev201611081523"
-}    
+}
