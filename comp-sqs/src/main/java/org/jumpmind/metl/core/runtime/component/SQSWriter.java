@@ -64,12 +64,12 @@ public class SQSWriter extends AbstractComponentRuntime {
             for (String input : ((TextMessage) inputMessage).getPayload()) { 
                 if (messageGroupId == null || messageGroupId.isEmpty()) {
                     sendMessage(SendMessageRequest.builder()
-                            .queueUrl(queueUrl)
+                            .queueUrl(resolveParamsAndHeaders(queueUrl, inputMessage))
                             .messageBody(input)
                             .build());
                 } else {
                     sendMessage(SendMessageRequest.builder()
-                            .queueUrl(queueUrl)
+                            .queueUrl(resolveParamsAndHeaders(queueUrl, inputMessage))
                             .messageGroupId(messageGroupId)
                             .messageBody(input)
                             .build());

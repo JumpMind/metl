@@ -94,6 +94,7 @@ public class SQSReader extends AbstractComponentRuntime {
 
             SqsClient client = (SqsClient)getResourceReference();
             int messagesRead = 0;
+            queueUrl = resolveParamsAndHeaders(queueUrl, inputMessage);
 
             while (messagesRead < maxMsgsToRead) {
                 checkForInterruption();
