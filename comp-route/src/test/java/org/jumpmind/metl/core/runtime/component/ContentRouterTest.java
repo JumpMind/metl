@@ -45,11 +45,9 @@ import org.jumpmind.metl.core.utils.TestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@RunWith(PowerMockRunner.class)
 public class ContentRouterTest {
 
     Flow flow;

@@ -3,16 +3,16 @@ import java.util.Date
 
 buildscript {
     repositories {
-        jcenter()
         mavenCentral()
+	maven { url 'https://plugins.gradle.org/m2' }
     }
 
     dependencies {
     	classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.3'
         classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.6'
-        classpath 'fi.jasoft.plugin:gradle-vaadin-plugin:0.11.1'
+        classpath 'com.devsoap.plugin:gradle-vaadin-plugin:2.0.0.beta2'
         classpath 'com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2'
-        classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'      
+        classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
         classpath 'co.riiid:gradle-github-plugin:0.3.1'
     }
 }
@@ -22,9 +22,10 @@ version = version + "." + buildNumber
 
 ext {
     majorMinorVersion = version.substring(0, version.indexOf(".", version.indexOf(".")+ 1))
-}    
+}
 
 apply plugin: 'co.riiid.gradle'
+apply plugin: 'com.devsoap.plugin.vaadin'
 
 repositories {
     mavenCentral()
@@ -67,22 +68,22 @@ task publishMetl {
             verbose: 'true',
             localFile: '../metl-war/src/main/webapp/doc/html/user-guide.html',
             remoteTofile: "${targetScpSite}/user-guide-${version}.html")
- 
+
         println "Publishing war distribution to source forge"
         ant.scp(
             trust: 'true',
             verbose: 'true',
             localFile: '../metl-war/build/libs/metl.war',
             remoteTofile: "${targetScpSite}/metl-${version}.war")
-            
+
         println "Publishing metl doc documentation to jumpmind.com"
         ant.scp(
             trust: 'true',
             verbose: 'true',
             port: 2222,
             localFile: '../metl-war/src/main/webapp/doc/html/user-guide.html',
-            remoteTofile: "$jumpmindUser:$jumpmindPassword@jumpmind.com:~/www/downloads/metl/doc/user-guide-${majorMinorVersion}.html")      
+            remoteTofile: "$jumpmindUser:$jumpmindPassword@jumpmind.com:~/www/downloads/metl/doc/user-guide-${majorMinorVersion}.html")
     }
-    
-   
+
+
 }

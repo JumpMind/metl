@@ -28,7 +28,7 @@ import java.util.Map;
 
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
-import com.vaadin.addon.contextmenu.ContextMenu;
+import com.vaadin.contextmenu.ContextMenu;
 import com.vaadin.server.Resource;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.TabSheet;

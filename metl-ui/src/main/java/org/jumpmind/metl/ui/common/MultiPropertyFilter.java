@@ -22,9 +22,9 @@ package org.jumpmind.metl.ui.common;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.Item;
-import com.vaadin.data.Property;
+import com.vaadin.v7.data.Container;
+import com.vaadin.v7.data.Item;
+import com.vaadin.v7.data.Property;
 
 /**
  * Custom Vaadin filter for filtering on more than one container item property.

@@ -39,7 +39,7 @@ import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 
 import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
+import com.vaadin.v7.ui.ComboBox;
 import com.vaadin.ui.themes.ValoTheme;
 
 class ScriptTemplatesDialog extends ResizableWindow {

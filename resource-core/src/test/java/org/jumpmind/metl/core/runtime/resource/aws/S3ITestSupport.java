@@ -3,9 +3,13 @@ package org.jumpmind.metl.core.runtime.resource.aws;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.net.URISyntaxException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 import org.junit.AfterClass;
@@ -111,12 +115,17 @@ public class S3ITestSupport {
     }
 
     protected static File testFile(final String fileName) {
-        try {
-            return new File(
-                    Thread.currentThread().getContextClassLoader().getResource(fileName).toURI());
-        } catch (URISyntaxException ex) {
-            throw new RuntimeException(ex);
+        // allow this to work from EITHER file system or test JAR
+        Path p;
+        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName)) {
+            p = Files.createTempFile(S3ITestSupport.class.getSimpleName(), null);
+            Files.copy(is, p, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
         }
+        File tmp = p.toFile();
+        tmp.deleteOnExit();
+        return tmp;
     }
 
     protected static void assertSdkHttpSuccess(final SdkHttpResponse response) {

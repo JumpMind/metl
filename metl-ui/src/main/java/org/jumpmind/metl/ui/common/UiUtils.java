@@ -27,8 +27,8 @@ import java.io.InputStream;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.Label;
+import com.vaadin.v7.shared.ui.label.ContentMode;
+import com.vaadin.v7.ui.Label;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;

@@ -68,7 +68,7 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
 
 		MappingDiagramState state = getState();
 		state.component = component;
-		state.readOnly = readOnly;
+		//state.readOnly = readOnly;
 
         if (component.getInputModel() instanceof RelationalModel) {
             state.relationalInputModel = (RelationalModel) component.getInputModel();

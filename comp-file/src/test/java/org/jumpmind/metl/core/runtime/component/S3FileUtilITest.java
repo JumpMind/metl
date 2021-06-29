@@ -10,9 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -105,13 +102,6 @@ public class S3FileUtilITest extends S3ITestSupport {
                 .mapToObj(i -> new Setting(nvPairs[i], nvPairs[i + 1])).toArray(Setting[]::new);
     }
 
-    private static File makeCopyOf(final File sourceFile) throws IOException {
-        Path tempFile = Files
-                .createTempFile(S3FileUtilITest.class.getSimpleName().toLowerCase() + "-", null);
-        Files.copy(sourceFile.toPath(), tempFile, StandardCopyOption.REPLACE_EXISTING);
-        return tempFile.toFile();
-    }
-
     @Test
     public void runWhenPerUowIgnoresNonControlMessage() {
         assumeTrue("AWS credentials are not present", awsCredentialsArePresent());
@@ -170,7 +160,7 @@ public class S3FileUtilITest extends S3ITestSupport {
         // AWS max key length (64):
         // ---------------****************************************************************
         String testKey = "upload-control-message-filename-key-settings/test";
-        File sourceFile = makeCopyOf(testFile());
+        File sourceFile = testFile();
         Setting[] settings = settingsArray(S3FileUtil.SETTING_FILE_NAME,
                 sourceFile.getAbsolutePath(), S3FileUtil.SETTING_OBJECT_KEY, testKey);
         IComponentRuntime runtime = s3FileUtil(settings);
@@ -200,8 +190,8 @@ public class S3FileUtilITest extends S3ITestSupport {
         // ---------------****************************************************************
         String testKey = "upload-txtmsg-nfiles/s3fileutilitest-9223372036854775807.tmp";
 
-        File sourceFile1 = makeCopyOf(testFile());
-        File sourceFile2 = makeCopyOf(testFile());
+        File sourceFile1 = testFile();
+        File sourceFile2 = testFile();
         String expectedNameProcessed1 = String.format("%s/%s", TEST_BUCKET_NAME,
                 sourceFile1.getName());
         String expectedNameProcessed2 = String.format("%s/%s", TEST_BUCKET_NAME,
@@ -250,8 +240,8 @@ public class S3FileUtilITest extends S3ITestSupport {
                 testKey.replace("$(_sequence)", "0"));
         String expectedNameProcessed2 = String.format("%s/%s", TEST_BUCKET_NAME,
                 testKey.replace("$(_sequence)", "1"));
-        File sourceFile1 = makeCopyOf(testFile());
-        File sourceFile2 = makeCopyOf(testFile());
+        File sourceFile1 = testFile();
+        File sourceFile2 = testFile();
         Setting[] settings = settingsArray(AbstractComponentRuntime.RUN_WHEN,
                 AbstractComponentRuntime.PER_MESSAGE, S3FileUtil.SETTING_GET_FILE_NAME_FROM_MESSAGE,
                 "true", S3FileUtil.SETTING_OBJECT_KEY, testKey);

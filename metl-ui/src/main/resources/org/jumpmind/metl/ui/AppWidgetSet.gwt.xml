@@ -2,7 +2,7 @@
 <!DOCTYPE module PUBLIC "-//Vaadin//DTD Vaadin 7//EN" "https://raw.github.com/vaadin/gwt/master/distro-source/core/src/gwt-module.dtd">
 <!-- WS Compiler: manually edited -->
 <module>
-        <inherits name="com.vaadin.DefaultWidgetSet" />
+        <inherits name="com.vaadin.v7.Vaadin7WidgetSet" />
         <inherits name="org.jumpmind.vaadin.ui.sqlexplorer.AppWidgetSet" />
         <inherits name="org.vaadin.teemusa.gridextensions.GridExtensionPackWidgetSet" />
         <inherits name="org.vaadin.aceeditor.AceEditorWidgetSet" />
