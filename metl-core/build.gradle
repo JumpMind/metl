@@ -37,7 +37,7 @@ dependencies {
     compile "commons-io:commons-io:$commonsIoVersion"
     compile "commons-net:commons-net:$commonsNetVersion"
     compile "jaxen:jaxen:$jaxenVersion"
-    compile "javax.mail:mail:$javaMailVersion"
+    compile "javax.mail:javax.mail-api:$javaMailVersion"
     compile "org.jdom:jdom2:$jdomVersion"
     compile "javax.el:javax.el-api:3.0.0"
     compile "com.h2database:h2:$h2Version"

@@ -43,7 +43,9 @@ public class MailSession {
     public static final String SETTING_PASSWORD = "mail.password";
     
     public static final String SETTING_USE_TLS = "mail.smtp.starttls.enable";
-    
+
+    public static final String SETTING_PROTOCOLS = "mail.smtp.ssl.protocols";
+
     public static final String SETTING_USE_AUTH = "mail.smtp.auth";
 
     Session session;
@@ -60,6 +62,7 @@ public class MailSession {
         prop.setProperty(SETTING_PORT_NUMBER, getGlobalSetting(SETTING_PORT_NUMBER, "25"));
         prop.setProperty(SETTING_FROM, getGlobalSetting(SETTING_FROM, "metl@localhost"));
         prop.setProperty(SETTING_USE_TLS, getGlobalSetting(SETTING_USE_TLS, "false"));
+        prop.setProperty(SETTING_PROTOCOLS, getGlobalSetting(SETTING_PROTOCOLS, "TLSv1.2"));
         prop.setProperty(SETTING_USE_AUTH, getGlobalSetting(SETTING_USE_AUTH, "false"));
 
         session = Session.getInstance(prop);
