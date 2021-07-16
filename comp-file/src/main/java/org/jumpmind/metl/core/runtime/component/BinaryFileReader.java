@@ -61,17 +61,16 @@ public class BinaryFileReader extends AbstractFileReader {
 
     private void processFiles(List<String> files, Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
 
-        filesRead.addAll(files);
-
         for (String file : files) {
             Map<String, Serializable> headers = new HashMap<>(1);
             headers.putAll(inputMessage.getHeader());
-            headers.put("source.file.path", file);
             try {
-                if (isNotBlank(file)) {
-                    info("Reading file: %s", file);
-                }
                 String filePath = resolveParamsAndHeaders(file, inputMessage);
+                headers.put("source.file.path", filePath);
+                filesRead.add(filePath);
+                if (isNotBlank(filePath)) {
+                    info("Reading file: %s", filePath);
+                }
                 try (InputStream inStream = directory.getInputStream(filePath, mustExist)) {
                     //TODO: if the file is bigger than the allowable message size, this doesn't work
                     if (inStream != null) {
@@ -79,8 +78,8 @@ public class BinaryFileReader extends AbstractFileReader {
                         callback.sendBinaryMessage(headers, payload);
                         getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                     } else {
-                        if (isNotBlank(file)) {
-                            info("File %s didn't exist, but must exist setting was false.  Continuing", file);
+                        if (isNotBlank(filePath)) {
+                            info("File %s didn't exist, but must exist setting was false.  Continuing", filePath);
                         }
                     }
                 }
