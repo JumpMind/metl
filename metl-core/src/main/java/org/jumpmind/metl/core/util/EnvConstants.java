@@ -44,4 +44,6 @@ public final class EnvConstants {
     
     public static final String LOG_FILE_PATTERN_LAYOUT = "log.file.pattern.layout";
     
+    public static final String JMX_ENABLED = "jmx.enabled";
+    
 }
