@@ -140,8 +140,8 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
                 stream.filter(path -> path.toFile().getName().startsWith(databaseName))
                 .forEach(path -> deleteDatabaseFile(path.toFile()));
             } catch (IOException e) {
-                log.warn("Failed to delete file", e);	
-            }        	
+                log.warn("Failed to delete file", e);
+            }
         }
         
         databasePlatform = null;
