@@ -301,12 +301,12 @@ public class DataDiff extends AbstractComponentRuntime {
         ds.close();
 
         if (!inMemoryCompare) {
-        	try (Stream<Path> stream = Files.list(Paths.get(System.getProperty("h2.baseDir")))) {
-        		stream.filter(path -> path.toFile().getName().startsWith(databaseName))
+            try (Stream<Path> stream = Files.list(Paths.get(System.getProperty("h2.baseDir")))) {
+                stream.filter(path -> path.toFile().getName().startsWith(databaseName))
                 .forEach(path -> deleteDatabaseFile(path.toFile()));
-        	} catch (IOException e) {
-        		log.warn("Failed to delete file", e);	
-        	}        	
+            } catch (IOException e) {
+                log.warn("Failed to delete file", e);	
+            }        	
         }
 
         databasePlatform = null;
