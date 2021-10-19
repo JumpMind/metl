@@ -1,5 +1,4 @@
 /**
- * Licensed to JumpMind Inc under one or more contributor
  * license agreements.  See the NOTICE file distributed
  * with this work for additional information regarding
  * copyright ownership.  JumpMind Inc licenses this file
@@ -523,7 +522,10 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         if (brokerService == null) {
             try {
                 BrokerService broker = new BrokerService();
-                broker.setPersistent(false);
+            	broker.setPersistent(false);
+                if (env.getProperty(EnvConstants.JMX_ENABLED,"false").equalsIgnoreCase("false")) {
+                    broker.setUseJmx(false);
+                }
                 broker.getSystemUsage().getMemoryUsage().setLimit(10*1024*10);
                 broker.start();
                 brokerService = broker;

@@ -23,10 +23,12 @@ package org.jumpmind.metl.core.runtime.component;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Types;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
@@ -134,9 +136,9 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
         ds.close();
 
         if (!inMemoryDb) {
-            try {
-                Files.list(Paths.get(System.getProperty("h2.baseDir"))).filter(path -> path.toFile().getName().startsWith(databaseName))
-                        .forEach(path -> deleteDatabaseFile(path.toFile()));
+            try (Stream<Path> stream = Files.list(Paths.get(System.getProperty("h2.baseDir")))) {
+                stream.filter(path -> path.toFile().getName().startsWith(databaseName))
+                .forEach(path -> deleteDatabaseFile(path.toFile()));
             } catch (IOException e) {
                 log.warn("Failed to delete file", e);
             }
