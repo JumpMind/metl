@@ -156,6 +156,7 @@
                     <choice>Basic Auth</choice>
                     <choice>Token Auth</choice>
                     <choice>OAuth 1.0</choice>
+                    <choice>AWS Signature</choice>
                 </choices>
             </setting>
             <setting id='security.usertoken.username' required='false' type='text'>
@@ -187,6 +188,15 @@
             </setting>
             <setting id='security.oauth10.realm' required='false' type='text'>
                 <name>OAuth 1.0 Realm</name>
+            </setting>
+            <setting id='security.awssig.accesskey' required='false' type='text'>
+                <name>AWS Signature Access Key</name>
+            </setting>
+            <setting id='security.awssig.secretkey' required='false' type='text'>
+                <name>AWS Signature Secret Key</name>
+            </setting>
+            <setting id='security.awssig.region' required='false' type='text'>
+                <name>AWS Signature Region</name>
             </setting>
         </settings>
     </resource>

@@ -21,6 +21,14 @@
 package org.jumpmind.metl.core.runtime.resource;
 
 import com.sun.jersey.oauth.signature.*;
+
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
+
 import org.apache.commons.codec.binary.Base64;
 import org.jumpmind.exception.IoException;
 import org.slf4j.Logger;
@@ -56,6 +64,7 @@ public class HttpDirectory implements IHttpDirectory {
     public static final String SECURITY_BASIC = "Basic Auth";
     public static final String SECURITY_TOKEN = "Token Auth";
     public static final String SECURITY_OAUTH_10 = "OAuth 1.0";
+    public static final String SECURITY_AWS_SIGNATURE = "AWS Signature";
 
     String url;
     String httpMethod;
@@ -71,13 +80,16 @@ public class HttpDirectory implements IHttpDirectory {
     String oa1Realm;
     String oa1Token;
     String oa1TokenSecret;
+    String awsSigAccess;
+    String awsSigSecret;
+    String awsSigRegion;
     int timeout;
     int contentLength;
 
     public HttpDirectory(String url, String httpMethod, String contentType, int timeout,
             String security, String username, String password, String token, String oa1ConsumerKey,
             String oa1ConsumerSecret, String oa1Token, String oa1TokenSecret, String oa1Version,
-            String oa1SignatureMethod, String oa1Realm) {
+            String oa1SignatureMethod, String oa1Realm, String awsSigAccess, String awsSigSecret, String awsSigRegion) {
         this.url = url;
         this.httpMethod = httpMethod;
         this.contentType = contentType;
@@ -93,6 +105,9 @@ public class HttpDirectory implements IHttpDirectory {
         this.oa1Version = oa1Version;
         this.oa1SignatureMethod = oa1SignatureMethod;
         this.oa1Realm = oa1Realm;
+        this.awsSigAccess = awsSigAccess;
+        this.awsSigSecret = awsSigSecret;
+        this.awsSigRegion = awsSigRegion;
     }
 
     @Override
@@ -244,6 +259,7 @@ public class HttpDirectory implements IHttpDirectory {
             }
             setBasicAuthIfNeeded(httpUrlConnection);
             setOAuth10IfNeeded(httpUrlConnection, parameters);
+            setAwsSignatureAuthIfNeeded(httpUrlConnection);
             return httpUrlConnection;
         } catch (Exception e) {
             throw new IoException(e);
@@ -280,6 +296,22 @@ public class HttpDirectory implements IHttpDirectory {
             conn.setRequestProperty("Authorization", "Basic " + encodedAuthorization);
         } else if (SECURITY_TOKEN.equals(security)) {
             conn.setRequestProperty("Authorization", "Bearer " + token);
+        }
+    }
+
+    protected void setAwsSignatureAuthIfNeeded(HttpURLConnection conn) {
+        if (SECURITY_AWS_SIGNATURE.equals(security)) {        	
+            AwsCredentials credentials = AwsBasicCredentials.create(awsSigAccess, awsSigSecret);
+            AwsCredentialsProvider provider = StaticCredentialsProvider.create(credentials);
+            
+            conn = 
+            UrlConnectionHttpClient.builder()
+                    .region(Region.of(awsSigRegion))
+                    .credentialsProvider(provider)
+                    .build();
+            String userpassword = String.format("%s:%s", username, password);
+            String encodedAuthorization = new String(Base64.encodeBase64(userpassword.getBytes()));
+            conn.setRequestProperty("Authorization", "Basic " + encodedAuthorization);
         }
     }
 
