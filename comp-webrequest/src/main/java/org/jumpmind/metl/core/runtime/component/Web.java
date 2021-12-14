@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.util.Base64;
@@ -391,6 +392,12 @@ public class Web extends AbstractComponentRuntime {
         } else if (HttpDirectory.SECURITY_OAUTH_10.equals(httpDirectory.getSecurity())) {
             // TODO: We should really put this back in
             throw new UnsupportedOperationException("OAuth 1.0 support has been removed from Metl.");
+        }  else if (HttpDirectory.SECURITY_AWS_SIGNATURE.equals(httpDirectory.getSecurity())) {
+            Map<String, String> awsHeaders = generateAwsSignatureHeaders();
+            
+            for (Map.Entry<String, String> entrySet : awsHeaders.entrySet()) {
+                request.setHeader(entrySet.getKey(), entrySet.getValue());
+            }
         }
     }
 
@@ -419,6 +426,43 @@ public class Web extends AbstractComponentRuntime {
         } else {
             return resolveParamsAndHeaders(basePath, inputMessage);
         }
+    }
+    
+    // THE BIG BOY
+    private Map<String, String> generateAwsSignatureHeaders() {
+        // Things we need in order for this to work
+        String accessKey = "";
+        String secretAccessKey = "";
+        String xApiKey = "";
+        String regionName = "";
+        String serviceName = "";
+        String httpMethod = "";
+        String hostWithoutProtocol = "";
+        String sku = "";
+        String canonicalURI = "";
+        
+        TreeMap<String, String> awsHeaders = new TreeMap<>();
+        awsHeaders.put("accept", "application/json");
+        awsHeaders.put("host", hostWithoutProtocol);
+        awsHeaders.put("x-api-key", xApiKey);
+
+        TreeMap<String, String> queryParams = new TreeMap<>();
+        queryParams.put("sku", sku);
+        
+        AwsAuthorization authorization = new AwsAuthorization.Builder(accessKey, secretAccessKey)
+                .regionName(regionName)
+                .serviceName(serviceName)
+                .httpMethodName(httpMethod)
+                .canonicalURI(canonicalURI)
+                .queryParametes(queryParams)
+                .awsHeaders(awsHeaders)
+                .payload(null)
+                .debug()
+                .build();
+        
+        Map<String, String> awsSignatureHeaders = authorization.getHeaders();
+        awsSignatureHeaders.put("x-api-key", xApiKey);
+        return awsSignatureHeaders;
     }
 
     private class HttpGetWithEntity extends HttpEntityEnclosingRequestBase {

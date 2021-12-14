@@ -22,13 +22,6 @@ package org.jumpmind.metl.core.runtime.resource;
 
 import com.sun.jersey.oauth.signature.*;
 
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.AwsCredentials;
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
-
 import org.apache.commons.codec.binary.Base64;
 import org.jumpmind.exception.IoException;
 import org.slf4j.Logger;
@@ -259,7 +252,6 @@ public class HttpDirectory implements IHttpDirectory {
             }
             setBasicAuthIfNeeded(httpUrlConnection);
             setOAuth10IfNeeded(httpUrlConnection, parameters);
-            setAwsSignatureAuthIfNeeded(httpUrlConnection);
             return httpUrlConnection;
         } catch (Exception e) {
             throw new IoException(e);
@@ -296,22 +288,6 @@ public class HttpDirectory implements IHttpDirectory {
             conn.setRequestProperty("Authorization", "Basic " + encodedAuthorization);
         } else if (SECURITY_TOKEN.equals(security)) {
             conn.setRequestProperty("Authorization", "Bearer " + token);
-        }
-    }
-
-    protected void setAwsSignatureAuthIfNeeded(HttpURLConnection conn) {
-        if (SECURITY_AWS_SIGNATURE.equals(security)) {        	
-            AwsCredentials credentials = AwsBasicCredentials.create(awsSigAccess, awsSigSecret);
-            AwsCredentialsProvider provider = StaticCredentialsProvider.create(credentials);
-            
-            conn = 
-            UrlConnectionHttpClient.builder()
-                    .region(Region.of(awsSigRegion))
-                    .credentialsProvider(provider)
-                    .build();
-            String userpassword = String.format("%s:%s", username, password);
-            String encodedAuthorization = new String(Base64.encodeBase64(userpassword.getBytes()));
-            conn.setRequestProperty("Authorization", "Basic " + encodedAuthorization);
         }
     }
 
