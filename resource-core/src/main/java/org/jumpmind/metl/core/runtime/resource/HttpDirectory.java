@@ -76,13 +76,15 @@ public class HttpDirectory implements IHttpDirectory {
     String awsSigAccess;
     String awsSigSecret;
     String awsSigRegion;
+    String awsSigServiceName;
     int timeout;
     int contentLength;
 
     public HttpDirectory(String url, String httpMethod, String contentType, int timeout,
             String security, String username, String password, String token, String oa1ConsumerKey,
             String oa1ConsumerSecret, String oa1Token, String oa1TokenSecret, String oa1Version,
-            String oa1SignatureMethod, String oa1Realm, String awsSigAccess, String awsSigSecret, String awsSigRegion) {
+            String oa1SignatureMethod, String oa1Realm, String awsSigAccess, String awsSigSecret,
+            String awsSigRegion, String awsSigServiceName) {
         this.url = url;
         this.httpMethod = httpMethod;
         this.contentType = contentType;
@@ -101,6 +103,7 @@ public class HttpDirectory implements IHttpDirectory {
         this.awsSigAccess = awsSigAccess;
         this.awsSigSecret = awsSigSecret;
         this.awsSigRegion = awsSigRegion;
+        this.awsSigServiceName = awsSigServiceName;
     }
 
     @Override
@@ -374,7 +377,22 @@ public class HttpDirectory implements IHttpDirectory {
     public int getTimeout() {
         return timeout;
     }
-
+    
+    public String getAwsSigAccess() {
+        return awsSigAccess;
+    }
+    
+    public String getAwsSigSecret() {
+        return awsSigSecret;
+    }
+    
+    public String getAwsSigRegion() {
+        return awsSigRegion;
+    }
+    
+    public String getAwsSigServiceName() {
+        return awsSigServiceName;
+    }
 
 
     private class OAuthReq implements OAuthRequest {

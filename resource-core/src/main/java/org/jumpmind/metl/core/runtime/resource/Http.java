@@ -64,22 +64,33 @@ public class Http extends AbstractResourceRuntime {
 
     public static final String SECURITY_AWSSIG_REGION = "security.awssig.region";
 
+    public static final String SECURITY_AWSSIG_SERVICENAME = "security.awssig.servicename";
+
     HttpDirectory streamable;
 
     @Override
     protected void start(TypedProperties properties) {
-        streamable = new HttpDirectory(properties.get(URL), properties.get(HTTP_METHOD,
-                HTTP_METHOD_GET),
+        streamable = new HttpDirectory(
+                properties.get(URL),
+                properties.get(HTTP_METHOD, HTTP_METHOD_GET),
                 properties.get(CONTENT_TYPE),
-                properties.getInt(HTTP_TIMEOUT), properties.get(SECURITY),
-                properties.get(SECURITY_USERNAME), properties.get(SECURITY_PASSWORD),
-                properties.get(SECURITY_TOKEN_VALUE), 
-                properties.get(SECURITY_OAUTH10_CONSUMER_KEY), properties.get(SECURITY_OAUTH10_CONSUMER_SECRET),
-                properties.get(SECURITY_OAUTH10_TOKEN), properties.get(SECURITY_OAUTH10_TOKEN_SECRET),
-                properties.get(SECURITY_OAUTH10_VERSION), properties.get(SECURITY_OAUTH10_SIGNATURE_METHOD),
+                properties.getInt(HTTP_TIMEOUT),
+                properties.get(SECURITY),
+                properties.get(SECURITY_USERNAME),
+                properties.get(SECURITY_PASSWORD),
+                properties.get(SECURITY_TOKEN_VALUE),
+                properties.get(SECURITY_OAUTH10_CONSUMER_KEY),
+                properties.get(SECURITY_OAUTH10_CONSUMER_SECRET),
+                properties.get(SECURITY_OAUTH10_TOKEN),
+                properties.get(SECURITY_OAUTH10_TOKEN_SECRET),
+                properties.get(SECURITY_OAUTH10_VERSION),
+                properties.get(SECURITY_OAUTH10_SIGNATURE_METHOD),
                 properties.get(SECURITY_OAUTH10_REALM),
-        		properties.get(SECURITY_AWSSIG_ACCESSKEY), properties.get(SECURITY_AWSSIG_SECRETKEY),
-        		properties.get(SECURITY_AWSSIG_REGION));
+                properties.get(SECURITY_AWSSIG_ACCESSKEY),
+                properties.get(SECURITY_AWSSIG_SECRETKEY),
+                properties.get(SECURITY_AWSSIG_REGION),
+                properties.get(SECURITY_AWSSIG_SERVICENAME)
+            );
     }
 
     @Override

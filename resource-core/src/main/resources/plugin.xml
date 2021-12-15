@@ -198,6 +198,9 @@
             <setting id='security.awssig.region' required='false' type='text'>
                 <name>AWS Signature Region</name>
             </setting>
+            <setting id='security.awssig.servicename' required='false' type='text'>
+                <name>AWS Signature Service Name</name>
+            </setting>
         </settings>
     </resource>
 
