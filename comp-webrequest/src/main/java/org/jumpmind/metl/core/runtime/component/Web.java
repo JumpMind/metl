@@ -431,9 +431,10 @@ public class Web extends AbstractComponentRuntime {
     
     private Map<String, String> generateAwsSignatureHeaders(HttpRequestBase request, IHttpDirectory httpDirectory) {
         URI hostURI = request.getURI();
-        
+
         // TODO - Add validation around this header
         String apiKey = "";
+
         Header[] apiKeyHeaders = request.getHeaders("x-api-key");
         if (apiKeyHeaders.length > 0) {
             apiKey = apiKeyHeaders[0].getValue().trim();
@@ -452,7 +453,6 @@ public class Web extends AbstractComponentRuntime {
                 .queryParametes((TreeMap<String, String>) getQueryParams(hostURI.getQuery()))
                 .awsHeaders(awsHeaders)
                 .payload(null)
-                .debug()
                 .build();
         
         Map<String, String> awsSignatureHeaders = authorization.getHeaders();
