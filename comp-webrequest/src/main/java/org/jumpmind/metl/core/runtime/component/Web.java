@@ -444,7 +444,7 @@ public class Web extends AbstractComponentRuntime {
         awsHeaders.put("accept", "application/json");
         awsHeaders.put("host", hostURI.getHost());
         awsHeaders.put("x-api-key", apiKey);
-        
+
         AwsAuthorization authorization = new AwsAuthorization.Builder(httpDirectory.getAwsSigAccess(), httpDirectory.getAwsSigSecret())
                 .regionName(httpDirectory.getAwsSigRegion())
                 .serviceName(httpDirectory.getAwsSigServiceName())

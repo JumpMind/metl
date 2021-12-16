@@ -95,6 +95,9 @@ public class AwsAuthorization {
         }
     }
 
+    private final char[] hexArray = "0123456789ABCDEF".toCharArray();
+    private final String HMACAlgorithm = "AWS4-HMAC-SHA256";
+    private final String aws4Request = "aws4_request";
     private String accessKeyID;
     private String secretAccessKey;
     private String regionName;
@@ -104,9 +107,6 @@ public class AwsAuthorization {
     private TreeMap<String, String> queryParametes;
     private TreeMap<String, String> awsHeaders;
     private String payload;
-
-    private final String HMACAlgorithm = "AWS4-HMAC-SHA256";
-    private final String aws4Request = "aws4_request";
     private String strSignedHeader;
     private String xAmzDate;
     private String currentDate;
@@ -123,6 +123,31 @@ public class AwsAuthorization {
         payload = builder.payload;
         xAmzDate = getTimeStamp();
         currentDate = getDate();
+    }
+
+    public Map<String, String> getHeaders() {
+        awsHeaders.put("x-amz-date", xAmzDate);
+
+        String canonicalURL = prepareCanonicalRequest();
+        String stringToSign = prepareStringToSign(canonicalURL);
+        String signature = calculateSignature(stringToSign);
+
+        if (signature != null) {
+            Map<String, String> header = new HashMap<String, String>(0);
+            header.put("x-amz-date", xAmzDate);
+            header.put("Authorization", buildAuthorizationString(signature));
+
+            return header;
+        }
+
+        return null;
+    }
+
+    private String buildAuthorizationString(String strSignature) {
+        return HMACAlgorithm + " "
+                + "Credential=" + accessKeyID + "/" + getDate() + "/" + regionName + "/" + serviceName + "/" + aws4Request + ","
+                + "SignedHeaders=" + strSignedHeader + ","
+                + "Signature=" + strSignature;
     }
 
     private String prepareCanonicalRequest() {
@@ -173,12 +198,10 @@ public class AwsAuthorization {
     }
 
     private String prepareStringToSign(String canonicalURL) {
-        String stringToSign = "";
-
-        stringToSign = HMACAlgorithm + "\n";
-        stringToSign += xAmzDate + "\n";
-        stringToSign += currentDate + "/" + regionName + "/" + serviceName + "/" + aws4Request + "\n";
-        stringToSign += generateHex(canonicalURL);
+        String stringToSign = HMACAlgorithm + "\n"
+                + xAmzDate + "\n"
+                + currentDate + "/" + regionName + "/" + serviceName + "/" + aws4Request + "\n"
+                + generateHex(canonicalURL);
 
         return stringToSign;
     }
@@ -194,31 +217,6 @@ public class AwsAuthorization {
             ex.printStackTrace();
         }
         return null;
-    }
-
-    public Map<String, String> getHeaders() {
-        awsHeaders.put("x-amz-date", xAmzDate);
-
-        String canonicalURL = prepareCanonicalRequest();
-        String stringToSign = prepareStringToSign(canonicalURL);
-        String signature = calculateSignature(stringToSign);
-
-        if (signature != null) {
-            Map<String, String> header = new HashMap<String, String>(0);
-            header.put("x-amz-date", xAmzDate);
-            header.put("Authorization", buildAuthorizationString(signature));
-
-            return header;
-        }
-
-        return null;
-    }
-
-    private String buildAuthorizationString(String strSignature) {
-        return HMACAlgorithm + " "
-                + "Credential=" + accessKeyID + "/" + getDate() + "/" + regionName + "/" + serviceName + "/" + aws4Request + ","
-                + "SignedHeaders=" + strSignedHeader + ","
-                + "Signature=" + strSignature;
     }
 
     private String generateHex(String data) {
@@ -242,15 +240,13 @@ public class AwsAuthorization {
     }
 
     private byte[] getSignatureKey(String key, String date, String regionName, String serviceName) throws Exception {
-        byte[] kSecret = ("AWS4" + key).getBytes("UTF8");
-        byte[] kDate = HmacSHA256(kSecret, date);
-        byte[] kRegion = HmacSHA256(kDate, regionName);
-        byte[] kService = HmacSHA256(kRegion, serviceName);
-        byte[] kSigning = HmacSHA256(kService, aws4Request);
-        return kSigning;
+        byte[] secret = ("AWS4" + key).getBytes("UTF8");
+        byte[] dateHex = HmacSHA256(secret, date);
+        byte[] region = HmacSHA256(dateHex, regionName);
+        byte[] service = HmacSHA256(region, serviceName);
+        byte[] signing = HmacSHA256(service, aws4Request);
+        return signing;
     }
-
-    final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
 
     private String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
