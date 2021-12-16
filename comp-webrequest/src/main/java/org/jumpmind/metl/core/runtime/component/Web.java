@@ -448,7 +448,7 @@ public class Web extends AbstractComponentRuntime {
                 .serviceName(httpDirectory.getAwsSigServiceName())
                 .httpMethodName(httpMethod)
                 .canonicalURI(hostURI.getPath())
-                .queryParametes((TreeMap<String, String>) getQueryParams(hostURI.getQuery()))
+                .queryParameters((TreeMap<String, String>) getQueryParams(hostURI.getQuery()))
                 .awsHeaders(awsHeaders)
                 .payload(null)
                 .build();

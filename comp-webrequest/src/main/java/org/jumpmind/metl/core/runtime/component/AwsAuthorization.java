@@ -46,7 +46,7 @@ public class AwsAuthorization {
         private String serviceName;
         private String httpMethodName;
         private String canonicalURI;
-        private TreeMap<String, String> queryParametes;
+        private TreeMap<String, String> queryParameters;
         private TreeMap<String, String> awsHeaders;
         private String payload;
 
@@ -75,8 +75,8 @@ public class AwsAuthorization {
             return this;
         }
 
-        public Builder queryParametes(TreeMap<String, String> queryParametes) {
-            this.queryParametes = queryParametes;
+        public Builder queryParameters(TreeMap<String, String> queryParameters) {
+            this.queryParameters = queryParameters;
             return this;
         }
 
@@ -104,7 +104,7 @@ public class AwsAuthorization {
     private String serviceName;
     private String httpMethodName;
     private String canonicalURI;
-    private TreeMap<String, String> queryParametes;
+    private TreeMap<String, String> queryParameters;
     private TreeMap<String, String> awsHeaders;
     private String payload;
     private String strSignedHeader;
@@ -118,7 +118,7 @@ public class AwsAuthorization {
         serviceName = builder.serviceName;
         httpMethodName = builder.httpMethodName;
         canonicalURI = builder.canonicalURI;
-        queryParametes = builder.queryParametes;
+        queryParameters = builder.queryParameters;
         awsHeaders = builder.awsHeaders;
         payload = builder.payload;
         xAmzDate = getTimeStamp();
@@ -159,8 +159,8 @@ public class AwsAuthorization {
         canonicalURL.append(canonicalURI).append("\n");
 
         StringBuilder queryString = new StringBuilder("");
-        if (queryParametes != null && !queryParametes.isEmpty()) {
-            for (Map.Entry<String, String> entrySet : queryParametes.entrySet()) {
+        if (queryParameters != null && !queryParameters.isEmpty()) {
+            for (Map.Entry<String, String> entrySet : queryParameters.entrySet()) {
                 String key = entrySet.getKey();
                 String value = entrySet.getValue();
                 queryString.append(key).append("=").append(encodeParameter(value)).append("&");
