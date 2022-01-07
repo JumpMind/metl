@@ -21,6 +21,7 @@
 package org.jumpmind.metl.core.runtime.resource;
 
 import com.sun.jersey.oauth.signature.*;
+
 import org.apache.commons.codec.binary.Base64;
 import org.jumpmind.exception.IoException;
 import org.slf4j.Logger;
@@ -56,6 +57,7 @@ public class HttpDirectory implements IHttpDirectory {
     public static final String SECURITY_BASIC = "Basic Auth";
     public static final String SECURITY_TOKEN = "Token Auth";
     public static final String SECURITY_OAUTH_10 = "OAuth 1.0";
+    public static final String SECURITY_AWS_SIGNATURE = "AWS Signature";
 
     String url;
     String httpMethod;
@@ -71,13 +73,18 @@ public class HttpDirectory implements IHttpDirectory {
     String oa1Realm;
     String oa1Token;
     String oa1TokenSecret;
+    String awsSigAccess;
+    String awsSigSecret;
+    String awsSigRegion;
+    String awsSigServiceName;
     int timeout;
     int contentLength;
 
     public HttpDirectory(String url, String httpMethod, String contentType, int timeout,
             String security, String username, String password, String token, String oa1ConsumerKey,
             String oa1ConsumerSecret, String oa1Token, String oa1TokenSecret, String oa1Version,
-            String oa1SignatureMethod, String oa1Realm) {
+            String oa1SignatureMethod, String oa1Realm, String awsSigAccess, String awsSigSecret,
+            String awsSigRegion, String awsSigServiceName) {
         this.url = url;
         this.httpMethod = httpMethod;
         this.contentType = contentType;
@@ -93,6 +100,10 @@ public class HttpDirectory implements IHttpDirectory {
         this.oa1Version = oa1Version;
         this.oa1SignatureMethod = oa1SignatureMethod;
         this.oa1Realm = oa1Realm;
+        this.awsSigAccess = awsSigAccess;
+        this.awsSigSecret = awsSigSecret;
+        this.awsSigRegion = awsSigRegion;
+        this.awsSigServiceName = awsSigServiceName;
     }
 
     @Override
@@ -366,7 +377,22 @@ public class HttpDirectory implements IHttpDirectory {
     public int getTimeout() {
         return timeout;
     }
-
+    
+    public String getAwsSigAccess() {
+        return awsSigAccess;
+    }
+    
+    public String getAwsSigSecret() {
+        return awsSigSecret;
+    }
+    
+    public String getAwsSigRegion() {
+        return awsSigRegion;
+    }
+    
+    public String getAwsSigServiceName() {
+        return awsSigServiceName;
+    }
 
 
     private class OAuthReq implements OAuthRequest {
