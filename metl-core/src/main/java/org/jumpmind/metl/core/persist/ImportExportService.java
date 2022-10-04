@@ -468,6 +468,8 @@ public class ImportExportService extends AbstractService implements IImportExpor
                 transaction);
         processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_component_entity_setting"),
                 transaction);
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_component_model_setting"),
+                transaction);
         processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_component_setting"),
                 transaction);
         processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_component"),

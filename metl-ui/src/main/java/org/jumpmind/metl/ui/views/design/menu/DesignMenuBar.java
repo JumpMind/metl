@@ -31,7 +31,7 @@ import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.ui.common.AbstractMenuBar;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
 
-import com.vaadin.ui.AbstractSelect;
+import com.vaadin.v7.ui.AbstractSelect;
 
 public class DesignMenuBar extends AbstractMenuBar {
 
@@ -68,7 +68,8 @@ public class DesignMenuBar extends AbstractMenuBar {
         add("File|New|Resource|Mail Session");
         add("File|New|Resource|Subscribe|JMS");
         add("File|New|Resource|Queue|Kafka Publisher");
-        add("File|New|Resource|Queue|SQS");        
+        add("File|New|Resource|Queue|SQS");      
+        add("File|New|Resource|Cloud Bucket|AWS S3");
         add("File|Open");
         addSeparator("File");
         add("File|Import...");        

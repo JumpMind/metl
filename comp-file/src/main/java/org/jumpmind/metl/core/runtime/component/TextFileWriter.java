@@ -31,7 +31,6 @@ import java.util.ArrayList;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.ContentMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
@@ -115,17 +114,17 @@ public class TextFileWriter extends AbstractFileWriter {
             initStreamAndWriter(inputMessage);
 
             if (inputMessage instanceof ContentMessage<?>) {
-                try {
+                try (BufferedWriter writer = bufferedWriter) {
                     Object payload = ((ContentMessage<?>) inputMessage).getPayload();
                     if (payload instanceof ArrayList) {
                         ArrayList<?> recs = (ArrayList<?>) payload;
                         for (Object rec : recs) {
                             initStreamAndWriter(inputMessage);
-                            bufferedWriter.write(rec != null ? rec.toString() : "");
+                            writer.write(rec != null ? rec.toString() : "");
                             if (lineTerminator != null && lineTerminator.length()!=0) { 
-                                bufferedWriter.write(lineTerminator);
+                                writer.write(lineTerminator);
                             } else {
-                                bufferedWriter.newLine();
+                                writer.newLine();
                             }
                             
                             if (CLOSE_ON_ROW.equals(closeOn)) {
@@ -134,13 +133,13 @@ public class TextFileWriter extends AbstractFileWriter {
                         }
 
                     } else if (payload instanceof String) {
-                        bufferedWriter.write((String) payload);
+                        writer.write((String) payload);
                     } else {
-                        bufferedWriter.write("");
+                        writer.write("");
                     }
 
-                    if (bufferedWriter != null){
-                       bufferedWriter.flush();
+                    if (writer != null){
+                       writer.flush();
                     }
                     
                     if (CLOSE_ON_MESSAGE.equals(closeOn)) {
@@ -149,6 +148,8 @@ public class TextFileWriter extends AbstractFileWriter {
 
                 } catch (IOException e) {
                     throw new IoException(e);
+                } finally {
+                    bufferedWriter = null;
                 }
             }
         }
@@ -211,6 +212,7 @@ public class TextFileWriter extends AbstractFileWriter {
         try {
             bufferedWriter = new BufferedWriter(new OutputStreamWriter(stream, encoding));
         } catch (UnsupportedEncodingException e) {
+            IOUtils.closeQuietly(stream);
             throw new IoException("Error creating buffered writer " + e.getMessage());
         }
         return bufferedWriter;

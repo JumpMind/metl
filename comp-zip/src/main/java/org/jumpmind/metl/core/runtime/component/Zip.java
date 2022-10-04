@@ -116,17 +116,11 @@ public class Zip extends AbstractComponentRuntime {
         }
         
         if (inputMessage instanceof ControlMessage) {
-            IDirectory sourceDir = null;
-            IDirectory targetDir = null;
-            ZipOutputStream zos = null;
+            IDirectory sourceDir = sourceResource.reference();
+            IDirectory targetDir = targetResource.reference();
+            targetDir.delete(targetPath);
 
-            sourceDir = sourceResource.reference();
-            targetDir = targetResource.reference();
-        	
-            try {
-            	targetDir.delete(targetPath);
-                zos = new ZipOutputStream(targetDir.getOutputStream(targetPath, false), Charset.forName(encoding));
-
+            try (ZipOutputStream zos = new ZipOutputStream(targetDir.getOutputStream(targetPath, false), Charset.forName(encoding))) {
                 for (String fileName : fileNames) {
                     FileInfo sourceZipFile = sourceDir.listFile(fileName);           
                     log(LogLevel.INFO, "Received file name to add to zip: %s", sourceZipFile);
@@ -135,35 +129,27 @@ public class Zip extends AbstractComponentRuntime {
                     }
 
                     if (sourceZipFile != null) {
-                        try {
-                            if (!sourceZipFile.isDirectory()) {
-                                ZipEntry entry = new ZipEntry(sourceZipFile.getName());
-                                entry.setSize(sourceZipFile.getSize());
-                                entry.setTime(sourceZipFile.getLastUpdated());
-                                zos.putNextEntry(entry);
-                                log(LogLevel.INFO, "Adding %s", sourceZipFile.getName());                        
-                                InputStream fis = sourceDir.getInputStream(sourceZipFile.getRelativePath(), unitOfWorkBoundaryReached);
+                        if (!sourceZipFile.isDirectory()) {
+                            ZipEntry entry = new ZipEntry(sourceZipFile.getName());
+                            entry.setSize(sourceZipFile.getSize());
+                            entry.setTime(sourceZipFile.getLastUpdated());
+                            zos.putNextEntry(entry);
+                            log(LogLevel.INFO, "Adding %s", sourceZipFile.getName());
+                            try (InputStream fis = sourceDir.getInputStream(sourceZipFile.getRelativePath(), unitOfWorkBoundaryReached)) {
                                 if (fis != null) {
-                                    try {
-                                        IOUtils.copy(fis, zos);
-                                    } finally {
-                                        IOUtils.closeQuietly(fis);
-                                    }
+                                    IOUtils.copy(fis, zos);
                                 }
                             }
-                            zos.closeEntry();
-                        } catch (IOException e) {
-                            throw new IoException(e);
                         }
+                        zos.closeEntry();
                     }
                 }
-                
-                log(LogLevel.INFO, "Generated %s", targetPath);
 
-            } finally {
-                IOUtils.closeQuietly(zos);
+                log(LogLevel.INFO, "Generated %s", targetPath);
+            } catch (IOException ex) {
+                throw new IoException(ex);
             }
-            
+
             if (deleteOnComplete) {
                 for (String fileName : fileNames) {
                 	sourceDir.delete(fileName);

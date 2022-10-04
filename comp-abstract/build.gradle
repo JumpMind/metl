@@ -1,10 +1,10 @@
 apply from: '../metl-assemble/common.gradle'
 
-version = '3.7.3.' + pluginBuildNumber
+version = '3.8.7.' + pluginBuildNumber
 
 dependencies {
     compile project(':resource-core')
-    provided project(':metl-core')   
-    provided project(':metl-ui')
-    testCompile project(path: ':metl-core', configuration: 'testArtifacts') 
+    compileOnly project(':metl-core')
+    compileOnly project(':metl-ui')
+    testCompile project(path: ':metl-core', configuration: 'testArtifacts')
 }

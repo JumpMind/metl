@@ -404,7 +404,10 @@ public class AgentRuntime {
                         TypedProperties alreadyDeployedOverrides = alreadyDeployed.getResourceRuntimeSettings();
                         for (Object key : combined.keySet()) {
                             Object newObj = combined.get(key);
-                            Object oldObj = alreadyDeployedOverrides.get(key);
+                            Object oldObj=null;
+                            if (alreadyDeployedOverrides != null ) {
+                            	oldObj = alreadyDeployedOverrides.get(key);
+                            }
                             if (!ObjectUtils.equals(newObj, oldObj)) {
                                 deploy = true;
                                 break;

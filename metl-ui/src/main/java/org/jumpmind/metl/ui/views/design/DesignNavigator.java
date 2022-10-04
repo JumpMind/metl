@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.IconMultiStateFormatting.IconSet;
 import org.jumpmind.metl.core.model.AbstractModel;
 import org.jumpmind.metl.core.model.AbstractName;
 import org.jumpmind.metl.core.model.AbstractNamedObject;
@@ -63,27 +64,27 @@ import org.jumpmind.vaadin.ui.common.ConfirmDialog.IConfirmListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
+import com.vaadin.v7.data.Container;
+import com.vaadin.v7.data.util.BeanItemContainer;
+import com.vaadin.v7.event.FieldEvents.TextChangeEvent;
+import com.vaadin.v7.event.FieldEvents.TextChangeListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
-import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.v7.ui.AbstractSelect.ItemCaptionMode;
+import com.vaadin.v7.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.DefaultFieldFactory;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.v7.ui.DefaultFieldFactory;
+import com.vaadin.v7.ui.Field;
+import com.vaadin.v7.ui.HorizontalLayout;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.ColumnHeaderMode;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.TreeTable;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.v7.ui.Table;
+import com.vaadin.v7.ui.Table.ColumnHeaderMode;
+import com.vaadin.v7.ui.TextField;
+import com.vaadin.v7.ui.TreeTable;
+import com.vaadin.v7.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
@@ -550,6 +551,10 @@ public class DesignNavigator extends VerticalLayout {
                 this.treeTable.setItemIcon(resource, Icons.EMAIL);
             } else if (resource.getType().contains("JMS")) {
                 this.treeTable.setItemIcon(resource, Icons.QUEUE);
+            } else if (resource.getType().contains("SQS")) {
+                this.treeTable.setItemIcon(resource, Icons.QUEUE);
+            } else if (resource.getType().contains("S3")) {
+                this.treeTable.setItemIcon(resource, Icons.CLOUD);
             } else {
                 this.treeTable.setItemIcon(resource, Icons.FILE_SYSTEM);
             }
@@ -1004,6 +1009,10 @@ public class DesignNavigator extends VerticalLayout {
     
     public void addNewMailSession() {
         addNewResource("MailSession", "Mail Session", Icons.EMAIL);
+    }
+    
+    public void addNewAWSS3() {
+    	addNewResource("AWS S3", "AWS S3", Icons.CLOUD);
     }
 
     protected void addNewResource(String type, String defaultName, FontAwesome icon) {

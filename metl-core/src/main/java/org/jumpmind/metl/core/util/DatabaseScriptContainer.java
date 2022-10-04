@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jumpmind.db.platform.IDatabasePlatform;
@@ -120,9 +119,7 @@ public class DatabaseScriptContainer {
     }
 
     protected void executeImports(Resource resource) throws IOException {
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream()))) {
             String line = reader.readLine();
             while (line != null) {
                 if (line.startsWith(IMPORT_PREFIX)) {
@@ -135,8 +132,6 @@ public class DatabaseScriptContainer {
                 }
                 line = reader.readLine();
             }
-        } finally {
-            IOUtils.closeQuietly(reader);
         }
     }
 

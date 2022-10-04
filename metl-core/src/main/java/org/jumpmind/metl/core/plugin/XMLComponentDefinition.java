@@ -73,6 +73,8 @@ public class XMLComponentDefinition extends XMLAbstractDefinition {
         QUEUE,        
         @XmlEnumValue("none")
         NONE, 
+        @XmlEnumValue("cloud_bucket")
+        CLOUD_BUCKET,
         @XmlEnumValue("any")
         ANY
     }

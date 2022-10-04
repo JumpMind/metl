@@ -280,9 +280,9 @@ public class StartWebServer {
             char[] password = System.getProperty(SSL_TRUSTSTORE_PASSWORD) != null ? System.getProperty(SSL_TRUSTSTORE_PASSWORD).toCharArray()
                     : null;
             if (trustStoreFile.exists()) {
-                FileInputStream is = new FileInputStream(trustStoreFile);
-                ks.load(is, password);
-                is.close();
+                try (FileInputStream is = new FileInputStream(trustStoreFile)) {
+                    ks.load(is, password);
+                }
             } else {
                 ks.load(null, password);
             }
@@ -300,9 +300,9 @@ public class StartWebServer {
             KeyStore ks = KeyStore.getInstance(keyStoreType);
             File keyStoreFile = getKeyStoreFile(args);
             if (keyStoreFile.exists()) {
-                FileInputStream is = new FileInputStream(keyStoreFile);
-                ks.load(is, keyPass.toCharArray());
-                is.close();
+                try (FileInputStream is = new FileInputStream(keyStoreFile)) {
+                    ks.load(is, keyPass.toCharArray());
+                }
             } else {
                 ks.load(null, keyPass.toCharArray());
             }
@@ -346,9 +346,9 @@ public class StartWebServer {
 
                 File keyStoreFile = getKeyStoreFile(args);
                 keyStoreFile.getParentFile().mkdirs();
-                FileOutputStream fos = new FileOutputStream(keyStoreFile);
-                keyStore.store(fos, keyPass.toCharArray());
-                fos.close();
+                try (FileOutputStream fos = new FileOutputStream(keyStoreFile)) {
+                    keyStore.store(fos, keyPass.toCharArray());
+                }
             }
 
         } catch (RuntimeException e) {

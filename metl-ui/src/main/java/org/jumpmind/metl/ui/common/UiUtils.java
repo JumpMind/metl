@@ -27,13 +27,13 @@ import java.io.InputStream;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.vaadin.v7.shared.ui.label.ContentMode;
+import com.vaadin.v7.ui.Label;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.ui.definition.XMLComponentUI;
-
-import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.Label;
 
 public final class UiUtils {
 
@@ -104,16 +104,15 @@ public final class UiUtils {
     }
     
     public static String getBase64RepresentationOfImageForComponentType(String projectVersionId, String type, ApplicationContext context) {
-        InputStream is = getComponentImageInputStream(projectVersionId, type, context);
-        if (is != null) {
-            try {
+        try (InputStream is = getComponentImageInputStream(projectVersionId, type, context)) {
+            if (is != null) {
                 byte[] bytes = IOUtils.toByteArray(is);
                 return new String(Base64.encodeBase64(bytes));
-            } catch (IOException e) {
-                throw new IoException(e);
+            } else {
+                return null;
             }
-        } else {
-            return null;
+        } catch (IOException ex) {
+            throw new IoException(ex);
         }
     }
 

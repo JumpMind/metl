@@ -28,26 +28,26 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.PostCommitHandler;
-import org.jumpmind.vaadin.ui.common.ExportDialog;
+import org.jumpmind.metl.ui.common.ExportDialog;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.GeneratedPropertyContainer;
+import com.vaadin.v7.data.util.BeanItemContainer;
+import com.vaadin.v7.data.util.GeneratedPropertyContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.shared.ui.grid.HeightMode;
+import com.vaadin.v7.shared.ui.grid.HeightMode;
 import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.SelectionMode;
-import com.vaadin.ui.Grid.SingleSelectionModel;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.v7.ui.Grid;
+import com.vaadin.v7.ui.Grid.SelectionMode;
+import com.vaadin.v7.ui.Grid.SingleSelectionModel;
+import com.vaadin.v7.ui.HorizontalLayout;
+import com.vaadin.v7.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.v7.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class WhereUsedPanel extends Panel implements IUiPanel {
@@ -137,8 +137,7 @@ public class WhereUsedPanel extends Panel implements IUiPanel {
 
     protected void export() {
         String fileNamePrefix = whereUsedObjectName.toLowerCase().replace(' ', '-') + "-where-used";
-        ExportDialog dialog = new ExportDialog(componentWhereUsedGrid, fileNamePrefix, whereUsedObjectName);
-        UI.getCurrent().addWindow(dialog);
+        ExportDialog.show(context, componentWhereUsedGrid);
     }
     
     protected void addHeader(String caption) {

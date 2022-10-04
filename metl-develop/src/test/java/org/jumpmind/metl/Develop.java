@@ -21,16 +21,17 @@
 package org.jumpmind.metl;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.websocket.server.ServerContainer;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.annotations.AnnotationConfiguration.ClassInheritanceMap;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.Configuration.ClassList;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -43,7 +44,7 @@ public class Develop {
         if (args.length > 0) {
             pathPrefix = args[0];
         }
-        System.out.println(IOUtils.toString(new FileInputStream(pathPrefix + "metl-server/src/main/resources/Metl.asciiart")));
+        System.out.println(new String(Files.readAllBytes(Paths.get(pathPrefix, "metl-server/src/main/resources/Metl.asciiart")), Charset.defaultCharset()));
 
         new File(System.getProperty("java.io.tmpdir")).mkdirs();
         new File("working").mkdirs();
@@ -60,8 +61,8 @@ public class Develop {
         webapp.setWar(pathPrefix + "metl-war/src/main/webapp");
         webapp.setResourceBase(pathPrefix + "metl-war/src/main/webapp");
 
-        ConcurrentHashMap<String, ConcurrentHashSet<String>> map = new ClassInheritanceMap();
-        ConcurrentHashSet<String> set = new ConcurrentHashSet<>();
+        ConcurrentHashMap<String, Set<String>> map = new ClassInheritanceMap();
+        Set<String> set = ConcurrentHashMap.newKeySet();
         set.add("org.jumpmind.metl.ui.init.AppInitializer");
         map.put("org.springframework.web.WebApplicationInitializer", set);
         webapp.setAttribute(AnnotationConfiguration.CLASS_INHERITANCE_MAP, map);

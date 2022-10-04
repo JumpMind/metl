@@ -59,6 +59,7 @@ public class ProjectVersionMenuManager extends AbstractDesignSelectedValueMenuMa
                 "File|New|Resource|Subscribe|JMS",
                 "File|New|Resource|Queue|Kafka Publisher",
                 "File|New|Resource|Queue|SQS",
+                "File|New|Resource|Cloud Bucket|AWS S3",
                 "File|Open",
                 "File|Import...",        
                 "File|Export...",        

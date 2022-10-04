@@ -1,5 +1,4 @@
 /**
- * Licensed to JumpMind Inc under one or more contributor
  * license agreements.  See the NOTICE file distributed
  * with this work for additional information regarding
  * copyright ownership.  JumpMind Inc licenses this file
@@ -105,7 +104,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import com.cybercom.vaadin.spring.UIScope;
+import org.jumpmind.metl.vaadin.spring.UIScope;
 
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
@@ -523,7 +522,10 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         if (brokerService == null) {
             try {
                 BrokerService broker = new BrokerService();
-                broker.setPersistent(false);
+            	broker.setPersistent(false);
+                if (env.getProperty(EnvConstants.JMX_ENABLED,"false").equalsIgnoreCase("false")) {
+                    broker.setUseJmx(false);
+                }
                 broker.getSystemUsage().getMemoryUsage().setLimit(10*1024*10);
                 broker.start();
                 brokerService = broker;
