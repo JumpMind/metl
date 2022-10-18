@@ -37,23 +37,23 @@ import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.ExcelFileWriter;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.metl.ui.common.ExportDialog;
+import org.jumpmind.vaadin.ui.common.ExportDialog;
 
-import com.vaadin.v7.data.util.BeanItemContainer;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.Transferable;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptAll;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.v7.ui.AbstractSelect.AbstractSelectTargetDetails;
+import com.vaadin.ui.AbstractSelect.AbstractSelectTargetDetails;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.Table;
-import com.vaadin.v7.ui.Table.CellStyleGenerator;
-import com.vaadin.v7.ui.Table.TableDragMode;
+import com.vaadin.ui.Field;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.Table.CellStyleGenerator;
+import com.vaadin.ui.Table.TableDragMode;
 import com.vaadin.ui.UI;
 
 @SuppressWarnings("serial")
@@ -137,7 +137,8 @@ public class EditExcelWriterPanel extends AbstractComponentEditPanel {
 
     protected void export() {
         String fileNamePrefix = component.getName().toLowerCase().replace(' ', '-');
-        ExportDialog.show(context, table);
+        ExportDialog dialog = new ExportDialog(table, fileNamePrefix, component.getName());
+        UI.getCurrent().addWindow(dialog);
     }
     
     @SuppressWarnings("unchecked")

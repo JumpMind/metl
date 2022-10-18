@@ -29,28 +29,28 @@ import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.runtime.component.Mapping;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.views.design.AbstractFlowStepAwareComponentEditPanel;
-import org.jumpmind.metl.ui.common.ExportDialog;
+import org.jumpmind.vaadin.ui.common.ExportDialog;
 
-import com.vaadin.v7.data.Property.ValueChangeEvent;
-import com.vaadin.v7.data.Property.ValueChangeListener;
-import com.vaadin.v7.event.FieldEvents.TextChangeEvent;
-import com.vaadin.v7.event.FieldEvents.TextChangeListener;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.v7.shared.ui.label.ContentMode;
-import com.vaadin.v7.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.HorizontalLayout;
-import com.vaadin.v7.ui.Label;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.Table;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
-import com.vaadin.v7.ui.VerticalLayout;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
@@ -263,7 +263,8 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
         }
         
         String fileNamePrefix = component.getName().toLowerCase().replace(' ', '-');
-        ExportDialog.show(context, table);
+        ExportDialog dialog = new ExportDialog(table, fileNamePrefix, component.getName());
+        UI.getCurrent().addWindow(dialog);
     }
 
     class EventListener implements Listener {

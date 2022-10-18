@@ -34,9 +34,9 @@ import org.springframework.context.annotation.Scope;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.v7.ui.HorizontalLayout;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.v7.ui.VerticalLayout;
+import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
 @Scope(value = "ui")

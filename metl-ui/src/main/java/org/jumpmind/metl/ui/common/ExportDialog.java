@@ -53,12 +53,12 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.v7.ui.Label;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.v7.ui.OptionGroup;
+import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
-import com.vaadin.v7.ui.VerticalLayout;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class ExportDialog extends ResizableWindow {

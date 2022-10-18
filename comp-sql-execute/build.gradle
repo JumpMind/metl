@@ -1,10 +1,10 @@
 apply from: '../metl-assemble/common.gradle'
 
-version = '3.8.7.' + pluginBuildNumber
+version = '3.8.8.' + pluginBuildNumber
 
 dependencies {
-    compileOnly project(':metl-ui')
+    provided project(':metl-ui')   
     compile project(':comp-abstract')
     compile project(':comp-rdbms-reader')
-    testCompile project(path: ':metl-core', configuration: 'testArtifacts')
+    testCompile project(path: ':metl-core', configuration: 'testArtifacts')     
 }

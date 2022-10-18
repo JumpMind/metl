@@ -39,7 +39,7 @@ public class Diagram extends AbstractJavaScriptComponent {
     public Diagram(boolean readOnly) {
         setPrimaryStyleName("diagram");
         setId("diagram");
-        //getState().readOnly = readOnly;
+        getState().readOnly = readOnly;
 
         addFunction("onNodeSelected", (arguments) -> {
             DiagramState state = getState();

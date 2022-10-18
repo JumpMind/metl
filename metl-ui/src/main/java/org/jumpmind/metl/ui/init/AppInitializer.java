@@ -281,7 +281,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
                 getLogger().error("Failed to install Metl samples", e);
             }
             
-            configurationService.save(new PluginRepository("default", "https://maven.jumpmind.com/repo"));
+            configurationService.save(new PluginRepository("default", "http://maven.jumpmind.com/repo"));
             configurationService.save(new PluginRepository("central", "https://repo1.maven.org/maven2"));
         }
         getLogger().info("The configuration database has been initialized");

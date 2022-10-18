@@ -24,9 +24,9 @@ import java.util.Date;
 
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 
-import com.vaadin.v7.data.Property;
+import com.vaadin.data.Property;
 
-public class Table extends com.vaadin.v7.ui.Table {
+public class Table extends com.vaadin.ui.Table {
 
     private static final long serialVersionUID = 1L;
     @Override

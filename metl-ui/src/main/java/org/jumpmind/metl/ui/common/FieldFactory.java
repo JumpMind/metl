@@ -20,9 +20,9 @@
  */
 package org.jumpmind.metl.ui.common;
 
-import com.vaadin.v7.data.fieldgroup.DefaultFieldGroupFieldFactory;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.data.fieldgroup.DefaultFieldGroupFieldFactory;
+import com.vaadin.ui.Field;
+import com.vaadin.ui.TextField;
 
 public class FieldFactory extends DefaultFieldGroupFieldFactory {
 

@@ -36,11 +36,11 @@ import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
-import com.vaadin.v7.data.util.BeanItemContainer;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
-import com.vaadin.v7.ui.Table;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 
 @SuppressWarnings("serial")

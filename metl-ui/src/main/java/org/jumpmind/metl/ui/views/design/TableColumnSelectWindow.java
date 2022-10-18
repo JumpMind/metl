@@ -49,18 +49,18 @@ import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.jumpmind.vaadin.ui.sqlexplorer.DbTree;
 import org.jumpmind.vaadin.ui.sqlexplorer.DefaultSettingsProvider;
 
-import com.vaadin.v7.data.Property.ValueChangeEvent;
-import com.vaadin.v7.data.Property.ValueChangeListener;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.ui.Button;
-import com.vaadin.v7.ui.Label;
-import com.vaadin.v7.ui.OptionGroup;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.TextField;
-import com.vaadin.v7.ui.Upload;
-import com.vaadin.v7.ui.Upload.Receiver;
-import com.vaadin.v7.ui.Upload.SucceededEvent;
-import com.vaadin.v7.ui.Upload.SucceededListener;
-import com.vaadin.v7.ui.VerticalLayout;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.Upload;
+import com.vaadin.ui.Upload.Receiver;
+import com.vaadin.ui.Upload.SucceededEvent;
+import com.vaadin.ui.Upload.SucceededListener;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class TableColumnSelectWindow extends ResizableWindow implements ValueChangeListener, Receiver, SucceededListener {

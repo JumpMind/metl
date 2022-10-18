@@ -31,7 +31,7 @@ import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.ui.common.AbstractMenuBar;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
 
-import com.vaadin.v7.ui.AbstractSelect;
+import com.vaadin.ui.AbstractSelect;
 
 public class DesignMenuBar extends AbstractMenuBar {
 

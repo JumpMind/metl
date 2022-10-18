@@ -65,39 +65,39 @@ import org.jumpmind.vaadin.ui.common.ReadOnlyTextAreaDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.data.sort.SortOrder;
-import com.vaadin.v7.data.util.BeanContainer;
-import com.vaadin.v7.data.util.BeanItem;
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.data.util.filter.SimpleStringFilter;
-import com.vaadin.v7.event.ItemClickEvent;
+import com.vaadin.data.Property;
+import com.vaadin.data.sort.SortOrder;
+import com.vaadin.data.util.BeanContainer;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.filter.SimpleStringFilter;
+import com.vaadin.event.ItemClickEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.ResourceReference;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.v7.shared.ui.label.ContentMode;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.DragAndDropWrapper;
-import com.vaadin.v7.ui.Grid;
-import com.vaadin.v7.ui.Grid.HeaderCell;
-import com.vaadin.v7.ui.Grid.HeaderRow;
-import com.vaadin.v7.ui.Grid.SelectionMode;
-import com.vaadin.v7.ui.HorizontalLayout;
-import com.vaadin.v7.ui.Label;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.HeaderCell;
+import com.vaadin.ui.Grid.HeaderRow;
+import com.vaadin.ui.Grid.SelectionMode;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.Table.ColumnGenerator;
-import com.vaadin.v7.ui.TextField;
-import com.vaadin.v7.ui.VerticalLayout;
+import com.vaadin.ui.Table.ColumnGenerator;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
-import com.vaadin.v7.ui.renderers.DateRenderer;
+import com.vaadin.ui.renderers.DateRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBackgroundRefreshable<Object> {
@@ -277,6 +277,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         flowPanel.setContent(wrapper);
 
         stepTable.setSelectionMode(SelectionMode.SINGLE);
+        stepTable.setImmediate(true);
         stepTable.setSizeFull();
         stepTable.addColumn("componentName", String.class).setHeaderCaption("Component Name")
                 .setWidth(250);
@@ -822,7 +823,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         private static final long serialVersionUID = 1L;
 
         @SuppressWarnings("unchecked")
-        public Object generateCell(com.vaadin.v7.ui.Table source, Object itemId, Object columnId) {
+        public Object generateCell(com.vaadin.ui.Table source, Object itemId, Object columnId) {
             BeanItem<ExecutionStepLog> logItem = (BeanItem<ExecutionStepLog>) source
                     .getItem(itemId);
             String executionStepId = (String) logItem.getItemProperty("executionStepId").getValue();

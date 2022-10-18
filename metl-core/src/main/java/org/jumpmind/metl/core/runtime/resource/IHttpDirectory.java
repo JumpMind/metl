@@ -37,5 +37,13 @@ public interface IHttpDirectory extends IDirectory {
     public String getPassword();    
     
     public String getToken();
+    
+    public String getAwsSigAccess();
+    
+    public String getAwsSigSecret();
+    
+    public String getAwsSigRegion();
+    
+    public String getAwsSigServiceName();
 
 }

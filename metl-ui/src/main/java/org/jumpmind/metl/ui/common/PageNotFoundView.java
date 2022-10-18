@@ -25,8 +25,8 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
-import com.vaadin.v7.ui.Label;
-import com.vaadin.v7.ui.VerticalLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.VerticalLayout;
 
 public class PageNotFoundView extends VerticalLayout implements View {
 

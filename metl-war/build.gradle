@@ -1,9 +1,10 @@
 apply from: '../metl-assemble/common.gradle'
 
-apply plugin: 'com.devsoap.plugin.vaadin'
+apply plugin: 'fi.jasoft.plugin.vaadin'
 
 configurations {
     executableWar
+    provided
 }
 
 eclipse {
@@ -15,8 +16,7 @@ eclipse {
 }
 
 war {
-    duplicatesStrategy = DuplicatesStrategy.WARN
-    archiveFileName="metl.war"
+    archiveName="metl.war"
     jar.enabled = true
     from {
         configurations.executableWar.collect {
@@ -25,69 +25,56 @@ war {
     }
     {
         exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
-    }
+    }    
     from ('build') { include 'plugins.zip' }
     manifest { attributes 'Main-Class': 'org.jumpmind.metl.Metl' }
-}
+}    
 
 // Don't compress javascript
 // vaadin.gwt.style = "PRETTY"
 vaadin.version = vaadinVersion
-vaadinCompile.widgetset = 'org.jumpmind.metl.ui.AppWidgetSet'
-vaadinCompile.gwtSdkFirstInClasspath = false
-// The vaadinUpdateWidgetset task uses unsafe access to child projects'
-// configurations (such access is removed in Gradle 6)
-// (ref. https://github.com/johndevs/gradle-vaadin-plugin/blob/2.0.0.beta2/src/main/groovy/com/devsoap/plugin/tasks/UpdateWidgetsetTask.groovy#L138)
-vaadinCompile.manageWidgetset = false
-//vaadinCompile.widgetset = 'org.jumpmind.metl.ui.AppWidgetSet'
+vaadin.widgetset = 'org.jumpmind.metl.ui.AppWidgetSet'
 vaadin.manageDependencies = true
 vaadin.manageRepositories = false
 vaadin.push = true
+sourceSets.main.compileClasspath += [configurations.provided]
 
 dependencies {
     compile project(":metl-ui")
-    vaadinCompile "com.vaadin:vaadin-compatibility-shared:$vaadinVersion"
-    vaadinCompile "com.vaadin:vaadin-compatibility-server:$vaadinVersion"
-    vaadinCompile "com.vaadin:vaadin-compatibility-client:$vaadinVersion"
-    vaadinCompile "com.vaadin:vaadin-compatibility-themes:$vaadinVersion"
-    vaadinCompile "com.vaadin:vaadin-compatibility-client-compiled:$vaadinVersion"
-    vaadinCompile ("com.vaadin:vaadin-client-compiler:$vaadinVersion") {
+    provided ("com.vaadin:vaadin-client-compiler:$vaadinVersion")  {
        exclude group:'org.eclipse.jetty'
-    }
-    executableWar project(":metl-server")
+    }    
+    executableWar project(":metl-server")    
 }
 
-task copyJavaDocsToWebapp(type: Copy) {
-    duplicatesStrategy = DuplicatesStrategy.WARN
-    dependsOn javadoc
+task copyJavaDocsToWebapp(type: Copy) {    
+    dependsOn javadoc    
     destinationDir = file("src/main/webapp/doc")
     into('javadoc') {
         from ('../metl-core/build/docs/javadoc') { include '**/*' }
         from ('../metl-ui/build/docs/javadoc') { include '**/*' }
-    }
+    }    
 }
 
 task copyPluginsForDevelopment (type:Copy) {
-   duplicatesStrategy = DuplicatesStrategy.WARN
    rootProject.allprojects.findAll { it.name.startsWith('comp') || it.name.startsWith('resource') }.each {
        dependsOn ":$it.name:publishMavenJavaPublicationToMavenRepository"
    }
-
+    
    from ('build/plugins')
    destinationDir file('../metl-develop/working/plugins')
    rename 'maven-metadata.xml(.*)', 'maven-metadata-local.xml$1'
 }
 
 task zipPlugins (type:Zip) {
-    duplicatesStrategy = DuplicatesStrategy.WARN
     rootProject.allprojects.findAll { it.name.startsWith('comp') || it.name.startsWith('resource') }.each {
         dependsOn ":$it.name:publishMavenJavaPublicationToMavenRepository"
     }
-
+    
     from ('build/plugins')
-    destinationDirectory = file('build')
+    destinationDir file('build') 
     rename 'maven-metadata.xml(.*)', 'maven-metadata-local.xml$1'
-    archiveFileName = 'plugins.zip'
+    archiveName 'plugins.zip'
 }
 
 

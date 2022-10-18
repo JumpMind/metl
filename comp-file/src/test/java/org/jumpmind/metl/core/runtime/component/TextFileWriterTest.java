@@ -87,12 +87,6 @@ public class TextFileWriterTest {
         TextFileWriter writer = new TextFileWriter();
         writer.setContext(new ComponentContext(null, writerFlowStep, null, new ExecutionTrackerNoOp(), deployedResources, null, null,null));
         writer.start();
-	/*
-	 * XXX: How was this ever passing without append=true? Fixture does not
-	 * lend itself to doing this via Setting, so just simulating the effect
-	 * here (justifiable for UT since handle() is the unit under test here)
-	 */
-        writer.append = true;
         writer.handle(createSingleRowTextMessageToWrite(1, false), null, true);
         writer.handle(createSingleRowTextMessageToWrite(2, false), null, true);
         writer.handle(createSingleRowTextMessageToWrite(3, false), null, true);
@@ -103,7 +97,7 @@ public class TextFileWriterTest {
     private static void checkTextFile() throws Exception {
         Path path = Paths.get(FILE_PATH + FILE_NAME);
         List<String> fileLines = Files.readAllLines(path, StandardCharsets.UTF_8);
-        assertEquals("expected 4 lines: " + fileLines, 4, fileLines.size());
+        assertEquals(4, fileLines.size());
         assertEquals("Line 1", fileLines.get(0));
         assertEquals("Line 2", fileLines.get(1));
         assertEquals("Line 3", fileLines.get(2));

@@ -66,23 +66,23 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
-import com.vaadin.v7.data.Container.Indexed;
-import com.vaadin.v7.data.Item;
+import com.vaadin.data.Container.Indexed;
+import com.vaadin.data.Item;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Button;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.FormLayout;
-import com.vaadin.v7.ui.Grid;
-import com.vaadin.v7.ui.Grid.SelectionMode;
-import com.vaadin.v7.ui.HorizontalLayout;
-import com.vaadin.v7.ui.OptionGroup;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.SelectionMode;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.PasswordField;
+import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TabSheet;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
-import com.vaadin.v7.ui.VerticalLayout;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFlowRunnable {

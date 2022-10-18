@@ -37,25 +37,25 @@ import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 
-import com.vaadin.v7.data.Property.ValueChangeEvent;
-import com.vaadin.v7.data.Property.ValueChangeListener;
-import com.vaadin.v7.data.util.BeanItemContainer;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.FieldEvents.BlurEvent;
 import com.vaadin.event.FieldEvents.BlurListener;
-import com.vaadin.v7.event.ItemClickEvent;
-import com.vaadin.v7.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.HorizontalLayout;
-import com.vaadin.v7.ui.Table;
-import com.vaadin.v7.ui.Table.ColumnGenerator;
-import com.vaadin.v7.ui.TreeTable;
-import com.vaadin.v7.ui.VerticalLayout;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.Table.ColumnGenerator;
+import com.vaadin.ui.TreeTable;
+import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
 public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPanel {

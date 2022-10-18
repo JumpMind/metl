@@ -20,9 +20,9 @@
  */
 package org.jumpmind.metl.ui.common;
 
-import com.vaadin.v7.data.fieldgroup.FieldGroup.CommitEvent;
-import com.vaadin.v7.data.fieldgroup.FieldGroup.CommitException;
-import com.vaadin.v7.data.fieldgroup.FieldGroup.CommitHandler;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitEvent;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitHandler;
 
 public class PostCommitHandler implements CommitHandler {
 
