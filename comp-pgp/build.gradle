@@ -3,9 +3,9 @@ apply from: '../metl-assemble/common.gradle'
 version = '3.8.8.' + pluginBuildNumber
 
 dependencies {
-    provided project(':metl-ui')   
+    compileOnly project(':metl-ui')
     compile project(':comp-abstract')
     compile "org.bouncycastle:bcprov-jdk15on:${bouncycastleVersion}"
     compile "org.bouncycastle:bcpg-jdk15on:${bouncycastleVersion}"
-    testCompile project(path: ':metl-core', configuration: 'testArtifacts')     
+    testCompile project(path: ':metl-core', configuration: 'testArtifacts')
 }
