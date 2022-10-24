@@ -21,7 +21,6 @@
 package org.jumpmind.metl.core.runtime.resource;
 
 import com.sun.jersey.oauth.signature.*;
-
 import org.apache.commons.codec.binary.Base64;
 import org.jumpmind.exception.IoException;
 import org.slf4j.Logger;
@@ -377,7 +376,7 @@ public class HttpDirectory implements IHttpDirectory {
     public int getTimeout() {
         return timeout;
     }
-    
+
     public String getAwsSigAccess() {
         return awsSigAccess;
     }

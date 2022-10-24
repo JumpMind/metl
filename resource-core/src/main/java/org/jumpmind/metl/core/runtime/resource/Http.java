@@ -57,7 +57,7 @@ public class Http extends AbstractResourceRuntime {
     public static final String SECURITY_OAUTH10_SIGNATURE_METHOD = "security.oauth10.signature.method";
     
     public static final String SECURITY_OAUTH10_REALM = "security.oauth10.realm";
-
+    
     public static final String SECURITY_AWSSIG_ACCESSKEY = "security.awssig.accesskey";
 
     public static final String SECURITY_AWSSIG_SECRETKEY = "security.awssig.secretkey";
@@ -78,7 +78,7 @@ public class Http extends AbstractResourceRuntime {
                 properties.get(SECURITY),
                 properties.get(SECURITY_USERNAME),
                 properties.get(SECURITY_PASSWORD),
-                properties.get(SECURITY_TOKEN_VALUE),
+                properties.get(SECURITY_TOKEN_VALUE), 
                 properties.get(SECURITY_OAUTH10_CONSUMER_KEY),
                 properties.get(SECURITY_OAUTH10_CONSUMER_SECRET),
                 properties.get(SECURITY_OAUTH10_TOKEN),
