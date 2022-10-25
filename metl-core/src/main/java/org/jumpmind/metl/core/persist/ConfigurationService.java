@@ -2047,7 +2047,7 @@ public class ConfigurationService extends AbstractService
                 + "        inner join %1$s_component co "
                 + "          on s.component_id = co.id "
                 + "        where s.name like '%%resource%%' "
-                + "          and co.deleted = 0)) c "
+                + "          and co.deleted = 0) x) c "
                 + "   on fs.component_id = c.id "
                 + "left outer join %1$s_resource r "
                 + "   on c.resource_id = r.id "
