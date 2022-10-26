@@ -16,7 +16,8 @@ eclipse {
 }
 
 war {
-    archiveName="metl.war"
+    duplicatesStrategy = DuplicatesStrategy.WARN
+    archiveFileName="metl.war"
     jar.enabled = true
     from {
         configurations.executableWar.collect {
@@ -39,7 +40,6 @@ vaadinCompile.gwtSdkFirstInClasspath = false
 // configurations (such access is removed in Gradle 6)
 // (ref. https://github.com/johndevs/gradle-vaadin-plugin/blob/2.0.0.beta2/src/main/groovy/com/devsoap/plugin/tasks/UpdateWidgetsetTask.groovy#L138)
 vaadinCompile.manageWidgetset = false
-//vaadinCompile.widgetset = 'org.jumpmind.metl.ui.AppWidgetSet'
 vaadin.manageDependencies = true
 vaadin.manageRepositories = false
 vaadin.push = true
@@ -49,7 +49,7 @@ dependencies {
     provided ("com.vaadin:vaadin-client-compiler:$vaadinVersion")  {
        exclude group:'org.eclipse.jetty'
     }    
-    executableWar project(":metl-server")    
+    executableWar project(":metl-server")
 }
 
 task copyJavaDocsToWebapp(type: Copy) {    

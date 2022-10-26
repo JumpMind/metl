@@ -1,3 +1,4 @@
 */.gradle
 /.DS_Store
 **/.idea/
+metl-assemble/build/.vaadin-gradle-plugin-version.check
