@@ -1,8 +1,2 @@
-/bin/
-/.settings/
-/build/
-/.classpath
-/.project
-/*.iml
-/.DS_Store
-*.gz
+build/
+.DS_Store/

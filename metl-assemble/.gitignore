@@ -1,9 +1,2 @@
 /bin/
 .DS_Store
-/plugins/
-metl.properties
-/build/
-*.db
-*.log
-*gz
-keystore

@@ -1,2 +1,10 @@
 */.gradle
 /.DS_Store
+**/build/
+**/.idea/
+**/.classpath
+**/.project
+**/.settings/
+*.war
+**/*.gz
+work/
