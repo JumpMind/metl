@@ -22,10 +22,17 @@ package org.jumpmind.metl.ui.mapping;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
+import org.jumpmind.metl.core.model.ComponentModelSetting;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.RelationalModel;
+import org.jumpmind.metl.core.model.ComponentModelSetting.Type;
 import org.jumpmind.metl.core.runtime.component.Mapping;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.views.design.AbstractFlowStepAwareComponentEditPanel;
@@ -85,6 +92,9 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
             removeButton.setEnabled(false);
             autoMapButton.addClickListener(new AutoMapListener());
             removeButton.addClickListener(new RemoveListener());
+            Button removeAllLink = buttonBar.addButton("Remove All Links", FontAwesome.REMOVE);
+            removeAllLink.addClickListener(new RemoveAllListener());
+
         }
         buttonBar.addButtonRight("Export", FontAwesome.DOWNLOAD, (e)->export());
 
@@ -193,20 +203,21 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
             boolean exact) {
         boolean isMapped = false;
         boolean exactMatch = exact && attr.getName().equalsIgnoreCase(attr2.getName()) && entity1.getName().equals(entity2.getName());
-        for (ComponentAttribSetting setting : component.getAttributeSettings()) {
-            if (setting.getName().equals(Mapping.ATTRIBUTE_MAPS_TO) && setting.getValue().equals(attr2.getId())) {
+        for (ComponentModelSetting setting : component.getModelSettings()) {
+            if (setting.getName().equals(Mapping.MODEL_OBJECT_MAPS_TO) && setting.getValue().equals(attr2.getId())) {
                 isMapped = true;
                 break;
             }
         }
         if (!isMapped && ((fuzzy && fuzzyMatches(attr.getName(), attr2.getName()))
                 || ((!exact && attr.getName().equalsIgnoreCase(attr2.getName())) || exactMatch))) {
-            ComponentAttribSetting setting = new ComponentAttribSetting();
-            setting.setAttributeId(attr.getId());
+            ComponentModelSetting setting = new ComponentModelSetting();
+            setting.setModelObjectId(attr.getId());
+            setting.setType(Type.ATTRIBUTE.toString());
             setting.setComponentId(component.getId());
-            setting.setName(Mapping.ATTRIBUTE_MAPS_TO);
+            setting.setName(Mapping.MODEL_OBJECT_MAPS_TO);
             setting.setValue(attr2.getId());
-            component.addAttributeSetting(setting);
+            component.addModelSetting(setting);
             context.getConfigurationService().save(setting);
             diagram.markAsDirty();
         }
@@ -252,7 +263,7 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
         
         int itemId = 0;
         for (ComponentAttribSetting setting : component.getAttributeSettings()) {
-            if (Mapping.ATTRIBUTE_MAPS_TO.equals(setting.getName())) {
+            if (Mapping.MODEL_OBJECT_MAPS_TO.equals(setting.getName())) {
                 ModelAttrib srcAttribute = inputModel.getAttributeById(setting.getAttributeId());
                 ModelEntity srcEntity = inputModel.getEntityById(srcAttribute.getEntityId());
                 ModelAttrib dstAttribute = outputModel.getAttributeById(setting.getValue());
@@ -266,13 +277,34 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
         ExportDialog dialog = new ExportDialog(table, fileNamePrefix, component.getName());
         UI.getCurrent().addWindow(dialog);
     }
-
+    
     class EventListener implements Listener {
         public void componentEvent(Event event) {
             if (event instanceof SelectEvent) {
                 SelectEvent selectEvent = (SelectEvent) event;
                 removeButton.setEnabled(selectEvent.getSelectedSourceId() != null);
             }
+        }
+    }
+
+    class RemoveAllListener implements ClickListener {
+        public void buttonClick(ClickEvent event) {
+        	Map<String, List<String>> linksMap = new HashMap<>();
+        	for (ComponentModelSetting setting : component.getModelSettings()) {
+        		if (setting.getName().equals(Mapping.MODEL_OBJECT_MAPS_TO)) {
+            		List<String> linksList = new ArrayList<String>();
+            		linksList.add(setting.getModelObjectId());
+            		linksList.add(setting.getValue());
+        			linksMap.put(setting.getModelObjectId() + "-" + setting.getValue(), linksList);
+        		}
+        	}
+            for (String key : linksMap.keySet()) {
+            	List<String> links = linksMap.get(key);
+        		diagram.removeConnection(links.get(0), links.get(1));
+            	diagram.markAsDirty();
+            }
+        	    	
+        	removeButton.setEnabled(false);        
         }
     }
 
