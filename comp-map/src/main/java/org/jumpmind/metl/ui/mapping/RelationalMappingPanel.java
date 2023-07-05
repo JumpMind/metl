@@ -36,6 +36,7 @@ import org.jumpmind.metl.core.model.ComponentModelSetting.Type;
 import org.jumpmind.metl.core.runtime.component.Mapping;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.views.design.AbstractFlowStepAwareComponentEditPanel;
+import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.ExportDialog;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -289,22 +290,26 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
 
     class RemoveAllListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-        	Map<String, List<String>> linksMap = new HashMap<>();
-        	for (ComponentModelSetting setting : component.getModelSettings()) {
-        		if (setting.getName().equals(Mapping.MODEL_OBJECT_MAPS_TO)) {
-            		List<String> linksList = new ArrayList<String>();
-            		linksList.add(setting.getModelObjectId());
-            		linksList.add(setting.getValue());
-        			linksMap.put(setting.getModelObjectId() + "-" + setting.getValue(), linksList);
-        		}
-        	}
-            for (String key : linksMap.keySet()) {
-            	List<String> links = linksMap.get(key);
-        		diagram.removeConnection(links.get(0), links.get(1));
-            	diagram.markAsDirty();
-            }
-        	    	
-        	removeButton.setEnabled(false);        
+            ConfirmDialog.show("Delete ALL Links?", "Are you sure you want to remove all of the connections between source and target attributes?",
+                    ()->{
+	                    	Map<String, List<String>> linksMap = new HashMap<>();
+	                    	for (ComponentModelSetting setting : component.getModelSettings()) {
+	                    		if (setting.getName().equals(Mapping.MODEL_OBJECT_MAPS_TO)) {
+	                        		List<String> linksList = new ArrayList<String>();
+	                        		linksList.add(setting.getModelObjectId());
+	                        		linksList.add(setting.getValue());
+	                    			linksMap.put(setting.getModelObjectId() + "-" + setting.getValue(), linksList);
+	                    		}
+	                    	}
+	                        for (String key : linksMap.keySet()) {
+	                        	List<String> links = linksMap.get(key);
+	                    		diagram.removeConnection(links.get(0), links.get(1));
+	                        	diagram.markAsDirty();
+	                        }
+	                    	    	
+	                    	removeButton.setEnabled(false);        
+		            		return true;                    	
+			            });
         }
     }
 
