@@ -1,7 +1,5 @@
 apply from: '../metl-assemble/common.gradle'
 
-version = '3.8.8.' + pluginBuildNumber
-
 dependencies {
     provided project(':metl-ui')
     compile project(':comp-rdbms-reader')
