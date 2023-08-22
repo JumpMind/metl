@@ -560,11 +560,11 @@
     <column description="The parent schema object for this schema object"
             name="parent_id"
             size="36"
-            type="VARCHAR" />
+            type="CHAR" />
     <column description="The ref model id if type=REF"
             name="ref_model_id"
             size="36"
-            type="VARCHAR" />            
+            type="CHAR" />            
     <column description="Pattern for type=string"
             name="pattern"
             size="500"
