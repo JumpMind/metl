@@ -88,6 +88,8 @@ public interface IConfigurationService {
     public void delete(AbstractObject obj);
 
     public void delete(RelationalModel model);
+    
+    public void delete(HierarchicalModel model);
 
     public void delete(ModelEntity modelEntity);
 
