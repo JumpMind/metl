@@ -602,13 +602,11 @@ public class StepRuntime implements Runnable {
     }
 
     private void flowCompletedWithErrors(IComponentRuntime componentRuntime, Throwable myError, List<Throwable> allErrors) {
-        if (!cancelled) {
-            try {
-                componentRuntime.flowCompletedWithErrors(myError);
-            } catch (Throwable ex) {
-                recordError(1, ex);
-                componentContext.getExecutionTracker().flowStepFailedOnComplete(componentContext, ex);
-            }
+        try {
+            componentRuntime.flowCompletedWithErrors(myError);
+        } catch (Throwable ex) {
+            recordError(1, ex);
+            componentContext.getExecutionTracker().flowStepFailedOnComplete(componentContext, ex);
         }
     }
 
