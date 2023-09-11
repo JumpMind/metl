@@ -76,7 +76,8 @@ import java.util.Date
         maven { url "https://repository.jboss.org/nexus/content/repositories/deprecated" }
         maven { url "https://www.soapui.org/repository/maven2" }
         maven { url "https://github.com/santhosh-tekuri/maven-repository/raw/master" }
-        jcenter()        
+        jcenter()
+        maven { url "https://www2.ph.ed.ac.uk/maven2" }
     }     
      
     
