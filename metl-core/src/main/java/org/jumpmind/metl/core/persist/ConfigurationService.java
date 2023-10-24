@@ -861,6 +861,10 @@ public class ConfigurationService extends AbstractService
 
     @Override
     public void delete(RelationalModel model) {
+    	// have to also delete the children associated with this Rel Model
+        for (ModelEntity modelEntity : model.getModelEntities()) {
+            delete(modelEntity);
+        }
         model.setDeleted(true);
         save((AbstractObject) model);
     }
@@ -1952,6 +1956,14 @@ public class ConfigurationService extends AbstractService
             object.getChildObjects().add(childObject);
             refresh(childObject);            
         }
+    }
+
+    @Override
+    public void delete(HierarchicalModel model) {
+    	// have to also delete the children associated with this Hier Model
+        delete(model.getRootObject());
+        model.setDeleted(true);
+        save((AbstractObject) model);
     }
 
     public void delete(ModelSchemaObject schemaObject) {

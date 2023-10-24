@@ -114,17 +114,17 @@ public class TextFileWriter extends AbstractFileWriter {
             initStreamAndWriter(inputMessage);
 
             if (inputMessage instanceof ContentMessage<?>) {
-                try (BufferedWriter writer = bufferedWriter) {
+                try {
                     Object payload = ((ContentMessage<?>) inputMessage).getPayload();
                     if (payload instanceof ArrayList) {
                         ArrayList<?> recs = (ArrayList<?>) payload;
                         for (Object rec : recs) {
                             initStreamAndWriter(inputMessage);
-                            writer.write(rec != null ? rec.toString() : "");
+                            bufferedWriter.write(rec != null ? rec.toString() : "");
                             if (lineTerminator != null && lineTerminator.length()!=0) { 
-                                writer.write(lineTerminator);
+                            	bufferedWriter.write(lineTerminator);
                             } else {
-                                writer.newLine();
+                            	bufferedWriter.newLine();
                             }
                             
                             if (CLOSE_ON_ROW.equals(closeOn)) {
@@ -133,13 +133,13 @@ public class TextFileWriter extends AbstractFileWriter {
                         }
 
                     } else if (payload instanceof String) {
-                        writer.write((String) payload);
+                    	bufferedWriter.write((String) payload);
                     } else {
-                        writer.write("");
+                    	bufferedWriter.write("");
                     }
 
-                    if (writer != null){
-                       writer.flush();
+                    if (bufferedWriter != null){
+                    	bufferedWriter.flush();
                     }
                     
                     if (CLOSE_ON_MESSAGE.equals(closeOn)) {
@@ -148,8 +148,6 @@ public class TextFileWriter extends AbstractFileWriter {
 
                 } catch (IOException e) {
                     throw new IoException(e);
-                } finally {
-                    bufferedWriter = null;
                 }
             }
         }
@@ -179,12 +177,20 @@ public class TextFileWriter extends AbstractFileWriter {
     public void stop() {
         super.stop();
         closeDirectory();
+        closeFile();
     }
 
     @Override
     public void flowCompletedWithErrors(Throwable myError) {
         closeFile();
+        closeDirectory();
         super.flowCompletedWithErrors(myError);
+    }
+    
+    @Override
+    public void flowCompleted(boolean cancel) {
+    	closeDirectory();
+    	closeFile();
     }
 
     private void initStreamAndWriter(Message inputMessage) {

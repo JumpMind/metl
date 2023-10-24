@@ -45,7 +45,8 @@ dependencies {
     compile "org.codehaus.groovy:groovy-all:$groovyVersion"
     compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
     compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion"  
-    compile group: 'net.sf.saxon', name: 'saxon', version: '9.1.0.8'
+	compile group: 'net.sf.saxon', name: 'saxon9', version: '9.1.0.8'
+	runtime group: 'net.sf.saxon', name: 'saxon9-dom', version: '9.1.0.8'
     compile "com.jcraft:jsch:0.1.54"
     compile "oauth.signpost:oauth-signpost:1.2.1.2"    
     compile "org.apache.ant:ant:$antVersion"

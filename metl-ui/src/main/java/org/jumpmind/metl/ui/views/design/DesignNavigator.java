@@ -1160,15 +1160,15 @@ public class DesignNavigator extends VerticalLayout {
 
         @Override
         public boolean onOk() {
-        	AbstractModel model = null;
         	if (toDelete instanceof HierarchicalModelName) {
-                model = configurationService.findHierarchicalModel(toDelete.getId());
+        		HierarchicalModel hierModel = configurationService.findHierarchicalModel(toDelete.getId());
+            	configurationService.delete(hierModel);
         	} else if (toDelete instanceof RelationalModelName) {
-                model = configurationService.findRelationalModel(toDelete.getId());
+        		RelationalModel relModel = configurationService.findRelationalModel(toDelete.getId());
+            	configurationService.delete(relModel);
         	} else {
         		throw new RuntimeException("Request to delete an unknown model type could not be handled.");
         	}
-        	configurationService.delete(model);
             tabs.closeTab(toDelete.getId());
             Object parent = treeTable.getParent(toDelete);
             refresh();
