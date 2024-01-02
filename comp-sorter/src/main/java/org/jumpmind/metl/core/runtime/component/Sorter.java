@@ -303,7 +303,7 @@ public class Sorter extends AbstractComponentRuntime {
 		if (databasePlatform == null) {
 			ResettableBasicDataSource ds = new ResettableBasicDataSource();
 			ds.setDriverClassName(Driver.class.getName());
-			ds.setMaxActive(1);
+			ds.setMaxTotal(2);
 			ds.setInitialSize(1);
 			ds.setMinIdle(1);
 			ds.setMaxIdle(1);

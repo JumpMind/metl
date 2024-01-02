@@ -29,18 +29,17 @@ import org.jumpmind.metl.core.model.AgentStatus;
 import org.jumpmind.metl.core.model.GlobalSetting;
 import org.jumpmind.metl.core.runtime.resource.MailSession;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
-import org.jumpmind.vaadin.ui.common.ImmediateUpdatePasswordField;
-import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.HasValue.ValueChangeListener;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -48,13 +47,15 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.PasswordField;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
 @UiComponent
 @Scope(value = "ui")
 @Order(800)
-@AdminMenuLink(name = "Mail Server", id = "Mail Server", icon = FontAwesome.ENVELOPE_O)
+@AdminMenuLink(name = "Mail Server", id = "Mail Server", icon = VaadinIcons.ENVELOPE_O)
 public class MailServerPanel extends AbstractAdminPanel {
 
     final Logger log = LoggerFactory.getLogger(getClass());
@@ -79,79 +80,69 @@ public class MailServerPanel extends AbstractAdminPanel {
         FormLayout form = new FormLayout();
         form.setSpacing(true);
 
-        ImmediateUpdateTextField hostField = new ImmediateUpdateTextField("Host name") {
-            protected void save(String value) {
-                saveSetting(hostNameSetting, value);
-            }
-        };
+        TextField hostField = new TextField("Host name");
+        hostField.setValueChangeMode(ValueChangeMode.LAZY);
+        hostField.setValueChangeTimeout(200);
+        hostField.addValueChangeListener(event -> saveSetting(hostNameSetting, event.getValue()));
         hostField.setValue(hostNameSetting.getValue());
         hostField.setWidth(25f, Unit.EM);
         form.addComponent(hostField);
         hostField.focus();
 
-        NativeSelect transportField = new NativeSelect("Transport");
-        transportField.addItem("smtp");
-        transportField.addItem("smtps");
-        transportField.addItem("mock_smtp");
-        transportField.select(transportSetting.getValue() == null ? "smtp" : transportSetting.getValue());
-        transportField.setNullSelectionAllowed(false);
-        transportField.setImmediate(true);
+        NativeSelect<String> transportField = new NativeSelect<String>("Transport");
+        transportField.setItems("smtp", "smtps", "mock_smtp");
+        transportField.setValue(transportSetting.getValue() == null ? "smtp" : transportSetting.getValue());
+        transportField.setEmptySelectionAllowed(false);
         transportField.setWidth(10f, Unit.EM);
-        transportField.addValueChangeListener(new ValueChangeListener() {
-            public void valueChange(ValueChangeEvent event) {
-                saveSetting(transportSetting, (String) event.getProperty().getValue());
+        transportField.addValueChangeListener(new ValueChangeListener<String>() {
+            public void valueChange(ValueChangeEvent<String> event) {
+                saveSetting(transportSetting, event.getValue());
             }
         });
         form.addComponent(transportField);
 
-        ImmediateUpdateTextField portField = new ImmediateUpdateTextField("Port") {
-            protected void save(String value) {
-                saveSetting(portSetting, value);
-            }
-        };
+        TextField portField = new TextField("Port");
+        portField.setValueChangeMode(ValueChangeMode.LAZY);
+        portField.setValueChangeTimeout(200);
+        portField.addValueChangeListener(event -> saveSetting(portSetting, event.getValue()));
         portField.setValue(portSetting.getValue());
         portField.setWidth(25f, Unit.EM);
         form.addComponent(portField);
 
-        ImmediateUpdateTextField fromField = new ImmediateUpdateTextField("From Address") {
-            protected void save(String value) {
-                saveSetting(fromSetting, value);
-            }
-        };
+        TextField fromField = new TextField("From Address");
+        fromField.setValueChangeMode(ValueChangeMode.LAZY);
+        fromField.setValueChangeTimeout(200);
+        fromField.addValueChangeListener(event -> saveSetting(fromSetting, event.getValue()));
         fromField.setValue(fromSetting.getValue());
         fromField.setWidth(25f, Unit.EM);
         form.addComponent(fromField);
 
         CheckBox tlsField = new CheckBox("Use TLS", Boolean.valueOf(useTlsSetting.getValue()));
-        tlsField.setImmediate(true);
-        tlsField.addValueChangeListener(new ValueChangeListener() {
-            public void valueChange(ValueChangeEvent event) {
-                saveSetting(useTlsSetting, ((Boolean) event.getProperty().getValue()).toString());
+        tlsField.addValueChangeListener(new ValueChangeListener<Boolean>() {
+            public void valueChange(ValueChangeEvent<Boolean> event) {
+                saveSetting(useTlsSetting, event.getValue().toString());
             }            
         });
         form.addComponent(tlsField);
 
-        final ImmediateUpdateTextField userField = new ImmediateUpdateTextField("Username") {
-            protected void save(String value) {
-                saveSetting(usernameSetting, value);
-            }            
-        };
+        TextField userField = new TextField("Username");
+        userField.setValueChangeMode(ValueChangeMode.LAZY);
+        userField.setValueChangeTimeout(200);
+        userField.addValueChangeListener(event -> saveSetting(usernameSetting, event.getValue()));
         userField.setValue(usernameSetting.getValue());
         userField.setWidth(25f, Unit.EM);
 
-        final ImmediateUpdatePasswordField passwordField = new ImmediateUpdatePasswordField("Password") {
-            protected void save(String value) {
-                saveSetting(passwordSetting, value);
-            }            
-        };
+        PasswordField passwordField = new PasswordField("Password");
+        passwordField.setValueChangeMode(ValueChangeMode.LAZY);
+        passwordField.setValueChangeTimeout(200);
+        passwordField.addValueChangeListener(event -> saveSetting(passwordSetting, event.getValue()));
         passwordField.setValue(passwordSetting.getValue());
         passwordField.setWidth(25f, Unit.EM);
 
         CheckBox authField = new CheckBox("Use Authentication", Boolean.valueOf(useAuthSetting.getValue()));
-        authField.setImmediate(true);
-        authField.addValueChangeListener(new ValueChangeListener() {
-            public void valueChange(ValueChangeEvent event) {
-                Boolean isEnabled = (Boolean) event.getProperty().getValue();
+        authField.addValueChangeListener(new ValueChangeListener<Boolean>() {
+            public void valueChange(ValueChangeEvent<Boolean> event) {
+                Boolean isEnabled = event.getValue();
                 saveSetting(useAuthSetting, isEnabled.toString());
                 userField.setEnabled(isEnabled);
                 passwordField.setEnabled(isEnabled);

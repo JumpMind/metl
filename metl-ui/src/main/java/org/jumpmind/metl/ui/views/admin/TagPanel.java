@@ -20,7 +20,9 @@
  */
 package org.jumpmind.metl.ui.views.admin;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.jumpmind.metl.core.model.Tag;
@@ -30,23 +32,24 @@ import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.event.selection.SelectionEvent;
+import com.vaadin.event.selection.SelectionListener;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Table;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.ItemClick;
+import com.vaadin.ui.Grid.SelectionMode;
+import com.vaadin.ui.components.grid.ItemClickListener;
 
 @SuppressWarnings("serial")
 @UiComponent
 @Scope(value = "ui")
 @Order(300)
-@AdminMenuLink(name = "Tags", id = "Tags", icon = FontAwesome.TAG)
+@AdminMenuLink(name = "Tags", id = "Tags", icon = VaadinIcons.TAG)
 public class TagPanel extends AbstractAdminPanel {
 
     Button newButton;
@@ -54,44 +57,38 @@ public class TagPanel extends AbstractAdminPanel {
     Button editButton;
     
     Button removeButton;
-
-    BeanItemContainer<Tag> container;
     
-    Table table;
+    List<Tag> tagList = new ArrayList<Tag>();
+    
+    Grid<Tag> grid;
     
     public TagPanel() {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        newButton = buttonBar.addButton("New", FontAwesome.PLUS);
+        newButton = buttonBar.addButton("New", VaadinIcons.PLUS);
         newButton.addClickListener(new NewClickListener());
 
-        editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
+        editButton = buttonBar.addButton("Edit", VaadinIcons.EDIT);
         editButton.addClickListener(new EditClickListener());
 
-        removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
+        removeButton = buttonBar.addButton("Remove", VaadinIcons.TRASH);
         removeButton.addClickListener(new RemoveClickListener());
 
-        container = new BeanItemContainer<Tag>(Tag.class);
+        grid = new Grid<Tag>();
+        grid.setSizeFull();
+        //grid.setCacheRate(100);
+        //grid.setPageLength(100);
+        grid.setSelectionMode(SelectionMode.MULTI);
 
-        table = new Table();
-        table.setSizeFull();
-        table.setCacheRate(100);
-        table.setPageLength(100);
-        table.setImmediate(true);
-        table.setSelectable(true);
-        table.setMultiSelect(true);
+        grid.addColumn(Tag::getName).setId("name").setCaption("Tag Name").setSortable(true);
+        grid.addColumn(Tag::getColor).setCaption("Color");
+        grid.addItemClickListener(new GridItemClickListener());
+        grid.addSelectionListener(new GridSelectionListener());
+        grid.sort("name", SortDirection.ASCENDING);
 
-        table.setContainerDataSource(container);
-        table.setVisibleColumns("name", "color");
-        table.setColumnHeaders("Tag Name", "Color");
-        table.addItemClickListener(new TableItemClickListener());
-        table.addValueChangeListener(new TableValueChangeListener());
-        table.setSortContainerPropertyId("name");
-        table.setSortAscending(true);
-
-        addComponent(table);
-        setExpandRatio(table, 1.0f);
+        addComponent(grid);
+        setExpandRatio(grid, 1.0f);
     }
 
     @Override
@@ -109,9 +106,10 @@ public class TagPanel extends AbstractAdminPanel {
     }
 
     public void refresh() {
-        container.removeAllItems();
-        container.addAll(context.getConfigurationService().findTags());
-        table.sort();
+        tagList.clear();
+        tagList.addAll(context.getConfigurationService().findTags());
+        tagList.sort(null);
+        grid.setItems(tagList);
         setButtonsEnabled();
     }
 
@@ -122,14 +120,12 @@ public class TagPanel extends AbstractAdminPanel {
         removeButton.setEnabled(enabled);
     }
 
-    @SuppressWarnings("unchecked")
     protected Set<Tag> getSelectedItems() {
-        return (Set<Tag>) table.getValue();
+        return grid.getSelectedItems();
     }
 
-    @SuppressWarnings("unchecked")
     protected Tag getFirstSelectedItem() {
-        Set<Tag> tags = (Set<Tag>) table.getValue();
+        Set<Tag> tags = grid.getSelectedItems();
         Iterator<Tag> iter = tags.iterator();
         if (iter.hasNext()) {
             return iter.next();
@@ -161,29 +157,30 @@ public class TagPanel extends AbstractAdminPanel {
             for (Tag tag : getSelectedItems()) {
                 configurationService.deleteEntityTagsForTag(tag);
                 configurationService.delete(tag);                
-                container.removeItem(tag);
+                tagList.remove(tag);
             }
-            table.setValue(null);
+            grid.setItems(tagList);
+            grid.deselectAll();
             setButtonsEnabled();
         }
     }
 
-    class TableItemClickListener implements ItemClickListener {
+    class GridItemClickListener implements ItemClickListener<Tag> {
         long lastClick;
         
-        public void itemClick(ItemClickEvent event) {
-            if (event.isDoubleClick()) {
+        public void itemClick(ItemClick<Tag> event) {
+            if (event.getMouseEventDetails().isDoubleClick()) {
                 editButton.click();
-            } else if (getSelectedItems().contains(event.getItemId()) &&
+            } else if (getSelectedItems().contains(event.getItem()) &&
                 System.currentTimeMillis()-lastClick > 500) {
-                    table.setValue(null);
+                    grid.deselectAll();
             }
             lastClick = System.currentTimeMillis();
         }
     }
 
-    class TableValueChangeListener implements ValueChangeListener {
-        public void valueChange(ValueChangeEvent event) {
+    class GridSelectionListener implements SelectionListener<Tag> {
+        public void selectionChange(SelectionEvent<Tag> event) {
             setButtonsEnabled();
         }
     }

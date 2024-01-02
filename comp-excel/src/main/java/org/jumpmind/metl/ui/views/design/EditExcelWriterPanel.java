@@ -23,11 +23,9 @@ package org.jumpmind.metl.ui.views.design;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -37,31 +35,22 @@ import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.ExcelFileWriter;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.vaadin.ui.common.ExportDialog;
+import org.jumpmind.metl.ui.common.ExportDialog;
 
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.Transferable;
-import com.vaadin.event.dd.DragAndDropEvent;
-import com.vaadin.event.dd.DropHandler;
-import com.vaadin.event.dd.acceptcriteria.AcceptAll;
-import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.AbstractSelect.AbstractSelectTargetDetails;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.CellStyleGenerator;
-import com.vaadin.ui.Table.TableDragMode;
-import com.vaadin.ui.UI;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.SelectionMode;
+import com.vaadin.ui.components.grid.GridRowDragger;
 
 @SuppressWarnings("serial")
 public class EditExcelWriterPanel extends AbstractComponentEditPanel {
+    
+    List<RecordFormat> recordFormatList = new ArrayList<RecordFormat>();
 
-    Table table = new Table();
-
-    BeanItemContainer<RecordFormat> container = new BeanItemContainer<RecordFormat>(RecordFormat.class);
+    Grid<RecordFormat> grid = new Grid<RecordFormat>();
 
     Set<RecordFormat> selectedItemIds;
 
@@ -70,44 +59,37 @@ public class EditExcelWriterPanel extends AbstractComponentEditPanel {
         if (!readOnly) {
             addComponent(buttonBar);
 
-            Button moveUpButton = buttonBar.addButton("Move Up", FontAwesome.ARROW_UP);
+            Button moveUpButton = buttonBar.addButton("Move Up", VaadinIcons.ARROW_UP);
             moveUpButton.addClickListener(new MoveUpClickListener());
 
-            Button moveDownButton = buttonBar.addButton("Move Down", FontAwesome.ARROW_DOWN);
+            Button moveDownButton = buttonBar.addButton("Move Down", VaadinIcons.ARROW_DOWN);
             moveDownButton.addClickListener(new MoveDownClickListener());
 
-            Button moveTopButton = buttonBar.addButton("Move Top", FontAwesome.ANGLE_DOUBLE_UP);
+            Button moveTopButton = buttonBar.addButton("Move Top", VaadinIcons.ANGLE_DOUBLE_UP);
             moveTopButton.addClickListener(new MoveTopClickListener());
 
-            Button moveBottomButton = buttonBar.addButton("Move Bottom", FontAwesome.ANGLE_DOUBLE_DOWN);
+            Button moveBottomButton = buttonBar.addButton("Move Bottom", VaadinIcons.ANGLE_DOUBLE_DOWN);
             moveBottomButton.addClickListener(new MoveBottomClickListener());
 
-            Button cutButton = buttonBar.addButton("Cut", FontAwesome.CUT);
+            Button cutButton = buttonBar.addButton("Cut", VaadinIcons.SCISSORS);
             cutButton.addClickListener(new CutClickListener());
 
-            Button pasteButton = buttonBar.addButton("Paste", FontAwesome.PASTE);
+            Button pasteButton = buttonBar.addButton("Paste", VaadinIcons.PASTE);
             pasteButton.addClickListener(new PasteClickListener());
         }
         
-        buttonBar.addButtonRight("Export", FontAwesome.DOWNLOAD, (e)->export());
+        buttonBar.addButtonRight("Export", VaadinIcons.DOWNLOAD, (e)->export());
 
-        table.setContainerDataSource(container);
-
-        table.setSelectable(true);
-        table.setSortEnabled(false);
-        table.setImmediate(true);
-        table.setSizeFull();
-        table.setVisibleColumns(new Object[] { "entityName", "attributeName", "ordinalSetting" });
-        table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Ordinal" });
-        table.setCellStyleGenerator(new TableCellStyleGenerator());
-        table.setEditable(false);
-        table.setMultiSelect(true);
+        grid.setSizeFull();
+        grid.addColumn(RecordFormat::getEntityName).setCaption("Entity Name").setSortable(false);
+        grid.addColumn(RecordFormat::getAttributeName).setCaption("Attribute Name").setSortable(false);
+        grid.addColumn(RecordFormat::getOrdinalSetting).setCaption("Ordinal").setSortable(false);
+        grid.setSelectionMode(SelectionMode.MULTI);
         if (!readOnly) {
-            table.setDragMode(TableDragMode.MULTIROW);
-            table.setDropHandler(new TableDropHandler());
+            new GridRowDragger<RecordFormat>(grid);
         }
-        addComponent(table);
-        setExpandRatio(table, 1.0f);
+        addComponent(grid);
+        setExpandRatio(grid, 1.0f);
 
         RelationalModel model = (RelationalModel) component.getInputModel();
 
@@ -128,22 +110,20 @@ public class EditExcelWriterPanel extends AbstractComponentEditPanel {
             });
 
             for (RecordFormat recordFormat : attributes) {
-                table.addItem(recordFormat);
+                recordFormatList.add(recordFormat);
             }
         }
+        grid.setItems(recordFormatList);
         calculatePositions();
         saveOrdinalSettings();
     }
 
     protected void export() {
-        String fileNamePrefix = component.getName().toLowerCase().replace(' ', '-');
-        ExportDialog dialog = new ExportDialog(table, fileNamePrefix, component.getName());
-        UI.getCurrent().addWindow(dialog);
+        ExportDialog.show(context, grid);
     }
     
-    @SuppressWarnings("unchecked")
     protected Set<RecordFormat> getSelectedItems() {
-        return (Set<RecordFormat>) table.getValue();
+        return grid.getSelectedItems();
     }
 
     protected RecordFormat getSelectedItem() {
@@ -157,7 +137,7 @@ public class EditExcelWriterPanel extends AbstractComponentEditPanel {
     protected void calculatePositions() {
         boolean needsRefreshed = false;
         int ordinal = 1;
-        for (RecordFormat record : container.getItemIds()) {
+        for (RecordFormat record : recordFormatList) {
             if (record.getOrdinalSetting() != ordinal) {
                 record.setOrdinalSetting(ordinal);
                 needsRefreshed = true;
@@ -169,18 +149,18 @@ public class EditExcelWriterPanel extends AbstractComponentEditPanel {
             if (record != null) {
                 record.setFocusFieldId("transformText");
             }
-            table.refreshRowCache();
+            grid.setItems(recordFormatList);
         }
     }
 
     protected void moveItemsTo(Set<RecordFormat> itemIds, int index) {
-        if (index >= 0 && index < container.getItemIds().size() && itemIds.size() > 0) {
-            int firstItemIndex = container.indexOfId(itemIds.iterator().next());
+        if (index >= 0 && index < recordFormatList.size() && itemIds.size() > 0) {
+            int firstItemIndex = recordFormatList.indexOf(itemIds.iterator().next());
             if (index != firstItemIndex) {
                 for (RecordFormat itemId : itemIds) {
-                    boolean movingUp = index < container.indexOfId(itemId);
-                    container.removeItem(itemId);
-                    container.addItemAt(index, itemId);
+                    boolean movingUp = index < recordFormatList.indexOf(itemId);
+                    recordFormatList.remove(itemId);
+                    recordFormatList.add(index, itemId);
                     if (movingUp) {
                         index++;
                     }
@@ -195,7 +175,7 @@ public class EditExcelWriterPanel extends AbstractComponentEditPanel {
         String attrName;
         attrName = ExcelFileWriter.EXCEL_WRITER_ATTRIBUTE_ORDINAL;
         int ordinal = 1;
-        for (RecordFormat record : container.getItemIds()) {
+        for (RecordFormat record : recordFormatList) {
             saveSetting(record.getAttributeId(), attrName, String.valueOf(ordinal));
             ordinal++;
         }
@@ -219,7 +199,7 @@ public class EditExcelWriterPanel extends AbstractComponentEditPanel {
             Set<RecordFormat> itemIds = getSelectedItems();
             if (itemIds.size() > 0 && itemIds != null) {
                 RecordFormat firstItem = itemIds.iterator().next();
-                int index = container.indexOfId(firstItem) - 1;
+                int index = recordFormatList.indexOf(firstItem) - 1;
                 moveItemsTo(getSelectedItems(), index);
             }
         }
@@ -234,7 +214,7 @@ public class EditExcelWriterPanel extends AbstractComponentEditPanel {
                 while (iter.hasNext()) {
                     lastItem = iter.next();
                 }
-                int index = container.indexOfId(lastItem) + 1;
+                int index = recordFormatList.indexOf(lastItem) + 1;
                 moveItemsTo(getSelectedItems(), index);
             }
         }
@@ -248,7 +228,7 @@ public class EditExcelWriterPanel extends AbstractComponentEditPanel {
 
     class MoveBottomClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            moveItemsTo(getSelectedItems(), container.size() - 1);
+            moveItemsTo(getSelectedItems(), recordFormatList.size() - 1);
         }
     }
 
@@ -256,10 +236,8 @@ public class EditExcelWriterPanel extends AbstractComponentEditPanel {
         public void buttonClick(ClickEvent event) {
             Set<RecordFormat> itemIds = getSelectedItems();
             selectedItemIds = new LinkedHashSet<RecordFormat>(itemIds);
-            for (RecordFormat itemId : itemIds) {
-                table.unselect(itemId);
-            }
-            table.refreshRowCache();
+            grid.deselectAll();
+            grid.setItems(recordFormatList);
         }
     }
 
@@ -267,34 +245,10 @@ public class EditExcelWriterPanel extends AbstractComponentEditPanel {
         public void buttonClick(ClickEvent event) {
             Set<RecordFormat> itemIds = getSelectedItems();
             if (itemIds.size() > 0 && selectedItemIds != null) {
-                int index = container.indexOfId(itemIds.iterator().next());
+                int index = recordFormatList.indexOf(itemIds.iterator().next());
                 moveItemsTo(selectedItemIds, index);
                 selectedItemIds = null;
             }
-        }
-    }
-
-    class TableDropHandler implements DropHandler {
-        public void drop(DragAndDropEvent event) {
-            AbstractSelectTargetDetails targetDetails = (AbstractSelectTargetDetails) event.getTargetDetails();
-            Transferable transferable = event.getTransferable();
-            if (transferable.getSourceComponent() == table) {
-                RecordFormat target = (RecordFormat) targetDetails.getItemIdOver();
-                moveItemsTo(getSelectedItems(), container.indexOfId(target));
-            }
-        }
-
-        public AcceptCriterion getAcceptCriterion() {
-            return AcceptAll.get();
-        }
-    }
-
-    class TableCellStyleGenerator implements CellStyleGenerator {
-        public String getStyle(Table source, Object itemId, Object propertyId) {
-            if (propertyId != null && selectedItemIds != null && selectedItemIds.contains(itemId)) {
-                return "highlight";
-            }
-            return null;
         }
     }
 
@@ -302,8 +256,6 @@ public class EditExcelWriterPanel extends AbstractComponentEditPanel {
         ModelEntity modelEntity;
 
         ModelAttrib modelAttribute;
-
-        Map<Object, Field<?>> fields = new HashMap<Object, Field<?>>();
 
         Object focusFieldId;
 
@@ -344,14 +296,6 @@ public class EditExcelWriterPanel extends AbstractComponentEditPanel {
 
         public void setFocusFieldId(Object id) {
             this.focusFieldId = id;
-        }
-
-        public Field<?> getFocusField() {
-            Field<?> field = fields.get(focusFieldId);
-            if (field == null) {
-                field = fields.get("width");
-            }
-            return field;
         }
 
         public int getOrdinalSetting() {

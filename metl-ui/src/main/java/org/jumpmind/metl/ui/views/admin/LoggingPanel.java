@@ -41,16 +41,16 @@ import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.HasValue.ValueChangeListener;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
-import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -67,7 +67,7 @@ import com.vaadin.ui.themes.ValoTheme;
 @UiComponent
 @Scope(value = "ui")
 @Order(1300)
-@AdminMenuLink(name = "Logging", id = "Logging", icon = FontAwesome.FILE_TEXT_O)
+@AdminMenuLink(name = "Logging", id = "Logging", icon = VaadinIcons.FILE_TEXT_O)
 public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefreshable<Object> {
 
     BackgroundRefresherService backgroundRefresherService;
@@ -112,11 +112,10 @@ public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefre
         topPanelLayout.setComponentAlignment(refreshButton, Alignment.BOTTOM_LEFT);
 
         bufferSize = new TextField();
-        bufferSize.setImmediate(true);
         bufferSize.setWidth(5, Unit.EM);
         bufferSize.setValue("1000");
-        bufferSize.addValueChangeListener(new ValueChangeListener() {
-            public void valueChange(ValueChangeEvent event) {
+        bufferSize.addValueChangeListener(new ValueChangeListener<String>() {
+            public void valueChange(ValueChangeEvent<String> event) {
                 refresh();
             }
         });
@@ -124,14 +123,12 @@ public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefre
 
         filter = new TextField();
         filter.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
-        filter.setInputPrompt("Filter");
-        filter.setIcon(FontAwesome.SEARCH);
-        filter.setNullRepresentation("");
-        filter.setImmediate(true);
-        filter.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        filter.setTextChangeTimeout(200);
-        filter.addValueChangeListener(new ValueChangeListener() {
-            public void valueChange(ValueChangeEvent event) {
+        filter.setPlaceholder("Filter");
+        filter.setIcon(VaadinIcons.SEARCH);
+        filter.setValueChangeMode(ValueChangeMode.LAZY);
+        filter.setValueChangeTimeout(200);
+        filter.addValueChangeListener(new ValueChangeListener<String>() {
+            public void valueChange(ValueChangeEvent<String> event) {
                 refresh();
             }
         });
@@ -140,7 +137,6 @@ public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefre
 
         autoRefreshOn = new CheckBox("Auto Refresh");
         autoRefreshOn.setValue(true);
-        autoRefreshOn.setImmediate(true);
         topPanelLayout.addComponent(autoRefreshOn);
         topPanelLayout.setComponentAlignment(autoRefreshOn, Alignment.BOTTOM_LEFT);
 
@@ -163,7 +159,8 @@ public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefre
 
         logPanel = new Panel("Log Output");
         logPanel.setSizeFull();
-        logView = new Label("", ContentMode.HTML);
+        logView = new Label("");
+        logView.setContentMode(ContentMode.HTML);
         logView.setSizeUndefined();
         logPanel.setContent(logView);
         addComponent(logPanel);

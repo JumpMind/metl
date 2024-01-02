@@ -33,17 +33,16 @@ import org.jumpmind.metl.ui.common.UiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.server.FontAwesome;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.StreamResource;
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.DragAndDropWrapper;
-import com.vaadin.ui.DragAndDropWrapper.DragStartMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.dnd.DragSourceExtension;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class EditFlowPalette extends VerticalLayout {
@@ -83,14 +82,13 @@ public class EditFlowPalette extends VerticalLayout {
         
         TextField filterField = new TextField();
         filterField.setWidth(WIDTH-30, Unit.PIXELS);
-        filterField.setInputPrompt("Filter");
+        filterField.setPlaceholder("Filter");
         filterField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
-        filterField.setIcon(FontAwesome.SEARCH);
-        filterField.setImmediate(true);
-        filterField.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        filterField.setTextChangeTimeout(200);
-        filterField.addTextChangeListener((event) -> {
-            filterText = event.getText().toLowerCase();
+        filterField.setIcon(VaadinIcons.SEARCH);
+        filterField.setValueChangeMode(ValueChangeMode.LAZY);
+        filterField.setValueChangeTimeout(200);
+        filterField.addValueChangeListener((event) -> {
+            filterText = event.getValue().toLowerCase();
             populateComponentPalette();
         });
         top.addComponent(filterField);
@@ -152,11 +150,10 @@ public class EditFlowPalette extends VerticalLayout {
         paletteItem.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
         paletteItem.addStyleName("leftAligned");
         paletteItem.setWidth(100, Unit.PERCENTAGE);
-        DragAndDropWrapper wrapper = new DragAndDropWrapper(paletteItem);
-        wrapper.setSizeUndefined();
-        wrapper.setDragStartMode(DragStartMode.WRAPPER);
-        componentLayout.addComponent(wrapper);
-        componentLayout.setComponentAlignment(wrapper, Alignment.TOP_CENTER);
+        DragSourceExtension<FlowPaletteItem> extension = new DragSourceExtension<FlowPaletteItem>(paletteItem);
+        extension.setDragData(paletteItem);
+        componentLayout.addComponent(paletteItem);
+        componentLayout.setComponentAlignment(paletteItem, Alignment.TOP_CENTER);
 
     }
 

@@ -24,7 +24,6 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.websocket.server.ServerContainer;
 
@@ -61,7 +60,7 @@ public class Develop {
         webapp.setWar(pathPrefix + "metl-war/src/main/webapp");
         webapp.setResourceBase(pathPrefix + "metl-war/src/main/webapp");
 
-        ConcurrentHashMap<String, ConcurrentHashSet<String>> map = new ClassInheritanceMap();
+        ClassInheritanceMap map = new ClassInheritanceMap();
         ConcurrentHashSet<String> set = new ConcurrentHashSet<>();
         set.add("org.jumpmind.metl.ui.init.AppInitializer");
         map.put("org.springframework.web.WebApplicationInitializer", set);

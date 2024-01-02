@@ -26,28 +26,24 @@ import org.jumpmind.metl.core.model.WhereUsed;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
+import org.jumpmind.metl.ui.common.ExportDialog;
 import org.jumpmind.metl.ui.common.Icons;
-import org.jumpmind.metl.ui.common.PostCommitHandler;
-import org.jumpmind.vaadin.ui.common.ExportDialog;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.GeneratedPropertyContainer;
-import com.vaadin.server.FontAwesome;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
-import com.vaadin.ui.Grid.SingleSelectionModel;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.components.grid.SingleSelectionModel;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class WhereUsedPanel extends Panel implements IUiPanel {
@@ -66,11 +62,9 @@ public class WhereUsedPanel extends Panel implements IUiPanel {
     
     String whereUsedObjectName;
 
-    Grid componentWhereUsedGrid;
+    Grid<WhereUsed> componentWhereUsedGrid;
     
     Button openButton;
-
-    BeanItemContainer<WhereUsed> componentWhereUsedGridContainer;
     
     public WhereUsedPanel(String whereUsedType, String whereUsedObjectId, String whereUsedObjectName, ApplicationContext context, DesignNavigator projectNavigator) {
         this.setSizeFull();
@@ -88,31 +82,20 @@ public class WhereUsedPanel extends Panel implements IUiPanel {
         ButtonBar buttonBar = new ButtonBar();
         content.addComponent(buttonBar);
         openButton = buttonBar.addButton("Open Flow", Icons.FLOW, (event)->openFlow()); 
-        buttonBar.addButtonRight("Export", FontAwesome.DOWNLOAD, (event)->export());
+        buttonBar.addButtonRight("Export", VaadinIcons.DOWNLOAD, (event)->export());
         
-        componentWhereUsedGrid = new Grid();
+        componentWhereUsedGrid = new Grid<WhereUsed>();
         componentWhereUsedGrid.setSelectionMode(SelectionMode.SINGLE);
         componentWhereUsedGrid.setHeightMode(HeightMode.ROW);
         componentWhereUsedGrid.setWidth(100, Unit.PERCENTAGE);
-        componentWhereUsedGrid.addColumn("objectId", String.class).setHeaderCaption("Id").setEditable(false).setHidden(true);  // adding hidden column of id because the export does not allow only one column in output
-        componentWhereUsedGrid.addColumn("projectName", String.class).setHeaderCaption("Project").setEditable(false);
+        componentWhereUsedGrid.addColumn(WhereUsed::getObjectId).setCaption("Id").setHidden(true); // adding hidden column of id because the export does not allow only one column in output
+        componentWhereUsedGrid.addColumn(WhereUsed::getProjectName).setCaption("Project");
         
         if (!"ProjectVersion".equals(whereUsedType)) {
-	        componentWhereUsedGrid.addColumn("flowName", String.class).setHeaderCaption("Flow").setEditable(false);
-	        componentWhereUsedGrid.addColumn("componentName", String.class).setHeaderCaption("Component").setEditable(false);
+        	componentWhereUsedGrid.addColumn(WhereUsed::getFlowName).setCaption("Flow");
+        	componentWhereUsedGrid.addColumn(WhereUsed::getComponentName).setCaption("Component");
         }
         
-        componentWhereUsedGridContainer = new BeanItemContainer<>(WhereUsed.class);
-        GeneratedPropertyContainer gpcontainer =
-                new GeneratedPropertyContainer(componentWhereUsedGridContainer);
-        componentWhereUsedGrid.setContainerDataSource(gpcontainer);
-        
-        componentWhereUsedGrid.getEditorFieldGroup().addCommitHandler(new PostCommitHandler(() -> {
-            WhereUsed item = (WhereUsed) componentWhereUsedGrid.getEditedItemId();
-            IConfigurationService configurationService = context.getConfigurationService();
-            configurationService.save(item);
-            componentWhereUsedGrid.markAsDirty();
-        }));
         content.addComponent(componentWhereUsedGrid);
 
         VerticalLayout spacer = new VerticalLayout();
@@ -126,19 +109,17 @@ public class WhereUsedPanel extends Panel implements IUiPanel {
     protected void openFlow() {
     	String flowId = "";
     	String flowName = "";
-    	Object selected = ((SingleSelectionModel) componentWhereUsedGrid.getSelectionModel()).getSelectedRow();
+    	WhereUsed selected = ((SingleSelectionModel<WhereUsed>) componentWhereUsedGrid.getSelectionModel()).getSelectedItem().orElse(null);
     	if (selected != null) {
-    		flowId = componentWhereUsedGrid.getContainerDataSource().getItem(selected).getItemProperty("objectId").getValue().toString();
-    		flowName = componentWhereUsedGrid.getContainerDataSource().getItem(selected).getItemProperty("flowName").getValue().toString();
+    		flowId = selected.getObjectId();
+    		flowName = selected.getFlowName();
             EditFlowPanel flowLayout = new EditFlowPanel(context, flowId, designNavigator, designNavigator.tabs);
             designNavigator.tabs.addCloseableTab(flowId, flowName, Icons.FLOW, flowLayout);
     	}
     }
 
     protected void export() {
-        String fileNamePrefix = whereUsedObjectName.toLowerCase().replace(' ', '-') + "-where-used";
-        ExportDialog dialog = new ExportDialog(componentWhereUsedGrid, fileNamePrefix, whereUsedObjectName);
-        UI.getCurrent().addWindow(dialog);
+        ExportDialog.show(context, componentWhereUsedGrid);
     }
     
     protected void addHeader(String caption) {
@@ -163,9 +144,8 @@ public class WhereUsedPanel extends Panel implements IUiPanel {
         } else if ("ProjectVersion".equals(whereUsedType)) {
         	whereUsed = configurationService.findProjectVersionWhereUsed(whereUsedObjectId);
         }
-        componentWhereUsedGridContainer.removeAllItems();
-        componentWhereUsedGridContainer.addAll(whereUsed);
-        componentWhereUsedGrid.setHeightByRows(componentWhereUsedGridContainer.size() > 0 ? componentWhereUsedGridContainer.size() : 1);
+        componentWhereUsedGrid.setItems(whereUsed);
+        componentWhereUsedGrid.setHeightByRows(whereUsed.size() > 0 ? whereUsed.size() : 1);
     }
 
     @Override

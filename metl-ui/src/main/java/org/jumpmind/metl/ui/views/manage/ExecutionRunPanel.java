@@ -20,6 +20,7 @@
  */
 package org.jumpmind.metl.ui.views.manage;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.File;
@@ -31,6 +32,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.Execution;
@@ -60,43 +62,40 @@ import org.jumpmind.util.AppUtils;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
-import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.vaadin.ui.common.ReadOnlyTextAreaDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.data.Property;
-import com.vaadin.data.sort.SortOrder;
-import com.vaadin.data.util.BeanContainer;
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.filter.SimpleStringFilter;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.server.FontAwesome;
+import com.vaadin.data.provider.GridSortOrder;
+import com.vaadin.data.provider.Query;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Page;
 import com.vaadin.server.ResourceReference;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.HeaderCell;
-import com.vaadin.ui.Grid.HeaderRow;
+import com.vaadin.ui.Grid.Column;
+import com.vaadin.ui.Grid.ItemClick;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.Table.ColumnGenerator;
+
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
+import com.vaadin.ui.components.grid.HeaderRow;
+import com.vaadin.ui.components.grid.SingleSelectionModel;
+import com.vaadin.ui.dnd.DropTargetExtension;
 import com.vaadin.ui.renderers.DateRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -109,8 +108,12 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
     IExecutionService executionService;
 
     VerticalSplitPanel splitPanel;
+    
+    List<ExecutionStep> stepList = new ArrayList<ExecutionStep>();
 
-    Grid stepTable = new Grid();
+    Grid<ExecutionStep> stepTable = new Grid<ExecutionStep>();
+    
+    TextField componentNameFilterField;
 
     RunDiagram diagram;
 
@@ -122,17 +125,17 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
 
     List<AbstractObject> selected = new ArrayList<AbstractObject>();
 
-    Grid logTable;
+    List<ExecutionStepLog> logList = new ArrayList<ExecutionStepLog>();
 
-    BeanContainer<String, ExecutionStep> stepContainer = new BeanContainer<String, ExecutionStep>(
-            ExecutionStep.class);
-
-    BeanItemContainer<ExecutionStepLog> logContainer = new BeanItemContainer<ExecutionStepLog>(
-            ExecutionStepLog.class);
+    Grid<ExecutionStepLog> logTable;
+    
+    TextField messageFilterField;
+    
+    ComboBox<String> levelFilterCombo;
 
     Label flowLabel = new Label();
 
-    Label statusLabel = new Label("", ContentMode.HTML);
+    Label statusLabel = new Label();
 
     Label startLabel = new Label();
 
@@ -160,7 +163,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
 
     boolean lastDataRefreshWasDone = false;
 
-    List<SortOrder> lastSortOrder;
+    List<GridSortOrder<ExecutionStepLog>> lastSortOrder;
 
     Label status;
     
@@ -174,7 +177,8 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         this(executionId, context, parentTabSheet, null);
     }
 
-    public ExecutionRunPanel(String executionId, ApplicationContext context,
+    @SuppressWarnings("unchecked")
+	public ExecutionRunPanel(String executionId, ApplicationContext context,
             TabbedPanel parentTabSheet, IFlowRunnable flowRunnable) {
         this.executionService = context.getExecutionService();
         this.executionId = executionId;
@@ -200,18 +204,15 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         Label limitLabel = new Label("Max Log Messages To Show :");
         right.addComponent(limitLabel);
         right.setComponentAlignment(limitLabel, Alignment.MIDDLE_RIGHT);
-        limitField = new ImmediateUpdateTextField(null) {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected void save(String text) {
-                Setting setting = context.getUser()
-                        .findSetting(UserSetting.SETTING_MAX_LOG_MESSAGE_TO_SHOW);
-                setting.setValue(Integer.toString(getMaxToShow(text)));
-                context.getConfigurationService().save(setting);
-            }
-        };
+        limitField = new TextField();
+        limitField.setValueChangeMode(ValueChangeMode.LAZY);
+        limitField.setValueChangeTimeout(200);
+        limitField.addValueChangeListener(event -> {
+            Setting setting = context.getUser()
+                    .findSetting(UserSetting.SETTING_MAX_LOG_MESSAGE_TO_SHOW);
+            setting.setValue(Integer.toString(getMaxToShow(event.getValue())));
+            context.getConfigurationService().save(setting);
+        });
         limitField.setWidth("5em");
         limitField.setValue(
                 context.getUser().get(UserSetting.SETTING_MAX_LOG_MESSAGE_TO_SHOW, "1000"));
@@ -242,9 +243,13 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         addComponent(buttonBar);
 
         HorizontalLayout header1 = new HorizontalLayout();
-        header1.addComponent(new Label("<b>Flow:</b>", ContentMode.HTML));
+        Label flowTitleLabel = new Label("<b>Flow:</b>");
+        flowTitleLabel.setContentMode(ContentMode.HTML);
+        header1.addComponent(flowTitleLabel);
         header1.addComponent(flowLabel);
-        header1.addComponent(new Label("<b>Start:</b>", ContentMode.HTML));
+        Label startTitleLabel = new Label("<b>Start:</b>");
+        startTitleLabel.setContentMode(ContentMode.HTML);
+        header1.addComponent(startTitleLabel);
         header1.addComponent(startLabel);
         header1.setSpacing(true);
         header1.setMargin(new MarginInfo(false, true, false, true));
@@ -252,16 +257,19 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         addComponent(header1);
 
         HorizontalLayout header2 = new HorizontalLayout();
-        header2.addComponent(new Label("<b>Status:</b>", ContentMode.HTML));
+        Label statusTitleLabel = new Label("<b>Status:</b>");
+        statusTitleLabel.setContentMode(ContentMode.HTML);
+        header2.addComponent(statusTitleLabel);
+        statusLabel.setContentMode(ContentMode.HTML);
         header2.addComponent(statusLabel);
-        header2.addComponent(new Label("<b>End:</b>", ContentMode.HTML));
+        Label endTitleLabel = new Label("<b>End:</b>");
+        endTitleLabel.setContentMode(ContentMode.HTML);
+        header2.addComponent(endTitleLabel);
         header2.addComponent(endLabel);
         header2.setSpacing(true);
         header2.setMargin(new MarginInfo(false, true, true, true));
         header2.setWidth("100%");
         addComponent(header2);
-
-        stepContainer.setBeanIdProperty("id");
 
         diagramLayout = new VerticalLayout();
         diagramLayout.setWidth(10000, Unit.PIXELS);
@@ -271,111 +279,78 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         flowPanel.setSizeFull();
         flowPanel.addStyleName(ValoTheme.PANEL_WELL);
         
-        // Wrapper fixes issue with the diagram not expanding inside the scroll panel.
-        DragAndDropWrapper wrapper = new DragAndDropWrapper(diagramLayout);
-        wrapper.setSizeUndefined();
-        flowPanel.setContent(wrapper);
+        new DropTargetExtension<AbstractLayout>(diagramLayout);
+        flowPanel.setContent(diagramLayout);
 
         stepTable.setSelectionMode(SelectionMode.SINGLE);
-        stepTable.setImmediate(true);
         stepTable.setSizeFull();
-        stepTable.addColumn("componentName", String.class).setHeaderCaption("Component Name")
-                .setWidth(250);
-        stepTable.addColumn("threadNumber", Integer.class).setHeaderCaption("Thread").setWidth(100);
-        stepTable.addColumn("status", String.class).setHeaderCaption("Status").setWidth(120);
-        stepTable.addColumn("payloadReceived", Integer.class).setHeaderCaption("Payload Recvd")
-                .setWidth(120);
-        stepTable.addColumn("messagesReceived", Integer.class).setHeaderCaption("Msgs Recvd")
-                .setWidth(100);
-        stepTable.addColumn("messagesProduced", Integer.class).setHeaderCaption("Msgs Sent")
-                .setWidth(100);
-        stepTable.addColumn("payloadProduced", Integer.class).setHeaderCaption("Payload Sent")
-                .setWidth(120);
-        stepTable.addColumn("startTime", Date.class).setHeaderCaption("Start").setWidth(120)
-                .setMaximumWidth(170).setRenderer(new DateRenderer(UIConstants.TIME_FORMAT));
-        stepTable.addColumn("endTime", Date.class).setHeaderCaption("End").setWidth(120)
-                .setMaximumWidth(170).setRenderer(new DateRenderer(UIConstants.TIME_FORMAT));
-        stepTable.addColumn("handleDurationString", String.class).setHeaderCaption("Run Duration")
-                .setWidth(140);
-        stepTable.addColumn("queueDurationString", String.class).setHeaderCaption("Wait Duration")
-                .setWidth(140);
-        stepTable.setContainerDataSource(stepContainer);
+        stepTable.addColumn(ExecutionStep::getComponentName).setId("componentName").setCaption("Component Name").setWidth(250);
+        stepTable.addColumn(ExecutionStep::getThreadNumber).setCaption("Thread").setWidth(100);
+        stepTable.addColumn(ExecutionStep::getStatus).setCaption("Status").setWidth(120);
+        stepTable.addColumn(ExecutionStep::getPayloadReceived).setCaption("Payload Recvd").setWidth(120);
+        stepTable.addColumn(ExecutionStep::getMessagesReceived).setCaption("Msgs Recvd").setWidth(100);
+        stepTable.addColumn(ExecutionStep::getMessagesProduced).setCaption("Msgs Sent").setWidth(100);
+        stepTable.addColumn(ExecutionStep::getPayloadProduced).setCaption("Payload Send").setWidth(120);
+		stepTable.addColumn(ExecutionStep::getStartTime).setCaption("Start").setWidth(120).setMaximumWidth(170)
+				.setRenderer(new DateRenderer(UIConstants.TIME_FORMAT));
+		stepTable.addColumn(ExecutionStep::getEndTime).setCaption("End").setWidth(120).setMaximumWidth(170)
+				.setRenderer(new DateRenderer(UIConstants.TIME_FORMAT));
+		stepTable.addColumn(ExecutionStep::getHandleDurationString).setCaption("Run Duration").setWidth(140);
+		stepTable.addColumn(ExecutionStep::getQueueDurationString).setCaption("Wait Duration").setWidth(140);
         stepTable.addSelectionListener(event -> {
-            String stepId = (String) stepTable.getSelectedRow();
-            logContainer.removeAllItems();
-            List<ExecutionStepLog> logs = executionService.findExecutionStepLogs(stepId,
-                    getMaxToShow());
-            logContainer.addAll(logs);
-            downloadLink.setVisible(logs.size() > 0);
-            setLogMinimized(logContainer.size()==0);
+            ExecutionStep selected = ((SingleSelectionModel<ExecutionStep>) stepTable).getSelectedItem().orElse(null);
+            String stepId = selected != null ? selected.getId() : null;
+            logList = executionService.findExecutionStepLogs(stepId, getMaxToShow());
+            refreshLogTable();
+            downloadLink.setVisible(logList.size() > 0);
+            setLogMinimized(logTable.getDataProvider().size(new Query<>())==0);
             updateStatus();
         });
         
-        HeaderRow stepTableFilterHeader = stepTable.appendHeaderRow();
-        HeaderCell componentNameFilterCell = stepTableFilterHeader.getCell("componentName");
-        TextField componentNameFilterField = new TextField();
-        componentNameFilterField.setInputPrompt("Filter");
+        componentNameFilterField = new TextField();
+        componentNameFilterField.setPlaceholder("Filter");
         componentNameFilterField.addStyleName(ValoTheme.TEXTFIELD_TINY);
         componentNameFilterField.setWidth("100%");
-        componentNameFilterField.addTextChangeListener(change -> {
-            stepContainer.removeContainerFilters("componentName");
-            if (!change.getText().isEmpty())
-                stepContainer.addContainerFilter(
-                        new SimpleStringFilter("componentName", change.getText(), true, false));
-        });
-        componentNameFilterCell.setComponent(componentNameFilterField);
+        componentNameFilterField.setValueChangeMode(ValueChangeMode.LAZY);
+        componentNameFilterField.addValueChangeListener(change -> refreshStepTable());
+        HeaderRow stepTableFilterHeader = stepTable.appendHeaderRow();
+        stepTableFilterHeader.getCell("componentId").setComponent(componentNameFilterField);
 
-
-        logTable = new Grid();
-        logTable.addColumn("level", String.class).setHeaderCaption("Level").setWidth(110)
-                .setMaximumWidth(200);
-        logTable.addColumn("createTime", Date.class).setHeaderCaption("Time").setWidth(120)
-                .setMaximumWidth(200).setRenderer(new DateRenderer(UIConstants.TIME_FORMAT));
-        logTable.addColumn("logText", String.class).setHeaderCaption("Message").setExpandRatio(1);
-        logTable.setContainerDataSource(logContainer);
+        logTable = new Grid<ExecutionStepLog>();
+        logTable.addColumn(ExecutionStepLog::getLevel).setId("Level").setCaption("Level").setWidth(110).setMaximumWidth(200);
+		logTable.addColumn(ExecutionStepLog::getCreateTime).setId("Time").setCaption("Time").setWidth(120).setMaximumWidth(200)
+				.setRenderer(new DateRenderer(UIConstants.TIME_FORMAT));
+		logTable.addColumn(ExecutionStepLog::getLogText).setId("Message").setCaption("Message").setExpandRatio(1);
         logTable.setSizeFull();
         logTable.addItemClickListener(event -> logTableCellClicked(logTable, event));
         logTable.addSortListener(event -> {
             lastSortOrder = event.getSortOrder();
         });
 
-        HeaderRow filteringHeader = logTable.appendHeaderRow();
-        HeaderCell logTextFilterCell = filteringHeader.getCell("logText");
-        TextField filterField = new TextField();
-        filterField.setInputPrompt("Filter");
-        filterField.addStyleName(ValoTheme.TEXTFIELD_TINY);
-        filterField.setWidth("100%");
+        
+        messageFilterField = new TextField();
+        messageFilterField.setPlaceholder("Filter");
+        messageFilterField.addStyleName(ValoTheme.TEXTFIELD_TINY);
+        messageFilterField.setWidth("100%");
 
         // Update filter When the filter input is changed
-        filterField.addTextChangeListener(change -> {
-            // Can't modify filters so need to replace
-            logContainer.removeContainerFilters("logText");
+        messageFilterField.addValueChangeListener(change -> refreshLogTable());
+        HeaderRow filteringHeader = logTable.appendHeaderRow();
+        filteringHeader.getCell("Message").setComponent(messageFilterField);
 
-            // (Re)create the filter if necessary
-            if (!change.getText().isEmpty())
-                logContainer.addContainerFilter(
-                        new SimpleStringFilter("logText", change.getText(), true, false));
-        });
-        logTextFilterCell.setComponent(filterField);
-
-        HeaderCell levelFilterCell = filteringHeader.getCell("level");
-        ComboBox levelFilter = new ComboBox();
-        levelFilter.setWidth(8, Unit.EM);
-        levelFilter.setNullSelectionAllowed(true);
+        levelFilterCombo = new ComboBox<String>();
+        levelFilterCombo.setWidth(8, Unit.EM);
+        levelFilterCombo.setEmptySelectionAllowed(true);
+        List<String> itemList = new ArrayList<String>();
         LogLevel[] levels = LogLevel.values();
         for (LogLevel logLevel : levels) {
-            levelFilter.addItem(logLevel.name());
+            itemList.add(logLevel.name());
         }
-        levelFilter.addValueChangeListener(change -> {
-            logContainer.removeContainerFilters("level");
-            String text = (String) levelFilter.getValue();
-            if (isNotBlank(text)) {
-                logContainer.addContainerFilter(new SimpleStringFilter("level", text, true, false));
-            }
-        });
-        levelFilterCell.setComponent(levelFilter);
+        levelFilterCombo.setItems(itemList);
+        levelFilterCombo.addValueChangeListener(change -> refreshLogTable());
+        filteringHeader.getCell("Level").setComponent(levelFilterCombo);
 
-        levelFilter.addStyleName(ValoTheme.COMBOBOX_TINY);
+        levelFilterCombo.addStyleName(ValoTheme.COMBOBOX_TINY);
 
         VerticalLayout logLayout = new VerticalLayout();
         logLayout.setSizeFull();
@@ -392,7 +367,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         statusBar.setComponentAlignment(status, Alignment.MIDDLE_LEFT);
         logLayout.addComponent(statusBar);
 
-        downloadLink = new Button("Download", FontAwesome.DOWNLOAD);
+        downloadLink = new Button("Download", VaadinIcons.DOWNLOAD);
         downloadLink.addClickListener(e -> download());
         downloadLink.addStyleName(ValoTheme.BUTTON_LINK);
         statusBar.addComponent(downloadLink);
@@ -415,7 +390,8 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         context.getBackgroundRefresherService().register(this);
     }
 
-    protected void download() {
+    @SuppressWarnings("unchecked")
+	protected void download() {
         String stepId = null;
         if (showDiagramCheckbox.getValue()) {
             if (diagram.getSelectedNodeIds().size()>0) {
@@ -429,7 +405,8 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
                 }
             }
         } else {
-            stepId = (String) stepTable.getSelectedRow();
+            ExecutionStep selected = ((SingleSelectionModel<ExecutionStep>) stepTable).getSelectedItem().orElse(null);
+            stepId = selected != null ? selected.getId() : null;
         }
         
         if (stepId != null) {
@@ -539,18 +516,15 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         return list;
     }
 
-    protected void logTableCellClicked(Grid logTable, ItemClickEvent event) {
-        if (event.isDoubleClick()) {
-            Object object = event.getPropertyId();
-            if (!object.toString().equals("")) {
-                Object prop = event.getPropertyId();
-                String header = logTable.getColumn(prop).getHeaderCaption();
-                Property<?> p = event.getItem().getItemProperty(prop);
-                if (p != null) {
-                    String data = String.valueOf(p.getValue());
-                    new ReadOnlyTextAreaDialog(header, data, false).showAtSize(.5);
-                }
-            }
+    protected void logTableCellClicked(Grid<ExecutionStepLog> logTable, ItemClick<ExecutionStepLog> event) {
+        if (event.getMouseEventDetails().isDoubleClick()) {
+        	Column<ExecutionStepLog, ?> column = event.getColumn();
+        	ExecutionStepLog log = event.getItem();
+        	if (column != null && log != null) {
+        		String data = String.valueOf(column.getValueProvider().apply(log));
+        		String header = column.getId();
+        		new ReadOnlyTextAreaDialog(header, data, false).showAtSize(.5);
+        	}
         }
     }
 
@@ -602,7 +576,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
 
     protected void showDetails() {
         splitPanel.setFirstComponent(stepTable);
-        setLogMinimized(stepTable.getSelectedRows().isEmpty());
+        setLogMinimized(stepTable.getSelectedItems().isEmpty());
         Setting setting = context.getUser().findSetting(UserSetting.SETTING_SHOW_RUN_DIAGRAM);
         setting.setValue("false");
         context.getConfigurationService().save(setting);
@@ -628,14 +602,16 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         CommonUiUtils.notify(ex);   
     }
 
-    protected ExecutionData getExecutionData() {
+    @SuppressWarnings("unchecked")
+	protected ExecutionData getExecutionData() {
         ExecutionData data = new ExecutionData();
         data.execution = executionService.findExecution(executionId);
         data.steps = executionService.findExecutionSteps(executionId);
         this.flow = context.getConfigurationService().findFlow(data.execution.getFlowId());
 
-        String selected = (String) stepTable.getSelectedRow();
-        data.logs = executionService.findExecutionStepLogs(selected, getMaxToShow());
+        ExecutionStep selected = ((SingleSelectionModel<ExecutionStep>) stepTable).getSelectedItem().orElse(null);
+        String selectedId = selected != null ? selected.getId() : null;
+        data.logs = executionService.findExecutionStepLogs(selectedId, getMaxToShow());
         return data;
     }
 
@@ -670,11 +646,9 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
                     }
                 }
 
-                logContainer.removeAllItems();
-                List<ExecutionStepLog> logs = executionService.findExecutionStepLogs(stepIds,
-                        getMaxToShow());
-                logContainer.addAll(logs);
-                setLogMinimized(logContainer.size()==0);
+                logList = executionService.findExecutionStepLogs(stepIds, getMaxToShow());
+                refreshLogTable();
+                setLogMinimized(logList.size()==0);
                 updateStatus();
             }
         }
@@ -691,25 +665,26 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
     }
 
     protected void updateStatus() {
-        boolean max = logContainer.getItemIds().size() >= getMaxToShow();
+    	int logCount = logTable.getDataProvider().size(new Query<>());
+        boolean max = logCount >= getMaxToShow();
         if (max) {
             status.setValue(
-                    "<span style='color:red'>Displaying only " + logContainer.getItemIds().size()
+                    "<span style='color:red'>Displaying only " + logCount
                             + " messages.  Adjust max number of log message to show more.</span>");
         } else {
             status.setValue(
-                    "<span>Displaying " + logContainer.getItemIds().size() + " messages</span>");
+                    "<span>Displaying " + logCount + " messages</span>");
         }
     }
 
     protected boolean isDone() {
         boolean done = ExecutionStatus.isDone(statusLabel.getValue());
         if (done) {
-            List<String> ids = stepContainer.getItemIds();
-            for (String id : ids) {
-                ExecutionStep step = stepContainer.getItem(id).getBean();
+            List<ExecutionStep> steps = stepTable.getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
+            for (ExecutionStep step : steps) {
                 if (!ExecutionStatus.isDone(step.getStatus())) {
                     done = false;
+                    break;
                 }
             }
         }
@@ -725,15 +700,15 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
                 if (data.execution.getStatus().equals(ExecutionStatus.ERROR.name())) {
                     statusLabel.setStyleName("error");
                     statusLabel.setValue(
-                            FontAwesome.WARNING.getHtml() + " " + data.execution.getStatus());
+                    		VaadinIcons.WARNING.getHtml() + " " + data.execution.getStatus());
                 } else if (data.execution.getStatus().equals(ExecutionStatus.DONE.name())) {
                     statusLabel.setStyleName("done");
                     statusLabel.setValue(
-                            FontAwesome.CHECK.getHtml() + " " + data.execution.getStatus());
+                    		VaadinIcons.CHECK.getHtml() + " " + data.execution.getStatus());
                 } else if (data.execution.getStatus().equals(ExecutionStatus.RUNNING.name())) {
                     statusLabel.setStyleName("running");
                     statusLabel.setValue(
-                            FontAwesome.SPINNER.getHtml() + " " + data.execution.getStatus());
+                    		VaadinIcons.SPINNER.getHtml() + " " + data.execution.getStatus());
                 } else {
                     statusLabel.setStyleName("");
                     statusLabel.setValue(data.execution.getStatus());
@@ -745,40 +720,24 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
                 redrawFlow();
             }
 
-            String selected = (String) stepTable.getSelectedRow();
-            if (stepContainer.size() != data.steps.size()) {
-                stepContainer.removeAllItems();
-                stepContainer.addAll(data.steps);
-            } else {
-                for (ExecutionStep step : data.steps) {
-                    BeanItem<ExecutionStep> item = stepContainer.getItem(step.getId());
-                    item.getItemProperty("status").setValue(step.getStatus());
-                    item.getItemProperty("payloadReceived").setValue(step.getPayloadReceived());
-                    item.getItemProperty("messagesReceived").setValue(step.getMessagesReceived());
-                    item.getItemProperty("messagesProduced").setValue(step.getMessagesProduced());
-                    item.getItemProperty("payloadProduced").setValue(step.getPayloadProduced());
-                    item.getItemProperty("endTime").setValue(step.getEndTime());
-                    item.getItemProperty("startTime").setValue(step.getStartTime());
-                    item.getItemProperty("handleDuration").setValue(step.getHandleDuration());
-                    item.getItemProperty("queueDuration").setValue(step.getQueueDuration());
-
-                }
-            }
+            ExecutionStep selected = ((SingleSelectionModel<ExecutionStep>) stepTable).getSelectedItem().orElse(null);
+            
+            stepList = data.steps;
+            refreshStepTable();
 
             if (selected == null && data.steps.size() > 0) {
-                stepTable.select(selected);
+                stepTable.deselectAll();
             }
-
-            List<ExecutionStepLog> logMessages = new ArrayList<>(logContainer.getItemIds());
 
             List<ExecutionStepLog> newLogMessages = new ArrayList<>(data.logs);
 
-            for (ExecutionStepLog logMsg : logMessages) {
+            for (ExecutionStepLog logMsg : logList) {
                 newLogMessages.remove(logMsg);
             }
 
             if (newLogMessages.size() > 0) {
-                logContainer.addAll(newLogMessages);
+                logList.addAll(newLogMessages);
+                refreshLogTable();
                 if (lastSortOrder != null) {
                     logTable.setSortOrder(lastSortOrder);
                 }
@@ -791,6 +750,41 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
             removeButton.setVisible(lastDataRefreshWasDone);
             cancelButton.setVisible(!lastDataRefreshWasDone);
         }
+    }
+    
+    protected void refreshStepTable() {
+    	List<ExecutionStep> filteredStepList = new ArrayList<ExecutionStep>();
+    	String filterValue = componentNameFilterField.getValue();
+    	if (isNotBlank(filterValue)) {
+        	for (ExecutionStep step : stepList) {
+        		String componentName = step.getComponentName();
+        		if (componentName != null && componentName.toLowerCase().contains(filterValue.toLowerCase())) {
+        			filteredStepList.add(step);
+        		}
+        	}
+    	} else {
+    		filteredStepList.addAll(stepList);
+    	}
+    	stepTable.setItems(filteredStepList);
+    }
+    
+    protected void refreshLogTable() {
+    	List<ExecutionStepLog> filteredLogList = new ArrayList<ExecutionStepLog>();
+    	String messageFilterValue = messageFilterField.getValue();
+    	String levelFilterValue = levelFilterCombo.getValue();
+    	if (isNotBlank(messageFilterValue) || isNotBlank(levelFilterValue)) {
+    		for (ExecutionStepLog log : logList) {
+    			String message = log.getLogText();
+    			String level = log.getLevel();
+				if ((isBlank(messageFilterValue) || (message != null && message.toLowerCase().contains(messageFilterValue.toLowerCase())))
+						&& (isBlank(levelFilterValue) || (level != null && level.toLowerCase().contains(levelFilterValue.toLowerCase())))) {
+    				filteredLogList.add(log);
+    			}
+    		}
+    	} else {
+    		filteredLogList.addAll(logList);
+    	}
+    	logTable.setItems(filteredLogList);
     }
 
     protected String formatDate(Date date) {
@@ -815,20 +809,6 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
                 }
             }
             return executionStep;
-        }
-    }
-
-    public class ComponentNameColumnGenerator implements ColumnGenerator {
-
-        private static final long serialVersionUID = 1L;
-
-        @SuppressWarnings("unchecked")
-        public Object generateCell(com.vaadin.ui.Table source, Object itemId, Object columnId) {
-            BeanItem<ExecutionStepLog> logItem = (BeanItem<ExecutionStepLog>) source
-                    .getItem(itemId);
-            String executionStepId = (String) logItem.getItemProperty("executionStepId").getValue();
-            BeanItem<ExecutionStep> stepItem = stepContainer.getItem(executionStepId);
-            return new Label((String) stepItem.getItemProperty("componentName").getValue());
         }
     }
 

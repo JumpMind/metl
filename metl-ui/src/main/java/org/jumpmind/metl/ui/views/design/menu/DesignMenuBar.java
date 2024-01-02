@@ -20,6 +20,7 @@
  */
 package org.jumpmind.metl.ui.views.design.menu;
 
+import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FolderName;
 import org.jumpmind.metl.core.model.HierarchicalModelName;
@@ -31,13 +32,13 @@ import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.ui.common.AbstractMenuBar;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
 
-import com.vaadin.ui.AbstractSelect;
+import com.vaadin.ui.TreeGrid;
 
 public class DesignMenuBar extends AbstractMenuBar {
 
     private static final long serialVersionUID = 1L;
 
-    public DesignMenuBar(DesignNavigator navigator, AbstractSelect tree) {
+    public DesignMenuBar(DesignNavigator navigator, TreeGrid<AbstractNamedObject> tree) {
         super(tree, new NothingSelectAction(navigator));
         addMenuManager(ProjectVersion.class, new ProjectVersionMenuManager(navigator));
         addMenuManager(Project.class, new ProjectMenuManager(navigator));
@@ -95,7 +96,7 @@ public class DesignMenuBar extends AbstractMenuBar {
         }
         
         @Override
-        protected boolean isReadOnly(Object selected) {
+        protected boolean isReadOnly(AbstractNamedObject selected) {
             return false;
         }
         

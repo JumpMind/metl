@@ -21,9 +21,13 @@
 package org.jumpmind.metl.ui.views.design;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
@@ -33,31 +37,26 @@ import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.ui.common.ButtonBar;
+import org.jumpmind.metl.ui.common.ExportDialog;
 import org.jumpmind.metl.ui.views.design.ImportXmlTemplateWindow.ImportXmlListener;
-import org.jumpmind.vaadin.ui.common.ExportDialog;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.filter.And;
-import com.vaadin.data.util.filter.Compare;
-import com.vaadin.data.util.filter.IsNull;
-import com.vaadin.data.util.filter.Not;
-import com.vaadin.data.util.filter.SimpleStringFilter;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.combobox.FilteringMode;
+import com.vaadin.data.provider.Query;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.HeaderCell;
-import com.vaadin.ui.Grid.HeaderRow;
+import com.vaadin.ui.Grid.Column;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.components.grid.HeaderCell;
+import com.vaadin.ui.components.grid.HeaderRow;
 import com.vaadin.ui.themes.ValoTheme;
 
 
@@ -65,11 +64,19 @@ public class EditJsonPanel extends AbstractComponentEditPanel {
 
     private static final long serialVersionUID = 1L;
 
-    Grid grid;
+    List<Record> recordList = new ArrayList<Record>();
+
+    Grid<Record> grid;
+    
+    TextField entityFilterField = new TextField();
+    
+    TextField attributeFilterField = new TextField();
+    
+    CheckBox filterCheckBox = new CheckBox("Show Set Only");
 
     Set<String> xpathChoices;
-
-    BeanItemContainer<Record> container;
+    
+    ComboBox<String> pathCombo = new ComboBox<String>();
     
     public final static String JSON_PATH = "json.path";
     public final static String JSON_TEMPLATE = "json.template";
@@ -79,10 +86,10 @@ public class EditJsonPanel extends AbstractComponentEditPanel {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        Button editButton = buttonBar.addButton("Edit Template", FontAwesome.FILE_CODE_O);
+        Button editButton = buttonBar.addButton("Edit Template", VaadinIcons.FILE_CODE);
         editButton.addClickListener(new EditTemplateClickListener());
 
-        buttonBar.addButtonRight("Export", FontAwesome.DOWNLOAD, (e) -> export());
+        buttonBar.addButtonRight("Export", VaadinIcons.DOWNLOAD, (e) -> export());
 
         buildGrid();
         refresh();
@@ -91,37 +98,41 @@ public class EditJsonPanel extends AbstractComponentEditPanel {
     }
 
     protected void export() {
-        String fileNamePrefix = component.getName().toLowerCase().replace(' ', '-');
-        ExportDialog dialog = new ExportDialog(grid, fileNamePrefix, component.getName());
-        UI.getCurrent().addWindow(dialog);
+        ExportDialog.show(context, grid);
     }
 
-    protected void buildGrid() {
-        grid = new Grid();
+    @SuppressWarnings("unchecked")
+	protected void buildGrid() {
+        grid = new Grid<Record>();
         grid.setSelectionMode(SelectionMode.NONE);
         grid.setSizeFull();
-        grid.setEditorEnabled(!readOnly);
-        container = new BeanItemContainer<Record>(Record.class);
-        grid.setContainerDataSource(container);
         grid.setColumns("entityName", "attributeName", "path");
+        grid.addColumn(Record::getEntityName).setId("entityName").setCaption("Entity Name");
+        grid.addColumn(Record::getAttributeName).setId("attributeName").setCaption("Attribute Name");
+        grid.addColumn(Record::getPath).setId("path").setCaption("Path").setExpandRatio(1);
         HeaderRow filterRow = grid.appendHeaderRow();
 
-        addColumn("entityName", filterRow);
+        addColumn("entityName", filterRow, entityFilterField);
 
-        addColumn("attributeName", filterRow);
+        addColumn("attributeName", filterRow, attributeFilterField);
 
-        ComboBox combo = new ComboBox();
-        combo.addValueChangeListener(e->saveSettings());
-        combo.setWidth(100, Unit.PERCENTAGE);
-        combo.setImmediate(true);
-        combo.setNewItemsAllowed(true);
-        combo.setInvalidAllowed(true);
-        combo.setTextInputAllowed(true);
-        combo.setScrollToSelectedItem(true);
-        combo.setFilteringMode(FilteringMode.CONTAINS);
-        grid.getColumn("path").setEditorField(combo).setExpandRatio(1);
+        if (!readOnly) {
+            ComboBox<String> combo = new ComboBox<String>();
+            combo.addValueChangeListener(e->saveSettings());
+            combo.setWidth(100, Unit.PERCENTAGE);
+            combo.setNewItemProvider(newItem -> {
+    			List<String> itemList = combo.getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
+    			itemList.add(newItem);
+    			combo.setItems(itemList);
+    			combo.setValue(newItem);
+    			return Optional.of(newItem);
+            });
+            combo.setTextInputAllowed(true);
+            combo.setScrollToSelectedItem(true);
+            ((Column<Record, String>) grid.getColumn("path")).setEditorComponent(combo, Record::setPath);
+            grid.getEditor().setEnabled(true).setBuffered(false);
+        }
         addShowPopulatedFilter("path", filterRow);
-        grid.setEditorBuffered(false);
         addComponent(grid);
         setExpandRatio(grid, 1);
     }
@@ -142,53 +153,57 @@ public class EditJsonPanel extends AbstractComponentEditPanel {
                 for (ModelAttrib attr : entity.getModelAttributes()) {
                     if (firstAttribute) {
                         firstAttribute = false;
-                        container.addItem(entityRecord);
+                        recordList.add(entityRecord);
                     }
-                    container.addItem(new Record(entity, attr));
+                    recordList.add(new Record(entity, attr));
                 }
                 if (firstAttribute) {
-                    container.addItem(entityRecord);
+                    recordList.add(entityRecord);
                 }
             }
         }
+        refreshGrid();
     }
     
+    protected void refreshGrid() {
+    	List<Record> filteredRecordList = new ArrayList<Record>();
+    	for (Record record : recordList) {
+    		if (!isFilteredOut(record)) {
+    			filteredRecordList.add(record);
+    		}
+    	}
+    	grid.setItems(filteredRecordList);
+    }
+
+    protected boolean isFilteredOut(Record record) {
+		boolean validEntity = StringUtils.isBlank(entityFilterField.getValue()) || (record.getEntityName() != null
+				&& record.getEntityName().toLowerCase().contains(entityFilterField.getValue().toLowerCase()));
+		boolean validAttribute = StringUtils.isBlank(attributeFilterField.getValue()) || (record.getAttributeName() != null
+				&& record.getAttributeName().toLowerCase().contains(attributeFilterField.getValue().toLowerCase()));
+    	boolean validPath = StringUtils.isNotBlank(record.getPath());
+    	return !validEntity || !validAttribute || !validPath;
+    }
+
     protected void addShowPopulatedFilter(String propertyId, HeaderRow filterRow) {
         HeaderCell cell = filterRow.getCell(propertyId);
-        CheckBox group = new CheckBox("Show Set Only");
-        group.setImmediate(true);
-        group.addValueChangeListener(l->{
-            container.removeContainerFilters(propertyId);
-            if (group.getValue()) {
-                container.addContainerFilter(new And(new Not(new Compare.Equal(propertyId,"")), new Not(new IsNull(propertyId))));
-            }
-        });
-        group.addStyleName(ValoTheme.CHECKBOX_SMALL);
-        cell.setComponent(group);
+        filterCheckBox.addValueChangeListener(l->refreshGrid());
+        filterCheckBox.addStyleName(ValoTheme.CHECKBOX_SMALL);
+        cell.setComponent(filterCheckBox);
         
     }
 
-    protected void addColumn(String propertyId, HeaderRow filterRow) {
+    protected void addColumn(String propertyId, HeaderRow filterRow, TextField filterField) {
         grid.getColumn(propertyId).setEditable(false);
         HeaderCell cell = filterRow.getCell(propertyId);
-        TextField filterField = new TextField();
-        filterField.setInputPrompt("Filter");
-        filterField.setImmediate(true);
+        filterField.setPlaceholder("Filter");
         filterField.addStyleName(ValoTheme.TEXTFIELD_TINY);
         filterField.setWidth(100, Unit.PERCENTAGE);
-        filterField.addTextChangeListener(change -> {
-            container.removeContainerFilters(propertyId);
-            if (!change.getText().isEmpty()) {
-                container.addContainerFilter(
-                        new SimpleStringFilter(propertyId, change.getText(), true, false));
-            }
-        });
+        filterField.addValueChangeListener(change -> refreshGrid());
         cell.setComponent(filterField);
     }
 
     protected void saveSettings() {
-        for (Object obj : container.getItemIds()) {
-            Record record = (Record) obj;
+        for (Record record : recordList) {
             if (record.modelAttribute != null) {
                 saveAttributeSetting(record.modelAttribute.getId(),
                         JSON_PATH,
@@ -291,7 +306,6 @@ public class EditJsonPanel extends AbstractComponentEditPanel {
             content.setMargin(true);
 
             editor = new AceEditor();
-            editor.setImmediate(true);
             editor.setMode(AceMode.xml);
             editor.setSizeFull();
             editor.setHighlightActiveLine(true);

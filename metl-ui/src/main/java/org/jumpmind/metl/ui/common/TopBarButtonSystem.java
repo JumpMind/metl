@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.vaadin.server.FontAwesome;
+import com.vaadin.icons.VaadinIcons;
 
 @Component
 @Scope(value="ui")
@@ -42,7 +42,7 @@ public class TopBarButtonSystem extends TopBarButton {
     protected ApplicationContext context;
 
     public TopBarButtonSystem() {
-        super(FontAwesome.WARNING);
+        super(VaadinIcons.WARNING);
     }
     
     @PostConstruct
@@ -55,7 +55,7 @@ public class TopBarButtonSystem extends TopBarButton {
 
         if (StringUtils.isNotBlank(caption)) {
             setCaption(caption);
-            setHtmlContentAllowed(true);
+            setCaptionAsHtml(true);
         } else {
             setVisible(false);
         }

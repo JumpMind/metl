@@ -121,7 +121,6 @@ public class ImportDialog extends Window {
         }
         final UploadHandler handler = new UploadHandler();
         upload = new Upload(null, handler);
-        upload.setImmediate(true);
         upload.setButtonCaption("Upload");
         upload.addFinishedListener(new Upload.FinishedListener() {
             private static final long serialVersionUID = 1L;

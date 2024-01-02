@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -30,48 +30,37 @@ import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowParameter;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextArea;
-import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.FieldEvents.FocusEvent;
-import com.vaadin.event.FieldEvents.FocusListener;
-import com.vaadin.event.Transferable;
-import com.vaadin.event.dd.DragAndDropEvent;
-import com.vaadin.event.dd.DropHandler;
-import com.vaadin.event.dd.acceptcriteria.AcceptAll;
-import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.server.FontAwesome;
+import com.vaadin.event.selection.SelectionEvent;
+import com.vaadin.event.selection.SelectionListener;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.AbstractSelect.AbstractSelectTargetDetails;
+import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.TableDragMode;
-import com.vaadin.ui.TableFieldFactory;
+import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.components.grid.GridRowDragger;
+import com.vaadin.ui.components.grid.SingleSelectionModel;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-class EditFlowSettingsDialog extends ResizableWindow implements ValueChangeListener {
+class EditFlowSettingsDialog extends ResizableWindow implements SelectionListener<FlowParameter> {
 
     ApplicationContext context;
 
     Flow flow;
+    
+    List<FlowParameter> flowParameterList = new ArrayList<FlowParameter>();
 
-    BeanItemContainer<FlowParameter> container;
-
-    Table table;
+    Grid<FlowParameter> grid;
 
     Button insertButton;
 
@@ -94,51 +83,55 @@ class EditFlowSettingsDialog extends ResizableWindow implements ValueChangeListe
         formLayout.setWidth(100, Unit.PERCENTAGE);
         addComponent(formLayout);
         
-        ImmediateUpdateTextArea description = new ImmediateUpdateTextArea("Notes") {
-            protected void save(String text) {
-                flow.setNotes(text);
-                context.getConfigurationService().save(flow);
-            };
-        };
-        description.setValue(flow.getNotes());
+        TextArea description = new TextArea("Notes");
+        description.setValueChangeMode(ValueChangeMode.LAZY);
+        description.setValueChangeTimeout(200);
+        description.addValueChangeListener(event -> {
+            flow.setNotes(event.getValue());
+            context.getConfigurationService().save(flow);
+        });
+        if (flow.getNotes() != null) {
+            description.setValue(flow.getNotes());
+        }
         formLayout.addComponent(description);
 
         addHeader("Parameters");
         
         if (!readOnly) {
             ButtonBar buttonBar = new ButtonBar();
-            buttonBar.addButton("Add", FontAwesome.PLUS, new AddClickListener());
-            insertButton = buttonBar.addButton("Insert", FontAwesome.CHEVRON_RIGHT, new InsertClickListener());
+            buttonBar.addButton("Add", VaadinIcons.PLUS, new AddClickListener());
+            insertButton = buttonBar.addButton("Insert", VaadinIcons.CHEVRON_RIGHT, new InsertClickListener());
             insertButton.setEnabled(false);
-            removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O, new RemoveClickListener());
+            removeButton = buttonBar.addButton("Remove", VaadinIcons.TRASH, new RemoveClickListener());
             removeButton.setEnabled(false);
             addComponent(buttonBar);
         }
         
-        VerticalLayout tableWrapperLayout = new VerticalLayout();
-        tableWrapperLayout.setMargin(true);
-        tableWrapperLayout.setSizeFull();
+        VerticalLayout gridWrapperLayout = new VerticalLayout();
+        gridWrapperLayout.setMargin(true);
+        gridWrapperLayout.setSizeFull();
         
-        table = new Table();
-        table.setSizeFull();
-        container = new BeanItemContainer<FlowParameter>(FlowParameter.class);
-        table.setContainerDataSource(container);
-        table.setSelectable(true);
-        table.setSortEnabled(false);
+        grid = new Grid<FlowParameter>();
+        grid.setSizeFull();
+        grid.addColumn(FlowParameter::getPosition).setCaption("#").setSortable(false);
         if (!readOnly) {
-            table.setEditable(true);
-            table.setDragMode(TableDragMode.ROW);
-            table.setDropHandler(new TableDropHandler());
-            table.setTableFieldFactory(new EditFieldFactory());
-            table.addValueChangeListener(this);
+            new GridRowDragger<FlowParameter>(grid).getGridDropTarget().addGridDropListener(event -> saveAllPositions());
+            grid.addSelectionListener(this);
+            
+            grid.addColumn(FlowParameter::getName).setEditorComponent(createEditorField(), FlowParameter::setName)
+                    .setCaption("Name").setExpandRatio(3).setSortable(false);
+            grid.addColumn(FlowParameter::getDefaultValue).setEditorComponent(createEditorField(), FlowParameter::setDefaultValue)
+                    .setCaption("Default Value").setExpandRatio(6).setSortable(false);
+            grid.getEditor().setEnabled(true).addSaveListener(event -> {
+                context.getConfigurationService().save(event.getBean());
+            });
+        } else {
+            grid.addColumn(FlowParameter::getName).setCaption("Name").setExpandRatio(3).setSortable(false);
+            grid.addColumn(FlowParameter::getDefaultValue).setCaption("Default Value").setExpandRatio(6).setSortable(false);
         }
-        table.setVisibleColumns("position", "name", "defaultValue");
-        table.setColumnHeaders("#", "Name", "Default Value");
-        table.setColumnExpandRatio("name", .3f);
-        table.setColumnExpandRatio("defaultValue", .6f);
-        tableWrapperLayout.addComponent(table);
+        gridWrapperLayout.addComponent(grid);
         
-        addComponent(tableWrapperLayout, 1);
+        addComponent(gridWrapperLayout, 1);
 
         addComponent(buildButtonFooter(closeButton));
 
@@ -149,9 +142,7 @@ class EditFlowSettingsDialog extends ResizableWindow implements ValueChangeListe
             }
         });
 
-        for (FlowParameter flowParameter : params) {
-            table.addItem(flowParameter);
-        }
+        grid.setItems(params);
     }
     
     protected void addHeader(String caption) {
@@ -164,9 +155,9 @@ class EditFlowSettingsDialog extends ResizableWindow implements ValueChangeListe
         addComponent(componentHeaderWrapper);
     }
 
-    public void valueChange(ValueChangeEvent event) {
-        removeButton.setEnabled(table.getValue() != null);
-        insertButton.setEnabled(table.getValue() != null);
+    public void selectionChange(SelectionEvent<FlowParameter> event) {
+        removeButton.setEnabled(!grid.getSelectedItems().isEmpty());
+        insertButton.setEnabled(!grid.getSelectedItems().isEmpty());
     }
 
     protected void addItem(int index) {
@@ -176,16 +167,14 @@ class EditFlowSettingsDialog extends ResizableWindow implements ValueChangeListe
         parameter.setPosition((index + 1));
         context.getConfigurationService().save(parameter);
         flow.getFlowParameters().add(parameter);
-        container.addItemAt(index, parameter);
-        table.select(parameter);
-        table.setCurrentPageFirstItemId(parameter);
+        flowParameterList.add(index, parameter);
+        grid.setItems(flowParameterList);
+        grid.select(parameter);
     }
 
     protected void saveAllPositions() {
-        @SuppressWarnings("unchecked")
-        Collection<FlowParameter> parameters = (Collection<FlowParameter>) table.getItemIds();
         int count = 1;
-        for (FlowParameter parameter : parameters) {
+        for (FlowParameter parameter : flowParameterList) {
             parameter.setPosition(count++);
             context.getConfigurationService().save(parameter);
         }
@@ -199,21 +188,25 @@ class EditFlowSettingsDialog extends ResizableWindow implements ValueChangeListe
 
     class InsertClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            addItem(container.indexOfId((FlowParameter) table.getValue()));
-            saveAllPositions();
+            FlowParameter parameter = ((SingleSelectionModel<FlowParameter>) grid.getSelectionModel()).getSelectedItem().orElse(null);
+            if (parameter != null) {
+                addItem(flowParameterList.indexOf(parameter));
+                saveAllPositions();
+            }
         }
     }
 
     class RemoveClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            FlowParameter parameter = (FlowParameter) table.getValue();
+            FlowParameter parameter = ((SingleSelectionModel<FlowParameter>) grid.getSelectionModel()).getSelectedItem().orElse(null);
             if (parameter != null) {
                 flow.getFlowParameters().remove(parameter);
                 context.getConfigurationService().delete((AbstractObject) parameter);
-                int index = container.indexOfId(parameter);
-                table.removeItem(parameter);
-                if (index < container.size()) {
-                    table.select(container.getIdByIndex(index));
+                int index = flowParameterList.indexOf(parameter);
+                flowParameterList.remove(parameter);
+                grid.setItems(flowParameterList);
+                if (index < flowParameterList.size()) {
+                    grid.select(flowParameterList.get(index));
                 }
                 saveAllPositions();
             }
@@ -225,53 +218,13 @@ class EditFlowSettingsDialog extends ResizableWindow implements ValueChangeListe
             EditFlowSettingsDialog.this.close();
         }
     }
-
-    class EditFieldFactory implements TableFieldFactory {
-        public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId,
-                com.vaadin.ui.Component uiContext) {
-            final FlowParameter parameter = (FlowParameter) itemId;
-            final TextField textField = new ImmediateUpdateTextField(null) {
-                protected void save(String text) {
-                    parameter.setDefaultValue(text);
-                    context.getConfigurationService().save(parameter);
-                }
-            };
-            textField.addFocusListener(new FocusListener() {
-                public void focus(FocusEvent event) {
-                    table.select(itemId);
-                }
-            });
-            if (propertyId.equals("position")) {
-                textField.setReadOnly(true);
-                textField.setWidth(3, Unit.EM);
-            } else {
-                textField.setWidth(100, Unit.PERCENTAGE);
-            }
-            return textField;
-        }
-    }
-
-    class TableDropHandler implements DropHandler {
-        public void drop(DragAndDropEvent event) {
-            AbstractSelectTargetDetails targetDetails = (AbstractSelectTargetDetails) event.getTargetDetails();
-            Transferable transferable = event.getTransferable();
-            if (transferable.getSourceComponent() == table) {
-                FlowParameter target = (FlowParameter) targetDetails.getItemIdOver();
-                int targetIndex = container.indexOfId(target);
-                FlowParameter source = (FlowParameter) transferable.getData("itemId");
-                if (targetIndex == -1) {
-                    targetIndex = 0;
-                }
-                container.removeItem(source);
-                container.addItemAt(targetIndex, source);
-                table.select(source);
-                saveAllPositions();
-            }
-        }
-
-        public AcceptCriterion getAcceptCriterion() {
-            return AcceptAll.get();
-        }
+    
+    protected TextField createEditorField() {
+        final TextField textField = new TextField();
+        textField.setValueChangeMode(ValueChangeMode.LAZY);
+        textField.setValueChangeTimeout(200);
+        textField.setWidth(100, Unit.PERCENTAGE);
+        return textField;
     }
 
 }

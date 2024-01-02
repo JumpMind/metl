@@ -21,6 +21,7 @@
 package org.jumpmind.metl.ui.views.design.menu;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
 
 public class ProjectDependencyMenuManager extends AbstractDesignSelectedValueMenuManager {
@@ -39,7 +40,7 @@ public class ProjectDependencyMenuManager extends AbstractDesignSelectedValueMen
     }    
     
     @Override
-    protected String[] getDisabledPaths(Object selected) {
+    protected String[] getDisabledPaths(AbstractNamedObject selected) {
         if (isReadOnly(selected)) {
             return (String[])ArrayUtils.addAll(super.getDisabledPaths(selected), new String[] { "Edit|Remove",
                     "Edit|Change Dependency Version"

@@ -26,12 +26,9 @@ import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.HasValue.ValueChangeListener;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.ComboBox;
 
 public class EditScriptPanel extends AbstractComponentEditPanel {
@@ -47,46 +44,50 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
 
     AceEditor editor;
 
-    ComboBox select;
+    ComboBox<String> select;
 
     @SuppressWarnings("serial")
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        buttonBar.addButtonRight("Templates", FontAwesome.QUESTION_CIRCLE,
+        buttonBar.addButtonRight("Templates", VaadinIcons.QUESTION_CIRCLE,
                 (e) -> new ScriptTemplatesDialog(this, context, component, readOnly)
                         .showAtSize(.75));
 
         editor = CommonUiUtils.createAceEditor();
-        editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        editor.setTextChangeTimeout(200);
 
         editor.setMode(AceMode.java);
 
-        select = new ComboBox();
+        select = new ComboBox<String>();
         select.setWidth(40, Unit.EM);
         select.setTextInputAllowed(false);
 
-        select.addItem(Script.IMPORTS);
-        select.setItemCaption(Script.IMPORTS, SCRIPT_IMPORTS);
-        select.addItem(Script.METHODS);
-        select.setItemCaption(Script.METHODS, SCRIPT_METHODS);
-        select.addItem(Script.INIT_SCRIPT);
-        select.setItemCaption(Script.INIT_SCRIPT, SCRIPT_ON_INIT);
-        select.addItem(Script.HANDLE_SCRIPT);
-        select.setItemCaption(Script.HANDLE_SCRIPT, SCRIPT_ON_HANDLE);
-        select.addItem(Script.ON_FLOW_SUCCESS);
-        select.setItemCaption(Script.ON_FLOW_SUCCESS, SCRIPT_ON_SUCCESS);
-        select.addItem(Script.ON_FLOW_ERROR);
-        select.setItemCaption(Script.ON_FLOW_ERROR, SCRIPT_ON_ERROR);
+		select.setItems(Script.IMPORTS, Script.METHODS, Script.INIT_SCRIPT, Script.HANDLE_SCRIPT,
+				Script.ON_FLOW_SUCCESS, Script.ON_FLOW_ERROR);
+		select.setItemCaptionGenerator(item -> {
+			switch (item) {
+				case Script.IMPORTS:
+					return SCRIPT_IMPORTS;
+				case Script.METHODS:
+					return SCRIPT_METHODS;
+				case Script.INIT_SCRIPT:
+					return SCRIPT_ON_INIT;
+				case Script.HANDLE_SCRIPT:
+					return SCRIPT_ON_HANDLE;
+				case Script.ON_FLOW_SUCCESS:
+					return SCRIPT_ON_SUCCESS;
+				case Script.ON_FLOW_ERROR:
+					return SCRIPT_ON_ERROR;
+				default:
+					return "";
+			}
+		});
 
-        select.setImmediate(true);
-        select.setNullSelectionAllowed(false);
-        select.setNewItemsAllowed(false);
-        select.addValueChangeListener(new ValueChangeListener() {
+        select.setEmptySelectionAllowed(false);
+        select.addValueChangeListener(new ValueChangeListener<String>() {
             @Override
-            public void valueChange(ValueChangeEvent event) {
+            public void valueChange(ValueChangeEvent<String> event) {
                 refresh();
             }
         });
@@ -94,12 +95,12 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
         buttonBar.addLeft(select);
 
         if (!readOnly) {
-            editor.addTextChangeListener(new TextChangeListener() {
+            editor.addValueChangeListener(new ValueChangeListener<String>() {
 
                 @Override
-                public void textChange(TextChangeEvent event) {
+                public void valueChange(ValueChangeEvent<String> event) {
                     String key = (String) select.getValue();
-                    EditScriptPanel.this.component.put(key, event.getText());
+                    EditScriptPanel.this.component.put(key, event.getValue());
                     EditScriptPanel.this.context.getConfigurationService()
                             .save(EditScriptPanel.this.component.findSetting(key));
                 }

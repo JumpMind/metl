@@ -24,7 +24,7 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import org.jumpmind.db.sql.SqlTemplateSettings;
@@ -46,7 +46,7 @@ import org.vaadin.aceeditor.AceMode;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutAction.ModifierKey;
 import com.vaadin.event.ShortcutListener;
-import com.vaadin.server.FontAwesome;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -71,7 +71,7 @@ public class EditRdbmsReaderPanel extends AbstractComponentEditPanel {
 
             executeSqlClickListener = new ExecuteSqlClickListener();
 
-            executeButton = buttonBar.addButton("Execute", FontAwesome.PLAY, executeSqlClickListener);
+            executeButton = buttonBar.addButton("Execute", VaadinIcons.PLAY, executeSqlClickListener);
             executeButton.setEnabled(false);
 
             Resource resource = component.getResource();

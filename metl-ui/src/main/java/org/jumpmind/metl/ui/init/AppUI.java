@@ -24,12 +24,7 @@ import static org.jumpmind.metl.core.util.AppConstants.DEFAULT_GROUP;
 import static org.jumpmind.metl.core.util.AppConstants.DEFAULT_USER;
 import static org.jumpmind.metl.ui.common.UiUtils.whereAreYou;
 
-import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -55,15 +50,6 @@ import com.vaadin.annotations.PreserveOnRefresh;
 import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
-import com.vaadin.data.util.converter.Converter;
-import com.vaadin.data.util.converter.DefaultConverterFactory;
-import com.vaadin.data.util.converter.StringToBigDecimalConverter;
-import com.vaadin.data.util.converter.StringToBooleanConverter;
-import com.vaadin.data.util.converter.StringToDateConverter;
-import com.vaadin.data.util.converter.StringToDoubleConverter;
-import com.vaadin.data.util.converter.StringToFloatConverter;
-import com.vaadin.data.util.converter.StringToIntegerConverter;
-import com.vaadin.data.util.converter.StringToLongConverter;
 import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.Responsive;
 import com.vaadin.server.ThemeResource;
@@ -73,8 +59,8 @@ import com.vaadin.server.VaadinServlet;
 import com.vaadin.server.VaadinServletRequest;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.communication.PushMode;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -135,63 +121,6 @@ public class AppUI extends UI {
             }
         });
 
-        VaadinSession.getCurrent().setConverterFactory(new DefaultConverterFactory() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected Converter<Date, ?> createDateConverter(Class<?> sourceType) {
-                return super.createDateConverter(sourceType);
-            }
-
-            protected Converter<String, ?> createStringConverter(Class<?> sourceType) {
-                if (Double.class.isAssignableFrom(sourceType)) {
-                    return new StringToDoubleConverter();
-                } else if (Float.class.isAssignableFrom(sourceType)) {
-                    return new StringToFloatConverter();
-                } else if (Integer.class.isAssignableFrom(sourceType)) {
-                    return new StringToIntegerConverter() {
-                        private static final long serialVersionUID = 1L;
-
-                        @Override
-                        protected NumberFormat getFormat(Locale locale) {
-                            NumberFormat format = super.getFormat(locale);
-                            format.setGroupingUsed(false);
-                            return format;
-                        }
-                    };
-                } else if (Long.class.isAssignableFrom(sourceType)) {
-                    return new StringToLongConverter() {
-                        private static final long serialVersionUID = 1L;
-
-                        @Override
-                        protected NumberFormat getFormat(Locale locale) {
-                            NumberFormat format = super.getFormat(locale);
-                            format.setGroupingUsed(false);
-                            return format;
-                        }
-                    };
-                } else if (BigDecimal.class.isAssignableFrom(sourceType)) {
-                    return new StringToBigDecimalConverter();
-                } else if (Boolean.class.isAssignableFrom(sourceType)) {
-                    return new StringToBooleanConverter();
-                } else if (Date.class.isAssignableFrom(sourceType)) {
-                    return new StringToDateConverter() {
-                        protected DateFormat getFormat(Locale locale) {
-                            if (locale == null) {
-                                locale = Locale.getDefault();
-                            }
-                            DateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                            f.setLenient(false);
-                            return f;
-                        }
-                    };
-                } else {
-                    return null;
-                }
-            }
-
-        });
-
         Responsive.makeResponsive(this);
         afterInit();
     }
@@ -232,7 +161,8 @@ public class AppUI extends UI {
             icon.setWidth(70f, Unit.PIXELS);
             layout.addComponent(icon);
 
-            Label labelIntro = new Label(intro, ContentMode.HTML);
+            Label labelIntro = new Label(intro);
+            labelIntro.setContentMode(ContentMode.HTML);
             labelIntro.setStyleName("large");
             labelIntro.setWidth(530f, Unit.PIXELS);
             layout.addComponent(labelIntro);
@@ -240,7 +170,7 @@ public class AppUI extends UI {
 
             TextArea textField = new TextArea();
             textField.setSizeFull();
-            textField.setWordwrap(false);
+            textField.setWordWrap(false);
             textField.setValue(message);
             addComponent(textField);
             content.setExpandRatio(textField, 1.0f);

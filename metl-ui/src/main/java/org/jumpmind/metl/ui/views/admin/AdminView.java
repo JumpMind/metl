@@ -37,27 +37,24 @@ import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
-import com.vaadin.data.Item;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Resource;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.Table.ColumnHeaderMode;
-import com.vaadin.ui.TreeTable;
+import com.vaadin.ui.Tree;
+import com.vaadin.ui.Tree.ItemClick;
+import com.vaadin.ui.Tree.ItemClickListener;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope(value = "ui")
-@TopBarLink(category = Category.Admin, name = "Admin", id = "admin", icon = FontAwesome.GEARS, menuOrder = 10)
-public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemClickListener {
+@TopBarLink(category = Category.Admin, name = "Admin", id = "admin", icon = VaadinIcons.COGS, menuOrder = 10)
+public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemClickListener<AdminMenuLink> {
 
     private static final long serialVersionUID = 1L;
 
@@ -69,7 +66,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
     
     TabbedPanel tabbedPanel;
     
-    TreeTable table;
+    Tree<AdminMenuLink> tree;
 
     Map<String, Component> sideMenuById = new HashMap<String, Component>();
     
@@ -88,28 +85,24 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         container.addComponent(tabbedPanel);
         leftSplit.setSecondComponent(container);
 
-        table = new TreeTable();
-        table.addStyleName(ValoTheme.TREETABLE_NO_HORIZONTAL_LINES);
-        table.addStyleName(ValoTheme.TREETABLE_NO_STRIPES);
-        table.addStyleName(ValoTheme.TREETABLE_NO_VERTICAL_LINES);
-        table.addStyleName(ValoTheme.TREETABLE_BORDERLESS);
-        table.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
-        table.setSizeFull();
-        table.setCacheRate(100);
-        table.setPageLength(100);
-        table.setImmediate(true);
-        table.setSelectable(true);
-        table.addItemClickListener(this);
-        table.addStyleName("noselect");
-        table.addContainerProperty("id", String.class, null);
-        table.setVisibleColumns(new Object[] { "id" });
-        table.setColumnExpandRatio("id", 1);
+        tree = new Tree<AdminMenuLink>();
+        tree.addStyleName(ValoTheme.TREETABLE_NO_HORIZONTAL_LINES);
+        tree.addStyleName(ValoTheme.TREETABLE_NO_STRIPES);
+        tree.addStyleName(ValoTheme.TREETABLE_NO_VERTICAL_LINES);
+        tree.addStyleName(ValoTheme.TREETABLE_BORDERLESS);
+        tree.setSizeFull();
+        //tree.setCacheRate(100);
+        //tree.setPageLength(100);
+        tree.addItemClickListener(this);
+        tree.addStyleName("noselect");
+        tree.setItemCaptionGenerator(item -> item.id());
+        tree.setItemIconGenerator(item -> item.icon());
         
         for (AdminSideView sideView : sideMenu) {
             AdminMenuLink link = (AdminMenuLink) sideView.getClass().getAnnotation(AdminMenuLink.class);
             sideView.setAdminView(this);
                 if (link != null && link.uiClass().equals(AppUI.class) && sideView.isAccessible()) {
-                    addItem(link.id(), link.icon());
+                    addItem(link);
                     sideMenuById.put(link.id(), sideView.getView());
                 }
         }
@@ -123,29 +116,24 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         leftMenuBar.setWidth(100, Unit.PERCENTAGE);
         navigator.addComponent(leftMenuBar);
 
-        navigator.addComponent(table);
-        navigator.setExpandRatio(table, 1);
+        navigator.addComponent(tree);
+        navigator.setExpandRatio(tree, 1);
         
         addComponent(leftSplit);
         
     }
 
-    @SuppressWarnings("unchecked")
-    protected void addItem(String id, Resource icon) {
-        Item item = table.addItem(id);
-        item.getItemProperty("id").setValue(id);
-        table.setItemIcon(id, icon);
-        table.setChildrenAllowed(id, false);
-        table.setCollapsed(id, true);
+    protected void addItem(AdminMenuLink link) {
+        tree.getTreeData().addItem(null, link);
     }
 
-    public void itemClick(ItemClickEvent event) {
-        if (event.getButton() == MouseButton.LEFT) {
-            Object value = event.getItemId();
+    public void itemClick(ItemClick<AdminMenuLink> event) {
+        if (event.getMouseEventDetails().getButton() == MouseButton.LEFT) {
+            AdminMenuLink value = event.getItem();
             if (value != null) {
-                String id = value.toString();
+                String id = value.id();
                 Component panel = sideMenuById.get(id);
-                tabbedPanel.addCloseableTab(id, id, table.getItemIcon(id), panel);
+                tabbedPanel.addCloseableTab(id, id, value.icon(), panel);
             }
         }
     }
@@ -175,8 +163,8 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         return tabbedPanel;
     }
 
-    protected TreeTable getTable() {
-        return table;
+    protected Tree<AdminMenuLink> getTree() {
+        return tree;
     }
 
 

@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.ui.common;
 
+import org.jumpmind.metl.core.model.AbstractNamedObject;
+
 public abstract class AbstractSelectedValueMenuManager implements ISelectedValueMenuManager {
 
     @Override
@@ -29,10 +31,10 @@ public abstract class AbstractSelectedValueMenuManager implements ISelectedValue
 
     abstract protected String[] getEnabledPaths(Object selected);
 
-    abstract protected String[] getDisabledPaths(Object selected);
+    abstract protected String[] getDisabledPaths(AbstractNamedObject selected);
 
     @Override
-    public boolean isEnabled(String menuSelected, Object selected) {
+    public boolean isEnabled(String menuSelected, AbstractNamedObject selected) {
         String[] enabledPaths = getEnabledPaths(selected);
         if (enabledPaths != null) {
             String[] disabledPaths = getDisabledPaths(selected);

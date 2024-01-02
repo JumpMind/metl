@@ -46,13 +46,12 @@ import javax.annotation.PostConstruct;
 
 import org.apache.activemq.Service;
 import org.apache.activemq.broker.BrokerService;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.h2.Driver;
 import org.h2.tools.Server;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import org.jumpmind.db.sql.SqlException;
-import org.jumpmind.db.sql.SqlPersistenceManager;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
@@ -66,6 +65,7 @@ import org.jumpmind.metl.core.persist.IPluginService;
 import org.jumpmind.metl.core.persist.ImportExportService;
 import org.jumpmind.metl.core.persist.OperationsService;
 import org.jumpmind.metl.core.persist.PluginService;
+import org.jumpmind.metl.core.persist.SqlPersistenceManager;
 import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.core.plugin.PluginManager;
 import org.jumpmind.metl.core.runtime.AgentManager;
@@ -105,7 +105,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import com.cybercom.vaadin.spring.UIScope;
+import org.jumpmind.metl.vaadin.spring.UIScope;
 
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;

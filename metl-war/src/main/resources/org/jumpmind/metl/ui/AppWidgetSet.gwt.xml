@@ -3,10 +3,8 @@
 <!-- WS Compiler: manually edited -->
 <module>
         <inherits name="com.vaadin.DefaultWidgetSet" />
-        <inherits name="org.jumpmind.metl.ui.AppWidgetSet" />
-        <inherits name="org.jumpmind.vaadin.ui.sqlexplorer.AppWidgetSet" />
-        <inherits name="com.vaadin.addon.contextmenu.WidgetSet" />
         <inherits name="org.vaadin.aceeditor.AceEditorWidgetSet" />
+        <inherits name="com.vaadin.contextmenu.WidgetSet" />
         <set-configuration-property name="devModeRedirectEnabled" value="true" />
         <set-property name="user.agent" value="gecko1_8,safari,ie10" />
         <source path="client" />

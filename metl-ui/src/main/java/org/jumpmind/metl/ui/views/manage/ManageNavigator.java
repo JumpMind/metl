@@ -21,14 +21,12 @@
 package org.jumpmind.metl.ui.views.manage;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.jumpmind.metl.core.model.AbstractNamedObject;
-import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AgentDeploymentSummary;
 import org.jumpmind.metl.core.model.AgentName;
 import org.jumpmind.metl.core.model.FlowName;
@@ -42,18 +40,16 @@ import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Icons;
 
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.server.FontAwesome;
+import com.vaadin.event.selection.SelectionListener;
+import com.vaadin.icons.VaadinIcons;
+import com.vaadin.shared.MouseEventDetails;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
-import com.vaadin.ui.Component;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.CellStyleGenerator;
-import com.vaadin.ui.Table.ColumnHeaderMode;
-import com.vaadin.ui.TreeTable;
+import com.vaadin.ui.TreeGrid;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.components.grid.SingleSelectionModel;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
@@ -63,7 +59,7 @@ public class ManageNavigator extends Panel {
     
     protected static final Name IN_ERROR = new Name("In Error");
 
-    TreeTable treeTable;
+    TreeGrid<AbstractNamedObject> treeGrid;
 
     Folder agentsFolder;
 
@@ -87,9 +83,9 @@ public class ManageNavigator extends Panel {
         leftMenuBar.setWidth(100, Unit.PERCENTAGE);
         content.addComponent(leftMenuBar);
 
-        treeTable = buildTreeTable();
-        content.addComponent(treeTable);
-        content.setExpandRatio(treeTable, 1);
+        treeGrid = buildTreeGrid();
+        content.addComponent(treeGrid);
+        content.setExpandRatio(treeGrid, 1);
 
         agentsFolder = new Folder();
         agentsFolder.setName("Agents");
@@ -99,28 +95,23 @@ public class ManageNavigator extends Panel {
     }
 
     public void refresh() {
-        Object selected = treeTable.getValue();
-        List<Object> expandedItems = new ArrayList<Object>();
-        Collection<?> items = treeTable.getItemIds();
-        for (Object object : items) {
-            if (!treeTable.isCollapsed(object)) {
+        AbstractNamedObject selected = getCurrentSelection();
+        List<AbstractNamedObject> expandedItems = new ArrayList<AbstractNamedObject>();
+        List<AbstractNamedObject> items = getAllItems();
+        for (AbstractNamedObject object : items) {
+            if (treeGrid.isExpanded(object)) {
                 expandedItems.add(object);
             }
         }
 
-        treeTable.removeAllItems();
+        treeGrid.getTreeData().clear();
                 
-        treeTable.addItem(CURRENTLY_RUNNING);
-        treeTable.setChildrenAllowed(CURRENTLY_RUNNING, false);
-        treeTable.setItemIcon(CURRENTLY_RUNNING, FontAwesome.GEARS);
+        treeGrid.getTreeData().addItem(null, CURRENTLY_RUNNING);
         
-        treeTable.addItem(IN_ERROR);
-        treeTable.setChildrenAllowed(IN_ERROR, false);
-        treeTable.setItemIcon(IN_ERROR, FontAwesome.WARNING);
+        treeGrid.getTreeData().addItem(null, IN_ERROR);
 
         
-        treeTable.addItem(agentsFolder);
-        treeTable.setItemIcon(agentsFolder, FontAwesome.FOLDER);
+        treeGrid.getTreeData().addItem(null, agentsFolder);
 
         List<Folder> folders = context.getConfigurationService().findFolders(null, FolderType.AGENT);
         for (Folder folder : folders) {
@@ -129,31 +120,45 @@ public class ManageNavigator extends Panel {
         
         addAgentsToFolder(null);
 
-        treeTable.addItem(flowsFolder);
-        treeTable.setItemIcon(flowsFolder, FontAwesome.FOLDER);
+        treeGrid.getTreeData().addItem(null, flowsFolder);
         addFlowsToFolder(flowsFolder);
+        treeGrid.getDataProvider().refreshAll();
 
-        for (Object object : expandedItems) {
-            treeTable.setCollapsed(object, false);
+        for (AbstractNamedObject object : expandedItems) {
+            treeGrid.expand(object);
         }
 
-        treeTable.focus();
-        if (treeTable.containsId(selected)) {
-            treeTable.setValue(selected);
+        treeGrid.focus();
+        if (getAllItems().contains(selected)) {
+            treeGrid.select(selected);
         } else {
-            treeTable.setValue(CURRENTLY_RUNNING);
+            treeGrid.select(CURRENTLY_RUNNING);
+        }
+    }
+    
+    protected List<AbstractNamedObject> getAllItems() {
+        List<AbstractNamedObject> itemList = new ArrayList<AbstractNamedObject>();
+        addItemsRecursively(null, itemList);
+        return itemList;
+    }
+    
+    protected void addItemsRecursively(AbstractNamedObject item, List<AbstractNamedObject> list) {
+        if (item != null) {
+            list.add(item);
+        }
+        for (AbstractNamedObject child : treeGrid.getTreeData().getChildren(item)) {
+            addItemsRecursively(child, list);
         }
     }
 
-    protected void addChildFolder(Folder folder, AbstractObject root) {
-        treeTable.addItem(folder);
-        treeTable.setItemIcon(folder, FontAwesome.FOLDER);
-        treeTable.setCollapsed(folder, true);
+    protected void addChildFolder(Folder folder, AbstractNamedObject root) {
         if (folder.getParent() != null) {
-            treeTable.setParent(folder, folder.getParent());
+            treeGrid.getTreeData().addItem(folder.getParent(), folder);
         } else {
-            treeTable.setParent(folder, root);
+            treeGrid.getTreeData().addItem(root, folder);
         }
+        treeGrid.getDataProvider().refreshAll();
+        treeGrid.collapse(folder);
 
         List<Folder> children = folder.getChildren();
         for (Folder child : children) {
@@ -166,9 +171,9 @@ public class ManageNavigator extends Panel {
     }
 
     @SuppressWarnings("unchecked")
-    protected Set<Object> getTableValues() {
+    protected Set<Object> getGridValues() {
         Set<Object> selectedIds = null;
-        Object obj = treeTable.getValue();
+        Object obj = getCurrentSelection();
         if (obj instanceof Set) {
             selectedIds = (Set<Object>) obj;
         } else {
@@ -180,57 +185,59 @@ public class ManageNavigator extends Panel {
         return selectedIds;
     }
 
-    protected TreeTable buildTreeTable() {
-        final TreeTable table = new TreeTable();
-        table.addStyleName(ValoTheme.TREETABLE_NO_HORIZONTAL_LINES);
-        table.addStyleName(ValoTheme.TREETABLE_NO_STRIPES);
-        table.addStyleName(ValoTheme.TREETABLE_NO_VERTICAL_LINES);
-        table.addStyleName(ValoTheme.TREETABLE_BORDERLESS);
-        table.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
-        table.setSizeFull();
-        table.setCacheRate(100);
-        table.setPageLength(100);
-        table.setImmediate(true);
-        table.setSelectable(true);
-        table.setEditable(false);
-        table.setContainerDataSource(new BeanItemContainer<AbstractNamedObject>(AbstractNamedObject.class));
-        table.setVisibleColumns(new Object[] { "name" });
-        table.setColumnExpandRatio("name", 1);
+    protected TreeGrid<AbstractNamedObject> buildTreeGrid() {
+        final TreeGrid<AbstractNamedObject> grid = new TreeGrid<AbstractNamedObject>();
+        grid.addStyleName(ValoTheme.TREETABLE_NO_HORIZONTAL_LINES);
+        grid.addStyleName(ValoTheme.TREETABLE_NO_STRIPES);
+        grid.addStyleName(ValoTheme.TREETABLE_NO_VERTICAL_LINES);
+        grid.addStyleName(ValoTheme.TREETABLE_BORDERLESS);
+        grid.setHeaderVisible(false);
+        grid.setSizeFull();
+        //grid.setCacheRate(100);
+        //grid.setPageLength(100);
+        grid.addComponentColumn(item -> {
+            Label nameLabel = new Label(item.getName());
+            if (item.equals(CURRENTLY_RUNNING)) {
+                nameLabel.setIcon(VaadinIcons.COGS);
+            } else if (item.equals(IN_ERROR)) {
+                nameLabel.setIcon(VaadinIcons.WARNING);
+            } else if (item instanceof Folder) {
+                nameLabel.setIcon(grid.isExpanded(item) ? VaadinIcons.FOLDER_OPEN : VaadinIcons.FOLDER);
+            } else if (item instanceof AgentName) {
+                nameLabel.setIcon(Icons.AGENT);
+            } else if (item instanceof AgentDeploymentSummary) {
+                nameLabel.setIcon(Icons.DEPLOYMENT);
+            } else if (item instanceof FlowName) {
+                nameLabel.setIcon(Icons.FLOW);
+            }
+            return nameLabel;
+        }).setExpandRatio(1);
 
-        table.addItemClickListener((event) -> {
-            if (event.getButton() == MouseButton.LEFT) {
-                if (event.isDoubleClick()) {
-                    if (treeTable.hasChildren(event.getItemId())) {
-                        treeTable.setCollapsed(event.getItemId(),
-                                !treeTable.isCollapsed(event.getItemId()));
+        grid.addItemClickListener((event) -> {
+            MouseEventDetails details = event.getMouseEventDetails();
+            if (details.getButton() == MouseButton.LEFT) {
+                if (details.isDoubleClick()) {
+                    AbstractNamedObject item = event.getItem();
+                    if (!treeGrid.getTreeData().getChildren(item).isEmpty()) {
+                        if (treeGrid.isExpanded(item)) {
+                            treeGrid.collapse(item);
+                        } else {
+                            treeGrid.expand(item);
+                        }
                     }
                 }
             }
         });
 
-        table.addCollapseListener((event) -> {
-            if (event.getItemId() instanceof Folder) {
-                table.setItemIcon(event.getItemId(), FontAwesome.FOLDER);
-            }
-        });
-
-        table.addExpandListener((event) -> {
-            if (event.getItemId() instanceof Folder) {
-                table.setItemIcon(event.getItemId(), FontAwesome.FOLDER_OPEN);
-            }
-        });      
-
-        table.setCellStyleGenerator(new CellStyleGenerator() {
-            public String getStyle(Table source, Object itemId, Object propertyId) {
-                if (itemId instanceof Folder && "name".equals(propertyId)) {
-                    return "folder";
-                } else {
-                    return null;
-                }
+        grid.setStyleGenerator(itemId -> {
+            if (itemId instanceof Folder) {
+                return "folder";
+            } else {
+                return null;
             }
         });
         
-        table.setItemDescriptionGenerator((Component source, Object itemId, Object propertyId) -> {
+        grid.setDescriptionGenerator(itemId -> {
             if (itemId instanceof ProjectVersionFlowName) {
                 ProjectVersionFlowName flow = (ProjectVersionFlowName) itemId;
                 return flow.projectVersion != null ? flow.projectVersion.getName() : "";
@@ -242,7 +249,7 @@ public class ManageNavigator extends Panel {
             }
         });
 
-        return table;
+        return grid;
     }
 
     protected void addAgentsToFolder(Folder folder) {
@@ -252,20 +259,15 @@ public class ManageNavigator extends Panel {
 
             List<AgentDeploymentSummary> deployments = operationsService.findAgentDeploymentSummary(agent.getId());
 
-            treeTable.addItem(agent);
-            treeTable.setItemIcon(agent, Icons.AGENT);
-            treeTable.setChildrenAllowed(agent, deployments.size() > 0);
-            treeTable.setParent(agent, folder != null ? folder : agentsFolder);
+            treeGrid.getTreeData().addItem(folder != null ? folder : agentsFolder, agent);
 
             for (AgentDeploymentSummary agentDeployment : deployments) {
                 if (agentDeployment.getType().equals(AgentDeploymentSummary.TYPE_FLOW)) {
-                    treeTable.addItem(agentDeployment);
-                    treeTable.setItemIcon(agentDeployment, Icons.DEPLOYMENT);
-                    treeTable.setParent(agentDeployment, agent);
-                    treeTable.setChildrenAllowed(agentDeployment, false);
+                    treeGrid.getTreeData().addItem(agent, agentDeployment);
                 }
             }
         }
+        treeGrid.getDataProvider().refreshAll();
     }
 
     protected void addFlowsToFolder(Folder folder) {
@@ -277,25 +279,22 @@ public class ManageNavigator extends Panel {
         for (FlowName flow : flows) {
             if (executedFlowIds.contains(flow.getId())) {
                 flow = new ProjectVersionFlowName(projectVersions.get(flow.getProjectVersionId()), flow);
-                treeTable.addItem(flow);
-                treeTable.setItemIcon(flow, Icons.FLOW);
-                treeTable.setParent(flow, folder);
-                treeTable.setChildrenAllowed(flow, false);
+                treeGrid.getTreeData().addItem(folder, flow);
             }
         }
     }
 
-    public void addValueChangeListener(ValueChangeListener listener) {
-        treeTable.addValueChangeListener(listener);
+    public void addValueChangeListener(SelectionListener<AbstractNamedObject> listener) {
+        treeGrid.addSelectionListener(listener);
     }
 
-    public Object getCurrentSelection() {
-        return treeTable.getValue();
+    public AbstractNamedObject getCurrentSelection() {
+        return ((SingleSelectionModel<AbstractNamedObject>) treeGrid.getSelectionModel()).getSelectedItem().orElse(null);
     }
 
-    public Object getCurrentSelectionParent() {
-        if (treeTable.getValue() != null) {
-            return treeTable.getParent(treeTable.getValue());
+    public AbstractNamedObject getCurrentSelectionParent() {
+        if (getCurrentSelection() != null) {
+            return treeGrid.getTreeData().getParent(getCurrentSelection());
         } else {
             return null;
         }

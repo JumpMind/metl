@@ -129,7 +129,7 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
         return handled;
     }
     
-    protected boolean isReadOnly(Object selected) {
+    protected boolean isReadOnly(AbstractNamedObject selected) {
         ProjectVersion projectVersion = navigator.findProjectVersion(selected);
         if (projectVersion != null) {
             return projectVersion.locked();
@@ -138,7 +138,7 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
         }
     }
     
-    protected String[] getDisabledPaths(Object selected) {
+    protected String[] getDisabledPaths(AbstractNamedObject selected) {
         if (isReadOnly(selected)) {
             return new String[] { "File|New|Project Dependency", "File|New|Flow|Design", "File|New|Flow|Test", 
                     "File|New|Model|Hierarchical", "File|New|Model|Relational",

@@ -23,7 +23,7 @@ package org.jumpmind.metl.ui.common;
 import java.io.Serializable;
 import java.sql.SQLException;
 
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import org.jumpmind.db.sql.SqlTemplateSettings;
@@ -55,7 +55,7 @@ public class DbResource implements IDb, Serializable {
         public IDatabasePlatform getPlatform() {
             if (platform == null) {                
                 BasicDataSource dataSource = BasicDataSourceFactory.create(properties);
-                dataSource.setMaxActive(2);
+                dataSource.setMaxTotal(2);
                 dataSource.setMaxIdle(1);
                 dataSource.setMinIdle(0);
                 dataSource.setInitialSize(0);

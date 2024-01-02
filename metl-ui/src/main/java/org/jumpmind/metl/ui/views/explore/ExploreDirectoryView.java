@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -51,24 +50,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
+import com.vaadin.event.CollapseEvent;
+import com.vaadin.event.ExpandEvent;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Tree.CollapseEvent;
-import com.vaadin.ui.Tree.ExpandEvent;
-import com.vaadin.ui.TreeTable;
+import com.vaadin.ui.TreeGrid;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope("ui")
-@TopBarLink(id = "exploreDirectories", category = Category.Explore, menuOrder = 20, name = "Directory", icon = FontAwesome.DATABASE)
+@TopBarLink(id = "exploreDirectories", category = Category.Explore, menuOrder = 20, name = "Directory", icon = VaadinIcons.DATABASE)
 public class ExploreDirectoryView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = 1L;
@@ -78,34 +76,37 @@ public class ExploreDirectoryView extends VerticalLayout implements View {
     @Autowired
     ApplicationContext context;
 
-    TreeTable table;
+    TreeGrid<Object> grid;
 
     public ExploreDirectoryView() {
         setSizeFull();
         setMargin(false);
 
         ButtonBar buttonBar = new ButtonBar();
-        Button refreshButton = buttonBar.addButton("Refresh", FontAwesome.REFRESH);
+        Button refreshButton = buttonBar.addButton("Refresh", VaadinIcons.REFRESH);
         refreshButton.addClickListener(event -> refresh());
         addComponent(buttonBar);
 
-        table = new TreeTable();
-        table.setSizeFull();
-        table.addExpandListener(event -> expanded(event));
-        table.addCollapseListener(event -> collapsed(event));
-        table.setSelectable(true);
-        table.addContainerProperty("name", String.class, null);
-        table.addGeneratedColumn("name", (source, itemId, propertyId) -> fileLinkComponent(source, itemId, propertyId));
-        table.setColumnHeader("name", "");
-        table.addContainerProperty("lastModified", Date.class, null);
-        table.setColumnHeader("lastModified", "Date Modified");
-        table.setColumnWidth("lastModified", 150);
-        table.addContainerProperty("size", Long.class, null);
-        table.setColumnHeader("size", "Size (bytes)");
-        table.setColumnExpandRatio("name", 1);
-        table.setCellStyleGenerator((source, itemId, propertyId) -> cellStyle(source, itemId, propertyId));
-        addComponent(table);
-        setExpandRatio(table, 1);
+        grid = new TreeGrid<Object>();
+        grid.setSizeFull();
+        grid.addExpandListener(event -> expanded(event));
+        grid.addCollapseListener(event -> collapsed(event));
+        grid.addComponentColumn(item -> fileLinkComponent(item)).setCaption("").setExpandRatio(1);
+        grid.addColumn(item -> {
+            if (item instanceof FileInfo) {
+                return ((FileInfo) item).getLastUpdated();
+            }
+            return null;
+        }).setCaption("Date Modified").setWidth(150);
+        grid.addColumn(item -> {
+            if (item instanceof FileInfo) {
+                return ((FileInfo) item).getSize();
+            }
+            return null;
+        }).setCaption("Size (bytes)");
+        grid.setStyleGenerator(itemId -> cellStyle(itemId));
+        addComponent(grid);
+        setExpandRatio(grid, 1);
         
     }
     
@@ -118,23 +119,27 @@ public class ExploreDirectoryView extends VerticalLayout implements View {
         refresh();
     }
 
-    protected Component fileLinkComponent(Table source, Object itemId, Object propertyId) {
+    protected Component fileLinkComponent(Object itemId) {
         if (itemId instanceof FileInfo) {
             final FileInfo file = (FileInfo) itemId;
             if (!file.isDirectory()) {
                 final Button button = new Button(file.getName());
                 button.addStyleName(ValoTheme.BUTTON_LINK);
                 button.addStyleName(ValoTheme.BUTTON_SMALL);
-                button.setIcon(FontAwesome.FILE);
+                button.setIcon(VaadinIcons.FILE);
                 StreamResource resource = new StreamResource(() -> stream(file), file.getName());
                 FileDownloader fileDownloader = new FileDownloader(resource);
                 fileDownloader.extend(button);
                 return button;
             } else {
-                return new Label(file.getName());
+                Label label = new Label(file.getName());
+                label.setIcon(grid.isExpanded(itemId) ? Icons.FOLDER_OPEN : Icons.FOLDER_CLOSED);
+                return label;
             }
         } else {
-            return new Label(((DirectoryResource) itemId).getName());
+            Label label = new Label(((DirectoryResource) itemId).getName());
+            label.setIcon(grid.isExpanded(itemId) ? Icons.FOLDER_OPEN : Icons.FOLDER_CLOSED);
+            return label;
 
         }
     }
@@ -144,7 +149,7 @@ public class ExploreDirectoryView extends VerticalLayout implements View {
         return resource.getDirectory().getInputStream(file.getRelativePath(), true);
     }
 
-    protected String cellStyle(Table source, Object itemId, Object propertyId) {
+    protected String cellStyle(Object itemId) {
         String styleName = null;
         if (itemId instanceof FileInfo) {
             styleName = ((FileInfo) itemId).isDirectory() ? "folder" : null;
@@ -154,20 +159,19 @@ public class ExploreDirectoryView extends VerticalLayout implements View {
         return styleName;
     }
 
-    protected void collapsed(CollapseEvent event) {
-        Object item = event.getItemId();
-        table.setItemIcon(item, Icons.FOLDER_CLOSED);
-        Collection<?> children = table.getChildren(item);
+    protected void collapsed(CollapseEvent<Object> event) {
+        Object item = event.getCollapsedItem();
+        Collection<?> children = grid.getTreeData().getChildren(item);
         if (children != null) {
             for (Object object : new HashSet<>(children)) {
-                table.removeItem(object);
+                grid.getTreeData().removeItem(object);
             }
         }
+        grid.getDataProvider().refreshAll();
     }
 
-    protected void expanded(ExpandEvent event) {
-        Object item = event.getItemId();
-        table.setItemIcon(item, Icons.FOLDER_OPEN);
+    protected void expanded(ExpandEvent<Object> event) {
+        Object item = event.getExpandedItem();
         DirectoryResource resource = getDirectoryResource(item);
         IDirectory directory = resource.getDirectory();
         try {
@@ -187,27 +191,20 @@ public class ExploreDirectoryView extends VerticalLayout implements View {
         if (item instanceof DirectoryResource) {
             return (DirectoryResource) item;
         } else {
-            return getDirectoryResource(table.getParent(item));
+            return getDirectoryResource(grid.getTreeData().getParent(item));
         }
     }
 
     protected void addChildren(Object item, List<FileInfo> files) {
         for (FileInfo fileInfo : files) {
-            table.addItem(new Object[] { new Date(fileInfo.getLastUpdated()), fileInfo.getSize() }, fileInfo);
-            table.setParent(fileInfo, item);
-            if (fileInfo.isDirectory()) {
-                table.setItemIcon(fileInfo, Icons.FOLDER_CLOSED);
-                table.setChildrenAllowed(fileInfo, true);
-            } else {
-                //table.setItemIcon(fileInfo, FontAwesome.FILE);
-                table.setChildrenAllowed(fileInfo, false);
-            }
+            grid.getTreeData().addItem(item, fileInfo);
         }
 
+        grid.getDataProvider().refreshAll();
     }
 
     protected void refresh() {
-        table.removeAllItems();
+        grid.getTreeData().clear();
 
         List<DirectoryResource> directoryRuntimes = new ArrayList<>();
         IAgentManager agentManager = context.getAgentManager();
@@ -231,11 +228,10 @@ public class ExploreDirectoryView extends VerticalLayout implements View {
         });
 
         for (DirectoryResource resource : directoryRuntimes) {
-            table.addItem(new Object[] { null, null }, resource);
-            table.setItemIcon(resource, Icons.FOLDER_CLOSED);
-            table.setChildrenAllowed(resource, true);
+            grid.getTreeData().addItem(null, resource);
         }
 
+        grid.getDataProvider().refreshAll();
     }
 
     static class DirectoryResource implements Serializable {

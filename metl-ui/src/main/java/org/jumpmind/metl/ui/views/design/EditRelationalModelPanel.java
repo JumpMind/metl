@@ -38,40 +38,40 @@ import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelEntitySorter;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
+import org.jumpmind.metl.ui.common.ExportDialog;
 import org.jumpmind.metl.ui.common.UiUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
-import org.jumpmind.vaadin.ui.common.ExportDialog;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
-import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.vaadin.ui.common.NotifyDialog;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.HasValue.ValueChangeListener;
 import com.vaadin.event.FieldEvents.BlurEvent;
 import com.vaadin.event.FieldEvents.BlurListener;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.event.selection.SelectionEvent;
+import com.vaadin.event.selection.SelectionListener;
+import com.vaadin.icons.VaadinIcons;
+import com.vaadin.shared.Registration;
+import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.ItemClick;
+import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.TreeTable;
+import com.vaadin.ui.TreeGrid;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.components.grid.ItemClickListener;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
@@ -79,13 +79,13 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
 
     ApplicationContext context;
 
-    TreeTable treeTable = new TreeTable();
+    TreeGrid<AbstractNamedObject> treeGrid = new TreeGrid<AbstractNamedObject>();
 
-    Table table = new Table();
+    Grid<Record> grid = new Grid<Record>();
 
     RelationalModel model;
 
-    Set<Object> lastEditItemIds = Collections.emptySet();
+    Set<AbstractNamedObject> lastEditItemIds = Collections.emptySet();
 
     TableColumnSelectWindow tableColumnSelectWindow;
 
@@ -110,10 +110,10 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
     TextField filterField;
 
     ShortcutListener enterKeyListener;
+    
+    Registration enterKeyRegistration;
 
     boolean readOnly;
-
-    BeanItemContainer<Record> container = new BeanItemContainer<Record>(Record.class);
 
     public EditRelationalModelPanel(ApplicationContext context, String modelId, boolean readOnly) {
         this.context = context;
@@ -126,218 +126,211 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
         ButtonBar buttonBar2 = new ButtonBar();
         addComponent(buttonBar2);
 
-            addEntityButton = buttonBar1.addButton("Add Entity", FontAwesome.TABLE);
+            addEntityButton = buttonBar1.addButton("Add Entity", VaadinIcons.TABLE);
             addEntityButton.addClickListener(new AddEntityClickListener());
 
-            addAttributeButton = buttonBar1.addButton("Add Attr", FontAwesome.COLUMNS);
+            addAttributeButton = buttonBar1.addButton("Add Attr", VaadinIcons.SPLIT_H);
             addAttributeButton.addClickListener(new AddAttributeClickListener());
 
-            editButton = buttonBar1.addButton("Edit", FontAwesome.EDIT);
+            editButton = buttonBar1.addButton("Edit", VaadinIcons.EDIT);
             editButton.addClickListener(new EditClickListener());
 
-            removeButton = buttonBar1.addButton("Remove", FontAwesome.TRASH_O);
+            removeButton = buttonBar1.addButton("Remove", VaadinIcons.TRASH);
             removeButton.addClickListener(new RemoveClickListener());
 
-            moveUpButton = buttonBar2.addButton("Up", FontAwesome.ARROW_UP, e -> moveUp());
-            moveDownButton = buttonBar2.addButton("Down", FontAwesome.ARROW_DOWN, e -> moveDown());
-            moveTopButton = buttonBar2.addButton("Top", FontAwesome.ANGLE_DOUBLE_UP,
+            moveUpButton = buttonBar2.addButton("Up", VaadinIcons.ARROW_UP, e -> moveUp());
+            moveDownButton = buttonBar2.addButton("Down", VaadinIcons.ARROW_DOWN, e -> moveDown());
+            moveTopButton = buttonBar2.addButton("Top", VaadinIcons.ANGLE_DOUBLE_UP,
                     e -> moveTop());
-            moveBottomButton = buttonBar2.addButton("Bottom", FontAwesome.ANGLE_DOUBLE_DOWN,
+            moveBottomButton = buttonBar2.addButton("Bottom", VaadinIcons.ANGLE_DOUBLE_DOWN,
                     e -> moveBottom());
 
-            importButton = buttonBar1.addButtonRight("Import ...", FontAwesome.UPLOAD,
+            importButton = buttonBar1.addButtonRight("Import ...", VaadinIcons.UPLOAD,
                     new ImportClickListener());
 
-        buttonBar1.addButtonRight("Export...", FontAwesome.DOWNLOAD, (e) -> export());
+        buttonBar1.addButtonRight("Export...", VaadinIcons.DOWNLOAD, (e) -> export());
 
         filterField = buttonBar2.addFilter();
-        filterField.addTextChangeListener(new TextChangeListener() {
-            public void textChange(TextChangeEvent event) {
-                filterField.setValue(event.getText());
-                treeTable.removeAllItems();
-                addAll(event.getText(), EditRelationalModelPanel.this.model.getModelEntities());
+        filterField.addValueChangeListener(new ValueChangeListener<String>() {
+            public void valueChange(ValueChangeEvent<String> event) {
+                filterField.setValue(event.getValue());
+                treeGrid.getTreeData().clear();
+                addAll(event.getValue(), EditRelationalModelPanel.this.model.getModelEntities());
             }
         });
 
-        treeTable.setSizeFull();
-        treeTable.setCacheRate(100);
-        treeTable.setPageLength(100);
-        treeTable.setImmediate(true);
-        treeTable.setSelectable(true);
-        treeTable.setMultiSelect(true);
-        treeTable.addGeneratedColumn("name", new ColumnGenerator() {
-            public Object generateCell(Table source, Object itemId, Object columnId) {
-                final AbstractNamedObject obj = (AbstractNamedObject) itemId;
+        treeGrid.setSizeFull();
+        //treeGrid.setCacheRate(100);
+        //treeGrid.setPageLength(100);
+        treeGrid.setSelectionMode(SelectionMode.MULTI);
+        treeGrid.addComponentColumn(obj -> {
+            if (lastEditItemIds.contains(obj) && !readOnly) {
+                TextField t = new TextField();
+                t.setValueChangeMode(ValueChangeMode.LAZY);
+                t.setValueChangeTimeout(200);
+                t.addValueChangeListener(event -> {
+                    String newName = trim(event.getValue());
+                    boolean unique = true;
+                    if (obj instanceof ModelEntity) {
+                        List<ModelEntity> entities = model.getModelEntities();
+                        for (ModelEntity entity : entities) {
+                            if (!entity.equals(obj) && entity.getName().equals(newName)) {
+                                unique = false;
+                            }
+                        }
+                    } else if (obj instanceof ModelAttrib) {
+                        List<ModelAttrib> attributes = model.getEntityById(((ModelAttrib)obj).getEntityId()).getModelAttributes();
+                        for (ModelAttrib attribute : attributes) {
+                            if (!attribute.equals(obj) && attribute.getName().equals(newName)) {
+                                unique = false;
+                            }
+                        }
+                    }
+                    if (unique) {
+                        obj.setName(newName);
+                        EditRelationalModelPanel.this.context.getConfigurationService().save(obj);
+                    } else {
+                        NotifyDialog.show("Name needs to be unique", "Name needs to be unique", null, Type.WARNING_MESSAGE);
+                    }
+                });
+                t.setWidth(100, Unit.PERCENTAGE);
+                t.setValue(obj.getName());
+                t.focus();
+                t.selectAll();
+                t.setIcon(obj instanceof ModelEntity ? VaadinIcons.TABLE : VaadinIcons.SPLIT_H);
+                return t;
+            } else {
+                Label label = UiUtils.getName(filterField.getValue(), obj.getName());
+                label.setIcon(obj instanceof ModelEntity ? VaadinIcons.TABLE : VaadinIcons.SPLIT_H);
+                return label;
+            }
+        }).setCaption("Name");
+
+        treeGrid.addComponentColumn(itemId -> {
+            if (itemId instanceof ModelAttrib) {
+                final ModelAttrib obj = (ModelAttrib) itemId;
                 if (lastEditItemIds.contains(itemId) && !readOnly) {
-                    ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
-                        protected void save(String text) {
-                            String newName = trim(text);
-                            boolean unique = true;
-                            if (obj instanceof ModelEntity) {
-                                List<ModelEntity> entities = model.getModelEntities();
-                                for (ModelEntity entity : entities) {
-                                    if (!entity.equals(obj) && entity.getName().equals(newName)) {
-                                        unique = false;
-                                    }
-                                }
-                            } else if (obj instanceof ModelAttrib) {
-                                List<ModelAttrib> attributes = model.getEntityById(((ModelAttrib)obj).getEntityId()).getModelAttributes();
-                                for (ModelAttrib attribute : attributes) {
-                                    if (!attribute.equals(obj) && attribute.getName().equals(newName)) {
-                                        unique = false;
-                                    }
-                                }
-                            }
-                            if (unique) {
-                                obj.setName(newName);
-                                EditRelationalModelPanel.this.context.getConfigurationService().save(obj);
-                            } else {
-                                NotifyDialog.show("Name needs to be unique", "Name needs to be unique", null, Type.WARNING_MESSAGE);
-                            }
-                        };
-                    };
+                    TextField t = new TextField();
+                    t.setValueChangeMode(ValueChangeMode.LAZY);
+                    t.setValueChangeTimeout(200);
+                    t.addValueChangeListener(event -> {
+                        obj.setDescription(trim(event.getValue()));
+                        EditRelationalModelPanel.this.context.getConfigurationService().save(obj);
+                    });
                     t.setWidth(100, Unit.PERCENTAGE);
-                    t.setValue(obj.getName());
-                    t.focus();
-                    t.selectAll();
+                    t.setValue(obj.getDescription() != null ? obj.getDescription() : "");
                     return t;
                 } else {
-                    return UiUtils.getName(filterField.getValue(), obj.getName());
+                    return UiUtils.getName(filterField.getValue(), obj.getDescription());
                 }
             }
-        });
-        treeTable.setColumnHeader("name", "Name");
-
-        treeTable.addGeneratedColumn("description", new ColumnGenerator() {
-            public Object generateCell(Table source, Object itemId, Object columnId) {
-                if (itemId instanceof ModelAttrib) {
-                    final ModelAttrib obj = (ModelAttrib) itemId;
-                    if (lastEditItemIds.contains(itemId) && !readOnly) {
-                        ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
-                            protected void save(String text) {
-                                obj.setDescription(trim(text));
-                                EditRelationalModelPanel.this.context.getConfigurationService().save(obj);
-                            };
-                        };
-                        t.setWidth(100, Unit.PERCENTAGE);
-                        t.setValue(obj.getDescription());
-                        return t;
-                    } else {
-                        return UiUtils.getName(filterField.getValue(), obj.getDescription());
-                    }
-                }
-                if (itemId instanceof ModelEntity) {
-                    final ModelEntity obj = (ModelEntity) itemId;
-                    if (lastEditItemIds.contains(itemId) && !readOnly) {
-                        ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
-                            protected void save(String text) {                                
-                                obj.setDescription(trim(text));
-                                EditRelationalModelPanel.this.context.getConfigurationService().save(obj);
-                            };
-                        };
-                        t.setWidth(100, Unit.PERCENTAGE);
-                        t.setValue(obj.getDescription());
-                        return t;
-                    } else {
-                        return UiUtils.getName(filterField.getValue(), obj.getDescription());
-                    }
-                } else
-                    return null;
-            }
-        });
-        treeTable.setColumnHeader("description", "Description");
-
-        treeTable.addGeneratedColumn("type", new ColumnGenerator() {
-            public Object generateCell(Table source, Object itemId, Object columnId) {
-                if (itemId instanceof ModelAttrib) {
-                    final ModelAttrib obj = (ModelAttrib) itemId;
-                    if (lastEditItemIds.contains(itemId) && !readOnly) {
-                        final ComboBox cbox = new ComboBox();
-                        cbox.setNullSelectionAllowed(false);
-                        for (DataType dataType : DataType.values()) {
-                            cbox.addItem(dataType.name());
-                        }
-                        cbox.setValue(obj.getType());
-                        cbox.addValueChangeListener(new ValueChangeListener() {
-                            public void valueChange(ValueChangeEvent event) {
-                                obj.setType((String) cbox.getValue());
-                                EditRelationalModelPanel.this.context.getConfigurationService().save(obj);
-                            }
-                        });
-                        cbox.addBlurListener(new BlurListener() {
-                            public void blur(BlurEvent event) {
-                                Collection<?> items = treeTable.getItemIds();
-                                boolean found = false;
-                                for (Object item : items) {
-                                    if (item.equals(obj)) {
-                                        found = true;
-                                    } else if (found) {
-                                        selectOnly(item);
-                                        editSelectedItem();
-                                        break;
-                                    }
-                                }
-                            }
-                        });
-
-                        return cbox;
-                    } else {
-                        return obj.getType();
-                    }
+            if (itemId instanceof ModelEntity) {
+                final ModelEntity obj = (ModelEntity) itemId;
+                if (lastEditItemIds.contains(itemId) && !readOnly) {
+                    TextField t = new TextField();
+                    t.setValueChangeMode(ValueChangeMode.LAZY);
+                    t.setValueChangeTimeout(200);
+                    t.addValueChangeListener(event -> {
+                        obj.setDescription(trim(event.getValue()));
+                        EditRelationalModelPanel.this.context.getConfigurationService().save(obj);
+                    });
+                    t.setWidth(100, Unit.PERCENTAGE);
+                    t.setValue(obj.getDescription() != null ? obj.getDescription() : "");
+                    return t;
                 } else {
-                    return null;
+                    return UiUtils.getName(filterField.getValue(), obj.getDescription());
                 }
-            }
-        });
-        treeTable.setColumnHeader("type", "Type");
+            } else
+                return null;
+        }).setCaption("Description");
 
-        treeTable.addGeneratedColumn("pk", new ColumnGenerator() {
-            public Object generateCell(Table source, Object itemId, Object columnId) {
-                if (itemId instanceof ModelAttrib) {
-                    final ModelAttrib obj = (ModelAttrib) itemId;
-                    if (lastEditItemIds.contains(itemId) && !readOnly) {
-                        final CheckBox cbox = new CheckBox();
-                        cbox.setValue(obj.isPk());
-                        cbox.setImmediate(true);
-                        cbox.addValueChangeListener(event -> togglePk(obj));
-                        cbox.addBlurListener(new BlurListener() {
-                            public void blur(BlurEvent event) {
-                                Collection<?> items = treeTable.getItemIds();
-                                boolean found = false;
-                                for (Object item : items) {
-                                    if (item.equals(obj)) {
-                                        found = true;
-                                    } else if (found) {
-                                        selectOnly(item);
-                                        editSelectedItem();
-                                        break;
-                                    }
+        treeGrid.addComponentColumn(itemId -> {
+            if (itemId instanceof ModelAttrib) {
+                final ModelAttrib obj = (ModelAttrib) itemId;
+                if (lastEditItemIds.contains(itemId) && !readOnly) {
+                    final ComboBox<String> cbox = new ComboBox<String>();
+                    cbox.setEmptySelectionAllowed(false);
+                    List<String> itemList = new ArrayList<String>();
+                    for (DataType dataType : DataType.values()) {
+                        itemList.add(dataType.name());
+                    }
+                    cbox.setItems(itemList);
+                    cbox.setValue(obj.getType());
+                    cbox.addValueChangeListener(new ValueChangeListener<String>() {
+                        public void valueChange(ValueChangeEvent<String> event) {
+                            obj.setType(cbox.getValue());
+                            EditRelationalModelPanel.this.context.getConfigurationService().save(obj);
+                        }
+                    });
+                    cbox.addBlurListener(new BlurListener() {
+                        public void blur(BlurEvent event) {
+                            List<AbstractNamedObject> items = getAllItems();
+                            boolean found = false;
+                            for (AbstractNamedObject item : items) {
+                                if (item.equals(obj)) {
+                                    found = true;
+                                } else if (found) {
+                                    selectOnly(item);
+                                    editSelectedItem();
+                                    break;
                                 }
                             }
-                        });
+                        }
+                    });
 
-                        return cbox;
-                    } else if (obj.isPk()) {
-                        return new Label(FontAwesome.KEY.getHtml(), ContentMode.HTML);
-                    }
+                    return cbox;
+                } else {
+                    return new Label(obj.getType());
                 }
+            } else {
                 return null;
             }
-        });
-        treeTable.setColumnHeader("pk", "PK");
-        treeTable.setColumnWidth("pk", 40);
+        }).setCaption("Type");
 
-        treeTable.addItemClickListener(new TreeTableItemClickListener());
-        treeTable.addValueChangeListener(new TreeTableValueChangeListener());
+        treeGrid.addComponentColumn(itemId -> {
+            if (itemId instanceof ModelAttrib) {
+                final ModelAttrib obj = (ModelAttrib) itemId;
+                if (lastEditItemIds.contains(itemId) && !readOnly) {
+                    final CheckBox cbox = new CheckBox();
+                    cbox.setValue(obj.isPk());
+                    cbox.addValueChangeListener(event -> togglePk(obj));
+                    cbox.addBlurListener(new BlurListener() {
+                        public void blur(BlurEvent event) {
+                            List<AbstractNamedObject> items = getAllItems();
+                            boolean found = false;
+                            for (AbstractNamedObject item : items) {
+                                if (item.equals(obj)) {
+                                    found = true;
+                                } else if (found) {
+                                    selectOnly(item);
+                                    editSelectedItem();
+                                    break;
+                                }
+                            }
+                        }
+                    });
+
+                    return cbox;
+                } else if (obj.isPk()) {
+                    Label label = new Label(VaadinIcons.KEY.getHtml());
+                    label.setContentMode(ContentMode.HTML);
+                    return label;
+                }
+            }
+            return null;
+        }).setCaption("PK").setWidth(40);
+
+        treeGrid.addItemClickListener(new TreeGridItemClickListener());
+        treeGrid.addSelectionListener(new TreeGridSelectionListener());
         enterKeyListener = new ShortcutListener("Enter", KeyCode.ENTER, null) {
             public void handleAction(Object sender, Object target) {
                 lastEditItemIds = Collections.emptySet();
-                treeTable.refreshRowCache();
+                treeGrid.getDataProvider().refreshAll();
             }
         };
 
-        addComponent(treeTable);
-        setExpandRatio(treeTable, 1.0f);
+        addComponent(treeGrid);
+        setExpandRatio(treeGrid, 1.0f);
 
         HorizontalLayout hlayout = new HorizontalLayout();
         addComponent(hlayout);
@@ -358,21 +351,36 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
 
         setButtonsEnabled();
 
-        table.setContainerDataSource(container);
-        table.setVisibleColumns(
-                new Object[] { "entityName", "attributeName", "description", "type", "pk" });
-        table.setColumnHeaders(
-                new String[] { "Entity Name", "Attribute Name", "Description", "Type", "PK" });
+        grid.addColumn(Record::getEntityName).setCaption("Entity Name");
+        grid.addColumn(Record::getAttributeName).setCaption("Attribute Name");
+        grid.addColumn(Record::getDescription).setCaption("Description");
+        grid.addColumn(Record::getType).setCaption("Type");
+        grid.addColumn(Record::getPk).setCaption("PK");
 
         if (model.getModelEntities().size() > 10) {
             collapseAll();
         }
     }
 
+    protected List<AbstractNamedObject> getAllItems() {
+        List<AbstractNamedObject> itemList = new ArrayList<AbstractNamedObject>();
+        addItemsRecursively(null, itemList);
+        return itemList;
+    }
+    
+    protected void addItemsRecursively(AbstractNamedObject item, List<AbstractNamedObject> list) {
+        if (item != null) {
+            list.add(item);
+        }
+        for (AbstractNamedObject child : treeGrid.getTreeData().getChildren(item)) {
+            addItemsRecursively(child, list);
+        }
+    }
+
     protected void move(boolean down, boolean toEnd) {
         ModelAttrib selected = (ModelAttrib) getSelected();
         if (selected != null) {
-            ModelEntity entity = (ModelEntity) treeTable.getParent(selected);
+            ModelEntity entity = (ModelEntity) treeGrid.getTreeData().getParent(selected);
             List<ModelAttrib> attributes = entity.getModelAttributes();
             int index = attributes.indexOf(selected);
             if (down && index < attributes.size() - 1 && !toEnd) {
@@ -396,15 +404,15 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                 context.getConfigurationService().save(modelAttribute);
             }
 
-            Collection<?> children = new ArrayList<>(treeTable.getChildren(entity));
-            for (Object object : children) {
-                treeTable.removeItem(object);
+            List<AbstractNamedObject> children = new ArrayList<AbstractNamedObject>(treeGrid.getTreeData().getChildren(entity));
+            for (AbstractNamedObject object : children) {
+                treeGrid.getTreeData().removeItem(object);
             }
 
             for (ModelAttrib modelAttribute : attributes) {
                 addModelAttribute(entity, modelAttribute);
             }
-            treeTable.select(selected);
+            treeGrid.select(selected);
 
         }
     }
@@ -426,23 +434,20 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
     }
 
     protected void collapseAll() {
-        for (Object itemId : treeTable.getItemIds()) {
-            treeTable.setCollapsed(itemId, true);
+        for (AbstractNamedObject itemId : getAllItems()) {
+            treeGrid.collapse(itemId);
         }
     }
 
     protected void expandAll() {
-        for (Object itemId : treeTable.getItemIds()) {
-            treeTable.setCollapsed(itemId, false);
+        for (AbstractNamedObject itemId : getAllItems()) {
+            treeGrid.expand(itemId);
         }
     }
 
     protected void export() {
-        table.removeAllItems();
-        updateExportTable(filterField.getValue(), model.getModelEntities());
-        String fileNamePrefix = model.getName().toLowerCase().replace(' ', '-');
-        ExportDialog dialog = new ExportDialog(table, fileNamePrefix, model.getName());
-        UI.getCurrent().addWindow(dialog);
+        updateExportGrid(filterField.getValue(), model.getModelEntities());
+        ExportDialog.show(context, grid);
     }
 
     protected void togglePk(ModelAttrib a) {
@@ -452,7 +457,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
 
     public void setButtonsEnabled() {
         if (!readOnly) {
-            Set<Object> selected = getSelectedItems();
+            Set<AbstractNamedObject> selected = getSelectedItems();
             addAttributeButton.setEnabled(selected.size() > 0);
             removeButton.setEnabled(selected.size() > 0);
             editButton.setEnabled(selected.size() > 0);
@@ -483,12 +488,14 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
 
     @Override
     public void selected() {
-        treeTable.addShortcutListener(enterKeyListener);
+        enterKeyRegistration = treeGrid.addShortcutListener(enterKeyListener);
     }
 
     @Override
     public void deselected() {
-        treeTable.removeShortcutListener(enterKeyListener);
+        if (enterKeyRegistration != null) {
+            enterKeyRegistration.remove();
+        }
     }
 
     protected Object getSelected() {
@@ -499,26 +506,22 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
         }
     }
 
-    @SuppressWarnings("unchecked")
-    protected Set<Object> getSelectedItems() {
-        return (Set<Object>) treeTable.getValue();
+    protected Set<AbstractNamedObject> getSelectedItems() {
+        return treeGrid.getSelectedItems();
     }
 
-    protected void selectOnly(Object itemId) {
-        for (Object id : getSelectedItems()) {
-            treeTable.unselect(id);
-        }
-        treeTable.select(itemId);
+    protected void selectOnly(AbstractNamedObject itemId) {
+        treeGrid.deselectAll();
+        treeGrid.select(itemId);
     }
 
     protected void add(ModelEntity modelEntity) {
         addModelEntity(modelEntity);
         for (ModelAttrib modelAttribute : modelEntity.getModelAttributes()) {
-            treeTable.setChildrenAllowed(modelEntity, true);
             modelAttribute.setEntityId(modelEntity.getId());
             addModelAttribute(modelEntity, modelAttribute);
         }
-        treeTable.setCollapsed(modelEntity, false);
+        treeGrid.expand(modelEntity);
     }
 
     protected void addAll(String filter, Collection<ModelEntity> modelEntityList) {
@@ -540,9 +543,10 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
         for (ModelEntity modelEntity : filteredModelEntityList) {
             add(modelEntity);
         }
+        treeGrid.getDataProvider().refreshAll();
     }
 
-    protected void updateExportTable(String filter, Collection<ModelEntity> modelEntityList) {
+    protected void updateExportGrid(String filter, Collection<ModelEntity> modelEntityList) {
         filter = filter != null ? filter.toLowerCase() : null;
         ArrayList<ModelEntity> filteredModelEntityList = new ArrayList<ModelEntity>();
         for (ModelEntity modelEntity : modelEntityList) {
@@ -557,32 +561,28 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
             }
         }
 
+        List<Record> recordList = new ArrayList<Record>();
         Collections.sort(filteredModelEntityList, new ModelEntitySorter());
         for (ModelEntity modelEntity : filteredModelEntityList) {
             for (ModelAttrib modelAttribute : modelEntity.getModelAttributes()) {
-                table.addItem(new Record(modelEntity, modelAttribute));
+                recordList.add(new Record(modelEntity, modelAttribute));
             }
         }
+        grid.setItems(recordList);
     }
 
     protected void addModelEntity(ModelEntity modelEntity) {
-        treeTable.addItem(modelEntity);
-        treeTable.setItemIcon(modelEntity, FontAwesome.TABLE);
-        treeTable.setChildrenAllowed(modelEntity, false);
+        treeGrid.getTreeData().addItem(null, modelEntity);
     }
 
     protected void addModelAttribute(ModelEntity entity, ModelAttrib modelAttribute) {
-        treeTable.addItem(modelAttribute);
-        treeTable.setItemIcon(modelAttribute, FontAwesome.COLUMNS);
-        treeTable.setChildrenAllowed(entity, true);
-        treeTable.setParent(modelAttribute, entity);
-        treeTable.setChildrenAllowed(modelAttribute, false);
+        treeGrid.getTreeData().addItem(entity, modelAttribute);
     }
 
     protected void editSelectedItem() {
         lastEditItemIds = getSelectedItems();
-        treeTable.refreshRowCache();
-        table.refreshRowCache();
+        treeGrid.getDataProvider().refreshAll();
+        grid.getDataProvider().refreshAll();
     }
 
     class AddEntityClickListener implements ClickListener {
@@ -600,17 +600,17 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
 
     class AddAttributeClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            Set<Object> itemIds = getSelectedItems();
+            Set<AbstractNamedObject> itemIds = getSelectedItems();
             if (itemIds.size() > 0) {
                 ModelAttrib a = new ModelAttrib();
                 a.setName("New Attribute");
                 a.setDataType(DataType.VARCHAR);
-                Object itemId = itemIds.iterator().next();
+                AbstractNamedObject itemId = itemIds.iterator().next();
                 ModelEntity entity = null;
                 if (itemId instanceof ModelEntity) {
                     entity = (ModelEntity) itemId;
                 } else if (itemId instanceof ModelAttrib) {
-                    entity = (ModelEntity) treeTable.getParent(itemId);
+                    entity = (ModelEntity) treeGrid.getTreeData().getParent(itemId);
                 }
 
                 if (entity != null) {
@@ -618,7 +618,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                     entity.addModelAttribute(a);
                     context.getConfigurationService().save(a);
                     addModelAttribute(entity, a);
-                    treeTable.setCollapsed(entity, false);
+                    treeGrid.expand(entity);
                     selectOnly(a);
                     editSelectedItem();
                 }
@@ -633,40 +633,39 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
     }
 
     class RemoveClickListener implements ClickListener {
-        @SuppressWarnings("unchecked")
         public void buttonClick(ClickEvent event) {
 
-            Set<Object> itemIds = new HashSet<Object>();
-            Set<Object> selectedIds = getSelectedItems();
+            Set<AbstractNamedObject> itemIds = new HashSet<AbstractNamedObject>();
+            Set<AbstractNamedObject> selectedIds = getSelectedItems();
             
             ConfirmDialog.show("Delete?",
                     "Are you sure you want to delete the " + selectedIds.size() + " selected items?",
                     ()->{
-                        for (Object itemId : selectedIds) {
-                            Collection<Object> children = (Collection<Object>) treeTable
-                                    .getContainerDataSource().getChildren(itemId);
+                        for (AbstractNamedObject itemId : selectedIds) {
+                            Collection<AbstractNamedObject> children = treeGrid.getTreeData().getChildren(itemId);
                             if (children != null) {
                                 itemIds.addAll(children);
                             }
                             itemIds.add(itemId);
                         }
 
-                        for (Object itemId : itemIds) {
+                        for (AbstractNamedObject itemId : itemIds) {
                             if (itemId instanceof ModelAttrib) {
                                 ModelAttrib a = (ModelAttrib) itemId;
                                 context.getConfigurationService().delete((ModelAttrib) itemId);
-                                ModelEntity entity = (ModelEntity) treeTable.getParent(itemId);
+                                ModelEntity entity = (ModelEntity) treeGrid.getTreeData().getParent(itemId);
                                 entity.removeModelAttribute(a);
-                                treeTable.removeItem(itemId);
+                                treeGrid.getTreeData().removeItem(itemId);
                             }
                         }
-                        for (Object itemId : itemIds) {
+                        for (AbstractNamedObject itemId : itemIds) {
                             if (itemId instanceof ModelEntity) {
                                 context.getConfigurationService().delete((ModelEntity) itemId);
-                                treeTable.removeItem(itemId);
+                                treeGrid.getTreeData().removeItem(itemId);
                                 model.getModelEntities().remove(itemId);
                             }
                         }
+                        treeGrid.getDataProvider().refreshAll();
 
                         return true;
                     });
@@ -684,7 +683,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
 
         public void selected(Collection<ModelEntity> modelEntityCollection) {
             HashMap<String, ModelEntity> existingModelEntities = new HashMap<String, ModelEntity>();
-            for (Object itemId : treeTable.getItemIds()) {
+            for (Object itemId : getAllItems()) {
                 if (itemId instanceof ModelEntity) {
                     ModelEntity modelEntity = (ModelEntity) itemId;
                     existingModelEntities.put(modelEntity.getName().toUpperCase(), modelEntity);
@@ -709,27 +708,28 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                     }
                 }
             }
+            treeGrid.getDataProvider().refreshAll();
         }
     }
 
-    class TreeTableItemClickListener implements ItemClickListener {
+    class TreeGridItemClickListener implements ItemClickListener<AbstractNamedObject> {
         long lastClick;
 
-        public void itemClick(ItemClickEvent event) {
-            if (event.isDoubleClick()) {
+        public void itemClick(ItemClick<AbstractNamedObject> event) {
+            if (event.getMouseEventDetails().isDoubleClick()) {
                 editSelectedItem();
             } else if (System.currentTimeMillis() - lastClick > 1000
                     && getSelectedItems().size() > 0) {
-                treeTable.setValue(null);
+                treeGrid.deselectAll();
             }
             lastClick = System.currentTimeMillis();
         }
     }
 
-    class TreeTableValueChangeListener implements ValueChangeListener {
-        public void valueChange(ValueChangeEvent event) {
+    class TreeGridSelectionListener implements SelectionListener<AbstractNamedObject> {
+        public void selectionChange(SelectionEvent<AbstractNamedObject> event) {
             lastEditItemIds = Collections.emptySet();
-            treeTable.refreshRowCache();
+            treeGrid.getDataProvider().refreshAll();
             setButtonsEnabled();
         }
     }

@@ -27,7 +27,7 @@ import java.io.InputStream;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Label;
 
 import org.apache.commons.codec.binary.Base64;
@@ -70,7 +70,8 @@ public final class UiUtils {
                 name = pre + "<span class='highlight'>" + highlighted + "</span>" + post;
             }
         }
-        Label label = new Label(name, ContentMode.HTML);
+        Label label = new Label(name);
+        label.setContentMode(ContentMode.HTML);
         return label;
     }
 

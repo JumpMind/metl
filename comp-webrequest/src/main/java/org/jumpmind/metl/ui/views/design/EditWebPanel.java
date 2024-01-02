@@ -26,9 +26,8 @@ import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.HasValue.ValueChangeListener;
 
 @SuppressWarnings("serial")
 public class EditWebPanel extends AbstractComponentEditPanel {
@@ -40,13 +39,11 @@ public class EditWebPanel extends AbstractComponentEditPanel {
         addComponent(buttonBar);
 
         editor = CommonUiUtils.createAceEditor();
-        editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        editor.setTextChangeTimeout(200);
         editor.setMode(AceMode.xml);
         editor.setValue(component.get(Web.BODY_TEXT));
-        editor.addTextChangeListener(new TextChangeListener() {
-            public void textChange(TextChangeEvent event) {
-                component.put(Web.BODY_TEXT, event.getText());
+        editor.addValueChangeListener(new ValueChangeListener<String>() {
+            public void valueChange(ValueChangeEvent<String> event) {
+                component.put(Web.BODY_TEXT, event.getValue());
                 context.getConfigurationService().save(component.findSetting(Web.BODY_TEXT));
             }
         });

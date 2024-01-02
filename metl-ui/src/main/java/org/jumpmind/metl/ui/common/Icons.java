@@ -20,85 +20,85 @@
  */
 package org.jumpmind.metl.ui.common;
 
-import com.vaadin.server.FontAwesome;
+import com.vaadin.icons.VaadinIcons;
 
 final public class Icons {
 
     private Icons() {
     }
     
-    public static final FontAwesome UPDATE = FontAwesome.CLOCK_O;
+    public static final VaadinIcons UPDATE = VaadinIcons.CLOCK;
     
-    public static final FontAwesome UPLOAD = FontAwesome.UPLOAD;
+    public static final VaadinIcons UPLOAD = VaadinIcons.UPLOAD;
     
-    public static final FontAwesome REFRESH = FontAwesome.REFRESH;
+    public static final VaadinIcons REFRESH = VaadinIcons.REFRESH;
     
-    public static final FontAwesome FOLDER_OPEN = FontAwesome.FOLDER_OPEN;
+    public static final VaadinIcons FOLDER_OPEN = VaadinIcons.FOLDER_OPEN;
     
-    public static final FontAwesome FOLDER_CLOSED = FontAwesome.FOLDER;
+    public static final VaadinIcons FOLDER_CLOSED = VaadinIcons.FOLDER;
 
-    public static final FontAwesome SEARCH = FontAwesome.SEARCH;
+    public static final VaadinIcons SEARCH = VaadinIcons.SEARCH;
     
-    public static final FontAwesome DELETE = FontAwesome.TRASH_O;
+    public static final VaadinIcons DELETE = VaadinIcons.TRASH;
 
-    public static final FontAwesome CANCEL = FontAwesome.STOP;
+    public static final VaadinIcons CANCEL = VaadinIcons.STOP;
     
-    public static final FontAwesome PROJECT = FontAwesome.CUBES;
+    public static final VaadinIcons PROJECT = VaadinIcons.CUBES;
     
-    public static final FontAwesome PROJECT_VERSION = FontAwesome.CUBE;
+    public static final VaadinIcons PROJECT_VERSION = VaadinIcons.CUBE;
     
-    public static final FontAwesome DEPENDENCY = FontAwesome.HAND_O_RIGHT;
+    public static final VaadinIcons DEPENDENCY = VaadinIcons.ARROW_RIGHT;
     
-    public static final FontAwesome AGENT = FontAwesome.CLOUD;
+    public static final VaadinIcons AGENT = VaadinIcons.CLOUD;
     
-    public static final FontAwesome DEPLOYMENT = FontAwesome.SUITCASE;
+    public static final VaadinIcons DEPLOYMENT = VaadinIcons.SUITCASE;
     
-    public static final FontAwesome GENERAL_RESOURCE = FontAwesome.LINK;
+    public static final VaadinIcons GENERAL_RESOURCE = VaadinIcons.LINK;
     
-    public static final FontAwesome WEB = FontAwesome.GLOBE;
+    public static final VaadinIcons WEB = VaadinIcons.GLOBE;
 
-    public static final FontAwesome FLOW = FontAwesome.SHARE_ALT;
+    public static final VaadinIcons FLOW = VaadinIcons.CONNECT;
     
-    public static final FontAwesome MODEL = FontAwesome.SITEMAP;
+    public static final VaadinIcons MODEL = VaadinIcons.SITEMAP;
     
-    public static final FontAwesome VERSION = FontAwesome.FILE_TEXT;
+    public static final VaadinIcons VERSION = VaadinIcons.FILE_TEXT;
     
-    public static final FontAwesome DATABASE = FontAwesome.DATABASE;
+    public static final VaadinIcons DATABASE = VaadinIcons.DATABASE;
     
-    public static final FontAwesome QUEUE = FontAwesome.BARS;
+    public static final VaadinIcons QUEUE = VaadinIcons.MENU;
     
-    public static final FontAwesome FILE_SYSTEM = FontAwesome.FILES_O;
+    public static final VaadinIcons FILE_SYSTEM = VaadinIcons.COPY_O;
     
-    public static final FontAwesome RUN = FontAwesome.PLAY;
+    public static final VaadinIcons RUN = VaadinIcons.PLAY;
     
-    public static final FontAwesome EXECUTION = FontAwesome.ROCKET;
+    public static final VaadinIcons EXECUTION = VaadinIcons.ROCKET;
     
-    public static final FontAwesome LOG = FontAwesome.FILE_TEXT_O;
+    public static final VaadinIcons LOG = VaadinIcons.FILE_TEXT_O;
 
-    public static final FontAwesome COMPONENT = FontAwesome.PUZZLE_PIECE;
+    public static final VaadinIcons COMPONENT = VaadinIcons.PUZZLE_PIECE;
 
-    public static final FontAwesome USER = FontAwesome.USER;
+    public static final VaadinIcons USER = VaadinIcons.USER;
     
-    public static final FontAwesome GROUP = FontAwesome.USERS;
+    public static final VaadinIcons GROUP = VaadinIcons.USERS;
     
-    public static final FontAwesome EMAIL = FontAwesome.ENVELOPE_O;
+    public static final VaadinIcons EMAIL = VaadinIcons.ENVELOPE_O;
     
-    public static final FontAwesome REST = FontAwesome.WRENCH;
+    public static final VaadinIcons REST = VaadinIcons.WRENCH;
     
-    public static final FontAwesome SETTINGS = FontAwesome.GEARS;
+    public static final VaadinIcons SETTINGS = VaadinIcons.COGS;
     
-    public static final FontAwesome LOGGING = FontAwesome.PENCIL;
+    public static final VaadinIcons LOGGING = VaadinIcons.PENCIL;
     
-    public static final FontAwesome NOTIFICATION = FontAwesome.COMMENT;
+    public static final VaadinIcons NOTIFICATION = VaadinIcons.COMMENT;
     
-    public static final FontAwesome LIST = FontAwesome.LIST;
+    public static final VaadinIcons LIST = VaadinIcons.LIST;
     
-    public static final FontAwesome BOOK = FontAwesome.BOOK;
+    public static final VaadinIcons BOOK = VaadinIcons.BOOK;
     
-    public static final FontAwesome TAG = FontAwesome.TAG;
+    public static final VaadinIcons TAG = VaadinIcons.TAG;
     
-    public static final FontAwesome LOCK = FontAwesome.LOCK;
+    public static final VaadinIcons LOCK = VaadinIcons.LOCK;
     
-    public static final FontAwesome CLOUD = FontAwesome.CLOUD;
+    public static final VaadinIcons CLOUD = VaadinIcons.CLOUD;
     
 }

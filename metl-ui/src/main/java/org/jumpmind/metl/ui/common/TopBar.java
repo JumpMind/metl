@@ -32,8 +32,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.Button;
@@ -75,7 +75,7 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
             addComponent(topBarButton);
         }
 
-        Button logoutButton = new Button("Logout", FontAwesome.SIGN_OUT);
+        Button logoutButton = new Button("Logout", VaadinIcons.SIGN_OUT);
         logoutButton.addClickListener(event -> logout());
         addComponent(logoutButton);
 

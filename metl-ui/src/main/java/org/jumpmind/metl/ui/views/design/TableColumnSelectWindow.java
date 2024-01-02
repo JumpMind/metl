@@ -49,12 +49,12 @@ import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.jumpmind.vaadin.ui.sqlexplorer.DbTree;
 import org.jumpmind.vaadin.ui.sqlexplorer.DefaultSettingsProvider;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.HasValue.ValueChangeListener;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.RadioButtonGroup;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.Receiver;
@@ -63,7 +63,7 @@ import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class TableColumnSelectWindow extends ResizableWindow implements ValueChangeListener, Receiver, SucceededListener {
+public class TableColumnSelectWindow extends ResizableWindow implements ValueChangeListener<String>, Receiver, SucceededListener {
 
     private static final long serialVersionUID = 1L;
 
@@ -87,7 +87,7 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
 
     VerticalLayout optionLayout;
     
-    OptionGroup optionGroup;
+    RadioButtonGroup<String> optionGroup;
     
     Panel scrollable;
 
@@ -121,13 +121,9 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
         layout.setSizeFull();
         layout.addComponent(new Label("Import Entity and Attributes from a database, csv file or source file header row into the model."));
 
-        optionGroup = new OptionGroup("Select the location of the model.");
-        optionGroup.addItem(OPTION_DB);
-        optionGroup.addItem(OPTION_REL_FILE);
-        optionGroup.addItem(OPTION_FILE_HEADER_ROW);
-        optionGroup.setNullSelectionAllowed(false);
-        optionGroup.setImmediate(true);
-        optionGroup.select(OPTION_DB);
+        optionGroup = new RadioButtonGroup<String>("Select the location of the model.");
+        optionGroup.setItems(OPTION_DB, OPTION_REL_FILE, OPTION_FILE_HEADER_ROW);
+        optionGroup.setValue(OPTION_DB);
         optionGroup.addValueChangeListener(this);
         layout.addComponent(optionGroup);
 
@@ -148,14 +144,12 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
         relCsvUpload.setButtonCaption(null);
 
         fileHeaderEntity = new TextField("Entity Name");
-        fileHeaderEntity.setColumns(25);
-        fileHeaderEntity.setNullRepresentation("");
-        fileHeaderEntity.setRequired(true);
+        fileHeaderEntity.setWidth("25em");
+        fileHeaderEntity.setRequiredIndicatorVisible(true);
 
         fileHeaderDelimiter = new TextField("Header Row Delimiter", ",");
-        fileHeaderDelimiter.setColumns(5);
-        fileHeaderDelimiter.setNullRepresentation("");
-        fileHeaderDelimiter.setRequired(true);
+        fileHeaderDelimiter.setWidth("5em");
+        fileHeaderDelimiter.setRequiredIndicatorVisible(true);
         
         fileHeaderUpload = new Upload("Source file containing a header row to use as attributes (will be created as VARCHAR type, no PK)", this);
         fileHeaderUpload.addSucceededListener(this);
@@ -196,7 +190,7 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
     }
 
     @Override
-    public void valueChange(ValueChangeEvent event) {
+    public void valueChange(ValueChangeEvent<String> event) {
         rebuildOptionLayout();
     }
 
@@ -221,7 +215,7 @@ public class TableColumnSelectWindow extends ResizableWindow implements ValueCha
     protected void refresh() {
         if (optionGroup.getValue().equals(OPTION_DB)) {
             provider.refresh(true);
-            dbTree.refresh();
+            dbTree.refresh(true);
         }
     }
 

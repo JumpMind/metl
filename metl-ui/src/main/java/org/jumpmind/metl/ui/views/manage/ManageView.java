@@ -21,7 +21,6 @@
 package org.jumpmind.metl.ui.views.manage;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,9 +40,7 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
 import org.jumpmind.metl.ui.common.Icons;
-import org.jumpmind.metl.ui.common.MultiPropertyFilter;
 import org.jumpmind.metl.ui.common.TabbedPanel;
-import org.jumpmind.metl.ui.common.Table;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
@@ -54,33 +51,33 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.HasValue.ValueChangeListener;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.AbstractSelect;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.shared.data.sort.SortDirection;
+import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.Column;
+import com.vaadin.ui.Grid.ItemClick;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.components.grid.ItemClickListener;
+import com.vaadin.ui.components.grid.SingleSelectionModel;
 import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope(value = "ui")
-@TopBarLink(category = Category.Manage, name = "Manage", id = "manage", icon = FontAwesome.GEARS, menuOrder = 25)
+@TopBarLink(category = Category.Manage, name = "Manage", id = "manage", icon = VaadinIcons.COGS, menuOrder = 25)
 public class ManageView extends HorizontalLayout implements View, IUiPanel, IBackgroundRefreshable<Object> {
     
     final Logger log = LoggerFactory.getLogger(getClass());
@@ -98,14 +95,15 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
     TabbedPanel tabs;
 
-    BeanItemContainer<Execution> executionContainer = new BeanItemContainer<Execution>(
-            Execution.class);
+    List<Execution> executionList = new ArrayList<Execution>();
 
-    Table table;
+    Grid<Execution> grid;
 
     Button viewButton;
 
-    AbstractSelect statusSelect;
+    ComboBox<String> statusSelect;
+    
+    TextField filterField;
 
     int limit = DEFAULT_LIMIT;
 
@@ -116,7 +114,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         viewButton.setEnabled(false);
         viewButton.addClickListener(new ClickListener() {
             public void buttonClick(ClickEvent event) {
-                viewLog(table.getValue());
+                viewLog(((SingleSelectionModel<Execution>) grid.getSelectionModel()).getSelectedItem().orElse(null));
             }
         });
 
@@ -126,18 +124,18 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         header.addComponent(viewButton);
         header.setComponentAlignment(viewButton, Alignment.BOTTOM_RIGHT);
 
-        statusSelect = new ComboBox("Status");
-        statusSelect.setNewItemsAllowed(false);
-        statusSelect.setNullSelectionAllowed(false);
-        statusSelect.addItem(ANY);
-        statusSelect.setValue(ANY);
+        statusSelect = new ComboBox<String>("Status");
+        statusSelect.setEmptySelectionAllowed(false);
+        List<String> statusList = new ArrayList<String>();
+        statusList.add(ANY);
         for (ExecutionStatus status : ExecutionStatus.values()) {
-            statusSelect.addItem(status.toString());
+            statusList.add(status.toString());
         }
-        ;
-        statusSelect.addValueChangeListener(new ValueChangeListener() {
+        statusSelect.setItems(statusList);
+        statusSelect.setValue(ANY);
+        statusSelect.addValueChangeListener(new ValueChangeListener<String>() {
             @Override
-            public void valueChange(ValueChangeEvent event) {
+            public void valueChange(ValueChangeEvent<String> event) {
                 refreshUI(getBackgroundData(), true);
             }
         });
@@ -151,13 +149,12 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         limitLayout.setComponentAlignment(limitLabel, Alignment.MIDDLE_CENTER);
         TextField limitField = new TextField(null, String.valueOf(DEFAULT_LIMIT));
         limitField.setWidth("5em");
-        limitField.setImmediate(true);
-        limitField.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        limitField.setTextChangeTimeout(200);
-        limitField.addTextChangeListener(new TextChangeListener() {
-            public void textChange(TextChangeEvent event) {
+        limitField.setValueChangeMode(ValueChangeMode.LAZY);
+        limitField.setValueChangeTimeout(200);
+        limitField.addValueChangeListener(new ValueChangeListener<String>() {
+            public void valueChange(ValueChangeEvent<String> event) {
                 try {
-                    limit = Integer.parseInt(event.getText());
+                    limit = Integer.parseInt(event.getValue());
                 } catch (Exception e) {
                 }
                 refreshUI(getBackgroundData(), true);
@@ -169,21 +166,15 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         header.setComponentAlignment(limitLayout, Alignment.BOTTOM_RIGHT);
         header.setExpandRatio(limitLayout, 1.0f);
 
-        TextField filterField = new TextField();
-        filterField.setInputPrompt("Filter");
+        filterField = new TextField();
+        filterField.setPlaceholder("Filter");
         filterField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
-        filterField.setIcon(FontAwesome.SEARCH);
-        filterField.setImmediate(true);
-        filterField.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        filterField.setTextChangeTimeout(200);
-        filterField.addTextChangeListener(new TextChangeListener() {
-            public void textChange(TextChangeEvent event) {
-                executionContainer.removeAllContainerFilters();
-                if (!StringUtils.isBlank(event.getText())) {
-                    executionContainer.addContainerFilter(
-                            new MultiPropertyFilter(event.getText(), new String[] { "agentName",
-                                    "hostName", "flowName", "status", "startTime", "endTime" }));
-                }
+        filterField.setIcon(VaadinIcons.SEARCH);
+        filterField.setValueChangeMode(ValueChangeMode.LAZY);
+        filterField.setValueChangeTimeout(200);
+        filterField.addValueChangeListener(new ValueChangeListener<String>() {
+            public void valueChange(ValueChangeEvent<String> event) {
+                refreshGrid();
             }
         });
         header.addComponent(filterField);
@@ -194,38 +185,33 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         header.setWidth("100%");
         mainTab.addComponent(header);
 
-        table = new Table();
-        table.setContainerDataSource(executionContainer);
-        table.setSelectable(true);
-        table.setMultiSelect(false);
-        table.setSizeFull();
-        table.setColumnCollapsingAllowed(true);
-        table.addItemClickListener(new ItemClickListener() {
+        grid = new Grid<Execution>();
+        grid.setSizeFull();
+        grid.addItemClickListener(new ItemClickListener<Execution>() {
             @Override
-            public void itemClick(ItemClickEvent event) {
-                if (event.isDoubleClick()) {
-                    viewLog(event.getItemId());
+            public void itemClick(ItemClick<Execution> event) {
+                if (event.getMouseEventDetails().isDoubleClick()) {
+                    viewLog(event.getItem());
                 }
             }
         });
-        table.setVisibleColumns(new Object[] { "agentName", "deploymentName", "hostName", "status",
-                "startTime", "endTime", "createBy", "parameters" });
-        table.setColumnHeaders(new String[] { "Agent", "Deployment", "Host", "Status", "Start",
-                "End", "Caller", "Parameters" });
-        table.setColumnWidth("agentName", 250);
-        table.setColumnWidth("deploymentName", 250);
-        table.setColumnWidth("hostName", 145);
-        table.setColumnWidth("status", 90);
-        table.setColumnWidth("startTime", 170);
-        table.setColumnWidth("endTime", 170);
-        table.setColumnWidth("createBy", 100);
-        table.setColumnWidth("parameters", 5000);
-        table.setColumnCollapsed("hostName", true);
-        table.setSortContainerPropertyId("startTime");
-        table.setSortAscending(false);
-        table.addValueChangeListener((event) -> viewButton.setEnabled(table.getValue() != null));
-        mainTab.addComponent(table);
-        mainTab.setExpandRatio(table, 1.0f);
+        grid.addColumn(Execution::getAgentName).setCaption("Agent").setWidth(250);
+        grid.addColumn(Execution::getDeploymentName).setCaption("Deployment").setWidth(250);
+        grid.addColumn(Execution::getHostName).setCaption("Host").setWidth(145).setHidden(true);
+        grid.addColumn(Execution::getStatus).setCaption("Status").setWidth(90);
+        grid.addColumn(item -> CommonUiUtils.formatDateTime(item.getStartTime())).setId("startTime")
+                .setSortProperty("startTime").setCaption("Start").setWidth(170);
+        grid.addColumn(item -> CommonUiUtils.formatDateTime(item.getEndTime())).setSortProperty("endTime")
+                .setCaption("End").setWidth(170);
+        grid.addColumn(Execution::getCreateBy).setCaption("Caller").setWidth(100);
+        grid.addColumn(Execution::getParameters).setCaption("Parameters").setWidth(5000);
+        for (Column<Execution, ?> column : grid.getColumns()) {
+            column.setSortable(true).setHidable(true);
+        }
+        grid.sort("startTime", SortDirection.DESCENDING);
+        grid.addSelectionListener((event) -> viewButton.setEnabled(event.getFirstSelectedItem().isPresent()));
+        mainTab.addComponent(grid);
+        mainTab.setExpandRatio(grid, 1.0f);
 
         tabs = new TabbedPanel();
         tabs.setMainTab("Executions", Icons.EXECUTION, mainTab);
@@ -338,36 +324,56 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     protected void refreshUI(Object obj, boolean tabToFront) {
         List<Execution> data = (List<Execution>) obj;
         if (needsUpdated(data)) {
-            Object currentTableSelection = table.getValue();
-            table.setValue(null);
-            table.removeAllItems();
+            Execution currentGridSelection = ((SingleSelectionModel<Execution>) grid.getSelectionModel())
+                    .getSelectedItem().orElse(null);
+            grid.deselectAll();
+            executionList.clear();
             if (data != null) {
-                executionContainer.addAll((List<Execution>) data);
-                table.sort();
-                table.setValue(currentTableSelection);
-                table.refreshRowCache();
+                executionList.addAll(data);
             }
-            viewButton.setEnabled(table.getValue() != null);
+            refreshGrid();
+            if (data != null && currentGridSelection != null) {
+                grid.select(currentGridSelection);
+            }
+            viewButton.setEnabled(data != null && currentGridSelection != null);
             if (tabToFront) {
                 tabs.mainTabToTop();
             }
         }
+    }
+    
+    protected void refreshGrid() {
+        List<Execution> filteredExecutionList = new ArrayList<Execution>();
+        String filterValue = filterField.getValue();
+        if (StringUtils.isNotBlank(filterValue)) {
+            for (Execution execution : executionList) {
+                if (StringUtils.containsIgnoreCase(execution.getAgentName(), filterValue)
+                        && StringUtils.containsIgnoreCase(execution.getHostName(), filterValue)
+                        && StringUtils.containsIgnoreCase(execution.getFlowName(), filterValue)
+                        && StringUtils.containsIgnoreCase(execution.getStatus(), filterValue)
+                        && StringUtils.containsIgnoreCase(CommonUiUtils.formatDateTime(execution.getStartTime()), filterValue)
+                        && StringUtils.containsIgnoreCase(CommonUiUtils.formatDateTime(execution.getEndTime()), filterValue)) {
+                    filteredExecutionList.add(execution);
+                }
+            }
+        } else {
+            filteredExecutionList.addAll(executionList);
+        }
+        grid.setItems(filteredExecutionList);
     }
 
     protected boolean needsUpdated(List<Execution> data) {
         boolean needsUpdated = false;
         List<Execution> all = data != null ? new ArrayList<Execution>(data)
                 : new ArrayList<Execution>(0);
-        @SuppressWarnings("unchecked")
-        Collection<Execution> tableValues = (Collection<Execution>) table.getItemIds();
 
-        if (all.size() != tableValues.size()) {
-            log.debug("new execution count = " + all.size() + ", old execution count = " + tableValues.size());
+        if (all.size() != executionList.size()) {
+            log.debug("new execution count = " + all.size() + ", old execution count = " + executionList.size());
             needsUpdated = true;
         }
         
         if (!needsUpdated) {
-            for (Execution execution : tableValues) {
+            for (Execution execution : executionList) {
                 if (execution.getExecutionStatus() == ExecutionStatus.RUNNING) {
                     for (Execution newExecution : all) {
                         if (newExecution.equals(execution) &&  
@@ -381,7 +387,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         }
 
         if (!needsUpdated) {
-            all.removeAll(tableValues);
+            all.removeAll(executionList);
             log.debug("different execution count = " + all.size());
             needsUpdated = all.size() > 0;
         }
@@ -390,11 +396,13 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     }
 
     protected void viewLog(Object item) {
-        Execution execution = (Execution) item;
-        ExecutionRunPanel logPanel = new ExecutionRunPanel(execution.getId(), context, tabs, null);
-        tabs.addCloseableTab(execution.getId(), "Log " + execution.getFlowName(), Icons.LOG,
-                logPanel);
-        logPanel.onBackgroundUIRefresh(logPanel.onBackgroundDataRefresh());
+        if (item != null) {
+            Execution execution = (Execution) item;
+            ExecutionRunPanel logPanel = new ExecutionRunPanel(execution.getId(), context, tabs, null);
+            tabs.addCloseableTab(execution.getId(), "Log " + execution.getFlowName(), Icons.LOG,
+                    logPanel);
+            logPanel.onBackgroundUIRefresh(logPanel.onBackgroundDataRefresh());
+        }
     }
 
 }

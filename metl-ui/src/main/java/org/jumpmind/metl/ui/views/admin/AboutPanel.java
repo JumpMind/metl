@@ -20,7 +20,9 @@
  */
 package org.jumpmind.metl.ui.views.admin;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 
@@ -28,7 +30,6 @@ import org.apache.commons.lang.time.FastDateFormat;
 import org.jumpmind.metl.core.runtime.AgentManager;
 import org.jumpmind.metl.core.util.VersionUtils;
 import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
-import org.jumpmind.metl.ui.common.Table;
 import org.jumpmind.util.AppUtils;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.UiComponent;
@@ -37,22 +38,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope(value = "ui")
 @Order(1400)
-@AdminMenuLink(name = "About", id = "About", icon = FontAwesome.QUESTION)
+@AdminMenuLink(name = "About", id = "About", icon = VaadinIcons.QUESTION)
 public class AboutPanel extends AbstractAdminPanel implements IBackgroundRefreshable<Object> {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
     private static final long serialVersionUID = 1L;
 
-    Table table;
+    Grid<String[]> grid;
 
     public AboutPanel() {
         setSizeFull();
@@ -66,14 +68,13 @@ public class AboutPanel extends AbstractAdminPanel implements IBackgroundRefresh
         gcCollect.addStyleName(ValoTheme.BUTTON_TINY);
         addComponent(gcCollect);
 
-        table = new Table();
-        table.setSizeFull();
-        table.addStyleName("noscroll");
-        table.addContainerProperty("Name", String.class, null);
-        table.setColumnWidth("Name", 200);
-        table.addContainerProperty("Value", String.class, null);
-        addComponent(table);
-        setExpandRatio(table, 1);
+        grid = new Grid<String[]>();
+        grid.setSizeFull();
+        grid.addStyleName("noscroll");
+        grid.addColumn(item -> item[0]).setCaption("Name").setWidth(200);
+        grid.addColumn(item -> item[1]).setCaption("Value");
+        addComponent(grid);
+        setExpandRatio(grid, 1);
     }
     
     @PostConstruct
@@ -115,30 +116,22 @@ public class AboutPanel extends AbstractAdminPanel implements IBackgroundRefresh
     }
 
     protected void refresh() {
-        table.removeAllItems();
-        int itemId = 0;
-        table.addItem(new Object[] { "Application Version", VersionUtils.getCurrentVersion() },
-                itemId++);
-        table.addItem(new Object[] { "Build Time", VersionUtils.getBuildTime() }, itemId++);
-        table.addItem(new Object[] { "SCM Revision", VersionUtils.getScmVersion() }, itemId++);
-        table.addItem(new Object[] { "SCM Branch", VersionUtils.getScmBranch() }, itemId++);
+        List<String[]> itemList = new ArrayList<String[]>();
+        itemList.add(new String[] { "Application Version", VersionUtils.getCurrentVersion() });
+        itemList.add(new String[] { "Build Time", VersionUtils.getBuildTime() });
+        itemList.add(new String[] { "SCM Revision", VersionUtils.getScmVersion() });
+        itemList.add(new String[] { "SCM Branch", VersionUtils.getScmBranch() });
 
-        table.addItem(new Object[] { "Host Name", AppUtils.getHostName() }, itemId++);
-        table.addItem(new Object[] { "IP Address", AppUtils.getIpAddress() }, itemId++);
-        table.addItem(new Object[] { "Java Version", System.getProperty("java.version") },
-                itemId++);
-        table.addItem(
-                new Object[] { "System Time",
-                        FastDateFormat.getTimeInstance(FastDateFormat.MEDIUM).format(new Date()) },
-                itemId++);
-        table.addItem(
-                new Object[] { "Used Heap", Long.toString(
-                        Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) },
-                itemId++);
-        table.addItem(new Object[] { "Heap Size", Long.toString(Runtime.getRuntime().maxMemory()) },
-                itemId++);
-        table.addItem(new Object[] { "Last Restart",
-                CommonUiUtils.formatDateTime(AgentManager.lastRestartTime) }, itemId++);
+        itemList.add(new String[] { "Host Name", AppUtils.getHostName() });
+        itemList.add(new String[] { "IP Address", AppUtils.getIpAddress() });
+        itemList.add(new String[] { "Java Version", System.getProperty("java.version") });
+        itemList.add(new String[] { "System Time",
+                FastDateFormat.getTimeInstance(FastDateFormat.MEDIUM).format(new Date()) });
+        itemList.add(new String[] { "Used Heap",
+                Long.toString(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) });
+        itemList.add(new String[] { "Heap Size", Long.toString(Runtime.getRuntime().maxMemory()) });
+        itemList.add(new String[] { "Last Restart", CommonUiUtils.formatDateTime(AgentManager.lastRestartTime) });
+        grid.setItems(itemList);
     }
 
     @Override

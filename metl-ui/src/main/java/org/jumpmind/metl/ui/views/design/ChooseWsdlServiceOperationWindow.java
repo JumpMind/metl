@@ -33,7 +33,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.ListSelect;
+import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -56,11 +56,10 @@ public class ChooseWsdlServiceOperationWindow extends Window {
 
         layout.addComponent(new Label("Choose the SOAP operation to use."));
 
-        final ListSelect field = new ListSelect();
-        field.setNullSelectionAllowed(false);
-        field.setMultiSelect(false);
+        final NativeSelect<SoapOperation> field = new NativeSelect<SoapOperation>();
+        field.setEmptySelectionAllowed(false);
         field.setWidth(100, Unit.PERCENTAGE);
-        field.setRows(15);
+        field.setVisibleItemCount(15);
         layout.addComponent(field);
 
         Collections.sort(operations, new Comparator<SoapOperation>() {
@@ -69,10 +68,8 @@ public class ChooseWsdlServiceOperationWindow extends Window {
             }
         });
 
-        for (SoapOperation operation : operations) {
-            field.addItem(operation);            
-            field.setItemCaption(operation, operation.getBindingName().getLocalPart() + "." + operation.getOperationName());
-        }
+        field.setItems(operations);
+        field.setItemCaptionGenerator(item -> item.getBindingName().getLocalPart() + "." + item.getOperationName());
 
         HorizontalLayout buttonLayout = new HorizontalLayout();
         buttonLayout.setSpacing(true);

@@ -32,14 +32,14 @@ import org.jumpmind.vaadin.ui.sqlexplorer.SqlExplorer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
 @Scope("ui")
-@TopBarLink(id = "exploreDataSources", category = Category.Explore, menuOrder = 10, name = "DataSource", icon = FontAwesome.DATABASE)
+@TopBarLink(id = "exploreDataSources", category = Category.Explore, menuOrder = 10, name = "DataSource", icon = VaadinIcons.DATABASE)
 public class ExploreDataSourceView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = 1L;

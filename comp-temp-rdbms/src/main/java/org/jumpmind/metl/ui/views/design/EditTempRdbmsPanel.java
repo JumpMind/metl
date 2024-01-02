@@ -26,11 +26,8 @@ import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.HasValue.ValueChangeListener;
 import com.vaadin.ui.ComboBox;
 
 public class EditTempRdbmsPanel extends AbstractComponentEditPanel {
@@ -39,7 +36,7 @@ public class EditTempRdbmsPanel extends AbstractComponentEditPanel {
 
     AceEditor editor;
     
-    ComboBox select;
+    ComboBox<String> select;
 
     @SuppressWarnings("serial")
     protected void buildUI() {
@@ -47,24 +44,17 @@ public class EditTempRdbmsPanel extends AbstractComponentEditPanel {
         addComponent(buttonBar);
         
     	editor = CommonUiUtils.createAceEditor();
-        editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        editor.setTextChangeTimeout(200);
         editor.setMode(AceMode.sql);
         
-        select = new ComboBox();
+        select = new ComboBox<String>();
         select.setWidth(40, Unit.EM);
         select.setTextInputAllowed(false);
         
-        select.addItem(TempRdbms.DDL);
-        select.setItemCaption(TempRdbms.DDL, TempRdbms.DDL);
-        select.addItem(TempRdbms.SQL);
-        select.setItemCaption(TempRdbms.SQL, TempRdbms.SQL);
-        select.setImmediate(true);
-        select.setNullSelectionAllowed(false);
-        select.setNewItemsAllowed(false);
-        select.addValueChangeListener(new ValueChangeListener() {
+        select.setItems(TempRdbms.DDL, TempRdbms.SQL);
+        select.setEmptySelectionAllowed(false);
+        select.addValueChangeListener(new ValueChangeListener<String>() {
             @Override
-            public void valueChange(ValueChangeEvent event) {
+            public void valueChange(ValueChangeEvent<String> event) {
                 refresh();
             }
         });
@@ -72,12 +62,12 @@ public class EditTempRdbmsPanel extends AbstractComponentEditPanel {
         buttonBar.addLeft(select);
         
         if (!readOnly) {
-            editor.addTextChangeListener(new TextChangeListener() {
+            editor.addValueChangeListener(new ValueChangeListener<String>() {
 
                 @Override
-                public void textChange(TextChangeEvent event) {
+                public void valueChange(ValueChangeEvent<String> event) {
                     String key = (String) select.getValue();
-                    EditTempRdbmsPanel.this.component.put(key, event.getText());
+                    EditTempRdbmsPanel.this.component.put(key, event.getValue());
                     EditTempRdbmsPanel.this.context.getConfigurationService()
                             .save(EditTempRdbmsPanel.this.component.findSetting(key));
                 }

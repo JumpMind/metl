@@ -60,8 +60,8 @@ import org.reficio.ws.builder.core.Wsdl;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.HasValue.ValueChangeListener;
 import com.vaadin.server.Page;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -69,7 +69,7 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.OptionGroup;
+import com.vaadin.ui.RadioButtonGroup;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
@@ -84,7 +84,7 @@ import jlibs.xml.xsd.XSInstance;
 import jlibs.xml.xsd.XSParser;
 
 @SuppressWarnings("serial")
-public class ImportXmlTemplateWindow extends ResizableWindow implements ValueChangeListener, ClickListener, Receiver, SucceededListener {
+public class ImportXmlTemplateWindow extends ResizableWindow implements ValueChangeListener<String>, ClickListener, Receiver, SucceededListener {
 
     private static final String OPTION_TEXT = "Text";
 
@@ -98,7 +98,7 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
 
     VerticalLayout optionLayout;
 
-    OptionGroup optionGroup;
+    RadioButtonGroup<String> optionGroup;
 
     AceEditor editor;
 
@@ -106,7 +106,7 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
 
     TextField urlTextField;
     
-    ComboBox resourceComboBox;
+    ComboBox<Resource> resourceComboBox;
 
     ByteArrayOutputStream uploadedData;
 
@@ -131,14 +131,9 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
         layout.addStyleName(ValoTheme.WINDOW_BOTTOM_TOOLBAR);
         layout.addComponent(new Label("Import XML from either an XSD or WSDL source."));
 
-        optionGroup = new OptionGroup("Select the location of the XSD or WSDL.");
-        optionGroup.addItem(OPTION_TEXT);
-        optionGroup.addItem(OPTION_FILE);
-        optionGroup.addItem(OPTION_URL);
-        optionGroup.addItem(OPTION_RESOURCE);
-        optionGroup.setNullSelectionAllowed(false);
-        optionGroup.setImmediate(true);
-        optionGroup.select(OPTION_TEXT);
+        optionGroup = new RadioButtonGroup<String>("Select the location of the XSD or WSDL.");
+        optionGroup.setItems(OPTION_TEXT, OPTION_FILE, OPTION_URL, OPTION_RESOURCE);
+        optionGroup.setValue(OPTION_TEXT);
         optionGroup.addValueChangeListener(this);
         layout.addComponent(optionGroup);
 
@@ -172,8 +167,8 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
 
     }
     
-    protected ComboBox createResourceCB() {
-        ComboBox cb = new ComboBox("HTTP Resource");
+    protected ComboBox<Resource> createResourceCB() {
+        ComboBox<Resource> cb = new ComboBox<Resource>("HTTP Resource");
         
         String projectVersionId = component.getProjectVersionId();
         IConfigurationService configurationService = context.getConfigurationService();
@@ -187,9 +182,7 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
         }
         List<Resource> resources = new ArrayList<>(configurationService.findResourcesByTypes(projectVersionId, true, typeStrings));
         if (resources != null) {
-            for (Resource resource : resources) {
-                cb.addItem(resource);
-            }
+        	cb.setItems(resources);
         }
 
         cb.setWidth(50.0f, Unit.PERCENTAGE);
@@ -214,7 +207,7 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
     }
 
     @Override
-    public void valueChange(ValueChangeEvent event) {
+    public void valueChange(ValueChangeEvent<String> event) {
         rebuildOptionLayout();
     }
 

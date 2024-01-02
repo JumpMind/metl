@@ -20,15 +20,12 @@
  */
 package org.jumpmind.metl.ui.common;
 
-import com.vaadin.data.Property;
 import com.vaadin.ui.TextField;
 
 @SuppressWarnings("serial")
 public class EnableFocusTextField extends TextField {
 
     protected boolean focusAllowed = true;
-    
-    ValueChangeListener listener;
     
     public EnableFocusTextField() {
     }
@@ -39,25 +36,6 @@ public class EnableFocusTextField extends TextField {
     
     public boolean isFocusAllowed() {
         return focusAllowed;
-    }
-    
-    @Override
-    public void addValueChangeListener(com.vaadin.data.Property.ValueChangeListener listener) {
-        super.addValueChangeListener(listener);
-        this.listener = listener;
-    }
-    
-    @SuppressWarnings("rawtypes")
-    @Override
-    public void setPropertyDataSource(Property newDataSource) {
-        if (listener != null) {
-            super.removeValueChangeListener(listener);
-         }
-        super.setPropertyDataSource(newDataSource);
-         if (listener != null) {
-             super.addValueChangeListener(listener);
-         }
-
     }
     
     @Override

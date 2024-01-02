@@ -30,14 +30,13 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
-import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.RelationalModelName;
 import org.jumpmind.metl.core.model.ProjectVersion;
-import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
@@ -45,6 +44,7 @@ import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.data.provider.Query;
 import com.vaadin.server.Page;
 import com.vaadin.server.ResourceReference;
 import com.vaadin.server.StreamResource;
@@ -52,10 +52,10 @@ import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.CheckBoxGroup;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -66,9 +66,9 @@ public class ExportDialog extends ResizableWindow {
     final Logger log = LoggerFactory.getLogger(getClass());
     private static final long serialVersionUID = 1L;
     private ApplicationContext context;
-    OptionGroup exportFlowGroup;
-    OptionGroup exportModelGroup;
-    OptionGroup exportResourceGroup;
+    CheckBoxGroup<FlowName> exportFlowGroup;
+    CheckBoxGroup<RelationalModelName> exportModelGroup;
+    CheckBoxGroup<ResourceName> exportResourceGroup;
     VerticalLayout affectedLayout;
     String projectVersionId;
 
@@ -118,9 +118,9 @@ public class ExportDialog extends ResizableWindow {
     }
     
     private void selectAll() {
-        exportFlowGroup.setValue(exportFlowGroup.getContainerDataSource().getItemIds());
-        exportModelGroup.setValue(exportModelGroup.getContainerDataSource().getItemIds());
-        exportResourceGroup.setValue(exportResourceGroup.getContainerDataSource().getItemIds());
+		exportFlowGroup.setValue(exportFlowGroup.getDataProvider().fetch(new Query<>()).collect(Collectors.toSet()));
+        exportModelGroup.setValue(exportModelGroup.getDataProvider().fetch(new Query<>()).collect(Collectors.toSet()));
+        exportResourceGroup.setValue(exportResourceGroup.getDataProvider().fetch(new Query<>()).collect(Collectors.toSet()));
     }
     
     private void selectNone() {
@@ -129,10 +129,9 @@ public class ExportDialog extends ResizableWindow {
         exportResourceGroup.setValue(null);
     }
 
-    @SuppressWarnings("unchecked")
     private void updateAffectedObjects() {
-        Set<String> flowIds = (Set<String>) exportFlowGroup.getValue();
-        Set<String> modelIds = (Set<String>) exportModelGroup.getValue();
+        Set<String> flowIds = exportFlowGroup.getValue().stream().map(item -> item.getId()).collect(Collectors.toSet());
+        Set<String> modelIds = exportModelGroup.getValue().stream().map(item -> item.getId()).collect(Collectors.toSet());
         affectedLayout.removeAllComponents();
         Set<Flow> flows = new HashSet<Flow>();
         for (String flowId : flowIds) {
@@ -175,14 +174,13 @@ public class ExportDialog extends ResizableWindow {
         AbstractObjectNameBasedSorter.sort(allFlows);
 
         // flows
-        exportFlowGroup = new OptionGroup("Flows");
+        exportFlowGroup = new CheckBoxGroup<FlowName>("Flows");
         exportFlowGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
-        exportFlowGroup.setMultiSelect(true);
+        exportFlowGroup.setItems(allFlows);
+        exportFlowGroup.setItemCaptionGenerator(item -> item.getName());
         for (FlowName key : allFlows) {
-            exportFlowGroup.addItem(key.getId());
-            exportFlowGroup.setItemCaption(key.getId(), key.getName());
             if (allChecked || key.equals(selectedFlow)) {
-                exportFlowGroup.select(key.getId());
+                exportFlowGroup.select(key);
             }
         }
         exportFlowGroup.addValueChangeListener(selectedItem -> updateAffectedObjects());
@@ -191,70 +189,58 @@ public class ExportDialog extends ResizableWindow {
         // models
         List<RelationalModelName> models = configurationService.findRelationalModelsInProject(projectVersionId);
         AbstractObjectNameBasedSorter.sort(models);
-        exportModelGroup = new OptionGroup("Models");
+        exportModelGroup = new CheckBoxGroup<RelationalModelName>("Models");
         exportModelGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
-        exportModelGroup.setMultiSelect(true);
-        for (RelationalModelName key : models) {
-            exportModelGroup.addItem(key.getId());
-            exportModelGroup.setItemCaption(key.getId(), key.getName());
-            if (allChecked || key.equals(selectedModel)) {
-                exportModelGroup.select(key.getId());
-            }
-        }
+        exportModelGroup.setItemCaptionGenerator(item -> item.getName());
         layout.addComponent(exportModelGroup);
 
         // resources
         List<ResourceName> resources = configurationService.findResourcesInProject(projectVersionId);
         AbstractObjectNameBasedSorter.sort(resources);
-        exportResourceGroup = new OptionGroup("Resources");
+        exportResourceGroup = new CheckBoxGroup<ResourceName>("Resources");
         exportResourceGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
-        exportResourceGroup.setMultiSelect(true);
-        for (ResourceName key : resources) {
-            exportResourceGroup.addItem(key.getId());
-            exportResourceGroup.setItemCaption(key.getId(), key.getName());
-            if (allChecked || key.equals(selectedResource)) {
-                exportResourceGroup.select(key.getId());
-            }
-        }
+        exportResourceGroup.setItemCaptionGenerator(item -> item.getName());
         layout.addComponent(exportResourceGroup);
 
-        @SuppressWarnings("unchecked")
-        Set<String> flowIds = (Set<String>) exportFlowGroup.getValue();
-        for (String flowId : flowIds) {
-            addDependentModels(flowId);
-            addDependentResources(flowId);
+        List<RelationalModelName> dependentModels = new ArrayList<RelationalModelName>();
+        List<ResourceName> dependentResources = new ArrayList<ResourceName>();
+        Set<FlowName> flowNames = exportFlowGroup.getValue();
+        for (FlowName flowName : flowNames) {
+        	String flowId = flowName.getId();
+			dependentModels.addAll(context.getConfigurationService().findDependentModels(flowId).stream()
+					.map(model -> new RelationalModelName(model)).collect(Collectors.toList()));
+			dependentResources.addAll(context.getConfigurationService().findDependentResources(flowId).stream()
+					.map(resource -> new ResourceName(resource)).collect(Collectors.toList()));
+        }
+        
+        models.addAll(dependentModels);
+        exportModelGroup.setItems(models);
+        for (RelationalModelName key : models) {
+            if (allChecked || key.equals(selectedModel) || dependentModels.contains(key)) {
+                exportModelGroup.select(key);
+            }
+        }
+        
+        resources.addAll(dependentResources);
+        exportResourceGroup.setItems(resources);
+        for (ResourceName key : resources) {
+            if (allChecked || key.equals(selectedResource) || dependentResources.contains(key)) {
+                exportResourceGroup.select(key);
+            }
         }
 
-    }
-
-    private void addDependentModels(String flowId) {
-        List<RelationalModel> models = context.getConfigurationService().findDependentModels(flowId);
-        for (RelationalModel model : models) {
-            exportModelGroup.addItem(model.getId());
-            exportModelGroup.setItemCaption(model.getId(), model.getName());
-            exportModelGroup.select(model.getId());
-        }
-    }
-
-    private void addDependentResources(String flowId) {
-        List<Resource> resources = context.getConfigurationService().findDependentResources(flowId);
-        for (Resource resource : resources) {
-            exportResourceGroup.addItem(resource.getId());
-            exportResourceGroup.setItemCaption(resource.getId(), resource.getName());
-            exportResourceGroup.select(resource.getId());
-        }
     }
 
     public static interface IExportListener extends Serializable {
         public void onFinished(String dataToImport);
     }
 
-    @SuppressWarnings({ "serial", "unchecked" })
+    @SuppressWarnings({ "serial" })
     class ExportClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            Set<String> flowIds = (Set<String>) exportFlowGroup.getValue();
-            Set<String> modelIds = (Set<String>) exportModelGroup.getValue();
-            Set<String> resourceIds = (Set<String>) exportResourceGroup.getValue();
+            Set<String> flowIds = exportFlowGroup.getValue().stream().map(item -> item.getId()).collect(Collectors.toSet());
+            Set<String> modelIds = exportModelGroup.getValue().stream().map(item -> item.getId()).collect(Collectors.toSet());
+            Set<String> resourceIds = exportResourceGroup.getValue().stream().map(item -> item.getId()).collect(Collectors.toSet());
             String export = context.getImportExportService().exportFlows(projectVersionId, new ArrayList<String>(flowIds),
                     new ArrayList<String>(modelIds), new ArrayList<String>(resourceIds), context.getUser().getLoginId());
             ProjectVersion projectVersion = context.getConfigurationService().findProjectVersion(projectVersionId);

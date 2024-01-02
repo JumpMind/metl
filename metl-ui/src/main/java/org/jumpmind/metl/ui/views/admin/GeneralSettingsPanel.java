@@ -21,19 +21,22 @@
 package org.jumpmind.metl.ui.views.admin;
 
 import org.jumpmind.metl.core.model.GlobalSetting;
-import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
+import com.vaadin.data.Binder;
+import com.vaadin.data.converter.StringToIntegerConverter;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -41,7 +44,7 @@ import com.vaadin.ui.themes.ValoTheme;
 @UiComponent
 @Scope(value = "ui")
 @Order(500)
-@AdminMenuLink(name = "General Settings", id = "General Settings", icon = FontAwesome.GEARS)
+@AdminMenuLink(name = "General Settings", id = "General Settings", icon = VaadinIcons.COGS)
 public class GeneralSettingsPanel extends AbstractAdminPanel {
 
     private static final String THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART = "This will take effect on the next server restart";
@@ -106,22 +109,22 @@ public class GeneralSettingsPanel extends AbstractAdminPanel {
         AbstractField<?> field = null;
         if (Boolean.class.equals(converter)) {
             final CheckBox checkbox = new CheckBox(text);
-            checkbox.setImmediate(true);
             checkbox.setValue(Boolean.parseBoolean(setting.getValue()));
             checkbox.addValueChangeListener(
                     (e) -> saveSetting(setting, checkbox.getValue().toString()));
             field = checkbox;
         } else {
-            field = new ImmediateUpdateTextField(text) {
-                protected void save(String value) {
-                    saveSetting(setting, value);
-                }
-            };
+            field = new TextField();
+            ((TextField) field).setValueChangeMode(ValueChangeMode.LAZY);
+            ((TextField) field).setValueChangeTimeout(200);
+            field.addValueChangeListener(event -> saveSetting(setting, (String) event.getValue()));
             field.setDescription(description);
-            ((ImmediateUpdateTextField) field).setValue(setting.getValue());
+            ((TextField) field).setValue(setting.getValue());
 
-            if (converter != null) {
-                field.setConverter(converter);
+            if (converter.equals(Integer.class)) {
+                new Binder<String>().forField((TextField) field)
+                        .withConverter(new StringToIntegerConverter("Value must be an integer"))
+                        .bind(value -> Integer.parseInt(value), (value, newValue) -> value = String.valueOf(newValue));
             }
         }
         form.addComponent(field);

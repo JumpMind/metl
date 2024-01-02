@@ -27,8 +27,8 @@ import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.HasValue.ValueChangeListener;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
@@ -84,16 +84,16 @@ public class PluginRepositoryEditPanel extends VerticalLayout implements IUiPane
         }
     }
 
-    class UrlChangeListener implements ValueChangeListener {
-        public void valueChange(ValueChangeEvent event) {
-            pluginRepository.setUrl((String) event.getProperty().getValue());
+    class UrlChangeListener implements ValueChangeListener<String> {
+        public void valueChange(ValueChangeEvent<String> event) {
+            pluginRepository.setUrl(event.getValue());
             save(pluginRepository);
         }
     }
 
-    class NameChangeListener implements ValueChangeListener {
-        public void valueChange(ValueChangeEvent event) {
-            pluginRepository.setName((String) event.getProperty().getValue());
+    class NameChangeListener implements ValueChangeListener<String> {
+        public void valueChange(ValueChangeEvent<String> event) {
+            pluginRepository.setName(event.getValue());
             save(pluginRepository);
         }
     }   

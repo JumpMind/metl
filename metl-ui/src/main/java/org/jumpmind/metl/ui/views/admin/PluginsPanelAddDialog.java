@@ -26,8 +26,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
@@ -46,7 +48,7 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.ListSelect;
+import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Upload;
@@ -75,11 +77,11 @@ public class PluginsPanelAddDialog extends ResizableWindow {
 
     String handEnteredName;
 
-    private ListSelect versionSelect;
+    private NativeSelect<String> versionSelect;
 
-    private ComboBox groupCombo;
+    private ComboBox<String> groupCombo;
 
-    private ComboBox nameCombo;
+    private ComboBox<String> nameCombo;
 
     private TextField groupField;
 
@@ -112,7 +114,6 @@ public class PluginsPanelAddDialog extends ResizableWindow {
 
         uploadHandler = new UploadHandler();
         uploadButton = new Upload(null, uploadHandler);
-        uploadButton.setImmediate(true);
         uploadButton.setVisible(false);
         uploadButton.setButtonCaption("Upload");
         uploadButton.addFinishedListener(e -> finishedUpload());
@@ -182,44 +183,45 @@ public class PluginsPanelAddDialog extends ResizableWindow {
             names.add(plugin.getArtifactName());
         }
 
-        versionSelect = new ListSelect("Versions");
-        groupCombo = new ComboBox("Group");
-        nameCombo = new ComboBox("Name");
+        versionSelect = new NativeSelect<String>("Versions");
+        groupCombo = new ComboBox<String>("Group");
+        nameCombo = new ComboBox<String>("Name");
 
-        versionSelect.setRows(4);
-        versionSelect.setMultiSelect(false);
-        versionSelect.setNullSelectionAllowed(false);
+        versionSelect.setVisibleItemCount(4);
+        versionSelect.setEmptySelectionAllowed(false);
         versionSelect.setWidth(100, Unit.PERCENTAGE);
         versionSelect.addValueChangeListener(e -> versionSelected());
 
         groupCombo.setWidth(100, Unit.PERCENTAGE);
-        groupCombo.setNewItemsAllowed(true);
-        groupCombo.addItems(groups);
+        groupCombo.setItems(groups);
         groupCombo.addValueChangeListener(e -> {
             populateNameField(nameCombo);
             setSearchButtonEnabled();
         });
-        groupCombo.setNewItemHandler((newItemCaption) -> {
-            groupCombo.removeItem(handEnteredGroup);
-            handEnteredGroup = newItemCaption;
-            groupCombo.addItem(handEnteredGroup);
-            groupCombo.setValue(handEnteredGroup);
-            setSearchButtonEnabled();
+        groupCombo.setNewItemProvider(newGroup -> {
+        	groups.remove(handEnteredGroup);
+        	handEnteredGroup = newGroup;
+        	groups.add(handEnteredGroup);
+        	groupCombo.setItems(groups);
+        	groupCombo.setValue(handEnteredGroup);
+        	setSearchButtonEnabled();
+        	return Optional.of(newGroup);
         });
         layout.addComponent(groupCombo);
 
         nameCombo.setWidth(100, Unit.PERCENTAGE);
-        nameCombo.setNewItemsAllowed(true);
-        nameCombo.addItems(names);
+        nameCombo.setItems(names);
         nameCombo.addValueChangeListener(e -> {
             setSearchButtonEnabled();
         });
-        nameCombo.setNewItemHandler((newItemCaption) -> {
-            nameCombo.removeItem(handEnteredName);
-            handEnteredName = newItemCaption;
-            nameCombo.addItem(handEnteredName);
-            nameCombo.setValue(handEnteredName);
-            setSearchButtonEnabled();
+        nameCombo.setNewItemProvider(newName -> {
+        	names.remove(handEnteredName);
+        	handEnteredName = newName;
+        	names.add(handEnteredName);
+        	nameCombo.setItems(names);
+        	nameCombo.setValue(handEnteredName);
+        	setSearchButtonEnabled();
+        	return Optional.of(newName);
         });
         layout.addComponent(nameCombo);
 
@@ -241,16 +243,15 @@ public class PluginsPanelAddDialog extends ResizableWindow {
                 versions.remove(plugin.getArtifactVersion());
             }
         }
-        versionSelect.removeAllItems();
-        versionSelect.addItems(versions);
+        versionSelect.setItems(versions);
     }
 
     protected void setSearchButtonEnabled() {
         searchButton.setEnabled(nameCombo.getValue() != null && groupCombo.getValue() != null);
-        versionSelect.removeAllItems();
+        versionSelect.setItems(new ArrayList<String>());
     }
 
-    protected void populateNameField(ComboBox nameField) {
+    protected void populateNameField(ComboBox<?> nameField) {
 
     }
 
@@ -260,17 +261,17 @@ public class PluginsPanelAddDialog extends ResizableWindow {
 
         groupField = new TextField("Group");
         groupField.setWidth(100, Unit.PERCENTAGE);
-        groupField.setRequired(true);
+        groupField.setRequiredIndicatorVisible(true);
         layout.addComponent(groupField);
 
         nameField = new TextField("Name");
         nameField.setWidth(100, Unit.PERCENTAGE);
-        nameField.setRequired(true);
+        nameField.setRequiredIndicatorVisible(true);
         layout.addComponent(nameField);
 
         versionField = new TextField("Version");
         versionField.setWidth(100, Unit.PERCENTAGE);
-        versionField.setRequired(true);
+        versionField.setRequiredIndicatorVisible(true);
         layout.addComponent(versionField);
 
         return layout;

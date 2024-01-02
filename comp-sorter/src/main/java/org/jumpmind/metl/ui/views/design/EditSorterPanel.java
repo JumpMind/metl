@@ -25,12 +25,10 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -42,33 +40,23 @@ import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.Sorter;
 import org.jumpmind.metl.ui.common.ButtonBar;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.Transferable;
-import com.vaadin.event.dd.DragAndDropEvent;
-import com.vaadin.event.dd.DropHandler;
-import com.vaadin.event.dd.acceptcriteria.AcceptAll;
-import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.AbstractSelect.AbstractSelectTargetDetails;
+import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.HasValue.ValueChangeListener;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.CellStyleGenerator;
-import com.vaadin.ui.TableFieldFactory;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.TextField;
 
 @SuppressWarnings("serial")
 public class EditSorterPanel extends AbstractComponentEditPanel {
+    
+    List<RecordFormat> recordFormatList = new ArrayList<RecordFormat>();
 
-    Table table = new Table();
-
-    BeanItemContainer<RecordFormat> container = new BeanItemContainer<RecordFormat>(RecordFormat.class);
+    Grid<RecordFormat> grid = new Grid<RecordFormat>();
 
     TextField filterTextField;
 
@@ -81,61 +69,47 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        Button moveUpButton = buttonBar.addButton("Move Up", FontAwesome.ARROW_UP);
+        Button moveUpButton = buttonBar.addButton("Move Up", VaadinIcons.ARROW_UP);
         moveUpButton.addClickListener(new MoveUpClickListener());
 
-        Button moveDownButton = buttonBar.addButton("Move Down", FontAwesome.ARROW_DOWN);
+        Button moveDownButton = buttonBar.addButton("Move Down", VaadinIcons.ARROW_DOWN);
         moveDownButton.addClickListener(new MoveDownClickListener());
 
-        Button moveTopButton = buttonBar.addButton("Move Top", FontAwesome.ANGLE_DOUBLE_UP);
+        Button moveTopButton = buttonBar.addButton("Move Top", VaadinIcons.ANGLE_DOUBLE_UP);
         moveTopButton.addClickListener(new MoveTopClickListener());
 
-        Button moveBottomButton = buttonBar.addButton("Move Bottom", FontAwesome.ANGLE_DOUBLE_DOWN);
+        Button moveBottomButton = buttonBar.addButton("Move Bottom", VaadinIcons.ANGLE_DOUBLE_DOWN);
         moveBottomButton.addClickListener(new MoveBottomClickListener());
         
         filterTextField = buttonBar.addFilter();
-        filterTextField.addTextChangeListener(event -> updateTable(event.getText()));
+        filterTextField.addValueChangeListener(event -> updateGrid(event.getValue()));
 
-        table.setContainerDataSource(container);
+        grid.setSizeFull();
+        grid.addColumn(RecordFormat::getEntityName).setCaption("Entity Name").setSortable(false);
+        grid.addColumn(RecordFormat::getAttributeName).setCaption("Attribute Name").setSortable(false);
+        grid.addColumn(RecordFormat::getOrdinalSetting).setCaption("Sort Order").setSortable(false);
+        grid.addComponentColumn(setting -> createAttributeCheckBox(setting, Sorter.ATTRIBUTE_SORTER_ENABLED))
+                .setCaption("Sort").setSortable(false);
+        grid.setSelectionMode(SelectionMode.MULTI);
+        addComponent(grid);
+        setExpandRatio(grid, 1.0f);
 
-        table.setSelectable(true);
-        table.setSortEnabled(false);
-        table.setImmediate(true);
-        table.setSizeFull();
-        table.setVisibleColumns(new Object[] { "entityName", "attributeName", "ordinalSetting", "sortSetting" });
-        table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Sort Order", "Sort" });
-        table.setTableFieldFactory(new EditFieldFactory());
-        table.setCellStyleGenerator(new TableCellStyleGenerator());
-        table.setEditable(true);
-        table.setMultiSelect(true);
-        addComponent(table);
-        setExpandRatio(table, 1.0f);
-
-        updateTable(null);
+        updateGrid(null);
         
         calculatePositions();
         saveOrdinalSettings();
         saveSortSettings();
     }
 
-    @SuppressWarnings("unchecked")
     protected Set<RecordFormat> getSelectedItems() {
-        return (Set<RecordFormat>) table.getValue();
-    }
-
-    protected RecordFormat getSelectedItem() {
-        Set<RecordFormat> selectedItems = getSelectedItems();
-        if (selectedItems != null && selectedItems.size() == 1) {
-            return selectedItems.iterator().next();
-        }
-        return null;
+        return grid.getSelectedItems();
     }
     
-    protected void updateTable(String filter) {
+    protected void updateGrid(String filter) {
         filter = filter != null ? filter.toLowerCase() : null;
         filterTextField.setValue(filter);
-        table.removeAllItems();
         RelationalModel model = (RelationalModel) component.getInputModel();
+        recordFormatList = new ArrayList<RecordFormat>();
 
         if (model != null) {
             model = context.getConfigurationService().findRelationalModel(model.getId());
@@ -174,19 +148,20 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
             });
 
             for (RecordFormat recordFormat : checkedAttributes) {
-                table.addItem(recordFormat);
+                recordFormatList.add(recordFormat);
             }
 
             for (RecordFormat recordFormat : attributes) {
-                table.addItem(recordFormat);
+                recordFormatList.add(recordFormat);
             }
         }
+        grid.setItems(recordFormatList);
     }
 
     protected void calculatePositions() {
         boolean needsRefreshed = false;
         int ordinal = 1;
-        for (RecordFormat record : container.getItemIds()) {
+        for (RecordFormat record : recordFormatList) {
         	if (record.getSortSetting()) {
 	            if (record.getOrdinalSetting() != ordinal) {
 	                record.setOrdinalSetting(ordinal);
@@ -202,22 +177,18 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
         }
         
         if (needsRefreshed) {
-            RecordFormat record = getSelectedItem();
-            if (record != null) {
-                record.setFocusFieldId("sortSetting");
-            }
-            table.refreshRowCache();
+            grid.setItems(recordFormatList);
         }
     }
 
     protected void moveItemsTo(Set<RecordFormat> itemIds, int index) {
-        if (index >= 0 && index < container.getItemIds().size() && itemIds.size() > 0) {
-            int firstItemIndex = container.indexOfId(itemIds.iterator().next());
+        if (index >= 0 && index < recordFormatList.size() && itemIds.size() > 0) {
+            int firstItemIndex = recordFormatList.indexOf(itemIds.iterator().next());
             if (index != firstItemIndex) {
                 for (RecordFormat itemId : itemIds) {
-                    boolean movingUp = index < container.indexOfId(itemId);
-                    container.removeItem(itemId);
-                    container.addItemAt(index, itemId);
+                    boolean movingUp = index < recordFormatList.indexOf(itemId);
+                    recordFormatList.remove(itemId);
+                    recordFormatList.add(index, itemId);
                     if (movingUp) {
                         index++;
                     }
@@ -225,14 +196,14 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
                 calculatePositions();
                 saveOrdinalSettings();
             }
-        table.refreshRowCache();
+            grid.setItems(recordFormatList);
         }
     }
 
     protected void saveOrdinalSettings() {
         String attrName = Sorter.SORTER_ATTRIBUTE_ORDINAL;
         int ordinal = 1;
-        for (RecordFormat record : container.getItemIds()) {
+        for (RecordFormat record : recordFormatList) {
         	if (record.getSortSetting()) {
         		saveSetting(record.getAttributeId(), attrName, String.valueOf(ordinal));
             	ordinal++;
@@ -245,7 +216,7 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
     protected void saveSortSettings() {
         String attrName = Sorter.ATTRIBUTE_SORTER_ENABLED;
 
-        for (RecordFormat record : container.getItemIds()) {
+        for (RecordFormat record : recordFormatList) {
             saveSetting(record.getAttributeId(), attrName, String.valueOf(record.getSortSetting()));
         }
     }
@@ -268,16 +239,16 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
     	int lastEntitySortIndex = -1;
     	int lastItemIndex = -1;
     	int lastEntityIndex = -1;
-    	for (RecordFormat record : container.getItemIds()) {
+    	for (RecordFormat record : recordFormatList) {
     		if (isSelected && record.getSortSetting() && !attributeId.equals(record.getAttributeId())) {
     			lastSortItemIndex++;
     			if (entityId.equals(record.getEntityId())) {
-	    			lastEntitySortIndex = container.indexOfId(record);
+	    			lastEntitySortIndex = recordFormatList.indexOf(record);
     			}
     		}
 			lastItemIndex++;
 			if (!record.getSortSetting() && entityId.equals(record.getEntityId()) && !attributeId.equals(record.getAttributeId())) {
-				lastEntityIndex = container.indexOfId(record);
+				lastEntityIndex = recordFormatList.indexOf(record);
 			}
     	}
     	
@@ -318,10 +289,10 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
             if (selectedSortRecords.size() > 0 && selectedSortRecords != null) {
             	// loop through list of selected records to see if moving an attribute into another entity
             	// add the remaining attributes to keep the entity as a whole together o/w just move the attribute within the entity
-            	for (RecordFormat record : container.getItemIds()) {
+            	for (RecordFormat record : recordFormatList) {
             		if (record.getSortSetting()) {
             			if (!selectedEntityId.equals(record.getEntityId())) {
-            				previousEntityLastIndex = container.indexOfId(record);
+            				previousEntityLastIndex = recordFormatList.indexOf(record);
             			} else {
             				break;
             			}
@@ -329,7 +300,7 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
             	}
 
                 RecordFormat firstItem = selectedSortRecords.iterator().next();
-                int index = container.indexOfId(firstItem) - 1;
+                int index = recordFormatList.indexOf(firstItem) - 1;
                 if (index >= 0 && index > previousEntityLastIndex) {
                 	moveItemsTo(selectedSortRecords, index);
                 }
@@ -358,7 +329,7 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
         	
         	if (selectedSortRecords.size() > 0 && selectedSortRecords != null) {
             	int lastSortItemIndex = 0;
-            	for (RecordFormat record : container.getItemIds()) {
+            	for (RecordFormat record : recordFormatList) {
             		if (record.getSortSetting()) {
             			lastSortItemIndex++;
             		}
@@ -366,12 +337,12 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
 
             	// loop through list of selected records to see if moving an attribute into another entity
             	// add the remaining attributes to keep the entity as a whole together o/w just move the attribute within the entity
-            	ListIterator<RecordFormat> allItemsIterator = container.getItemIds().listIterator(container.getItemIds().size());
+            	ListIterator<RecordFormat> allItemsIterator = recordFormatList.listIterator(recordFormatList.size());
                 while (allItemsIterator.hasPrevious()) {
                 	RecordFormat record = allItemsIterator.previous();
             		if (record.getSortSetting()) {
             			if (!selectedEntityId.equals(record.getEntityId())) {
-            				nextEntityFirstIndex = container.indexOfId(record);
+            				nextEntityFirstIndex = recordFormatList.indexOf(record);
             			} else {
             				break;
             			}
@@ -384,7 +355,7 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
                 	lastSortItem = iter.next();
                 }
                 
-                int index = container.indexOfId(lastSortItem) + 1;
+                int index = recordFormatList.indexOf(lastSortItem) + 1;
                 if (index < lastSortItemIndex && (index < nextEntityFirstIndex || nextEntityFirstIndex == -1)) {
                 	moveItemsTo(selectedSortRecords, index);
                 }
@@ -414,10 +385,10 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
         	if (selectedSortRecords.size() > 0 && selectedSortRecords != null) {
 	        	// loop through list of selected records to see if moving an attribute into another entity
 	        	// add the remaining attributes to keep the entity as a whole together o/w just move the attribute within the entity
-	        	for (RecordFormat record : container.getItemIds()) {
+	        	for (RecordFormat record : recordFormatList) {
 	        		if (record.getSortSetting()) {
 	        			if (!selectedEntityId.equals(record.getEntityId())) {
-	        				previousEntityLastIndex = container.indexOfId(record);
+	        				previousEntityLastIndex = recordFormatList.indexOf(record);
 	        			} else {
 	        				break;
 	        			}
@@ -455,12 +426,12 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
         	if (selectedSortRecords.size() > 0 && selectedSortRecords != null) {
 	        	// loop through list of selected records to see if moving an attribute into another entity
 	        	// add the remaining attributes to keep the entity as a whole together o/w just move the attribute within the entity
-	        	ListIterator<RecordFormat> allItemsIterator = container.getItemIds().listIterator(container.getItemIds().size());
+	        	ListIterator<RecordFormat> allItemsIterator = recordFormatList.listIterator(recordFormatList.size());
 	            while (allItemsIterator.hasPrevious()) {
 	            	RecordFormat record = allItemsIterator.previous();
 	        		if (record.getSortSetting()) {
 	        			if (!selectedEntityId.equals(record.getEntityId())) {
-	        				nextEntityFirstIndex = container.indexOfId(record);
+	        				nextEntityFirstIndex = recordFormatList.indexOf(record);
 	        			} else {
 	        				break;
 	        			}
@@ -468,14 +439,14 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
 	            }
 	            
 	        	RecordFormat lastSortItem = null;
-	        	for (RecordFormat record : container.getItemIds()) {
+	        	for (RecordFormat record : recordFormatList) {
 	        		if (record.getSortSetting()) {
 	        			lastSortItem = record;
 	        		}
 	        	}
 	        	
 	        	if (nextEntityFirstIndex == -1) {
-		            int index = container.indexOfId(lastSortItem);
+		            int index = recordFormatList.indexOf(lastSortItem);
 	        		moveItemsTo(selectedSortRecords, index);
 	        	} else {
 		        	moveItemsTo(selectedSortRecords, nextEntityFirstIndex - 1);
@@ -484,98 +455,44 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
         }
     }
 
-    class TableDropHandler implements DropHandler {
-        public void drop(DragAndDropEvent event) {
-            AbstractSelectTargetDetails targetDetails = (AbstractSelectTargetDetails) event.getTargetDetails();
-            Transferable transferable = event.getTransferable();
-            if (transferable.getSourceComponent() == table) {
-                RecordFormat target = (RecordFormat) targetDetails.getItemIdOver();
-                moveItemsTo(getSelectedItems(), container.indexOfId(target));
-            }
-        }
+    protected CheckBox createAttributeCheckBox(final RecordFormat record, final String key) {
+        final CheckBox checkBox = new CheckBox();
+        checkBox.addValueChangeListener(new ValueChangeListener<Boolean>() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public void valueChange(ValueChangeEvent<Boolean> event) {
+                ComponentAttribSetting setting = component.getSingleAttributeSetting(record.getAttributeId(), key);
 
-        public AcceptCriterion getAcceptCriterion() {
-            return AcceptAll.get();
-        }
-    }
-
-    class EditFieldFactory implements TableFieldFactory {
-        public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId,
-                com.vaadin.ui.Component uiContext) {
-            final RecordFormat record = (RecordFormat) itemId;
-            Field<?> field = null;
-            if (propertyId.equals("sortSetting")) {
-                return createAttributeCheckBox(record, Sorter.ATTRIBUTE_SORTER_ENABLED);
-            }
-
-            RecordFormat selected = getSelectedItem();
-            if (selected == itemId && record.getFocusField() != null) {
-                record.getFocusField().focus();
-            }
-            return field;
-        }
-
-        protected CheckBox createAttributeCheckBox(final RecordFormat record, final String key) {
-            final CheckBox checkBox = new CheckBox();
-            checkBox.setImmediate(true);
-            checkBox.addValueChangeListener(new ValueChangeListener() {
-                private static final long serialVersionUID = 1L;
-                @Override
-                public void valueChange(ValueChangeEvent event) {
-                    ComponentAttribSetting setting = component.getSingleAttributeSetting(record.getAttributeId(), key);
-
-                    String oldValue = setting == null ? Boolean.FALSE.toString() : setting.getValue();
-                    if (setting == null) {
-                        setting = new ComponentAttribSetting(record.getAttributeId(), component.getId(), key, Boolean.FALSE.toString());
-                        component.addAttributeSetting(setting);
-                    }
-                    setting.setValue(checkBox.getValue().toString());
-                    if (!oldValue.equals(setting.getValue())) {
-                        context.getConfigurationService().save(setting);   
-                        Set<RecordFormat> attributes = new HashSet<>();
-                        attributes.add(record);
-                        
-                        if (oldValue.equals(Boolean.FALSE.toString())) { 
-	                        moveItemsTo(attributes, getLastSortItemIndex(record.getEntityId(), record.getAttributeId(), true) + 1);
-                        } else {
-                        	moveItemsTo(attributes, getLastSortItemIndex(record.getEntityId(), record.getAttributeId(), false));
-                        }
-                    }
-
-                    calculatePositions();
-                    saveOrdinalSettings();
-                    saveSortSettings();
+                String oldValue = setting == null ? Boolean.FALSE.toString() : setting.getValue();
+                if (setting == null) {
+                    setting = new ComponentAttribSetting(record.getAttributeId(), component.getId(), key, Boolean.FALSE.toString());
+                    component.addAttributeSetting(setting);
                 }
-            });
-            return checkBox;
-        }
-        
-        protected void focusOn(RecordFormat record, Object propertyId) {
-            record.setFocusFieldId(propertyId);
-            for (Object itemId : getSelectedItems()) {
-                table.unselect(itemId);
-            }
-            table.select(record);
-        }
-    }
+                setting.setValue(checkBox.getValue().toString());
+                if (!oldValue.equals(setting.getValue())) {
+                    context.getConfigurationService().save(setting);   
+                    Set<RecordFormat> attributes = new HashSet<>();
+                    attributes.add(record);
+                    
+                    if (oldValue.equals(Boolean.FALSE.toString())) { 
+                        moveItemsTo(attributes, getLastSortItemIndex(record.getEntityId(), record.getAttributeId(), true) + 1);
+                    } else {
+                    	moveItemsTo(attributes, getLastSortItemIndex(record.getEntityId(), record.getAttributeId(), false));
+                    }
+                }
 
-    class TableCellStyleGenerator implements CellStyleGenerator {
-        public String getStyle(Table source, Object itemId, Object propertyId) {
-            if (propertyId != null && selectedItemIds != null && selectedItemIds.contains(itemId)) {
-                return "highlight";
+                calculatePositions();
+                saveOrdinalSettings();
+                saveSortSettings();
             }
-            return null;
-        }
+        });
+        return checkBox;
     }
 
     public class RecordFormat {
         ModelEntity modelEntity;
 
         ModelAttrib modelAttribute;
-
-        Map<Object, Field<?>> fields = new HashMap<Object, Field<?>>();
-
-        Object focusFieldId;
 
         boolean sortSetting = false;
 
@@ -645,22 +562,6 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
 
         public void setSortSetting(boolean sortSetting) {
             this.sortSetting = sortSetting;
-        }
-
-        public void addField(Object id, Field<?> field) {
-            fields.put(id, field);
-        }
-
-        public void setFocusFieldId(Object id) {
-            this.focusFieldId = id;
-        }
-
-        public Field<?> getFocusField() {
-            Field<?> field = fields.get(focusFieldId);
-            if (field == null) {
-                field = fields.get("width");
-            }
-            return field;
         }
 
         public int getOrdinalSetting() {

@@ -21,8 +21,10 @@
 package org.jumpmind.metl.ui.views.design;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
@@ -31,27 +33,28 @@ import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.ExcelFileReader;
 
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.filter.And;
-import com.vaadin.data.util.filter.Compare;
-import com.vaadin.data.util.filter.IsNull;
-import com.vaadin.data.util.filter.Not;
-import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.HeaderCell;
-import com.vaadin.ui.Grid.HeaderRow;
+import com.vaadin.ui.Grid.Column;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.components.grid.HeaderCell;
+import com.vaadin.ui.components.grid.HeaderRow;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class EditExcelReaderPanel extends AbstractComponentEditPanel {
 
     private static final long serialVersionUID = 1L;
+    
+    List<Record> recordList = new ArrayList<Record>();
 
-    Grid grid;
-
-    BeanItemContainer<Record> container;    
+    Grid<Record> grid; 
+    
+    TextField entityFilterField = new TextField();
+    
+    TextField attributeFilterField = new TextField();
+    
+    CheckBox filterCheckBox = new CheckBox("Show Set Only");
     
     @Override
     protected void buildUI() {
@@ -60,64 +63,50 @@ public class EditExcelReaderPanel extends AbstractComponentEditPanel {
         refresh();
     }
     
-    protected void buildGrid() {
-        grid = new Grid();
+    @SuppressWarnings("unchecked")
+	protected void buildGrid() {
+        grid = new Grid<Record>();
         grid.setSelectionMode(SelectionMode.NONE);
         grid.setSizeFull();
-        grid.setEditorEnabled(!readOnly);
-        container = new BeanItemContainer<Record>(Record.class);
-        grid.setContainerDataSource(container);
         grid.setColumnOrder("entityName", "attributeName", "excelMapping");
+        grid.addColumn(Record::getEntityName).setId("entityName").setCaption("Entity Name");
+        grid.addColumn(Record::getAttributeName).setId("attributeName").setCaption("Attribute Name");
+        grid.addColumn(Record::getExcelMapping).setId("excelMapping").setCaption("Excel Mapping").setExpandRatio(1);
         HeaderRow filterRow = grid.appendHeaderRow();
-        addColumn("entityName", filterRow);
-        addColumn("attributeName", filterRow);
-        TextField tfExcelMapping = new TextField();
-        tfExcelMapping.addBlurListener(e->saveExcelMappingSettings());
-        tfExcelMapping.setWidth(100, Unit.PERCENTAGE);
-        tfExcelMapping.setImmediate(true);
-        grid.getColumn("excelMapping").setEditorField(tfExcelMapping).setExpandRatio(1);
+        addColumn("entityName", filterRow, entityFilterField);
+        addColumn("attributeName", filterRow, attributeFilterField);
+        if (!readOnly) {
+            TextField tfExcelMapping = new TextField();
+            tfExcelMapping.addBlurListener(e->saveExcelMappingSettings());
+            tfExcelMapping.setWidth(100, Unit.PERCENTAGE);
+            ((Column<Record, String>) grid.getColumn("excelMapping")).setEditorComponent(tfExcelMapping, Record::setExcelMapping);
+            grid.getEditor().setEnabled(true).setBuffered(false);
+        }
         addShowPopulatedFilter("excelMapping", filterRow);
-        grid.setEditorBuffered(false);
         addComponent(grid);
         setExpandRatio(grid, 1);
     }
 
-    protected void addColumn(String propertyId, HeaderRow filterRow) {
+    protected void addColumn(String propertyId, HeaderRow filterRow, TextField filterField) {
         grid.getColumn(propertyId).setEditable(false);
         HeaderCell cell = filterRow.getCell(propertyId);
-        TextField filterField = new TextField();
-        filterField.setInputPrompt("Filter");
-        filterField.setImmediate(true);
+        filterField.setPlaceholder("Filter");
         filterField.addStyleName(ValoTheme.TEXTFIELD_TINY);
         filterField.setWidth(100, Unit.PERCENTAGE);
-        filterField.addTextChangeListener(change -> {
-            container.removeContainerFilters(propertyId);
-            if (!change.getText().isEmpty()) {
-                container.addContainerFilter(
-                        new SimpleStringFilter(propertyId, change.getText(), true, false));
-            }
-        });
+        filterField.addValueChangeListener(change -> refreshGrid());
         cell.setComponent(filterField);
     }    
     
     protected void addShowPopulatedFilter(String propertyId, HeaderRow filterRow) {
         HeaderCell cell = filterRow.getCell(propertyId);
-        CheckBox group = new CheckBox("Show Set Only");
-        group.setImmediate(true);
-        group.addValueChangeListener(l->{
-            container.removeContainerFilters(propertyId);
-            if (group.getValue()) {
-                container.addContainerFilter(new And(new Not(new Compare.Equal(propertyId,"")), new Not(new IsNull(propertyId))));
-            }
-        });
-        group.addStyleName(ValoTheme.CHECKBOX_SMALL);
-        cell.setComponent(group);
+        filterCheckBox.addValueChangeListener(l->refreshGrid());
+        filterCheckBox.addStyleName(ValoTheme.CHECKBOX_SMALL);
+        cell.setComponent(filterCheckBox);
         
     }
 
     protected void saveExcelMappingSettings() {
-        for (Object obj : container.getItemIds()) {
-            Record record = (Record) obj;
+        for (Record record : recordList) {
             if (record.modelAttribute != null) {
                 saveAttributeSetting(record.modelAttribute.getId(),
                         ExcelFileReader.SETTING_EXCEL_MAPPING,
@@ -210,9 +199,29 @@ public class EditExcelReaderPanel extends AbstractComponentEditPanel {
 
             for (ModelEntity entity : model.getModelEntities()) {
                 for (ModelAttrib attr : entity.getModelAttributes()) {
-                    container.addItem(new Record(entity, attr));
+                    recordList.add(new Record(entity, attr));
                 }
             }
         }
+        refreshGrid();
+    }
+    
+    protected void refreshGrid() {
+    	List<Record> filteredRecordList = new ArrayList<Record>();
+    	for (Record record : recordList) {
+    		if (!isFilteredOut(record)) {
+    			filteredRecordList.add(record);
+    		}
+    	}
+    	grid.setItems(filteredRecordList);
+    }
+    
+    protected boolean isFilteredOut(Record record) {
+		boolean validEntity = StringUtils.isBlank(entityFilterField.getValue()) || (record.getEntityName() != null
+				&& record.getEntityName().toLowerCase().contains(entityFilterField.getValue().toLowerCase()));
+		boolean validAttribute = StringUtils.isBlank(attributeFilterField.getValue()) || (record.getAttributeName() != null
+				&& record.getAttributeName().toLowerCase().contains(attributeFilterField.getValue().toLowerCase()));
+    	boolean validExcelMapping = StringUtils.isNotBlank(record.getExcelMapping());
+    	return !validEntity || !validAttribute || !validExcelMapping;
     }
 }

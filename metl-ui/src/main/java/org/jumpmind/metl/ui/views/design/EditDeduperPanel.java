@@ -38,40 +38,26 @@ import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UiUtils;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.Transferable;
-import com.vaadin.event.dd.DragAndDropEvent;
-import com.vaadin.event.dd.DropHandler;
-import com.vaadin.event.dd.acceptcriteria.AcceptAll;
-import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.AbstractSelect.AbstractSelectTargetDetails;
+import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.HasValue.ValueChangeListener;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.CellStyleGenerator;
-import com.vaadin.ui.Table.ColumnGenerator;
-import com.vaadin.ui.Table.TableDragMode;
-import com.vaadin.ui.TableFieldFactory;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.components.grid.GridRowDragger;
 
-@SuppressWarnings("serial")
 public class EditDeduperPanel extends AbstractComponentEditPanel {
 
     private static final long serialVersionUID = 1L;
     
-    Table entityTable = new Table();
-    BeanItemContainer<EntitySettings> entitySettingsContainer = new BeanItemContainer<EntitySettings>(EntitySettings.class);
+    Grid<EntitySettings> entityGrid = new Grid<EntitySettings>();
     List<EntitySettings> entitySettings = new ArrayList<EntitySettings>();
     
-    Table attributeTable = new Table();
-    BeanItemContainer<AttributeSettings> attributeSettingsContainer = new BeanItemContainer<AttributeSettings>(AttributeSettings.class);
+    Grid<AttributeSettings> attributeGrid = new Grid<AttributeSettings>();
     List<AttributeSettings> attributeSettings = new ArrayList<AttributeSettings>();
 
     TextField entityFilterField;
@@ -84,26 +70,25 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
     
     protected void buildUI() {
     	buildButtonBar();
-    	buildEntityTable();
+    	buildEntityGrid();
     	fillEntityContainer();
-        updateEntityTable(null);
+        updateEntityGrid(null);
         buildAttributeWindow();
     }
 
     protected void buildButtonBar() {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
-        editButton = buttonBar.addButton("Edit Columns", FontAwesome.EDIT);
+        editButton = buttonBar.addButton("Edit Columns", VaadinIcons.EDIT);
         editButton.addClickListener(new EditButtonClickListener());
         entityFilterField = buttonBar.addFilter();
-        entityFilterField.addTextChangeListener(event -> updateEntityTable(event.getText()));
+        entityFilterField.addValueChangeListener(event -> updateEntityGrid(event.getValue()));
         
         addComponent(buttonBar);    	
     }
 
-    @SuppressWarnings("unchecked")
     protected Set<EntitySettings> getSelectedItems() {
-        return (Set<EntitySettings>) entityTable.getValue();
+        return entityGrid.getSelectedItems();
     }
     
     protected EntitySettings getSelectedItem() {
@@ -119,50 +104,24 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
         public void buttonClick(ClickEvent event) {
             if (getSelectedItem() != null) {
             	refreshAttributeContainer((EntitySettings) getSelectedItem());
-            	updateAttributeTable();
+            	updateAttributeGrid();
                 attributeWindow.show();
             }
         }   
     }    
     
-    protected void buildEntityTable() {
-        entityTable.setContainerDataSource(entitySettingsContainer);
-        entityTable.setSelectable(true);
-        entityTable.setSortEnabled(false);
-        entityTable.setImmediate(true);
-        entityTable.setSizeFull();
-        entityTable.addGeneratedColumn("entityName", new ColumnGenerator() {
-            private static final long serialVersionUID = 1L;
-            @Override
-            public Object generateCell(Table source, Object itemId, Object columnId) {
-                EntitySettings setting = (EntitySettings) itemId;
-                RelationalModel model = (RelationalModel) component.getInputModel();
-                ModelEntity entity = model.getEntityById(setting.getEntityId());
-                return UiUtils.getName(entityFilterField.getValue(), entity.getName());
-            }
-        });
-        entityTable.setVisibleColumns(new Object[] { "entityName" });
-        entityTable.setColumnWidth("entityName", 250);
-        entityTable.setColumnHeaders(new String[] { "Entity Name" });
-        entityTable.setColumnExpandRatio("entityName", 1);
-        entityTable.setTableFieldFactory(new EditEntityFieldFactory());
-        entityTable.setEditable(true);
-        entityTable.setMultiSelect(true);
-        entityTable.setDragMode(TableDragMode.MULTIROW);
-        entityTable.setDropHandler(new TableDropHandler());
-        entityTable.setCellStyleGenerator(new TableCellStyleGenerator());
-        addComponent(entityTable);        
-        setExpandRatio(entityTable, 1.0f);
+    protected void buildEntityGrid() {
+        entityGrid.setSizeFull();
+        entityGrid.addColumn(setting -> {
+            RelationalModel model = (RelationalModel) component.getInputModel();
+            ModelEntity entity = model.getEntityById(setting.getEntityId());
+            return UiUtils.getName(entityFilterField.getValue(), entity.getName());
+        }).setCaption("Entity Name").setWidth(250).setExpandRatio(1).setSortable(false);
+        entityGrid.setSelectionMode(SelectionMode.MULTI);
+        new GridRowDragger<EntitySettings>(entityGrid);
+        addComponent(entityGrid);        
+        setExpandRatio(entityGrid, 1.0f);
     }    
-    
-    class TableCellStyleGenerator implements CellStyleGenerator {
-        public String getStyle(Table source, Object itemId, Object propertyId) {
-            if (propertyId != null && selectedItemIds != null && selectedItemIds.contains(itemId)) {
-                return "highlight";
-            }
-            return null;
-        }
-    }
 
     protected void fillEntityContainer() {  	
         if (component.getInputModel() != null) {
@@ -173,33 +132,18 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
         }    	
     }
     
-    protected void updateEntityTable(String filter) {
+    protected void updateEntityGrid(String filter) {
         filter = filter != null ? filter.toLowerCase() : null;
         entityFilterField.setValue(filter);
-        entityTable.removeAllItems();
+        List<EntitySettings> filteredEntitySettings = new ArrayList<EntitySettings>();
         for (EntitySettings entitySetting : entitySettings) {
             RelationalModel model = (RelationalModel) component.getInputModel();
             ModelEntity entity = model.getEntityById(entitySetting.getEntityId());
             if (isBlank(filter) || entity.getName().toLowerCase().contains(filter)) {
-            	entityTable.addItem(entitySetting);
+            	filteredEntitySettings.add(entitySetting);
             }
         }
-    }
-    
-    protected void moveItemsTo(Set<EntitySettings> itemIds, int index) {
-        if (index >= 0 && index < entitySettingsContainer.getItemIds().size() && itemIds.size() > 0) {
-            int firstItemIndex = entitySettingsContainer.indexOfId(itemIds.iterator().next());
-            if (index != firstItemIndex) {
-                for (EntitySettings itemId : itemIds) {
-                    boolean movingUp = index < entitySettingsContainer.indexOfId(itemId);
-                    entitySettingsContainer.removeItem(itemId);
-                    entitySettingsContainer.addItemAt(index, itemId);
-                    if (movingUp) {
-                        index++;
-                    }
-                }
-            }
-        }
+        entityGrid.setItems(filteredEntitySettings);
     }
          
     protected void saveSetting(String entityId, String name, String value) {
@@ -212,14 +156,6 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
         } else if (!StringUtils.equals(setting.getValue(), value)) {
             setting.setValue(value);
             context.getConfigurationService().save(setting);
-        }
-    }
-    
-    class EditEntityFieldFactory implements TableFieldFactory {
-        private static final long serialVersionUID = 1L;
-        public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId,
-                com.vaadin.ui.Component uiContext) {
-            return null;
         }
     }
 
@@ -267,34 +203,21 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
 			setWidth(800f, Unit.PIXELS);
 			setHeight(600f, Unit.PIXELS);
 			content.setMargin(true);
-			buildAttributeTable();
+			buildAttributeGrid();
 			addComponent(buildButtonFooter(buildCloseButton()));
 		}
     	
-        private void buildAttributeTable() {
+        private void buildAttributeGrid() {
      	   
-     	   attributeTable.setContainerDataSource(attributeSettingsContainer);
-     	   attributeTable.setSelectable(true);
-     	   attributeTable.setImmediate(true);
-     	   attributeTable.setSortEnabled(false);
-     	   attributeTable.setSizeFull();
-     	   attributeTable.addGeneratedColumn("attributeName", new ColumnGenerator() {
-     	      private static final long serialVersionUID = 1L;
-                @Override
-                public Object generateCell(Table source, Object itemId, Object columnId) {
-             	   AttributeSettings setting = (AttributeSettings) itemId;
-                    RelationalModel model = (RelationalModel) component.getInputModel();
-                    ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
-                    return UiUtils.getName(entityFilterField.getValue(), attribute.getName());
-                }
-            });
-     	   attributeTable.setVisibleColumns(new Object[] { "attributeName", "dedupeEnabled" });
-     	   attributeTable.setColumnWidth("attributeName", 250);
-     	   attributeTable.setColumnHeaders(new String[] { "Attribute Name", "Dedupe Enabled" });
-     	   attributeTable.setColumnExpandRatio("attributeName", 1);
-     	   attributeTable.setTableFieldFactory(new EditAttributeFieldFactory());
-     	   attributeTable.setEditable(true);
-           addComponent(attributeTable, 1);
+     	   attributeGrid.setSizeFull();
+     	   attributeGrid.addColumn(setting -> {
+               RelationalModel model = (RelationalModel) component.getInputModel();
+               ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
+               return UiUtils.getName(entityFilterField.getValue(), attribute.getName());
+     	   }).setCaption("Attribute Name").setWidth(250).setExpandRatio(1).setSortable(false);
+           attributeGrid.addComponentColumn(setting -> createAttributeCheckBox(setting, Deduper.ATTRIBUTE_DEDUPE_ENABLED))
+                   .setCaption("Dedupe Enabled").setSortable(false);
+           addComponent(attributeGrid, 1);
             
         }
     }
@@ -311,33 +234,16 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
   	   }
      }
 
-    protected void updateAttributeTable() {
-        attributeTable.removeAllItems();
-        for (AttributeSettings attributeSetting : attributeSettings) {
-            attributeTable.addItem(attributeSetting);
-        }
+    protected void updateAttributeGrid() {
+        attributeGrid.setItems(attributeSettings);
     }    
-    
-    class EditAttributeFieldFactory implements TableFieldFactory {
-        private static final long serialVersionUID = 1L;
-        public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId,
-                com.vaadin.ui.Component uiContext) {
-            final AttributeSettings settings = (AttributeSettings) itemId;
-            if (propertyId.equals("dedupeEnabled")) {
-                return createAttributeCheckBox(settings, Deduper.ATTRIBUTE_DEDUPE_ENABLED);
-            } else {
-                return null;
-            }
-        }
-    }
     
     protected CheckBox createAttributeCheckBox(final AttributeSettings settings, final String key) {
         final CheckBox checkBox = new CheckBox();
-        checkBox.setImmediate(true);
-        checkBox.addValueChangeListener(new ValueChangeListener() {
+        checkBox.addValueChangeListener(new ValueChangeListener<Boolean>() {
             private static final long serialVersionUID = 1L;
             @Override
-            public void valueChange(ValueChangeEvent event) {
+            public void valueChange(ValueChangeEvent<Boolean> event) {
                 ComponentAttribSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(), key);
 
                 String oldValue = setting == null ? Boolean.FALSE.toString() : setting.getValue();
@@ -399,20 +305,5 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
                 return super.equals(obj);
             }
         }   
-    }
-    
-    class TableDropHandler implements DropHandler {
-        public void drop(DragAndDropEvent event) {
-            AbstractSelectTargetDetails targetDetails = (AbstractSelectTargetDetails) event.getTargetDetails();
-            Transferable transferable = event.getTransferable();
-            if (transferable.getSourceComponent() == entityTable) {
-                EntitySettings target = (EntitySettings) targetDetails.getItemIdOver();
-                moveItemsTo(getSelectedItems(), entitySettingsContainer.indexOfId(target));
-            }
-        }
-
-        public AcceptCriterion getAcceptCriterion() {
-            return AcceptAll.get();
-        }
     }
 }

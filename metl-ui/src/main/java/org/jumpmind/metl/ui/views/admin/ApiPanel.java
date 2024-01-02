@@ -26,16 +26,16 @@ import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.ExternalResource;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.ui.BrowserFrame;
 
 @UiComponent
 @Scope(value = "ui")
 @Order(400)
-@AdminMenuLink(name = "REST", id = "REST", icon = FontAwesome.WRENCH)
+@AdminMenuLink(name = "REST", id = "REST", icon = VaadinIcons.WRENCH)
 public class ApiPanel extends AbstractAdminPanel {
 
     final Log logger = LogFactory.getLog(getClass());

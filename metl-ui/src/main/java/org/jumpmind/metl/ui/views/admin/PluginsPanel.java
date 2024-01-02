@@ -36,18 +36,18 @@ import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
-import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Table;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.Grid.SelectionMode;
 
 @SuppressWarnings("serial")
 @UiComponent
 @Scope(value = "ui")
 @Order(700)
-@AdminMenuLink(name = "Plugins", id = "Plugins", icon = FontAwesome.PUZZLE_PIECE)
+@AdminMenuLink(name = "Plugins", id = "Plugins", icon = VaadinIcons.PUZZLE_PIECE)
 public class PluginsPanel extends AbstractAdminPanel {
 
     Button addButton;
@@ -58,9 +58,7 @@ public class PluginsPanel extends AbstractAdminPanel {
 
     Button moveDownButton;
 
-    BeanItemContainer<Plugin> container;
-
-    Table table;
+    Grid<Plugin> grid;
 
     List<Plugin> plugins;
 
@@ -73,33 +71,28 @@ public class PluginsPanel extends AbstractAdminPanel {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        addButton = buttonBar.addButton("Add", FontAwesome.PLUS);
+        addButton = buttonBar.addButton("Add", VaadinIcons.PLUS);
         addButton.addClickListener(e -> addPlugin());
 
-        moveUpButton = buttonBar.addButton("Move Up", FontAwesome.ARROW_UP, e -> moveUp());
+        moveUpButton = buttonBar.addButton("Move Up", VaadinIcons.ARROW_UP, e -> moveUp());
 
-        moveDownButton = buttonBar.addButton("Move Down", FontAwesome.ARROW_DOWN, e -> moveDown());
+        moveDownButton = buttonBar.addButton("Move Down", VaadinIcons.ARROW_DOWN, e -> moveDown());
 
-        removeButton = buttonBar.addButton("Purge Unused", FontAwesome.TRASH_O, e -> purgeUnused());
+        removeButton = buttonBar.addButton("Purge Unused", VaadinIcons.TRASH, e -> purgeUnused());
 
-        container = new BeanItemContainer<Plugin>(Plugin.class);
+        grid = new Grid<Plugin>();
+        grid.setSizeFull();
+        //grid.setCacheRate(100);
+        grid.setSelectionMode(SelectionMode.MULTI);
 
-        table = new Table();
-        table.setSizeFull();
-        table.setCacheRate(100);
-        table.setImmediate(true);
-        table.setSelectable(true);
-        table.setMultiSelect(true);
-        table.setSortEnabled(false);
+        grid.addColumn(Plugin::getArtifactGroup).setCaption("Group").setSortable(false);
+        grid.addColumn(Plugin::getArtifactName).setCaption("Name").setSortable(false);
+        grid.addColumn(Plugin::getArtifactVersion).setCaption("Version").setSortable(false);
+        grid.addColumn(Plugin::getLastUpdateTime).setCaption("Updated").setWidth(UIConstants.DATETIME_WIDTH_PIXELS).setSortable(false);
+        grid.addSelectionListener(e -> setButtonsEnabled());
 
-        table.setContainerDataSource(container);
-        table.setVisibleColumns("artifactGroup", "artifactName", "artifactVersion", "lastUpdateTime");
-        table.setColumnHeaders("Group", "Name", "Version", "Updated");
-        table.setColumnWidth("lastUpdateTime", UIConstants.DATETIME_WIDTH_PIXELS);
-        table.addValueChangeListener(e -> setButtonsEnabled());
-
-        addComponent(table);
-        setExpandRatio(table, 1.0f);
+        addComponent(grid);
+        setExpandRatio(grid, 1.0f);
 
         context.getPluginManager().refresh();
     }
@@ -123,8 +116,6 @@ public class PluginsPanel extends AbstractAdminPanel {
     }
 
     public void refresh() {
-        container.removeAllItems();
-
         plugins = context.getPluginService().findPlugins();
         Collections.sort(plugins, new Comparator<Plugin>() {
             @Override
@@ -132,8 +123,7 @@ public class PluginsPanel extends AbstractAdminPanel {
                 return new Integer(o1.getLoadOrder()).compareTo(new Integer(o2.getLoadOrder()));
             }
         });
-        container.addAll(plugins);
-        table.sort();
+        grid.setItems(plugins);
         setButtonsEnabled();
     }
 
@@ -143,19 +133,18 @@ public class PluginsPanel extends AbstractAdminPanel {
         moveDownButton.setEnabled(enabled);
     }
 
-    @SuppressWarnings("unchecked")
     protected Set<Plugin> getSelectedItems() {
-        return (Set<Plugin>) table.getValue();
+        return grid.getSelectedItems();
     }
 
     protected void moveItemsTo(Set<Plugin> itemIds, int index) {
-        if (index >= 0 && index < container.getItemIds().size() && itemIds.size() > 0) {
-            int firstItemIndex = container.indexOfId(itemIds.iterator().next());
+        if (index >= 0 && index < plugins.size() && itemIds.size() > 0) {
+            int firstItemIndex = plugins.indexOf(itemIds.iterator().next());
             if (index != firstItemIndex) {
                 for (Plugin itemId : itemIds) {
-                    boolean movingUp = index < container.indexOfId(itemId);
-                    container.removeItem(itemId);
-                    container.addItemAt(index, itemId);
+                    boolean movingUp = index < plugins.indexOf(itemId);
+                    plugins.remove(itemId);
+                    plugins.add(index, itemId);
                     if (movingUp) {
                         index++;
                     }
@@ -168,7 +157,6 @@ public class PluginsPanel extends AbstractAdminPanel {
     }
 
     protected void updateLoadOrder() {
-        List<Plugin> plugins = container.getItemIds();
         int loadOrder = 1;
         for (Plugin plugin : plugins) {
             if (loadOrder != plugin.getLoadOrder()) {
@@ -184,7 +172,7 @@ public class PluginsPanel extends AbstractAdminPanel {
         Set<Plugin> itemIds = getSelectedItems();
         if (itemIds.size() > 0 && itemIds != null) {
             Plugin firstItem = itemIds.iterator().next();
-            int index = container.indexOfId(firstItem) - 1;
+            int index = plugins.indexOf(firstItem) - 1;
             moveItemsTo(getSelectedItems(), index);
         }
     }
@@ -197,7 +185,7 @@ public class PluginsPanel extends AbstractAdminPanel {
             while (iter.hasNext()) {
                 lastItem = iter.next();
             }
-            int index = container.indexOfId(lastItem) + 1;
+            int index = plugins.indexOf(lastItem) + 1;
             moveItemsTo(getSelectedItems(), index);
         }
     }

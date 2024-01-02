@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
 
 import org.jumpmind.metl.ui.init.AppUI;
 
-import com.vaadin.server.FontAwesome;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.UI;
 
 @Target({java.lang.annotation.ElementType.TYPE})
@@ -45,6 +45,6 @@ public @interface TopBarLink {
     
     boolean useAsDefault() default false;
     
-    FontAwesome icon() default FontAwesome.ASTERISK;
+    VaadinIcons icon() default VaadinIcons.ASTERISK;
 
 }

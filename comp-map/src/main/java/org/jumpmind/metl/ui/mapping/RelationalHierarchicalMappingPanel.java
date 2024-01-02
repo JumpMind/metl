@@ -38,35 +38,27 @@ import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.runtime.component.Mapping;
 import org.jumpmind.metl.core.runtime.component.RelationalHierarchicalMapping;
 import org.jumpmind.metl.ui.common.ButtonBar;
+import org.jumpmind.metl.ui.common.ExportDialog;
 import org.jumpmind.metl.ui.views.design.AbstractFlowStepAwareComponentEditPanel;
-import org.jumpmind.vaadin.ui.common.ExportDialog;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
-import com.vaadin.server.FontAwesome;
+import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.HasValue.ValueChangeListener;
+import com.vaadin.icons.VaadinIcons;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Field;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.ColumnGenerator;
-import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -89,8 +81,7 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
     
     HierarchicalModel outputModel;
     
-    Table queryMappingTable = new Table();
-    BeanItemContainer<EntitySettings> entitySettingsContainer = new BeanItemContainer<EntitySettings>(EntitySettings.class);
+    Grid<EntitySettings> queryMappingGrid = new Grid<EntitySettings>();
     List<EntitySettings> entitySettings = new ArrayList<EntitySettings>();
 
     EditByQueryMappingWindow queryMappingWindow;
@@ -102,8 +93,8 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
         ButtonBar buttonBar = new ButtonBar();
         if (!readOnly) {
             addComponent(buttonBar);
-            Button byQueryMapButton = buttonBar.addButton("By Query Map", FontAwesome.MAP);
-            removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
+            Button byQueryMapButton = buttonBar.addButton("By Query Map", VaadinIcons.MAP_MARKER);
+            removeButton = buttonBar.addButton("Remove", VaadinIcons.TRASH);
             removeButton.setEnabled(false);
             byQueryMapButton.addClickListener(new ByQueryMapListener());            
             String queryMethod = component.get(RelationalHierarchicalMapping.HIERARCHICAL_QUERY_METHOD,RelationalHierarchicalMapping.QUERY_METHOD_BY_JOIN);
@@ -112,18 +103,20 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
             }
             removeButton.addClickListener(new RemoveListener());
         }
-        buttonBar.addButtonRight("Export", FontAwesome.DOWNLOAD, (e)->export());
+        buttonBar.addButtonRight("Export", VaadinIcons.DOWNLOAD, (e)->export());
 
         HorizontalLayout titleHeader = new HorizontalLayout();
         titleHeader.setSpacing(true);
         titleHeader.setMargin(new MarginInfo(false, true, false, true));
         titleHeader.setWidth(100f, Unit.PERCENTAGE);
-        titleHeader.addComponent(
-                new Label("<b>Input Model:</b> &nbsp;" + (component.getInputModel() != null ? component.getInputModel().getName() : "?"),
-                        ContentMode.HTML));
-        titleHeader.addComponent(
-                new Label("<b>Output Model:</b> &nbsp;" + (component.getOutputModel() != null ? component.getOutputModel().getName() : "?"),
-                        ContentMode.HTML));
+		Label inputModelLabel = new Label("<b>Input Model:</b> &nbsp;"
+				+ (component.getInputModel() != null ? component.getInputModel().getName() : "?"));
+		inputModelLabel.setContentMode(ContentMode.HTML);
+        titleHeader.addComponent(inputModelLabel);
+		Label outputModelLabel = new Label("<b>Output Model:</b> &nbsp;"
+				+ (component.getOutputModel() != null ? component.getOutputModel().getName() : "?"));
+		outputModelLabel.setContentMode(ContentMode.HTML);
+        titleHeader.addComponent(outputModelLabel);
         addComponent(titleHeader);
 
         HorizontalLayout filterHeader = new HorizontalLayout();
@@ -142,13 +135,12 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
 
         srcTextFilter = new TextField();
         srcTextFilter.setWidth(20, Unit.EM);
-        srcTextFilter.setInputPrompt("Filter");
+        srcTextFilter.setPlaceholder("Filter");
         srcTextFilter.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
-        srcTextFilter.setIcon(FontAwesome.SEARCH);
-        srcTextFilter.setImmediate(true);
-        srcTextFilter.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        srcTextFilter.setTextChangeTimeout(200);
-        srcTextFilter.addTextChangeListener(new FilterInputTextListener());
+        srcTextFilter.setIcon(VaadinIcons.SEARCH);
+        srcTextFilter.setValueChangeMode(ValueChangeMode.LAZY);
+        srcTextFilter.setValueChangeTimeout(200);
+        srcTextFilter.addValueChangeListener(new FilterInputTextListener());
         srcFilterHeader.addComponent(srcTextFilter);
 
         srcMapFilter = new CheckBox("Mapped Only");
@@ -157,13 +149,12 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
 
         dstTextFilter = new TextField();
         dstTextFilter.setWidth(20, Unit.EM);
-        dstTextFilter.setInputPrompt("Filter");
+        dstTextFilter.setPlaceholder("Filter");
         dstTextFilter.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
-        dstTextFilter.setIcon(FontAwesome.SEARCH);
-        dstTextFilter.setImmediate(true);
-        dstTextFilter.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        dstTextFilter.setTextChangeTimeout(200);
-        dstTextFilter.addTextChangeListener(new FilterOutputTextListener());
+        dstTextFilter.setIcon(VaadinIcons.SEARCH);
+        dstTextFilter.setValueChangeMode(ValueChangeMode.LAZY);
+        dstTextFilter.setValueChangeTimeout(200);
+        dstTextFilter.addValueChangeListener(new FilterOutputTextListener());
         dstFilterHeader.addComponent(dstTextFilter);
 
         dstMapFilter = new CheckBox("Mapped Only");
@@ -173,7 +164,7 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
         Panel panel = new Panel();
         VerticalLayout vlay = new VerticalLayout();
         vlay.setSizeFull();
-        diagram = new MappingDiagram(context, component, readOnly);
+        diagram = new MappingDiagram(context, component);
         diagram.setSizeFull();
         vlay.addComponent(diagram);
         panel.setContent(vlay);
@@ -229,10 +220,10 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
     }
 
     protected void export() {
-        Table table = new Table();
-        table.addContainerProperty("Source Entity", String.class, null);
-        table.addContainerProperty("Source Attribute",  String.class, null);
-        table.addContainerProperty("Destination Schema Object", String.class, null);
+        Grid<Object> grid = new Grid<Object>();
+        grid.addColumn(item -> "").setCaption("Source Entity");
+        grid.addColumn(item -> "").setCaption("Source Attribute");
+        grid.addColumn(item -> "").setCaption("Destination Schema Object");
         
         int itemId = 0;
         for (ComponentAttribSetting setting : component.getAttributeSettings()) {
@@ -246,9 +237,7 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
             }
         }
         
-        String fileNamePrefix = component.getName().toLowerCase().replace(' ', '-');
-        ExportDialog dialog = new ExportDialog(table, fileNamePrefix, component.getName());
-        UI.getCurrent().addWindow(dialog);
+        ExportDialog.show(context, grid);
     }
 
     class EventListener implements Listener {
@@ -271,33 +260,33 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
         public void buttonClick(ClickEvent event) {
             //TODO:
             refreshEntitySettingsContainer();
-            updateQueryMappingTable();
+            updateQueryMappingGrid();
             queryMappingWindow.show();
 
         }
     }
 
-    class FilterInputTextListener implements TextChangeListener {
-        public void textChange(TextChangeEvent event) {
-            diagram.filterInputModel((String) event.getText(), srcMapFilter.getValue());
+    class FilterInputTextListener implements ValueChangeListener<String> {
+        public void valueChange(ValueChangeEvent<String> event) {
+            diagram.filterInputModel(event.getValue(), srcMapFilter.getValue());
         }
     }
 
-    class FilterOutputTextListener implements TextChangeListener {
-        public void textChange(TextChangeEvent event) {
-            diagram.filterOutputModel((String) event.getText(), dstMapFilter.getValue());
+    class FilterOutputTextListener implements ValueChangeListener<String> {
+        public void valueChange(ValueChangeEvent<String> event) {
+            diagram.filterOutputModel(event.getValue(), dstMapFilter.getValue());
         }
     }
 
-    class FilterSrcMapListener implements ValueChangeListener {
-        public void valueChange(ValueChangeEvent event) {
-            diagram.filterInputModel(srcTextFilter.getValue(), (boolean) event.getProperty().getValue());
+    class FilterSrcMapListener implements ValueChangeListener<Boolean> {
+        public void valueChange(ValueChangeEvent<Boolean> event) {
+            diagram.filterInputModel(srcTextFilter.getValue(), event.getValue());
         }
     }
 
-    class FilterDstMapListener implements ValueChangeListener {
-        public void valueChange(ValueChangeEvent event) {
-            diagram.filterOutputModel(dstTextFilter.getValue(), (boolean) event.getProperty().getValue());
+    class FilterDstMapListener implements ValueChangeListener<Boolean> {
+        public void valueChange(ValueChangeEvent<Boolean> event) {
+            diagram.filterOutputModel(dstTextFilter.getValue(), event.getValue());
         }
     }
     
@@ -309,35 +298,21 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
             setWidth(800f, Unit.PIXELS);
             setHeight(600f, Unit.PIXELS);
             content.setMargin(true);
-            buildQueryMappingTable();
+            buildQueryMappingGrid();
             addComponent(buildButtonFooter(buildCloseButton()));
         }
 
-        private void buildQueryMappingTable() {
+        private void buildQueryMappingGrid() {
 
-            queryMappingTable.setContainerDataSource(entitySettingsContainer);
-            queryMappingTable.setSelectable(true);
-            queryMappingTable.setSortEnabled(false);
-            queryMappingTable.setImmediate(true);
-            queryMappingTable.setSizeFull();
-            queryMappingTable.addGeneratedColumn("entityName", new ColumnGenerator() {
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public Object generateCell(Table source, Object itemId, Object columnId) {
-                    EntitySettings setting = (EntitySettings) itemId;
-                    HierarchicalModel model = (HierarchicalModel) component.getOutputModel();
-                    ModelSchemaObject object = model.getObjectById(setting.getEntityId());
-                    return object.getName();
-                }
-            });
-            queryMappingTable.setVisibleColumns(new Object[] { "entityName", "sourceStep" });
-            queryMappingTable.setColumnWidth("sourceStep", 350);
-            queryMappingTable.setColumnHeaders(new String[] { "Entity Name", "Source Step" });
-            queryMappingTable.setColumnExpandRatio("entityName", 1);
-            queryMappingTable.setTableFieldFactory(new EditSourceStepFieldFactory());
-            queryMappingTable.setEditable(true);
-            addComponent(queryMappingTable, 1);
+            queryMappingGrid.setSizeFull();
+            queryMappingGrid.addColumn(setting -> {
+                HierarchicalModel model = (HierarchicalModel) component.getOutputModel();
+                ModelSchemaObject object = model.getObjectById(setting.getEntityId());
+                return object.getName();
+            }).setCaption("Entiy Name").setExpandRatio(1).setSortable(false);
+            queryMappingGrid.addComponentColumn(setting -> createSourceStepComboBox(setting, RelationalHierarchicalMapping.ENTITY_TO_ORGINATING_STEP_ID))
+                    .setCaption("Source Step").setWidth(350).setSortable(false);
+            addComponent(queryMappingGrid, 1);
         }
     }
     
@@ -380,43 +355,27 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
 //        }        
 
 
-    protected void updateQueryMappingTable() {
-        queryMappingTable.removeAllItems();
-        for (EntitySettings entitySetting : entitySettings) {
-            queryMappingTable.addItem(entitySetting);
-        }
+    protected void updateQueryMappingGrid() {
+        queryMappingGrid.setItems(entitySettings);
     }    
     
-    class EditSourceStepFieldFactory implements TableFieldFactory {
-        private static final long serialVersionUID = 1L;
-
-        public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId,
-                com.vaadin.ui.Component uiContext) {
-            final EntitySettings settings = (EntitySettings) itemId;
-            if (propertyId.equals("sourceStep")) {
-                return createSourceStepComboBox(settings, RelationalHierarchicalMapping.ENTITY_TO_ORGINATING_STEP_ID);
-            } else {
-                return null;
-            }
-        }
-    }
-    
-    protected ComboBox createSourceStepComboBox(final EntitySettings settings, final String key) {
-        final ComboBox comboBox = new ComboBox();
-        comboBox.setImmediate(true);
+    protected ComboBox<FlowStep> createSourceStepComboBox(final EntitySettings settings, final String key) {
+        final ComboBox<FlowStep> comboBox = new ComboBox<FlowStep>();
         flow = context.getConfigurationService().findFlow(flow.getId());
+        List<FlowStep> comboStepList = new ArrayList<FlowStep>();
         List<FlowStepLink> stepLinks = flow.findFlowStepLinksWithTarget(flowStep.getId());
         for (FlowStepLink flowStepLink : stepLinks) {
             FlowStep comboStep = flow.findFlowStepWithId(flowStepLink.getSourceStepId());
-            comboBox.addItem(comboStep.getId());
-            comboBox.setItemCaption(comboStep.getId(), comboStep.getName());
+            comboStepList.add(comboStep);
         }
+        comboBox.setItemCaptionGenerator(item -> item.getName());
+        comboBox.setItems(comboStepList);
 
-        comboBox.addValueChangeListener(new ValueChangeListener() {
+        comboBox.addValueChangeListener(new ValueChangeListener<FlowStep>() {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public void valueChange(ValueChangeEvent event) {
+            public void valueChange(ValueChangeEvent<FlowStep> event) {
                 ComponentEntitySetting setting = component.getSingleEntitySetting(settings.getEntityId(), key);
 
                 String oldValue = setting == null ? null : setting.getValue();
@@ -424,8 +383,8 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
                     setting = new ComponentEntitySetting(settings.getEntityId(), component.getId(), key, null);
                     component.addEntitySetting(setting);
                 }
-                if (comboBox.getValue() != null) {
-                    setting.setValue(comboBox.getValue().toString());
+                if (comboBox.getValue() != null && comboBox.getValue().getId() != null) {
+                    setting.setValue(comboBox.getValue().getId().toString());
                 } else {
                     setting.setValue(null);
                 }

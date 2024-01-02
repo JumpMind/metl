@@ -21,9 +21,7 @@
 package org.jumpmind.metl.ui.common;
 
 
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomField;
@@ -81,37 +79,28 @@ public abstract class ImmediateUpdateTogglePasswordField extends CustomField<Str
         textField.addStyleName("noborder");
         // End Work Around
         
-        passwordField.setImmediate(true);
-        textField.setImmediate(true);
-        passwordField.setNullRepresentation("");
-        textField.setNullRepresentation("");
-        passwordField.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        textField.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        passwordField.setTextChangeTimeout(200);
-        textField.setTextChangeTimeout(200);
-        passwordField.addTextChangeListener(new TextChangeListener() {
+        passwordField.setValueChangeMode(ValueChangeMode.LAZY);
+        textField.setValueChangeMode(ValueChangeMode.LAZY);
+        passwordField.setValueChangeTimeout(200);
+        textField.setValueChangeTimeout(200);
+        passwordField.addValueChangeListener(new ValueChangeListener<String>() {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public void textChange(TextChangeEvent event) {
-                save(event.getText());
+            public void valueChange(ValueChangeEvent<String> event) {
+                save(event.getValue());
             }
         });
-        textField.addTextChangeListener(new TextChangeListener() {
+        textField.addValueChangeListener(new ValueChangeListener<String>() {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public void textChange(TextChangeEvent event) {
-                save(event.getText());
+            public void valueChange(ValueChangeEvent<String> event) {
+                save(event.getValue());
             }
         });
 
         return layout;
-    }
-    
-    @Override
-    public Class<? extends String> getType() {
-        return String.class;
     }
 
     public boolean isToggleAllowed() {
@@ -124,7 +113,16 @@ public abstract class ImmediateUpdateTogglePasswordField extends CustomField<Str
     }
     
     @Override
-    public void setValue(String value) {
+    public String getValue() {
+    	if (button.getCaption().equals(BUTTON_SHOW)) {
+    		return passwordField.getValue();
+    	} else {
+    		return textField.getValue();
+    	}
+    }
+    
+    @Override
+    protected void doSetValue(String value) {
         passwordField.setValue(value);
         textField.setValue(value);
     }

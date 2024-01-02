@@ -35,81 +35,55 @@ import org.jumpmind.metl.core.runtime.component.RdbmsWriter;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UiUtils;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
+import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.HasValue.ValueChangeListener;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.ColumnGenerator;
-import com.vaadin.ui.TableFieldFactory;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.TextField;
 
 @SuppressWarnings("serial")
 public class EditRdbmsWriterPanel extends AbstractComponentEditPanel {
 
-    Table table = new Table();
+    Grid<AttributeSettings> grid = new Grid<AttributeSettings>();
 
     TextField filterField;
 
     List<AttributeSettings> attributeSettings = new ArrayList<AttributeSettings>();
-
-    BeanItemContainer<AttributeSettings> container = new BeanItemContainer<AttributeSettings>(AttributeSettings.class);
 
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
         filterField = buttonBar.addFilter();
-        filterField.addTextChangeListener(new TextChangeListener() {
+        filterField.addValueChangeListener(new ValueChangeListener<String>() {
 
             @Override
-            public void textChange(TextChangeEvent event) {
-                filterField.setValue(event.getText());
-                updateTable(event.getText());
+            public void valueChange(ValueChangeEvent<String> event) {
+                filterField.setValue(event.getValue());
+                updateGrid(event.getValue());
             }
         });
 
         addComponent(buttonBar);
 
-        table.setContainerDataSource(container);
-
-        table.setSelectable(true);
-        table.setSortEnabled(false);
-        table.setImmediate(true);
-        table.setSortEnabled(true);
-        table.setSizeFull();
-        table.addGeneratedColumn("entityName", new ColumnGenerator() {
-
-            @Override
-            public Object generateCell(Table source, Object itemId, Object columnId) {
-                AttributeSettings setting = (AttributeSettings) itemId;
-                RelationalModel model = (RelationalModel) component.getInputModel();
-                ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
-                ModelEntity entity = model.getEntityById(attribute.getEntityId());
-                return UiUtils.getName(filterField.getValue(), entity.getName());
-            }
-        });
-        table.addGeneratedColumn("attributeName", new ColumnGenerator() {
-
-            @Override
-            public Object generateCell(Table source, Object itemId, Object columnId) {
-                AttributeSettings setting = (AttributeSettings) itemId;
-                RelationalModel model = (RelationalModel) component.getInputModel();
-                ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
-                return UiUtils.getName(filterField.getValue(), attribute.getName());
-            }
-        });
-        table.setVisibleColumns(new Object[] { "entityName", "attributeName", "insertEnabled", "updateEnabled" });
-        table.setColumnWidth("entityName", 250);
-        table.setColumnWidth("attributeName", 250);
-        table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Insert Enabled", "Update Enabled" });
-        table.setColumnExpandRatio("value", 1);
-        table.setTableFieldFactory(new EditFieldFactory());
-        table.setEditable(true);
-        addComponent(table);
-        setExpandRatio(table, 1.0f);
+        grid.setSizeFull();
+        grid.addColumn(setting -> {
+            RelationalModel model = (RelationalModel) component.getInputModel();
+            ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
+            ModelEntity entity = model.getEntityById(attribute.getEntityId());
+            return UiUtils.getName(filterField.getValue(), entity.getName());
+        }).setCaption("Entity Name").setWidth(250).setSortable(true);
+        grid.addColumn(setting -> {
+            RelationalModel model = (RelationalModel) component.getInputModel();
+            ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
+            return UiUtils.getName(filterField.getValue(), attribute.getName());
+        }).setCaption("Attribute Name").setWidth(250).setSortable(true);
+        grid.addComponentColumn(setting -> createCheckBox(setting, RdbmsWriter.ATTRIBUTE_INSERT_ENABLED))
+                .setCaption("Insert Enabled").setSortable(true);
+        grid.addComponentColumn(setting -> createCheckBox(setting, RdbmsWriter.ATTRIBUTE_UPDATE_ENABLED))
+                .setCaption("Update Enabled").setSortable(true);
+        addComponent(grid);
+        setExpandRatio(grid, 1.0f);
 
         if (component.getInputModel() != null) {
 
@@ -142,41 +116,26 @@ public class EditRdbmsWriterPanel extends AbstractComponentEditPanel {
             });
         }
 
-        updateTable(null);
+        updateGrid(null);
 
     }
 
-    protected void updateTable(String filter) {
+    protected void updateGrid(String filter) {
         filter = filter != null ? filter.toLowerCase() : null;
-        table.removeAllItems();
+        List<AttributeSettings> filteredAttributeSettings = new ArrayList<AttributeSettings>();
         for (AttributeSettings attributeSetting : attributeSettings) {
             RelationalModel model = (RelationalModel) component.getInputModel();
             ModelAttrib attribute = model.getAttributeById(attributeSetting.getAttributeId());
             ModelEntity entity = model.getEntityById(attribute.getEntityId());
             if (isBlank(filter) || entity.getName().toLowerCase().contains(filter) || attribute.getName().toLowerCase().contains(filter)) {
-                table.addItem(attributeSetting);
+                filteredAttributeSettings.add(attributeSetting);
             }
         }
-    }
-
-    class EditFieldFactory implements TableFieldFactory {
-        public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId,
-                com.vaadin.ui.Component uiContext) {
-            final AttributeSettings settings = (AttributeSettings) itemId;
-
-            if (propertyId.equals("insertEnabled")) {
-                return createCheckBox(settings, RdbmsWriter.ATTRIBUTE_INSERT_ENABLED);
-            } else if (propertyId.equals("updateEnabled")) {
-                return createCheckBox(settings, RdbmsWriter.ATTRIBUTE_UPDATE_ENABLED);
-            } else {
-                return null;
-            }
-        }
+        grid.setItems(filteredAttributeSettings);
     }
 
     private CheckBox createCheckBox(final AttributeSettings settings, final String key) {
         final CheckBox checkBox = new CheckBox();
-        checkBox.setImmediate(true);
         if (!readOnly) {
             checkBox.addValueChangeListener((event) -> {
                 ComponentAttribSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(), key);

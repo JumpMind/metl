@@ -21,6 +21,8 @@
 package org.jumpmind.metl.ui.views.design;
 
 import java.io.IOException;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.metl.core.model.Component;
@@ -67,19 +69,23 @@ class ScriptTemplatesDialog extends ResizableWindow {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        ComboBox templates = new ComboBox();
+        ComboBox<Template> templates = new ComboBox<Template>();
         templates.setWidth(400, Unit.PIXELS);
-        templates.setNullSelectionAllowed(false);
+        templates.setEmptySelectionAllowed(false);
         buttonBar.addLeft(templates);
 
+        Template currentValue = null;
         try {
             ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(
                     ScriptTemplatesDialog.class.getClassLoader());
             Resource[] resources = resolver
                     .getResources("classpath:/org/jumpmind/metl/ui/examples/scripts/*.groovy");
+            Set<Template> templateSet = new LinkedHashSet<Template>();
             for (Resource resource : resources) {
-                templates.addItem(new Template(resource.getFilename()));
+                templateSet.add(new Template(resource.getFilename()));
             }
+            templates.setItems(templateSet);
+            currentValue = templateSet.iterator().next();
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
@@ -87,14 +93,16 @@ class ScriptTemplatesDialog extends ResizableWindow {
         }
 
         templates.addValueChangeListener(
-                (e) -> editor.setValue(((Template) e.getProperty().getValue()).script));
+                (e) -> editor.setValue(e.getValue().script));
 
         editor = CommonUiUtils.createAceEditor();
         editor.setSizeFull();
         editor.setMode(AceMode.java);
         addComponent(editor, 1);
 
-        templates.setValue(templates.getItemIds().iterator().next());
+        if (currentValue != null) {
+        	templates.setValue(currentValue);
+        }
 
         Button applyButton = new Button("Apply This Template",
                 e -> notifyApplyTemplate((Template) templates.getValue()));

@@ -67,22 +67,19 @@ import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.event.dd.DragAndDropEvent;
-import com.vaadin.event.dd.acceptcriteria.AcceptAll;
-import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.server.FontAwesome;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Resource;
+import com.vaadin.shared.MouseEventDetails;
 import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.AbstractSplitPanel;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.DragAndDropWrapper;
-import com.vaadin.ui.DragAndDropWrapper.WrapperTargetDetails;
-import com.vaadin.ui.DragAndDropWrapper.WrapperTransferable;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
+import com.vaadin.ui.dnd.DropTargetExtension;
+import com.vaadin.ui.dnd.event.DropEvent;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
@@ -173,13 +170,12 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         diagramLayout.setWidth(10000, Unit.PIXELS);
         diagramLayout.setHeight(10000, Unit.PIXELS);
 
-        DragAndDropWrapper wrapper = new DragAndDropWrapper(diagramLayout);
-        wrapper.setSizeUndefined();
-        wrapper.setDropHandler(new DropHandler());
+        DropTargetExtension<AbstractLayout> extension = new DropTargetExtension<AbstractLayout>(diagramLayout);
+        extension.addDropListener(new DropListener());
         flowPanel = new Panel();
         flowPanel.setSizeFull();
         flowPanel.addStyleName(ValoTheme.PANEL_WELL);
-        flowPanel.setContent(wrapper);
+        flowPanel.setContent(diagramLayout);
 
         if (isVerticalView()) {
             vSplit.addComponent(flowPanel);
@@ -206,30 +202,30 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             runButton.addClickListener((event)->runFlow());
         }
 
-        settingsButton = buttonBar.addButton("Settings", FontAwesome.GEARS);
+        settingsButton = buttonBar.addButton("Settings", VaadinIcons.COGS);
         settingsButton.addClickListener((event) -> new EditFlowSettingsDialog(context, flow, readOnly).showAtSize(.75));        
 
         if (!readOnly) {
-            Button selectAllButton = buttonBar.addButton("Select All", FontAwesome.CROSSHAIRS);
+            Button selectAllButton = buttonBar.addButton("Select All", VaadinIcons.CROSSHAIRS);
             selectAllButton.addClickListener((event)->setSelectedAll());
 
-            copyButton = buttonBar.addButton("Copy", FontAwesome.COPY);
+            copyButton = buttonBar.addButton("Copy", VaadinIcons.COPY);
             copyButton.addClickListener((event)->copySelected());
             copyButton.setEnabled(false);
 
-            delButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
+            delButton = buttonBar.addButton("Remove", VaadinIcons.TRASH);
             delButton.addClickListener((event)->deleteSelected());
             delButton.setEnabled(false);;
 
         }
         
-        advancedEditButton = buttonBar.addButton("Advanced Edit", FontAwesome.EDIT, e->openAdvancedEditor());
+        advancedEditButton = buttonBar.addButton("Advanced Edit", VaadinIcons.EDIT, e->openAdvancedEditor());
         advancedEditButton.setEnabled(false);
 
-        Button exportButton = buttonBar.addButtonRight("Capture", FontAwesome.CAMERA, (event)->export());
+        Button exportButton = buttonBar.addButtonRight("Capture", VaadinIcons.CAMERA, (event)->export());
         exportButton.setId("exportButton");
         
-        buttonBar.addButtonRight("Layout", FontAwesome.COLUMNS, (event)->toggleView());
+        buttonBar.addButtonRight("Layout", VaadinIcons.SPLIT_H, (event)->toggleView());
         
         return buttonBar;
     }
@@ -389,7 +385,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             diagramLayout.removeComponent(diagram);
         }
 
-        diagram = new Diagram(readOnly);
+        diagram = new Diagram();
         List<String> ids = new ArrayList<String>(selected.size());
         for (AbstractObject s : selected) {
             if (s instanceof FlowStep) {
@@ -710,40 +706,27 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         }
 
     }
-
-    class DropHandler implements com.vaadin.event.dd.DropHandler {
+    
+    class DropListener implements com.vaadin.ui.dnd.event.DropListener<AbstractLayout> {
 
         @Override
-        public void drop(DragAndDropEvent event) {
-            WrapperTransferable t = (WrapperTransferable) event.getTransferable();
-            WrapperTargetDetails details = (WrapperTargetDetails) event.getTargetDetails();
-            DragAndDropWrapper wrapper = (DragAndDropWrapper) t.getSourceComponent();
-            Object object = wrapper.iterator().next();
+        public void drop(DropEvent<AbstractLayout> event) {
+            MouseEventDetails details = event.getMouseEventDetails();
+            Object object = event.getDragSourceComponent().orElse(null);
             if (object instanceof FlowPaletteItem && !readOnly) {
                 FlowPaletteItem flowPaletteItem = (FlowPaletteItem) object;
                 if (flowPaletteItem.isShared()) {
                     Component component = new Component();
                     component.setId(flowPaletteItem.getComponentId());
                     configurationService.refresh(component, true);
-                    addComponent(flowPaletteItem.getCaption(),
-                            details.getMouseEvent().getClientX() - details.getAbsoluteLeft(),
-                            details.getMouseEvent().getClientY() - details.getAbsoluteTop(),
-                            component);
+                    addComponent(flowPaletteItem.getCaption(), details.getClientX(), details.getClientY(), component);
                 } else {
                     Component component = new Component();
                     component.setType(flowPaletteItem.getComponentType());
                     component.setShared(false);
-                    addComponent(flowPaletteItem.getCaption(),
-                            details.getMouseEvent().getClientX() - details.getAbsoluteLeft(),
-                            details.getMouseEvent().getClientY() - details.getAbsoluteTop(),
-                            component);
+                    addComponent(flowPaletteItem.getCaption(), details.getClientX(), details.getClientY(), component);
                 }
             }
-        }
-
-        @Override
-        public AcceptCriterion getAcceptCriterion() {
-            return AcceptAll.get();
         }
     }
 

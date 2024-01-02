@@ -28,9 +28,11 @@ dependencies {
         exclude group: 'javax.servlet'
     }
     compile "commons-lang:commons-lang:$commonsLangVersion"
-    compile "commons-dbcp:commons-dbcp:$commonsDbcpVersion"
+    compile "org.apache.commons:commons-dbcp2:$commonsDbcpVersion"
     compile "commons-io:commons-io:$commonsIoVersion"
     compile "commons-net:commons-net:$commonsNetVersion"    
+    compile "commons-fileupload:commons-fileupload:$commonsFileuploadVersion"
+    compile "commons-collections:commons-collections:$commonsCollectionsVersion"
     compile "jaxen:jaxen:$jaxenVersion"
     compile "javax.mail:javax.mail-api:$javaMailVersion"
     compile "org.jdom:jdom2:$jdomVersion"

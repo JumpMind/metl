@@ -32,7 +32,7 @@ import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.ui.OptionGroup;
+import com.vaadin.ui.CheckBoxGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -43,7 +43,7 @@ public class TagDialog  extends ResizableWindow {
     final Logger log = LoggerFactory.getLogger(getClass());
     private static final long serialVersionUID = 1L;
     private IConfigurationService configurationService;
-    private OptionGroup tagGroup;
+    private CheckBoxGroup<Tag> tagGroup;
     private String entityId;
     private String entityType;
     
@@ -75,15 +75,14 @@ public class TagDialog  extends ResizableWindow {
         }
         List<EntityTag> entityTags = configurationService.findEntityTagsForEntity(entityId);
         List<Tag> tags = configurationService.findTags();
-        tagGroup = new OptionGroup("Tags");
+        tagGroup = new CheckBoxGroup<Tag>("Tags");
         tagGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
-        tagGroup.setMultiSelect(true);
+        tagGroup.setItemCaptionGenerator(tag -> tag.getName());
+        tagGroup.setItems(tags);
         for (Tag tag : tags) {
-            tagGroup.addItem(tag.getId());
-            tagGroup.setItemCaption(tag.getId(), tag.getName());
             for (EntityTag entityTag:entityTags) {
                 if (tag.getId().equals(entityTag.getTagId())) {
-                    tagGroup.select(tag.getId());
+                    tagGroup.select(tag);
                     break;
                 }
             }
@@ -92,12 +91,11 @@ public class TagDialog  extends ResizableWindow {
         tagLayout.addComponent(tagGroup);
     }
 
-    @SuppressWarnings("unchecked")
     private void updateAffectedObjects() {
         configurationService.deleteEntityTags(entityId);
-        Set<String> tagIds = (Set<String>) tagGroup.getValue();
-        for (String tagId : tagIds) {
-            configurationService.save(new EntityTag(entityId, entityType, tagId));
+        Set<Tag> tags = tagGroup.getValue();
+        for (Tag tag : tags) {
+            configurationService.save(new EntityTag(entityId, entityType, tag.getId()));
         }
     }
 

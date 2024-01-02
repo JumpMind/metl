@@ -28,58 +28,44 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
-import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.ModelAttributeScriptHelper;
 import org.jumpmind.metl.core.runtime.component.Transformer;
 import org.jumpmind.metl.ui.common.ButtonBar;
+import org.jumpmind.metl.ui.common.ExportDialog;
 import org.jumpmind.metl.ui.common.UiUtils;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
-import org.jumpmind.vaadin.ui.common.ExportDialog;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.AbstractSelect;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.HasValue.ValueChangeListener;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.ColumnGenerator;
-import com.vaadin.ui.TableFieldFactory;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
 
 @SuppressWarnings("serial")
 public class EditTransformerPanel extends AbstractComponentEditPanel {
 
-    Table table = new Table();
+    Grid<ComponentAttribSetting> grid = new Grid<ComponentAttribSetting>();
 
-    Table exportTable = new Table();
+    Grid<Record> exportGrid = new Grid<Record>();
 
     TextField filterField;
 
-    AbstractSelect filterPopField;
+    ComboBox<String> filterPopField;
 
     List<ComponentAttribSetting> componentAttributes;
-
-    BeanItemContainer<ComponentAttribSetting> container = new BeanItemContainer<ComponentAttribSetting>(
-            ComponentAttribSetting.class);
-    BeanItemContainer<Record> exportContainer = new BeanItemContainer<Record>(Record.class);
 
     static final String SHOW_ALL = "Show All";
     static final String SHOW_POPULATED_ENTITIES = "Show Entities with Transforms";
@@ -89,89 +75,38 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        filterPopField = new ComboBox();
-        filterPopField.addItem(SHOW_ALL);
-        filterPopField.addItem(SHOW_POPULATED_ENTITIES);
-        filterPopField.addItem(SHOW_POPULATED_ATTRIBUTES);
+        filterPopField = new ComboBox<String>();
+        List<String> itemList = new ArrayList<String>();
+        itemList.add(SHOW_ALL);
+        itemList.add(SHOW_POPULATED_ENTITIES);
+        itemList.add(SHOW_POPULATED_ATTRIBUTES);
         if (component.getInputModel() != null) {
             for (ModelEntity entity : ((RelationalModel)component.getInputModel()).getModelEntities()) {
-                filterPopField.addItem(entity.getName());
+            	itemList.add(entity.getName());
             }
         }
-        filterPopField.setNullSelectionAllowed(false);
-        filterPopField.setImmediate(true);
+        filterPopField.setItems(itemList);
+        filterPopField.setEmptySelectionAllowed(false);
         filterPopField.setWidth(20, Unit.EM);
         filterPopField.setValue(SHOW_ALL);
         filterPopField.addValueChangeListener(event ->  {
             if (isNotBlank(filterField.getValue())) {
                 filterField.clear();
             }
-            updateTable();
+            updateGrid();
         });
         buttonBar.addLeft(filterPopField);
 
-        buttonBar.addButtonRight("Export", FontAwesome.DOWNLOAD, (e) -> export());
+        buttonBar.addButtonRight("Export", VaadinIcons.DOWNLOAD, (e) -> export());
 
         filterField = buttonBar.addFilter();
-        filterField.addTextChangeListener(event -> {
-            String text = event.getText();
+        filterField.addValueChangeListener(event -> {
+            String text = event.getValue();
             filterPopField.setValue(SHOW_ALL);
-            updateTable(text);
+            updateGrid(text);
         });
 
         addComponent(buttonBar);
-
-        table.setContainerDataSource(container);
-
-        table.setSelectable(true);
-        table.setSortEnabled(false);
-        table.setImmediate(true);
-        table.setSortEnabled(true);
-        table.setSizeFull();
-        table.addGeneratedColumn("entityName", new ColumnGenerator() {
-
-            @Override
-            public Object generateCell(Table source, Object itemId, Object columnId) {
-                ComponentAttribSetting setting = (ComponentAttribSetting) itemId;
-                RelationalModel model = (RelationalModel) component.getInputModel();
-                ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
-                ModelEntity entity = model.getEntityById(attribute.getEntityId());
-                return UiUtils.getName(filterField.getValue(), entity.getName());
-            }
-        });
-        table.addGeneratedColumn("attributeName", new ColumnGenerator() {
-
-            @Override
-            public Object generateCell(Table source, Object itemId, Object columnId) {
-                ComponentAttribSetting setting = (ComponentAttribSetting) itemId;
-                RelationalModel model = (RelationalModel) component.getInputModel();
-                ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
-                return UiUtils.getName(filterField.getValue(), attribute.getName());
-            }
-        });
-
-        table.addGeneratedColumn("editButton", new ColumnGenerator() {
-
-            @Override
-            public Object generateCell(Table source, Object itemId, Object columnId) {
-                ComponentAttribSetting setting = (ComponentAttribSetting) itemId;
-                Button button = new Button();
-                button.setIcon(FontAwesome.GEAR);
-                button.addClickListener((event) -> new EditTransformWindow(setting).showAtSize(.75));
-                return button;
-            }
-        });       
-        
-        table.setVisibleColumns(new Object[] { "entityName", "attributeName", "value", "editButton" });
-        table.setColumnWidth("entityName", 250);
-        table.setColumnWidth("attributeName", 250);
-        table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Transform", "Edit" });
-        table.setColumnExpandRatio("value", 1);
-        table.setTableFieldFactory(new EditFieldFactory());
-        table.setEditable(true);
-        addComponent(table);
-        setExpandRatio(table, 1.0f);
-        
 
         if (component.getInputModel() != null) {
 
@@ -214,11 +149,56 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             });
         }
 
-        updateTable(null);
+        grid.setSizeFull();
+        grid.addColumn(setting -> {
+            RelationalModel model = (RelationalModel) component.getInputModel();
+            ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
+            ModelEntity entity = model.getEntityById(attribute.getEntityId());
+            return UiUtils.getName(filterField.getValue(), entity.getName());
+        }).setCaption("Entity Name").setWidth(250).setSortable(true);
+        grid.addColumn(setting -> {
+            RelationalModel model = (RelationalModel) component.getInputModel();
+            ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
+            return UiUtils.getName(filterField.getValue(), attribute.getName());
+        }).setCaption("Attribute Name").setWidth(250).setSortable(true);
+        final ComboBox<String> combo = new ComboBox<String>();
+        combo.setWidth(100, Unit.PERCENTAGE);
+        List<String> functionList = new ArrayList<String>();
+        String[] functions = ModelAttributeScriptHelper.getSignatures();
+        for (String function : functions) {
+            functionList.add(function);
+        }
+        combo.setPageLength(functions.length > 20 ? 20 : functions.length);
+        for (ComponentAttribSetting setting : componentAttributes) {
+            if (setting.getValue() != null && !functionList.contains(setting.getValue())) {
+                functionList.add(setting.getValue());
+            }
+        }
+        combo.setItems(functionList);
+        combo.setNewItemProvider(newItem -> {
+            functionList.add(newItem);
+            combo.setItems(functionList);
+            combo.setValue(newItem);
+            return Optional.of(newItem);
+        });
+        grid.addColumn(ComponentAttribSetting::getValue).setEditorComponent(combo, ComponentAttribSetting::setValue)
+                .setCaption("Transform").setExpandRatio(1).setSortable(true);
+        grid.addComponentColumn(setting -> {
+            Button button = new Button();
+            button.setIcon(VaadinIcons.COG);
+            button.addClickListener((event) -> new EditTransformWindow(setting).showAtSize(.75));
+            return button;
+        }).setCaption("Edit").setSortable(false);
+        
+        grid.getEditor().setEnabled(true).addSaveListener(event -> context.getConfigurationService().save(event.getBean()));
+        addComponent(grid);
+        setExpandRatio(grid, 1.0f);
 
-        exportTable.setContainerDataSource(exportContainer);
-        exportTable.setVisibleColumns(new Object[] { "entityName", "attributeName", "value" });
-        exportTable.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Transform" });
+        updateGrid(null);
+
+        exportGrid.addColumn(Record::getEntityName).setCaption("Entity Name");
+        exportGrid.addColumn(Record::getAttributeName).setCaption("Attribute Name");
+        exportGrid.addColumn(Record::getValue).setCaption("Transform");
     }
     
     protected void removeDeadAttributeSettings() {
@@ -241,15 +221,15 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         }
     }
     
-    protected void updateTable() {
+    protected void updateGrid() {
         String filter = null;
         if (SHOW_ALL.equals(filterPopField.getValue())) {
             filter = filterField.getValue();
         } 
-        updateTable(filter);
+        updateGrid(filter);
     }
 
-    protected void updateTable(String filter) {
+    protected void updateGrid(String filter) {
         boolean showPopulatedEntities = filterPopField.getValue().equals(SHOW_POPULATED_ENTITIES);
         boolean showPopulatedAttributes = filterPopField.getValue().equals(SHOW_POPULATED_ATTRIBUTES);
         if (!showPopulatedEntities && !showPopulatedAttributes && !filterPopField.getValue().equals(SHOW_ALL)) {
@@ -261,8 +241,8 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             Collection<String> entityNames = new ArrayList<>();
 
             filter = filter != null ? filter.toLowerCase() : null;
+            List<ComponentAttribSetting> filteredComponentAttributes = new ArrayList<ComponentAttribSetting>();
             if (model != null) {
-                table.removeAllItems();
                 // loop through the attributes with transforms to get a list of
                 // entities
                 for (ComponentAttribSetting componentAttribute : componentAttributes) {
@@ -283,33 +263,31 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
                     if (isBlank(filter) || entity.getName().toLowerCase().contains(filter)
                             || attribute.getName().toLowerCase().contains(filter)) {
                         if (populated) {
-                            table.addItem(componentAttribute);
+                            filteredComponentAttributes.add(componentAttribute);
                         }
                     }
                 }
             }
+            grid.setItems(filteredComponentAttributes);
         }
     }
 
     protected void export() {
-        exportTable.removeAllItems();
-        updateExportTable(filterField.getValue());
-        String fileNamePrefix = component.getName().toLowerCase().replace(' ', '-');
-        ExportDialog dialog = new ExportDialog(exportTable, fileNamePrefix, component.getName());
-        UI.getCurrent().addWindow(dialog);
+        updateExportGrid(filterField.getValue());
+        ExportDialog.show(context, exportGrid);
     }
 
-    protected void updateExportTable(String filter) {
+    protected void updateExportGrid(String filter) {
         boolean showPopulatedEntities = filterPopField.getValue().equals(SHOW_POPULATED_ENTITIES);
         boolean showPopulatedAttributes = filterPopField.getValue().equals(SHOW_POPULATED_ATTRIBUTES);
 
+        List<Record> recordList = new ArrayList<Record>();
         if (componentAttributes != null) {
             RelationalModel model = (RelationalModel) component.getInputModel();
             Collection<String> entityNames = new ArrayList<>();
 
             filter = filter != null ? filter.toLowerCase() : null;
             if (model != null) {
-                exportTable.removeAllItems();
                 // loop through the attributes with transforms to get a list of
                 // entities
                 for (ComponentAttribSetting componentAttribute : componentAttributes) {
@@ -330,12 +308,13 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
                     if (isBlank(filter) || entity.getName().toLowerCase().contains(filter)
                             || attribute.getName().toLowerCase().contains(filter)) {
                         if (populated) {
-                            exportTable.addItem(new Record(entity, attribute));
+                            recordList.add(new Record(entity, attribute));
                         }
                     }
                 }
             }
         }
+        exportGrid.setItems(recordList);
     }
 
     public class Record {
@@ -388,37 +367,6 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         }
     }
     
-    class EditFieldFactory implements TableFieldFactory {
-        public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId,
-                com.vaadin.ui.Component uiContext) {
-            final ComponentAttribSetting setting = (ComponentAttribSetting) itemId;
-            Field<?> field = null;
-
-            if (propertyId.equals("value") && (setting.getValue() == null || !setting.getValue().contains("\n"))) {
-                final ComboBox combo = new ComboBox();
-                combo.setWidth(100, Unit.PERCENTAGE);
-                String[] functions = ModelAttributeScriptHelper.getSignatures();
-                for (String function : functions) {
-                    combo.addItem(function);
-                }
-                combo.setPageLength(functions.length > 20 ? 20 : functions.length);
-                if (setting.getValue() != null && !combo.getItemIds().contains(setting.getValue())) {
-                    combo.addItem(setting.getValue());
-                }
-                combo.setImmediate(true);
-                combo.setNewItemsAllowed(true);
-                combo.addValueChangeListener(new ValueChangeListener() {
-                    public void valueChange(ValueChangeEvent event) {
-                        setting.setValue((String) combo.getValue());
-                        context.getConfigurationService().save(setting);
-                    }
-                });
-                field = combo;
-            }
-            return field;
-        }
-    }    
-    
     class EditTransformWindow extends ResizableWindow {
         private static final long serialVersionUID = 1L;
         
@@ -433,20 +381,19 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             ButtonBar buttonBar = new ButtonBar();
             addComponent(buttonBar);
             
-            ComboBox combo = new ComboBox();
+            ComboBox<String> combo = new ComboBox<String>();
             combo.setWidth(400, Unit.PIXELS);
             String[] functions = ModelAttributeScriptHelper.getSignatures();
-            for (String function : functions) {
-                combo.addItem(function);
+            combo.setItems(functions);
+            if (functions.length > 0) {
+            	combo.setValue(functions[0]);
             }
-            combo.setValue(combo.getItemIds().iterator().next());
-            combo.setNullSelectionAllowed(false);
+            combo.setEmptySelectionAllowed(false);
             combo.setPageLength(functions.length > 20 ? 20 : functions.length);
-            combo.setImmediate(true);
             
             buttonBar.addLeft(combo);
 
-            buttonBar.addButton("Insert", FontAwesome.SIGN_IN,
+            buttonBar.addButton("Insert", VaadinIcons.SIGN_IN,
                     new ClickListener() {
                             
                         @Override
@@ -467,15 +414,13 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             
             
             editor = CommonUiUtils.createAceEditor();
-            editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
-            editor.setTextChangeTimeout(200);
             editor.setMode(AceMode.java);
             
-            editor.addTextChangeListener(new TextChangeListener() {
+            editor.addValueChangeListener(new ValueChangeListener<String>() {
 
                 @Override
-                public void textChange(TextChangeEvent event) {
-                    setting.setValue(event.getText());
+                public void valueChange(ValueChangeEvent<String> event) {
+                    setting.setValue(event.getValue());
                     EditTransformerPanel.this.context.getConfigurationService()
                             .save(setting);
                 }
@@ -492,7 +437,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         @Override
         public void close() {
             super.close();
-            updateTable();
+            updateGrid();
         }
 
     }

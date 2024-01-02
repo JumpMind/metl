@@ -24,11 +24,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vaadin.addon.contextmenu.ContextMenu;
-import com.vaadin.event.ItemClickEvent.ItemClickNotifier;
+import org.jumpmind.metl.core.model.AbstractNamedObject;
+
+import com.vaadin.contextmenu.ContextMenu;
+import com.vaadin.shared.MouseEventDetails;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
-import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.TreeGrid;
+import com.vaadin.ui.components.grid.SingleSelectionModel;
 import com.vaadin.ui.themes.ValoTheme;
 
 abstract public class AbstractMenuBar extends MenuBar {
@@ -37,7 +40,7 @@ abstract public class AbstractMenuBar extends MenuBar {
 
     Map<Class<?>, ISelectedValueMenuManager> menuActionsByClass;
 
-    protected AbstractSelect parent;
+    protected TreeGrid<AbstractNamedObject> parent;
 
     ISelectedValueMenuManager nothingSelectedMenuManager;
 
@@ -45,7 +48,7 @@ abstract public class AbstractMenuBar extends MenuBar {
 
     ContextMenu contextMenu;
 
-    public AbstractMenuBar(AbstractSelect parent,
+    public AbstractMenuBar(TreeGrid<AbstractNamedObject> parent,
             ISelectedValueMenuManager nothingSelectedMenuManager) {
         addStyleName(ValoTheme.MENUBAR_BORDERLESS);
         setWidth(100, Unit.PERCENTAGE);
@@ -53,20 +56,16 @@ abstract public class AbstractMenuBar extends MenuBar {
         this.parent = parent;
         this.nothingSelectedMenuManager = nothingSelectedMenuManager;
         this.menuActionsByClass = new HashMap<>();
-        this.parent.addValueChangeListener((e) -> valueChanged());
+        this.parent.addSelectionListener((e) -> valueChanged());
         this.handler = new Handler();
 
         contextMenu = new ContextMenu(parent, false);
-        if (parent instanceof ItemClickNotifier) {
-            ItemClickNotifier notifier = (ItemClickNotifier)parent;
-            notifier.addItemClickListener(e->{
-                if (e.getButton()==MouseButton.RIGHT && !e.isDoubleClick()) {
-                    contextMenu.open(e.getClientX(), e.getClientY());
-                }
-            });
-        } else {
-            parent.addContextClickListener(e->contextMenu.open(e.getClientX(), e.getClientY()));
-        }
+        parent.addItemClickListener(e->{
+            MouseEventDetails details = e.getMouseEventDetails();
+            if (details.getButton()==MouseButton.RIGHT && !details.isDoubleClick()) {
+                contextMenu.open(details.getClientX(), details.getClientY());
+            }
+        });
 
         buildMenu();
 
@@ -83,18 +82,6 @@ abstract public class AbstractMenuBar extends MenuBar {
     }
 
     private String buildMenuString(MenuItem item) {
-        StringBuilder menuString = new StringBuilder();
-        do {
-            menuString.insert(0, item.getText());
-            item = item.getParent();
-            if (item != null) {
-                menuString.insert(0, "|");
-            }
-        } while (item != null);
-        return menuString.toString();
-    }
-
-    private String buildMenuString(com.vaadin.addon.contextmenu.MenuItem item) {
         StringBuilder menuString = new StringBuilder();
         do {
             menuString.insert(0, item.getText());
@@ -129,17 +116,17 @@ abstract public class AbstractMenuBar extends MenuBar {
         return item;
     }
 
-    protected com.vaadin.addon.contextmenu.MenuItem getContextMenuItem(String path) {
-        com.vaadin.addon.contextmenu.MenuItem item = null;
+    protected MenuItem getContextMenuItem(String path) {
+        MenuItem item = null;
         String[] names = parse(path);
         for (String name : names) {
-            List<com.vaadin.addon.contextmenu.MenuItem> items = null;
+            List<MenuItem> items = null;
             if (item == null) {
                 items = contextMenu.getItems();
             } else {
                 items = item.getChildren();
             }
-            for (com.vaadin.addon.contextmenu.MenuItem menuItem : items) {
+            for (MenuItem menuItem : items) {
                 if (menuItem.getText().equals(name)) {
                     item = menuItem;
                 }
@@ -150,7 +137,7 @@ abstract public class AbstractMenuBar extends MenuBar {
 
     
     protected void valueChanged() {
-        Object selected = parent.getValue();
+        AbstractNamedObject selected = ((SingleSelectionModel<AbstractNamedObject>) parent.getSelectionModel()).getSelectedItem().orElse(null);
         ISelectedValueMenuManager action = null;
         if (selected != null) {
             Class<?> clazz = selected.getClass();
@@ -167,7 +154,7 @@ abstract public class AbstractMenuBar extends MenuBar {
         }
     }
 
-    private void setMenuBarEnabled(ISelectedValueMenuManager action, List<MenuItem> items, Object selected) {
+    private void setMenuBarEnabled(ISelectedValueMenuManager action, List<MenuItem> items, AbstractNamedObject selected) {
         if (items != null) {
             for (MenuItem menuItem : items) {
                 menuItem.setEnabled(action.isEnabled(buildMenuString(menuItem), selected));
@@ -177,11 +164,11 @@ abstract public class AbstractMenuBar extends MenuBar {
         }
     }
     
-    private void setContextMenuEnabled(ISelectedValueMenuManager action, List<com.vaadin.addon.contextmenu.MenuItem> items, Object selected) {
+    private void setContextMenuEnabled(ISelectedValueMenuManager action, List<MenuItem> items, AbstractNamedObject selected) {
         if (items != null) {
-            for (com.vaadin.addon.contextmenu.MenuItem menuItem : items) {
+            for (MenuItem menuItem : items) {
                 menuItem.setEnabled(action.isEnabled(buildMenuString(menuItem), selected));
-                List<com.vaadin.addon.contextmenu.MenuItem> children = menuItem.getChildren();
+                List<MenuItem> children = menuItem.getChildren();
                 setContextMenuEnabled(action, children, selected);
             }
         }
@@ -191,7 +178,7 @@ abstract public class AbstractMenuBar extends MenuBar {
 
     protected void add(String path) {
         MenuItem item = null;
-        com.vaadin.addon.contextmenu.MenuItem contextItem = null;
+        MenuItem contextItem = null;
         for (String name : parse(path)) {
             if (item == null) {
                 item = addToMenuBarIfNotExists(name, null, getItems());
@@ -239,12 +226,10 @@ abstract public class AbstractMenuBar extends MenuBar {
         return item;
     }
 
-    private com.vaadin.addon.contextmenu.MenuItem addToContextMenuIfNotExists(String name,
-            com.vaadin.addon.contextmenu.MenuItem parent,
-            List<com.vaadin.addon.contextmenu.MenuItem> items) {
-        com.vaadin.addon.contextmenu.MenuItem item = null;
+	private MenuItem addToContextMenuIfNotExists(String name, MenuItem parent, List<MenuItem> items) {
+        MenuItem item = null;
         if (items != null) {
-            for (com.vaadin.addon.contextmenu.MenuItem menuItem : items) {
+            for (MenuItem menuItem : items) {
                 if (menuItem.getText().equals(name)) {
                     item = menuItem;
                 }
@@ -260,7 +245,7 @@ abstract public class AbstractMenuBar extends MenuBar {
         return item;
     }
 
-    class Handler implements Command, com.vaadin.addon.contextmenu.Menu.Command {
+    class Handler implements Command {
 
         private static final long serialVersionUID = 1L;
 
@@ -269,13 +254,8 @@ abstract public class AbstractMenuBar extends MenuBar {
             menuSelected(buildMenuString(selectedItem));
         }
 
-        @Override
-        public void menuSelected(com.vaadin.addon.contextmenu.MenuItem selectedItem) {
-            menuSelected(buildMenuString(selectedItem));
-        }
-
         protected void menuSelected(String menuString) {
-            Object selected = parent.getValue();
+            Object selected = ((SingleSelectionModel<AbstractNamedObject>) parent.getSelectionModel()).getSelectedItem().orElse(null);
             ISelectedValueMenuManager action = null;
             if (selected != null) {
                 Class<?> clazz = selected.getClass();

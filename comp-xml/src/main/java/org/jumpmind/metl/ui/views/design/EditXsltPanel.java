@@ -39,9 +39,9 @@ import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
-import com.vaadin.server.FontAwesome;
+import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.HasValue.ValueChangeListener;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -52,7 +52,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings({ "serial" })
-public class EditXsltPanel extends AbstractComponentEditPanel implements TextChangeListener {
+public class EditXsltPanel extends AbstractComponentEditPanel implements ValueChangeListener<String> {
 
     TextField filterField;
     
@@ -69,12 +69,12 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements TextCha
         addComponent(buttonBar);
 
         if (!readOnly) {
-          Button testButton = buttonBar.addButton("Test", FontAwesome.FILE_CODE_O);
+          Button testButton = buttonBar.addButton("Test", VaadinIcons.FILE_CODE);
           testButton.addClickListener(new TestClickListener());
         }
 
         filterField = buttonBar.addFilter();
-        filterField.addTextChangeListener(this);
+        filterField.addValueChangeListener(this);
         
         HorizontalSplitPanel splitPanel = new HorizontalSplitPanel();
         splitPanel.setSizeFull();
@@ -86,7 +86,7 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements TextCha
         editor.setSizeFull();
         editor.setHighlightActiveLine(true);
         editor.setShowPrintMargin(false);
-        editor.addTextChangeListener(new StylesheetChangeListener());
+        editor.addValueChangeListener(new StylesheetChangeListener());
         editor.setValue(component.findSetting(XsltProcessor.XSLT_PROCESSOR_STYLESHEET).getValue());
         leftLayout.addComponent(new Label("XSLT Stylesheet"));
         leftLayout.addComponent(editor);
@@ -127,9 +127,9 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements TextCha
     }
 
     @Override
-    public void textChange(TextChangeEvent event) {
+    public void valueChange(ValueChangeEvent<String> event) {
         textArea.setReadOnly(false);
-        filterField.setValue(event.getText());
+        filterField.setValue(event.getValue());
         textArea.setValue(getSampleXml());
         textArea.setReadOnly(readOnly);
     }
@@ -188,8 +188,8 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements TextCha
         return entities;
     }
 
-    class StylesheetChangeListener implements TextChangeListener {
-        public void textChange(TextChangeEvent event) {
+    class StylesheetChangeListener implements ValueChangeListener<String> {
+        public void valueChange(ValueChangeEvent<String> event) {
             Setting stylesheet = component.findSetting(XsltProcessor.XSLT_PROCESSOR_STYLESHEET);
             stylesheet.setValue(editor.getValue());
             context.getConfigurationService().save(component);
@@ -212,7 +212,7 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements TextCha
             
             TextArea textField = new TextArea();
             textField.setSizeFull();
-            textField.setWordwrap(false);
+            textField.setWordWrap(false);
             
             Thread thread = Thread.currentThread();
             ClassLoader previousLoader = thread.getContextClassLoader();

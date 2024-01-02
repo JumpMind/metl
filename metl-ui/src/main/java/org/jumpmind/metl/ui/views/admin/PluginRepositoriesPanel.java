@@ -20,7 +20,9 @@
  */
 package org.jumpmind.metl.ui.views.admin;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.jumpmind.metl.core.model.PluginRepository;
@@ -30,23 +32,24 @@ import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.event.selection.SelectionEvent;
+import com.vaadin.event.selection.SelectionListener;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Table;
+import com.vaadin.ui.Grid.ItemClick;
+import com.vaadin.ui.Grid.SelectionMode;
+import com.vaadin.ui.components.grid.ItemClickListener;
+import com.vaadin.ui.Grid;
 
 @SuppressWarnings("serial")
 @UiComponent
 @Scope(value = "ui")
 @Order(600)
-@AdminMenuLink(name = "Plugin Repositories", id = "Plugin Repositories", icon = FontAwesome.DATABASE)
+@AdminMenuLink(name = "Plugin Repositories", id = "Plugin Repositories", icon = VaadinIcons.DATABASE)
 public class PluginRepositoriesPanel extends AbstractAdminPanel {
 
     Button newButton;
@@ -54,45 +57,39 @@ public class PluginRepositoriesPanel extends AbstractAdminPanel {
     Button editButton;
     
     Button removeButton;
-
-    BeanItemContainer<PluginRepository> container;
     
-    Table table;
+    List<PluginRepository> pluginRepositoryList = new ArrayList<PluginRepository>();
+    
+    Grid<PluginRepository> grid;
     
     public PluginRepositoriesPanel() {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        newButton = buttonBar.addButton("Add", FontAwesome.PLUS);
+        newButton = buttonBar.addButton("Add", VaadinIcons.PLUS);
         newButton.addClickListener(new NewClickListener());
 
-        editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
+        editButton = buttonBar.addButton("Edit", VaadinIcons.EDIT);
         editButton.addClickListener(new EditClickListener());
 
-        removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
+        removeButton = buttonBar.addButton("Remove", VaadinIcons.TRASH);
         removeButton.addClickListener(new RemoveClickListener());
 
-        container = new BeanItemContainer<PluginRepository>(PluginRepository.class);
+        grid = new Grid<PluginRepository>();
+        grid.setSizeFull();
+        //grid.setCacheRate(100);
+        //grid.setPageLength(100);
+        grid.setSelectionMode(SelectionMode.MULTI);
 
-        table = new Table();
-        table.setSizeFull();
-        table.setCacheRate(100);
-        table.setPageLength(100);
-        table.setImmediate(true);
-        table.setSelectable(true);
-        table.setMultiSelect(true);
+        grid.addColumn(PluginRepository::getName).setId("name").setCaption("Name").setSortable(true);
+        grid.addColumn(PluginRepository::getUrl).setCaption("Url");
+        grid.addColumn(PluginRepository::getLastUpdateTime).setCaption("Updated").setWidth(UIConstants.DATETIME_WIDTH_PIXELS);
+        grid.addItemClickListener(new GridItemClickListener());
+        grid.addSelectionListener(new GridSelectionListener());
+        grid.sort("name", SortDirection.ASCENDING);
 
-        table.setContainerDataSource(container);
-        table.setVisibleColumns("name", "url", "lastUpdateTime");
-        table.setColumnHeaders("Name", "Url", "Updated");
-        table.setColumnWidth("lastUpdateTime", UIConstants.DATETIME_WIDTH_PIXELS);
-        table.addItemClickListener(new TableItemClickListener());
-        table.addValueChangeListener(new TableValueChangeListener());
-        table.setSortContainerPropertyId("name");
-        table.setSortAscending(true);
-
-        addComponent(table);
-        setExpandRatio(table, 1.0f);
+        addComponent(grid);
+        setExpandRatio(grid, 1.0f);
     }
 
     @Override
@@ -110,9 +107,9 @@ public class PluginRepositoriesPanel extends AbstractAdminPanel {
     }
 
     public void refresh() {
-        container.removeAllItems();
-        container.addAll(context.getPluginService().findPluginRepositories());
-        table.sort();
+        pluginRepositoryList.clear();
+        pluginRepositoryList.addAll(context.getPluginService().findPluginRepositories());
+        grid.setItems(pluginRepositoryList);
         setButtonsEnabled();
     }
 
@@ -123,14 +120,12 @@ public class PluginRepositoriesPanel extends AbstractAdminPanel {
         removeButton.setEnabled(enabled);
     }
 
-    @SuppressWarnings("unchecked")
     protected Set<PluginRepository> getSelectedItems() {
-        return (Set<PluginRepository>) table.getValue();
+        return grid.getSelectedItems();
     }
 
-    @SuppressWarnings("unchecked")
     protected PluginRepository getFirstSelectedItem() {
-        Set<PluginRepository> pluginRepositorys = (Set<PluginRepository>) table.getValue();
+        Set<PluginRepository> pluginRepositorys = grid.getSelectedItems();
         Iterator<PluginRepository> iter = pluginRepositorys.iterator();
         if (iter.hasNext()) {
             return iter.next();
@@ -159,29 +154,31 @@ public class PluginRepositoriesPanel extends AbstractAdminPanel {
         public void buttonClick(ClickEvent event) {
             for (PluginRepository pluginRepository : getSelectedItems()) {
                 context.getConfigurationService().delete(pluginRepository);
-                container.removeItem(pluginRepository);
+                pluginRepositoryList.remove(pluginRepository);
             }
-            table.setValue(null);
+            
+            grid.setItems(pluginRepositoryList);
+            grid.deselectAll();
             setButtonsEnabled();
         }
     }
 
-    class TableItemClickListener implements ItemClickListener {
+    class GridItemClickListener implements ItemClickListener<PluginRepository> {
         long lastClick;
         
-        public void itemClick(ItemClickEvent event) {
-            if (event.isDoubleClick()) {
+        public void itemClick(ItemClick<PluginRepository> event) {
+            if (event.getMouseEventDetails().isDoubleClick()) {
                 editButton.click();
-            } else if (getSelectedItems().contains(event.getItemId()) &&
+            } else if (getSelectedItems().contains(event.getItem()) &&
                 System.currentTimeMillis()-lastClick > 500) {
-                    table.setValue(null);
+                    grid.deselectAll();
             }
             lastClick = System.currentTimeMillis();
         }
     }
 
-    class TableValueChangeListener implements ValueChangeListener {
-        public void valueChange(ValueChangeEvent event) {
+    class GridSelectionListener implements SelectionListener<PluginRepository> {
+        public void selectionChange(SelectionEvent<PluginRepository> event) {
             setButtonsEnabled();
         }
     }

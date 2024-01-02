@@ -31,16 +31,14 @@ import org.jumpmind.metl.core.model.Tag;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.ui.ColorPicker;
+import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.HasValue.ValueChangeListener;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.components.colorpicker.ColorChangeEvent;
-import com.vaadin.ui.components.colorpicker.ColorChangeListener;
 
 @SuppressWarnings("serial")
 
@@ -73,8 +71,8 @@ public class TagEditPanel extends VerticalLayout implements IUiPanel {
         colorPickerField.setHistoryVisibility(true);
         colorPickerField.setTextfieldVisibility(false);
         colorPickerField.setHSVVisibility(false);
-        colorPickerField.setColor(new Color(tag.getColor()));
-        colorPickerField.addColorChangeListener(new ColorFieldListener());         
+        colorPickerField.setValue(new Color(tag.getColor()));
+        colorPickerField.addValueChangeListener(new ColorFieldListener());         
 
         HorizontalLayout hLayout = new HorizontalLayout();
         hLayout.setCaption("Color");
@@ -127,17 +125,17 @@ public class TagEditPanel extends VerticalLayout implements IUiPanel {
         }
     }
 
-    class NameChangeListener implements ValueChangeListener {
-        public void valueChange(ValueChangeEvent event) {
-            tag.setName((String) event.getProperty().getValue());
+    class NameChangeListener implements ValueChangeListener<String> {
+        public void valueChange(ValueChangeEvent<String> event) {
+            tag.setName(event.getValue());
             save(tag);
         }
     }
 
-    class ColorFieldListener implements ColorChangeListener {
+    class ColorFieldListener implements ValueChangeListener<Color> {
         @Override
-        public void colorChanged(ColorChangeEvent event) {
-            tag.setColor(event.getColor().getRGB());
+        public void valueChange(ValueChangeEvent<Color> event) {
+            tag.setColor(event.getValue().getRGB());
             save(tag);
         }
     }    

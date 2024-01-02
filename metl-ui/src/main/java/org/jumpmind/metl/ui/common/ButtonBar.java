@@ -20,10 +20,10 @@
  */
 package org.jumpmind.metl.ui.common;
 
-import com.vaadin.server.FontAwesome;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Resource;
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
@@ -82,13 +82,12 @@ public class ButtonBar extends HorizontalLayout {
 
     public TextField addFilter() {
         TextField textField = new TextField();
-        textField.setColumns(15);
+        textField.setWidth("15em");
         textField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
-        textField.setInputPrompt("Filter");
-        textField.setIcon(FontAwesome.SEARCH);
-        textField.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        textField.setTextChangeTimeout(500);
-        textField.setNullRepresentation("");
+        textField.setPlaceholder("Filter");
+        textField.setIcon(VaadinIcons.SEARCH);
+        textField.setValueChangeMode(ValueChangeMode.LAZY);
+        textField.setValueChangeTimeout(500);
         wrapper.addComponent(textField);
         wrapper.setComponentAlignment(textField, Alignment.BOTTOM_RIGHT);
         return textField;

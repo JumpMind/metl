@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
-<stringAttribute key="bad_container_name" value="/metl-ui/src/shortcuts"/>
-<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/metl-develop/src/test/java/org/jumpmind/metl/Develop.java"/>
-</listAttribute>
-<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
-<listEntry value="1"/>
-</listAttribute>
-<listAttribute key="org.eclipse.debug.ui.favoriteGroups">
-<listEntry value="org.eclipse.debug.ui.launchGroup.debug"/>
-<listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
-</listAttribute>
-<booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.jumpmind.metl.Develop"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="metl-develop"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dorg.jumpmind.metl.ui.init.config.dir=working -Xmx1024m -Dlog.to.console.enabled=true -Djava.io.tmpdir=working/tmp -Dh2.baseDir=working"/>
+    <stringAttribute key="bad_container_name" value="/metl-ui/src/shortcuts"/>
+    <booleanAttribute key="org.eclipse.debug.core.ATTR_FORCE_SYSTEM_CONSOLE_ENCODING" value="false"/>
+    <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+        <listEntry value="/metl-develop/src/test/java/org/jumpmind/metl/Develop.java"/>
+    </listAttribute>
+    <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+        <listEntry value="1"/>
+    </listAttribute>
+    <listAttribute key="org.eclipse.debug.ui.favoriteGroups">
+        <listEntry value="org.eclipse.debug.ui.launchGroup.debug"/>
+        <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
+    </listAttribute>
+    <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
+    <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.jumpmind.metl.Develop"/>
+    <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="metl-develop"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="metl-develop"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dorg.jumpmind.metl.ui.init.config.dir=working -Xmx1024m -Dlog.to.console.enabled=true -Djava.io.tmpdir=working/tmp -Dh2.baseDir=working"/>
 </launchConfiguration>

@@ -36,10 +36,9 @@ public class Diagram extends AbstractJavaScriptComponent {
 
     private static final long serialVersionUID = 1L;
 
-    public Diagram(boolean readOnly) {
+    public Diagram() {
         setPrimaryStyleName("diagram");
         setId("diagram");
-        getState().readOnly = readOnly;
 
         addFunction("onNodeSelected", (arguments) -> {
             DiagramState state = getState();

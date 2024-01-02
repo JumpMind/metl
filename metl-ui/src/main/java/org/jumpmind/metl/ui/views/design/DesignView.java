@@ -31,16 +31,16 @@ import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
 @Scope(value = "ui")
-@TopBarLink(category = Category.Design, name = "Design", id = "design", icon = FontAwesome.SHARE_ALT, menuOrder = 1, useAsDefault = true)
+@TopBarLink(category = Category.Design, name = "Design", id = "design", icon = VaadinIcons.CONNECT, menuOrder = 1, useAsDefault = true)
 public class DesignView extends HorizontalLayout implements View {
 
     private static final long serialVersionUID = 1L;

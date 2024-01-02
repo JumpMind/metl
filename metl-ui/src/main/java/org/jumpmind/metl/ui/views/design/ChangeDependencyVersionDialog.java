@@ -20,8 +20,6 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
-import java.util.List;
-
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.persist.IConfigurationService;
@@ -30,15 +28,12 @@ import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.data.Item;
-import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.event.ShortcutAction.KeyCode;
-import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.RadioButtonGroup;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -49,7 +44,7 @@ public class ChangeDependencyVersionDialog extends ResizableWindow  {
     final Logger log = LoggerFactory.getLogger(getClass());
     private static final long serialVersionUID = 1L;
     IConfigurationService configService;
-    OptionGroup optionGroup;
+    RadioButtonGroup<ProjectVersion> optionGroup;
     ProjectVersionDepends dependency;
     DesignNavigator designNavigator;
 
@@ -87,29 +82,19 @@ public class ChangeDependencyVersionDialog extends ResizableWindow  {
         vLayout.setExpandRatio(projectVersionPanel, 1);       
     }
     
-    @SuppressWarnings("unchecked")
     protected Panel buildPossibleTargetVersions(ProjectVersion targetProjectVersion) {
 
         Panel possibleTargetVersionsPanel = new Panel("Available Target Versions");        
         possibleTargetVersionsPanel.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
         possibleTargetVersionsPanel.setSizeFull();
-
-        IndexedContainer container = new IndexedContainer();
-        optionGroup = new OptionGroup("Project Version", container);
+        
+        optionGroup = new RadioButtonGroup<ProjectVersion>("Project Version");
         optionGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
-        optionGroup.setItemCaptionMode(ItemCaptionMode.PROPERTY);
-        optionGroup.setItemCaptionPropertyId("versionLabel");
         optionGroup.addStyleName("indent");
+        optionGroup.setItemCaptionGenerator(version -> version.getVersionLabel());
+        optionGroup.setItemEnabledProvider(version -> !targetProjectVersion.getId().equalsIgnoreCase(version.getId()));
+        optionGroup.setItems(configService.findProjectVersionsByProject(targetProjectVersion.getProject()));
 
-        List<ProjectVersion> projectVersions = configService.findProjectVersionsByProject(targetProjectVersion.getProject());        
-        container.addContainerProperty("versionLabel", String.class, null); 
-        for (ProjectVersion version : projectVersions) {
-            Item item = container.addItem(version.getId());
-            item.getItemProperty("versionLabel").setValue(version.getVersionLabel()); 
-            if (targetProjectVersion.getId().equalsIgnoreCase(version.getId())) {
-                optionGroup.setItemEnabled(version.getId(), false);
-            }
-        }
         possibleTargetVersionsPanel.setContent(optionGroup);
         return possibleTargetVersionsPanel;
     }
@@ -144,7 +129,8 @@ public class ChangeDependencyVersionDialog extends ResizableWindow  {
     }
 
     protected void change() {
-        String selectedVersionId = (String) optionGroup.getValue();
+    	ProjectVersion selectedVersion = optionGroup.getValue();
+        String selectedVersionId = selectedVersion != null ? selectedVersion.getId() : null;
         configService.updateProjectVersionDependency(dependency, selectedVersionId);  
         designNavigator.refresh();
         close();

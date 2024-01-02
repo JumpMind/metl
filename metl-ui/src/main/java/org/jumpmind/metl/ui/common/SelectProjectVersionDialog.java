@@ -22,20 +22,23 @@ package org.jumpmind.metl.ui.common;
 
 import java.util.List;
 
+import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 
-import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
+import com.vaadin.data.TreeData;
+import com.vaadin.data.provider.TreeDataProvider;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.components.grid.SingleSelectionModel;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class SelectProjectVersionDialog extends ResizableWindow {
@@ -44,7 +47,11 @@ public class SelectProjectVersionDialog extends ResizableWindow {
 
     ApplicationContext context;
 
-    Tree tree = new Tree();
+    Tree<AbstractNamedObject> tree = new Tree<AbstractNamedObject>();
+    
+    TreeData<AbstractNamedObject> treeData = new TreeData<AbstractNamedObject>();
+    
+    TreeDataProvider<AbstractNamedObject> treeDataProvider;
 
     IProjectVersionSelectListener listener;
 
@@ -54,10 +61,23 @@ public class SelectProjectVersionDialog extends ResizableWindow {
         super(caption);
         this.context = context;
 
-        tree.setMultiSelect(false);
-        tree.addContainerProperty("name", String.class, "");
-        tree.setItemCaptionPropertyId("name");
-        tree.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+        tree.setSelectionMode(SelectionMode.SINGLE);
+        tree.setItemCaptionGenerator(item -> {
+        	if (item instanceof ProjectVersion) {
+        		return ((ProjectVersion) item).getVersionLabel();
+        	}
+        	return item.getName();
+        });
+        tree.setItemIconGenerator(item -> {
+        	if (item instanceof Project) {
+        		return Icons.PROJECT;
+        	} else if (item instanceof ProjectVersion) {
+        		return Icons.VERSION;
+        	}
+        	return null;
+        });
+        treeDataProvider = new TreeDataProvider<AbstractNamedObject>(treeData);
+        tree.setDataProvider(treeDataProvider);
         addProjects(projectToExclude);
 
         setWidth(600.0f, Unit.PIXELS);
@@ -90,8 +110,10 @@ public class SelectProjectVersionDialog extends ResizableWindow {
 
         selectButton.addClickListener(new ClickListener() {
             public void buttonClick(ClickEvent event) {
-                if (tree.getValue() instanceof ProjectVersion) {
-                    listener.selected((ProjectVersion) tree.getValue());
+				AbstractNamedObject selection = ((SingleSelectionModel<AbstractNamedObject>) tree.getSelectionModel())
+						.getSelectedItem().orElse(null);
+                if (selection instanceof ProjectVersion) {
+                    listener.selected((ProjectVersion) selection);
                     close();
                 }
             }
@@ -110,22 +132,12 @@ public class SelectProjectVersionDialog extends ResizableWindow {
         List<Project> projects = context.getConfigurationService().findProjects();
         for (Project project : projects) {
             if (!projectToExclude.equals(project)) {
-                addItem(project, project.getName(), Icons.PROJECT, null, true);
+                treeData.addItem(null, project);
                 for (ProjectVersion version : project.getProjectVersions()) {
-                    addItem(version, version.getVersionLabel(), Icons.VERSION, project, false);
+                    treeData.addItem(project, version);
                 }
             }
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    protected void addItem(Object itemId, String name, FontAwesome icon, Object parent,
-            boolean areChildrenAllowed) {
-        tree.addItem(itemId);
-        tree.getContainerProperty(itemId, "name").setValue(name);
-        tree.setItemIcon(itemId, icon);
-        tree.setParent(itemId, parent);
-        tree.setChildrenAllowed(itemId, areChildrenAllowed);
     }
 
     public void setProjectVersionSelectListener(IProjectVersionSelectListener listener) {

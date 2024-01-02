@@ -23,12 +23,12 @@ package org.jumpmind.metl.ui.views.design;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
-import org.apache.poi.ss.usermodel.IconMultiStateFormatting.IconSet;
-import org.jumpmind.metl.core.model.AbstractModel;
+import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.metl.core.model.AbstractName;
 import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.AbstractObject;
@@ -64,27 +64,23 @@ import org.jumpmind.vaadin.ui.common.ConfirmDialog.IConfirmListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
-import com.vaadin.event.ShortcutAction.KeyCode;
-import com.vaadin.event.ShortcutListener;
+import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.HasValue.ValueChangeListener;
+import com.vaadin.data.TreeData;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.FileDownloader;
-import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.MouseEventDetails;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
-import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.DefaultFieldFactory;
-import com.vaadin.ui.Field;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.ColumnHeaderMode;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.TreeTable;
+import com.vaadin.ui.TreeGrid;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.components.grid.Editor;
+import com.vaadin.ui.components.grid.SingleSelectionModel;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
@@ -108,7 +104,7 @@ public class DesignNavigator extends VerticalLayout {
 
     TabbedPanel tabs;
 
-    TreeTable treeTable;
+    TreeGrid<AbstractNamedObject> treeGrid;
 
     AbstractNamedObject itemBeingEdited;
 
@@ -120,8 +116,6 @@ public class DesignNavigator extends VerticalLayout {
 
     CutCopyPasteManager cutCopyPasteManager;
 
-    BeanItemContainer<AbstractNamedObject> treeTblContainer = new BeanItemContainer<AbstractNamedObject>(AbstractNamedObject.class);
-
     String tagFilterText = null;
 
     public DesignNavigator(ApplicationContext context, TabbedPanel tabs) {
@@ -132,9 +126,9 @@ public class DesignNavigator extends VerticalLayout {
 
         setSizeFull();
         addStyleName(ValoTheme.MENU_ROOT);
-        buildTreeTable();
+        buildTreeGrid();
         HorizontalLayout hLayout = new HorizontalLayout();
-        menuBar = new DesignMenuBar(this, treeTable);
+        menuBar = new DesignMenuBar(this, treeGrid);
         hLayout.addComponent(menuBar);
         hLayout.addComponent(buildFilterField());
         hLayout.setSpacing(true);
@@ -160,14 +154,13 @@ public class DesignNavigator extends VerticalLayout {
         TextField filterField = new TextField();
         filterField.setIcon(Icons.SEARCH);
         filterField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
-        filterField.setInputPrompt("Tag Filter");
-        filterField.setImmediate(true);
-        filterField.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        filterField.setTextChangeTimeout(200);
-        filterField.addTextChangeListener(new TextChangeListener() {
-            public void textChange(TextChangeEvent event) {
-                if (!event.getText().isEmpty()) {
-                    tagFilterText = event.getText();
+        filterField.setPlaceholder("Tag Filter");
+        filterField.setValueChangeMode(ValueChangeMode.LAZY);
+        filterField.setValueChangeTimeout(200);
+        filterField.addValueChangeListener(new ValueChangeListener<String>() {
+            public void valueChange(ValueChangeEvent<String> event) {
+                if (event.getValue() != null && !event.getValue().isEmpty()) {
+                    tagFilterText = event.getValue();
                 } else {
                     tagFilterText = null;
                 }
@@ -177,91 +170,115 @@ public class DesignNavigator extends VerticalLayout {
         return filterField;
     }
 
-    protected TreeTable buildTreeTable() {
-        treeTable = new TreeTable();
-        treeTable.addStyleName(ValoTheme.TREETABLE_NO_HORIZONTAL_LINES);
-        treeTable.addStyleName(ValoTheme.TREETABLE_NO_STRIPES);
-        treeTable.addStyleName(ValoTheme.TREETABLE_NO_VERTICAL_LINES);
-        treeTable.addStyleName(ValoTheme.TREETABLE_BORDERLESS);
-        treeTable.addStyleName("noselect");
-        treeTable.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
-        treeTable.setItemCaptionMode(ItemCaptionMode.EXPLICIT);
-        treeTable.setSizeFull();
-        treeTable.setCacheRate(100);
-        treeTable.setPageLength(100);
-        treeTable.setImmediate(true);
-        treeTable.setSelectable(true);
-        treeTable.setEditable(true);
-        treeTable.setContainerDataSource(treeTblContainer);
-        treeTable.setTableFieldFactory(new DefaultFieldFactory() {
-            @Override
-            public Field<?> createField(Container container, Object itemId, Object propertyId, Component uiContext) {
-                return buildEditableNavigatorField(itemId);
+    protected TreeGrid<AbstractNamedObject> buildTreeGrid() {
+        treeGrid = new TreeGrid<AbstractNamedObject>();
+        treeGrid.addStyleName(ValoTheme.TREETABLE_NO_HORIZONTAL_LINES);
+        treeGrid.addStyleName(ValoTheme.TREETABLE_NO_STRIPES);
+        treeGrid.addStyleName(ValoTheme.TREETABLE_NO_VERTICAL_LINES);
+        treeGrid.addStyleName(ValoTheme.TREETABLE_BORDERLESS);
+        treeGrid.addStyleName("noselect");
+        treeGrid.setHeaderVisible(false);
+        treeGrid.setSizeFull();
+        //treeGrid.setCacheRate(100);
+        //treeGrid.setPageLength(100);
+        Editor<AbstractNamedObject> editor = treeGrid.getEditor();
+        editor.setEnabled(true);
+        editor.addOpenListener(event -> itemBeingEdited = event.getBean());
+        editor.addCancelListener(event -> abortEditingItem());
+        editor.addSaveListener(event -> finishEditingItem(event.getBean().getName()));
+        treeGrid.addComponentColumn(item -> {
+            Label nameLabel = new Label(item.getName());
+            nameLabel.setCaption("");
+            if (item instanceof FolderName) {
+                nameLabel.setIcon(treeGrid.isExpanded(item) ? Icons.FOLDER_OPEN : Icons.FOLDER_CLOSED);
+            } else if (item instanceof ProjectVersion) {
+                nameLabel.setIcon(((ProjectVersion) item).locked() ? VaadinIcons.LOCK : Icons.PROJECT_VERSION);
+            } else if (item instanceof Project) {
+                nameLabel.setIcon(Icons.PROJECT);
+            } else if (item instanceof ResourceName) {
+                nameLabel.setIcon(getIconForResource((ResourceName) item));
+            } else if (item instanceof ProjectVersionDepends) {
+                nameLabel.setIcon(Icons.DEPENDENCY);
+            } else if (item instanceof FlowName) {
+                nameLabel.setIcon(((FlowName) item).isWebService() ? Icons.WEB : Icons.FLOW);
+            } else if (item instanceof RelationalModelName || item instanceof HierarchicalModelName) {
+                nameLabel.setIcon(Icons.MODEL);
             }
-        });
-        treeTable.setVisibleColumns(new Object[] { "name" });
-        treeTable.setColumnExpandRatio("name", 1);
-        treeTable.addItemClickListener(event -> {
-            if (event.getButton() == MouseButton.LEFT) {
-                if (event.isDoubleClick()) {
+            return nameLabel;
+        }).setEditorBinding(treeGrid.getEditor().getBinder().bind(buildEditableNavigatorField(),
+                AbstractNamedObject::getName, AbstractNamedObject::setName)).setExpandRatio(1);
+        treeGrid.addItemClickListener(event -> {
+           MouseEventDetails details = event.getMouseEventDetails();
+            if (details.getButton() == MouseButton.LEFT) {
+                if (details.isDoubleClick()) {
                     abortEditingItem();
-                    open(event.getItemId());
-                    if (treeTable.areChildrenAllowed(event.getItemId())) {
-                        Object item = event.getItemId();
-                        treeTable.setCollapsed(item, !treeTable.isCollapsed(item));
+                    open(event.getItem());
+                    if (treeGrid.getDataProvider().hasChildren(event.getItem())) {
+                        AbstractNamedObject item = event.getItem();
+                        if (treeGrid.isExpanded(item)) {
+                            treeGrid.collapse(item);
+                        } else {
+                            treeGrid.expand(item);
+                        }
                     }
                 }
             }
         });
-        treeTable.addExpandListener(e -> {
+        treeGrid.addExpandListener(e -> {
             // deselect any selected rows when they expand or collapse?
-            AbstractObject object = (AbstractObject) treeTable.getValue();
-            treeTable.unselect(object);
-            if (e.getItemId() instanceof FolderName) {
-                treeTable.setItemIcon(e.getItemId(), Icons.FOLDER_OPEN);
-            } else if (e.getItemId() instanceof Project && !treeTable.hasChildren(e.getItemId())) {
-                addProjectVersions((Project) e.getItemId());
+            treeGrid.deselectAll();
+            if (e.getExpandedItem() instanceof Project && !treeGrid.getDataProvider().hasChildren(e.getExpandedItem())) {
+                addProjectVersions((Project) e.getExpandedItem());
             }
 
             saveExpandedList();
         });
-        treeTable.addCollapseListener(event -> {
-            if (event.getItemId() instanceof FolderName) {
-                treeTable.setItemIcon(event.getItemId(), Icons.FOLDER_CLOSED);
-            }
-            saveExpandedList();
-        });
-        treeTable.setCellStyleGenerator((Table source, Object itemId, Object propertyId) -> {
-            if ("name".equals(propertyId)) {
-                if (itemId instanceof FolderName) {
-                    return "folder";
-                } else if (itemId instanceof Project) {
-                    return "project";
-                } else if (itemId instanceof ProjectVersion) {
-                    ProjectVersion version = (ProjectVersion) itemId;
-                    return version.locked() ? "project-version-read-only" : "project-version";
-                } else {
-                    ProjectVersion version = findProjectVersion(itemId);
-                    if (version != null) {
-                        return version.locked() ? "project-version-read-only" : null;
-                    }
+        treeGrid.addCollapseListener(event -> saveExpandedList());
+        treeGrid.setStyleGenerator(itemId -> {
+            if (itemId instanceof FolderName) {
+                return "folder";
+            } else if (itemId instanceof Project) {
+                return "project";
+            } else if (itemId instanceof ProjectVersion) {
+                ProjectVersion version = (ProjectVersion) itemId;
+                return version.locked() ? "project-version-read-only" : "project-version";
+            } else {
+                ProjectVersion version = findProjectVersion(itemId);
+                if (version != null) {
+                    return version.locked() ? "project-version-read-only" : null;
                 }
             }
             return null;
         });
-        treeTable.addValueChangeListener(e -> selectionChanged());
+        treeGrid.addSelectionListener(e -> selectionChanged());
 
-        return treeTable;
+        return treeGrid;
+    }
+    
+    protected VaadinIcons getIconForResource(ResourceName resource) {
+        if ("Database".equals(resource.getType())) {
+            return Icons.DATABASE;
+        } else if ("Http".equals(resource.getType())) {
+            return Icons.WEB;
+        } else if ("MailSession".equals(resource.getType())) {
+            return Icons.EMAIL;
+        } else if (resource.getType().contains("JMS") || resource.getType().contains("SQS")) {
+            return Icons.QUEUE;
+        } else if (resource.getType().contains("S3")) {
+            return Icons.CLOUD;
+        } else {
+            return Icons.FILE_SYSTEM;
+        }
     }
 
     protected void saveExpandedList() {
         if (!rebuilding) {
             StringBuilder ids = new StringBuilder();
-            Collection<?> itemIds = treeTable.getItemIds();
-            for (Object itemId : itemIds) {
-                if (!treeTable.isCollapsed(itemId)) {
+            List<AbstractNamedObject> itemIds = getAllItems();
+            for (AbstractNamedObject itemId : itemIds) {
+                if (treeGrid.isExpanded(itemId)) {
                     if (itemId instanceof FolderName) {
-                        Collection<?> children = treeTable.getChildren(itemId);
+                        List<AbstractNamedObject> children = treeGrid.getTreeData().getChildren(itemId);
                         if (children.size() > 0) {
                             itemId = children.iterator().next();
                         }
@@ -278,9 +295,24 @@ public class DesignNavigator extends VerticalLayout {
             configurationService.save(setting);
         }
     }
+    
+    protected List<AbstractNamedObject> getAllItems() {
+        List<AbstractNamedObject> itemList = new ArrayList<AbstractNamedObject>();
+        addItemsRecursively(null, itemList);
+        return itemList;
+    }
+    
+    protected void addItemsRecursively(AbstractNamedObject item, List<AbstractNamedObject> list) {
+        if (item != null) {
+            list.add(item);
+        }
+        for (AbstractNamedObject child : treeGrid.getTreeData().getChildren(item)) {
+            addItemsRecursively(child, list);
+        }
+    }
 
     protected void selectionChanged() {
-        AbstractObject object = (AbstractObject) treeTable.getValue();
+        AbstractObject object = ((SingleSelectionModel<AbstractNamedObject>) treeGrid.getSelectionModel()).getSelectedItem().orElse(null);
         if (object != null) {
             Setting setting = context.getUser().findSetting(UserSetting.SETTING_DESIGN_NAVIGATOR_SELECTION_ID);
             setting.setValue(object.getId());
@@ -295,38 +327,30 @@ public class DesignNavigator extends VerticalLayout {
         }
     }
 
-    protected Field<?> buildEditableNavigatorField(Object itemId) {
-        if (itemBeingEdited != null && itemBeingEdited.equals(itemId)) {
-            final EnableFocusTextField field = new EnableFocusTextField();
-            field.addStyleName(ValoTheme.TEXTFIELD_SMALL);
-            field.setImmediate(true);
-            field.setWidth(95, Unit.PERCENTAGE);
-            field.addFocusListener(e -> {
-                field.setFocusAllowed(false);
-                field.selectAll();
-                field.setFocusAllowed(true);
-            });
-            field.focus();
-            field.addShortcutListener(new ShortcutListener("Escape", KeyCode.ESCAPE, null) {
-
-                @Override
-                public void handleAction(Object sender, Object target) {
-                    abortEditingItem();
-                }
-            });
-            field.addValueChangeListener(event -> finishEditingItem((String) event.getProperty().getValue()));
-            field.addBlurListener(event -> abortEditingItem());
-            return field;
-        } else {
-            return null;
-        }
+    protected EnableFocusTextField buildEditableNavigatorField() {
+        final EnableFocusTextField field = new EnableFocusTextField();
+        field.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+        field.setWidth(95, Unit.PERCENTAGE);
+        field.addFocusListener(e -> {
+            field.setFocusAllowed(false);
+            field.selectAll();
+            field.setFocusAllowed(true);
+        });
+        field.focus();
+        return field;
     }
 
     public boolean startEditingItem(AbstractNamedObject obj) {
         if (obj.isSettingNameAllowed()) {
             itemBeingEdited = obj;
-            treeTable.refreshRowCache();
-            treeTable.setValue(null);
+            treeGrid.getDataProvider().refreshAll();
+            treeGrid.deselectAll();
+            List<AbstractNamedObject> itemList = treeGrid.getDataCommunicator().fetchItemsWithRange(0,
+                    treeGrid.getDataCommunicator().getDataProviderSize());
+            int index = itemList.indexOf(obj);
+            if (index >= 0) {
+                treeGrid.getEditor().editRow(index);
+            }
             return true;
         } else {
             return false;
@@ -336,7 +360,7 @@ public class DesignNavigator extends VerticalLayout {
     protected void finishEditingItem(String value) {
         if (itemBeingEdited != null && isNotBlank(value)) {
             itemBeingEdited.setName(value);
-            Object selected = itemBeingEdited;
+            AbstractNamedObject selected = itemBeingEdited;
             Method method = null;
             try {
                 method = configurationService.getClass().getMethod("save", itemBeingEdited.getClass());
@@ -353,7 +377,7 @@ public class DesignNavigator extends VerticalLayout {
                 configurationService.save(itemBeingEdited);
             }
             itemBeingEdited = null;
-            treeTable.setValue(selected);
+            treeGrid.select(selected);
             refreshProjects();
         }
     }
@@ -362,7 +386,7 @@ public class DesignNavigator extends VerticalLayout {
         if (itemBeingEdited != null) {
             itemBeingEdited = null;
             refresh();
-            treeTable.focus();
+            treeGrid.focus();
         }
     }
 
@@ -374,31 +398,24 @@ public class DesignNavigator extends VerticalLayout {
         boolean add = true;
         Iterator<Component> i = iterator();
         while (i.hasNext()) {
-            if (i.next().equals(treeTable)) {
+            if (i.next().equals(treeGrid)) {
                 add = false;
                 break;
             }
         }
 
         if (add) {
-            addComponent(treeTable);
-            setExpandRatio(treeTable, 1);
+            addComponent(treeGrid);
+            setExpandRatio(treeGrid, 1);
         }
-        treeTable.refreshRowCache();
+        treeGrid.getDataProvider().refreshAll();
     }
 
     protected void addProjectVersions(Project project) {
         List<ProjectVersion> versions = project.getProjectVersions();
         for (ProjectVersion projectVersion : versions) {
-            treeTable.addItem(projectVersion);
-            if (projectVersion.locked()) {
-                treeTable.setItemIcon(projectVersion, FontAwesome.LOCK);
-            } else {
-                treeTable.setItemIcon(projectVersion, Icons.PROJECT_VERSION);
-            }
+            treeGrid.getTreeData().addItem(project, projectVersion);
 
-            treeTable.setChildrenAllowed(projectVersion, true);
-            treeTable.setParent(projectVersion, project);
             addFlowsToFolder(LABEL_FLOWS, projectVersion, false);
             addFlowsToFolder(LABEL_TESTS, projectVersion, true);
             addModelsToFolder(LABEL_MODELS, projectVersion);
@@ -407,37 +424,28 @@ public class DesignNavigator extends VerticalLayout {
         }
     }
 
-    protected void collapseAll(Object itemId) {
-        treeTable.setCollapsed(itemId, true);
-        Collection<?> itemIds = treeTable.getChildren(itemId);
-        if (itemIds != null) {
-            for (Object object : itemIds) {
-                treeTable.setCollapsed(object, true);
-            }
-        }
+    protected void collapseAll(AbstractNamedObject itemId) {
+        treeGrid.collapseRecursively(Stream.of(itemId), 1);
     }
 
     protected void refreshProjects() {
         rebuilding = true;
         try {
             long ts = System.currentTimeMillis();
-            Object selected = treeTable.getValue();
+            AbstractNamedObject selected = ((SingleSelectionModel<AbstractNamedObject>) treeGrid.getSelectionModel()).getSelectedItem().orElse(null);
             List<Project> projects;
-            if (tagFilterText == null) {
+            if (StringUtils.isBlank(tagFilterText)) {
                 projects = configurationService.findProjects();
             } else {
                 projects = configurationService.findProjectsWithTagLike(tagFilterText);
             }
-            Collection<?> itemIds = treeTable.getItemIds();
-            for (Object itemId : itemIds) {
+            List<AbstractNamedObject> itemIds = getAllItems();
+            for (AbstractNamedObject itemId : itemIds) {
                 collapseAll(itemId);
             }
-            treeTable.removeAllItems();
+            treeGrid.getTreeData().clear();
             for (Project project : projects) {
-                List<ProjectVersion> versions = project.getProjectVersions();
-                treeTable.addItem(project);
-                treeTable.setItemIcon(project, Icons.PROJECT);
-                treeTable.setChildrenAllowed(project, versions.size() > 0);
+                treeGrid.getTreeData().addItem(null, project);
             }
 
             if (selected == null) {
@@ -445,10 +453,9 @@ public class DesignNavigator extends VerticalLayout {
                 if (isNotBlank(selectedId)) {
                     String projectId = context.getUser().findSetting(UserSetting.SETTING_DESIGN_NAVIGATOR_SELECTED_PROJECT_ID).getValue();
                     if (isNotBlank(projectId)) {
-                        Collection<?> items = treeTable.getItemIds();
-                        for (Object object : items) {
+                        for (AbstractNamedObject object : itemIds) {
                             if (object instanceof Project && ((Project) object).getId().equals(projectId)
-                                    && !((Project) object).isDeleted()) {
+                                    && !((Project) object).isDeleted() && projects.contains(object)) {
                                 addProjectVersions((Project) object);
                                 selected = findChild(selectedId, object);
                                 break;
@@ -465,7 +472,7 @@ public class DesignNavigator extends VerticalLayout {
                     String[] typeAndId = typeIdString.split(":");
                     String type = typeAndId[0];
                     String id = typeAndId[1];
-                    AbstractObject object = null;
+                    AbstractNamedObject object = null;
                     if (type.equals(FlowName.class.getSimpleName())) {
                         object = new FlowName();
                         object.setId(id);
@@ -494,22 +501,23 @@ public class DesignNavigator extends VerticalLayout {
 
             if (selected != null) {
                 expand(selected);
-                treeTable.setValue(selected);
+                treeGrid.select(selected);
             }
+            treeGrid.getDataProvider().refreshAll();
             log.debug("It took {}ms to refresh projects in the design view", (System.currentTimeMillis() - ts));
         } finally {
             rebuilding = false;
         }
     }
 
-    protected Object findChild(String id, Object parent) {
-        Collection<?> items = treeTable.getChildren(parent);
+    protected AbstractNamedObject findChild(String id, AbstractNamedObject parent) {
+        List<AbstractNamedObject> items = treeGrid.getTreeData().getChildren(parent);
         if (items != null) {
-            for (Object object : items) {
-                if (id.equals(((AbstractObject) object).getId())) {
+            for (AbstractNamedObject object : items) {
+                if (id.equals(object.getId())) {
                     return object;
                 } else {
-                    Object obj = findChild(id, object);
+                    AbstractNamedObject obj = findChild(id, object);
                     if (obj != null) {
                         return obj;
                     }
@@ -526,11 +534,7 @@ public class DesignNavigator extends VerticalLayout {
         folder.setId(folderId);
         folder.setName(name);
 
-        treeTable.addItem(folder);
-        treeTable.setItemIcon(folder, Icons.FOLDER_CLOSED);
-        treeTable.setItemCaption(folder, name);
-        treeTable.setParent(folder, projectVersion);
-        treeTable.setChildrenAllowed(folder, false);
+        treeGrid.getTreeData().addItem(projectVersion, folder);
         return folder;
     }
 
@@ -541,25 +545,7 @@ public class DesignNavigator extends VerticalLayout {
             if (folder == null) {
                 folder = addVirtualFolder(folderName, projectVersion);
             }
-            this.treeTable.setChildrenAllowed(folder, true);
-            this.treeTable.addItem(resource);
-            if ("Database".equals(resource.getType())) {
-                this.treeTable.setItemIcon(resource, Icons.DATABASE);
-            } else if ("Http".equals(resource.getType())) {
-                this.treeTable.setItemIcon(resource, Icons.WEB);
-            } else if ("MailSession".equals(resource.getType())) {
-                this.treeTable.setItemIcon(resource, Icons.EMAIL);
-            } else if (resource.getType().contains("JMS")) {
-                this.treeTable.setItemIcon(resource, Icons.QUEUE);
-            } else if (resource.getType().contains("SQS")) {
-                this.treeTable.setItemIcon(resource, Icons.QUEUE);
-            } else if (resource.getType().contains("S3")) {
-                this.treeTable.setItemIcon(resource, Icons.CLOUD);
-            } else {
-                this.treeTable.setItemIcon(resource, Icons.FILE_SYSTEM);
-            }
-            this.treeTable.setChildrenAllowed(resource, false);
-            this.treeTable.setParent(resource, folder);
+            this.treeGrid.getTreeData().addItem(folder, resource);
         }
 
     }
@@ -571,11 +557,7 @@ public class DesignNavigator extends VerticalLayout {
             if (folder == null) {
                 folder = addVirtualFolder(folderName, projectVersion);
             }
-            this.treeTable.setChildrenAllowed(folder, true);
-            this.treeTable.addItem(dependency);
-            this.treeTable.setItemIcon(dependency, Icons.DEPENDENCY);
-            this.treeTable.setParent(dependency, folder);
-            this.treeTable.setChildrenAllowed(dependency, false);
+            this.treeGrid.getTreeData().addItem(folder, dependency);
         }
     }
 
@@ -587,11 +569,7 @@ public class DesignNavigator extends VerticalLayout {
                 if (folder == null) {
                     folder = addVirtualFolder(folderName, projectVersion);
                 }
-                this.treeTable.setChildrenAllowed(folder, true);
-                this.treeTable.addItem(flow);
-                this.treeTable.setItemIcon(flow, flow.isWebService() ? Icons.WEB : Icons.FLOW);
-                this.treeTable.setParent(flow, folder);
-                this.treeTable.setChildrenAllowed(flow, false);
+                this.treeGrid.getTreeData().addItem(folder, flow);
             }
         }
 
@@ -604,11 +582,7 @@ public class DesignNavigator extends VerticalLayout {
             if (folder == null) {
                 folder = addVirtualFolder(folderName, projectVersion);
             }
-            this.treeTable.setChildrenAllowed(folder, true);
-            this.treeTable.addItem(relationalModel);
-            this.treeTable.setItemIcon(relationalModel, Icons.MODEL);
-            this.treeTable.setParent(relationalModel, folder);
-            this.treeTable.setChildrenAllowed(relationalModel, false);
+            this.treeGrid.getTreeData().addItem(folder, relationalModel);
         }
         
         List<HierarchicalModelName> hierarchicalModels = context.getUiCache().findHierarchicalModelsInProject(projectVersion.getId());
@@ -616,16 +590,13 @@ public class DesignNavigator extends VerticalLayout {
             if (folder == null) {
                 folder = addVirtualFolder(folderName, projectVersion);
             }
-            this.treeTable.setChildrenAllowed(folder, true);
-            this.treeTable.addItem(hierarchicalModel);
-            this.treeTable.setItemIcon(hierarchicalModel, Icons.MODEL);
-            this.treeTable.setParent(hierarchicalModel, folder);
-            this.treeTable.setChildrenAllowed(hierarchicalModel, false);
+            this.treeGrid.getTreeData().addItem(folder, hierarchicalModel);
         }        
     }
 
-    protected void expand(Object value) {
-        if (value != null && !treeTable.containsId(value)) {
+    protected void expand(AbstractNamedObject value) {
+        List<AbstractNamedObject> items = getAllItems();
+        if (value != null && !items.contains(value)) {
             String projectVersionId = null;
             if (value instanceof AbstractName) {
                 AbstractName named = (AbstractName) value;
@@ -643,7 +614,6 @@ public class DesignNavigator extends VerticalLayout {
             }
 
             if (isNotBlank(projectId)) {
-                Collection<?> items = treeTable.getItemIds();
                 for (Object object : items) {
                     if (object instanceof Project && ((Project) object).getId().equals(projectId) && !((Project) object).isDeleted()) {
                         addProjectVersions(((Project) object));
@@ -651,23 +621,23 @@ public class DesignNavigator extends VerticalLayout {
                 }
             }
         }
-        if (value != null) {
-            treeTable.setCollapsed(value, false);
-            Object parent = treeTable.getParent(value);
+        if (value != null && treeGrid.getTreeData().contains(value)) {
+            treeGrid.expand(value);
+            AbstractNamedObject parent = treeGrid.getTreeData().getParent(value);
             while (parent != null) {
-                treeTable.setCollapsed(parent, false);
-                parent = treeTable.getParent(parent);
+                treeGrid.expand(parent);
+                parent = treeGrid.getTreeData().getParent(parent);
             }
         }
-        treeTable.focus();
+        treeGrid.focus();
     }
 
     public void unselectAll() {
-        treeTable.setValue(null);
+        treeGrid.deselectAll();
     }
 
     public void doOpen() {
-        open(treeTable.getValue());
+        open(((SingleSelectionModel<AbstractNamedObject>) treeGrid.getSelectionModel()).getSelectedItem().orElse(null));
     }
 
     protected void open(Object item) {
@@ -694,7 +664,7 @@ public class DesignNavigator extends VerticalLayout {
             ProjectVersion projectVersion = findProjectVersion(resource);
             PropertySheet sheet = new PropertySheet(context, tabs, context.isReadOnly(projectVersion, Privilege.DESIGN));
             sheet.setSource(configurationService.findResource(resource.getId()));
-            tabs.addCloseableTab(resource.getId(), resource.getName(), treeTable.getItemIcon(item), sheet);
+            tabs.addCloseableTab(resource.getId(), resource.getName(), getIconForResource((ResourceName) item), sheet);
         } else if (item instanceof ProjectVersion) {
             ProjectVersion projectVersion = (ProjectVersion) item;
             ProjectVersionSettingsPanel panel = new ProjectVersionSettingsPanel(projectVersion, context, this);
@@ -704,7 +674,7 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public void doWhereUsed() {
-        whereUsed(treeTable.getValue());
+        whereUsed(((SingleSelectionModel<AbstractNamedObject>) treeGrid.getSelectionModel()).getSelectedItem().orElse(null));
     }
     
     protected void whereUsed(Object item) {
@@ -722,7 +692,7 @@ public class DesignNavigator extends VerticalLayout {
     		ResourceName resource = (ResourceName) item;
             WhereUsedPanel panel = new WhereUsedPanel("Resource", resource.getId(), resource.getName(), context, this);
             tabs.addCloseableTab(resource.getId()+"WU",
-                    String.format("%s (Where Used)", resource.getName()), treeTable.getItemIcon(item), panel);
+                    String.format("%s (Where Used)", resource.getName()), getIconForResource((ResourceName) item), panel);
     	} else if (item instanceof FlowName) {
     		FlowName flow = (FlowName) item;
             WhereUsedPanel panel = new WhereUsedPanel("Flow", flow.getId(), flow.getName(), context, this);
@@ -737,15 +707,15 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public void doExport() {
-        ExportDialog.show(context, treeTable.getValue());
+        ExportDialog.show(context, ((SingleSelectionModel<AbstractNamedObject>) treeGrid.getSelectionModel()).getSelectedItem().orElse(null));
     }
 
     public void doTag() {
-        TagDialog.show(context, treeTable.getValue());
+        TagDialog.show(context, ((SingleSelectionModel<AbstractNamedObject>) treeGrid.getSelectionModel()).getSelectedItem().orElse(null));
     }
 
     public void doChangeDependencyVersion() {
-        ChangeDependencyVersionDialog.show(this, context, treeTable.getValue());
+        ChangeDependencyVersionDialog.show(this, context, ((SingleSelectionModel<AbstractNamedObject>) treeGrid.getSelectionModel()).getSelectedItem().orElse(null));
         refresh();
     }
 
@@ -754,7 +724,7 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public void doNewProjectBranch() {
-        Object object = treeTable.getValue();
+        AbstractNamedObject object = ((SingleSelectionModel<AbstractNamedObject>) treeGrid.getSelectionModel()).getSelectedItem().orElse(null);
         if (object instanceof ProjectVersion) {
             ProjectVersion original = (ProjectVersion) object;
             configurationService.refresh(original.getProject());
@@ -770,27 +740,25 @@ public class DesignNavigator extends VerticalLayout {
             newVersion.setReleaseDate(null);
             configurationService.save(newVersion);
             context.getDefinitionFactory().refresh(newVersion.getId());
-            treeTable.addItem(newVersion);
-            treeTable.setItemIcon(newVersion, Icons.PROJECT_VERSION);
-            treeTable.setParent(newVersion, treeTable.getParent(object));
-            treeTable.setChildrenAllowed(newVersion, false);
-            treeTable.setValue(newVersion);
+            TreeData<AbstractNamedObject> treeData = treeGrid.getTreeData();
+            treeData.addItem(treeData.getParent(object), newVersion);
+            treeGrid.select(newVersion);
             refreshProjects();
         }
     }
 
     public void doCut() {
-        Object object = treeTable.getValue();
+        Object object = ((SingleSelectionModel<AbstractNamedObject>) treeGrid.getSelectionModel()).getSelectedItem().orElse(null);
         cutCopyPasteManager.cut(object);
     }
 
     public void doCopy() {
-        Object object = treeTable.getValue();
+        Object object = ((SingleSelectionModel<AbstractNamedObject>) treeGrid.getSelectionModel()).getSelectedItem().orElse(null);
         cutCopyPasteManager.copy(object);
     }
 
     public void doPaste() {
-        Object object = treeTable.getValue();
+        Object object = ((SingleSelectionModel<AbstractNamedObject>) treeGrid.getSelectionModel()).getSelectedItem().orElse(null);
 
         String newProjectVersionId = null;
         if (object instanceof FolderName) {
@@ -829,7 +797,7 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public void doRemove() {
-        Object object = treeTable.getValue();
+        AbstractNamedObject object = ((SingleSelectionModel<AbstractNamedObject>) treeGrid.getSelectionModel()).getSelectedItem().orElse(null);
         if (object instanceof FlowName) {
             FlowName flow = (FlowName) object;
             ConfirmDialog.show("Delete Flow?", "Are you sure you want to delete the '" + flow.getName() + "' flow?",
@@ -859,20 +827,20 @@ public class DesignNavigator extends VerticalLayout {
                     new DeleteProjectVersionConfirmationListener(namedObject));
         } else if (object instanceof ProjectVersionDepends) {
             configurationService.delete((ProjectVersionDepends) object);
-            treeTable.removeItem(object);
+            treeGrid.getTreeData().removeItem(object);
         }
     }
 
     protected FolderName findFolderWithName(String name) {
-        Object value = treeTable.getValue();
+        AbstractNamedObject value = ((SingleSelectionModel<AbstractNamedObject>) treeGrid.getSelectionModel()).getSelectedItem().orElse(null);
         while (!(value instanceof ProjectVersion) && value != null) {
-            value = treeTable.getParent(value);
+            value = treeGrid.getTreeData().getParent(value);
         }
 
         if (value instanceof ProjectVersion) {
-            Collection<?> children = treeTable.getChildren(value);
+            List<AbstractNamedObject> children = treeGrid.getTreeData().getChildren(value);
             if (children != null) {
-                for (Object object : children) {
+                for (AbstractNamedObject object : children) {
                     if (object instanceof FolderName) {
                         FolderName folder = (FolderName) object;
                         if (folder.getName().equals(name)) {
@@ -886,13 +854,13 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public ProjectVersion findProjectVersion() {
-        Object value = treeTable.getValue();
+        AbstractNamedObject value = ((SingleSelectionModel<AbstractNamedObject>) treeGrid.getSelectionModel()).getSelectedItem().orElse(null);
         return findProjectVersion(value);
     }
 
-    public ProjectVersion findProjectVersion(Object value) {
+    public ProjectVersion findProjectVersion(AbstractNamedObject value) {
         while (!(value instanceof ProjectVersion) && value != null) {
-            value = treeTable.getParent(value);
+            value = treeGrid.getTreeData().getParent(value);
         }
 
         if (value instanceof ProjectVersion) {
@@ -927,16 +895,11 @@ public class DesignNavigator extends VerticalLayout {
             if (folder == null) {
                 folder = addVirtualFolder(LABEL_DEPENDENCIES, projectVersion);
             }
-            treeTable.setChildrenAllowed(folder, true);
 
-            treeTable.addItem(dependency);
-            treeTable.setItemIcon(dependency, Icons.DEPENDENCY);
-            treeTable.setParent(dependency, folder);
-            treeTable.setChildrenAllowed(dependency, false);
+            treeGrid.getTreeData().addItem(folder, dependency);
 
-            treeTable.setCollapsed(folder, false);
-            treeTable.setCollapsed(projectVersion, false);
-            treeTable.setValue(dependency);
+            treeGrid.expand(folder, projectVersion);
+            treeGrid.select(dependency);
         }
     }
 
@@ -947,7 +910,6 @@ public class DesignNavigator extends VerticalLayout {
         if (folder == null) {
             folder = addVirtualFolder(name, projectVersion);
         }
-        treeTable.setChildrenAllowed(folder, true);
 
         FlowName flow = new FlowName();
         flow.setProjectVersionId(projectVersion.getId());
@@ -955,14 +917,10 @@ public class DesignNavigator extends VerticalLayout {
         flow.setTest(testFlow);
         configurationService.save(flow);
 
-        treeTable.addItem(flow);
-        treeTable.setItemIcon(flow, Icons.FLOW);
-        treeTable.setParent(flow, folder);
-        treeTable.setChildrenAllowed(flow, false);
+        treeGrid.getTreeData().addItem(folder, flow);
 
-        treeTable.setCollapsed(folder, false);
-        treeTable.setCollapsed(projectVersion, false);
-        treeTable.setValue(flow);
+        treeGrid.expand(folder, projectVersion);
+        treeGrid.select(flow);
 
         startEditingItem(flow);
     }
@@ -1015,13 +973,12 @@ public class DesignNavigator extends VerticalLayout {
     	addNewResource("AWS S3", "AWS S3", Icons.CLOUD);
     }
 
-    protected void addNewResource(String type, String defaultName, FontAwesome icon) {
+    protected void addNewResource(String type, String defaultName, VaadinIcons icon) {
         ProjectVersion projectVersion = findProjectVersion();
         FolderName folder = findFolderWithName(LABEL_RESOURCES);
         if (folder == null) {
             folder = addVirtualFolder(LABEL_RESOURCES, projectVersion);
         }
-        treeTable.setChildrenAllowed(folder, true);
 
         ResourceName resource = new ResourceName();
         resource.setName(defaultName);
@@ -1029,12 +986,9 @@ public class DesignNavigator extends VerticalLayout {
         resource.setType(type);
         configurationService.save(resource);
 
-        treeTable.addItem(resource);
-        treeTable.setItemIcon(resource, icon);
-        treeTable.setParent(resource, folder);
-        treeTable.setChildrenAllowed(resource, false);
+        treeGrid.getTreeData().addItem(folder, resource);
 
-        treeTable.setCollapsed(folder, false);
+        treeGrid.expand(folder);
 
         startEditingItem(resource);
     }
@@ -1045,7 +999,6 @@ public class DesignNavigator extends VerticalLayout {
         if (folder == null) {
             folder = addVirtualFolder(LABEL_MODELS, projectVersion);
         }
-        treeTable.setChildrenAllowed(folder, true);
 
         HierarchicalModelName model = new HierarchicalModelName();
         model.setName("New Model");
@@ -1053,12 +1006,9 @@ public class DesignNavigator extends VerticalLayout {
 
         configurationService.save(model);
 
-        treeTable.addItem(model);
-        treeTable.setItemIcon(model, Icons.MODEL);
-        treeTable.setParent(model, folder);
-        treeTable.setChildrenAllowed(model, false);
+        treeGrid.getTreeData().addItem(folder, model);
 
-        treeTable.setCollapsed(folder, false);
+        treeGrid.expand(folder);
 
         startEditingItem(model);
     }
@@ -1069,7 +1019,6 @@ public class DesignNavigator extends VerticalLayout {
         if (folder == null) {
             folder = addVirtualFolder(LABEL_MODELS, projectVersion);
         }
-        treeTable.setChildrenAllowed(folder, true);
 
         RelationalModelName model = new RelationalModelName();
         model.setName("New Model");
@@ -1077,12 +1026,9 @@ public class DesignNavigator extends VerticalLayout {
 
         configurationService.save(model);
 
-        treeTable.addItem(model);
-        treeTable.setItemIcon(model, Icons.MODEL);
-        treeTable.setParent(model, folder);
-        treeTable.setChildrenAllowed(model, false);
+        treeGrid.getTreeData().addItem(folder, model);
 
-        treeTable.setCollapsed(folder, false);
+        treeGrid.expand(folder);
 
         startEditingItem(model);
     }
@@ -1116,10 +1062,10 @@ public class DesignNavigator extends VerticalLayout {
         public boolean onOk() {
             configurationService.deleteFlow(configurationService.findFlow(toDelete.getId()));
             tabs.closeTab(toDelete.getId());
-            Object parent = treeTable.getParent(toDelete);
+            AbstractNamedObject parent = treeGrid.getTreeData().getParent(toDelete);
             refresh();
-            treeTable.setValue(parent);
-            treeTable.setCollapsed(parent, false);
+            treeGrid.select(parent);
+            treeGrid.expand(parent);
 
             return true;
         }
@@ -1139,10 +1085,10 @@ public class DesignNavigator extends VerticalLayout {
         public boolean onOk() {
             configurationService.delete(configurationService.findResource(toDelete.getId()));
             tabs.closeTab(toDelete.getId());
-            Object parent = treeTable.getParent(toDelete);
+            AbstractNamedObject parent = treeGrid.getTreeData().getParent(toDelete);
             refresh();
-            treeTable.setValue(parent);
-            treeTable.setCollapsed(parent, false);
+            treeGrid.select(parent);
+            treeGrid.expand(parent);
             return true;
         }
 
@@ -1170,10 +1116,10 @@ public class DesignNavigator extends VerticalLayout {
         		throw new RuntimeException("Request to delete an unknown model type could not be handled.");
         	}
             tabs.closeTab(toDelete.getId());
-            Object parent = treeTable.getParent(toDelete);
+            AbstractNamedObject parent = treeGrid.getTreeData().getParent(toDelete);
             refresh();
-            treeTable.setValue(parent);
-            treeTable.setCollapsed(parent, false);
+            treeGrid.select(parent);
+            treeGrid.expand(parent);
 
             return true;
         }
@@ -1194,7 +1140,7 @@ public class DesignNavigator extends VerticalLayout {
             toDelete.setDeleted(true);
             configurationService.save(toDelete);
             tabs.closeAll();
-            treeTable.setValue(null);
+            treeGrid.deselectAll();
             refresh();
             return true;
         }
@@ -1215,10 +1161,10 @@ public class DesignNavigator extends VerticalLayout {
             toDelete.setDeleted(true);
             configurationService.save(toDelete);
             tabs.closeAll();
-            Object parent = treeTable.getParent(toDelete);
+            AbstractNamedObject parent = treeGrid.getTreeData().getParent(toDelete);
             refresh();
-            treeTable.setValue(parent);
-            treeTable.setCollapsed(parent, false);
+            treeGrid.select(parent);
+            treeGrid.expand(parent);
             return true;
         }
     }

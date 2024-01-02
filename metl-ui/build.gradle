@@ -3,16 +3,10 @@ version = origVersion
 
 dependencies {
     compile project(":metl-core")
-    compile (group:"org.jumpmind.vaadin", name:"sqlexplorer-vaadin", version:"$sqlExplorerVersion", changing:true) {
-       exclude group:'org.jumpmind.symmetric'
+    compile (group:"org.jumpmind.symmetric", name:"symmetric-sqlexplorer", version:"$symmetricVersion", changing:true) {
        exclude group:'com.vaadin'
-       exclude group:'com.vaadin.addon' , module:'vaadin-context-menu'
     }
-    compile "com.cybercom:spring-ui-scope:0.0.2"
     compile "org.springframework:spring-webmvc:$springVersion"
-    compile (group:"org.vaadin", name:"viritin", version:"1.61") {
-       exclude group:'com.vaadin'
-    }    
     compile "org.apache.poi:poi:3.11"
     compile "io.springfox:springfox-swagger2:$springfoxSwaggerVersion"
     compile "io.springfox:springfox-swagger-ui:$springfoxSwaggerVersion"
@@ -33,8 +27,8 @@ dependencies {
     compile "com.vaadin:vaadin-themes:$vaadinVersion"    
     compile "javax.servlet:javax.servlet-api:$servletVersion"
     compile "org.eclipse.jetty:jetty-servlet:$jettyVersion"
-    compile "com.vaadin.addon:vaadin-context-menu:0.7.4"
-	compile "org.vaadin.addons:aceeditor:0.8.14"
+    compile "com.vaadin:vaadin-context-menu:3.0.0"
+    compile "org.vaadin.addons:aceeditor:0.8.15"
     compileOnly "javax.servlet.jsp:jsp-api:$jspVersion"
     compileOnly "javax.websocket:javax.websocket-api:$webSocketVersion"     
     compileOnly  group: 'javax.portlet', name: 'portlet-api', version: '2.0'

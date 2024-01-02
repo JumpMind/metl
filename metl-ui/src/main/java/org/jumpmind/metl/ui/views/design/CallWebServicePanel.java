@@ -25,13 +25,15 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -66,8 +68,6 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
-import com.vaadin.data.Container.Indexed;
-import com.vaadin.data.Item;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Button;
@@ -76,13 +76,15 @@ import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.PasswordField;
+import com.vaadin.ui.RadioButtonGroup;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.components.grid.Editor;
+import com.vaadin.ui.components.grid.SingleSelectionModel;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFlowRunnable {
@@ -99,7 +101,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
 
     TextField urlField;
 
-    OptionGroup methodGroup;
+    RadioButtonGroup<String> methodGroup;
 
     VerticalLayout responseStatusAreaLayout;
 
@@ -111,7 +113,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
 
     TabbedPanel tabs;
 
-    ComboBox securitySchemeCombo;
+    ComboBox<SecurityScheme> securitySchemeCombo;
 
     TextField userField;
 
@@ -149,36 +151,27 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
         urlField = new TextField("URL");
         formLayout.addComponent(urlField);
 
-        methodGroup = new OptionGroup("Method");
+        methodGroup = new RadioButtonGroup<String>("Method");
         methodGroup.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
-        methodGroup.addItem("GET");
-        methodGroup.addItem("PUT");
-        methodGroup.addItem("POST");
-        methodGroup.addItem("DELETE");
+        methodGroup.setItems("GET", "PUT", "POST", "DELETE");
         formLayout.addComponent(methodGroup);
 
-        ComboBox contentType = new ComboBox("Content Type");
-        contentType.addItem(MimeTypeUtils.APPLICATION_JSON.toString());
-        contentType.addItem(MimeTypeUtils.APPLICATION_XML.toString());
-        contentType.setNullSelectionAllowed(false);
+        ComboBox<String> contentType = new ComboBox<String>("Content Type");
+        contentType.setItems(MimeTypeUtils.APPLICATION_JSON.toString(), MimeTypeUtils.APPLICATION_XML.toString());
+        contentType.setEmptySelectionAllowed(false);
         formLayout.addComponent(contentType);
 
-        securitySchemeCombo = new ComboBox("Security Scheme");
-        securitySchemeCombo.setNullSelectionAllowed(false);
-        SecurityScheme[] types = SecurityScheme.values();
-        for (SecurityScheme securityType : types) {
-            securitySchemeCombo.addItem(securityType);
-        }
+        securitySchemeCombo = new ComboBox<SecurityScheme>("Security Scheme");
+        securitySchemeCombo.setEmptySelectionAllowed(false);
+        securitySchemeCombo.setItems(SecurityScheme.values());
         securitySchemeCombo.addValueChangeListener((e) -> securityMethodChanged());
         formLayout.addComponent(securitySchemeCombo);
 
         userField = new TextField("Security Username");
-        userField.setNullRepresentation("");
         userField.setVisible(false);
         formLayout.addComponent(userField);
 
         passwordField = new PasswordField("Security Password");
-        passwordField.setNullRepresentation("");
         passwordField.setVisible(false);
         formLayout.addComponent(passwordField);
 
@@ -223,17 +216,17 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
             methodGroup.setValue(mapping.getMethod().name());
 
             List<FlowStep> steps = flow.getFlowSteps();
-            contentType.select(MimeTypeUtils.APPLICATION_JSON.toString());
+            contentType.setValue(MimeTypeUtils.APPLICATION_JSON.toString());
             for (FlowStep flowStep : steps) {
                 String format = flowStep.getComponent().findSetting("format").getValue();
                 if ("XML".equals(format)) {
-                    contentType.select(MimeTypeUtils.APPLICATION_XML.toString());
+                    contentType.setValue(MimeTypeUtils.APPLICATION_XML.toString());
                     break;
                 }
             }
 
         } else {
-            contentType.select(contentType.getItemIds().iterator().next());
+            contentType.setValue(MimeTypeUtils.APPLICATION_JSON.toString());
             methodGroup.setValue("GET");
         }
 
@@ -274,7 +267,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
             HttpEntity<String> entity = new HttpEntity<>(requestTabs.getPayload().getValue(),
                     headers);
             ResponseEntity<String> response = template.exchange(urlField.getValue(),
-                    HttpMethod.valueOf((String) methodGroup.getValue()), entity, String.class);
+                    HttpMethod.valueOf(methodGroup.getValue()), entity, String.class);
             responseTabs.getPayload().setValue(response.getBody());
             headerMap = response.getHeaders().toSingleValueMap();
             for (String key : headerMap.keySet()) {
@@ -324,7 +317,8 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
         private static final long serialVersionUID = 1L;
         VerticalLayout payloadLayout;
         TextArea payload;
-        Grid headersGrid;
+        List<Header> headersList = new ArrayList<Header>();
+        Grid<Header> headersGrid;
 
         public ReqRespTabSheet(String caption, boolean editable) {
             setCaption(caption);
@@ -335,7 +329,6 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
             payloadLayout = new VerticalLayout();
             payloadLayout.setSizeFull();
             payload = new TextArea();
-            payload.setNullRepresentation("");
             payload.setSizeFull();
             payloadLayout.addComponent(payload);
             addTab(payloadLayout, "Payload");
@@ -353,16 +346,22 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
                 requestHeadersLayout.addComponent(requestHeadersButtonLayout);
             }
 
-            headersGrid = new Grid();
-            headersGrid.setEditorEnabled(editable);
-            headersGrid.setEditorSaveCaption("Save");
-            headersGrid.setEditorCancelCaption("Cancel");
+            headersGrid = new Grid<Header>();
+            if (editable) {
+				headersGrid.addColumn(Header::getName).setCaption("Header")
+						.setEditorComponent(new TextField(), Header::setName).setExpandRatio(1);
+				headersGrid.addColumn(Header::getValue).setCaption("Value")
+						.setEditorComponent(new TextField(), Header::setValue).setExpandRatio(1);
+            	Editor<Header> headersEditor = headersGrid.getEditor();
+            	headersEditor.setEnabled(true);
+                headersEditor.setSaveCaption("Save");
+                headersEditor.setCancelCaption("Cancel");
+            } else {
+                headersGrid.addColumn(Header::getName).setCaption("Header").setExpandRatio(1);
+                headersGrid.addColumn(Header::getValue).setCaption("Value").setExpandRatio(1);
+            }
             headersGrid.setSelectionMode(SelectionMode.SINGLE);
             headersGrid.setSizeFull();
-            headersGrid.addColumn("headerName").setHeaderCaption("Header").setEditable(true)
-                    .setExpandRatio(1);
-            headersGrid.addColumn("headerValue").setHeaderCaption("Value").setEditable(true)
-                    .setExpandRatio(1);
             requestHeadersLayout.addComponent(headersGrid);
             requestHeadersLayout.setExpandRatio(headersGrid, 1);
             addTab(requestHeadersLayout, "Headers");
@@ -372,48 +371,40 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
             return payloadLayout;
         }
 
-        @SuppressWarnings("unchecked")
         protected void setHeader(String name, String value) {
-            Indexed container = headersGrid.getContainerDataSource();
-            Collection<?> itemIds = container.getItemIds();
             boolean found = false;
-            for (Object itemId : itemIds) {
-                Item item = container.getItem(itemId);
-                if (name.equals(item.getItemProperty("headerName").getValue())) {
-                    item.getItemProperty("headerValue").setValue(value);
+            for (Header header : headersList) {
+                if (name.equals(header.getName())) {
+                    header.setValue(value);
                     found = true;
                     break;
                 }
             }
 
             if (!found) {
-                Object itemId = container.addItem();
-                Item item = container.getItem(itemId);
-                item.getItemProperty("headerName").setValue(name);
-                item.getItemProperty("headerValue").setValue(value);
+                headersList.add(new Header(name, value));
             }
         }
 
         protected Map<String, String> getHeaders() {
             Map<String, String> headers = new HashMap<String, String>();
-            Indexed container = headersGrid.getContainerDataSource();
-            Collection<?> itemIds = container.getItemIds();
-            for (Object itemId : itemIds) {
-                Item item = container.getItem(itemId);
-                headers.put((String) item.getItemProperty("headerName").getValue(),
-                        (String) item.getItemProperty("headerValue").getValue());
+            for (Header header : headersList) {
+            	headers.put(header.getName(), header.getValue());
             }
             return headers;
         }
 
         protected void add() {
-            headersGrid.getContainerDataSource().addItem();
+            headersList.add(new Header());
+            headersGrid.setItems(headersList);
         }
 
         protected void delete() {
-            Object selected = headersGrid.getSelectedRow();
+            Header selected = ((SingleSelectionModel<Header>) headersGrid.getSelectionModel()).getSelectedItem().orElse(null);
             if (selected != null) {
-                headersGrid.getContainerDataSource().removeItem(selected);
+				headersList = headersList.stream().filter(header -> !StringUtils.equals(header.getName(), selected.getName()))
+						.collect(Collectors.toList());
+                headersGrid.setItems(headersList);
             }
         }
 
@@ -421,10 +412,38 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
             return payload;
         }
 
-        public Grid getHeadersGrid() {
+        public Grid<Header> getHeadersGrid() {
             return headersGrid;
         }
 
+        public class Header {
+        	private String name;
+        	private String value;
+        	
+        	public Header() {
+        	}
+        	
+        	public Header(String name, String value) {
+        		this.name = name;
+        		this.value = value;
+        	}
+
+			public String getName() {
+				return name;
+			}
+
+			public void setName(String name) {
+				this.name = name;
+			}
+
+			public String getValue() {
+				return value;
+			}
+
+			public void setValue(String value) {
+				this.value = value;
+			}
+        }
     }
     
     public class BasicRequestFactory extends HttpComponentsClientHttpRequestFactory {
