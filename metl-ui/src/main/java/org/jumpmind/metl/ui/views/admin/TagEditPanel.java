@@ -31,14 +31,11 @@ import org.jumpmind.metl.core.model.Tag;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
-import com.vaadin.shared.ui.colorpicker.Color;
-import com.vaadin.ui.ColorPicker;
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.data.HasValue.ValueChangeListener;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 
 @SuppressWarnings("serial")
 
@@ -59,14 +56,13 @@ public class TagEditPanel extends VerticalLayout implements IUiPanel {
         this.tag = tag;
 
         FormLayout form = new FormLayout();
-        form.setSpacing(true);
         
         TextField nameField = new TextField("Name", StringUtils.trimToEmpty(tag.getName()));
-        form.addComponent(nameField);
+        form.add(nameField);
         nameField.addValueChangeListener(new NameChangeListener());
         nameField.focus();
 
-        ColorPicker colorPickerField = new ColorPicker("Tag Color");
+        /*ColorPicker colorPickerField = new ColorPicker("Tag Color");
         colorPickerField.setSwatchesVisibility(true);
         colorPickerField.setHistoryVisibility(true);
         colorPickerField.setTextfieldVisibility(false);
@@ -76,9 +72,9 @@ public class TagEditPanel extends VerticalLayout implements IUiPanel {
 
         HorizontalLayout hLayout = new HorizontalLayout();
         hLayout.setCaption("Color");
-        hLayout.addComponent(colorPickerField);
+        hLayout.add(colorPickerField);
                 
-        form.addComponent(hLayout);
+        form.add(hLayout);*/
         
 //        List<Group> groups = context.getOperationsService().findGroups();
 //        groupsById = new HashMap<String, Group>();
@@ -102,7 +98,7 @@ public class TagEditPanel extends VerticalLayout implements IUiPanel {
 //        groupSelect.addValueChangeListener(new GroupChangeListener());
 //        form.addComponent(groupSelect);
 
-        addComponent(form);
+        add(form);
         setMargin(true);
     }
 
@@ -125,20 +121,20 @@ public class TagEditPanel extends VerticalLayout implements IUiPanel {
         }
     }
 
-    class NameChangeListener implements ValueChangeListener<String> {
-        public void valueChange(ValueChangeEvent<String> event) {
+    class NameChangeListener implements ValueChangeListener<ValueChangeEvent<String>> {
+        public void valueChanged(ValueChangeEvent<String> event) {
             tag.setName(event.getValue());
             save(tag);
         }
     }
 
-    class ColorFieldListener implements ValueChangeListener<Color> {
+    /*class ColorFieldListener implements ValueChangeListener<Color> {
         @Override
         public void valueChange(ValueChangeEvent<Color> event) {
             tag.setColor(event.getValue().getRGB());
             save(tag);
         }
-    }    
+    }    */
     
 //    class GroupChangeListener implements ValueChangeListener {
 //        @SuppressWarnings("unchecked")

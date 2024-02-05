@@ -29,7 +29,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.Html;
+import com.vaadin.flow.component.icon.VaadinIcon;
 
 @Component
 @Scope(value="ui")
@@ -42,7 +43,7 @@ public class TopBarButtonSystem extends TopBarButton {
     protected ApplicationContext context;
 
     public TopBarButtonSystem() {
-        super(VaadinIcons.WARNING);
+        super(VaadinIcon.WARNING);
     }
     
     @PostConstruct
@@ -54,8 +55,8 @@ public class TopBarButtonSystem extends TopBarButton {
         }
 
         if (StringUtils.isNotBlank(caption)) {
-            setCaption(caption);
-            setCaptionAsHtml(true);
+            setText(null);
+            setIcon(new Html(caption));
         } else {
             setVisible(false);
         }

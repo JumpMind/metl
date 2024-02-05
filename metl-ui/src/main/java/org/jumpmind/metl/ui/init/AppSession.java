@@ -27,7 +27,7 @@ import java.util.List;
 
 import org.jumpmind.metl.core.model.User;
 
-import com.vaadin.server.VaadinSession;
+import com.vaadin.flow.server.VaadinSession;
 
 public class AppSession implements Serializable {
 

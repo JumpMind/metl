@@ -59,8 +59,8 @@ public class DbResource implements IDb, Serializable {
                 dataSource.setMaxIdle(1);
                 dataSource.setMinIdle(0);
                 dataSource.setInitialSize(0);
-                platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource,
-                        new SqlTemplateSettings(), false, false);
+                platform = JdbcDatabasePlatformFactory.getInstance().create(dataSource, new SqlTemplateSettings(),
+                        false, false);
             }
             return platform;
         }

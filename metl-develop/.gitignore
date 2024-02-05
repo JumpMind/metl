@@ -9,3 +9,5 @@
 /target/
 /working-save/
 /working20170213/
+/node_modules/
+/webpack.generated.js

@@ -27,24 +27,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
-import com.vaadin.data.Binder;
-import com.vaadin.data.converter.StringToIntegerConverter;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.AbstractField;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.converter.StringToIntegerConverter;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 @SuppressWarnings("serial")
 @UiComponent
 @Scope(value = "ui")
 @Order(500)
-@AdminMenuLink(name = "General Settings", id = "General Settings", icon = VaadinIcons.COGS)
+@AdminMenuLink(name = "General Settings", id = "General Settings", icon = VaadinIcon.COGS)
 public class GeneralSettingsPanel extends AbstractAdminPanel {
 
     private static final String THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART = "This will take effect on the next server restart";
@@ -60,25 +60,20 @@ public class GeneralSettingsPanel extends AbstractAdminPanel {
     
     public void init() {
         form = new FormLayout();
-        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
 
-        Label section = new Label("Display Settings");
-        section.addStyleName(ValoTheme.LABEL_H3);
-        section.addStyleName(ValoTheme.LABEL_COLORED);
-        form.addComponent(section);
+        H3 section = new H3("Display Settings");
+        form.add(section);
 
-        addSetting("System Text", GlobalSetting.SYSTEM_TEXT, "",
-                "Set HTML content to be displayed in the top bar that can identify a particular environment")
+        ((Focusable<?>) addSetting("System Text", GlobalSetting.SYSTEM_TEXT, "",
+                "Set HTML content to be displayed in the top bar that can identify a particular environment"))
                         .focus();
         
-        section = new Label("Auto Backup");
-        section.addStyleName(ValoTheme.LABEL_H3);
-        section.addStyleName(ValoTheme.LABEL_COLORED);
-        form.addComponent(section); 
+        section = new H3("Auto Backup");
+        form.add(section); 
         
-        Label instructions = new Label("A restart is required after changing these settings");
-        instructions.addStyleName(ValoTheme.LABEL_LIGHT);
-        form.addComponent(instructions);
+        Span instructions = new Span("A restart is required after changing these settings");
+        instructions.getStyle().set("font-weight", "lighter");
+        form.add(instructions);
         
         addSetting("Enable Backup", GlobalSetting.CONFIG_BACKUP_ENABLED,
                 Boolean.toString(GlobalSetting.DEFAULT_CONFIG_BACKUP_ENABLED),
@@ -94,21 +89,21 @@ public class GeneralSettingsPanel extends AbstractAdminPanel {
 
         VerticalLayout paddedLayout = new VerticalLayout();
         paddedLayout.setMargin(true);
-        paddedLayout.addComponent(form);
-        addComponent(paddedLayout);
+        paddedLayout.add(form);
+        add(paddedLayout);
     }
 
-    protected AbstractField<?> addSetting(String text, String globalSetting, String defaultValue,
+    protected AbstractField<?, ?> addSetting(String text, String globalSetting, String defaultValue,
             String description) {
         return addSetting(text, globalSetting, defaultValue, description, String.class);
     }
 
-    protected AbstractField<?> addSetting(String text, String globalSetting, String defaultValue,
+    protected AbstractField<?, ?> addSetting(String text, String globalSetting, String defaultValue,
             String description, Class<?> converter) {
         final GlobalSetting setting = getGlobalSetting(globalSetting, defaultValue);
-        AbstractField<?> field = null;
+        AbstractField<?, ?> field = null;
         if (Boolean.class.equals(converter)) {
-            final CheckBox checkbox = new CheckBox(text);
+            final Checkbox checkbox = new Checkbox(text);
             checkbox.setValue(Boolean.parseBoolean(setting.getValue()));
             checkbox.addValueChangeListener(
                     (e) -> saveSetting(setting, checkbox.getValue().toString()));
@@ -118,7 +113,7 @@ public class GeneralSettingsPanel extends AbstractAdminPanel {
             ((TextField) field).setValueChangeMode(ValueChangeMode.LAZY);
             ((TextField) field).setValueChangeTimeout(200);
             field.addValueChangeListener(event -> saveSetting(setting, (String) event.getValue()));
-            field.setDescription(description);
+            field.getElement().setProperty("title", description);
             ((TextField) field).setValue(setting.getValue());
 
             if (converter.equals(Integer.class)) {
@@ -127,7 +122,7 @@ public class GeneralSettingsPanel extends AbstractAdminPanel {
                         .bind(value -> Integer.parseInt(value), (value, newValue) -> value = String.valueOf(newValue));
             }
         }
-        form.addComponent(field);
+        form.add(field);
         return field;
     }
 
@@ -160,12 +155,6 @@ public class GeneralSettingsPanel extends AbstractAdminPanel {
             setting.setValue(defaultValue);
         }
         return setting;
-    }
-
-    @Override
-    public void enter(ViewChangeEvent event) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override

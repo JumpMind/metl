@@ -40,81 +40,83 @@ import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
-import org.jumpmind.vaadin.ui.common.ResizableWindow;
+import org.jumpmind.vaadin.ui.common.ResizableDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.data.provider.Query;
-import com.vaadin.server.Page;
-import com.vaadin.server.ResourceReference;
-import com.vaadin.server.StreamResource;
-import com.vaadin.server.StreamResource.StreamSource;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.CheckBoxGroup;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.server.InputStreamFactory;
+import com.vaadin.flow.server.StreamResource;
 
-public class ExportDialog extends ResizableWindow {
+public class ExportDialog extends ResizableDialog {
 
     final Logger log = LoggerFactory.getLogger(getClass());
     private static final long serialVersionUID = 1L;
     private ApplicationContext context;
-    CheckBoxGroup<FlowName> exportFlowGroup;
-    CheckBoxGroup<RelationalModelName> exportModelGroup;
-    CheckBoxGroup<ResourceName> exportResourceGroup;
+    Anchor exportAnchor;
+    boolean generateNewExport = true;
+    CheckboxGroup<FlowName> exportFlowGroup;
+    CheckboxGroup<RelationalModelName> exportModelGroup;
+    CheckboxGroup<ResourceName> exportResourceGroup;
     VerticalLayout affectedLayout;
     String projectVersionId;
 
     public ExportDialog(ApplicationContext context, Object selectedElement) {
         super("Export Configuration");
         this.context = context;
-        initWindow(selectedElement);
+        initDialog(selectedElement);
     }
 
-    private void initWindow(Object selectedItem) {
-        Panel exportPanel = new Panel("Export and Dependencies");
-        exportPanel.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
-        exportPanel.setSizeFull();
+    private void initDialog(Object selectedItem) {
+        H3 exportHeader = new H3("Export and Dependencies");
         VerticalLayout exportLayout = new VerticalLayout();
         exportLayout.setMargin(true);
+        exportLayout.setSizeFull();
         addSelectedAndDependentObjects(exportLayout, selectedItem);
-        exportPanel.setContent(exportLayout);
 
-        Panel affectedPanel = new Panel("Possible Affected Flows");
-        affectedPanel.setSizeFull();
-        exportPanel.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
+        H3 affectedHeader = new H3("Possible Affected Flows");
         affectedLayout = new VerticalLayout();
         affectedLayout.setMargin(true);
+        affectedLayout.setSizeFull();
         updateAffectedObjects();
-        affectedPanel.setContent(affectedLayout);
 
-        // Split panel for Export and Affected
-        HorizontalSplitPanel splitPanel = new HorizontalSplitPanel();
-        splitPanel.setWidth(100, Unit.PERCENTAGE);
-        splitPanel.setFirstComponent(exportPanel);
-        splitPanel.setSecondComponent(affectedPanel);
+        // Split layout for Export and Affected
+        SplitLayout splitLayout = new SplitLayout();
+        splitLayout.setWidthFull();
+        splitLayout.addToPrimary(exportHeader, exportLayout);
+        splitLayout.addToSecondary(affectedHeader, affectedLayout);
 
-        addComponent(splitPanel, 1);
+        add(splitLayout, 1);
         
         Button selectAllLink = new Button("Select All");
-        selectAllLink.addStyleName(ValoTheme.BUTTON_LINK);
+        selectAllLink.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         selectAllLink.addClickListener((event) -> selectAll());
 
         Button selectNoneLink = new Button("Select None");
-        selectNoneLink.addStyleName(ValoTheme.BUTTON_LINK);
+        selectNoneLink.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         selectNoneLink.addClickListener((event) -> selectNone());
         
-        addComponent(buildButtonFooter(new Button[] {selectAllLink, selectNoneLink}, new Button("Export", new ExportClickListener()), buildCloseButton()));
+        exportAnchor = new Anchor();
+        exportAnchor.setTarget("_blank");
+        exportAnchor.getElement().setAttribute("download", true);
+        Button exportButton = new Button("Export", new ExportClickListener());
+        exportAnchor.add(exportButton);
+        add(buildButtonFooter(new Button[] {selectAllLink, selectNoneLink}, exportAnchor, buildCloseButton()));
 
-        setWidth(700, Unit.PIXELS);
-        setHeight(500, Unit.PIXELS);
+        setWidth("700px");
+        setHeight("500px");
     }
     
     private void selectAll() {
@@ -132,7 +134,7 @@ public class ExportDialog extends ResizableWindow {
     private void updateAffectedObjects() {
         Set<String> flowIds = exportFlowGroup.getValue().stream().map(item -> item.getId()).collect(Collectors.toSet());
         Set<String> modelIds = exportModelGroup.getValue().stream().map(item -> item.getId()).collect(Collectors.toSet());
-        affectedLayout.removeAllComponents();
+        affectedLayout.removeAll();
         Set<Flow> flows = new HashSet<Flow>();
         for (String flowId : flowIds) {
             flows.addAll(context.getConfigurationService().findAffectedFlowsByFlow(flowId));
@@ -144,7 +146,7 @@ public class ExportDialog extends ResizableWindow {
         for (Flow flow : flows) {
             // only add flow to affected flows if its not already being exported
             if (!flowIds.contains(flow.getId())) {
-                affectedLayout.addComponent(new Label(" - " + flow.getName()));
+                affectedLayout.add(new Span(" - " + flow.getName()));
             }
         }
     }
@@ -174,33 +176,36 @@ public class ExportDialog extends ResizableWindow {
         AbstractObjectNameBasedSorter.sort(allFlows);
 
         // flows
-        exportFlowGroup = new CheckBoxGroup<FlowName>("Flows");
-        exportFlowGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
+        exportFlowGroup = new CheckboxGroup<FlowName>();
+        exportFlowGroup.setLabel("Flows");
+        exportFlowGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
         exportFlowGroup.setItems(allFlows);
-        exportFlowGroup.setItemCaptionGenerator(item -> item.getName());
+        exportFlowGroup.setItemLabelGenerator(item -> item.getName());
         for (FlowName key : allFlows) {
             if (allChecked || key.equals(selectedFlow)) {
                 exportFlowGroup.select(key);
             }
         }
         exportFlowGroup.addValueChangeListener(selectedItem -> updateAffectedObjects());
-        layout.addComponent(exportFlowGroup);
+        layout.add(exportFlowGroup);
 
         // models
         List<RelationalModelName> models = configurationService.findRelationalModelsInProject(projectVersionId);
         AbstractObjectNameBasedSorter.sort(models);
-        exportModelGroup = new CheckBoxGroup<RelationalModelName>("Models");
-        exportModelGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
-        exportModelGroup.setItemCaptionGenerator(item -> item.getName());
-        layout.addComponent(exportModelGroup);
+        exportModelGroup = new CheckboxGroup<RelationalModelName>();
+        exportModelGroup.setLabel("Models");
+        exportModelGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        exportModelGroup.setItemLabelGenerator(item -> item.getName());
+        layout.add(exportModelGroup);
 
         // resources
         List<ResourceName> resources = configurationService.findResourcesInProject(projectVersionId);
         AbstractObjectNameBasedSorter.sort(resources);
-        exportResourceGroup = new CheckBoxGroup<ResourceName>("Resources");
-        exportResourceGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
-        exportResourceGroup.setItemCaptionGenerator(item -> item.getName());
-        layout.addComponent(exportResourceGroup);
+        exportResourceGroup = new CheckboxGroup<ResourceName>();
+        exportResourceGroup.setLabel("Resources");
+        exportResourceGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        exportResourceGroup.setItemLabelGenerator(item -> item.getName());
+        layout.add(exportResourceGroup);
 
         List<RelationalModelName> dependentModels = new ArrayList<RelationalModelName>();
         List<ResourceName> dependentResources = new ArrayList<ResourceName>();
@@ -236,8 +241,8 @@ public class ExportDialog extends ResizableWindow {
     }
 
     @SuppressWarnings({ "serial" })
-    class ExportClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class ExportClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             Set<String> flowIds = exportFlowGroup.getValue().stream().map(item -> item.getId()).collect(Collectors.toSet());
             Set<String> modelIds = exportModelGroup.getValue().stream().map(item -> item.getId()).collect(Collectors.toSet());
             Set<String> resourceIds = exportResourceGroup.getValue().stream().map(item -> item.getId()).collect(Collectors.toSet());
@@ -250,29 +255,32 @@ public class ExportDialog extends ResizableWindow {
     }
 
     protected void downloadExport(final String export, String filename) {
+        if (generateNewExport) {
+            InputStreamFactory factory = new InputStreamFactory() {
+                private static final long serialVersionUID = 1L;
 
-        StreamSource ss = new StreamSource() {
-            private static final long serialVersionUID = 1L;
-
-            public InputStream getStream() {
-                try {
-                    return new ByteArrayInputStream(export.getBytes(Charset.forName("utf-8")));
-                } catch (Exception e) {
-                    log.error("Failed to export configuration", e);
-                    CommonUiUtils.notify("Failed to export configuration.", Type.ERROR_MESSAGE);
-                    return null;
+                public InputStream createInputStream() {
+                    try {
+                        return new ByteArrayInputStream(export.getBytes(Charset.forName("utf-8")));
+                    } catch (Exception e) {
+                        log.error("Failed to export configuration", e);
+                        CommonUiUtils.notifyError("Failed to export configuration.");
+                        return null;
+                    }
                 }
-            }
-        };
-        String datetime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        StreamResource resource = new StreamResource(ss, String.format("%s-config-%s.json", filename, datetime));
-        final String KEY = "export";
-        setResource(KEY, resource);
-        Page.getCurrent().open(ResourceReference.create(resource, this, KEY).getURL(), null);
+            };
+            String datetime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+            StreamResource resource = new StreamResource(String.format("%s-config-%s.json", filename, datetime), factory);
+            exportAnchor.setHref(resource);
+            generateNewExport = false;
+            UI.getCurrent().getPage().executeJs("$0.click();", exportAnchor.getElement());
+        } else {
+            exportAnchor.removeHref();
+            generateNewExport = true;
+        }
     }
 
     public static void show(ApplicationContext context, Object selectedElement) {
-        ExportDialog dialog = new ExportDialog(context, selectedElement);
-        UI.getCurrent().addWindow(dialog);
+        new ExportDialog(context, selectedElement).open();
     }
 }

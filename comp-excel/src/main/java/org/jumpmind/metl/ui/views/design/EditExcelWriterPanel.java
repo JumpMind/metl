@@ -37,13 +37,12 @@ import org.jumpmind.metl.core.runtime.component.ExcelFileWriter;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.ExportDialog;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.SelectionMode;
-import com.vaadin.ui.components.grid.GridRowDragger;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.component.icon.VaadinIcon;
 
 @SuppressWarnings("serial")
 public class EditExcelWriterPanel extends AbstractComponentEditPanel {
@@ -57,39 +56,39 @@ public class EditExcelWriterPanel extends AbstractComponentEditPanel {
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
         if (!readOnly) {
-            addComponent(buttonBar);
+            add(buttonBar);
 
-            Button moveUpButton = buttonBar.addButton("Move Up", VaadinIcons.ARROW_UP);
+            Button moveUpButton = buttonBar.addButton("Move Up", VaadinIcon.ARROW_UP);
             moveUpButton.addClickListener(new MoveUpClickListener());
 
-            Button moveDownButton = buttonBar.addButton("Move Down", VaadinIcons.ARROW_DOWN);
+            Button moveDownButton = buttonBar.addButton("Move Down", VaadinIcon.ARROW_DOWN);
             moveDownButton.addClickListener(new MoveDownClickListener());
 
-            Button moveTopButton = buttonBar.addButton("Move Top", VaadinIcons.ANGLE_DOUBLE_UP);
+            Button moveTopButton = buttonBar.addButton("Move Top", VaadinIcon.ANGLE_DOUBLE_UP);
             moveTopButton.addClickListener(new MoveTopClickListener());
 
-            Button moveBottomButton = buttonBar.addButton("Move Bottom", VaadinIcons.ANGLE_DOUBLE_DOWN);
+            Button moveBottomButton = buttonBar.addButton("Move Bottom", VaadinIcon.ANGLE_DOUBLE_DOWN);
             moveBottomButton.addClickListener(new MoveBottomClickListener());
 
-            Button cutButton = buttonBar.addButton("Cut", VaadinIcons.SCISSORS);
+            Button cutButton = buttonBar.addButton("Cut", VaadinIcon.SCISSORS);
             cutButton.addClickListener(new CutClickListener());
 
-            Button pasteButton = buttonBar.addButton("Paste", VaadinIcons.PASTE);
+            Button pasteButton = buttonBar.addButton("Paste", VaadinIcon.PASTE);
             pasteButton.addClickListener(new PasteClickListener());
         }
         
-        buttonBar.addButtonRight("Export", VaadinIcons.DOWNLOAD, (e)->export());
+        buttonBar.addButtonRight("Export", VaadinIcon.DOWNLOAD, (e)->export());
 
         grid.setSizeFull();
-        grid.addColumn(RecordFormat::getEntityName).setCaption("Entity Name").setSortable(false);
-        grid.addColumn(RecordFormat::getAttributeName).setCaption("Attribute Name").setSortable(false);
-        grid.addColumn(RecordFormat::getOrdinalSetting).setCaption("Ordinal").setSortable(false);
+        grid.addColumn(RecordFormat::getEntityName).setHeader("Entity Name").setSortable(false);
+        grid.addColumn(RecordFormat::getAttributeName).setHeader("Attribute Name").setSortable(false);
+        grid.addColumn(RecordFormat::getOrdinalSetting).setHeader("Ordinal").setSortable(false);
         grid.setSelectionMode(SelectionMode.MULTI);
         if (!readOnly) {
-            new GridRowDragger<RecordFormat>(grid);
+            grid.setRowsDraggable(true);
         }
-        addComponent(grid);
-        setExpandRatio(grid, 1.0f);
+        add(grid);
+        expand(grid);
 
         RelationalModel model = (RelationalModel) component.getInputModel();
 
@@ -194,8 +193,8 @@ public class EditExcelWriterPanel extends AbstractComponentEditPanel {
         }
     }
 
-    class MoveUpClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class MoveUpClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             Set<RecordFormat> itemIds = getSelectedItems();
             if (itemIds.size() > 0 && itemIds != null) {
                 RecordFormat firstItem = itemIds.iterator().next();
@@ -205,8 +204,8 @@ public class EditExcelWriterPanel extends AbstractComponentEditPanel {
         }
     }
 
-    class MoveDownClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class MoveDownClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             Set<RecordFormat> itemIds = getSelectedItems();
             if (itemIds.size() > 0 && itemIds != null) {
                 RecordFormat lastItem = null;
@@ -220,20 +219,20 @@ public class EditExcelWriterPanel extends AbstractComponentEditPanel {
         }
     }
 
-    class MoveTopClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class MoveTopClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             moveItemsTo(getSelectedItems(), 0);
         }
     }
 
-    class MoveBottomClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class MoveBottomClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             moveItemsTo(getSelectedItems(), recordFormatList.size() - 1);
         }
     }
 
-    class CutClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class CutClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             Set<RecordFormat> itemIds = getSelectedItems();
             selectedItemIds = new LinkedHashSet<RecordFormat>(itemIds);
             grid.deselectAll();
@@ -241,8 +240,8 @@ public class EditExcelWriterPanel extends AbstractComponentEditPanel {
         }
     }
 
-    class PasteClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class PasteClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             Set<RecordFormat> itemIds = getSelectedItems();
             if (itemIds.size() > 0 && selectedItemIds != null) {
                 int index = recordFormatList.indexOf(itemIds.iterator().next());

@@ -32,21 +32,16 @@ import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.shared.ui.grid.HeightMode;
-import com.vaadin.ui.AbstractLayout;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.SelectionMode;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.components.grid.SingleSelectionModel;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
-public class WhereUsedPanel extends Panel implements IUiPanel {
+public class WhereUsedPanel extends VerticalLayout implements IUiPanel {
 
     private static final long serialVersionUID = 1L;
 
@@ -74,33 +69,29 @@ public class WhereUsedPanel extends Panel implements IUiPanel {
         this.whereUsedObjectId = whereUsedObjectId;
         this.whereUsedObjectName = whereUsedObjectName;
         
-        VerticalLayout content = new VerticalLayout();
-        setContent(content);
-        
         addHeader(whereUsedType + " - Where Used");
 
         ButtonBar buttonBar = new ButtonBar();
-        content.addComponent(buttonBar);
+        add(buttonBar);
         openButton = buttonBar.addButton("Open Flow", Icons.FLOW, (event)->openFlow()); 
-        buttonBar.addButtonRight("Export", VaadinIcons.DOWNLOAD, (event)->export());
+        buttonBar.addButtonRight("Export", VaadinIcon.DOWNLOAD, (event)->export());
         
         componentWhereUsedGrid = new Grid<WhereUsed>();
         componentWhereUsedGrid.setSelectionMode(SelectionMode.SINGLE);
-        componentWhereUsedGrid.setHeightMode(HeightMode.ROW);
-        componentWhereUsedGrid.setWidth(100, Unit.PERCENTAGE);
-        componentWhereUsedGrid.addColumn(WhereUsed::getObjectId).setCaption("Id").setHidden(true); // adding hidden column of id because the export does not allow only one column in output
-        componentWhereUsedGrid.addColumn(WhereUsed::getProjectName).setCaption("Project");
+        componentWhereUsedGrid.setAllRowsVisible(true);
+        componentWhereUsedGrid.setWidthFull();
+        componentWhereUsedGrid.addColumn(WhereUsed::getObjectId).setHeader("Id").setVisible(false); // adding hidden column of id because the export does not allow only one column in output
+        componentWhereUsedGrid.addColumn(WhereUsed::getProjectName).setHeader("Project");
         
         if (!"ProjectVersion".equals(whereUsedType)) {
-        	componentWhereUsedGrid.addColumn(WhereUsed::getFlowName).setCaption("Flow");
-        	componentWhereUsedGrid.addColumn(WhereUsed::getComponentName).setCaption("Component");
+        	componentWhereUsedGrid.addColumn(WhereUsed::getFlowName).setHeader("Flow");
+        	componentWhereUsedGrid.addColumn(WhereUsed::getComponentName).setHeader("Component");
         }
         
-        content.addComponent(componentWhereUsedGrid);
+        add(componentWhereUsedGrid);
 
         VerticalLayout spacer = new VerticalLayout();
-        content.addComponent(spacer);
-        content.setExpandRatio(spacer, 1);
+        addAndExpand(spacer);
 
         populateContainer();
         setButtonsEnabled();
@@ -109,12 +100,12 @@ public class WhereUsedPanel extends Panel implements IUiPanel {
     protected void openFlow() {
     	String flowId = "";
     	String flowName = "";
-    	WhereUsed selected = ((SingleSelectionModel<WhereUsed>) componentWhereUsedGrid.getSelectionModel()).getSelectedItem().orElse(null);
+    	WhereUsed selected = componentWhereUsedGrid.getSelectionModel().getFirstSelectedItem().orElse(null);
     	if (selected != null) {
     		flowId = selected.getObjectId();
     		flowName = selected.getFlowName();
             EditFlowPanel flowLayout = new EditFlowPanel(context, flowId, designNavigator, designNavigator.tabs);
-            designNavigator.tabs.addCloseableTab(flowId, flowName, Icons.FLOW, flowLayout);
+            designNavigator.tabs.addCloseableTab(flowId, flowName, new Icon(Icons.FLOW), flowLayout);
     	}
     }
 
@@ -124,12 +115,10 @@ public class WhereUsedPanel extends Panel implements IUiPanel {
     
     protected void addHeader(String caption) {
         HorizontalLayout componentHeaderWrapper = new HorizontalLayout();
-        componentHeaderWrapper.setMargin(new MarginInfo(false, false, false, true));
-        Label componentHeader = new Label(caption);
-        componentHeader.addStyleName(ValoTheme.LABEL_H3);
-        componentHeader.addStyleName(ValoTheme.LABEL_COLORED);
-        componentHeaderWrapper.addComponent(componentHeader);
-        ((AbstractLayout)getContent()).addComponent(componentHeaderWrapper);
+        componentHeaderWrapper.getStyle().set("margin", "0 0 0 16px");
+        H3 componentHeader = new H3(caption);
+        componentHeaderWrapper.add(componentHeader);
+        add(componentHeaderWrapper);
     }
     
     protected void populateContainer() {
@@ -145,7 +134,6 @@ public class WhereUsedPanel extends Panel implements IUiPanel {
         	whereUsed = configurationService.findProjectVersionWhereUsed(whereUsedObjectId);
         }
         componentWhereUsedGrid.setItems(whereUsed);
-        componentWhereUsedGrid.setHeightByRows(whereUsed.size() > 0 ? whereUsed.size() : 1);
     }
 
     @Override

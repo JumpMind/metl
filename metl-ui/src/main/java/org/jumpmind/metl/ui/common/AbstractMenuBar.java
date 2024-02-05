@@ -26,46 +26,53 @@ import java.util.Map;
 
 import org.jumpmind.metl.core.model.AbstractNamedObject;
 
-import com.vaadin.contextmenu.ContextMenu;
-import com.vaadin.shared.MouseEventDetails;
-import com.vaadin.shared.MouseEventDetails.MouseButton;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.TreeGrid;
-import com.vaadin.ui.components.grid.SingleSelectionModel;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.contextmenu.MenuItemBase;
+import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
+import com.vaadin.flow.component.grid.contextmenu.GridContextMenu.GridContextMenuItemClickEvent;
+import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
+import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.shared.Registration;
 
 abstract public class AbstractMenuBar extends MenuBar {
 
     private static final long serialVersionUID = 1L;
 
     Map<Class<?>, ISelectedValueMenuManager> menuActionsByClass;
+    
+    Map<MenuItemBase<?, ?, ?>, Registration> registrationMap;
+    
+    Map<MenuItemBase<?, ?, ?>, MenuItemBase<?, ?, ?>> parentMap;
 
     protected TreeGrid<AbstractNamedObject> parent;
 
     ISelectedValueMenuManager nothingSelectedMenuManager;
 
-    Handler handler;
+    MenuBarListener menuBarListener;
+    
+    ContextMenuListener contextMenuListener;
 
-    ContextMenu contextMenu;
+    GridContextMenu<AbstractNamedObject> contextMenu;
 
     public AbstractMenuBar(TreeGrid<AbstractNamedObject> parent,
             ISelectedValueMenuManager nothingSelectedMenuManager) {
-        addStyleName(ValoTheme.MENUBAR_BORDERLESS);
-        setWidth(100, Unit.PERCENTAGE);
+        setWidthFull();
 
         this.parent = parent;
         this.nothingSelectedMenuManager = nothingSelectedMenuManager;
         this.menuActionsByClass = new HashMap<>();
+        this.registrationMap = new HashMap<MenuItemBase<?, ?, ?>, Registration>();
+        this.parentMap = new HashMap<MenuItemBase<?, ?, ?>, MenuItemBase<?, ?, ?>>();
         this.parent.addSelectionListener((e) -> valueChanged());
-        this.handler = new Handler();
+        this.menuBarListener = new MenuBarListener();
+        this.contextMenuListener = new ContextMenuListener();
 
-        contextMenu = new ContextMenu(parent, false);
-        parent.addItemClickListener(e->{
-            MouseEventDetails details = e.getMouseEventDetails();
-            if (details.getButton()==MouseButton.RIGHT && !details.isDoubleClick()) {
-                contextMenu.open(details.getClientX(), details.getClientY());
-            }
-        });
+        contextMenu = parent.addContextMenu();
 
         buildMenu();
 
@@ -77,15 +84,15 @@ abstract public class AbstractMenuBar extends MenuBar {
     }
     
     protected void addSeparator(String path) {
-        getMenuItem(path).addSeparator();
-        getContextMenuItem(path).addSeparator();        
+        getMenuItem(path).getSubMenu().add(new Hr());
+        getContextMenuItem(path).getSubMenu().add(new Hr());    
     }
 
-    private String buildMenuString(MenuItem item) {
+    private String buildMenuString(MenuItemBase<?, ?, ?> item) {
         StringBuilder menuString = new StringBuilder();
         do {
             menuString.insert(0, item.getText());
-            item = item.getParent();
+            item = parentMap.get(item);
             if (item != null) {
                 menuString.insert(0, "|");
             }
@@ -105,7 +112,7 @@ abstract public class AbstractMenuBar extends MenuBar {
             if (item == null) {
                 items = getItems();
             } else {
-                items = item.getChildren();
+                items = item.getSubMenu().getItems();
             }
             for (MenuItem menuItem : items) {
                 if (menuItem.getText().equals(name)) {
@@ -116,19 +123,19 @@ abstract public class AbstractMenuBar extends MenuBar {
         return item;
     }
 
-    protected MenuItem getContextMenuItem(String path) {
-        MenuItem item = null;
+    protected MenuItemBase<?, ?, ?> getContextMenuItem(String path) {
+        MenuItemBase<?, ?, ?> item = null;
         String[] names = parse(path);
         for (String name : names) {
-            List<MenuItem> items = null;
+            List<?> items = null;
             if (item == null) {
                 items = contextMenu.getItems();
             } else {
-                items = item.getChildren();
+                items = item.getSubMenu().getItems();
             }
-            for (MenuItem menuItem : items) {
-                if (menuItem.getText().equals(name)) {
-                    item = menuItem;
+            for (Object menuItem : items) {
+                if (((HasText) menuItem).getText().equals(name)) {
+                    item = (MenuItemBase<?, ?, ?>) menuItem;
                 }
             }
         }
@@ -137,7 +144,7 @@ abstract public class AbstractMenuBar extends MenuBar {
 
     
     protected void valueChanged() {
-        AbstractNamedObject selected = ((SingleSelectionModel<AbstractNamedObject>) parent.getSelectionModel()).getSelectedItem().orElse(null);
+        AbstractNamedObject selected = parent.getSelectionModel().getFirstSelectedItem().orElse(null);
         ISelectedValueMenuManager action = null;
         if (selected != null) {
             Class<?> clazz = selected.getClass();
@@ -158,17 +165,18 @@ abstract public class AbstractMenuBar extends MenuBar {
         if (items != null) {
             for (MenuItem menuItem : items) {
                 menuItem.setEnabled(action.isEnabled(buildMenuString(menuItem), selected));
-                List<MenuItem> children = menuItem.getChildren();
+                List<MenuItem> children = menuItem.getSubMenu().getItems();
                 setMenuBarEnabled(action, children, selected);
             }
         }
     }
     
-    private void setContextMenuEnabled(ISelectedValueMenuManager action, List<MenuItem> items, AbstractNamedObject selected) {
+    private void setContextMenuEnabled(ISelectedValueMenuManager action, List<GridMenuItem<AbstractNamedObject>> items,
+            AbstractNamedObject selected) {
         if (items != null) {
-            for (MenuItem menuItem : items) {
+            for (GridMenuItem<AbstractNamedObject> menuItem : items) {
                 menuItem.setEnabled(action.isEnabled(buildMenuString(menuItem), selected));
-                List<MenuItem> children = menuItem.getChildren();
+                List<GridMenuItem<AbstractNamedObject>> children = menuItem.getSubMenu().getItems();
                 setContextMenuEnabled(action, children, selected);
             }
         }
@@ -178,19 +186,19 @@ abstract public class AbstractMenuBar extends MenuBar {
 
     protected void add(String path) {
         MenuItem item = null;
-        MenuItem contextItem = null;
+        GridMenuItem<AbstractNamedObject> contextItem = null;
         for (String name : parse(path)) {
             if (item == null) {
                 item = addToMenuBarIfNotExists(name, null, getItems());
             } else {
-                item = addToMenuBarIfNotExists(name, item, item.getChildren());
+                item = addToMenuBarIfNotExists(name, item, item.getSubMenu().getItems());
             }
 
             if (contextItem == null) {
                 contextItem = addToContextMenuIfNotExists(name, null, contextMenu.getItems());
             } else {
                 contextItem = addToContextMenuIfNotExists(name, contextItem,
-                        contextItem.getChildren());
+                        contextItem.getSubMenu().getItems());
             }
         }
 
@@ -219,17 +227,24 @@ abstract public class AbstractMenuBar extends MenuBar {
         }
         if (item == null) {
             if (parent != null) {
-                parent.setCommand(null);
+                Registration parentRegistration = registrationMap.get(parent);
+                if (parentRegistration != null) {
+                    parentRegistration.remove();
+                    registrationMap.remove(parent);
+                }
             }
-            item = parent != null ? parent.addItem(name, handler) : addItem(name, handler);
+            item = parent != null ? parent.getSubMenu().addItem(name) : addItem(name);
+            registrationMap.put(item, item.addClickListener(menuBarListener));
+            parentMap.put(item, parent);
         }
         return item;
     }
 
-	private MenuItem addToContextMenuIfNotExists(String name, MenuItem parent, List<MenuItem> items) {
-        MenuItem item = null;
+    private GridMenuItem<AbstractNamedObject> addToContextMenuIfNotExists(String name, GridMenuItem<AbstractNamedObject> parent,
+            List<GridMenuItem<AbstractNamedObject>> items) {
+        GridMenuItem<AbstractNamedObject> item = null;
         if (items != null) {
-            for (MenuItem menuItem : items) {
+            for (GridMenuItem<AbstractNamedObject> menuItem : items) {
                 if (menuItem.getText().equals(name)) {
                     item = menuItem;
                 }
@@ -237,36 +252,51 @@ abstract public class AbstractMenuBar extends MenuBar {
         }
         if (item == null) {
             if (parent != null) {
-                parent.setCommand(null);
+                Registration parentRegistration = registrationMap.get(parent);
+                if (parentRegistration != null) {
+                    parentRegistration.remove();
+                    registrationMap.remove(parent);
+                }
             }
-            item = parent != null ? parent.addItem(name, handler)
-                    : contextMenu.addItem(name, handler);
+            item = parent != null ? parent.getSubMenu().addItem(name) : contextMenu.addItem(name);
+            registrationMap.put(item, item.addMenuItemClickListener(contextMenuListener));
+            parentMap.put(item, parent);
         }
         return item;
     }
 
-    class Handler implements Command {
+    class MenuBarListener implements ComponentEventListener<ClickEvent<MenuItem>> {
 
         private static final long serialVersionUID = 1L;
 
         @Override
-        public void menuSelected(MenuItem selectedItem) {
-            menuSelected(buildMenuString(selectedItem));
+        public void onComponentEvent(ClickEvent<MenuItem> event) {
+            menuSelected(buildMenuString(event.getSource()));
+        }
+    }
+    
+    class ContextMenuListener implements ComponentEventListener<GridContextMenuItemClickEvent<AbstractNamedObject>> {
+
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public void onComponentEvent(GridContextMenuItemClickEvent<AbstractNamedObject> event) {
+            menuSelected(buildMenuString(event.getSource()));
+        }
+    }
+    
+    protected void menuSelected(String menuString) {
+        Object selected = parent.getSelectionModel().getFirstSelectedItem().orElse(null);
+        ISelectedValueMenuManager action = null;
+        if (selected != null) {
+            Class<?> clazz = selected.getClass();
+            action = menuActionsByClass.get(clazz);
+        } else {
+            action = nothingSelectedMenuManager;
         }
 
-        protected void menuSelected(String menuString) {
-            Object selected = ((SingleSelectionModel<AbstractNamedObject>) parent.getSelectionModel()).getSelectedItem().orElse(null);
-            ISelectedValueMenuManager action = null;
-            if (selected != null) {
-                Class<?> clazz = selected.getClass();
-                action = menuActionsByClass.get(clazz);
-            } else {
-                action = nothingSelectedMenuManager;
-            }
-
-            if (action != null) {
-                action.handle(menuString, selected);
-            }
+        if (action != null) {
+            action.handle(menuString, selected);
         }
     }
 

@@ -32,7 +32,7 @@ import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.model.ProjectVersionPlugin;
 import org.jumpmind.metl.core.security.ISecurityService;
-import org.jumpmind.persist.IPersistenceManager;
+import org.jumpmind.metl.core.persist.IPersistenceManager;
 
 public class PluginService extends AbstractService implements IPluginService {
     

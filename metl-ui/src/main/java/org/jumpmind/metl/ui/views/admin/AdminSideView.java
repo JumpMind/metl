@@ -20,10 +20,9 @@
  */
 package org.jumpmind.metl.ui.views.admin;
 
-import com.vaadin.navigator.View;
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.Component;
 
-public interface AdminSideView extends View {
+public interface AdminSideView {
 
     Component getView();
     

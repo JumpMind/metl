@@ -35,11 +35,11 @@ import org.jumpmind.metl.core.runtime.component.RdbmsWriter;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UiUtils;
 
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.data.HasValue.ValueChangeListener;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.textfield.TextField;
 
 @SuppressWarnings("serial")
 public class EditRdbmsWriterPanel extends AbstractComponentEditPanel {
@@ -52,19 +52,17 @@ public class EditRdbmsWriterPanel extends AbstractComponentEditPanel {
 
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
-        addComponent(buttonBar);
+        add(buttonBar);
 
         filterField = buttonBar.addFilter();
-        filterField.addValueChangeListener(new ValueChangeListener<String>() {
+        filterField.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
 
             @Override
-            public void valueChange(ValueChangeEvent<String> event) {
+            public void valueChanged(ValueChangeEvent<String> event) {
                 filterField.setValue(event.getValue());
                 updateGrid(event.getValue());
             }
         });
-
-        addComponent(buttonBar);
 
         grid.setSizeFull();
         grid.addColumn(setting -> {
@@ -72,18 +70,18 @@ public class EditRdbmsWriterPanel extends AbstractComponentEditPanel {
             ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
             ModelEntity entity = model.getEntityById(attribute.getEntityId());
             return UiUtils.getName(filterField.getValue(), entity.getName());
-        }).setCaption("Entity Name").setWidth(250).setSortable(true);
+        }).setHeader("Entity Name").setWidth("250px").setSortable(true);
         grid.addColumn(setting -> {
             RelationalModel model = (RelationalModel) component.getInputModel();
             ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
             return UiUtils.getName(filterField.getValue(), attribute.getName());
-        }).setCaption("Attribute Name").setWidth(250).setSortable(true);
-        grid.addComponentColumn(setting -> createCheckBox(setting, RdbmsWriter.ATTRIBUTE_INSERT_ENABLED))
-                .setCaption("Insert Enabled").setSortable(true);
-        grid.addComponentColumn(setting -> createCheckBox(setting, RdbmsWriter.ATTRIBUTE_UPDATE_ENABLED))
-                .setCaption("Update Enabled").setSortable(true);
-        addComponent(grid);
-        setExpandRatio(grid, 1.0f);
+        }).setHeader("Attribute Name").setWidth("250px").setSortable(true);
+        grid.addComponentColumn(setting -> createCheckbox(setting, RdbmsWriter.ATTRIBUTE_INSERT_ENABLED))
+                .setHeader("Insert Enabled").setSortable(true);
+        grid.addComponentColumn(setting -> createCheckbox(setting, RdbmsWriter.ATTRIBUTE_UPDATE_ENABLED))
+                .setHeader("Update Enabled").setSortable(true);
+        add(grid);
+        expand(grid);
 
         if (component.getInputModel() != null) {
 
@@ -134,10 +132,10 @@ public class EditRdbmsWriterPanel extends AbstractComponentEditPanel {
         grid.setItems(filteredAttributeSettings);
     }
 
-    private CheckBox createCheckBox(final AttributeSettings settings, final String key) {
-        final CheckBox checkBox = new CheckBox();
+    private Checkbox createCheckbox(final AttributeSettings settings, final String key) {
+        final Checkbox checkbox = new Checkbox();
         if (!readOnly) {
-            checkBox.addValueChangeListener((event) -> {
+            checkbox.addValueChangeListener((event) -> {
                 ComponentAttribSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(), key);
 
                 String oldValue = setting == null ? Boolean.TRUE.toString() : setting.getValue();
@@ -145,14 +143,14 @@ public class EditRdbmsWriterPanel extends AbstractComponentEditPanel {
                     setting = new ComponentAttribSetting(settings.getAttributeId(), component.getId(), key, Boolean.TRUE.toString());
                     component.addAttributeSetting(setting);
                 }
-                setting.setValue(checkBox.getValue().toString());
+                setting.setValue(checkbox.getValue().toString());
                 if (!oldValue.equals(setting.getValue())) {
                     context.getConfigurationService().save(setting);
                 }
             });
         }
-        checkBox.setReadOnly(readOnly);
-        return checkBox;
+        checkbox.setReadOnly(readOnly);
+        return checkbox;
     }
 
     public static class AttributeSettings {

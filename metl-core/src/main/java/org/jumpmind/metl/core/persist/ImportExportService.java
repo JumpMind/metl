@@ -61,7 +61,7 @@ import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.security.SecurityConstants;
 import org.jumpmind.metl.core.util.MessageException;
 import org.jumpmind.metl.core.util.VersionUtils;
-import org.jumpmind.persist.IPersistenceManager;
+import org.jumpmind.metl.core.persist.IPersistenceManager;
 import org.jumpmind.symmetric.io.data.DbExport;
 import org.jumpmind.symmetric.io.data.DbExport.Format;
 import org.jumpmind.util.AppUtils;

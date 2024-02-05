@@ -69,30 +69,28 @@ import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vaadin.aceeditor.AceEditor;
-import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.data.Binder;
-import com.vaadin.data.HasValue;
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.data.HasValue.ValueChangeListener;
-import com.vaadin.data.converter.StringToIntegerConverter;
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.AbsoluteLayout;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.Layout;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.RadioButtonGroup;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.converter.StringToIntegerConverter;
+import com.vaadin.flow.data.value.ValueChangeMode;
+
+import de.f0rce.ace.AceEditor;
+import de.f0rce.ace.enums.AceMode;
 
 @SuppressWarnings("serial")
-public class PropertySheet extends AbsoluteLayout {
+public class PropertySheet extends Div {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -104,7 +102,7 @@ public class PropertySheet extends AbsoluteLayout {
 
     Object value;
 
-    Panel panel;
+    VerticalLayout panel;
 
     TabbedPanel tabs;
 
@@ -117,10 +115,10 @@ public class PropertySheet extends AbsoluteLayout {
 
         setSizeFull();
 
-        panel = new Panel();
+        panel = new VerticalLayout();
         panel.setSizeFull();
-        panel.addStyleName("noborder");
-        addComponent(panel);
+        panel.addClassName("noborder");
+        add(panel);
     }
 
     public void setListener(IPropertySheetChangeListener listener) {
@@ -136,9 +134,7 @@ public class PropertySheet extends AbsoluteLayout {
         value = obj;
         VerticalLayout vLayout = new VerticalLayout();
         FormLayout formLayout = new FormLayout();
-        formLayout.setWidth(100, Unit.PERCENTAGE);
-        formLayout.setMargin(false);
-        formLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
+        formLayout.setWidthFull();
 
         if (obj != null) {
 
@@ -188,16 +184,17 @@ public class PropertySheet extends AbsoluteLayout {
             }
 
         }
-        vLayout.addComponent(formLayout);
-        panel.setContent(vLayout);
+        vLayout.add(formLayout);
+        panel.removeAll();
+        panel.add(vLayout);
     }
     
-    private void addButtonBar(Layout layout, Resource resource) {
+    private void addButtonBar(VerticalLayout layout, Resource resource) {
         ButtonBar buttonBar = new ButtonBar();
         Button testBtn = buttonBar.addButton("Test", Icons.RUN);
         testBtn.addClickListener((event)->testResource(resource));
         testBtn.setEnabled(createResourceRuntime(resource).isTestSupported());
-        layout.addComponent(buttonBar);
+        layout.add(buttonBar);
     }
     
     private void testResource(Resource resource) {
@@ -209,7 +206,7 @@ public class PropertySheet extends AbsoluteLayout {
             if (rootCause == null) {
                 rootCause = ex;
             }
-            CommonUiUtils.notify("Resource test failed. Root Cause: " + rootCause.getMessage(), com.vaadin.ui.Notification.Type.ERROR_MESSAGE);
+            CommonUiUtils.notifyError("Resource test failed. Root Cause: " + rootCause.getMessage());
         }
     }
     
@@ -232,21 +229,20 @@ public class PropertySheet extends AbsoluteLayout {
             }
         }
         if (components.size() != 0 && !readOnly) {
-            formLayout.addComponent(buildRadioButtonGroup("Enabled", ENABLED, components));
-            formLayout.addComponent(buildRadioButtonGroup("Log Input", LOG_INPUT, components));
-            formLayout.addComponent(buildRadioButtonGroup("Log Output", LOG_OUTPUT, components));
+            formLayout.add(buildRadioButtonGroup("Enabled", ENABLED, components), buildRadioButtonGroup("Log Input", LOG_INPUT, components),
+                    buildRadioButtonGroup("Log Output", LOG_OUTPUT, components));
         }
     }
 
     protected RadioButtonGroup<String> buildRadioButtonGroup(String caption, String name, List<Component> components) {
-        RadioButtonGroup<String> optionGroup = new RadioButtonGroup<String>(caption);
-        optionGroup.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
+        RadioButtonGroup<String> optionGroup = new RadioButtonGroup<String>();
+        optionGroup.setLabel(caption);
         optionGroup.setItems("ON", "OFF");
         optionGroup.addValueChangeListener((event) -> saveSetting(name, optionGroup, components));
         return optionGroup;
     }
 
-    protected void saveSetting(String name, HasValue<String> field, List<Component> components) {
+    protected void saveSetting(String name, HasValue<?, String> field, List<Component> components) {
         for (final Component component : components) {
             saveSetting(name, field.getValue() != null ? Boolean.valueOf(field.getValue().equals("ON")).toString() : null, component);
         }
@@ -259,7 +255,7 @@ public class PropertySheet extends AbsoluteLayout {
         TextField textField = new TextField("Resource Type");
         textField.setValue(resource.getType());
         textField.setReadOnly(true);
-        formLayout.addComponent(textField);
+        formLayout.add(textField);
     }
 
     protected void addComponentProperties(FormLayout formLayout, Component component) {
@@ -269,7 +265,7 @@ public class PropertySheet extends AbsoluteLayout {
         TextField textField = new TextField("Component Type");
         textField.setValue(componentDefintion.getName());
         textField.setReadOnly(true);
-        formLayout.addComponent(textField);
+        formLayout.add(textField);
         addResourceCombo(componentDefintion, formLayout, component);
         addInputModelCombo(componentDefintion, formLayout, component);
         addOutputModelCombo(componentDefintion, formLayout, component);
@@ -287,7 +283,6 @@ public class PropertySheet extends AbsoluteLayout {
         FlowStep step = getSingleFlowStep();
         if (step != null) {
             final ComboBox<FlowStep> combo = new ComboBox<FlowStep>("Error Suspense Step");
-            combo.setEmptySelectionAllowed(true);
             IConfigurationService configurationService = context.getConfigurationService();
             Flow flow = configurationService.findFlow(step.getFlowId());
             String currentErrorHandlerId = component.get(ComponentSettingsConstants.ERROR_HANDLER);
@@ -302,15 +297,15 @@ public class PropertySheet extends AbsoluteLayout {
                 }
             }
             combo.setItems(comboStepList);
-            combo.setItemCaptionGenerator(item -> item.getName());
+            combo.setItemLabelGenerator(item -> item.getName());
             if (currentValue != null) {
                 combo.setValue(currentValue);
             }            
-            combo.addValueChangeListener(new ValueChangeListener<FlowStep>() {
+            combo.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<FlowStep>>() {
                 private static final long serialVersionUID = 1L;
 
                 @Override
-                public void valueChange(ValueChangeEvent<FlowStep> event) {
+                public void valueChanged(ValueChangeEvent<FlowStep> event) {
                     Setting setting = step.getComponent().findSetting(ComponentSettingsConstants.ERROR_HANDLER);
                     FlowStep value = event.getValue();
                     setting.setValue(value != null ? value.getId() : null);
@@ -318,7 +313,7 @@ public class PropertySheet extends AbsoluteLayout {
                 }
             });
             combo.setReadOnly(readOnly);
-            formLayout.addComponent(combo);
+            formLayout.add(combo);
         }
     }
 
@@ -335,7 +330,6 @@ public class PropertySheet extends AbsoluteLayout {
 	                    	|| (componentDefinition.getOutputMessageType() == MessageType.ANY && componentDefinition.isShowOutputModel()))
                     && !componentDefinition.isInputOutputModelsMatch()) {
                 final ComboBox<AbstractName> combo = new ComboBox<AbstractName>("Output Model");
-                combo.setEmptySelectionAllowed(true);
                 
                 List<AbstractName> models = new ArrayList<AbstractName>();
                 if (componentDefinition.getOutputMessageType() == MessageType.ANY
@@ -371,11 +365,11 @@ public class PropertySheet extends AbsoluteLayout {
                         }
                     }
                 }
-                combo.addValueChangeListener(new ValueChangeListener<AbstractName>() {
+                combo.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<AbstractName>>() {
                     private static final long serialVersionUID = 1L;
 
                     @Override
-                    public void valueChange(ValueChangeEvent<AbstractName> event) {
+                    public void valueChanged(ValueChangeEvent<AbstractName> event) {
                         AbstractName model = combo.getValue();
                         if (model != null) {
 	                        component.setOutputModelId(model.getId());
@@ -389,7 +383,7 @@ public class PropertySheet extends AbsoluteLayout {
                     }
                 });
                 combo.setReadOnly(readOnly);
-                formLayout.addComponent(combo);
+                formLayout.add(combo);
             }
         }
     }
@@ -410,8 +404,8 @@ public class PropertySheet extends AbsoluteLayout {
         });
         textField.setValue(component.getName());
         textField.setRequiredIndicatorVisible(true);
-        textField.setDescription("Name for the component on the flow");
-        formLayout.addComponent(textField);
+        textField.getElement().setProperty("title", "Name for the component on the flow");
+        formLayout.add(textField);
     }
 
     protected void addInputModelCombo(XMLComponentDefinition componentDefinition, FormLayout formLayout, final Component component) {
@@ -424,7 +418,6 @@ public class PropertySheet extends AbsoluteLayout {
             		|| componentDefinition.getInputMessageType() == MessageType.MODEL)
                     || (componentDefinition.getInputMessageType() == MessageType.ANY && componentDefinition.isShowInputModel())) {
                 final ComboBox<AbstractName> combo = new ComboBox<AbstractName>("Input Model");              
-                combo.setEmptySelectionAllowed(true);
 
                 List<AbstractName> models = new ArrayList<AbstractName>();
                 if (componentDefinition.getInputMessageType() == MessageType.ANY
@@ -460,11 +453,11 @@ public class PropertySheet extends AbsoluteLayout {
                         }
                     }
                 }
-                combo.addValueChangeListener(new ValueChangeListener<AbstractName>() {
+                combo.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<AbstractName>>() {
                     private static final long serialVersionUID = 1L;
 
                     @Override
-                    public void valueChange(ValueChangeEvent<AbstractName> event) {
+                    public void valueChanged(ValueChangeEvent<AbstractName> event) {
                         AbstractName model = combo.getValue();
                         if (model != null) {
                             component.setInputModelId(model.getId());
@@ -482,7 +475,7 @@ public class PropertySheet extends AbsoluteLayout {
                     }
                 });
                 combo.setReadOnly(readOnly);
-                formLayout.addComponent(combo);
+                formLayout.add(combo);
             }
         }
     }
@@ -512,17 +505,17 @@ public class PropertySheet extends AbsoluteLayout {
                         resourcesCombo.setValue(component.getResource());
                     }
                 }
-                resourcesCombo.addValueChangeListener(new ValueChangeListener<Resource>() {
+                resourcesCombo.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<Resource>>() {
                     private static final long serialVersionUID = 1L;
 
                     @Override
-                    public void valueChange(ValueChangeEvent<Resource> event) {
+                    public void valueChanged(ValueChangeEvent<Resource> event) {
                         component.setResource(resourcesCombo.getValue());
                         context.getConfigurationService().save(component);
                     }
                 });
 
-                formLayout.addComponent(resourcesCombo);
+                formLayout.add(resourcesCombo);
             }
         }
     }
@@ -559,22 +552,22 @@ public class PropertySheet extends AbsoluteLayout {
             FlowStep step = null;
             switch (type) {
                 case BOOLEAN:
-                    final CheckBox checkBox = new CheckBox(definition.getName());
+                    final Checkbox checkbox = new Checkbox(definition.getName());
                     boolean defaultValue = false;
                     if (isNotBlank(definition.getDefaultValue())) {
                         defaultValue = Boolean.parseBoolean(definition.getDefaultValue());
                     }
-                    checkBox.setValue(obj.getBoolean(definition.getId(), defaultValue));
-                    checkBox.setRequiredIndicatorVisible(required);
-                    checkBox.setDescription(description);
+                    checkbox.setValue(obj.getBoolean(definition.getId(), defaultValue));
+                    checkbox.setRequiredIndicatorVisible(required);
+                    checkbox.getElement().setProperty("title", description);
 
-                    checkBox.addValueChangeListener(new ValueChangeListener<Boolean>() {
+                    checkbox.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<Boolean>>() {
 
                         private static final long serialVersionUID = 1L;
 
                         @Override
-                        public void valueChange(ValueChangeEvent<Boolean> event) {
-                            saveSetting(definition.getId(), checkBox.getValue().toString(), obj);
+                        public void valueChanged(ValueChangeEvent<Boolean> event) {
+                            saveSetting(definition.getId(), checkbox.getValue().toString(), obj);
                             if (listener != null) {
                                 List<Component> components = new ArrayList<Component>(1);
                                 components.add((Component) obj);
@@ -582,27 +575,30 @@ public class PropertySheet extends AbsoluteLayout {
                             }
                         }
                     });
-                    checkBox.setReadOnly(readOnly);
-                    formLayout.addComponent(checkBox);
+                    checkbox.setReadOnly(readOnly);
+                    formLayout.add(checkbox);
                     break;
                 case CHOICE:
                     final ComboBox<String> choice = new ComboBox<String>(definition.getName());
                     List<String> choices = definition.getChoices() != null ? definition.getChoices().getChoice() : new ArrayList<String>(0);
                     choice.setItems(choices);
                     choice.setValue(obj.get(definition.getId(), definition.getDefaultValue()));
-                    choice.setDescription(description);
-                    choice.setEmptySelectionAllowed(false);
-                    choice.addValueChangeListener(new ValueChangeListener<String>() {
+                    choice.getElement().setProperty("title", description);
+                    choice.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
 
                         private static final long serialVersionUID = 1L;
 
                         @Override
-                        public void valueChange(ValueChangeEvent<String> event) {
-                            saveSetting(definition.getId(), choice.getValue(), obj);
+                        public void valueChanged(ValueChangeEvent<String> event) {
+                            if (event.getValue() != null) {
+                                saveSetting(definition.getId(), choice.getValue(), obj);
+                            } else {
+                                choice.setValue(event.getOldValue());
+                            }
                         }
                     });
                     choice.setReadOnly(readOnly);
-                    formLayout.addComponent(choice);
+                    formLayout.add(choice);
                     break;
                 case PASSWORD:
                     
@@ -627,9 +623,9 @@ public class PropertySheet extends AbsoluteLayout {
                     }
                     
                     passwordField.setRequiredIndicatorVisible(required);
-                    passwordField.setDescription(description);
+                    passwordField.getElement().setProperty("title", description);
                     passwordField.setReadOnly(readOnly);
-                    formLayout.addComponent(passwordField);
+                    formLayout.add(passwordField);
                     break;
                 case INTEGER:
                     TextField integerField = new TextField(definition.getName());
@@ -641,9 +637,9 @@ public class PropertySheet extends AbsoluteLayout {
                     String integerFieldValue = obj.get(definition.getId(), definition.getDefaultValue());
                     integerField.setValue(integerFieldValue != null ? integerFieldValue : "");
                     integerField.setRequiredIndicatorVisible(required);
-                    integerField.setDescription(description);
+                    integerField.getElement().setProperty("title", description);
                     integerField.setReadOnly(readOnly);
-                    formLayout.addComponent(integerField);
+                    formLayout.add(integerField);
                     break;
                 case TEXT:
                     TextField textField = new TextField(definition.getName());
@@ -653,9 +649,9 @@ public class PropertySheet extends AbsoluteLayout {
                     String fieldValue = obj.get(definition.getId(), definition.getDefaultValue());
                     textField.setValue(fieldValue != null ? fieldValue : "");
                     textField.setRequiredIndicatorVisible(required);
-                    textField.setDescription(description);
+                    textField.getElement().setProperty("title", description);
                     textField.setReadOnly(readOnly);
-                    formLayout.addComponent(textField);
+                    formLayout.add(textField);
                     break;
                 case SOURCE_STEP:
                     step = getSingleFlowStep();
@@ -674,24 +670,27 @@ public class PropertySheet extends AbsoluteLayout {
                             }
                         }
                         sourceStepsCombo.setItems(sourceStepList);
-                        sourceStepsCombo.setItemCaptionGenerator(item -> item.getName());
+                        sourceStepsCombo.setItemLabelGenerator(item -> item.getName());
                         if (currentValue != null) {
                         	sourceStepsCombo.setValue(currentValue);
                         }
-                        sourceStepsCombo.setDescription(description);
-                        sourceStepsCombo.setEmptySelectionAllowed(false);
+                        sourceStepsCombo.getElement().setProperty("title", description);
                         sourceStepsCombo.setRequiredIndicatorVisible(definition.isRequired());
-                        sourceStepsCombo.addValueChangeListener(new ValueChangeListener<FlowStep>() {
+                        sourceStepsCombo.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<FlowStep>>() {
 
                             private static final long serialVersionUID = 1L;
 
                             @Override
-                            public void valueChange(ValueChangeEvent<FlowStep> event) {
-                                saveSetting(definition.getId(), sourceStepsCombo.getValue().getId(), obj);
+                            public void valueChanged(ValueChangeEvent<FlowStep> event) {
+                                if (event.getValue() != null) {
+                                    saveSetting(definition.getId(), sourceStepsCombo.getValue().getId(), obj);
+                                } else {
+                                    sourceStepsCombo.setValue(event.getOldValue());
+                                }
                             }
                         });
                         sourceStepsCombo.setReadOnly(readOnly);
-                        formLayout.addComponent(sourceStepsCombo);
+                        formLayout.add(sourceStepsCombo);
                     }
                     break;
                 case FLOW:
@@ -711,31 +710,34 @@ public class PropertySheet extends AbsoluteLayout {
                             }
                         }
                         combo.setItems(nameList);
-                        combo.setItemCaptionGenerator(item -> item.getName());
+                        combo.setItemLabelGenerator(item -> item.getName());
                         if (currentValue != null) {
                         	combo.setValue(currentValue);
                         }
-                        combo.setDescription(description);
-                        combo.setEmptySelectionAllowed(false);
+                        combo.getElement().setProperty("title", description);
                         combo.setRequiredIndicatorVisible(definition.isRequired());
-                        combo.addValueChangeListener(new ValueChangeListener<FlowName>() {
+                        combo.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<FlowName>>() {
 
                             private static final long serialVersionUID = 1L;
 
                             @Override
-                            public void valueChange(ValueChangeEvent<FlowName> event) {
-                                saveSetting(definition.getId(), combo.getValue().getId(), obj);
+                            public void valueChanged(ValueChangeEvent<FlowName> event) {
+                                if (event.getValue() != null) {
+                                    saveSetting(definition.getId(), combo.getValue().getId(), obj);
+                                } else {
+                                    combo.setValue(event.getOldValue());
+                                }
                             }
                         });
                         combo.setReadOnly(readOnly);
-                        formLayout.addComponent(combo);
+                        formLayout.add(combo);
                     }
                     break;
                 case STREAMABLE_RESOURCE:
-                    formLayout.addComponent(createResourceCombo(definition, obj, ResourceCategory.STREAMABLE));
+                    formLayout.add(createResourceCombo(definition, obj, ResourceCategory.STREAMABLE));
                     break;
                 case DATASOURCE_RESOURCE:
-                    formLayout.addComponent(createResourceCombo(definition, obj, ResourceCategory.DATASOURCE));
+                    formLayout.add(createResourceCombo(definition, obj, ResourceCategory.DATASOURCE));
                     break;
                 case MODEL_COLUMN:
                     if (component != null) {
@@ -769,48 +771,50 @@ public class PropertySheet extends AbsoluteLayout {
                                 }
                             }
                             modelColumnCombo.setItems(attributeList);
-                            modelColumnCombo.setItemCaptionGenerator(item -> attributeToEntityMap.get(item.getId()) + "." + item.getName());
+                            modelColumnCombo.setItemLabelGenerator(item -> attributeToEntityMap.get(item.getId()) + "." + item.getName());
                         } else {
                             //TODO: HIERARCHICAL MODEL
                         }
                         if (currentValue != null) {
                             modelColumnCombo.setValue(currentValue);
                         }
-                        modelColumnCombo.setDescription(description);
-                        modelColumnCombo.setEmptySelectionAllowed(definition.isRequired());
+                        modelColumnCombo.getElement().setProperty("title", description);
                         modelColumnCombo.setRequiredIndicatorVisible(definition.isRequired());
-                        modelColumnCombo.addValueChangeListener(new ValueChangeListener<ModelAttrib>() {
+                        modelColumnCombo.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<ModelAttrib>>() {
 
                             private static final long serialVersionUID = 1L;
 
                             @Override
-                            public void valueChange(ValueChangeEvent<ModelAttrib> event) {
-                            	ModelAttrib value = modelColumnCombo.getValue();
-                                saveSetting(definition.getId(), value != null ? value.getId() : null, obj);
+                            public void valueChanged(ValueChangeEvent<ModelAttrib> event) {
+                                if (definition.isRequired() || event.getValue() != null) {
+                                    ModelAttrib value = modelColumnCombo.getValue();
+                                    saveSetting(definition.getId(), value != null ? value.getId() : null, obj);
+                                } else {
+                                    modelColumnCombo.setValue(event.getOldValue());
+                                }
                             }
                         });
                         modelColumnCombo.setReadOnly(readOnly);
-                        formLayout.addComponent(modelColumnCombo);
+                        formLayout.add(modelColumnCombo);
                     }
                     break;
                 case SCRIPT:
                     final AceEditor editor = CommonUiUtils.createAceEditor();
                     editor.setMode(AceMode.java);
-                    editor.setHeight(10, Unit.EM);
-                    editor.setCaption(definition.getName());
+                    editor.setHeight("10em");
                     editor.setShowGutter(false);
                     editor.setShowPrintMargin(false);
                     editor.setValue(obj.get(definition.getId(), definition.getDefaultValue()));
-                    editor.addValueChangeListener(new ValueChangeListener<String>() {
+                    editor.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
                         @Override
-                        public void valueChange(ValueChangeEvent<String> event) {
+                        public void valueChanged(ValueChangeEvent<String> event) {
                             Setting data = obj.findSetting(definition.getId());
                             data.setValue(event.getValue());
                             context.getConfigurationService().save(data);
                         }
                     });
                     editor.setReadOnly(readOnly);
-                    formLayout.addComponent(editor);
+                    formLayout.addFormItem(editor, definition.getName());
                     break;
                 case MULTILINE_TEXT:
                 case XML:
@@ -820,11 +824,12 @@ public class PropertySheet extends AbsoluteLayout {
                     area.addValueChangeListener(event -> saveSetting(definition.getId(), event.getValue(), obj));
                     String areaValue = obj.get(definition.getId(), definition.getDefaultValue());
                     area.setValue(areaValue != null ? areaValue : "");
-                    area.setRows(5);
+                    area.setHeight("143px");
+                    //area.setRows(5);
                     area.setRequiredIndicatorVisible(required);
-                    area.setDescription(description);
+                    area.getElement().setProperty("title", description);
                     area.setReadOnly(readOnly);
-                    formLayout.addComponent(area);
+                    formLayout.add(area);
                     break;
                 case TARGET_STEP:
                     step = getSingleFlowStep();
@@ -843,30 +848,29 @@ public class PropertySheet extends AbsoluteLayout {
                             	currentValue = targetStep;
                             }
                         }
-                        targetStepsCombo.setItemCaptionGenerator(item -> item.getName());
+                        targetStepsCombo.setItemLabelGenerator(item -> item.getName());
                         targetStepsCombo.setItems(targetStepList);
                         if (currentValue != null) {
                         	targetStepsCombo.setValue(currentValue);
                         }
-                        targetStepsCombo.setDescription(description);
-                        targetStepsCombo.setEmptySelectionAllowed(true);
+                        targetStepsCombo.getElement().setProperty("title", description);
                         targetStepsCombo.setRequiredIndicatorVisible(definition.isRequired());
-                        targetStepsCombo.addValueChangeListener(new ValueChangeListener<FlowStep>() {
+                        targetStepsCombo.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<FlowStep>>() {
 
                             private static final long serialVersionUID = 1L;
 
                             @Override
-                            public void valueChange(ValueChangeEvent<FlowStep> event) {
+                            public void valueChanged(ValueChangeEvent<FlowStep> event) {
                             	FlowStep value = targetStepsCombo.getValue();
                                 saveSetting(definition.getId(), value != null ? value.getId() : null, obj);
                             }
                         });
                         targetStepsCombo.setReadOnly(readOnly);
-                        formLayout.addComponent(targetStepsCombo);
+                        formLayout.add(targetStepsCombo);
                     }
                     break;
                 case CLOUD_BUCKET:
-                    formLayout.addComponent(createResourceCombo(definition, obj, ResourceCategory.CLOUD_BUCKET));
+                    formLayout.add(createResourceCombo(definition, obj, ResourceCategory.CLOUD_BUCKET));
                     break;
                 default:
                     break;
@@ -880,8 +884,7 @@ public class PropertySheet extends AbsoluteLayout {
         FlowStep step = getSingleFlowStep();
         String projectVersionId = step.getComponent().getProjectVersionId();
         final ComboBox<Resource> combo = new ComboBox<Resource>(definition.getName());
-        combo.setDescription(definition.getDescription());
-        combo.setEmptySelectionAllowed(false);
+        combo.getElement().setProperty("title", definition.getDescription());
         combo.setRequiredIndicatorVisible(definition.isRequired());
         Set<XMLResourceDefinition> types = context.getDefinitionFactory()
                 .getResourceDefinitions(projectVersionId, category);
@@ -907,8 +910,14 @@ public class PropertySheet extends AbsoluteLayout {
                 combo.setValue(currentValue);
             }
         }
-        combo.setItemCaptionGenerator(item -> item.getName());
-		combo.addValueChangeListener(event -> saveSetting(definition.getId(), combo.getValue().getId(), obj));
+        combo.setItemLabelGenerator(item -> item.getName());
+		combo.addValueChangeListener(event -> {
+		    if (event.getValue() != null) {
+		        saveSetting(definition.getId(), combo.getValue().getId(), obj);
+		    } else {
+		        combo.setValue(event.getOldValue());
+		    }
+		});
         combo.setReadOnly(readOnly);
         return combo;
     }

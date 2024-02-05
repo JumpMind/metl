@@ -34,18 +34,28 @@ import org.jumpmind.metl.core.model.ComponentModelSetting.Type;
 import org.jumpmind.metl.core.runtime.component.Mapping;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 
-import com.vaadin.annotations.JavaScript;
-import com.vaadin.annotations.StyleSheet;
-import com.vaadin.ui.AbstractJavaScriptComponent;
-import com.vaadin.ui.JavaScriptFunction;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ClientCallable;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dependency.JavaScript;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.page.Page;
 
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
-@JavaScript({ "dom.jsPlumb-1.7.5-min.js", "mapping-diagram.js" })
-@StyleSheet({ "mapping-diagram.css" })
+@CssImport("./mapping-diagram.css")
+@JsModule("./mapping-diagram.js")
+@JsModule("jsplumb")
+@JavaScript("./mapping-diagram.js")
 @SuppressWarnings("serial")
-public class MappingDiagram extends AbstractJavaScriptComponent {
+public class MappingDiagram extends Div {
+    
+    private MappingDiagramDetail diagramDetail;
+    
+    private IMappingPanel panel;
 
 	ApplicationContext context;
 
@@ -55,41 +65,47 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
 
 	String selectedTargetId;
 
-	public MappingDiagram(ApplicationContext context, Component component) {
+	public MappingDiagram(ApplicationContext context, Component component, IMappingPanel panel) {
 		this.context = context;
 		this.component = component;
-		setPrimaryStyleName("mapping-diagram");
+		this.panel = panel;
+		diagramDetail = new MappingDiagramDetail();
+		addClassName("mapping-diagram");
 		setId("mapping-diagram");
 
 		cleanAbandonedLinks(component);
 
-		MappingDiagramState state = getState();
-		state.component = component;
+		diagramDetail.setComponent(component);
 
         if (component.getInputModel() instanceof RelationalModel) {
-            state.relationalInputModel = (RelationalModel) component.getInputModel();
-            context.getConfigurationService().refresh((RelationalModel) state.relationalInputModel);
-            Collections.sort(((RelationalModel) state.relationalInputModel).getModelEntities(), new ModelEntitySorter());
-            ((RelationalModel) state.relationalInputModel).sortAttributes();
+            diagramDetail.setRelationalInputModel((RelationalModel) component.getInputModel());
+            context.getConfigurationService().refresh(diagramDetail.getRelationalInputModel());
+            Collections.sort((diagramDetail.getRelationalInputModel()).getModelEntities(), new ModelEntitySorter());
+            diagramDetail.getRelationalInputModel().sortAttributes();
         } else {
-            state.hierarchicalInputModel = (HierarchicalModel) component.getInputModel();
-            context.getConfigurationService().refresh((HierarchicalModel) state.hierarchicalInputModel);
+            diagramDetail.setHierarchicalInputModel((HierarchicalModel) component.getInputModel());
+            context.getConfigurationService().refresh(diagramDetail.getHierarchicalInputModel());
         }
 
         if (component.getOutputModel() instanceof RelationalModel) {
-            state.relationalOutputModel = (RelationalModel) component.getOutputModel();
-            if (state.relationalOutputModel != null) {
-                context.getConfigurationService().refresh((RelationalModel) state.relationalOutputModel);
-                Collections.sort(((RelationalModel) state.relationalOutputModel).getModelEntities(), new ModelEntitySorter());
-                ((RelationalModel) state.relationalOutputModel).sortAttributes();
+            diagramDetail.setRelationalOutputModel((RelationalModel) component.getOutputModel());
+            if (diagramDetail.getRelationalOutputModel() != null) {
+                context.getConfigurationService().refresh(diagramDetail.getRelationalOutputModel());
+                Collections.sort((diagramDetail.getRelationalOutputModel()).getModelEntities(), new ModelEntitySorter());
+                diagramDetail.getRelationalOutputModel().sortAttributes();
             }
         } else {
-            state.hierarchicalOutputModel = (HierarchicalModel) component.getOutputModel();     
-            context.getConfigurationService().refresh((HierarchicalModel) state.hierarchicalOutputModel);            
+            diagramDetail.setHierarchicalOutputModel((HierarchicalModel) component.getOutputModel());
+            context.getConfigurationService().refresh(diagramDetail.getHierarchicalOutputModel());            
         }		
-		addFunction("onSelect", new OnSelectFunction());
-		addFunction("onConnection", new OnConnectionFunction());
 	}
+	
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        Page page = UI.getCurrent().getPage();
+        page.executeJs("window.org_jumpmind_metl_ui_mapping_MappingDiagram()");
+    }
 
     protected void cleanAbandonedLinks(Component c) {
         if (c.getModelSettings() != null) {
@@ -133,11 +149,6 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
             }
         }
     }
-	
-	@Override
-	protected MappingDiagramState getState() {
-		return (MappingDiagramState) super.getState();
-	}
 
 	public void removeSelected() {
 		if (selectedSourceId != null) {
@@ -146,18 +157,18 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
 	}
 
 	public void filterInputModel(String text, boolean filterMapped) {
-		callFunction("filterInputModel", text, filterMapped);
+		UI.getCurrent().getPage().executeJs("filterInputModel($0,$1)", text, filterMapped);
 	}
 
 	public void filterOutputModel(String text, boolean filterMapped) {
-		callFunction("filterOutputModel", text, filterMapped);
+		UI.getCurrent().getPage().executeJs("filterOutputModel($0,$1)", text, filterMapped);
 	}
 
 	protected void removeConnection(String sourceId, String targetId) {
 		removeModelObjectConnection(sourceId, targetId);
 		if (sourceId.equals(selectedSourceId) && targetId.equals(selectedTargetId)) {
 			selectedSourceId = selectedTargetId = null;
-			fireEvent(new SelectEvent(MappingDiagram.this, selectedSourceId, selectedTargetId));
+			panel.selectEvent(new SelectEvent(MappingDiagram.this, selectedSourceId, selectedTargetId));
 		}			
 	}
 	
@@ -167,7 +178,6 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
 			if (setting.getValue().equals(targetId)) {
 				component.getModelSettings().remove(setting);
 				context.getConfigurationService().delete(setting);
-				markAsDirty();
 			}
 		}
 	}
@@ -183,35 +193,24 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
 		modelSetting.setType(Type.ATTRIBUTE.toString());
 		component.addModelSetting(modelSetting);		
 		context.getConfigurationService().save(setting);			
-		markAsDirty();
 	}	
 	
-	class OnSelectFunction implements JavaScriptFunction {
-		public void call(JsonArray arguments) {
-			if (arguments.length() > 0) {
-				JsonObject json = arguments.getObject(0);
-				selectedSourceId = json.getString("sourceId").substring(3);
-				selectedTargetId = json.getString("targetId").substring(3);
-			} else {
-				selectedSourceId = selectedTargetId = null;
-			}
-			fireEvent(new SelectEvent(MappingDiagram.this, selectedSourceId, selectedTargetId));
-		}
-	}
-
-	class OnConnectionFunction implements JavaScriptFunction {
-		public void call(JsonArray arguments) {
-			if (arguments.length() > 0) {
-				JsonObject json = arguments.getObject(0);
-				String sourceId = json.getString("sourceId").substring(3);
-				String targetId = json.getString("targetId").substring(3);
-				boolean removed = json.getBoolean("removed");
-				if (removed) {
-					removeConnection(sourceId, targetId);
-				} else {
-					addConnection(sourceId, targetId);
-				}
-			}
-		}
-	}
+    @ClientCallable
+    private void onSelect(JsonObject json) {
+        selectedSourceId = json.getString("sourceId").substring(3);
+        selectedTargetId = json.getString("targetId").substring(3);
+        panel.selectEvent(new SelectEvent(MappingDiagram.this, selectedSourceId, selectedTargetId));
+    }
+    
+    @ClientCallable
+    private void onConnection(JsonObject json) {
+        String sourceId = json.getString("sourceId").substring(3);
+        String targetId = json.getString("targetId").substring(3);
+        boolean removed = json.getBoolean("removed");
+        if (removed) {
+            removeConnection(sourceId, targetId);
+        } else {
+            addConnection(sourceId, targetId);
+        }
+    }
 }

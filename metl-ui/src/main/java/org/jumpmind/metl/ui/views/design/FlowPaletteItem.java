@@ -20,7 +20,12 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.server.StreamResource;
 
 public class FlowPaletteItem extends Button {
     
@@ -32,9 +37,15 @@ public class FlowPaletteItem extends Button {
     
     boolean isShared;
 
-    public FlowPaletteItem(String label) {
+    public FlowPaletteItem(String label, StreamResource imageResource) {
         super(label);
-        addStyleName("hidefocus");
+        addClassName("hidefocus");
+        VerticalLayout buttonLayout = new VerticalLayout();
+        Image image = new Image(imageResource, "");
+        Span span = new Span(label);
+        buttonLayout.add(image, span);
+        buttonLayout.setHorizontalComponentAlignment(Alignment.CENTER, image, span);
+        setIcon(buttonLayout);
     }
     
     public void setComponentType(String componentType) {

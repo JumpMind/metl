@@ -40,20 +40,19 @@ import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Icons;
 
-import com.vaadin.event.selection.SelectionListener;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.MouseEventDetails;
-import com.vaadin.shared.MouseEventDetails.MouseButton;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TreeGrid;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.components.grid.SingleSelectionModel;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.selection.SelectionListener;
 
 @SuppressWarnings("serial")
-public class ManageNavigator extends Panel {
+public class ManageNavigator extends VerticalLayout {
 
     protected static final Name CURRENTLY_RUNNING = new Name("Currently Running");
     
@@ -72,20 +71,16 @@ public class ManageNavigator extends Panel {
 
         setSizeFull();
 
-        addStyleName(ValoTheme.MENU_ROOT);
-
         VerticalLayout content = new VerticalLayout();
         content.setSizeFull();
-        setContent(content);
+        add(content);
 
         MenuBar leftMenuBar = new MenuBar();
-        leftMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
-        leftMenuBar.setWidth(100, Unit.PERCENTAGE);
-        content.addComponent(leftMenuBar);
+        leftMenuBar.setWidthFull();
+        content.add(leftMenuBar);
 
         treeGrid = buildTreeGrid();
-        content.addComponent(treeGrid);
-        content.setExpandRatio(treeGrid, 1);
+        content.addAndExpand(treeGrid);
 
         agentsFolder = new Folder();
         agentsFolder.setName("Agents");
@@ -187,36 +182,43 @@ public class ManageNavigator extends Panel {
 
     protected TreeGrid<AbstractNamedObject> buildTreeGrid() {
         final TreeGrid<AbstractNamedObject> grid = new TreeGrid<AbstractNamedObject>();
-        grid.addStyleName(ValoTheme.TREETABLE_NO_HORIZONTAL_LINES);
-        grid.addStyleName(ValoTheme.TREETABLE_NO_STRIPES);
-        grid.addStyleName(ValoTheme.TREETABLE_NO_VERTICAL_LINES);
-        grid.addStyleName(ValoTheme.TREETABLE_BORDERLESS);
-        grid.setHeaderVisible(false);
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
         grid.setSizeFull();
-        //grid.setCacheRate(100);
-        //grid.setPageLength(100);
+        grid.setPageSize(100);
         grid.addComponentColumn(item -> {
-            Label nameLabel = new Label(item.getName());
+            Icon icon = null;
+            String title = null;
             if (item.equals(CURRENTLY_RUNNING)) {
-                nameLabel.setIcon(VaadinIcons.COGS);
+                icon = new Icon(VaadinIcon.COGS);
             } else if (item.equals(IN_ERROR)) {
-                nameLabel.setIcon(VaadinIcons.WARNING);
+                icon = new Icon(VaadinIcon.WARNING);
             } else if (item instanceof Folder) {
-                nameLabel.setIcon(grid.isExpanded(item) ? VaadinIcons.FOLDER_OPEN : VaadinIcons.FOLDER);
+                icon = new Icon(grid.isExpanded(item) ? VaadinIcon.FOLDER_OPEN : VaadinIcon.FOLDER);
             } else if (item instanceof AgentName) {
-                nameLabel.setIcon(Icons.AGENT);
+                icon = new Icon(Icons.AGENT);
             } else if (item instanceof AgentDeploymentSummary) {
-                nameLabel.setIcon(Icons.DEPLOYMENT);
+                icon = new Icon(Icons.DEPLOYMENT);
+                title = ((AgentDeploymentSummary) item).getProjectName();
             } else if (item instanceof FlowName) {
-                nameLabel.setIcon(Icons.FLOW);
+                icon = new Icon(Icons.FLOW);
+                if (item instanceof ProjectVersionFlowName) {
+                    ProjectVersionFlowName flow = (ProjectVersionFlowName) item;
+                    title = flow.projectVersion != null ? flow.projectVersion.getName() : "";
+                }
             }
-            return nameLabel;
-        }).setExpandRatio(1);
+            if (icon != null) {
+                HorizontalLayout layout = new HorizontalLayout(new Span(item.getName()), icon);
+                if (title != null) {
+                    layout.getElement().setProperty("title", title);
+                }
+                return layout;
+            }
+            return new Span(item.getName());
+        }).setFlexGrow(1);
 
         grid.addItemClickListener((event) -> {
-            MouseEventDetails details = event.getMouseEventDetails();
-            if (details.getButton() == MouseButton.LEFT) {
-                if (details.isDoubleClick()) {
+            if (event.getButton() == 0) {
+                if (event.getClickCount() == 2) {
                     AbstractNamedObject item = event.getItem();
                     if (!treeGrid.getTreeData().getChildren(item).isEmpty()) {
                         if (treeGrid.isExpanded(item)) {
@@ -229,21 +231,9 @@ public class ManageNavigator extends Panel {
             }
         });
 
-        grid.setStyleGenerator(itemId -> {
+        grid.setClassNameGenerator(itemId -> {
             if (itemId instanceof Folder) {
                 return "folder";
-            } else {
-                return null;
-            }
-        });
-        
-        grid.setDescriptionGenerator(itemId -> {
-            if (itemId instanceof ProjectVersionFlowName) {
-                ProjectVersionFlowName flow = (ProjectVersionFlowName) itemId;
-                return flow.projectVersion != null ? flow.projectVersion.getName() : "";
-            } else if (itemId instanceof AgentDeploymentSummary) {
-                AgentDeploymentSummary summary = (AgentDeploymentSummary) itemId;
-                return summary.getProjectName();
             } else {
                 return null;
             }
@@ -284,12 +274,12 @@ public class ManageNavigator extends Panel {
         }
     }
 
-    public void addValueChangeListener(SelectionListener<AbstractNamedObject> listener) {
+    public void addValueChangeListener(SelectionListener<Grid<AbstractNamedObject>, AbstractNamedObject> listener) {
         treeGrid.addSelectionListener(listener);
     }
 
     public AbstractNamedObject getCurrentSelection() {
-        return ((SingleSelectionModel<AbstractNamedObject>) treeGrid.getSelectionModel()).getSelectedItem().orElse(null);
+        return treeGrid.getSelectionModel().getFirstSelectedItem().orElse(null);
     }
 
     public AbstractNamedObject getCurrentSelectionParent() {

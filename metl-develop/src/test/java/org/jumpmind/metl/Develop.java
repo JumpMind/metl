@@ -27,6 +27,7 @@ import java.nio.file.Paths;
 
 import javax.websocket.server.ServerContainer;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.annotations.AnnotationConfiguration.ClassInheritanceMap;
 import org.eclipse.jetty.server.Server;
@@ -49,6 +50,13 @@ public class Develop {
         new File("working").mkdirs();
         System.setProperty("org.jumpmind.metl.ui.init.config.dir","working");
         
+        File clientJsDest = new File("bin/main/META-INF/metl/VAADIN/static/client/client-7411BA7112A12159D80F3BB11AD68707.cache.js");
+        if (!clientJsDest.exists()) {
+            new File(clientJsDest.getParent()).mkdirs();
+            System.out.println("Copying client-*.cache.js...");
+            FileUtils.copyFile(new File("static/client/client-7411BA7112A12159D80F3BB11AD68707.cache.js"), clientJsDest);
+        }
+
         Server server = new Server(42000);
         ClassList classlist = Configuration.ClassList.setServerDefault(server);
         classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration", "org.eclipse.jetty.annotations.AnnotationConfiguration");

@@ -26,16 +26,14 @@ import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.ExternalResource;
-import com.vaadin.server.Page;
-import com.vaadin.ui.BrowserFrame;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.IFrame;
+import com.vaadin.flow.component.icon.VaadinIcon;
 
 @UiComponent
 @Scope(value = "ui")
 @Order(400)
-@AdminMenuLink(name = "REST", id = "REST", icon = VaadinIcons.WRENCH)
+@AdminMenuLink(name = "REST", id = "REST", icon = VaadinIcon.WRENCH)
 public class ApiPanel extends AbstractAdminPanel {
 
     final Log logger = LogFactory.getLog(getClass());
@@ -44,11 +42,12 @@ public class ApiPanel extends AbstractAdminPanel {
 
     public ApiPanel() {   
         setSizeFull();
-        String url = Page.getCurrent()
-                .getLocation().getPath();
-        BrowserFrame e = new BrowserFrame(null, new ExternalResource(url.substring(0, url.lastIndexOf("/")) + "/api.html"));
-        e.setSizeFull();
-        addComponent(e);
+        UI.getCurrent().getPage().fetchCurrentURL(url -> {
+            String urlString = url.toString();
+            IFrame e = new IFrame(urlString.substring(0, urlString.lastIndexOf("/")) + "/api.html");
+            e.setSizeFull();
+            add(e);
+        });
     }
 
     @Override
@@ -62,10 +61,6 @@ public class ApiPanel extends AbstractAdminPanel {
 
     @Override
     public void selected() {
-    }
-
-    @Override
-    public void enter(ViewChangeEvent event) {
     }
 
     @Override

@@ -39,8 +39,6 @@ import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_VALI
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -61,6 +59,7 @@ import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.persist.IImportExportService;
 import org.jumpmind.metl.core.persist.IOperationsService;
+import org.jumpmind.metl.core.persist.IPersistenceManager;
 import org.jumpmind.metl.core.persist.IPluginService;
 import org.jumpmind.metl.core.persist.ImportExportService;
 import org.jumpmind.metl.core.persist.OperationsService;
@@ -82,42 +81,34 @@ import org.jumpmind.metl.core.security.SecurityService;
 import org.jumpmind.metl.core.util.EnvConstants;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.MockJdbcDriver;
+import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.common.ViewManager;
 import org.jumpmind.metl.ui.definition.DefinitionPlusUIFactory;
 import org.jumpmind.metl.ui.definition.IDefinitionPlusUIFactory;
 import org.jumpmind.metl.ui.persist.IUICache;
 import org.jumpmind.metl.ui.persist.UICache;
-import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.security.SecurityServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.env.Environment;
-import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import org.jumpmind.metl.vaadin.spring.UIScope;
 
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.Contact;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
+@ComponentScan(basePackages = "org.jumpmind.metl.ui")
 @Configuration
 @EnableTransactionManagement
 @EnableWebMvc
-@EnableSwagger2
-public class AppConfig extends WebMvcConfigurerAdapter {
+public class AppConfig {
 
     protected static final Logger log = LoggerFactory.getLogger(AppConfig.class);
 
@@ -167,31 +158,12 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     IOperationsService operationsService;
     
     IUICache uiCache;
-
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
-
-        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
-    }
-
-    @Override
-    public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
-        configurer.defaultContentType(MediaType.APPLICATION_JSON).favorParameter(true).mediaType("xml", MediaType.APPLICATION_XML);
-    }
-
-    @Bean
-    public Docket swaggerSpringMvcPlugin() {
-        return new Docket(DocumentationType.SWAGGER_2).produces(contentTypes()).consumes(contentTypes())
-                .apiInfo(new ApiInfo("Metl API", "This is the REST API for Metl", null, null, (Contact) null, null, null));
-    }
-
-    protected Set<String> contentTypes() {
-        Set<String> set = new HashSet<String>();
-        set.add("application/xml");
-        set.add("application/json");
-        return set;
-    }
+    
+    BackgroundRefresherService backgroundRefresherService;
+    
+    ApplicationContext applicationContext;
+    
+    ViewManager viewManager;
 
     @Bean
     @Scope(value = "singleton")
@@ -326,7 +298,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IDatabasePlatform configDatabasePlatform() {
         if (configDatabasePlatform == null) {
-            configDatabasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(configDataSource(), new SqlTemplateSettings(),
+            configDatabasePlatform = JdbcDatabasePlatformFactory.getInstance().create(configDataSource(), new SqlTemplateSettings(),
                     false, false);
         }
         return configDatabasePlatform;
@@ -336,7 +308,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IDatabasePlatform executionDatabasePlatform() {
         if (executionDatabasePlatform == null) {
-            executionDatabasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(executionDataSource(),
+            executionDatabasePlatform = JdbcDatabasePlatformFactory.getInstance().create(executionDataSource(),
                     new SqlTemplateSettings(), false, false);
         }
         return executionDatabasePlatform;
@@ -544,6 +516,33 @@ public class AppConfig extends WebMvcConfigurerAdapter {
             subscribeManager = new SubscribeManager();
         }
         return subscribeManager;
+    }
+    
+    @Bean
+    @Scope(value = "ui")
+    public BackgroundRefresherService backgroundRefresherService() {
+        if (backgroundRefresherService == null) {
+            backgroundRefresherService = new BackgroundRefresherService();
+        }
+        return backgroundRefresherService;
+    }
+    
+    @Bean
+    @Scope(value = "ui")
+    public ApplicationContext applicationContext() {
+        if (applicationContext == null) {
+            applicationContext = new ApplicationContext();
+        }
+        return applicationContext;
+    }
+    
+    @Bean
+    @Scope(value = "ui")
+    public ViewManager viewManager() {
+        if (viewManager == null) {
+            viewManager = new ViewManager();
+        }
+        return viewManager;
     }
 
     @Bean

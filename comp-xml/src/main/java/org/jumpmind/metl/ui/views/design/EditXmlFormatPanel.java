@@ -48,26 +48,28 @@ import org.jumpmind.metl.core.runtime.component.XmlFormatter;
 import org.jumpmind.metl.core.runtime.component.XmlParser;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.ExportDialog;
-import org.jumpmind.metl.ui.views.design.ImportXmlTemplateWindow.ImportXmlListener;
-import org.jumpmind.vaadin.ui.common.ResizableWindow;
-import org.vaadin.aceeditor.AceEditor;
-import org.vaadin.aceeditor.AceMode;
+import org.jumpmind.metl.ui.views.design.ImportXmlTemplateDialog.ImportXmlListener;
+import org.jumpmind.vaadin.ui.common.ResizableDialog;
 
-import com.vaadin.data.provider.Query;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.Column;
-import com.vaadin.ui.Grid.SelectionMode;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.components.grid.HeaderCell;
-import com.vaadin.ui.components.grid.HeaderRow;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.component.grid.HeaderRow;
+import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
+import com.vaadin.flow.component.grid.editor.Editor;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.provider.Query;
+
+import de.f0rce.ace.AceEditor;
+import de.f0rce.ace.enums.AceMode;
 
 public class EditXmlFormatPanel extends AbstractComponentEditPanel {
 
@@ -81,7 +83,7 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
     
     TextField attributeFilterField = new TextField();
     
-    CheckBox filterCheckBox = new CheckBox("Show Set Only");
+    Checkbox filterCheckbox = new Checkbox("Show Set Only");
 
     Set<String> xpathChoices;
     
@@ -89,15 +91,15 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
 
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
-        addComponent(buttonBar);
+        add(buttonBar);
 
-        Button editButton = buttonBar.addButton("Edit Template", VaadinIcons.FILE_CODE);
+        Button editButton = buttonBar.addButton("Edit Template", VaadinIcon.FILE_CODE);
         editButton.addClickListener(new EditTemplateClickListener());
 
-        Button importButton = buttonBar.addButton("Import Template", VaadinIcons.DOWNLOAD);
+        Button importButton = buttonBar.addButton("Import Template", VaadinIcon.DOWNLOAD);
         importButton.addClickListener(new ImportTemplateClickListener());
 
-        buttonBar.addButtonRight("Export", VaadinIcons.DOWNLOAD, (e) -> export());
+        buttonBar.addButtonRight("Export", VaadinIcon.DOWNLOAD, (e) -> export());
 
         buildGrid();
         refresh();
@@ -110,14 +112,13 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
         ExportDialog.show(context, grid);
     }
 
-    @SuppressWarnings("unchecked")
 	protected void buildGrid() {
         grid = new Grid<Record>();
         grid.setSelectionMode(SelectionMode.NONE);
         grid.setSizeFull();
-        grid.addColumn(Record::getEntityName).setId("entityName").setCaption("Entity Name");
-        grid.addColumn(Record::getAttributeName).setId("attributeName").setCaption("Attribute Name");
-        grid.addColumn(Record::getXpath).setId("xpath").setCaption("Xpath").setExpandRatio(1);
+        grid.addColumn(Record::getEntityName).setKey("entityName").setHeader("Entity Name");
+        grid.addColumn(Record::getAttributeName).setKey("attributeName").setHeader("Attribute Name");
+        grid.addColumn(Record::getXpath).setKey("xpath").setHeader("Xpath").setFlexGrow(1);
         HeaderRow filterRow = grid.appendHeaderRow();
 
         addColumn("entityName", filterRow, entityFilterField);
@@ -126,22 +127,26 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
 
         if (!readOnly) {
             xpathCombo.addValueChangeListener(e->saveXPathSettings());
-            xpathCombo.setWidth(100, Unit.PERCENTAGE);
-            xpathCombo.setNewItemProvider(newItem -> {
+            xpathCombo.setWidthFull();
+            xpathCombo.setAllowCustomValue(true);
+            xpathCombo.addCustomValueSetListener(event -> {
     			List<String> itemList = xpathCombo.getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
-    			itemList.add(newItem);
+    			itemList.add(event.getDetail());
     			xpathCombo.setItems(itemList);
-    			xpathCombo.setValue(newItem);
-    			return Optional.of(newItem);
+    			xpathCombo.setValue(event.getDetail());
             });
-            xpathCombo.setTextInputAllowed(true);
-            xpathCombo.setScrollToSelectedItem(true);
-            ((Column<Record, String>) grid.getColumn("xpath")).setEditorComponent(xpathCombo, Record::setXpath);
-            grid.getEditor().setEnabled(true).setBuffered(false);
+            xpathCombo.setAllowCustomValue(true);
+            Editor<Record> editor = grid.getEditor();
+            Binder<Record> binder = new Binder<Record>();
+            editor.setBinder(binder);
+            binder.forField(xpathCombo).bind(Record::getXpath, Record::setXpath);
+            ((Column<Record>) grid.getColumnByKey("xpath")).setEditorComponent(xpathCombo);
+            editor.setBuffered(false);
+            grid.addItemDoubleClickListener(event -> editor.editItem(event.getItem()));
         }
         addShowPopulatedFilter("xpath", filterRow);
-        addComponent(grid);
-        setExpandRatio(grid, 1);
+        add(grid);
+        expand(grid);
     }
 
     protected void refresh() {
@@ -204,18 +209,17 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
     }
     
     protected void addShowPopulatedFilter(String propertyId, HeaderRow filterRow) {
-        HeaderCell cell = filterRow.getCell(propertyId);
-        filterCheckBox.addValueChangeListener(l->refreshGrid());
-        filterCheckBox.addStyleName(ValoTheme.CHECKBOX_SMALL);
-        cell.setComponent(filterCheckBox);
+        HeaderCell cell = filterRow.getCell(grid.getColumnByKey(propertyId));
+        filterCheckbox.addValueChangeListener(l->refreshGrid());
+        cell.setComponent(filterCheckbox);
         
     }
 
     protected void addColumn(String propertyId, HeaderRow filterRow, TextField filterField) {
-        HeaderCell cell = filterRow.getCell(propertyId);
+        HeaderCell cell = filterRow.getCell(grid.getColumnByKey(propertyId));
         filterField.setPlaceholder("Filter");
-        filterField.addStyleName(ValoTheme.TEXTFIELD_TINY);
-        filterField.setWidth(100, Unit.PERCENTAGE);
+        filterField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+        filterField.setWidthFull();
         filterField.addValueChangeListener(change -> refreshGrid());
         cell.setComponent(filterField);
     }
@@ -301,39 +305,39 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
         }
     }
 
-    class EditTemplateClickListener implements ClickListener {
+    class EditTemplateClickListener implements ComponentEventListener<ClickEvent<Button>> {
         private static final long serialVersionUID = 1L;
 
-        public void buttonClick(ClickEvent event) {
-            EditTemplateWindow window = new EditTemplateWindow();
-            window.show();
+        public void onComponentEvent(ClickEvent<Button> event) {
+            EditTemplateDialog dialog = new EditTemplateDialog();
+            dialog.show();
         }
     }
 
-    class EditTemplateWindow extends ResizableWindow {
+    class EditTemplateDialog extends ResizableDialog {
         private static final long serialVersionUID = 1L;
 
         AceEditor editor;
 
-        public EditTemplateWindow() {
+        public EditTemplateDialog() {
             super("Edit XML Template");
-            setWidth(800f, Unit.PIXELS);
-            setHeight(600f, Unit.PIXELS);
-            content.setMargin(true);
+            setWidth("800px");
+            setHeight("600px");
+            innerContent.setMargin(true);
 
             editor = new AceEditor();
             editor.setMode(AceMode.xml);
             editor.setSizeFull();
             editor.setHighlightActiveLine(true);
             editor.setShowPrintMargin(false);
-            addComponent(editor);
-            content.setExpandRatio(editor, 1.0f);
+            add(editor);
+            innerContent.expand(editor);
 
             Setting templateSetting = component.findSetting(XmlFormatter.XML_FORMATTER_TEMPLATE);
             editor.setValue(templateSetting.getValue());
             editor.setReadOnly(readOnly);
 
-            addComponent(buildButtonFooter(buildCloseButton()));
+            add(buildButtonFooter(buildCloseButton()));
         }
 
         @Override
@@ -348,23 +352,23 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
 
     }
 
-    class ImportTemplateClickListener implements ClickListener, ImportXmlListener {
+    class ImportTemplateClickListener implements ComponentEventListener<ClickEvent<Button>>, ImportXmlListener {
         private static final long serialVersionUID = 1L;
 
-        ImportXmlTemplateWindow importWindow;
+        ImportXmlTemplateDialog importDialog;
 
-        public void buttonClick(ClickEvent event) {
-            importWindow = new ImportXmlTemplateWindow(this, component, context);
-            UI.getCurrent().addWindow(importWindow);
+        public void onComponentEvent(ClickEvent<Button> event) {
+            importDialog = new ImportXmlTemplateDialog(this, component, context);
+            importDialog.open();
         }
 
         public void onImport(String xml) {
             Setting templateSetting = component.findSetting(XmlFormatter.XML_FORMATTER_TEMPLATE);
             templateSetting.setValue(xml);
             context.getConfigurationService().save(templateSetting);
-            importWindow.close();
-            EditTemplateWindow editWindow = new EditTemplateWindow();
-            editWindow.show();
+            importDialog.close();
+            EditTemplateDialog editDialog = new EditTemplateDialog();
+            editDialog.show();
         }
     }
 

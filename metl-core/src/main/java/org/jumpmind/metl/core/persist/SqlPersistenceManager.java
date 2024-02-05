@@ -18,7 +18,6 @@ import org.jumpmind.db.sql.DmlStatement;
 import org.jumpmind.db.sql.DmlStatement.DmlType;
 import org.jumpmind.db.sql.Row;
 import org.jumpmind.db.sql.SqlException;
-import org.jumpmind.persist.AbstractPersistenceManager;
 
 public class SqlPersistenceManager extends AbstractPersistenceManager {
 

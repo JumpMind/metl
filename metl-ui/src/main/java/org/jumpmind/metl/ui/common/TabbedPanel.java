@@ -27,24 +27,27 @@ import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.vaadin.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.TabSheet;
 
-import com.vaadin.contextmenu.ContextMenu;
-import com.vaadin.server.Resource;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.icon.Icon;
 
 public class TabbedPanel extends TabSheet {
 
     private static final long serialVersionUID = 1L;
 
-    protected Tab mainTab;
+    protected EnhancedTab mainTab;
 
-    protected Map<String, Tab> tabsById = new HashMap<String, Tab>();
+    protected Map<String, EnhancedTab> tabsById = new HashMap<String, EnhancedTab>();
 
     protected Map<Component, String> contentToId = new HashMap<Component, String>();
 
-    protected List<CloseHandler> closeHandlers = new ArrayList<TabSheet.CloseHandler>();
+    protected List<CloseHandler> closeHandlers = new ArrayList<CloseHandler>();
+    
+    protected CloseHandler closeHandler;
 
     protected IUiPanel selectedTab;
 
@@ -54,10 +57,9 @@ public class TabbedPanel extends TabSheet {
 
     public TabbedPanel() {
         setSizeFull();
-        addStyleName(ValoTheme.TABSHEET_FRAMED);
 
         addSelectedTabChangeListener((event) -> {
-            Component selected = event.getTabSheet().getSelectedTab();
+            Component selected = event.getSelectedTab();
             if (selectedTab != null) {
                 selectedTab.deselected();
                 selectedTab = null;
@@ -76,12 +78,12 @@ public class TabbedPanel extends TabSheet {
 
         setCloseHandler((tabsheet, tabContent) -> close(tabContent));
 
-        ContextMenu menu = new ContextMenu(this, true);
+        ContextMenu menu = new ContextMenu(this);
         menu.addItem("Close", selectedItem -> close());
         menu.addItem("Close Others", selectedItem -> closeOthers());
         menu.addItem("Close To the Left", selectedItem -> closeToTheLeft());
         menu.addItem("Close To the Right", selectedItem -> closeToTheRight());
-        menu.addSeparator();
+        menu.add(new Hr());
         menu.addItem("Close All", selectedItem -> closeAll());
     }
 
@@ -110,7 +112,7 @@ public class TabbedPanel extends TabSheet {
         }
 
         if (selectedOrder.size() > 0) {
-            Tab selectNext = tabsById.get(selectedOrder.get(selectedOrder.size() - 1));
+            EnhancedTab selectNext = tabsById.get(selectedOrder.get(selectedOrder.size() - 1));
             if (selectNext != null) {
                 setSelectedTab(selectNext);
             }
@@ -122,14 +124,14 @@ public class TabbedPanel extends TabSheet {
     }
 
     public void closeAll() {
-        for(Component next : getChildren()) {
+        for(Component next : getChildList()) {
             close(next);
         }
     }
 
     public void closeToTheLeft() {
         Component selected = getSelectedTab();
-        for(Component next : getChildren()) {
+        for(Component next : getChildList()) {
             if (!next.equals(selected)) {
                 close(next);
             } else {
@@ -141,7 +143,7 @@ public class TabbedPanel extends TabSheet {
     public void closeToTheRight() {
         Component selected = getSelectedTab();
         boolean closing = false;
-        for(Component next : getChildren()) {
+        for(Component next : getChildList()) {
             if (next.equals(selected)) {
                 closing = true;
             } else if (closing) {
@@ -152,14 +154,14 @@ public class TabbedPanel extends TabSheet {
 
     public void closeOthers() {
         Component selected = getSelectedTab();
-        for(Component next : getChildren()) {
+        for(Component next : getChildList()) {
             if (!next.equals(selected)) {
                 close(next);
             }
         }
     }
     
-    protected List<Component> getChildren() {
+    protected List<Component> getChildList() {
         List<Component> children = new ArrayList<>(getComponentCount());
         Iterator<Component> i = iterator();
         while (i.hasNext()) {
@@ -171,10 +173,16 @@ public class TabbedPanel extends TabSheet {
     public void addCloseHandler(CloseHandler handler) {
         this.closeHandlers.add(handler);
     }
+    
+    protected void setCloseHandler(CloseHandler handler) {
+        closeHandler = handler;
+    }
 
-    public void setMainTab(String caption, Resource icon, Component component) {
-        component.setSizeFull();
-        this.mainTab = addTab(component, caption, icon, 0);
+    public void setMainTab(String caption, Icon icon, Component component) {
+        if (component instanceof HasSize) {
+            ((HasSize) component).setSizeFull();
+        }
+        this.mainTab = add(component, caption, icon, 0);
     }
     
     public void mainTabToTop() {
@@ -182,23 +190,25 @@ public class TabbedPanel extends TabSheet {
     }
 
     public boolean closeTab(String id) {
-        Tab tab = tabsById.remove(id);
+        EnhancedTab tab = tabsById.remove(id);
         if (tab != null) {
             contentToId.remove(tab.getComponent());
-            this.removeTab(tab);
+            this.remove(tab);
             return true;
         } else {
             return false;
         }
     }
 
-    public void addCloseableTab(String id, String caption, Resource icon, Component component) {
-        Tab tab = tabsById.get(id);
+    public void addCloseableTab(String id, String caption, Icon icon, Component component) {
+        EnhancedTab tab = tabsById.get(id);
         if (tab == null) {
-            component.setSizeFull();
+            if (component instanceof HasSize) {
+                ((HasSize) component).setSizeFull();
+            }
             contentToId.put(component, id);
-            tab = addTab(component, caption, icon);
-            tab.setClosable(true);
+            tab = add(component, caption, icon);
+            tab.setCloseable(true);
             tabsById.put(id, tab);
             setSelectedTab(tab);
         } else {
@@ -206,4 +216,15 @@ public class TabbedPanel extends TabSheet {
         }
     }
 
+    @Override
+    public void remove(EnhancedTab tab) {
+        super.remove(tab);
+        if (closeHandler != null) {
+            closeHandler.onTabClose(this, tab.getComponent());
+        }
+    }
+
+    public interface CloseHandler {
+        public void onTabClose(TabbedPanel panel, Component component);
+    }
 }

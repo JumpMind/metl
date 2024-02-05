@@ -168,7 +168,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                         throw new RuntimeException("The data source resource has not been configured.  Please configure it.");
                     }
                     DataSource dataSource = (DataSource) getResourceReference();
-                    databasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(),
+                    databasePlatform = JdbcDatabasePlatformFactory.getInstance().create(dataSource, new SqlTemplateSettings(),
                             quoteIdentifiers, false);
                 }
                 if (targetTables == null) {

@@ -59,7 +59,7 @@ import org.jumpmind.metl.core.model.UserSetting;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.security.SecurityConstants;
 import org.jumpmind.metl.core.util.NameValue;
-import org.jumpmind.persist.IPersistenceManager;
+import org.jumpmind.metl.core.persist.IPersistenceManager;
 import org.jumpmind.properties.TypedProperties;
 
 public class OperationsService extends AbstractService implements IOperationsService {

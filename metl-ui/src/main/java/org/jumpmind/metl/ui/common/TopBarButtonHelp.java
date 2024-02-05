@@ -24,8 +24,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.Page;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.page.Page;
 
 @Component
 @Scope(value="ui")
@@ -35,14 +38,17 @@ public class TopBarButtonHelp extends TopBarButton {
     private static final long serialVersionUID = 1L;
 
     public TopBarButtonHelp() {
-        super("Help", VaadinIcons.QUESTION_CIRCLE);
+        super("Help", VaadinIcon.QUESTION_CIRCLE);
         addClickListener(event -> openHelp(event));
     }
 
-    protected void openHelp(ClickEvent event) {
-        String docUrl = Page.getCurrent().getLocation().toString();
-        docUrl = docUrl.substring(0, docUrl.lastIndexOf("/"));
-        Page.getCurrent().open(docUrl + "/doc/html/user-guide.html", "doc");
+    protected void openHelp(ClickEvent<Button> event) {
+        Page page = UI.getCurrent().getPage();
+        page.fetchCurrentURL(url -> {
+            String docUrl = url.toString();
+            docUrl = docUrl.substring(0, docUrl.lastIndexOf("/"));
+            page.open(docUrl + "/doc/html/user-guide.html", "doc");
+        });
     }
 
 }

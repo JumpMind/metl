@@ -40,44 +40,31 @@ import org.jumpmind.metl.core.util.VersionUtils;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.TopBar;
 import org.jumpmind.metl.ui.common.ViewManager;
-import org.jumpmind.vaadin.ui.common.ResizableWindow;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import com.vaadin.annotations.PreserveOnRefresh;
-import com.vaadin.annotations.Push;
-import com.vaadin.annotations.Theme;
-import com.vaadin.annotations.Title;
-import com.vaadin.server.DefaultErrorHandler;
-import com.vaadin.server.Responsive;
-import com.vaadin.server.ThemeResource;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinService;
-import com.vaadin.server.VaadinServlet;
-import com.vaadin.server.VaadinServletRequest;
-import com.vaadin.server.VaadinSession;
-import com.vaadin.shared.communication.PushMode;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.Html;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Push;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.PreserveOnRefresh;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinServlet;
+import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.flow.server.VaadinSession;
 
-@Theme("apptheme")
-@Title("Metl")
+@PageTitle("Metl")
 @PreserveOnRefresh
-@Push(value = PushMode.AUTOMATIC)
+@Push()
 public class AppUI extends UI {
 
     private static final long serialVersionUID = 1L;
-
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     ViewManager viewManager;
 
@@ -85,7 +72,10 @@ public class AppUI extends UI {
 
     AppSession appSession;
 
-    @SuppressWarnings("serial")
+    public AppUI() {
+        getElement().getClassList().add("apptheme");
+    }
+
     @Override
     protected void init(VaadinRequest request) {
         HttpServletRequest req = ((VaadinServletRequest) VaadinService.getCurrentRequest())
@@ -98,30 +88,6 @@ public class AppUI extends UI {
         backgroundRefresherService = ctx.getBean(BackgroundRefresherService.class);
         backgroundRefresherService.init(this);
 
-        setErrorHandler(new DefaultErrorHandler() {
-            public void error(com.vaadin.server.ErrorEvent event) {
-                String intro = "Exception of type <b>";
-                String message = "";
-                for (Throwable t = event.getThrowable(); t != null; t = t.getCause()) {
-                    if (t.getCause() == null) {
-                        intro += t.getClass().getName()
-                                + "</b> with the following message:<br/><br/>";
-                        message = t.getMessage();
-                    }
-                }
-                ErrorWindow window = new ErrorWindow(intro, message);
-                window.show();
-
-                Throwable ex = event.getThrowable();
-                if (ex != null) {
-                    log.error(ex.getMessage(), ex);
-                } else {
-                    log.error("An unexpected error occurred");
-                }
-            }
-        });
-
-        Responsive.makeResponsive(this);
         afterInit();
     }
 
@@ -136,47 +102,15 @@ public class AppUI extends UI {
     }
 
     @Override
-    public void detach() {
+    public void onDetach(DetachEvent detachEvent) {
         if (backgroundRefresherService != null) {
             backgroundRefresherService.destroy();
         }
         if (appSession != null) {
             AppSession.remove(appSession);
         }
-        super.detach();
+        super.onDetach(detachEvent);
 
-    }
-
-    @SuppressWarnings({ "serial" })
-    class ErrorWindow extends ResizableWindow {
-        public ErrorWindow(String intro, String message) {
-            super("Error");
-            setWidth(600f, Unit.PIXELS);
-            setHeight(300f, Unit.PIXELS);
-            content.setMargin(true);
-
-            HorizontalLayout layout = new HorizontalLayout();
-            Label icon = new Label();
-            icon.setIcon(new ThemeResource("images/error.png"));
-            icon.setWidth(70f, Unit.PIXELS);
-            layout.addComponent(icon);
-
-            Label labelIntro = new Label(intro);
-            labelIntro.setContentMode(ContentMode.HTML);
-            labelIntro.setStyleName("large");
-            labelIntro.setWidth(530f, Unit.PIXELS);
-            layout.addComponent(labelIntro);
-            addComponent(layout);
-
-            TextArea textField = new TextArea();
-            textField.setSizeFull();
-            textField.setWordWrap(false);
-            textField.setValue(message);
-            addComponent(textField);
-            content.setExpandRatio(textField, 1.0f);
-
-            addComponent(buildButtonFooter(buildCloseButton()));
-        }
     }
 
     protected void afterInit() {
@@ -206,7 +140,7 @@ public class AppUI extends UI {
         }
         appCtx.setUser(user);
         login(user);
-        initMenu();
+        access(() -> initMenu());
     }
 
     protected void login(User user) {        
@@ -220,7 +154,7 @@ public class AppUI extends UI {
 
         VerticalLayout root = new VerticalLayout();
         root.setSizeFull();
-        setContent(root);
+        add(root);
 
         VerticalLayout contentArea = new VerticalLayout();
         contentArea.setSizeFull();
@@ -232,30 +166,29 @@ public class AppUI extends UI {
         user.setLastLoginTime(new Date());
         user.setFailedLogins(0);
         appCtx.getOperationsService().save(user);
-        getViewManager().init(this, contentArea);
+        getViewManager().init(this);
 
         TopBar menu = new TopBar(getViewManager(), appCtx);
 
         HorizontalLayout bottom = new HorizontalLayout();
-        bottom.addStyleName(ValoTheme.LAYOUT_WELL);
-        bottom.setWidth(100, Unit.PERCENTAGE);
-        bottom.setMargin(new MarginInfo(false, true, false, true));
+        bottom.setWidthFull();
+        bottom.getStyle().set("margin", "0 16px");
 
         HorizontalLayout left = new HorizontalLayout();
         left.setSpacing(true);
 
-        Label logo = new Label("<a href='http://www.jumpmind.com'><img src='VAADIN/themes/apptheme/images/powered-by-jumpmind.png'/></a>",
-                ContentMode.HTML);
-        bottom.addComponents(logo);
+        Html logo = new Html("<a href='http://www.jumpmind.com'><img src='VAADIN/themes/apptheme/images/powered-by-jumpmind.png'/></a>");
+        bottom.add(logo);
 
-        Label version = new Label("version " + VersionUtils.getCurrentVersion());
-        left.addComponent(version);
+        Span version = new Span("version " + VersionUtils.getCurrentVersion());
+        left.add(version);
 
-        bottom.addComponent(left);
-        bottom.setComponentAlignment(left, Alignment.MIDDLE_RIGHT);
+        bottom.addAndExpand(new Span());
+        bottom.add(left);
+        bottom.setVerticalComponentAlignment(Alignment.CENTER, left);
 
-        root.addComponents(menu, contentArea, bottom);
-        root.setExpandRatio(contentArea, 1);
+        root.add(menu, contentArea, bottom);
+        root.expand(contentArea);
     }
 
     protected ViewManager getViewManager() {

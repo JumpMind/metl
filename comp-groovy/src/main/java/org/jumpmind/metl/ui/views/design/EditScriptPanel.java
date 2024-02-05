@@ -23,13 +23,14 @@ package org.jumpmind.metl.ui.views.design;
 import org.jumpmind.metl.core.runtime.component.Script;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
-import org.vaadin.aceeditor.AceEditor;
-import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.data.HasValue.ValueChangeListener;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.ComboBox;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.icon.VaadinIcon;
+
+import de.f0rce.ace.AceEditor;
+import de.f0rce.ace.enums.AceMode;
 
 public class EditScriptPanel extends AbstractComponentEditPanel {
 
@@ -49,9 +50,9 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
     @SuppressWarnings("serial")
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
-        addComponent(buttonBar);
+        add(buttonBar);
 
-        buttonBar.addButtonRight("Templates", VaadinIcons.QUESTION_CIRCLE,
+        buttonBar.addButtonRight("Templates", VaadinIcon.QUESTION_CIRCLE,
                 (e) -> new ScriptTemplatesDialog(this, context, component, readOnly)
                         .showAtSize(.75));
 
@@ -60,12 +61,12 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
         editor.setMode(AceMode.java);
 
         select = new ComboBox<String>();
-        select.setWidth(40, Unit.EM);
-        select.setTextInputAllowed(false);
+        select.setWidth("40em");
+        select.setAllowCustomValue(false);
 
 		select.setItems(Script.IMPORTS, Script.METHODS, Script.INIT_SCRIPT, Script.HANDLE_SCRIPT,
 				Script.ON_FLOW_SUCCESS, Script.ON_FLOW_ERROR);
-		select.setItemCaptionGenerator(item -> {
+		select.setItemLabelGenerator(item -> {
 			switch (item) {
 				case Script.IMPORTS:
 					return SCRIPT_IMPORTS;
@@ -84,21 +85,24 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
 			}
 		});
 
-        select.setEmptySelectionAllowed(false);
-        select.addValueChangeListener(new ValueChangeListener<String>() {
+        select.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
             @Override
-            public void valueChange(ValueChangeEvent<String> event) {
-                refresh();
+            public void valueChanged(ValueChangeEvent<String> event) {
+                if (event.getValue() != null) {
+                    refresh();
+                } else {
+                    select.setValue(event.getOldValue());
+                }
             }
         });
         select.setValue(Script.HANDLE_SCRIPT);
         buttonBar.addLeft(select);
 
         if (!readOnly) {
-            editor.addValueChangeListener(new ValueChangeListener<String>() {
+            editor.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
 
                 @Override
-                public void valueChange(ValueChangeEvent<String> event) {
+                public void valueChanged(ValueChangeEvent<String> event) {
                     String key = (String) select.getValue();
                     EditScriptPanel.this.component.put(key, event.getValue());
                     EditScriptPanel.this.context.getConfigurationService()
@@ -107,8 +111,8 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
             });
         }
 
-        addComponent(editor);
-        setExpandRatio(editor, 1);
+        add(editor);
+        expand(editor);
 
     }
 

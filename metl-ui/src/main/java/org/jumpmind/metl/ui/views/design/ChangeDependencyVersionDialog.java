@@ -24,22 +24,25 @@ import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionDepends;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
-import org.jumpmind.vaadin.ui.common.ResizableWindow;
+import org.jumpmind.vaadin.ui.common.ResizableDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.event.ShortcutAction.KeyCode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.RadioButtonGroup;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 
-public class ChangeDependencyVersionDialog extends ResizableWindow  {
+public class ChangeDependencyVersionDialog extends ResizableDialog  {
 
     final Logger log = LoggerFactory.getLogger(getClass());
     private static final long serialVersionUID = 1L;
@@ -52,69 +55,66 @@ public class ChangeDependencyVersionDialog extends ResizableWindow  {
         super("Change Dependency Version");
         this.configService = context.getConfigurationService();
         this.designNavigator = designNavigator;
-        initWindow(selectedElement);
+        initDialog(selectedElement);
     }
 
     public static void show(DesignNavigator designNavigator, ApplicationContext context, Object selectedElement) {
-        ChangeDependencyVersionDialog dialog = new ChangeDependencyVersionDialog(context, selectedElement, designNavigator);
-        UI.getCurrent().addWindow(dialog);
+        new ChangeDependencyVersionDialog(context, selectedElement, designNavigator).open();
     }
 
-    private void initWindow(Object selectedItem) {
+    private void initDialog(Object selectedItem) {
         dependency = (ProjectVersionDepends) selectedItem;
         
-        setWidth(400.0f, Unit.PIXELS);
-        setHeight(600.0f, Unit.PIXELS);
+        setWidth("400px");
+        setHeight("600px");
         VerticalLayout vLayout = new VerticalLayout();
         vLayout.setSizeFull();
         vLayout.setMargin(true);
         ProjectVersion sourceProjectVersion = configService.findProjectVersion(dependency.getProjectVersionId());
         ProjectVersion targetProjectVersion = configService.findProjectVersion(dependency.getTargetProjectVersionId());
         FormLayout form = buildForm(sourceProjectVersion, targetProjectVersion);
-        vLayout.addComponent(form);
+        vLayout.add(form);
 
-        Panel projectVersionPanel = new Panel();
-        projectVersionPanel.setSizeFull();
-        projectVersionPanel.setContent(buildPossibleTargetVersions(targetProjectVersion));
-        vLayout.addComponent(projectVersionPanel);
-        addComponent(vLayout,1); 
-        addComponent(buildButtonBar());
-        vLayout.setExpandRatio(projectVersionPanel, 1);       
+        vLayout.addAndExpand(buildPossibleTargetVersions(targetProjectVersion));
+        addComponentAtIndex(1, vLayout);
+        add(buildButtonBar());  
     }
     
-    protected Panel buildPossibleTargetVersions(ProjectVersion targetProjectVersion) {
+    protected VerticalLayout buildPossibleTargetVersions(ProjectVersion targetProjectVersion) {
 
-        Panel possibleTargetVersionsPanel = new Panel("Available Target Versions");        
-        possibleTargetVersionsPanel.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
+        Scroller possibleTargetVersionsPanel = new Scroller();        
         possibleTargetVersionsPanel.setSizeFull();
         
-        optionGroup = new RadioButtonGroup<ProjectVersion>("Project Version");
-        optionGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
-        optionGroup.addStyleName("indent");
-        optionGroup.setItemCaptionGenerator(version -> version.getVersionLabel());
+        optionGroup = new RadioButtonGroup<ProjectVersion>();
+        optionGroup.setLabel("Project Version");
+        optionGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+        optionGroup.addClassName("indent");
+        optionGroup.setRenderer(new ComponentRenderer<Span, ProjectVersion>(version -> new Span(version.getVersionLabel())));
         optionGroup.setItemEnabledProvider(version -> !targetProjectVersion.getId().equalsIgnoreCase(version.getId()));
         optionGroup.setItems(configService.findProjectVersionsByProject(targetProjectVersion.getProject()));
 
         possibleTargetVersionsPanel.setContent(optionGroup);
-        return possibleTargetVersionsPanel;
+        
+        VerticalLayout possibleTargetVersionsLayout = new VerticalLayout(new H3("Available Target Versions"),
+                possibleTargetVersionsPanel);
+        possibleTargetVersionsLayout.setSizeFull();
+        return possibleTargetVersionsLayout;
     }
     
     protected FormLayout buildForm(ProjectVersion sourceProjectVersion, ProjectVersion targetProjectVersion) {
         FormLayout form = new FormLayout();
-        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        form.setMargin(true);
         TextField sourceProjectNameField = new TextField("Source Project");
         sourceProjectNameField.setValue(sourceProjectVersion.getProject().getName());
         sourceProjectNameField.setEnabled(false);
-        form.addComponent(sourceProjectNameField);
+        form.add(sourceProjectNameField);
         TextField targetProjectNameField = new TextField("Target Project");
         targetProjectNameField.setValue(targetProjectVersion.getProject().getName());
         targetProjectNameField.setEnabled(false);
-        form.addComponent(targetProjectNameField);
+        form.add(targetProjectNameField);
         TextField currentDependencyVersion = new TextField("Current Dependency Version");
         currentDependencyVersion.setValue(targetProjectVersion.getVersionLabel());
         currentDependencyVersion.setEnabled(false);
-        form.addComponent(currentDependencyVersion);
+        form.add(currentDependencyVersion);
 
         return form;
     }
@@ -123,8 +123,8 @@ public class ChangeDependencyVersionDialog extends ResizableWindow  {
         Button cancelButton = new Button("Cancel", e->cancel());
         Button changeButton = new Button("Change", e->change());
         changeButton.setDisableOnClick(true);
-        changeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
-        changeButton.setClickShortcut(KeyCode.ENTER);
+        changeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        changeButton.addClickShortcut(Key.ENTER);
         return buildButtonFooter(cancelButton, changeButton);        
     }
 

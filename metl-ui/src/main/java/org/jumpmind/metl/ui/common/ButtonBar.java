@@ -20,18 +20,16 @@
  */
 package org.jumpmind.metl.ui.common;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.Resource;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 public class ButtonBar extends HorizontalLayout {
 
@@ -48,81 +46,83 @@ public class ButtonBar extends HorizontalLayout {
     HorizontalLayout right;
 
     public ButtonBar() {
-        setWidth(100, Unit.PERCENTAGE);
-        setMargin(new MarginInfo(true, false, true, false));
+        setWidthFull();
+        getStyle().set("margin", "16px 0");
 
         wrapper = new HorizontalLayout();
         wrapper.setSpacing(true);
-        wrapper.setWidth(100, Unit.PERCENTAGE);
-        wrapper.addStyleName(STYLE);
-        wrapper.setMargin(new MarginInfo(false, true, false, false));
+        wrapper.setWidthFull();
+        wrapper.addClassName(STYLE);
+        wrapper.getStyle().set("margin", "0 16px 0 0");
 
         left = new HorizontalLayout();       
-        wrapper.addComponent(left);        
-        wrapper.setComponentAlignment(left, Alignment.MIDDLE_LEFT);
+        wrapper.add(left);        
+        wrapper.setVerticalComponentAlignment(Alignment.CENTER, left);
 
         bar = new HorizontalLayout();
 
-        wrapper.addComponent(bar);
-        wrapper.setComponentAlignment(bar, Alignment.MIDDLE_LEFT);
+        wrapper.add(bar);
+        wrapper.setVerticalComponentAlignment(Alignment.CENTER, bar);
 
-        Label spacer = new Label();
-        spacer.addStyleName(STYLE);
-        wrapper.addComponent(spacer);
-        wrapper.setExpandRatio(spacer, 1);
+        Span spacer = new Span();
+        spacer.addClassName(STYLE);
+        wrapper.addAndExpand(spacer);
 
         right = new HorizontalLayout();
         right.setSpacing(false);
         right.setMargin(false);
-        wrapper.addComponent(right);
-        wrapper.setComponentAlignment(right, Alignment.MIDDLE_RIGHT);
+        wrapper.add(right);
+        wrapper.setVerticalComponentAlignment(Alignment.CENTER, right);
 
-        addComponent(wrapper);
+        add(wrapper);
     }
 
     public TextField addFilter() {
         TextField textField = new TextField();
         textField.setWidth("15em");
-        textField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
         textField.setPlaceholder("Filter");
-        textField.setIcon(VaadinIcons.SEARCH);
+        textField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         textField.setValueChangeMode(ValueChangeMode.LAZY);
         textField.setValueChangeTimeout(500);
-        wrapper.addComponent(textField);
-        wrapper.setComponentAlignment(textField, Alignment.BOTTOM_RIGHT);
+        wrapper.add(textField);
+        wrapper.setVerticalComponentAlignment(Alignment.END, textField);
         return textField;
+    }
+    
+    public void addToBar(Component component) {
+        bar.add(component);
     }
 
     public void addRight(Component component) {
-        right.addComponent(component);
-        right.setComponentAlignment(component, Alignment.BOTTOM_RIGHT);
+        right.add(component);
+        right.setVerticalComponentAlignment(Alignment.END, component);
     }
 
     public void addLeft(Component component) {
-        left.setMargin(new MarginInfo(false, false, false, true));
-        left.addComponent(component);
+        left.getStyle().set("margin", "0 0 0 16px");
+        left.add(component);
     }
 
-    public Button addButton(String name, Resource icon) {
+    public Button addButton(String name, VaadinIcon icon) {
         return addButton(name, icon, null);
     }
 
-    public Button addButton(String name, Resource icon, ClickListener clickListener) {
+    public Button addButton(String name, VaadinIcon icon, ComponentEventListener<ClickEvent<Button>> clickListener) {
         Button button = createButton(name, icon, clickListener);
-        bar.addComponent(button);
+        bar.add(button);
         return button;
     }
 
-    public Button addButtonRight(String name, Resource icon, ClickListener clickListener) {
+    public Button addButtonRight(String name, VaadinIcon icon, ComponentEventListener<ClickEvent<Button>> clickListener) {
         Button button = createButton(name, icon, clickListener);
-        right.addComponent(button);
+        right.add(button);
         return button;
     }
     
-    public Button createButton(String name, Resource icon, ClickListener clickListener) {
+    public Button createButton(String name, VaadinIcon icon, ComponentEventListener<ClickEvent<Button>> clickListener) {
         Button button = new Button(name);
-        button.addStyleName(STYLE);
-        button.setIcon(icon);
+        button.addClassName(STYLE);
+        button.setIcon(new Icon(icon));
         if (clickListener != null) {
             button.addClickListener(clickListener);
         }

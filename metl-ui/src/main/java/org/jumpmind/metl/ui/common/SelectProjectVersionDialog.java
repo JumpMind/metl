@@ -25,29 +25,28 @@ import java.util.List;
 import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
-import org.jumpmind.vaadin.ui.common.ResizableWindow;
+import org.jumpmind.vaadin.ui.common.ResizableDialog;
 
-import com.vaadin.data.TreeData;
-import com.vaadin.data.provider.TreeDataProvider;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Grid.SelectionMode;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.Tree;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.components.grid.SingleSelectionModel;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 
-public class SelectProjectVersionDialog extends ResizableWindow {
+public class SelectProjectVersionDialog extends ResizableDialog {
 
     private static final long serialVersionUID = 1L;
 
     ApplicationContext context;
 
-    Tree<AbstractNamedObject> tree = new Tree<AbstractNamedObject>();
+    TreeGrid<AbstractNamedObject> tree = new TreeGrid<AbstractNamedObject>();
     
     TreeData<AbstractNamedObject> treeData = new TreeData<AbstractNamedObject>();
     
@@ -62,56 +61,52 @@ public class SelectProjectVersionDialog extends ResizableWindow {
         this.context = context;
 
         tree.setSelectionMode(SelectionMode.SINGLE);
-        tree.setItemCaptionGenerator(item -> {
-        	if (item instanceof ProjectVersion) {
-        		return ((ProjectVersion) item).getVersionLabel();
-        	}
-        	return item.getName();
-        });
-        tree.setItemIconGenerator(item -> {
-        	if (item instanceof Project) {
-        		return Icons.PROJECT;
-        	} else if (item instanceof ProjectVersion) {
-        		return Icons.VERSION;
-        	}
-        	return null;
+        tree.addComponentColumn(item -> {
+            Icon icon = null;
+            Span span = new Span(item.getName());
+            if (item instanceof Project) {
+                icon = new Icon(Icons.PROJECT);
+            } else if (item instanceof ProjectVersion) {
+                icon = new Icon(Icons.PROJECT_VERSION);
+                span.setText(((ProjectVersion) item).getVersionLabel());
+            }
+            if (icon != null) {
+                return new HorizontalLayout(icon, span);
+            }
+            return span;
         });
         treeDataProvider = new TreeDataProvider<AbstractNamedObject>(treeData);
         tree.setDataProvider(treeDataProvider);
         addProjects(projectToExclude);
 
-        setWidth(600.0f, Unit.PIXELS);
-        setHeight(600.0f, Unit.PIXELS);
+        setWidth("600px");
+        setHeight("600px");
 
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
         layout.setMargin(true);
         layout.setSizeFull();
-        layout.addComponent(new Label(introText));
+        layout.add(new Span(introText));
 
-        Panel scrollable = new Panel();
-        scrollable.addStyleName(ValoTheme.PANEL_BORDERLESS);
-        scrollable.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
+        Scroller scrollable = new Scroller();
         scrollable.setSizeFull();
         scrollable.setContent(tree);
-        layout.addComponent(scrollable);
-        layout.setExpandRatio(scrollable, 1.0f);
-        addComponent(layout, 1);
+        layout.addAndExpand(scrollable);
+        addComponentAtIndex(1, layout);
 
         Button cancelButton = new Button("Cancel");
         Button selectButton = new Button("Select");
-        addComponent(buildButtonFooter(cancelButton, selectButton));
+        add(buildButtonFooter(cancelButton, selectButton));
 
-        cancelButton.addClickListener(new ClickListener() {
-            public void buttonClick(ClickEvent event) {
+        cancelButton.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+            public void onComponentEvent(ClickEvent<Button> event) {
                 close();
             }
         });
 
-        selectButton.addClickListener(new ClickListener() {
-            public void buttonClick(ClickEvent event) {
-				AbstractNamedObject selection = ((SingleSelectionModel<AbstractNamedObject>) tree.getSelectionModel())
-						.getSelectedItem().orElse(null);
+        selectButton.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+            public void onComponentEvent(ClickEvent<Button> event) {
+				AbstractNamedObject selection = tree.getSelectionModel().getFirstSelectedItem().orElse(null);
                 if (selection instanceof ProjectVersion) {
                     listener.selected((ProjectVersion) selection);
                     close();
@@ -125,7 +120,7 @@ public class SelectProjectVersionDialog extends ResizableWindow {
         SelectProjectVersionDialog dialog = new SelectProjectVersionDialog(context,
                 projectToExclude, "Select Version", introText);
         dialog.setProjectVersionSelectListener(listener);
-        UI.getCurrent().addWindow(dialog);
+        dialog.open();
     }
 
     protected void addProjects(Project projectToExclude) {

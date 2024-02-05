@@ -22,185 +22,167 @@ package org.jumpmind.metl.ui.diagram;
 
 import java.util.List;
 
-import com.vaadin.annotations.JavaScript;
-import com.vaadin.annotations.StyleSheet;
-import com.vaadin.server.Page;
-import com.vaadin.ui.AbstractJavaScriptComponent;
+import org.jumpmind.metl.ui.views.design.EditFlowPanel;
+
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ClientCallable;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dependency.JavaScript;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.page.Page;
 
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
-@JavaScript({ "jquery-2.2.0.min.js", "dom.jsPlumb-1.7.5-min.js", "diagram.js", "html2canvas.js", "canvg.js"})
-@StyleSheet({ "diagram.css" })
-public class Diagram extends AbstractJavaScriptComponent {
+@JsModule("./html2canvas.js")
+@JsModule("./canvg.js")
+@CssImport("./diagram.css")
+@JsModule("./diagram.js")
+@JsModule("jquery")
+@JsModule("jsplumb")
+@JavaScript("./diagram.js")
+public class Diagram extends Div {
 
     private static final long serialVersionUID = 1L;
+    
+    private DiagramDetail diagramDetail;
+    
+    private EditFlowPanel panel;
 
-    public Diagram() {
-        setPrimaryStyleName("diagram");
+    public Diagram(EditFlowPanel panel) {
+        addClassName("diagram");
         setId("diagram");
-
-        addFunction("onNodeSelected", (arguments) -> {
-            DiagramState state = getState();
-            List<String> ids = state.selectedNodeIds;
-            ids.clear();
-            if (arguments.length() > 0) {
-                Object obj = arguments.get(0);
-                if (obj instanceof JsonObject) {
-                    JsonObject json = arguments.getObject(0);
-                    if (json.hasKey("nodes")) {
-                        JsonArray nodes = json.getArray("nodes");
-                        for (int i = 0; i < nodes.length(); i++) {
-                            ids.add(nodes.getObject(i).getString("id"));
-                        }
-                    }
-                }
-            }
-            fireEvent(new NodeSelectedEvent(Diagram.this, ids));
-        });
-        
-        addFunction("onLinkSelected", (arguments) -> {
-            if (arguments.length() > 0) {
-                Object obj = arguments.get(0);
-                if (obj instanceof JsonObject) {
-                    JsonObject json = arguments.getObject(0);
-                    String sourceNodeId = json.getString("sourceNodeId");
-                    String targetNodeId = json.getString("targetNodeId");
-                    fireEvent(new LinkSelectedEvent(Diagram.this, sourceNodeId, targetNodeId));
-                }
-            }
-        });        
-
-        addFunction("onNodeDoubleClick", (arguments) -> {
-            if (arguments.length() > 0) {
-                Object obj = arguments.get(0);
-                if (obj instanceof JsonObject) {
-                    JsonObject json = arguments.getObject(0);
-                    String id = json.getString("id");
-                    DiagramState state = getState();
-                    for (Node node : state.nodes) {
-                        if (node.getId().equals(id)) {
-                            fireEvent(new NodeDoubleClickedEvent(Diagram.this, node));
-                            break;
-                        }
-                    }
-                }
-            }
-        });
-
-        addFunction("onNodeMoved", (arguments) -> {
-            if (arguments.length() > 0) {
-                Object obj = arguments.get(0);
-                if (obj instanceof JsonObject) {
-                    JsonObject json = arguments.getObject(0);
-                    String id = json.getString("id");
-                    double x = json.getNumber("x");
-                    double y = json.getNumber("y");
-                    DiagramState state = getState();
-                    for (Node node : state.nodes) {
-                        if (node.getId().equals(id)) {
-                            // Why do we set the state on the server side?
-                            // Don't we have to send this back to the client
-                            // now?
-                            node.setX((int) x);
-                            node.setY((int) y);
-                            fireEvent(new NodeMovedEvent(Diagram.this, node));
-                            break;
-                        }
-                    }
-                }
-            }
-        });
-
-        addFunction("onConnection", (arguments) -> {
-            if (arguments.length() > 0) {
-                Object obj = arguments.get(0);
-                if (obj instanceof JsonObject) {
-                    JsonObject json = arguments.getObject(0);
-                    String sourceNodeId = json.getString("sourceNodeId");
-                    String targetNodeId = json.getString("targetNodeId");
-                    boolean removed = json.getBoolean("removed");
-                    DiagramState state = getState();
-                    for (Node node : state.nodes) {
-                        if (node.getId().equals(sourceNodeId)) {
-                            if (!removed && !node.getTargetNodeIds().contains(targetNodeId)) {
-                                node.getTargetNodeIds().add(targetNodeId);
-                            } else if (removed) {
-                                node.getTargetNodeIds().remove(targetNodeId);
-                            }
-                            fireEvent(new LinkEvent(Diagram.this, sourceNodeId, targetNodeId, removed));
-                            break;
-                        }
-                    }
-                }
-            }
-        });
-
-        addFunction("onConnectionMoved", (arguments) -> {
-            if (arguments.length() > 0) {
-                Object obj = arguments.get(0);
-                if (obj instanceof JsonObject) {
-                    JsonObject json = arguments.getObject(0);
-                    String sourceNodeId = json.getString("sourceNodeId");
-                    String targetNodeId = json.getString("targetNodeId");
-                    String origSourceNodeId = json.getString("origSourceNodeId");
-                    String origTargetNodeId = json.getString("origTargetNodeId");
-
-                    DiagramState state = getState();
-                    for (Node node : state.nodes) {
-                        if (node.getId().equals(sourceNodeId)) {
-                            if (!node.getTargetNodeIds().contains(targetNodeId)) {
-                                node.getTargetNodeIds().add(targetNodeId);
-                            }
-                            fireEvent(new LinkEvent(Diagram.this, sourceNodeId, targetNodeId, false));
-                            break;
-                        }
-                    }
-
-                    for (Node node : state.nodes) {
-                        if (node.getId().equals(origSourceNodeId)) {
-                            node.getTargetNodeIds().remove(origTargetNodeId);
-                            fireEvent(new LinkEvent(Diagram.this, origSourceNodeId, origTargetNodeId, true));
-                            break;
-                        }
-                    }
-
-                }
-            }
-        });
-
+        diagramDetail = new DiagramDetail();
+        this.panel = panel;
+    }
+    
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        Page page = UI.getCurrent().getPage();
+        page.executeJs("window.org_jumpmind_metl_ui_diagram_Diagram()");
     }
 
+    @ClientCallable
+    private void onNodeSelected(JsonObject json) {
+        List<String> ids = diagramDetail.getSelectedNodeIds();
+        ids.clear();
+        if (json.hasKey("nodes")) {
+            JsonArray nodes = json.getArray("nodes");
+            for (int i = 0; i < nodes.length(); i++) {
+                ids.add(nodes.getObject(i).getString("id"));
+            }
+        }
+        panel.nodeSelectedEvent(new NodeSelectedEvent(Diagram.this, ids));
+    }
+    
+    @ClientCallable
+    private void onLinkSelected(JsonObject json) {
+        String sourceNodeId = json.getString("sourceNodeId");
+        String targetNodeId = json.getString("targetNodeId");
+        panel.linkSelectedEvent(new LinkSelectedEvent(Diagram.this, sourceNodeId, targetNodeId));
+    }
+
+    @ClientCallable
+    private void onNodeDoubleClick(JsonObject json) {
+        String id = json.getString("id");
+        for (Node node : diagramDetail.getNodes()) {
+            if (node.getId().equals(id)) {
+                panel.nodeDoubleClickedEvent(new NodeDoubleClickedEvent(Diagram.this, node));
+                break;
+            }
+        }
+    }
+    
+    @ClientCallable
+    private void onNodeMoved(JsonObject json) {
+        String id = json.getString("id");
+        double x = json.getNumber("x");
+        double y = json.getNumber("y");
+        for (Node node : diagramDetail.getNodes()) {
+            if (node.getId().equals(id)) {
+                // Why do we set the state on the server side?
+                // Don't we have to send this back to the client
+                // now?
+                node.setX((int) x);
+                node.setY((int) y);
+                panel.nodeMovedEvent(new NodeMovedEvent(Diagram.this, node));
+                break;
+            }
+        }
+    }
+    
+    @ClientCallable
+    private void onConnection(JsonObject json) {
+        String sourceNodeId = json.getString("sourceNodeId");
+        String targetNodeId = json.getString("targetNodeId");
+        boolean removed = json.getBoolean("removed");
+        for (Node node : diagramDetail.getNodes()) {
+            if (node.getId().equals(sourceNodeId)) {
+                if (!removed && !node.getTargetNodeIds().contains(targetNodeId)) {
+                    node.getTargetNodeIds().add(targetNodeId);
+                } else if (removed) {
+                    node.getTargetNodeIds().remove(targetNodeId);
+                }
+                panel.linkEvent(new LinkEvent(Diagram.this, sourceNodeId, targetNodeId, removed));
+                break;
+            }
+        }
+    }
+    
+    @ClientCallable
+    private void onConnectionMoved(JsonObject json) {
+        String sourceNodeId = json.getString("sourceNodeId");
+        String targetNodeId = json.getString("targetNodeId");
+        String origSourceNodeId = json.getString("origSourceNodeId");
+        String origTargetNodeId = json.getString("origTargetNodeId");
+
+        for (Node node : diagramDetail.getNodes()) {
+            if (node.getId().equals(sourceNodeId)) {
+                if (!node.getTargetNodeIds().contains(targetNodeId)) {
+                    node.getTargetNodeIds().add(targetNodeId);
+                }
+                panel.linkEvent(new LinkEvent(Diagram.this, sourceNodeId, targetNodeId, false));
+                break;
+            }
+        }
+
+        for (Node node : diagramDetail.getNodes()) {
+            if (node.getId().equals(origSourceNodeId)) {
+                node.getTargetNodeIds().remove(origTargetNodeId);
+                panel.linkEvent(new LinkEvent(Diagram.this, origSourceNodeId, origTargetNodeId, true));
+                break;
+            }
+        }
+    }
+    
     public void setSelectedNodeIds(List<String> ids) {
-        getState().selectedNodeIds = ids;
+        diagramDetail.setSelectedNodeIds(ids);
     }
 
     public List<String> getSelectedNodeIds() {
-        return getState().selectedNodeIds;
+        return diagramDetail.getSelectedNodeIds();
     }
 
     public void setNodes(List<Node> nodes) {
-        getState().nodes = nodes;
+        diagramDetail.setNodes(nodes);
     }
 
     public void addNode(Node node) {
-        getState().nodes.add(node);
-    }
-
-    @Override
-    protected DiagramState getState() {
-        return (DiagramState) super.getState();
+        diagramDetail.addNode(node);
     }
 
     public List<Node> getNodes() {
-        return getState().nodes;
+        return diagramDetail.getNodes();
     }
     
     public void export() {
         // Lookup how large the canvas needs to be based on node positions.
         int maxHeight = 0;
         int maxWidth = 0;
-        for (Node node : getState().nodes) {
+        for (Node node : diagramDetail.getNodes()) {
             if (node.getX() > maxWidth) {
                 maxWidth = node.getX();
             }
@@ -212,7 +194,7 @@ public class Diagram extends AbstractJavaScriptComponent {
         maxWidth += 200;
         maxHeight += 200;
         // Call client side code to create the canvas and display it.
-        Page.getCurrent().getJavaScript().execute("exportDiagram("+maxWidth+","+maxHeight+");");
+        UI.getCurrent().getPage().executeJs("exportDiagram("+maxWidth+","+maxHeight+");");
     }
     
 }

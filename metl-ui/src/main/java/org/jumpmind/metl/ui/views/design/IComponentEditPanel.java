@@ -24,7 +24,7 @@ import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
-public interface IComponentEditPanel extends IUiPanel, com.vaadin.ui.Component {
+public interface IComponentEditPanel extends IUiPanel {
 
     public void init(boolean readOnly, Component component, ApplicationContext context, PropertySheet propertySheet);
 

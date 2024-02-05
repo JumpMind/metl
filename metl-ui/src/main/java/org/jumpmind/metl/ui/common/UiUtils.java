@@ -27,13 +27,12 @@ import java.io.InputStream;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.ui.definition.XMLComponentUI;
+
+import com.vaadin.flow.component.Html;
 
 public final class UiUtils {
 
@@ -60,7 +59,7 @@ public final class UiUtils {
         return ip;  
     }    
 
-    public static Label getName(String filter, String name) {
+    public static Html getName(String filter, String name) {
         if (isNotBlank(filter) && isNotBlank(name)) {
             int[] startEndIndex = getFilterMatchRange(filter, name);
             if (startEndIndex[0] != -1) {
@@ -70,9 +69,7 @@ public final class UiUtils {
                 name = pre + "<span class='highlight'>" + highlighted + "</span>" + post;
             }
         }
-        Label label = new Label(name);
-        label.setContentMode(ContentMode.HTML);
-        return label;
+        return new Html(name);
     }
 
     public static boolean filterMatches(String needle, String haystack) {

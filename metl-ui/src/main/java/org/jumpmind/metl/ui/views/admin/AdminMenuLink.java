@@ -26,8 +26,8 @@ import java.lang.annotation.Target;
 
 import org.jumpmind.metl.ui.init.AppUI;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.icon.VaadinIcon;
 
 @Target({java.lang.annotation.ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
@@ -38,5 +38,5 @@ public @interface AdminMenuLink {
     
     Class<? extends UI> uiClass() default AppUI.class;
     
-    VaadinIcons icon() default VaadinIcons.ASTERISK;
+    VaadinIcon icon() default VaadinIcon.ASTERISK;
 }

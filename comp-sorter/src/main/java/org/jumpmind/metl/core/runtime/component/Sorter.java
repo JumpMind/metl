@@ -309,8 +309,8 @@ public class Sorter extends AbstractComponentRuntime {
 			ds.setMaxIdle(1);
 			databaseName = UUID.randomUUID().toString();
 			ds.setUrl("jdbc:h2:mem:" + databaseName);
-			databasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(ds,
-					new SqlTemplateSettings(), true, false);
+            databasePlatform = JdbcDatabasePlatformFactory.getInstance().create(ds, new SqlTemplateSettings(), true,
+                    false);
 			
 			RelationalModel inputModel = (RelationalModel) context.getFlowStep().getComponent().getInputModel();
 			List<ModelEntity> entities = inputModel.getModelEntities();

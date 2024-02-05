@@ -27,21 +27,19 @@ import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.event.ShortcutAction.KeyCode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.ProgressBar;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 
-public class InProgressDialog<T> extends Window {
+public class InProgressDialog<T> extends Dialog {
 
     private static final long serialVersionUID = 1L;
 
@@ -61,13 +59,17 @@ public class InProgressDialog<T> extends Window {
         this.backgroundService = backgroundService;
         this.worker = worker;
         this.failureMessage = failureMessage;
-        setWidth(300, Unit.PIXELS);
-        setHeight(150, Unit.PIXELS);
-        setCaption("Working...");
+        setWidth("300px");
+        setHeight("150px");
         setModal(true);
 
+        Span header = new Span("<b>Working...</b><hr>");
+        header.setWidthFull();
+        header.getStyle().set("margin", null);
+        add(header);
+
         VerticalLayout content = new VerticalLayout();
-        setContent(content);
+        add(content);
 
         HorizontalLayout middle = new HorizontalLayout();
         middle.setSpacing(true);
@@ -75,39 +77,39 @@ public class InProgressDialog<T> extends Window {
 
         ProgressBar pg = new ProgressBar();
         pg.setIndeterminate(true);
-        middle.addComponent(pg);
+        middle.add(pg);
 
         if (isNotBlank(caption)) {
-            Label label = new Label(caption);
-            middle.addComponent(label);
+            Span span = new Span(caption);
+            middle.add(span);
         }
 
-        content.addComponent(middle);
-        content.setExpandRatio(middle, 1);
+        content.add(middle);
+        content.expand(middle);
 
         HorizontalLayout buttonBar = new HorizontalLayout();
-        buttonBar.setWidth(100, Unit.PERCENTAGE);
-        buttonBar.addStyleName(ValoTheme.WINDOW_BOTTOM_TOOLBAR);
+        buttonBar.setWidthFull();
         Button dismiss = new Button("Dismiss");
-        dismiss.addStyleName(ValoTheme.BUTTON_PRIMARY);
-        dismiss.setClickShortcut(KeyCode.ENTER);
-        dismiss.addClickListener(new ClickListener() {
+        dismiss.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        dismiss.addClickShortcut(Key.ENTER);
+        dismiss.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
 
             private static final long serialVersionUID = 1L;
 
             @Override
-            public void buttonClick(ClickEvent event) {
+            public void onComponentEvent(ClickEvent<Button> event) {
                 InProgressDialog.this.close();
             }
         });
-        buttonBar.addComponent(dismiss);
-        buttonBar.setComponentAlignment(dismiss, Alignment.MIDDLE_RIGHT);
-        content.addComponent(buttonBar);
+        buttonBar.addAndExpand(new Span());
+        buttonBar.add(dismiss);
+        buttonBar.setVerticalComponentAlignment(Alignment.CENTER, dismiss);
+        content.add(buttonBar);
 
     }
 
     public void show() {
-        UI.getCurrent().addWindow(this);
+        open();
         backgroundService.doWork(new IBackgroundRefreshable<Object>() {
 
             @Override
@@ -125,9 +127,9 @@ public class InProgressDialog<T> extends Window {
             @Override
             public void onUIError(Throwable ex) {
                 if (failureMessage != null) {
-                    CommonUiUtils.notify(failureMessage, Type.ERROR_MESSAGE);
+                    CommonUiUtils.notifyError(failureMessage);
                 } else {
-                    CommonUiUtils.notify(ex);
+                    CommonUiUtils.notifyError();
                 }
                 InProgressDialog.this.close();                
             }

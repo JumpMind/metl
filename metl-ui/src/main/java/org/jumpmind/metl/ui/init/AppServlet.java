@@ -23,16 +23,20 @@ package org.jumpmind.metl.ui.init;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebInitParam;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.annotations.VaadinServletConfiguration;
-import com.vaadin.server.VaadinServlet;
+import com.vaadin.flow.server.VaadinServlet;
 
-@VaadinServletConfiguration(productionMode = false, ui = AppUI.class, widgetset = "org.jumpmind.metl.ui.AppWidgetSet")
+//@VaadinServletConfiguration(productionMode = false, ui = AppUI.class, widgetset = "org.jumpmind.metl.ui.AppWidgetSet")
+//@WebServlet(urlPatterns = "/*", asyncSupported = true, initParams = {
+//        @WebInitParam(name = "org.atmosphere.cpr.asyncSupport", value = "org.atmosphere.container.JSR356AsyncSupport"),
+//        @WebInitParam(name = "beanName", value = "appUI"), @WebInitParam(name = "productionMode", value = "false") })
 public class AppServlet extends VaadinServlet {
 
     private static final long serialVersionUID = 1L;

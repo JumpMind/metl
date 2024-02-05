@@ -20,17 +20,17 @@
  */
 package org.jumpmind.metl.ui.diagram;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Component.Event;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.html.Div;
 
-public class NodeDoubleClickedEvent extends Event {
+public class NodeDoubleClickedEvent extends ComponentEvent<Div> {
 
     private static final long serialVersionUID = 1L;
 
     Node node;
     
-    public NodeDoubleClickedEvent(Component source, Node node) {
-        super(source);
+    public NodeDoubleClickedEvent(Div source, Node node) {
+        super(source, false);
         this.node = node;
     }
 

@@ -56,7 +56,7 @@ import org.jumpmind.metl.core.runtime.ExecutionTrackerRecorder;
 import org.jumpmind.metl.core.runtime.IExecutionTracker;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.util.LogUtils;
-import org.jumpmind.persist.IPersistenceManager;
+import org.jumpmind.metl.core.persist.IPersistenceManager;
 import org.jumpmind.symmetric.csv.CsvReader;
 import org.jumpmind.util.FormatUtils;
 import org.springframework.core.env.Environment;

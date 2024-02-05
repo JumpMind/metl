@@ -22,36 +22,41 @@ package org.jumpmind.metl.ui.common;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.Page;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import javax.servlet.http.HttpServletResponse;
 
-public class PageNotFoundView extends VerticalLayout implements View {
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.ErrorParameter;
+import com.vaadin.flow.router.HasErrorParameter;
+import com.vaadin.flow.router.NotFoundException;
+
+public class PageNotFoundView extends VerticalLayout implements HasErrorParameter<NotFoundException> {
 
     private static final long serialVersionUID = 1L;
 
-    Label pageNotFoundLabel = new Label();
+    Span pageNotFoundSpan = new Span();
 
-    ViewManager viewManager;
-
-    public PageNotFoundView(ViewManager viewManager) {
-        this.viewManager = viewManager;
+    public PageNotFoundView() {
         setSizeFull();
         setMargin(true);
-        addComponent(pageNotFoundLabel);
+        add(pageNotFoundSpan);
     }
 
     @Override
-    public void enter(ViewChangeEvent event) {
-        String uriFragment = Page.getCurrent().getUriFragment();
-        if (isBlank(uriFragment)) {
-            viewManager.navigateToDefault();
-        } else {
-            pageNotFoundLabel.addStyleName("failure");
-            pageNotFoundLabel.setValue("Could not find page for " + uriFragment);
-        }
+    public int setErrorParameter(BeforeEnterEvent event,
+          ErrorParameter<NotFoundException> parameter) {
+        UI.getCurrent().getPage().fetchCurrentURL(url -> {
+            String uriFragment = url.getRef();
+            if (isBlank(uriFragment)) {
+                //viewManager.navigateToDefault();
+            } else {
+                pageNotFoundSpan.addClassName("failure");
+                pageNotFoundSpan.setText("Could not find page for " + uriFragment);
+            }
+        });
+        return HttpServletResponse.SC_NOT_FOUND;
     }
 
 }

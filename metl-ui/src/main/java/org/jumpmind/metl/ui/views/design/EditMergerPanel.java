@@ -35,11 +35,11 @@ import org.jumpmind.metl.core.runtime.component.Merger;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UiUtils;
 
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.data.HasValue.ValueChangeListener;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.textfield.TextField;
 
 @SuppressWarnings("serial")
 public class EditMergerPanel extends AbstractComponentEditPanel {
@@ -52,19 +52,19 @@ public class EditMergerPanel extends AbstractComponentEditPanel {
 
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
-        addComponent(buttonBar);
+        add(buttonBar);
 
         filterField = buttonBar.addFilter();
-        filterField.addValueChangeListener(new ValueChangeListener<String>() {
+        filterField.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
 
             @Override
-            public void valueChange(ValueChangeEvent<String> event) {
+            public void valueChanged(ValueChangeEvent<String> event) {
                 filterField.setValue(event.getValue());
                 updateGrid(event.getValue());
             }
         });
 
-        addComponent(buttonBar);
+        add(buttonBar);
 
         grid.setSizeFull();
         grid.addColumn(setting -> {
@@ -72,15 +72,15 @@ public class EditMergerPanel extends AbstractComponentEditPanel {
             ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
             ModelEntity entity = model.getEntityById(attribute.getEntityId());
             return UiUtils.getName(filterField.getValue(), entity.getName());
-        }).setCaption("Entity Name").setWidth(250).setSortable(true);
+        }).setHeader("Entity Name").setWidth("250px").setSortable(true);
         grid.addColumn(setting -> {
             RelationalModel model = (RelationalModel) component.getInputModel();
             ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
             return UiUtils.getName(filterField.getValue(), attribute.getName());
-        }).setCaption("Attribute Name").setWidth(250).setSortable(true);
-        grid.addComponentColumn(setting -> createCheckBox(setting, Merger.MERGE_ATTRIBUTE)).setCaption("Join On").setSortable(true);
-        addComponent(grid);
-        setExpandRatio(grid, 1.0f);
+        }).setHeader("Attribute Name").setWidth("250px").setSortable(true);
+        grid.addComponentColumn(setting -> createCheckbox(setting, Merger.MERGE_ATTRIBUTE)).setHeader("Join On").setSortable(true);
+        add(grid);
+        expand(grid);
 
         if (component.getInputModel() != null) {
             RelationalModel model = (RelationalModel) component.getInputModel();
@@ -130,12 +130,12 @@ public class EditMergerPanel extends AbstractComponentEditPanel {
         grid.setItems(filteredAttributeSettings);
     }
 
-    private CheckBox createCheckBox(final AttributeSettings settings, final String key) {
-        final CheckBox checkBox = new CheckBox();
-        checkBox.addValueChangeListener(new ValueChangeListener<Boolean>() {
+    private Checkbox createCheckbox(final AttributeSettings settings, final String key) {
+        final Checkbox checkbox = new Checkbox();
+        checkbox.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<Boolean>>() {
 
             @Override
-            public void valueChange(ValueChangeEvent<Boolean> event) {
+            public void valueChanged(ValueChangeEvent<Boolean> event) {
                 ComponentAttribSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(), key);
 
                 String oldValue = setting == null ? Boolean.FALSE.toString() : setting.getValue();
@@ -143,14 +143,14 @@ public class EditMergerPanel extends AbstractComponentEditPanel {
                     setting = new ComponentAttribSetting(settings.getAttributeId(), component.getId(), key, Boolean.TRUE.toString());
                     component.addAttributeSetting(setting);
                 }
-                setting.setValue(checkBox.getValue().toString());
+                setting.setValue(checkbox.getValue().toString());
                 if (!oldValue.equals(setting.getValue())) {
                     context.getConfigurationService().save(setting);
                 }
             }
         });
-        checkBox.setReadOnly(readOnly);
-        return checkBox;
+        checkbox.setReadOnly(readOnly);
+        return checkbox;
 
     }
 

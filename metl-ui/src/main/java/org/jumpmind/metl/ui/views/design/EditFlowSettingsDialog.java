@@ -30,29 +30,29 @@ import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowParameter;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.vaadin.ui.common.ResizableWindow;
+import org.jumpmind.vaadin.ui.common.ResizableDialog;
 
-import com.vaadin.event.selection.SelectionEvent;
-import com.vaadin.event.selection.SelectionListener;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.components.grid.GridRowDragger;
-import com.vaadin.ui.components.grid.SingleSelectionModel;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.editor.Editor;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.selection.SelectionEvent;
+import com.vaadin.flow.data.selection.SelectionListener;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 @SuppressWarnings("serial")
-class EditFlowSettingsDialog extends ResizableWindow implements SelectionListener<FlowParameter> {
+class EditFlowSettingsDialog extends ResizableDialog implements SelectionListener<Grid<FlowParameter>, FlowParameter> {
 
     ApplicationContext context;
 
@@ -70,18 +70,21 @@ class EditFlowSettingsDialog extends ResizableWindow implements SelectionListene
         super("Flow Settings");
         this.context = context;
         this.flow = flow;
+        
+        UI.getCurrent().getPage().retrieveExtendedClientDetails(details -> {
+            setWidth((details.getWindowInnerWidth() * .75) + "px");
+            setHeight((details.getWindowInnerHeight() * .75) + "px");
+        });
 
         Button closeButton = new Button("Close");
-        closeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         closeButton.addClickListener(new CloseClickListener());
         
         addHeader("General Settings");
         
         FormLayout formLayout = new FormLayout();
-        formLayout.setMargin(true);
-        formLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        formLayout.setWidth(100, Unit.PERCENTAGE);
-        addComponent(formLayout);
+        formLayout.setWidthFull();
+        add(formLayout);
         
         TextArea description = new TextArea("Notes");
         description.setValueChangeMode(ValueChangeMode.LAZY);
@@ -93,18 +96,18 @@ class EditFlowSettingsDialog extends ResizableWindow implements SelectionListene
         if (flow.getNotes() != null) {
             description.setValue(flow.getNotes());
         }
-        formLayout.addComponent(description);
+        formLayout.add(description);
 
         addHeader("Parameters");
         
         if (!readOnly) {
             ButtonBar buttonBar = new ButtonBar();
-            buttonBar.addButton("Add", VaadinIcons.PLUS, new AddClickListener());
-            insertButton = buttonBar.addButton("Insert", VaadinIcons.CHEVRON_RIGHT, new InsertClickListener());
+            buttonBar.addButton("Add", VaadinIcon.PLUS, new AddClickListener());
+            insertButton = buttonBar.addButton("Insert", VaadinIcon.CHEVRON_RIGHT, new InsertClickListener());
             insertButton.setEnabled(false);
-            removeButton = buttonBar.addButton("Remove", VaadinIcons.TRASH, new RemoveClickListener());
+            removeButton = buttonBar.addButton("Remove", VaadinIcon.TRASH, new RemoveClickListener());
             removeButton.setEnabled(false);
-            addComponent(buttonBar);
+            add(buttonBar);
         }
         
         VerticalLayout gridWrapperLayout = new VerticalLayout();
@@ -113,27 +116,36 @@ class EditFlowSettingsDialog extends ResizableWindow implements SelectionListene
         
         grid = new Grid<FlowParameter>();
         grid.setSizeFull();
-        grid.addColumn(FlowParameter::getPosition).setCaption("#").setSortable(false);
+        grid.addColumn(FlowParameter::getPosition).setHeader("#").setSortable(false);
         if (!readOnly) {
-            new GridRowDragger<FlowParameter>(grid).getGridDropTarget().addGridDropListener(event -> saveAllPositions());
+            grid.setRowsDraggable(true);
+            grid.addDropListener(event -> saveAllPositions());
             grid.addSelectionListener(this);
             
-            grid.addColumn(FlowParameter::getName).setEditorComponent(createEditorField(), FlowParameter::setName)
-                    .setCaption("Name").setExpandRatio(3).setSortable(false);
-            grid.addColumn(FlowParameter::getDefaultValue).setEditorComponent(createEditorField(), FlowParameter::setDefaultValue)
-                    .setCaption("Default Value").setExpandRatio(6).setSortable(false);
-            grid.getEditor().setEnabled(true).addSaveListener(event -> {
-                context.getConfigurationService().save(event.getBean());
+            Editor<FlowParameter> editor = grid.getEditor();
+            Binder<FlowParameter> binder = new Binder<FlowParameter>();
+            editor.setBinder(binder);
+            TextField nameField = createEditorField();
+            binder.forField(nameField).bind(FlowParameter::getName, FlowParameter::setName);
+            grid.addColumn(FlowParameter::getName).setEditorComponent(nameField).setHeader("Name").setFlexGrow(3)
+                    .setSortable(false);
+            TextField defaultValueField = createEditorField();
+            binder.forField(defaultValueField).bind(FlowParameter::getDefaultValue, FlowParameter::setDefaultValue);
+            grid.addColumn(FlowParameter::getDefaultValue).setEditorComponent(defaultValueField)
+                    .setHeader("Default Value").setFlexGrow(6).setSortable(false);
+            editor.addSaveListener(event -> {
+                context.getConfigurationService().save(event.getItem());
             });
+            grid.addItemDoubleClickListener(event -> editor.editItem(event.getItem()));
         } else {
-            grid.addColumn(FlowParameter::getName).setCaption("Name").setExpandRatio(3).setSortable(false);
-            grid.addColumn(FlowParameter::getDefaultValue).setCaption("Default Value").setExpandRatio(6).setSortable(false);
+            grid.addColumn(FlowParameter::getName).setHeader("Name").setFlexGrow(3).setSortable(false);
+            grid.addColumn(FlowParameter::getDefaultValue).setHeader("Default Value").setFlexGrow(6).setSortable(false);
         }
-        gridWrapperLayout.addComponent(grid);
+        gridWrapperLayout.add(grid);
         
-        addComponent(gridWrapperLayout, 1);
+        addComponentAtIndex(1, gridWrapperLayout);
 
-        addComponent(buildButtonFooter(closeButton));
+        add(buildButtonFooter(closeButton));
 
         List<FlowParameter> params = flow.getFlowParameters();
         Collections.sort(params, new Comparator<FlowParameter>() {
@@ -147,15 +159,13 @@ class EditFlowSettingsDialog extends ResizableWindow implements SelectionListene
     
     protected void addHeader(String caption) {
         HorizontalLayout componentHeaderWrapper = new HorizontalLayout();
-        componentHeaderWrapper.setMargin(new MarginInfo(false, false, false, true));
-        Label componentHeader = new Label(caption);
-        componentHeader.addStyleName(ValoTheme.LABEL_H3);
-        componentHeader.addStyleName(ValoTheme.LABEL_COLORED);
-        componentHeaderWrapper.addComponent(componentHeader);
-        addComponent(componentHeaderWrapper);
+        componentHeaderWrapper.getStyle().set("margin", "0 0 0 16px");
+        H3 componentHeader = new H3(caption);
+        componentHeaderWrapper.add(componentHeader);
+        add(componentHeaderWrapper);
     }
 
-    public void selectionChange(SelectionEvent<FlowParameter> event) {
+    public void selectionChange(SelectionEvent<Grid<FlowParameter>, FlowParameter> event) {
         removeButton.setEnabled(!grid.getSelectedItems().isEmpty());
         insertButton.setEnabled(!grid.getSelectedItems().isEmpty());
     }
@@ -180,15 +190,15 @@ class EditFlowSettingsDialog extends ResizableWindow implements SelectionListene
         }
     }
 
-    class AddClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class AddClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             addItem(flow.getFlowParameters().size());
         }
     }
 
-    class InsertClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
-            FlowParameter parameter = ((SingleSelectionModel<FlowParameter>) grid.getSelectionModel()).getSelectedItem().orElse(null);
+    class InsertClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
+            FlowParameter parameter = grid.getSelectionModel().getFirstSelectedItem().orElse(null);
             if (parameter != null) {
                 addItem(flowParameterList.indexOf(parameter));
                 saveAllPositions();
@@ -196,9 +206,9 @@ class EditFlowSettingsDialog extends ResizableWindow implements SelectionListene
         }
     }
 
-    class RemoveClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
-            FlowParameter parameter = ((SingleSelectionModel<FlowParameter>) grid.getSelectionModel()).getSelectedItem().orElse(null);
+    class RemoveClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
+            FlowParameter parameter = grid.getSelectionModel().getFirstSelectedItem().orElse(null);
             if (parameter != null) {
                 flow.getFlowParameters().remove(parameter);
                 context.getConfigurationService().delete((AbstractObject) parameter);
@@ -213,8 +223,8 @@ class EditFlowSettingsDialog extends ResizableWindow implements SelectionListene
         }
     }
 
-    class CloseClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class CloseClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             EditFlowSettingsDialog.this.close();
         }
     }
@@ -223,7 +233,7 @@ class EditFlowSettingsDialog extends ResizableWindow implements SelectionListene
         final TextField textField = new TextField();
         textField.setValueChangeMode(ValueChangeMode.LAZY);
         textField.setValueChangeTimeout(200);
-        textField.setWidth(100, Unit.PERCENTAGE);
+        textField.setWidthFull();
         return textField;
     }
 

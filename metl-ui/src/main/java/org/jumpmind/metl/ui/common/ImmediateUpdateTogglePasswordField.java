@@ -20,14 +20,12 @@
  */
 package org.jumpmind.metl.ui.common;
 
-
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.customfield.CustomField;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 public abstract class ImmediateUpdateTogglePasswordField extends CustomField<String> {
     private static final long serialVersionUID = 1L;
@@ -41,31 +39,29 @@ public abstract class ImmediateUpdateTogglePasswordField extends CustomField<Str
     private boolean toggleAllowed = true;
 
     public ImmediateUpdateTogglePasswordField() {
+        this(null);
     }
     
     public ImmediateUpdateTogglePasswordField(String caption) {
-        setCaption(caption);
-    }
-
-    @Override
-    protected Component initContent() {
+        if (caption != null) {
+            setLabel(caption);
+        }
         HorizontalLayout layout = new HorizontalLayout();
         layout.setSpacing(true);
-        layout.addComponent(passwordField);
-        layout.addComponent(button);
+        layout.add(passwordField, button);
         
         button.addClickListener(event -> {
             if (toggleAllowed) {
-                if (button.getCaption().equals(BUTTON_SHOW)) {
+                if (button.getText().equals(BUTTON_SHOW)) {
                     // Show password
-                    button.setCaption(BUTTON_HIDE);
+                    button.setText(BUTTON_HIDE);
                     textField.setValue(passwordField.getValue());
-                    layout.replaceComponent(passwordField, textField);
+                    layout.replace(passwordField, textField);
                 } else {
                     // Hide password
-                    button.setCaption(BUTTON_SHOW);
+                    button.setText(BUTTON_SHOW);
                     passwordField.setValue(textField.getValue());
-                    layout.replaceComponent(textField, passwordField);
+                    layout.replace(textField, passwordField);
                 }
             }
         });
@@ -75,32 +71,32 @@ public abstract class ImmediateUpdateTogglePasswordField extends CustomField<Str
         // Work around is to remove the border manually to match the other 
         // fields that are not nested. 
         // Once bug is fixed, remove the following two lines. 
-        passwordField.addStyleName("noborder");
-        textField.addStyleName("noborder");
+        passwordField.addClassName("noborder");
+        textField.addClassName("noborder");
         // End Work Around
         
         passwordField.setValueChangeMode(ValueChangeMode.LAZY);
         textField.setValueChangeMode(ValueChangeMode.LAZY);
         passwordField.setValueChangeTimeout(200);
         textField.setValueChangeTimeout(200);
-        passwordField.addValueChangeListener(new ValueChangeListener<String>() {
+        passwordField.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public void valueChange(ValueChangeEvent<String> event) {
+            public void valueChanged(ValueChangeEvent<String> event) {
                 save(event.getValue());
             }
         });
-        textField.addValueChangeListener(new ValueChangeListener<String>() {
+        textField.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public void valueChange(ValueChangeEvent<String> event) {
+            public void valueChanged(ValueChangeEvent<String> event) {
                 save(event.getValue());
             }
         });
 
-        return layout;
+        add(layout);
     }
 
     public boolean isToggleAllowed() {
@@ -114,7 +110,7 @@ public abstract class ImmediateUpdateTogglePasswordField extends CustomField<Str
     
     @Override
     public String getValue() {
-    	if (button.getCaption().equals(BUTTON_SHOW)) {
+    	if (button.getText().equals(BUTTON_SHOW)) {
     		return passwordField.getValue();
     	} else {
     		return textField.getValue();
@@ -122,7 +118,12 @@ public abstract class ImmediateUpdateTogglePasswordField extends CustomField<Str
     }
     
     @Override
-    protected void doSetValue(String value) {
+    protected String generateModelValue() {
+        return getValue();
+    }
+    
+    @Override
+    protected void setPresentationValue(String value) {
         passwordField.setValue(value);
         textField.setValue(value);
     }

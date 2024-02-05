@@ -63,24 +63,26 @@ import org.jumpmind.metl.ui.diagram.NodeMovedEvent;
 import org.jumpmind.metl.ui.diagram.NodeSelectedEvent;
 import org.jumpmind.metl.ui.views.manage.ExecutionRunPanel;
 import org.jumpmind.util.AppUtils;
+import org.jumpmind.vaadin.ui.common.CustomSplitLayout;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.Resource;
-import com.vaadin.shared.MouseEventDetails;
-import com.vaadin.ui.AbstractLayout;
-import com.vaadin.ui.AbstractSplitPanel;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.VerticalSplitPanel;
-import com.vaadin.ui.dnd.DropTargetExtension;
-import com.vaadin.ui.dnd.event.DropEvent;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dnd.DropEvent;
+import com.vaadin.flow.component.dnd.DropTarget;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
+import com.vaadin.flow.dom.DomEvent;
+
+import elemental.json.JsonObject;
 
 @SuppressWarnings("serial")
 public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRunnable {
@@ -94,18 +96,22 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     boolean readOnly;
 
     PropertySheet propertySheet;
+    
+    VerticalLayout propertySheetLayout;
 
     DesignNavigator designNavigator;
 
     EditFlowPalette componentPalette;
+    
+    FlowPaletteItem droppedItem;
 
     TabbedPanel tabs;
 
     Diagram diagram;
 
-    Panel flowPanel;
+    Scroller flowPanel;
 
-    AbstractLayout diagramLayout;
+    VerticalLayout diagramLayout;
 
     Button runButton;
 
@@ -122,11 +128,11 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     IConfigurationService configurationService;
     
     VerticalLayout rightLayout;
-    AbstractSplitPanel vSplit;
-    AbstractSplitPanel hSplit;
+    CustomSplitLayout vSplit;
+    CustomSplitLayout hSplit;
     Boolean isVerticalView = null;
 
-    float lastPos = 70;
+    double lastPos = 70;
     
     final static float MAX_PANEL_POSITION = 99;
 
@@ -138,6 +144,9 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         this.tabs = tabs;
         this.designNavigator = designNavigator;
 
+        Span header = new Span("<b>Property Sheet</b><hr>");
+        header.setWidthFull();
+        header.getStyle().set("margin", null);
         this.propertySheet = new PropertySheet(context, tabs, readOnly);
         this.propertySheet.setListener((components) -> {
             List<FlowStep> steps = new ArrayList<FlowStep>();
@@ -146,51 +155,52 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             }
             refreshStepOnDiagram(steps);
         });
-        propertySheet.setCaption("Property Sheet");
+        propertySheetLayout = new VerticalLayout(header, propertySheet);
 
         componentPalette = new EditFlowPalette(this, context, flow.getProjectVersionId());
 
-        addComponent(componentPalette);
+        add(componentPalette);
 
         
         rightLayout = new VerticalLayout();
         rightLayout.setSizeFull();
 
-        rightLayout.addComponent(buildButtonBar());
+        rightLayout.add(buildButtonBar());
 
         // Create two different layouts for the user to toggle between.
-        vSplit = new VerticalSplitPanel();
+        vSplit = new CustomSplitLayout();
+        vSplit.setOrientation(Orientation.VERTICAL);
         vSplit.setSizeFull();
-        vSplit.setSplitPosition(MAX_PANEL_POSITION, Unit.PERCENTAGE);
-        hSplit = new HorizontalSplitPanel();
+        vSplit.setSplitterPosition(MAX_PANEL_POSITION);
+        hSplit = new CustomSplitLayout();
         hSplit.setSizeFull();
-        hSplit.setSplitPosition(MAX_PANEL_POSITION, Unit.PERCENTAGE);
+        hSplit.setSplitterPosition(MAX_PANEL_POSITION);
          
         diagramLayout = new VerticalLayout();
-        diagramLayout.setWidth(10000, Unit.PIXELS);
-        diagramLayout.setHeight(10000, Unit.PIXELS);
+        diagramLayout.setWidth("10000px");
+        diagramLayout.setHeight("10000px");
 
-        DropTargetExtension<AbstractLayout> extension = new DropTargetExtension<AbstractLayout>(diagramLayout);
+        DropTarget<VerticalLayout> extension = DropTarget.create(diagramLayout);
         extension.addDropListener(new DropListener());
-        flowPanel = new Panel();
+        extension.getElement().addEventListener("drop", this::onDrop)
+            .addEventData("event.offsetX")
+            .addEventData("event.offsetY");
+        flowPanel = new Scroller();
         flowPanel.setSizeFull();
-        flowPanel.addStyleName(ValoTheme.PANEL_WELL);
         flowPanel.setContent(diagramLayout);
 
         if (isVerticalView()) {
-            vSplit.addComponent(flowPanel);
-            vSplit.addComponent(propertySheet);
-            rightLayout.addComponent(vSplit);
-            rightLayout.setExpandRatio(vSplit, 1);
+            vSplit.addToPrimary(flowPanel);
+            vSplit.addToSecondary(propertySheetLayout);
+            rightLayout.addAndExpand(vSplit);
         } else {
-            hSplit.addComponent(flowPanel);
-            hSplit.addComponent(propertySheet);
-            rightLayout.addComponent(hSplit);
-            rightLayout.setExpandRatio(hSplit, 1);
+            hSplit.addToPrimary(flowPanel);
+            hSplit.addToSecondary(propertySheetLayout);
+            rightLayout.addAndExpand(hSplit);
         }
 
-        addComponent(rightLayout);
-        setExpandRatio(rightLayout, 1);
+        add(rightLayout);
+        expand(rightLayout);
 
         redrawFlow();
     }
@@ -202,30 +212,30 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             runButton.addClickListener((event)->runFlow());
         }
 
-        settingsButton = buttonBar.addButton("Settings", VaadinIcons.COGS);
-        settingsButton.addClickListener((event) -> new EditFlowSettingsDialog(context, flow, readOnly).showAtSize(.75));        
+        settingsButton = buttonBar.addButton("Settings", VaadinIcon.COGS);
+        settingsButton.addClickListener((event) -> new EditFlowSettingsDialog(context, flow, readOnly).open());        
 
         if (!readOnly) {
-            Button selectAllButton = buttonBar.addButton("Select All", VaadinIcons.CROSSHAIRS);
+            Button selectAllButton = buttonBar.addButton("Select All", VaadinIcon.CROSSHAIRS);
             selectAllButton.addClickListener((event)->setSelectedAll());
 
-            copyButton = buttonBar.addButton("Copy", VaadinIcons.COPY);
+            copyButton = buttonBar.addButton("Copy", VaadinIcon.COPY);
             copyButton.addClickListener((event)->copySelected());
             copyButton.setEnabled(false);
 
-            delButton = buttonBar.addButton("Remove", VaadinIcons.TRASH);
+            delButton = buttonBar.addButton("Remove", VaadinIcon.TRASH);
             delButton.addClickListener((event)->deleteSelected());
             delButton.setEnabled(false);;
 
         }
         
-        advancedEditButton = buttonBar.addButton("Advanced Edit", VaadinIcons.EDIT, e->openAdvancedEditor());
+        advancedEditButton = buttonBar.addButton("Advanced Edit", VaadinIcon.EDIT, e->openAdvancedEditor());
         advancedEditButton.setEnabled(false);
 
-        Button exportButton = buttonBar.addButtonRight("Capture", VaadinIcons.CAMERA, (event)->export());
+        Button exportButton = buttonBar.addButtonRight("Capture", VaadinIcon.CAMERA, (event)->export());
         exportButton.setId("exportButton");
         
-        buttonBar.addButtonRight("Layout", VaadinIcons.SPLIT_H, (event)->toggleView());
+        buttonBar.addButtonRight("Layout", VaadinIcon.SPLIT_H, (event)->toggleView());
         
         return buttonBar;
     }
@@ -234,32 +244,30 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         // There is an issue with the html2canvas library not writing 
         // component anchors correctly when the scroll panel is scrolled down.
         // Reset scrolling first.
-        flowPanel.setScrollLeft(0);
-        flowPanel.setScrollTop(0);
-        new ImagePreviewDialog(diagram).showAtSize(.75);
+        //flowPanel.setScrollLeft(0);
+        //flowPanel.setScrollTop(0);
+        new ImagePreviewDialog(diagram).open();
     }
     
     private void toggleView() {
         if (isVerticalView()) {
-            hSplit.addComponent(flowPanel);
-            hSplit.addComponent(propertySheet);
-            rightLayout.replaceComponent(vSplit, hSplit);
-            rightLayout.setExpandRatio(hSplit, 1);
+            hSplit.addToPrimary(flowPanel);
+            hSplit.addToSecondary(propertySheetLayout);
+            rightLayout.replace(vSplit, hSplit);
+            rightLayout.expand(hSplit);
             setVerticalView(false);
         } else {
-            vSplit.addComponent(flowPanel);
-            vSplit.addComponent(propertySheet);
-            rightLayout.replaceComponent(hSplit, vSplit);
-            rightLayout.setExpandRatio(vSplit, 1);
+            vSplit.addToPrimary(flowPanel);
+            vSplit.addToSecondary(propertySheetLayout);
+            rightLayout.replace(hSplit, vSplit);
+            rightLayout.expand(vSplit);
             setVerticalView(true);
         }
     }
 
-    protected Button createToolButton(String name, Resource icon) {
-        Button button = new Button(name, icon);
-        button.addStyleName(ValoTheme.BUTTON_SMALL);
-        button.addStyleName(ValoTheme.BUTTON_ICON_ALIGN_TOP);
-        button.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
+    protected Button createToolButton(String name, VaadinIcon icon) {
+        Button button = new Button(name, new Icon(icon));
+        button.addThemeVariants(ButtonVariant.LUMO_SMALL);
         return button;
     }
 
@@ -382,10 +390,10 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
     protected void redrawFlow() {
         if (diagram != null) {
-            diagramLayout.removeComponent(diagram);
+            diagramLayout.remove(diagram);
         }
 
-        diagram = new Diagram();
+        diagram = new Diagram(this);
         List<String> ids = new ArrayList<String>(selected.size());
         for (AbstractObject s : selected) {
             if (s instanceof FlowStep) {
@@ -400,10 +408,9 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
         diagram.setSelectedNodeIds(ids);
         diagram.setSizeFull();
-        diagram.addListener(new DiagramChangedListener());
         diagram.setNodes(getNodes());
 
-        diagramLayout.addComponent(diagram);
+        diagramLayout.add(diagram);
     }
 
     protected List<Node> getNodes() {
@@ -483,14 +490,14 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
         if (flow.isWebService()) {
             CallWebServicePanel panel = new CallWebServicePanel(deployment, context, tabs);
-            tabs.addCloseableTab(deployment.getId(), "Call " + flow.getName(), Icons.RUN, panel);
+            tabs.addCloseableTab(deployment.getId(), "Call " + flow.getName(), new Icon(Icons.RUN), panel);
         } else {
             String executionId = agentManager.getAgentRuntime(myDesignAgent.getId()).scheduleNow(context.getUser().getLoginId(), deployment,
                     flow.toFlowParametersAsString());
             if (executionId != null) {
                 ExecutionRunPanel logPanel = new ExecutionRunPanel(executionId, context, tabs,
                         this);
-                tabs.addCloseableTab(executionId, "Run " + flow.getName(), Icons.LOG, logPanel);
+                tabs.addCloseableTab(executionId, "Run " + flow.getName(), new Icon(Icons.LOG), logPanel);
                 logPanel.onBackgroundUIRefresh(logPanel.onBackgroundDataRefresh());
             }
         }
@@ -531,7 +538,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                             ((IFlowStepAware) panel).makeAwareOf(flowStep, flow);
                         }
                         panel.init(readOnly, flowStep.getComponent(), context, propertySheet);
-                        tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
+                        tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), new Icon(Icons.COMPONENT),
+                                (AbstractComponentEditPanel) panel);
                     }
                 }
        
@@ -540,16 +548,16 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     }
     
     protected void setPropertiesMinimized(boolean minimize) {
-        AbstractSplitPanel activePanel = isVerticalView() ? vSplit : hSplit;
+        CustomSplitLayout activePanel = isVerticalView() ? vSplit : hSplit;
         if (minimize 
-                && vSplit.getSplitPosition() != MAX_PANEL_POSITION 
-                && hSplit.getSplitPosition() != MAX_PANEL_POSITION) {
-            lastPos = activePanel.getSplitPosition();
-            vSplit.setSplitPosition(MAX_PANEL_POSITION, Unit.PERCENTAGE);
-            hSplit.setSplitPosition(MAX_PANEL_POSITION, Unit.PERCENTAGE);
-        } else if (!minimize && activePanel.getSplitPosition() == MAX_PANEL_POSITION) {
-            vSplit.setSplitPosition(lastPos, Unit.PERCENTAGE);    
-            hSplit.setSplitPosition(lastPos, Unit.PERCENTAGE);            
+                && vSplit.getSplitterPosition() != MAX_PANEL_POSITION 
+                && hSplit.getSplitterPosition() != MAX_PANEL_POSITION) {
+            lastPos = activePanel.getSplitterPosition();
+            vSplit.setSplitterPosition(MAX_PANEL_POSITION);
+            hSplit.setSplitterPosition(MAX_PANEL_POSITION);
+        } else if (!minimize && activePanel.getSplitterPosition() == MAX_PANEL_POSITION) {
+            vSplit.setSplitterPosition(lastPos);    
+            hSplit.setSplitterPosition(lastPos);            
         }
     }
     
@@ -622,110 +630,115 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         context.getConfigurationService().save(setting);
     }
 
-    class DiagramChangedListener implements Listener {
+    public void nodeSelectedEvent(NodeSelectedEvent event) {
+        setSelectedNodeIds(event.getNodeIds());
+    }
 
-        @Override
-        public void componentEvent(Event e) {
-            if (e instanceof NodeSelectedEvent) {
-                NodeSelectedEvent event = (NodeSelectedEvent) e;                
-                setSelectedNodeIds(event.getNodeIds());
-            } else if (e instanceof NodeDoubleClickedEvent) {
-                openAdvancedEditor();
-            } else if (e instanceof NodeMovedEvent) {
-                NodeMovedEvent event = (NodeMovedEvent) e;
-                Node node = event.getNode();
-                FlowStep flowStep = flow.findFlowStepWithId(node.getId());
-                if (flowStep != null) {
-                    flowStep.setX(node.getX());
-                    flowStep.setY(node.getY());
+    public void nodeDoubleClickedEvent(NodeDoubleClickedEvent event) {
+        openAdvancedEditor();
+    }
+
+    public void nodeMovedEvent(NodeMovedEvent event) {
+        Node node = event.getNode();
+        FlowStep flowStep = flow.findFlowStepWithId(node.getId());
+        if (flowStep != null) {
+            flowStep.setX(node.getX());
+            flowStep.setY(node.getY());
+        }
+        flow.calculateApproximateOrder();
+        configurationService.save(flowStep);
+    }
+
+    public void linkEvent(LinkEvent event) {
+        if (!event.isRemoved()) {
+            flow.getFlowStepLinks().add(new FlowStepLink(event.getSourceNodeId(), event.getTargetNodeId()));
+            Component sourceComp = flow.findFlowStepWithId(event.getSourceNodeId()).getComponent();
+            Component targetComp = flow.findFlowStepWithId(event.getTargetNodeId()).getComponent();
+            IDefinitionFactory factory = context.getDefinitionFactory();
+            XMLComponentDefinition sourceDefn = factory.getComponentDefinition(flow.getProjectVersionId(), sourceComp.getType());
+            XMLComponentDefinition targetDefn = factory.getComponentDefinition(flow.getProjectVersionId(), targetComp.getType());
+
+            if (targetComp.getInputModel() == null) {
+                if (sourceComp.getOutputModel() != null) {
+                    targetComp.setInputModel(sourceComp.getOutputModel());
+                    targetComp.setInputModelId(sourceComp.getOutputModelId());
+                } else if (sourceDefn.isInputOutputModelsMatch() && sourceComp.getInputModel() != null) {
+                    targetComp.setInputModel(sourceComp.getInputModel());
+                    targetComp.setInputModelId(sourceComp.getInputModelId());
                 }
-                flow.calculateApproximateOrder();
-                configurationService.save(flowStep);
-            } else if (e instanceof LinkEvent) {
-                LinkEvent event = (LinkEvent) e;
-                if (!event.isRemoved()) {
-                    flow.getFlowStepLinks().add(new FlowStepLink(event.getSourceNodeId(), event.getTargetNodeId()));
-                    Component sourceComp = flow.findFlowStepWithId(event.getSourceNodeId()).getComponent();
-                    Component targetComp = flow.findFlowStepWithId(event.getTargetNodeId()).getComponent();
-                    IDefinitionFactory factory = context.getDefinitionFactory();
-                    XMLComponentDefinition sourceDefn = factory.getComponentDefinition(flow.getProjectVersionId(), sourceComp.getType());
-                    XMLComponentDefinition targetDefn = factory.getComponentDefinition(flow.getProjectVersionId(), targetComp.getType());
-
-                    if (targetComp.getInputModel() == null) {
-                        if (sourceComp.getOutputModel() != null) {
-                            targetComp.setInputModel(sourceComp.getOutputModel());
-                            targetComp.setInputModelId(sourceComp.getOutputModelId());
-                        } else if (sourceDefn.isInputOutputModelsMatch() && sourceComp.getInputModel() != null) {
-                            targetComp.setInputModel(sourceComp.getInputModel());
-                            targetComp.setInputModelId(sourceComp.getInputModelId());
-                        }
-                        
-                        if (targetDefn.isInputOutputModelsMatch()) {
-                            targetComp.setOutputModel(targetComp.getInputModel());
-                            targetComp.setOutputModelId(targetComp.getInputModelId());
-                        }
-                    }
-
-                    if (sourceComp.getOutputModel() == null) {
-                        if (targetComp.getInputModel() != null) {
-                            sourceComp.setOutputModel(targetComp.getInputModel());
-                            sourceComp.setOutputModelId(targetComp.getInputModelId());
-                        }
-                        
-                        if (sourceDefn.isInputOutputModelsMatch()) {
-                            sourceComp.setInputModel(sourceComp.getOutputModel());
-                            sourceComp.setInputModelId(sourceComp.getOutputModelId());
-                        }
-                    }
-
-                    if (sourceComp.getInputModel() == null && sourceDefn.isInputOutputModelsMatch()) {
-                        if (targetComp.getInputModel() != null) {
-                            sourceComp.setInputModel(targetComp.getInputModel());
-                            sourceComp.setInputModelId(targetComp.getInputModelId());
-                            sourceComp.setOutputModel(targetComp.getInputModel());
-                            sourceComp.setOutputModelId(targetComp.getInputModelId());
-                        }
-                    }
-
-                    configurationService.save(flow);
-                    propertySheet.setSource(propertySheet.getValue());
-                } else {
-                    FlowStepLink link = flow.removeFlowStepLink(event.getSourceNodeId(), event.getTargetNodeId());
-                    if (link != null) {
-                        if (configurationService.delete(link)) {
-                            redrawFlow();
-                        }
-                    }
+                
+                if (targetDefn.isInputOutputModelsMatch()) {
+                    targetComp.setOutputModel(targetComp.getInputModel());
+                    targetComp.setOutputModelId(targetComp.getInputModelId());
                 }
-            } else if (e instanceof LinkSelectedEvent) {
-                LinkSelectedEvent event = (LinkSelectedEvent) e;
-                selected = new ArrayList<AbstractObject>(1);
-                selected.add(flow.findFlowStepLink(event.getSourceNodeId(), event.getTargetNodeId()));
-                setSelectedLinks(selected);
+            }
+
+            if (sourceComp.getOutputModel() == null) {
+                if (targetComp.getInputModel() != null) {
+                    sourceComp.setOutputModel(targetComp.getInputModel());
+                    sourceComp.setOutputModelId(targetComp.getInputModelId());
+                }
+                
+                if (sourceDefn.isInputOutputModelsMatch()) {
+                    sourceComp.setInputModel(sourceComp.getOutputModel());
+                    sourceComp.setInputModelId(sourceComp.getOutputModelId());
+                }
+            }
+
+            if (sourceComp.getInputModel() == null && sourceDefn.isInputOutputModelsMatch()) {
+                if (targetComp.getInputModel() != null) {
+                    sourceComp.setInputModel(targetComp.getInputModel());
+                    sourceComp.setInputModelId(targetComp.getInputModelId());
+                    sourceComp.setOutputModel(targetComp.getInputModel());
+                    sourceComp.setOutputModelId(targetComp.getInputModelId());
+                }
+            }
+
+            configurationService.save(flow);
+            propertySheet.setSource(propertySheet.getValue());
+        } else {
+            FlowStepLink link = flow.removeFlowStepLink(event.getSourceNodeId(), event.getTargetNodeId());
+            if (link != null) {
+                if (configurationService.delete(link)) {
+                    redrawFlow();
+                }
             }
         }
+    }
 
+    public void linkSelectedEvent(LinkSelectedEvent event) {
+        selected = new ArrayList<AbstractObject>(1);
+        selected.add(flow.findFlowStepLink(event.getSourceNodeId(), event.getTargetNodeId()));
+        setSelectedLinks(selected);
     }
     
-    class DropListener implements com.vaadin.ui.dnd.event.DropListener<AbstractLayout> {
+    private void onDrop(DomEvent event) {
+        if (droppedItem != null) {
+            JsonObject eventData = event.getEventData();
+            double x = eventData.getNumber("event.offsetX");
+            double y = eventData.getNumber("event.offsetY");
+            if (droppedItem.isShared()) {
+                Component component = new Component();
+                component.setId(droppedItem.getComponentId());
+                configurationService.refresh(component, true);
+                addComponent(droppedItem.getText(), (int) x, (int) y, component);
+            } else {
+                Component component = new Component();
+                component.setType(droppedItem.getComponentType());
+                component.setShared(false);
+                addComponent(droppedItem.getText(), (int) x, (int) y, component);
+            }
+            droppedItem = null;
+        }
+    }
+    
+    class DropListener implements ComponentEventListener<DropEvent<VerticalLayout>> {
 
         @Override
-        public void drop(DropEvent<AbstractLayout> event) {
-            MouseEventDetails details = event.getMouseEventDetails();
+        public void onComponentEvent(DropEvent<VerticalLayout> event) {
             Object object = event.getDragSourceComponent().orElse(null);
             if (object instanceof FlowPaletteItem && !readOnly) {
-                FlowPaletteItem flowPaletteItem = (FlowPaletteItem) object;
-                if (flowPaletteItem.isShared()) {
-                    Component component = new Component();
-                    component.setId(flowPaletteItem.getComponentId());
-                    configurationService.refresh(component, true);
-                    addComponent(flowPaletteItem.getCaption(), details.getClientX(), details.getClientY(), component);
-                } else {
-                    Component component = new Component();
-                    component.setType(flowPaletteItem.getComponentType());
-                    component.setShared(false);
-                    addComponent(flowPaletteItem.getCaption(), details.getClientX(), details.getClientY(), component);
-                }
+                droppedItem = (FlowPaletteItem) object;
             }
         }
     }

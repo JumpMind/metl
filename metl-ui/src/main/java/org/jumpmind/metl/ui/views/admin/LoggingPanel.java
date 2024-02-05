@@ -41,33 +41,33 @@ import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.data.HasValue.ValueChangeListener;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.Page;
-import com.vaadin.server.StreamResource;
-import com.vaadin.server.StreamResource.StreamSource;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Pre;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.Scroller.ScrollDirection;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.server.InputStreamFactory;
+import com.vaadin.flow.server.StreamResource;
 
 @SuppressWarnings("serial")
 @UiComponent
 @Scope(value = "ui")
 @Order(1300)
-@AdminMenuLink(name = "Logging", id = "Logging", icon = VaadinIcons.FILE_TEXT_O)
+@AdminMenuLink(name = "Logging", id = "Logging", icon = VaadinIcon.FILE_TEXT_O)
 public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefreshable<Object> {
 
     BackgroundRefresherService backgroundRefresherService;
@@ -76,11 +76,11 @@ public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefre
 
     TextField filter;
 
-    CheckBox autoRefreshOn;
+    Checkbox autoRefreshOn;
 
-    Label logView;
+    Pre logView;
 
-    Panel logPanel;
+    Scroller logPanel;
 
     File logFile;
 
@@ -99,90 +99,88 @@ public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefre
         setMargin(true);
 
         HorizontalLayout topPanelLayout = new HorizontalLayout();
-        topPanelLayout.setWidth(100, Unit.PERCENTAGE);
+        topPanelLayout.setWidthFull();
         topPanelLayout.setSpacing(true);
 
         Button refreshButton = new Button("Refresh");
-        refreshButton.addClickListener(new ClickListener() {
-            public void buttonClick(ClickEvent event) {
+        refreshButton.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+            public void onComponentEvent(ClickEvent<Button> event) {
                 refresh();
             }
         });
-        topPanelLayout.addComponent(refreshButton);
-        topPanelLayout.setComponentAlignment(refreshButton, Alignment.BOTTOM_LEFT);
+        topPanelLayout.add(refreshButton);
+        topPanelLayout.setVerticalComponentAlignment(Alignment.END, refreshButton);
 
         bufferSize = new TextField();
-        bufferSize.setWidth(5, Unit.EM);
+        bufferSize.setWidth("5em");
         bufferSize.setValue("1000");
-        bufferSize.addValueChangeListener(new ValueChangeListener<String>() {
-            public void valueChange(ValueChangeEvent<String> event) {
+        bufferSize.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
+            public void valueChanged(ValueChangeEvent<String> event) {
                 refresh();
             }
         });
-        topPanelLayout.addComponent(bufferSize);
+        topPanelLayout.add(bufferSize);
 
         filter = new TextField();
-        filter.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
         filter.setPlaceholder("Filter");
-        filter.setIcon(VaadinIcons.SEARCH);
+        filter.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         filter.setValueChangeMode(ValueChangeMode.LAZY);
         filter.setValueChangeTimeout(200);
-        filter.addValueChangeListener(new ValueChangeListener<String>() {
-            public void valueChange(ValueChangeEvent<String> event) {
+        filter.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
+            public void valueChanged(ValueChangeEvent<String> event) {
                 refresh();
             }
         });
-        topPanelLayout.addComponent(filter);
-        topPanelLayout.setComponentAlignment(filter, Alignment.BOTTOM_LEFT);
+        topPanelLayout.add(filter);
+        topPanelLayout.setVerticalComponentAlignment(Alignment.END, filter);
 
-        autoRefreshOn = new CheckBox("Auto Refresh");
+        autoRefreshOn = new Checkbox("Auto Refresh");
         autoRefreshOn.setValue(true);
-        topPanelLayout.addComponent(autoRefreshOn);
-        topPanelLayout.setComponentAlignment(autoRefreshOn, Alignment.BOTTOM_LEFT);
+        topPanelLayout.add(autoRefreshOn);
+        topPanelLayout.setVerticalComponentAlignment(Alignment.END, autoRefreshOn);
 
-        Label spacer = new Label();
-        topPanelLayout.addComponent(spacer);
-        topPanelLayout.setExpandRatio(spacer, 1);
+        Span spacer = new Span();
+        topPanelLayout.addAndExpand(spacer);
 
         if (logFile != null && logFile.exists()) {
             Button downloadButton = new Button("Download log file");
-            downloadButton.addStyleName(ValoTheme.BUTTON_LINK);
-            downloadButton.addStyleName(ValoTheme.BUTTON_SMALL);
+            downloadButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
 
-            FileDownloader fileDownloader = new FileDownloader(getLogFileResource());
-            fileDownloader.extend(downloadButton);
-            topPanelLayout.addComponent(downloadButton);
-            topPanelLayout.setComponentAlignment(downloadButton, Alignment.BOTTOM_RIGHT);
+            Anchor fileDownloader = new Anchor(getLogFileResource(), null);
+            fileDownloader.getElement().setAttribute("download", true);
+            fileDownloader.add(downloadButton);
+            topPanelLayout.add(fileDownloader);
+            topPanelLayout.setVerticalComponentAlignment(Alignment.END, fileDownloader);
         }
 
-        addComponent(topPanelLayout);
+        add(topPanelLayout);
 
-        logPanel = new Panel("Log Output");
+        logPanel = new Scroller(ScrollDirection.VERTICAL);
+        add(new H3("Log Output"));
         logPanel.setSizeFull();
-        logView = new Label("");
-        logView.setContentMode(ContentMode.HTML);
+        logView = new Pre("");
         logView.setSizeUndefined();
         logPanel.setContent(logView);
-        addComponent(logPanel);
-        setExpandRatio(logPanel, 1);
+        addAndExpand(logPanel);
         refresh();
         backgroundRefresherService.register(this);
     }
 
     private StreamResource getLogFileResource() {
-        StreamSource ss = new StreamSource() {
-            public InputStream getStream() {
+        InputStreamFactory factory = new InputStreamFactory() {
+            private static final long serialVersionUID = 1L;
+
+            public InputStream createInputStream() {
                 try {
                     return new BufferedInputStream(new FileInputStream(logFile));
                 } catch (FileNotFoundException e) {
-                    Notification note = new Notification("File Not Found", "Could not find "
-                            + logFile.getName() + " to download");
-                    note.show(Page.getCurrent());
+                    CommonUiUtils.notify("Could not find " + logFile.getName() + " to download");
                     return null;
                 }
             }
         };
-        return new StreamResource(ss, logFile.getName());
+        StreamResource sr = new StreamResource(logFile.getName(), factory);
+        return sr;
     }
 
     protected void refresh() {
@@ -265,18 +263,13 @@ public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefre
     public void onBackgroundUIRefresh(Object backgroundData) {
         if (backgroundData != null) {
             StringBuilder builder = (StringBuilder) backgroundData;
-            logView.setValue("<pre>" + builder.toString() + "</pre>");
-            logPanel.setScrollTop(1000000);
-            logPanel.markAsDirty();
+            logView.setText(builder.toString());
+            UI.getCurrent().getPage().executeJs("$0.scrollTop = $0.scrollHeight;", logPanel.getElement());
         }
     }
     
     @Override
     public void onUIError(Throwable ex) {
-        CommonUiUtils.notify(ex);
-    }
-
-    @Override
-    public void enter(ViewChangeEvent event) {
+        CommonUiUtils.notifyError();
     }
 }

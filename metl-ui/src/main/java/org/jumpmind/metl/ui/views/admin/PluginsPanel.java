@@ -36,18 +36,16 @@ import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Grid.SelectionMode;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.component.icon.VaadinIcon;
 
 @SuppressWarnings("serial")
 @UiComponent
 @Scope(value = "ui")
 @Order(700)
-@AdminMenuLink(name = "Plugins", id = "Plugins", icon = VaadinIcons.PUZZLE_PIECE)
+@AdminMenuLink(name = "Plugins", id = "Plugins", icon = VaadinIcon.PUZZLE_PIECE)
 public class PluginsPanel extends AbstractAdminPanel {
 
     Button addButton;
@@ -69,30 +67,29 @@ public class PluginsPanel extends AbstractAdminPanel {
     @Override
     public void init() {
         ButtonBar buttonBar = new ButtonBar();
-        addComponent(buttonBar);
+        add(buttonBar);
 
-        addButton = buttonBar.addButton("Add", VaadinIcons.PLUS);
+        addButton = buttonBar.addButton("Add", VaadinIcon.PLUS);
         addButton.addClickListener(e -> addPlugin());
 
-        moveUpButton = buttonBar.addButton("Move Up", VaadinIcons.ARROW_UP, e -> moveUp());
+        moveUpButton = buttonBar.addButton("Move Up", VaadinIcon.ARROW_UP, e -> moveUp());
 
-        moveDownButton = buttonBar.addButton("Move Down", VaadinIcons.ARROW_DOWN, e -> moveDown());
+        moveDownButton = buttonBar.addButton("Move Down", VaadinIcon.ARROW_DOWN, e -> moveDown());
 
-        removeButton = buttonBar.addButton("Purge Unused", VaadinIcons.TRASH, e -> purgeUnused());
+        removeButton = buttonBar.addButton("Purge Unused", VaadinIcon.TRASH, e -> purgeUnused());
 
         grid = new Grid<Plugin>();
         grid.setSizeFull();
-        //grid.setCacheRate(100);
         grid.setSelectionMode(SelectionMode.MULTI);
 
-        grid.addColumn(Plugin::getArtifactGroup).setCaption("Group").setSortable(false);
-        grid.addColumn(Plugin::getArtifactName).setCaption("Name").setSortable(false);
-        grid.addColumn(Plugin::getArtifactVersion).setCaption("Version").setSortable(false);
-        grid.addColumn(Plugin::getLastUpdateTime).setCaption("Updated").setWidth(UIConstants.DATETIME_WIDTH_PIXELS).setSortable(false);
+        grid.addColumn(Plugin::getArtifactGroup).setHeader("Group").setSortable(false);
+        grid.addColumn(Plugin::getArtifactName).setHeader("Name").setSortable(false);
+        grid.addColumn(Plugin::getArtifactVersion).setHeader("Version").setSortable(false);
+        grid.addColumn(Plugin::getLastUpdateTime).setHeader("Updated").setWidth("165px").setSortable(false);
         grid.addSelectionListener(e -> setButtonsEnabled());
 
-        addComponent(grid);
-        setExpandRatio(grid, 1.0f);
+        add(grid);
+        expand(grid);
 
         context.getPluginManager().refresh();
     }
@@ -191,14 +188,13 @@ public class PluginsPanel extends AbstractAdminPanel {
     }
 
     protected void addPlugin() {
-        PluginsPanelAddDialog dialog = new PluginsPanelAddDialog(context, PluginsPanel.this) {
+        new PluginsPanelAddDialog(context, PluginsPanel.this) {
             @Override
             public void close() {
                 super.close();
                 PluginsPanel.this.refresh();
             }
-        };
-        UI.getCurrent().addWindow(dialog);
+        }.open();
     }
 
     protected void purgeUnused() {
@@ -218,10 +214,6 @@ public class PluginsPanel extends AbstractAdminPanel {
         if (plugins.size() > 0) {
             refresh();
         }
-    }
-
-    @Override
-    public void enter(ViewChangeEvent event) {
     }
     
 

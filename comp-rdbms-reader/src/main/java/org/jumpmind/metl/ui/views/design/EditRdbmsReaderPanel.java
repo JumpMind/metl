@@ -40,17 +40,18 @@ import org.jumpmind.vaadin.ui.sqlexplorer.IDb;
 import org.jumpmind.vaadin.ui.sqlexplorer.ISettingsProvider;
 import org.jumpmind.vaadin.ui.sqlexplorer.QueryPanel;
 import org.jumpmind.vaadin.ui.sqlexplorer.Settings;
-import org.vaadin.aceeditor.AceEditor;
-import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.event.ShortcutAction.KeyCode;
-import com.vaadin.event.ShortcutAction.ModifierKey;
-import com.vaadin.event.ShortcutListener;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.KeyModifier;
+import com.vaadin.flow.component.Shortcuts;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+
+import de.f0rce.ace.AceEditor;
+import de.f0rce.ace.enums.AceMode;
 
 public class EditRdbmsReaderPanel extends AbstractComponentEditPanel {
 
@@ -67,11 +68,11 @@ public class EditRdbmsReaderPanel extends AbstractComponentEditPanel {
     protected void buildUI() {
         if (!readOnly) {
             ButtonBar buttonBar = new ButtonBar();
-            addComponent(buttonBar);
+            add(buttonBar);
 
             executeSqlClickListener = new ExecuteSqlClickListener();
 
-            executeButton = buttonBar.addButton("Execute", VaadinIcons.PLAY, executeSqlClickListener);
+            executeButton = buttonBar.addButton("Execute", VaadinIcon.PLAY, executeSqlClickListener);
             executeButton.setEnabled(false);
 
             Resource resource = component.getResource();
@@ -85,7 +86,7 @@ public class EditRdbmsReaderPanel extends AbstractComponentEditPanel {
                 dataSourceResource.start(resource, resource.toTypedProperties(context.getDefinitionFactory()
                         .getResourceDefintion(component.getProjectVersionId(), Datasource.TYPE).getSettings().getSetting()));
                 DataSource dataSource = dataSourceResource.reference();
-                platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), false, false);
+                platform = JdbcDatabasePlatformFactory.getInstance().create(dataSource, new SqlTemplateSettings(), false, false);
 
                 queryPanel = new QueryPanel(new IDb() {
 
@@ -143,31 +144,24 @@ public class EditRdbmsReaderPanel extends AbstractComponentEditPanel {
 
                 queryPanel.appendSql(component.get(RdbmsReader.SQL));
 
-                queryPanel.addShortcutListener(new ShortcutListener("", KeyCode.ENTER, new int[] { ModifierKey.CTRL }) {
-                    private static final long serialVersionUID = 1L;
+                Shortcuts.addShortcutListener(queryPanel, () -> {
+                    executeSqlClickListener.onComponentEvent(new ClickEvent<Button>(executeButton));
+                }, Key.ENTER, KeyModifier.CONTROL);
 
-                    @Override
-                    public void handleAction(Object sender, Object target) {
-                        executeSqlClickListener.buttonClick(new ClickEvent(executeButton));
-                    }
-                }
-
-                );
-
-                addComponent(queryPanel);
-                setExpandRatio(queryPanel, 1);
+                add(queryPanel);
+                expand(queryPanel);
             } else {
-                Label label = new Label("Before configuring SQL you must select a data source");
-                addComponent(label);
-                setExpandRatio(label, 1);
+                Span span = new Span("Before configuring SQL you must select a data source");
+                add(span);
+                expand(span);
             }
         } else {
             AceEditor editor = CommonUiUtils.createAceEditor();
             editor.setMode(AceMode.sql);
             editor.setValue(component.get(RdbmsReader.SQL));
             editor.setReadOnly(readOnly);
-            addComponent(editor);
-            setExpandRatio(editor, 1);
+            add(editor);
+            expand(editor);
         }
     }
 
@@ -200,10 +194,10 @@ public class EditRdbmsReaderPanel extends AbstractComponentEditPanel {
         }
     }
 
-    class ExecuteSqlClickListener implements ClickListener {
+    class ExecuteSqlClickListener implements ComponentEventListener<ClickEvent<Button>> {
         private static final long serialVersionUID = 1L;
 
-        public void buttonClick(ClickEvent event) {
+        public void onComponentEvent(ClickEvent<Button> event) {
             save();
             queryPanel.execute(false);
         }

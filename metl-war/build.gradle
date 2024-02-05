@@ -1,6 +1,9 @@
-apply from: '../metl-assemble/common.gradle'
+plugins {
+    id 'com.vaadin'
+    id 'war'
+}
 
-apply plugin: 'com.devsoap.plugin.vaadin'
+apply from: '../metl-assemble/common.gradle'
 
 configurations {
     executableWar
@@ -28,14 +31,6 @@ war {
     from ('build') { include 'plugins.zip' }
     manifest { attributes 'Main-Class': 'org.jumpmind.metl.Metl' }
 }    
-
-// Don't compress javascript
-// vaadin.gwt.style = "PRETTY"
-vaadin.version = vaadinVersion
-vaadinCompile.widgetset = 'org.jumpmind.metl.ui.AppWidgetSet'
-vaadin.manageDependencies = true
-vaadin.manageRepositories = false
-vaadin.push = true
 
 dependencies {
     compile project(":metl-ui")
@@ -76,7 +71,7 @@ task zipPlugins (type:Zip) {
 }
 
 
-develop.dependsOn tasks.getByPath(':metl-war:vaadinCompile')
+develop.dependsOn tasks.getByPath(':metl-war:vaadinPrepareFrontend')
 develop.dependsOn copyJavaDocsToWebapp
 assemble.dependsOn copyJavaDocsToWebapp
 develop.dependsOn copyPluginsForDevelopment

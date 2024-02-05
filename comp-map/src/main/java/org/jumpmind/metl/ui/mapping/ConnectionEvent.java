@@ -20,10 +20,10 @@
  */
 package org.jumpmind.metl.ui.mapping;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Component.Event;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.html.Div;
 
-public class ConnectionEvent extends Event {
+public class ConnectionEvent extends ComponentEvent<Div> {
 
     private static final long serialVersionUID = 1L;
 
@@ -33,8 +33,8 @@ public class ConnectionEvent extends Event {
 
     boolean removed;
 
-    public ConnectionEvent(Component source, String sourceId, String targetId, boolean removed) {
-        super(source);
+    public ConnectionEvent(Div source, String sourceId, String targetId, boolean removed) {
+        super(source, false);
         this.sourceId = sourceId;
         this.targetId = targetId;
         this.removed = removed;

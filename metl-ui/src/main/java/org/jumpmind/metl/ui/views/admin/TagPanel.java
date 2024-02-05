@@ -32,24 +32,24 @@ import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
-import com.vaadin.event.selection.SelectionEvent;
-import com.vaadin.event.selection.SelectionListener;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.shared.data.sort.SortDirection;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.ItemClick;
-import com.vaadin.ui.Grid.SelectionMode;
-import com.vaadin.ui.components.grid.ItemClickListener;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.component.grid.GridSortOrder;
+import com.vaadin.flow.component.grid.ItemClickEvent;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.data.provider.SortDirection;
+import com.vaadin.flow.data.selection.SelectionEvent;
+import com.vaadin.flow.data.selection.SelectionListener;
 
 @SuppressWarnings("serial")
 @UiComponent
 @Scope(value = "ui")
 @Order(300)
-@AdminMenuLink(name = "Tags", id = "Tags", icon = VaadinIcons.TAG)
+@AdminMenuLink(name = "Tags", id = "Tags", icon = VaadinIcon.TAG)
 public class TagPanel extends AbstractAdminPanel {
 
     Button newButton;
@@ -64,31 +64,32 @@ public class TagPanel extends AbstractAdminPanel {
     
     public TagPanel() {
         ButtonBar buttonBar = new ButtonBar();
-        addComponent(buttonBar);
+        add(buttonBar);
 
-        newButton = buttonBar.addButton("New", VaadinIcons.PLUS);
+        newButton = buttonBar.addButton("New", VaadinIcon.PLUS);
         newButton.addClickListener(new NewClickListener());
 
-        editButton = buttonBar.addButton("Edit", VaadinIcons.EDIT);
+        editButton = buttonBar.addButton("Edit", VaadinIcon.EDIT);
         editButton.addClickListener(new EditClickListener());
 
-        removeButton = buttonBar.addButton("Remove", VaadinIcons.TRASH);
+        removeButton = buttonBar.addButton("Remove", VaadinIcon.TRASH);
         removeButton.addClickListener(new RemoveClickListener());
 
         grid = new Grid<Tag>();
         grid.setSizeFull();
-        //grid.setCacheRate(100);
-        //grid.setPageLength(100);
+        grid.setPageSize(100);
         grid.setSelectionMode(SelectionMode.MULTI);
 
-        grid.addColumn(Tag::getName).setId("name").setCaption("Tag Name").setSortable(true);
-        grid.addColumn(Tag::getColor).setCaption("Color");
+        grid.addColumn(Tag::getName).setKey("name").setHeader("Tag Name").setSortable(true);
+        grid.addColumn(Tag::getColor).setHeader("Color");
         grid.addItemClickListener(new GridItemClickListener());
         grid.addSelectionListener(new GridSelectionListener());
-        grid.sort("name", SortDirection.ASCENDING);
+        List<GridSortOrder<Tag>> orderList = new ArrayList<GridSortOrder<Tag>>();
+        orderList.add(new GridSortOrder<Tag>(grid.getColumnByKey("name"), SortDirection.ASCENDING));
+        grid.sort(orderList);
 
-        addComponent(grid);
-        setExpandRatio(grid, 1.0f);
+        add(grid);
+        expand(grid);
     }
 
     @Override
@@ -133,26 +134,26 @@ public class TagPanel extends AbstractAdminPanel {
         return null;
     }
 
-    class NewClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class NewClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             Tag tag = new Tag();
             TagEditPanel editPanel = new TagEditPanel(context, tag);
-            adminView.getTabbedPanel().addCloseableTab(tag.getId(), "Edit Tag", getIcon(), editPanel);
+            adminView.getTabbedPanel().addCloseableTab(tag.getId(), "Edit Tag", new Icon(VaadinIcon.TAG), editPanel);
         }
     }
 
-    class EditClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class EditClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             Tag tag = getFirstSelectedItem();
 //TODO: refresh if we want to do things like show all entities that are tagged            
 //            context.getOperationsService().refresh(tag);
             TagEditPanel editPanel = new TagEditPanel(context, tag);
-            adminView.getTabbedPanel().addCloseableTab(tag.getId(), "Edit Tag", getIcon(), editPanel);
+            adminView.getTabbedPanel().addCloseableTab(tag.getId(), "Edit Tag", new Icon(VaadinIcon.TAG), editPanel);
         }
     }
 
-    class RemoveClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class RemoveClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             IConfigurationService configurationService = context.getConfigurationService();
             for (Tag tag : getSelectedItems()) {
                 configurationService.deleteEntityTagsForTag(tag);
@@ -165,11 +166,11 @@ public class TagPanel extends AbstractAdminPanel {
         }
     }
 
-    class GridItemClickListener implements ItemClickListener<Tag> {
+    class GridItemClickListener implements ComponentEventListener<ItemClickEvent<Tag>> {
         long lastClick;
         
-        public void itemClick(ItemClick<Tag> event) {
-            if (event.getMouseEventDetails().isDoubleClick()) {
+        public void onComponentEvent(ItemClickEvent<Tag> event) {
+            if (event.getClickCount() == 2) {
                 editButton.click();
             } else if (getSelectedItems().contains(event.getItem()) &&
                 System.currentTimeMillis()-lastClick > 500) {
@@ -179,14 +180,10 @@ public class TagPanel extends AbstractAdminPanel {
         }
     }
 
-    class GridSelectionListener implements SelectionListener<Tag> {
-        public void selectionChange(SelectionEvent<Tag> event) {
+    class GridSelectionListener implements SelectionListener<Grid<Tag>, Tag> {
+        public void selectionChange(SelectionEvent<Grid<Tag>, Tag> event) {
             setButtonsEnabled();
         }
-    }
-    
-    @Override
-    public void enter(ViewChangeEvent event) {
     }
 
 }

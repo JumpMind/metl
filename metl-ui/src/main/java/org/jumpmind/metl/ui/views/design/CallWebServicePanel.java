@@ -23,7 +23,6 @@ package org.jumpmind.metl.ui.views.design;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,6 +58,7 @@ import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.views.manage.ExecutionRunPanel;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.TabSheet;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -68,24 +68,25 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
-import com.vaadin.server.Page;
-import com.vaadin.server.VaadinServlet;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.SelectionMode;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.RadioButtonGroup;
-import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.components.grid.Editor;
-import com.vaadin.ui.components.grid.SingleSelectionModel;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.component.grid.editor.Editor;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.server.VaadinServlet;
 
 public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFlowRunnable {
 
@@ -133,81 +134,75 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
         viewExecutionLogButton = buttonBar.addButton("View Log", Icons.LOG, (e) -> openExecution());
         viewExecutionLogButton.setEnabled(false);
 
-        addComponent(buttonBar);
+        add(buttonBar);
 
-        Panel scrollable = new Panel();
-        scrollable.addStyleName(ValoTheme.PANEL_BORDERLESS);
-        scrollable.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
+        Scroller scrollable = new Scroller();
         scrollable.setSizeFull();
-        addComponent(scrollable);
-        setExpandRatio(scrollable, 1);
+        add(scrollable);
+        expand(scrollable);
 
         FormLayout formLayout = new FormLayout();
         formLayout.setSizeUndefined();
-        formLayout.setSpacing(true);
-        formLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         scrollable.setContent(formLayout);
 
         urlField = new TextField("URL");
-        formLayout.addComponent(urlField);
+        formLayout.add(urlField);
 
-        methodGroup = new RadioButtonGroup<String>("Method");
-        methodGroup.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
+        methodGroup = new RadioButtonGroup<String>();
+        methodGroup.setLabel("Method");
         methodGroup.setItems("GET", "PUT", "POST", "DELETE");
-        formLayout.addComponent(methodGroup);
+        formLayout.add(methodGroup);
 
         ComboBox<String> contentType = new ComboBox<String>("Content Type");
         contentType.setItems(MimeTypeUtils.APPLICATION_JSON.toString(), MimeTypeUtils.APPLICATION_XML.toString());
-        contentType.setEmptySelectionAllowed(false);
-        formLayout.addComponent(contentType);
+        formLayout.add(contentType);
 
         securitySchemeCombo = new ComboBox<SecurityScheme>("Security Scheme");
-        securitySchemeCombo.setEmptySelectionAllowed(false);
         securitySchemeCombo.setItems(SecurityScheme.values());
-        securitySchemeCombo.addValueChangeListener((e) -> securityMethodChanged());
-        formLayout.addComponent(securitySchemeCombo);
+        securitySchemeCombo.addValueChangeListener((e) -> securityMethodChanged(e));
+        formLayout.add(securitySchemeCombo);
 
         userField = new TextField("Security Username");
         userField.setVisible(false);
-        formLayout.addComponent(userField);
+        formLayout.add(userField);
 
         passwordField = new PasswordField("Security Password");
         passwordField.setVisible(false);
-        formLayout.addComponent(passwordField);
+        formLayout.add(passwordField);
 
         requestTabs = new ReqRespTabSheet("Request", true);
-        formLayout.addComponent(requestTabs);
+        formLayout.addFormItem(requestTabs, "Request");
 
         responseTabs = new ReqRespTabSheet("Response", false);
         responseStatusAreaLayout = new VerticalLayout();
         responseStatusAreaLayout.setSizeFull();
-        responseStatusAreaLayout.setCaption("Status");
         responseStatusArea = new TextArea();
         responseStatusArea.setSizeFull();
-        responseStatusAreaLayout.addComponent(responseStatusArea);
-        responseTabs.addTab(responseStatusAreaLayout, 0);
-        formLayout.addComponent(responseTabs);
+        responseStatusAreaLayout.add(responseStatusArea);
+        responseTabs.add(responseStatusAreaLayout, "Status", 0);
+        formLayout.addFormItem(responseTabs, "Response");
 
         contentType.addValueChangeListener((e) -> {
-            requestTabs.setHeader(HttpHeaders.CONTENT_TYPE, (String) contentType.getValue());
-            requestTabs.setHeader(HttpHeaders.ACCEPT, (String) contentType.getValue());
+            if (e.getValue() != null) {
+                requestTabs.setHeader(HttpHeaders.CONTENT_TYPE, (String) contentType.getValue());
+                requestTabs.setHeader(HttpHeaders.ACCEPT, (String) contentType.getValue());
+            } else {
+                contentType.setValue(e.getOldValue());
+            }
         });
 
         List<HttpRequestMapping> mappings = context.getHttpRequestMappingRegistry()
                 .getHttpRequestMappingsFor(deployment);
         if (mappings.size() > 0) {
             HttpRequestMapping mapping = mappings.get(0);
-            try {
-                ServletContext servletContext = VaadinServlet.getCurrent().getServletContext();
-                String contextPath = servletContext.getContextPath();
-                String pageUrl = Page.getCurrent().getLocation().toURL().toExternalForm();
-                String url = pageUrl.substring(0,
-                        pageUrl.indexOf(contextPath) + contextPath.length());
-                urlField.setValue(
-                        String.format("%s/api/ws%s", url, mapping.getPath().startsWith("/")
-                                ? mapping.getPath() : ("/" + mapping.getPath())));
-            } catch (MalformedURLException e1) {
-            }
+            ServletContext servletContext = VaadinServlet.getCurrent().getServletContext();
+            String contextPath = servletContext.getContextPath();
+            UI.getCurrent().getPage().fetchCurrentURL(url -> {
+                String pageUrl = url.toExternalForm();
+                String urlString = pageUrl.substring(0, pageUrl.indexOf(contextPath) + contextPath.length());
+                urlField.setValue(String.format("%s/api/ws%s", urlString,
+                        mapping.getPath().startsWith("/") ? mapping.getPath() : ("/" + mapping.getPath())));
+            });
 
             securitySchemeCombo.setValue(mapping.getSecurityScheme());
             userField.setValue(mapping.getSecurityUsername());
@@ -232,18 +227,22 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
 
     }
 
-    protected void securityMethodChanged() {
-        SecurityScheme scheme = (SecurityScheme) securitySchemeCombo.getValue();
-        boolean visible = scheme != SecurityScheme.NONE;
-        userField.setVisible(visible);
-        passwordField.setVisible(visible);
+    protected void securityMethodChanged(ValueChangeEvent<SecurityScheme> event) {
+        if (event.getValue() != null) {
+            SecurityScheme scheme = (SecurityScheme) securitySchemeCombo.getValue();
+            boolean visible = scheme != SecurityScheme.NONE;
+            userField.setVisible(visible);
+            passwordField.setVisible(visible);
+        } else {
+            securitySchemeCombo.setValue(event.getOldValue());
+        }
     }
 
     protected void openExecution() {
         if (isNotBlank(executionId)) {
             ExecutionRunPanel logPanel = new ExecutionRunPanel(executionId, context, tabs, this);
             logPanel.onBackgroundUIRefresh(logPanel.onBackgroundDataRefresh());
-            tabs.addCloseableTab(executionId, "Run " + deployment.getName(), Icons.LOG,
+            tabs.addCloseableTab(executionId, "Run " + deployment.getName(), new Icon(Icons.LOG),
                     logPanel);
         }
     }
@@ -321,50 +320,51 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
         Grid<Header> headersGrid;
 
         public ReqRespTabSheet(String caption, boolean editable) {
-            setCaption(caption);
-            setHeight(15, Unit.EM);
-            setWidth(550, Unit.PIXELS);
-            addStyleName(ValoTheme.TABSHEET_COMPACT_TABBAR);
+            setHeight("15em");
+            setWidth("550px");
 
             payloadLayout = new VerticalLayout();
             payloadLayout.setSizeFull();
             payload = new TextArea();
             payload.setSizeFull();
-            payloadLayout.addComponent(payload);
-            addTab(payloadLayout, "Payload");
+            payloadLayout.add(payload);
+            add(payloadLayout, "Payload");
 
             VerticalLayout requestHeadersLayout = new VerticalLayout();
             requestHeadersLayout.setSizeFull();
             if (editable) {
                 HorizontalLayout requestHeadersButtonLayout = new HorizontalLayout();
                 Button addButton = new Button("+", (e) -> add());
-                addButton.addStyleName(ValoTheme.BUTTON_SMALL);
+                addButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
                 Button deleteButton = new Button("-", (e) -> delete());
-                deleteButton.addStyleName(ValoTheme.BUTTON_SMALL);
-                requestHeadersButtonLayout.addComponent(addButton);
-                requestHeadersButtonLayout.addComponent(deleteButton);
-                requestHeadersLayout.addComponent(requestHeadersButtonLayout);
+                deleteButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+                requestHeadersButtonLayout.add(addButton, deleteButton);
+                requestHeadersLayout.add(requestHeadersButtonLayout);
             }
 
             headersGrid = new Grid<Header>();
             if (editable) {
-				headersGrid.addColumn(Header::getName).setCaption("Header")
-						.setEditorComponent(new TextField(), Header::setName).setExpandRatio(1);
-				headersGrid.addColumn(Header::getValue).setCaption("Value")
-						.setEditorComponent(new TextField(), Header::setValue).setExpandRatio(1);
-            	Editor<Header> headersEditor = headersGrid.getEditor();
-            	headersEditor.setEnabled(true);
-                headersEditor.setSaveCaption("Save");
-                headersEditor.setCancelCaption("Cancel");
+                Editor<Header> headersEditor = headersGrid.getEditor();
+                Binder<Header> binder = new Binder<Header>();
+                headersEditor.setBinder(binder);
+                TextField headerField = new TextField();
+                binder.forField(headerField).bind(Header::getName, Header::setName);
+                headersGrid.addColumn(Header::getName).setHeader("Header").setEditorComponent(headerField)
+                        .setFlexGrow(1);
+                TextField valueField = new TextField();
+                binder.forField(valueField).bind(Header::getValue, Header::setValue);
+                headersGrid.addColumn(Header::getValue).setHeader("Value").setEditorComponent(valueField)
+                        .setFlexGrow(1);
+            	
+                headersGrid.addItemDoubleClickListener(event -> headersEditor.editItem(event.getItem()));
             } else {
-                headersGrid.addColumn(Header::getName).setCaption("Header").setExpandRatio(1);
-                headersGrid.addColumn(Header::getValue).setCaption("Value").setExpandRatio(1);
+                headersGrid.addColumn(Header::getName).setHeader("Header").setFlexGrow(1);
+                headersGrid.addColumn(Header::getValue).setHeader("Value").setFlexGrow(1);
             }
             headersGrid.setSelectionMode(SelectionMode.SINGLE);
             headersGrid.setSizeFull();
-            requestHeadersLayout.addComponent(headersGrid);
-            requestHeadersLayout.setExpandRatio(headersGrid, 1);
-            addTab(requestHeadersLayout, "Headers");
+            requestHeadersLayout.addAndExpand(headersGrid);
+            add(requestHeadersLayout, "Headers");
         }
 
         public VerticalLayout getPayloadLayout() {
@@ -400,7 +400,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
         }
 
         protected void delete() {
-            Header selected = ((SingleSelectionModel<Header>) headersGrid.getSelectionModel()).getSelectedItem().orElse(null);
+            Header selected = headersGrid.getSelectionModel().getFirstSelectedItem().orElse(null);
             if (selected != null) {
 				headersList = headersList.stream().filter(header -> !StringUtils.equals(header.getName(), selected.getName()))
 						.collect(Collectors.toList());

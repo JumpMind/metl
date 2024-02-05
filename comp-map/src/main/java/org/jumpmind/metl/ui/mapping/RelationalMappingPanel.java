@@ -39,35 +39,31 @@ import org.jumpmind.metl.ui.common.ExportDialog;
 import org.jumpmind.metl.ui.views.design.AbstractFlowStepAwareComponentEditPanel;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.data.HasValue.ValueChangeListener;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.Html;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 @SuppressWarnings("serial")
-public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPanel {
+public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPanel implements IMappingPanel {
 
     MappingDiagram diagram;
 
     Button removeButton;
 
-    CheckBox srcMapFilter;
+    Checkbox srcMapFilter;
 
-    CheckBox dstMapFilter;
+    Checkbox dstMapFilter;
 
     TextField srcTextFilter;
 
@@ -84,83 +80,71 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
         
         ButtonBar buttonBar = new ButtonBar();
         if (!readOnly) {
-            addComponent(buttonBar);
-            Button autoMapButton = buttonBar.addButton("Auto Map", VaadinIcons.FLASH);
-            removeButton = buttonBar.addButton("Remove", VaadinIcons.TRASH);
+            add(buttonBar);
+            Button autoMapButton = buttonBar.addButton("Auto Map", VaadinIcon.FLASH);
+            removeButton = buttonBar.addButton("Remove", VaadinIcon.TRASH);
             removeButton.setEnabled(false);
             autoMapButton.addClickListener(new AutoMapListener());
             removeButton.addClickListener(new RemoveListener());
-            Button removeAllLink = buttonBar.addButton("Remove All Links", VaadinIcons.CLOSE);
+            Button removeAllLink = buttonBar.addButton("Remove All Links", VaadinIcon.CLOSE);
             removeAllLink.addClickListener(new RemoveAllListener());
 
         }
-        buttonBar.addButtonRight("Export", VaadinIcons.DOWNLOAD, (e)->export());
+        buttonBar.addButtonRight("Export", VaadinIcon.DOWNLOAD, (e)->export());
 
         HorizontalLayout titleHeader = new HorizontalLayout();
         titleHeader.setSpacing(true);
-        titleHeader.setMargin(new MarginInfo(false, true, false, true));
-        titleHeader.setWidth(100f, Unit.PERCENTAGE);
-		Label inputModelLabel = new Label("<b>Input Model:</b> &nbsp;" + (inputModel != null ? inputModel.getName() : "?"));
-		inputModelLabel.setContentMode(ContentMode.HTML);
-        titleHeader.addComponent(inputModelLabel);
-        Label outputModelLabel = new Label("<b>Output Model:</b> &nbsp;" + (outputModel != null ? outputModel.getName() : "?"));
-        outputModelLabel.setContentMode(ContentMode.HTML);
-        titleHeader.addComponent(outputModelLabel);
-        addComponent(titleHeader);
+        titleHeader.getStyle().set("margin", "0 16px");
+        titleHeader.setWidthFull();
+		Html inputModelHtml = new Html("<b>Input Model:</b> &nbsp;" + (inputModel != null ? inputModel.getName() : "?"));
+        Html outputModelHtml = new Html("<b>Output Model:</b> &nbsp;" + (outputModel != null ? outputModel.getName() : "?"));
+        titleHeader.add(inputModelHtml, outputModelHtml);
+        add(titleHeader);
 
         HorizontalLayout filterHeader = new HorizontalLayout();
         filterHeader.setSpacing(true);
-        filterHeader.setMargin(new MarginInfo(true, true, true, true));
-        filterHeader.setWidth(100f, Unit.PERCENTAGE);
+        filterHeader.setMargin(true);
+        filterHeader.setWidthFull();
         HorizontalLayout srcFilterHeader = new HorizontalLayout();
         srcFilterHeader.setSpacing(true);
-        srcFilterHeader.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
-        filterHeader.addComponent(srcFilterHeader);
+        srcFilterHeader.setDefaultVerticalComponentAlignment(Alignment.CENTER);
         HorizontalLayout dstFilterHeader = new HorizontalLayout();
         dstFilterHeader.setSpacing(true);
-        dstFilterHeader.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
-        filterHeader.addComponent(dstFilterHeader);
-        addComponent(filterHeader);
+        dstFilterHeader.setDefaultVerticalComponentAlignment(Alignment.CENTER);
+        filterHeader.add(srcFilterHeader, dstFilterHeader);
+        add(filterHeader);
 
         srcTextFilter = new TextField();
-        srcTextFilter.setWidth(20, Unit.EM);
+        srcTextFilter.setWidth("20em");
         srcTextFilter.setPlaceholder("Filter");
-        srcTextFilter.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
-        srcTextFilter.setIcon(VaadinIcons.SEARCH);
+        srcTextFilter.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         srcTextFilter.setValueChangeMode(ValueChangeMode.LAZY);
         srcTextFilter.setValueChangeTimeout(200);
         srcTextFilter.addValueChangeListener(new FilterInputTextListener());
-        srcFilterHeader.addComponent(srcTextFilter);
 
-        srcMapFilter = new CheckBox("Mapped Only");
+        srcMapFilter = new Checkbox("Mapped Only");
         srcMapFilter.addValueChangeListener(new FilterSrcMapListener());
-        srcFilterHeader.addComponent(srcMapFilter);
+        srcFilterHeader.add(srcTextFilter, srcMapFilter);
 
         dstTextFilter = new TextField();
-        dstTextFilter.setWidth(20, Unit.EM);
+        dstTextFilter.setWidth("20em");
         dstTextFilter.setPlaceholder("Filter");
-        dstTextFilter.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
-        dstTextFilter.setIcon(VaadinIcons.SEARCH);
+        dstTextFilter.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         dstTextFilter.setValueChangeMode(ValueChangeMode.LAZY);
         dstTextFilter.setValueChangeTimeout(200);
         dstTextFilter.addValueChangeListener(new FilterOutputTextListener());
-        dstFilterHeader.addComponent(dstTextFilter);
 
-        dstMapFilter = new CheckBox("Mapped Only");
+        dstMapFilter = new Checkbox("Mapped Only");
         dstMapFilter.addValueChangeListener(new FilterDstMapListener());
-        dstFilterHeader.addComponent(dstMapFilter);
+        dstFilterHeader.add(dstTextFilter, dstMapFilter);
 
-        Panel panel = new Panel();
         VerticalLayout vlay = new VerticalLayout();
         vlay.setSizeFull();
-        diagram = new MappingDiagram(context, component);
+        diagram = new MappingDiagram(context, component, this);
         diagram.setSizeFull();
-        vlay.addComponent(diagram);
-        panel.setContent(vlay);
-        panel.setSizeFull();
-        addComponent(panel);
-        setExpandRatio(panel, 1.0f);
-        diagram.addListener(new EventListener());
+        vlay.add(diagram);
+        add(vlay);
+        expand(vlay);
         
     }    
     
@@ -215,7 +199,6 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
             setting.setValue(attr2.getId());
             component.addModelSetting(setting);
             context.getConfigurationService().save(setting);
-            diagram.markAsDirty();
         }
 
         return exact;
@@ -252,10 +235,10 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
 
     protected void export() {
         Grid<String[]> table = new Grid<String[]>();
-        table.addColumn(item -> item[0]).setCaption("Source Entity");
-        table.addColumn(item -> item[1]).setCaption("Source Attribute");
-        table.addColumn(item -> item[2]).setCaption("Destination Entity");
-        table.addColumn(item -> item[3]).setCaption("Destination Attribute");
+        table.addColumn(item -> item[0]).setHeader("Source Entity");
+        table.addColumn(item -> item[1]).setHeader("Source Attribute");
+        table.addColumn(item -> item[2]).setHeader("Destination Entity");
+        table.addColumn(item -> item[3]).setHeader("Destination Attribute");
         
         List<String[]> itemList = new ArrayList<String[]>();
         for (ComponentAttribSetting setting : component.getAttributeSettings()) {
@@ -273,17 +256,13 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
         ExportDialog.show(context, table);
     }
     
-    class EventListener implements Listener {
-        public void componentEvent(Event event) {
-            if (event instanceof SelectEvent) {
-                SelectEvent selectEvent = (SelectEvent) event;
-                removeButton.setEnabled(selectEvent.getSelectedSourceId() != null);
-            }
-        }
+    @Override
+    public void selectEvent(SelectEvent event) {
+        removeButton.setEnabled(event.getSelectedSourceId() != null);
     }
 
-    class RemoveAllListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class RemoveAllListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             ConfirmDialog.show("Delete ALL Links?", "Are you sure you want to remove all of the connections between source and target attributes?",
                     ()->{
 	                    	Map<String, List<String>> linksMap = new HashMap<>();
@@ -298,7 +277,6 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
 	                        for (String key : linksMap.keySet()) {
 	                        	List<String> links = linksMap.get(key);
 	                    		diagram.removeConnection(links.get(0), links.get(1));
-	                        	diagram.markAsDirty();
 	                        }
 	                    	    	
 	                    	removeButton.setEnabled(false);        
@@ -307,40 +285,40 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
         }
     }
 
-    class RemoveListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class RemoveListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             diagram.removeSelected();
             removeButton.setEnabled(false);
         }
     }
 
-    class AutoMapListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class AutoMapListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             autoMap(false);
             autoMap(true);
         }
     }
     
-    class FilterInputTextListener implements ValueChangeListener<String> {
-        public void valueChange(ValueChangeEvent<String> event) {
+    class FilterInputTextListener implements ValueChangeListener<ValueChangeEvent<String>> {
+        public void valueChanged(ValueChangeEvent<String> event) {
             diagram.filterInputModel(event.getValue(), srcMapFilter.getValue());
         }
     }
 
-    class FilterOutputTextListener implements ValueChangeListener<String> {
-        public void valueChange(ValueChangeEvent<String> event) {
+    class FilterOutputTextListener implements ValueChangeListener<ValueChangeEvent<String>> {
+        public void valueChanged(ValueChangeEvent<String> event) {
             diagram.filterOutputModel(event.getValue(), dstMapFilter.getValue());
         }
     }
 
-    class FilterSrcMapListener implements ValueChangeListener<Boolean> {
-        public void valueChange(ValueChangeEvent<Boolean> event) {
+    class FilterSrcMapListener implements ValueChangeListener<ValueChangeEvent<Boolean>> {
+        public void valueChanged(ValueChangeEvent<Boolean> event) {
             diagram.filterInputModel(srcTextFilter.getValue(), event.getValue());
         }
     }
 
-    class FilterDstMapListener implements ValueChangeListener<Boolean> {
-        public void valueChange(ValueChangeEvent<Boolean> event) {
+    class FilterDstMapListener implements ValueChangeListener<ValueChangeEvent<Boolean>> {
+        public void valueChanged(ValueChangeEvent<Boolean> event) {
             diagram.filterOutputModel(dstTextFilter.getValue(), event.getValue());
         }
     }        

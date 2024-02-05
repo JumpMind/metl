@@ -32,7 +32,7 @@ import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.ui.common.AbstractMenuBar;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
 
-import com.vaadin.ui.TreeGrid;
+import com.vaadin.flow.component.treegrid.TreeGrid;
 
 public class DesignMenuBar extends AbstractMenuBar {
 

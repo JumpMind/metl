@@ -35,24 +35,25 @@ import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.component.XsltProcessor;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.vaadin.ui.common.ResizableWindow;
-import org.vaadin.aceeditor.AceEditor;
-import org.vaadin.aceeditor.AceMode;
+import org.jumpmind.vaadin.ui.common.ResizableDialog;
 
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.data.HasValue.ValueChangeListener;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
+
+import de.f0rce.ace.AceEditor;
+import de.f0rce.ace.enums.AceMode;
 
 @SuppressWarnings({ "serial" })
-public class EditXsltPanel extends AbstractComponentEditPanel implements ValueChangeListener<String> {
+public class EditXsltPanel extends AbstractComponentEditPanel implements ValueChangeListener<ValueChangeEvent<String>> {
 
     TextField filterField;
     
@@ -66,19 +67,19 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements ValueCh
     protected void buildUI() {
 
         ButtonBar buttonBar = new ButtonBar();
-        addComponent(buttonBar);
+        add(buttonBar);
 
         if (!readOnly) {
-          Button testButton = buttonBar.addButton("Test", VaadinIcons.FILE_CODE);
+          Button testButton = buttonBar.addButton("Test", VaadinIcon.FILE_CODE);
           testButton.addClickListener(new TestClickListener());
         }
 
         filterField = buttonBar.addFilter();
         filterField.addValueChangeListener(this);
         
-        HorizontalSplitPanel splitPanel = new HorizontalSplitPanel();
-        splitPanel.setSizeFull();
-        splitPanel.setSplitPosition(50, Unit.PERCENTAGE);
+        SplitLayout splitLayout = new SplitLayout();
+        splitLayout.setSizeFull();
+        splitLayout.setSplitterPosition(50);
 
         VerticalLayout leftLayout = new VerticalLayout();
         editor = new AceEditor();
@@ -88,25 +89,23 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements ValueCh
         editor.setShowPrintMargin(false);
         editor.addValueChangeListener(new StylesheetChangeListener());
         editor.setValue(component.findSetting(XsltProcessor.XSLT_PROCESSOR_STYLESHEET).getValue());
-        leftLayout.addComponent(new Label("XSLT Stylesheet"));
-        leftLayout.addComponent(editor);
-        leftLayout.setExpandRatio(editor, 1.0f);
+        leftLayout.add(new Span("XSLT Stylesheet"), editor);
+        leftLayout.expand(editor);
         leftLayout.setSizeFull();
-        splitPanel.setFirstComponent(leftLayout);
+        splitLayout.addToPrimary(leftLayout);
         
         VerticalLayout rightLayout = new VerticalLayout();
         rightLayout.setSizeFull();
-        rightLayout.addComponent(new Label("Sample Input XML"));
+        rightLayout.add(new Span("Sample Input XML"));
         textArea = new TextArea();
         textArea.setEnabled(false);
         textArea.setSizeFull();
         textArea.setValue(getSampleXml());
-        rightLayout.addComponent(textArea);
-        rightLayout.setExpandRatio(textArea, 1.0f);
-        splitPanel.setSecondComponent(rightLayout);
+        rightLayout.addAndExpand(textArea);
+        splitLayout.addToSecondary(rightLayout);
 
-        addComponent(splitPanel);
-        setExpandRatio(splitPanel, 1.0f);
+        add(splitLayout);
+        expand(splitLayout);
         
         textArea.setReadOnly(readOnly);
         editor.setReadOnly(readOnly);
@@ -127,7 +126,7 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements ValueCh
     }
 
     @Override
-    public void valueChange(ValueChangeEvent<String> event) {
+    public void valueChanged(ValueChangeEvent<String> event) {
         textArea.setReadOnly(false);
         filterField.setValue(event.getValue());
         textArea.setValue(getSampleXml());
@@ -188,31 +187,31 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements ValueCh
         return entities;
     }
 
-    class StylesheetChangeListener implements ValueChangeListener<String> {
-        public void valueChange(ValueChangeEvent<String> event) {
+    class StylesheetChangeListener implements ValueChangeListener<ValueChangeEvent<String>> {
+        public void valueChanged(ValueChangeEvent<String> event) {
             Setting stylesheet = component.findSetting(XsltProcessor.XSLT_PROCESSOR_STYLESHEET);
             stylesheet.setValue(editor.getValue());
             context.getConfigurationService().save(component);
         }
     }
 
-    class TestClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
-            TestWindow window = new TestWindow();
-            window.show();
+    class TestClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
+            TestDialog dialog = new TestDialog();
+            dialog.show();
         }
     }
 
-    class TestWindow extends ResizableWindow {
-        public TestWindow() {
+    class TestDialog extends ResizableDialog {
+        public TestDialog() {
             super("Test Transformation");
-            setWidth(800f, Unit.PIXELS);
-            setHeight(600f, Unit.PIXELS);
-            content.setMargin(true);
+            setWidth("800px");
+            setHeight("600px");
+            innerContent.setMargin(true);
             
             TextArea textField = new TextArea();
             textField.setSizeFull();
-            textField.setWordWrap(false);
+            textField.getStyle().set("white-space", "pre").set("overflow-x", "auto").set("padding-bottom", "1em");
             
             Thread thread = Thread.currentThread();
             ClassLoader previousLoader = thread.getContextClassLoader();
@@ -223,10 +222,10 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements ValueCh
                 thread.setContextClassLoader(previousLoader);
 
             }            
-            addComponent(textField);
-            content.setExpandRatio(textField, 1.0f);
+            add(textField);
+            expand(textField);
             
-            addComponent(buildButtonFooter(buildCloseButton()));
+            add(buildButtonFooter(buildCloseButton()));
         }
     }
 

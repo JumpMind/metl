@@ -27,29 +27,28 @@ import java.util.Set;
 
 import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
-import com.vaadin.event.selection.SelectionEvent;
-import com.vaadin.event.selection.SelectionListener;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.shared.data.sort.SortDirection;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Grid.ItemClick;
-import com.vaadin.ui.Grid.SelectionMode;
-import com.vaadin.ui.components.grid.ItemClickListener;
-import com.vaadin.ui.Grid;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.component.grid.GridSortOrder;
+import com.vaadin.flow.component.grid.ItemClickEvent;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.data.provider.SortDirection;
+import com.vaadin.flow.data.selection.SelectionEvent;
+import com.vaadin.flow.data.selection.SelectionListener;
 
 @SuppressWarnings("serial")
 @UiComponent
 @Scope(value = "ui")
 @Order(600)
-@AdminMenuLink(name = "Plugin Repositories", id = "Plugin Repositories", icon = VaadinIcons.DATABASE)
+@AdminMenuLink(name = "Plugin Repositories", id = "Plugin Repositories", icon = VaadinIcon.DATABASE)
 public class PluginRepositoriesPanel extends AbstractAdminPanel {
 
     Button newButton;
@@ -64,32 +63,33 @@ public class PluginRepositoriesPanel extends AbstractAdminPanel {
     
     public PluginRepositoriesPanel() {
         ButtonBar buttonBar = new ButtonBar();
-        addComponent(buttonBar);
+        add(buttonBar);
 
-        newButton = buttonBar.addButton("Add", VaadinIcons.PLUS);
+        newButton = buttonBar.addButton("Add", VaadinIcon.PLUS);
         newButton.addClickListener(new NewClickListener());
 
-        editButton = buttonBar.addButton("Edit", VaadinIcons.EDIT);
+        editButton = buttonBar.addButton("Edit", VaadinIcon.EDIT);
         editButton.addClickListener(new EditClickListener());
 
-        removeButton = buttonBar.addButton("Remove", VaadinIcons.TRASH);
+        removeButton = buttonBar.addButton("Remove", VaadinIcon.TRASH);
         removeButton.addClickListener(new RemoveClickListener());
 
         grid = new Grid<PluginRepository>();
         grid.setSizeFull();
-        //grid.setCacheRate(100);
-        //grid.setPageLength(100);
+        grid.setPageSize(100);
         grid.setSelectionMode(SelectionMode.MULTI);
 
-        grid.addColumn(PluginRepository::getName).setId("name").setCaption("Name").setSortable(true);
-        grid.addColumn(PluginRepository::getUrl).setCaption("Url");
-        grid.addColumn(PluginRepository::getLastUpdateTime).setCaption("Updated").setWidth(UIConstants.DATETIME_WIDTH_PIXELS);
+        grid.addColumn(PluginRepository::getName).setKey("name").setHeader("Name").setSortable(true);
+        grid.addColumn(PluginRepository::getUrl).setHeader("Url");
+        grid.addColumn(PluginRepository::getLastUpdateTime).setHeader("Updated").setWidth("165px");
         grid.addItemClickListener(new GridItemClickListener());
         grid.addSelectionListener(new GridSelectionListener());
-        grid.sort("name", SortDirection.ASCENDING);
+        List<GridSortOrder<PluginRepository>> orderList = new ArrayList<GridSortOrder<PluginRepository>>();
+        orderList.add(new GridSortOrder<PluginRepository>(grid.getColumnByKey("name"), SortDirection.ASCENDING));
+        grid.sort(orderList);
 
-        addComponent(grid);
-        setExpandRatio(grid, 1.0f);
+        add(grid);
+        expand(grid);
     }
 
     @Override
@@ -133,25 +133,25 @@ public class PluginRepositoriesPanel extends AbstractAdminPanel {
         return null;
     }
 
-    class NewClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class NewClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             PluginRepository pluginRepository = new PluginRepository();
             PluginRepositoryEditPanel editPanel = new PluginRepositoryEditPanel(context, pluginRepository);
-            adminView.getTabbedPanel().addCloseableTab(pluginRepository.getId(), "Edit Repository", getIcon(), editPanel);
+            adminView.getTabbedPanel().addCloseableTab(pluginRepository.getId(), "Edit Repository", new Icon(VaadinIcon.DATABASE), editPanel);
         }
     }
 
-    class EditClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class EditClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             PluginRepository pluginRepository = getFirstSelectedItem();
             context.getPluginService().refresh(pluginRepository);
             PluginRepositoryEditPanel editPanel = new PluginRepositoryEditPanel(context, pluginRepository);
-            adminView.getTabbedPanel().addCloseableTab(pluginRepository.getId(), "Edit Repository", getIcon(), editPanel);
+            adminView.getTabbedPanel().addCloseableTab(pluginRepository.getId(), "Edit Repository", new Icon(VaadinIcon.DATABASE), editPanel);
         }
     }
 
-    class RemoveClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class RemoveClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             for (PluginRepository pluginRepository : getSelectedItems()) {
                 context.getConfigurationService().delete(pluginRepository);
                 pluginRepositoryList.remove(pluginRepository);
@@ -163,11 +163,11 @@ public class PluginRepositoriesPanel extends AbstractAdminPanel {
         }
     }
 
-    class GridItemClickListener implements ItemClickListener<PluginRepository> {
+    class GridItemClickListener implements ComponentEventListener<ItemClickEvent<PluginRepository>> {
         long lastClick;
         
-        public void itemClick(ItemClick<PluginRepository> event) {
-            if (event.getMouseEventDetails().isDoubleClick()) {
+        public void onComponentEvent(ItemClickEvent<PluginRepository> event) {
+            if (event.getClickCount() == 2) {
                 editButton.click();
             } else if (getSelectedItems().contains(event.getItem()) &&
                 System.currentTimeMillis()-lastClick > 500) {
@@ -177,13 +177,9 @@ public class PluginRepositoriesPanel extends AbstractAdminPanel {
         }
     }
 
-    class GridSelectionListener implements SelectionListener<PluginRepository> {
-        public void selectionChange(SelectionEvent<PluginRepository> event) {
+    class GridSelectionListener implements SelectionListener<Grid<PluginRepository>, PluginRepository> {
+        public void selectionChange(SelectionEvent<Grid<PluginRepository>, PluginRepository> event) {
             setButtonsEnabled();
         }
-    }
-
-    @Override
-    public void enter(ViewChangeEvent event) {
     }
 }

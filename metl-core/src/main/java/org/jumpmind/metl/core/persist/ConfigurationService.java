@@ -83,7 +83,7 @@ import org.jumpmind.metl.core.model.WhereUsed;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.util.AppConstants;
 import org.jumpmind.metl.core.util.NameValue;
-import org.jumpmind.persist.IPersistenceManager;
+import org.jumpmind.metl.core.persist.IPersistenceManager;
 import org.jumpmind.util.FormatUtils;
 
 public class ConfigurationService extends AbstractService

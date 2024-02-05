@@ -23,11 +23,12 @@ package org.jumpmind.metl.ui.views.design;
 import org.jumpmind.metl.core.runtime.component.Web;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
-import org.vaadin.aceeditor.AceEditor;
-import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.data.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
+
+import de.f0rce.ace.AceEditor;
+import de.f0rce.ace.enums.AceMode;
 
 @SuppressWarnings("serial")
 public class EditWebPanel extends AbstractComponentEditPanel {
@@ -36,20 +37,20 @@ public class EditWebPanel extends AbstractComponentEditPanel {
     
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
-        addComponent(buttonBar);
+        add(buttonBar);
 
         editor = CommonUiUtils.createAceEditor();
         editor.setMode(AceMode.xml);
         editor.setValue(component.get(Web.BODY_TEXT));
-        editor.addValueChangeListener(new ValueChangeListener<String>() {
-            public void valueChange(ValueChangeEvent<String> event) {
+        editor.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
+            public void valueChanged(ValueChangeEvent<String> event) {
                 component.put(Web.BODY_TEXT, event.getValue());
                 context.getConfigurationService().save(component.findSetting(Web.BODY_TEXT));
             }
         });
 
-        addComponent(editor);
-        setExpandRatio(editor, 1);
+        add(editor);
+        expand(editor);
     }
 
 }

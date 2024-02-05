@@ -379,8 +379,8 @@ public class DataDiff extends AbstractComponentRuntime {
             } else {
                 ds.setUrl("jdbc:h2:file:./" + databaseName);
             }
-            databasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(ds,
-                    new SqlTemplateSettings(), true, false);
+            databasePlatform = JdbcDatabasePlatformFactory.getInstance().create(ds, new SqlTemplateSettings(), true,
+                    false);
 
             RelationalModel inputModel = (RelationalModel) context.getFlowStep().getComponent().getInputModel();
             List<ModelEntity> entities = inputModel.getModelEntities();

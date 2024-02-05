@@ -20,22 +20,28 @@
  */
 package org.jumpmind.metl.ui.init;
 
-import org.jsoup.nodes.Element;
+import org.jumpmind.vaadin.ui.common.ResizableDialog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.vaadin.server.BootstrapFragmentResponse;
-import com.vaadin.server.BootstrapListener;
-import com.vaadin.server.BootstrapPageResponse;
-import com.vaadin.server.CustomizedSystemMessages;
-import com.vaadin.server.ServiceException;
-import com.vaadin.server.SessionInitEvent;
-import com.vaadin.server.SessionInitListener;
-import com.vaadin.server.SystemMessages;
-import com.vaadin.server.SystemMessagesInfo;
-import com.vaadin.server.SystemMessagesProvider;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.server.CustomizedSystemMessages;
+import com.vaadin.flow.server.ServiceException;
+import com.vaadin.flow.server.SessionInitEvent;
+import com.vaadin.flow.server.SessionInitListener;
+import com.vaadin.flow.server.SystemMessages;
+import com.vaadin.flow.server.SystemMessagesInfo;
+import com.vaadin.flow.server.SystemMessagesProvider;
 
 public class AppSessionInitListener implements SessionInitListener {
 
     private static final long serialVersionUID = 1L;
+    
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Override
     public void sessionInit(final SessionInitEvent event)
@@ -53,27 +59,57 @@ public class AppSessionInitListener implements SessionInitListener {
                         return csm;
                     }
                 });
-        event.getSession().addBootstrapListener(new BootstrapListener() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void modifyBootstrapPage(final BootstrapPageResponse response) {
-                final Element head = response.getDocument().head();
-                head.appendElement("meta").attr("name", "viewport")
-                        .attr("content", "width=device-width, initial-scale=1");
-                head.appendElement("meta")
-                        .attr("name", "apple-mobile-web-app-capable")
-                        .attr("content", "yes");
-                head.appendElement("meta")
-                        .attr("name", "apple-mobile-web-app-status-bar-style")
-                        .attr("content", "black");
+        event.getSession().setErrorHandler(e -> {
+            String intro = "Exception of type <b>";
+            String message = "";
+            for (Throwable t = e.getThrowable(); t != null; t = t.getCause()) {
+                if (t.getCause() == null) {
+                    intro += t.getClass().getName()
+                            + "</b> with the following message:\n\n";
+                    message = t.getMessage();
+                }
             }
+            ErrorDialog dialog = new ErrorDialog(intro, message);
+            dialog.show();
 
-            @Override
-            public void modifyBootstrapFragment(
-                    final BootstrapFragmentResponse response) {
+            Throwable ex = e.getThrowable();
+            if (ex != null) {
+                log.error(ex.getMessage(), ex);
+            } else {
+                log.error("An unexpected error occurred");
             }
         });
+    }
+    
+    @SuppressWarnings({ "serial" })
+    class ErrorDialog extends ResizableDialog {
+        public ErrorDialog(String intro, String message) {
+            super("Error");
+            setWidth("600px");
+            setHeight("300px");
+            innerContent.setMargin(true);
+
+            HorizontalLayout layout = new HorizontalLayout();
+            Icon icon = new Icon(VaadinIcon.WARNING);
+            icon.setColor("red");
+            icon.setSize("70px");
+            layout.add(icon);
+
+            Span labelIntro = new Span(intro);
+            labelIntro.setClassName("large");
+            labelIntro.setWidth("530px");
+            layout.add(labelIntro);
+            add(layout);
+
+            TextArea textField = new TextArea();
+            textField.setSizeFull();
+            textField.getStyle().set("white-space", "pre").set("overflow-x", "auto").set("padding-bottom", "1em");
+            textField.setValue(message);
+            add(textField);
+            innerContent.expand(textField);
+
+            add(buildButtonFooter(buildCloseButton()));
+        }
     }
 
 }

@@ -27,11 +27,11 @@ import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.data.HasValue.ValueChangeListener;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 
 @SuppressWarnings("serial")
 
@@ -48,20 +48,19 @@ public class PluginRepositoryEditPanel extends VerticalLayout implements IUiPane
         this.pluginRepository = pluginRepository;
 
         FormLayout form = new FormLayout();
-        form.setSpacing(true);
 
         TextField field = new TextField("Name", StringUtils.trimToEmpty(pluginRepository.getName()));
-        field.setWidth(20, Unit.EM);
-        form.addComponent(field);
+        field.setWidth("20em");
+        form.add(field);
         field.addValueChangeListener(new NameChangeListener());
         field.focus();
 
         field = new TextField("Url", StringUtils.trimToEmpty(pluginRepository.getUrl()));
-        field.setWidth(45, Unit.EM);
+        field.setWidth("45em");
         field.addValueChangeListener(new UrlChangeListener());
-        form.addComponent(field);
+        form.add(field);
 
-        addComponent(form);
+        add(form);
         setMargin(true);
     }
 
@@ -84,15 +83,15 @@ public class PluginRepositoryEditPanel extends VerticalLayout implements IUiPane
         }
     }
 
-    class UrlChangeListener implements ValueChangeListener<String> {
-        public void valueChange(ValueChangeEvent<String> event) {
+    class UrlChangeListener implements ValueChangeListener<ValueChangeEvent<String>> {
+        public void valueChanged(ValueChangeEvent<String> event) {
             pluginRepository.setUrl(event.getValue());
             save(pluginRepository);
         }
     }
 
-    class NameChangeListener implements ValueChangeListener<String> {
-        public void valueChange(ValueChangeEvent<String> event) {
+    class NameChangeListener implements ValueChangeListener<ValueChangeEvent<String>> {
+        public void valueChanged(ValueChangeEvent<String> event) {
             pluginRepository.setName(event.getValue());
             save(pluginRepository);
         }

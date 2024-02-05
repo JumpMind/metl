@@ -35,7 +35,7 @@ import org.jumpmind.metl.core.model.FolderType;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.security.SecurityConstants;
-import org.jumpmind.persist.IPersistenceManager;
+import org.jumpmind.metl.core.persist.IPersistenceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

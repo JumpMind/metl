@@ -33,17 +33,16 @@ import org.jumpmind.metl.ui.common.UiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.StreamResource;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.dnd.DragSourceExtension;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.dnd.DragSource;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.server.InputStreamFactory;
+import com.vaadin.flow.server.StreamResource;
 
 public class EditFlowPalette extends VerticalLayout {
 
@@ -65,64 +64,58 @@ public class EditFlowPalette extends VerticalLayout {
         this.context = context;
         this.designFlowLayout = designFlowLayout;
         this.projectVersionId = projectVersionId;
-
-        final int WIDTH = 150;
         
-        setHeight(100, Unit.PERCENTAGE);
-        setWidth(WIDTH, Unit.PIXELS);
+        setHeightFull();
+        setWidth("150px");
 
         HorizontalLayout topWrapper = new HorizontalLayout();
-        topWrapper.setMargin(new MarginInfo(true, false, false, false));
+        topWrapper.getStyle().set("margin", "16px 0 0 0");
         HorizontalLayout top = new HorizontalLayout();
-        top.addStyleName(ButtonBar.STYLE);
+        top.addClassName(ButtonBar.STYLE);
         top.setMargin(true);
-        topWrapper.addComponent(top);
+        topWrapper.add(top);
         
-        addComponent(topWrapper);
+        add(topWrapper);
         
         TextField filterField = new TextField();
-        filterField.setWidth(WIDTH-30, Unit.PIXELS);
+        filterField.setWidth("120px");
         filterField.setPlaceholder("Filter");
-        filterField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
-        filterField.setIcon(VaadinIcons.SEARCH);
+        filterField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         filterField.setValueChangeMode(ValueChangeMode.LAZY);
         filterField.setValueChangeTimeout(200);
         filterField.addValueChangeListener((event) -> {
             filterText = event.getValue().toLowerCase();
             populateComponentPalette();
         });
-        top.addComponent(filterField);
+        top.add(filterField);
 
-        Panel panel = new Panel();
+        Scroller panel = new Scroller();
         panel.setSizeFull();
-        panel.addStyleName(ValoTheme.PANEL_BORDERLESS);
-        panel.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
 
         componentLayout = new VerticalLayout();
-        componentLayout.setMargin(new MarginInfo(true, false, false, false));
-        componentLayout.addStyleName("scrollable");
+        componentLayout.getStyle().set("margin", "16px 0 0 0");
+        componentLayout.addClassName("scrollable");
         panel.setContent(componentLayout);
 
-        addComponent(panel);
-        setExpandRatio(panel, 1);
+        addAndExpand(panel);
 
         populateComponentPalette();
 
     }  
 
     protected StreamResource getImageResourceForComponentType(String projectVersionId, XMLComponentDefinition componentDefinition) {
-        StreamResource.StreamSource source = new StreamResource.StreamSource() {
+        InputStreamFactory factory = new InputStreamFactory() {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public InputStream getStream() {
+            public InputStream createInputStream() {
                 return UiUtils.getComponentImageInputStream(projectVersionId, componentDefinition.getId(), context);
             }
         };
-        return new StreamResource(source, componentDefinition.getId());
+        return new StreamResource(componentDefinition.getId(), factory);
     }
     protected void populateComponentPalette() {
-        componentLayout.removeAllComponents();
+        componentLayout.removeAll();
         List<XMLComponentDefinition> componentDefinitions = context.getDefinitionFactory().getComponentDefinitions(projectVersionId);
         Collections.sort(componentDefinitions);
         for (XMLComponentDefinition definition : componentDefinitions) {
@@ -137,7 +130,7 @@ public class EditFlowPalette extends VerticalLayout {
     protected void addItemToFlowPanelSection(String labelName, String componentType, VerticalLayout componentLayout, StreamResource icon,
             String componentId) {
 
-        FlowPaletteItem paletteItem = new FlowPaletteItem(labelName);
+        FlowPaletteItem paletteItem = new FlowPaletteItem(labelName, icon);
         if (componentId != null) {
             paletteItem.setShared(true);
             paletteItem.setComponentId(componentId);
@@ -145,15 +138,12 @@ public class EditFlowPalette extends VerticalLayout {
             paletteItem.setComponentType(componentType);
             paletteItem.setShared(false);
         }
-        paletteItem.setIcon(icon);
-        paletteItem.addStyleName(ValoTheme.BUTTON_ICON_ALIGN_TOP);
-        paletteItem.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
-        paletteItem.addStyleName("leftAligned");
-        paletteItem.setWidth(100, Unit.PERCENTAGE);
-        DragSourceExtension<FlowPaletteItem> extension = new DragSourceExtension<FlowPaletteItem>(paletteItem);
+        paletteItem.addClassName("leftAligned");
+        paletteItem.setWidthFull();
+        DragSource<FlowPaletteItem> extension = DragSource.create(paletteItem);
         extension.setDragData(paletteItem);
-        componentLayout.addComponent(paletteItem);
-        componentLayout.setComponentAlignment(paletteItem, Alignment.TOP_CENTER);
+        componentLayout.add(paletteItem);
+        componentLayout.setHorizontalComponentAlignment(Alignment.CENTER, paletteItem);
 
     }
 

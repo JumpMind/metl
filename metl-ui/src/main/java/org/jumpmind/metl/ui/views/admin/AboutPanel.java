@@ -38,16 +38,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.icon.VaadinIcon;
 
 @UiComponent
 @Scope(value = "ui")
 @Order(1400)
-@AdminMenuLink(name = "About", id = "About", icon = VaadinIcons.QUESTION)
+@AdminMenuLink(name = "About", id = "About", icon = VaadinIcon.QUESTION)
 public class AboutPanel extends AbstractAdminPanel implements IBackgroundRefreshable<Object> {
 
     final Logger log = LoggerFactory.getLogger(getClass());
@@ -65,16 +64,15 @@ public class AboutPanel extends AbstractAdminPanel implements IBackgroundRefresh
             Runtime.getRuntime().gc();
             refresh();
         });
-        gcCollect.addStyleName(ValoTheme.BUTTON_TINY);
-        addComponent(gcCollect);
+        gcCollect.addThemeVariants(ButtonVariant.LUMO_SMALL);
+        add(gcCollect);
 
         grid = new Grid<String[]>();
         grid.setSizeFull();
-        grid.addStyleName("noscroll");
-        grid.addColumn(item -> item[0]).setCaption("Name").setWidth(200);
-        grid.addColumn(item -> item[1]).setCaption("Value");
-        addComponent(grid);
-        setExpandRatio(grid, 1);
+        grid.addClassName("noscroll");
+        grid.addColumn(item -> item[0]).setHeader("Name").setWidth("200px");
+        grid.addColumn(item -> item[1]).setHeader("Value");
+        addAndExpand(grid);
     }
     
     @PostConstruct
@@ -112,7 +110,8 @@ public class AboutPanel extends AbstractAdminPanel implements IBackgroundRefresh
 
     @Override
     public void onUIError(Throwable ex) {
-        CommonUiUtils.notify(ex);        
+        log.error("", ex);
+        CommonUiUtils.notifyError();        
     }
 
     protected void refresh() {
@@ -132,10 +131,6 @@ public class AboutPanel extends AbstractAdminPanel implements IBackgroundRefresh
         itemList.add(new String[] { "Heap Size", Long.toString(Runtime.getRuntime().maxMemory()) });
         itemList.add(new String[] { "Last Restart", CommonUiUtils.formatDateTime(AgentManager.lastRestartTime) });
         grid.setItems(itemList);
-    }
-
-    @Override
-    public void enter(ViewChangeEvent event) {
     }
 
 }

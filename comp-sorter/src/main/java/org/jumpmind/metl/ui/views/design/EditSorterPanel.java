@@ -40,16 +40,16 @@ import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.Sorter;
 import org.jumpmind.metl.ui.common.ButtonBar;
 
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.data.HasValue.ValueChangeListener;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.SelectionMode;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.textfield.TextField;
 
 @SuppressWarnings("serial")
 public class EditSorterPanel extends AbstractComponentEditPanel {
@@ -67,32 +67,32 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
 
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
-        addComponent(buttonBar);
+        add(buttonBar);
 
-        Button moveUpButton = buttonBar.addButton("Move Up", VaadinIcons.ARROW_UP);
+        Button moveUpButton = buttonBar.addButton("Move Up", VaadinIcon.ARROW_UP);
         moveUpButton.addClickListener(new MoveUpClickListener());
 
-        Button moveDownButton = buttonBar.addButton("Move Down", VaadinIcons.ARROW_DOWN);
+        Button moveDownButton = buttonBar.addButton("Move Down", VaadinIcon.ARROW_DOWN);
         moveDownButton.addClickListener(new MoveDownClickListener());
 
-        Button moveTopButton = buttonBar.addButton("Move Top", VaadinIcons.ANGLE_DOUBLE_UP);
+        Button moveTopButton = buttonBar.addButton("Move Top", VaadinIcon.ANGLE_DOUBLE_UP);
         moveTopButton.addClickListener(new MoveTopClickListener());
 
-        Button moveBottomButton = buttonBar.addButton("Move Bottom", VaadinIcons.ANGLE_DOUBLE_DOWN);
+        Button moveBottomButton = buttonBar.addButton("Move Bottom", VaadinIcon.ANGLE_DOUBLE_DOWN);
         moveBottomButton.addClickListener(new MoveBottomClickListener());
         
         filterTextField = buttonBar.addFilter();
         filterTextField.addValueChangeListener(event -> updateGrid(event.getValue()));
 
         grid.setSizeFull();
-        grid.addColumn(RecordFormat::getEntityName).setCaption("Entity Name").setSortable(false);
-        grid.addColumn(RecordFormat::getAttributeName).setCaption("Attribute Name").setSortable(false);
-        grid.addColumn(RecordFormat::getOrdinalSetting).setCaption("Sort Order").setSortable(false);
-        grid.addComponentColumn(setting -> createAttributeCheckBox(setting, Sorter.ATTRIBUTE_SORTER_ENABLED))
-                .setCaption("Sort").setSortable(false);
+        grid.addColumn(RecordFormat::getEntityName).setHeader("Entity Name").setSortable(false);
+        grid.addColumn(RecordFormat::getAttributeName).setHeader("Attribute Name").setSortable(false);
+        grid.addColumn(RecordFormat::getOrdinalSetting).setHeader("Sort Order").setSortable(false);
+        grid.addComponentColumn(setting -> createAttributeCheckbox(setting, Sorter.ATTRIBUTE_SORTER_ENABLED))
+                .setHeader("Sort").setSortable(false);
         grid.setSelectionMode(SelectionMode.MULTI);
-        addComponent(grid);
-        setExpandRatio(grid, 1.0f);
+        add(grid);
+        expand(grid);
 
         updateGrid(null);
         
@@ -267,8 +267,8 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
     	}
     }
 
-    class MoveUpClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class MoveUpClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
         	Set<RecordFormat> selectedSortRecords = new HashSet<RecordFormat>();
         	int previousEntityLastIndex = -1;
         	String selectedEntityId = "";
@@ -308,8 +308,8 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
         }
     }
 
-    class MoveDownClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class MoveDownClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
         	Set<RecordFormat> selectedSortRecords = new HashSet<RecordFormat>();
         	int nextEntityFirstIndex = -1;
         	String selectedEntityId = "";
@@ -363,8 +363,8 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
         }
     }
 
-    class MoveTopClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class MoveTopClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
         	Set<RecordFormat> selectedSortRecords = new HashSet<RecordFormat>();
         	int previousEntityLastIndex = -1;
         	String selectedEntityId = "";
@@ -404,8 +404,8 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
         }
     }
 
-    class MoveBottomClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class MoveBottomClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
         	Set<RecordFormat> selectedSortRecords = new HashSet<RecordFormat>();
         	int nextEntityFirstIndex = -1;
         	String selectedEntityId = "";
@@ -455,12 +455,12 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
         }
     }
 
-    protected CheckBox createAttributeCheckBox(final RecordFormat record, final String key) {
-        final CheckBox checkBox = new CheckBox();
-        checkBox.addValueChangeListener(new ValueChangeListener<Boolean>() {
+    protected Checkbox createAttributeCheckbox(final RecordFormat record, final String key) {
+        final Checkbox checkbox = new Checkbox();
+        checkbox.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<Boolean>>() {
             private static final long serialVersionUID = 1L;
             @Override
-            public void valueChange(ValueChangeEvent<Boolean> event) {
+            public void valueChanged(ValueChangeEvent<Boolean> event) {
                 ComponentAttribSetting setting = component.getSingleAttributeSetting(record.getAttributeId(), key);
 
                 String oldValue = setting == null ? Boolean.FALSE.toString() : setting.getValue();
@@ -468,7 +468,7 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
                     setting = new ComponentAttribSetting(record.getAttributeId(), component.getId(), key, Boolean.FALSE.toString());
                     component.addAttributeSetting(setting);
                 }
-                setting.setValue(checkBox.getValue().toString());
+                setting.setValue(checkbox.getValue().toString());
                 if (!oldValue.equals(setting.getValue())) {
                     context.getConfigurationService().save(setting);   
                     Set<RecordFormat> attributes = new HashSet<>();
@@ -486,7 +486,7 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
                 saveSortSettings();
             }
         });
-        return checkBox;
+        return checkbox;
     }
 
     public class RecordFormat {

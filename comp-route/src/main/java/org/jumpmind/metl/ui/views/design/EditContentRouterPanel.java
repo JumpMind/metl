@@ -35,13 +35,14 @@ import org.jumpmind.metl.ui.common.ButtonBar;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.components.grid.SingleSelectionModel;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.editor.Editor;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 @SuppressWarnings("serial")
 public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPanel {
@@ -57,17 +58,17 @@ public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPa
     protected void buildUI() {
         if (!readOnly) {
             ButtonBar buttonBar = new ButtonBar();
-            addComponent(buttonBar);
+            add(buttonBar);
 
-            addButton = buttonBar.addButton("Add", VaadinIcons.PLUS);
+            addButton = buttonBar.addButton("Add", VaadinIcon.PLUS);
             addButton.addClickListener((event) -> {
                 routeList.add(new Route());
                 grid.setItems(routeList);
             });
 
-            removeButton = buttonBar.addButton("Remove", VaadinIcons.TRASH);
+            removeButton = buttonBar.addButton("Remove", VaadinIcon.TRASH);
             removeButton.addClickListener((event) -> {
-                Route selected = ((SingleSelectionModel<Route>) grid.getSelectionModel()).getSelectedItem().orElse(null);
+                Route selected = grid.getSelectionModel().getFirstSelectedItem().orElse(null);
                 if (selected != null) {
                     routeList.remove(selected);
                     save();
@@ -77,12 +78,16 @@ public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPa
             final TextField textField = new TextField();
             textField.setValueChangeMode(ValueChangeMode.LAZY);
             textField.setValueChangeTimeout(200);
-            textField.setWidth(100, Unit.PERCENTAGE);
-            grid.addColumn(Route::getMatchExpression).setEditorComponent(textField, Route::setMatchExpression)
-                    .setCaption("Expression").setSortable(false);
+            textField.setWidthFull();
+            Editor<Route> editor = grid.getEditor();
+            Binder<Route> binder = new Binder<Route>();
+            editor.setBinder(binder);
+            binder.forField(textField).bind(Route::getMatchExpression, Route::setMatchExpression);
+            grid.addColumn(Route::getMatchExpression).setEditorComponent(textField).setHeader("Expression")
+                    .setSortable(false);
             
             final ComboBox<FlowStep> combo = new ComboBox<FlowStep>();
-            combo.setWidth(100, Unit.PERCENTAGE);
+            combo.setWidthFull();
             flow = context.getConfigurationService().findFlow(flow.getId());
             List<FlowStep> comboStepList = new ArrayList<FlowStep>();
             List<FlowStepLink> stepLinks = flow.findFlowStepLinksWithSource(flowStep.getId());
@@ -91,22 +96,30 @@ public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPa
                 comboStepList.add(comboStep);
             }
             combo.setItems(comboStepList);
-            combo.setItemCaptionGenerator(item -> item.getName());
-            combo.setEmptySelectionAllowed(false);
-            grid.addColumn(Route::getTargetStepId).setCaption("Target Step").setSortable(false);
+            combo.setValue(comboStepList.iterator().next());
+            combo.setItemLabelGenerator(item -> item.getName());
+            combo.addValueChangeListener(event -> {
+                if (event.getValue() == null) {
+                    combo.setValue(event.getOldValue());
+                }
+            });
+            binder.forField(combo).bind(route -> flow.findFlowStepWithId(route.getTargetStepId()),
+                    (route, step) -> route.setTargetStepId(step.getId()));
+            grid.addColumn(Route::getTargetStepId).setEditorComponent(combo).setHeader("Target Step").setSortable(false);
             
-            grid.getEditor().setEnabled(true).addSaveListener(event -> save());
+            editor.addSaveListener(event -> save());
+            grid.addItemDoubleClickListener(event -> editor.editItem(event.getItem()));
             
             grid.addSelectionListener((event) -> removeButton.setEnabled(!event.getAllSelectedItems().isEmpty()));
         } else {
-            grid.addColumn(Route::getMatchExpression).setCaption("Expression").setSortable(false);
-            grid.addColumn(Route::getTargetStepId).setCaption("Target Step").setSortable(false);
+            grid.addColumn(Route::getMatchExpression).setHeader("Expression").setSortable(false);
+            grid.addColumn(Route::getTargetStepId).setHeader("Target Step").setSortable(false);
         }
 
         grid.setSizeFull(); 
 
-        addComponent(grid);
-        setExpandRatio(grid, 1.0f);
+        add(grid);
+        expand(grid);
 
 
     }    

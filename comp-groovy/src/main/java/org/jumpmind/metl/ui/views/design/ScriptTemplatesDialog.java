@@ -31,20 +31,21 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
-import org.jumpmind.vaadin.ui.common.ResizableWindow;
+import org.jumpmind.vaadin.ui.common.ResizableDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.vaadin.aceeditor.AceEditor;
-import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 
-class ScriptTemplatesDialog extends ResizableWindow {
+import de.f0rce.ace.AceEditor;
+import de.f0rce.ace.enums.AceMode;
+
+class ScriptTemplatesDialog extends ResizableDialog {
 
     private static final long serialVersionUID = 1L;
     
@@ -67,11 +68,10 @@ class ScriptTemplatesDialog extends ResizableWindow {
         this.component = component;
 
         ButtonBar buttonBar = new ButtonBar();
-        addComponent(buttonBar);
+        add(buttonBar);
 
         ComboBox<Template> templates = new ComboBox<Template>();
-        templates.setWidth(400, Unit.PIXELS);
-        templates.setEmptySelectionAllowed(false);
+        templates.setWidth("400px");
         buttonBar.addLeft(templates);
 
         Template currentValue = null;
@@ -92,13 +92,18 @@ class ScriptTemplatesDialog extends ResizableWindow {
             logger.error("", e);
         }
 
-        templates.addValueChangeListener(
-                (e) -> editor.setValue(e.getValue().script));
+        templates.addValueChangeListener(event -> {
+            if (event.getValue() != null) {
+                editor.setValue(event.getValue().script);
+            } else {
+                templates.setValue(event.getOldValue());
+            }
+        });
 
         editor = CommonUiUtils.createAceEditor();
         editor.setSizeFull();
         editor.setMode(AceMode.java);
-        addComponent(editor, 1);
+        add(editor, 1);
 
         if (currentValue != null) {
         	templates.setValue(currentValue);
@@ -108,10 +113,10 @@ class ScriptTemplatesDialog extends ResizableWindow {
                 e -> notifyApplyTemplate((Template) templates.getValue()));
 
         Button closeButton = new Button("Close");
-        closeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         closeButton.addClickListener((e) -> close());
 
-        addComponent(buildButtonFooter(applyButton, closeButton));
+        add(buildButtonFooter(applyButton, closeButton));
 
     }
 

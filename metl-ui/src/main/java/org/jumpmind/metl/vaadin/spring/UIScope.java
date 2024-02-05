@@ -1,9 +1,11 @@
 /* adapted for Vaadin 8 from com.cybercom:spring-ui-scope:0.0.2 */
 package org.jumpmind.metl.vaadin.spring;
 
-import com.vaadin.server.ClientConnector;
-import com.vaadin.shared.Registration;
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.shared.Registration;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -14,7 +16,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.Scope;
 
 /* this is a stop-gap measure; not intended to exist beyond upgrade activities */
-public class UIScope implements Scope, ClientConnector.DetachListener, BeanFactoryPostProcessor {
+public class UIScope implements Scope, ComponentEventListener<DetachEvent>, BeanFactoryPostProcessor {
 	private static final long serialVersionUID = 1L;
 
 	private static final Object MUTEX = new Object();
@@ -109,7 +111,7 @@ public class UIScope implements Scope, ClientConnector.DetachListener, BeanFacto
     }
 
     @Override
-    public void detach(final ClientConnector.DetachEvent event) {
+    public void onComponentEvent(final DetachEvent event) {
 	UI ui = (UI) event.getSource();
 	Integer uiId = ui.getUIId();
 

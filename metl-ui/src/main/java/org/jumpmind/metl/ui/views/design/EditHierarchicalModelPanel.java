@@ -36,30 +36,29 @@ import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.data.HasValue.ValueChangeListener;
-import com.vaadin.event.FieldEvents.BlurEvent;
-import com.vaadin.event.FieldEvents.BlurListener;
-import com.vaadin.event.ShortcutAction.KeyCode;
-import com.vaadin.event.ShortcutListener;
-import com.vaadin.event.selection.SelectionEvent;
-import com.vaadin.event.selection.SelectionListener;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.Registration;
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Grid.ItemClick;
-import com.vaadin.ui.Grid.SelectionMode;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.TreeGrid;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.components.grid.ItemClickListener;
+import com.vaadin.flow.component.BlurNotifier.BlurEvent;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.ShortcutRegistration;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.component.grid.ItemClickEvent;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.selection.SelectionEvent;
+import com.vaadin.flow.data.selection.SelectionListener;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 @SuppressWarnings("serial")
 public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPanel {
@@ -74,17 +73,15 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
 
     Set<ModelSchemaObject> lastEditItemIds = Collections.emptySet();
 
-    TableColumnSelectWindow tableColumnSelectWindow;
+    TableColumnSelectDialog tableColumnSelectDialog;
 
     Button addSchemaObjectButton;
 
     Button editButton;
 
     Button removeButton;
-
-    ShortcutListener enterKeyListener;
     
-    Registration enterKeyRegistration;
+    ShortcutRegistration enterKeyRegistration;
 
     boolean readOnly;
 
@@ -94,20 +91,19 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         this.readOnly = readOnly;
         context.getConfigurationService().refresh(model);
         ButtonBar buttonBar1 = new ButtonBar();
-        addComponent(buttonBar1);
+        add(buttonBar1);
         
-        addSchemaObjectButton = buttonBar1.addButton("Add SchemaObject", VaadinIcons.PLUS);
+        addSchemaObjectButton = buttonBar1.addButton("Add SchemaObject", VaadinIcon.PLUS);
         addSchemaObjectButton.addClickListener(new AddSchemaObjectClickListener());
         
-        editButton = buttonBar1.addButton("Edit", VaadinIcons.EDIT);
+        editButton = buttonBar1.addButton("Edit", VaadinIcon.EDIT);
         editButton.addClickListener(new EditClickListener());
         
-        removeButton = buttonBar1.addButton("Remove", VaadinIcons.TRASH);
+        removeButton = buttonBar1.addButton("Remove", VaadinIcon.TRASH);
         removeButton.addClickListener(new RemoveClickListener());
 
         treeGrid.setSizeFull();
-        //treeGrid.setCacheRate(100);
-        //treeGrid.setPageLength(100);
+        treeGrid.setPageSize(100);
         treeGrid.setSelectionMode(SelectionMode.MULTI);
         treeGrid.addColumn(obj -> {
             if (lastEditItemIds.contains(obj) && !readOnly) {
@@ -119,18 +115,16 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
                     obj.setName(newName);
                     EditHierarchicalModelPanel.this.context.getConfigurationService().save(obj);                            
                 });
-                t.setWidth(100, Unit.PERCENTAGE);
+                t.setWidthFull();
                 t.setValue(obj.getName());
                 t.focus();
-                t.selectAll();
-                t.setIcon(VaadinIcons.CUBE);
+                t.getElement().executeJs("this.inputElement.select()");
+                t.setPrefixComponent(new Icon(VaadinIcon.CUBE));
                 return t;
             } else {
-                Label label = new Label(obj.getName());
-                label.setIcon(VaadinIcons.CUBE);
-                return label;
+                return new HorizontalLayout(new Icon(VaadinIcon.CUBE), new Span(obj.getName()));
             }
-        }).setCaption("Name");
+        }).setHeader("Name");
 
         treeGrid.addColumn(obj -> {
             if (lastEditItemIds.contains(obj) && !readOnly) {
@@ -141,32 +135,35 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
                     obj.setDescription(trim(event.getValue()));
                     EditHierarchicalModelPanel.this.context.getConfigurationService().save(obj);
                 });
-                t.setWidth(100, Unit.PERCENTAGE);
+                t.setWidthFull();
                 t.setValue(obj.getDescription());
                 return t;
             } else {
                 return obj.getDescription();
             }
-        }).setCaption("Description");
+        }).setHeader("Description");
 
         treeGrid.addColumn(obj -> {
             if (lastEditItemIds.contains(obj) && !readOnly) {
                 final ComboBox<String> cbox = new ComboBox<String>();
-                cbox.setEmptySelectionAllowed(false);
                 List<String> dataTypeList = new ArrayList<String>();
                 for (HierarchicalDataType dataType : HierarchicalDataType.values()) {
                     dataTypeList.add(dataType.name());
                 }
                 cbox.setItems(dataTypeList);
                 cbox.setValue(obj.getType());
-                cbox.addValueChangeListener(new ValueChangeListener<String>() {
-                    public void valueChange(ValueChangeEvent<String> event) {
-                        obj.setType(cbox.getValue());
-                        EditHierarchicalModelPanel.this.context.getConfigurationService().save(obj);
+                cbox.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
+                    public void valueChanged(ValueChangeEvent<String> event) {
+                        if (event.getValue() != null) {
+                            obj.setType(cbox.getValue());
+                            EditHierarchicalModelPanel.this.context.getConfigurationService().save(obj);
+                        } else {
+                            cbox.setValue(event.getOldValue());
+                        }
                     }
                 });
-                cbox.addBlurListener(new BlurListener() {
-                    public void blur(BlurEvent event) {
+                cbox.addBlurListener(new ComponentEventListener<BlurEvent<ComboBox<String>>>() {
+                    public void onComponentEvent(BlurEvent<ComboBox<String>> event) {
                         List<ModelSchemaObject> items = getAllItems();
                         boolean found = false;
                         for (ModelSchemaObject item : items) {
@@ -184,7 +181,7 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
             } else {
                 return obj.getType();
             }
-        }).setCaption("Type");
+        }).setHeader("Type");
 
         treeGrid.addColumn(obj -> {
             if (lastEditItemIds.contains(obj) && !readOnly) {
@@ -195,36 +192,30 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
                     obj.setPattern(trim(event.getValue()));
                     EditHierarchicalModelPanel.this.context.getConfigurationService().save(obj);
                 });
-                t.setWidth(100, Unit.PERCENTAGE);
+                t.setWidthFull();
                 t.setValue(obj.getPattern());
                 return t;
             } else {
                 return obj.getPattern();
             }
-        }).setCaption("Pattern");
+        }).setHeader("Pattern");
         
         treeGrid.addItemClickListener(new TreeGridItemClickListener());
         treeGrid.addSelectionListener(new TreeGridSelectionListener());
-        enterKeyListener = new ShortcutListener("Enter", KeyCode.ENTER, null) {
-            public void handleAction(Object sender, Object target) {
-                lastEditItemIds = Collections.emptySet();
-                treeGrid.getDataProvider().refreshAll();
-            }
-        };
 
-        addComponent(treeGrid);
-        setExpandRatio(treeGrid, 1.0f);
+        add(treeGrid);
+        expand(treeGrid);
 
         HorizontalLayout hlayout = new HorizontalLayout();
-        addComponent(hlayout);
+        add(hlayout);
 
         addAll(model);
 
         setButtonsEnabled();
 
-        grid.addColumn(Record::getName).setCaption("Name");
-        grid.addColumn(Record::getDescription).setCaption("Description");
-        grid.addColumn(Record::getType).setCaption("Type");
+        grid.addColumn(Record::getName).setHeader("Name");
+        grid.addColumn(Record::getDescription).setHeader("Description");
+        grid.addColumn(Record::getType).setHeader("Type");
 
         expandAll(null);
     }
@@ -287,7 +278,10 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
 
     @Override
     public void selected() {
-        enterKeyRegistration = treeGrid.addShortcutListener(enterKeyListener);
+        enterKeyRegistration = UI.getCurrent().addShortcutListener(() -> {
+            lastEditItemIds = Collections.emptySet();
+            treeGrid.getDataProvider().refreshAll();
+        }, Key.ENTER);
     }
 
     @Override
@@ -335,8 +329,8 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         grid.getDataProvider().refreshAll();
     }
 
-    class AddSchemaObjectClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class AddSchemaObjectClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
         		
             Set<ModelSchemaObject> selectedIds = getSelectedItems();
             if (selectedIds.size() > 1) {
@@ -374,14 +368,14 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         }
     }
 
-    class EditClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class EditClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             editSelectedItem();
         }
     }
 
-    class RemoveClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class RemoveClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
 
             Set<ModelSchemaObject> selectedItems = getSelectedItems();
             ConfirmDialog.show("Delete?",
@@ -398,11 +392,11 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         }
     }
 
-    class TreeGridItemClickListener implements ItemClickListener<ModelSchemaObject> {
+    class TreeGridItemClickListener implements ComponentEventListener<ItemClickEvent<ModelSchemaObject>> {
         long lastClick;
 
-        public void itemClick(ItemClick<ModelSchemaObject> event) {
-            if (event.getMouseEventDetails().isDoubleClick()) {
+        public void onComponentEvent(ItemClickEvent<ModelSchemaObject> event) {
+            if (event.getClickCount() == 2) {
                 editSelectedItem();
             } else if (System.currentTimeMillis() - lastClick > 1000
                     && getSelectedItems().size() > 0) {
@@ -412,8 +406,8 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         }
     }
 
-    class TreeGridSelectionListener implements SelectionListener<ModelSchemaObject> {
-        public void selectionChange(SelectionEvent<ModelSchemaObject> event) {
+    class TreeGridSelectionListener implements SelectionListener<Grid<ModelSchemaObject>, ModelSchemaObject> {
+        public void selectionChange(SelectionEvent<Grid<ModelSchemaObject>, ModelSchemaObject> event) {
             lastEditItemIds = Collections.emptySet();
             treeGrid.getDataProvider().refreshAll();
             setButtonsEnabled();

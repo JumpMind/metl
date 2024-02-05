@@ -40,19 +40,23 @@ import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.ExportDialog;
 import org.jumpmind.metl.ui.common.UiUtils;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
-import org.jumpmind.vaadin.ui.common.ResizableWindow;
-import org.vaadin.aceeditor.AceEditor;
-import org.vaadin.aceeditor.AceMode;
+import org.jumpmind.vaadin.ui.common.ResizableDialog;
 
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.data.HasValue.ValueChangeListener;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.editor.Editor;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
+
+import de.f0rce.ace.AceEditor;
+import de.f0rce.ace.enums.AceMode;
 
 @SuppressWarnings("serial")
 public class EditTransformerPanel extends AbstractComponentEditPanel {
@@ -73,7 +77,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
 
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
-        addComponent(buttonBar);
+        add(buttonBar);
 
         filterPopField = new ComboBox<String>();
         List<String> itemList = new ArrayList<String>();
@@ -86,18 +90,21 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             }
         }
         filterPopField.setItems(itemList);
-        filterPopField.setEmptySelectionAllowed(false);
-        filterPopField.setWidth(20, Unit.EM);
+        filterPopField.setWidth("20em");
         filterPopField.setValue(SHOW_ALL);
         filterPopField.addValueChangeListener(event ->  {
-            if (isNotBlank(filterField.getValue())) {
-                filterField.clear();
+            if (event.getValue() != null) {
+                if (isNotBlank(filterField.getValue())) {
+                    filterField.clear();
+                }
+                updateGrid();
+            } else {
+                filterPopField.setValue(event.getOldValue());
             }
-            updateGrid();
         });
         buttonBar.addLeft(filterPopField);
 
-        buttonBar.addButtonRight("Export", VaadinIcons.DOWNLOAD, (e) -> export());
+        buttonBar.addButtonRight("Export", VaadinIcon.DOWNLOAD, (e) -> export());
 
         filterField = buttonBar.addFilter();
         filterField.addValueChangeListener(event -> {
@@ -106,7 +113,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             updateGrid(text);
         });
 
-        addComponent(buttonBar);
+        add(buttonBar);
 
         if (component.getInputModel() != null) {
 
@@ -155,50 +162,55 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
             ModelEntity entity = model.getEntityById(attribute.getEntityId());
             return UiUtils.getName(filterField.getValue(), entity.getName());
-        }).setCaption("Entity Name").setWidth(250).setSortable(true);
+        }).setHeader("Entity Name").setWidth("250px").setSortable(true);
         grid.addColumn(setting -> {
             RelationalModel model = (RelationalModel) component.getInputModel();
             ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
             return UiUtils.getName(filterField.getValue(), attribute.getName());
-        }).setCaption("Attribute Name").setWidth(250).setSortable(true);
+        }).setHeader("Attribute Name").setWidth("250px").setSortable(true);
         final ComboBox<String> combo = new ComboBox<String>();
-        combo.setWidth(100, Unit.PERCENTAGE);
+        combo.setWidthFull();
         List<String> functionList = new ArrayList<String>();
         String[] functions = ModelAttributeScriptHelper.getSignatures();
         for (String function : functions) {
             functionList.add(function);
         }
-        combo.setPageLength(functions.length > 20 ? 20 : functions.length);
+        combo.setPageSize(functions.length > 20 ? 20 : functions.length);
         for (ComponentAttribSetting setting : componentAttributes) {
             if (setting.getValue() != null && !functionList.contains(setting.getValue())) {
                 functionList.add(setting.getValue());
             }
         }
         combo.setItems(functionList);
-        combo.setNewItemProvider(newItem -> {
-            functionList.add(newItem);
+        combo.setAllowCustomValue(true);
+        combo.addCustomValueSetListener(event -> {
+            functionList.add(event.getDetail());
             combo.setItems(functionList);
-            combo.setValue(newItem);
-            return Optional.of(newItem);
+            combo.setValue(event.getDetail());
         });
-        grid.addColumn(ComponentAttribSetting::getValue).setEditorComponent(combo, ComponentAttribSetting::setValue)
-                .setCaption("Transform").setExpandRatio(1).setSortable(true);
+        Editor<ComponentAttribSetting> editor = grid.getEditor();
+        Binder<ComponentAttribSetting> binder = new Binder<ComponentAttribSetting>();
+        editor.setBinder(binder);
+        binder.forField(combo).bind(ComponentAttribSetting::getValue, ComponentAttribSetting::setValue);
+        grid.addColumn(ComponentAttribSetting::getValue).setEditorComponent(combo)
+                .setHeader("Transform").setFlexGrow(1).setSortable(true);
         grid.addComponentColumn(setting -> {
             Button button = new Button();
-            button.setIcon(VaadinIcons.COG);
-            button.addClickListener((event) -> new EditTransformWindow(setting).showAtSize(.75));
+            button.setIcon(new Icon(VaadinIcon.COG));
+            button.addClickListener((event) -> new EditTransformDialog(setting).showAtSize(.75));
             return button;
-        }).setCaption("Edit").setSortable(false);
+        }).setHeader("Edit").setSortable(false);
         
-        grid.getEditor().setEnabled(true).addSaveListener(event -> context.getConfigurationService().save(event.getBean()));
-        addComponent(grid);
-        setExpandRatio(grid, 1.0f);
+        editor.addSaveListener(event -> context.getConfigurationService().save(event.getItem()));
+        grid.addItemDoubleClickListener(event -> editor.editItem(event.getItem()));
+        add(grid);
+        expand(grid);
 
         updateGrid(null);
 
-        exportGrid.addColumn(Record::getEntityName).setCaption("Entity Name");
-        exportGrid.addColumn(Record::getAttributeName).setCaption("Attribute Name");
-        exportGrid.addColumn(Record::getValue).setCaption("Transform");
+        exportGrid.addColumn(Record::getEntityName).setHeader("Entity Name");
+        exportGrid.addColumn(Record::getAttributeName).setHeader("Attribute Name");
+        exportGrid.addColumn(Record::getValue).setHeader("Transform");
     }
     
     protected void removeDeadAttributeSettings() {
@@ -367,44 +379,49 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         }
     }
     
-    class EditTransformWindow extends ResizableWindow {
+    class EditTransformDialog extends ResizableDialog {
         private static final long serialVersionUID = 1L;
         
         AceEditor editor;
+        
+        int cursorPosition = 0;
 
-        public EditTransformWindow(ComponentAttribSetting setting) {
+        public EditTransformDialog(ComponentAttribSetting setting) {
             super("Transform");
-            setWidth(800f, Unit.PIXELS);
-            setHeight(600f, Unit.PIXELS);
-            content.setMargin(true);
+            setWidth("800px");
+            setHeight("600px");
+            innerContent.setMargin(true);
             
             ButtonBar buttonBar = new ButtonBar();
-            addComponent(buttonBar);
+            add(buttonBar);
             
             ComboBox<String> combo = new ComboBox<String>();
-            combo.setWidth(400, Unit.PIXELS);
+            combo.setWidth("400px");
             String[] functions = ModelAttributeScriptHelper.getSignatures();
             combo.setItems(functions);
             if (functions.length > 0) {
             	combo.setValue(functions[0]);
             }
-            combo.setEmptySelectionAllowed(false);
-            combo.setPageLength(functions.length > 20 ? 20 : functions.length);
+            combo.addValueChangeListener(event -> {
+                if (event.getValue() == null) {
+                    combo.setValue(event.getOldValue());
+                }
+            });
+            combo.setPageSize(functions.length > 20 ? 20 : functions.length);
             
             buttonBar.addLeft(combo);
 
-            buttonBar.addButton("Insert", VaadinIcons.SIGN_IN,
-                    new ClickListener() {
+            buttonBar.addButton("Insert", VaadinIcon.SIGN_IN,
+                    new ComponentEventListener<ClickEvent<Button>>() {
                             
                         @Override
-                        public void buttonClick(ClickEvent event) {
+                        public void onComponentEvent(ClickEvent<Button> event) {
                             String script  = (editor.getValue()==null) ? "" : editor.getValue();
                             StringBuilder builder = new StringBuilder(script);
                             String substring = (String) combo.getValue();
-                            int startPosition = editor.getCursorPosition();
-                            builder.insert(startPosition, substring);
+                            builder.insert(cursorPosition, substring);
                             editor.setValue(builder.toString());
-                            editor.setSelection(startPosition, startPosition + substring.length());
+                            editor.setSelection(cursorPosition, cursorPosition + substring.length());
                             // Manually save text since TextChangeListener is not firing.
                             setting.setValue(editor.getValue());
                             EditTransformerPanel.this.context.getConfigurationService()
@@ -416,10 +433,11 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             editor = CommonUiUtils.createAceEditor();
             editor.setMode(AceMode.java);
             
-            editor.addValueChangeListener(new ValueChangeListener<String>() {
+            editor.addSelectionChangeListener(event -> cursorPosition = event.getSelectionFrom());
+            editor.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
 
                 @Override
-                public void valueChange(ValueChangeEvent<String> event) {
+                public void valueChanged(ValueChangeEvent<String> event) {
                     setting.setValue(event.getValue());
                     EditTransformerPanel.this.context.getConfigurationService()
                             .save(setting);
@@ -427,10 +445,10 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             });
             editor.setValue(setting.getValue());
             
-            content.addComponent(editor);
-            content.setExpandRatio(editor, 1);
+            innerContent.add(editor);
+            innerContent.expand(editor);
             
-            addComponent(buildButtonFooter(buildCloseButton()));
+            add(buildButtonFooter(buildCloseButton()));
             
         }
         

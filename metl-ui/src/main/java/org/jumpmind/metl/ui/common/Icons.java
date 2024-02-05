@@ -20,85 +20,85 @@
  */
 package org.jumpmind.metl.ui.common;
 
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 
 final public class Icons {
 
     private Icons() {
     }
     
-    public static final VaadinIcons UPDATE = VaadinIcons.CLOCK;
+    public static final VaadinIcon UPDATE = VaadinIcon.CLOCK;
     
-    public static final VaadinIcons UPLOAD = VaadinIcons.UPLOAD;
+    public static final VaadinIcon UPLOAD = VaadinIcon.UPLOAD;
     
-    public static final VaadinIcons REFRESH = VaadinIcons.REFRESH;
+    public static final VaadinIcon REFRESH = VaadinIcon.REFRESH;
     
-    public static final VaadinIcons FOLDER_OPEN = VaadinIcons.FOLDER_OPEN;
+    public static final VaadinIcon FOLDER_OPEN = VaadinIcon.FOLDER_OPEN;
     
-    public static final VaadinIcons FOLDER_CLOSED = VaadinIcons.FOLDER;
+    public static final VaadinIcon FOLDER_CLOSED = VaadinIcon.FOLDER;
 
-    public static final VaadinIcons SEARCH = VaadinIcons.SEARCH;
+    public static final VaadinIcon SEARCH = VaadinIcon.SEARCH;
     
-    public static final VaadinIcons DELETE = VaadinIcons.TRASH;
+    public static final VaadinIcon DELETE = VaadinIcon.TRASH;
 
-    public static final VaadinIcons CANCEL = VaadinIcons.STOP;
+    public static final VaadinIcon CANCEL = VaadinIcon.STOP;
     
-    public static final VaadinIcons PROJECT = VaadinIcons.CUBES;
+    public static final VaadinIcon PROJECT = VaadinIcon.CUBES;
     
-    public static final VaadinIcons PROJECT_VERSION = VaadinIcons.CUBE;
+    public static final VaadinIcon PROJECT_VERSION = VaadinIcon.CUBE;
     
-    public static final VaadinIcons DEPENDENCY = VaadinIcons.ARROW_RIGHT;
+    public static final VaadinIcon DEPENDENCY = VaadinIcon.ARROW_RIGHT;
     
-    public static final VaadinIcons AGENT = VaadinIcons.CLOUD;
+    public static final VaadinIcon AGENT = VaadinIcon.CLOUD;
     
-    public static final VaadinIcons DEPLOYMENT = VaadinIcons.SUITCASE;
+    public static final VaadinIcon DEPLOYMENT = VaadinIcon.SUITCASE;
     
-    public static final VaadinIcons GENERAL_RESOURCE = VaadinIcons.LINK;
+    public static final VaadinIcon GENERAL_RESOURCE = VaadinIcon.LINK;
     
-    public static final VaadinIcons WEB = VaadinIcons.GLOBE;
+    public static final VaadinIcon WEB = VaadinIcon.GLOBE;
 
-    public static final VaadinIcons FLOW = VaadinIcons.CONNECT;
+    public static final VaadinIcon FLOW = VaadinIcon.CONNECT;
     
-    public static final VaadinIcons MODEL = VaadinIcons.SITEMAP;
+    public static final VaadinIcon MODEL = VaadinIcon.SITEMAP;
     
-    public static final VaadinIcons VERSION = VaadinIcons.FILE_TEXT;
+    public static final VaadinIcon VERSION = VaadinIcon.FILE_TEXT;
     
-    public static final VaadinIcons DATABASE = VaadinIcons.DATABASE;
+    public static final VaadinIcon DATABASE = VaadinIcon.DATABASE;
     
-    public static final VaadinIcons QUEUE = VaadinIcons.MENU;
+    public static final VaadinIcon QUEUE = VaadinIcon.MENU;
     
-    public static final VaadinIcons FILE_SYSTEM = VaadinIcons.COPY_O;
+    public static final VaadinIcon FILE_SYSTEM = VaadinIcon.COPY_O;
     
-    public static final VaadinIcons RUN = VaadinIcons.PLAY;
+    public static final VaadinIcon RUN = VaadinIcon.PLAY;
     
-    public static final VaadinIcons EXECUTION = VaadinIcons.ROCKET;
+    public static final VaadinIcon EXECUTION = VaadinIcon.ROCKET;
     
-    public static final VaadinIcons LOG = VaadinIcons.FILE_TEXT_O;
+    public static final VaadinIcon LOG = VaadinIcon.FILE_TEXT_O;
 
-    public static final VaadinIcons COMPONENT = VaadinIcons.PUZZLE_PIECE;
+    public static final VaadinIcon COMPONENT = VaadinIcon.PUZZLE_PIECE;
 
-    public static final VaadinIcons USER = VaadinIcons.USER;
+    public static final VaadinIcon USER = VaadinIcon.USER;
     
-    public static final VaadinIcons GROUP = VaadinIcons.USERS;
+    public static final VaadinIcon GROUP = VaadinIcon.USERS;
     
-    public static final VaadinIcons EMAIL = VaadinIcons.ENVELOPE_O;
+    public static final VaadinIcon EMAIL = VaadinIcon.ENVELOPE_O;
     
-    public static final VaadinIcons REST = VaadinIcons.WRENCH;
+    public static final VaadinIcon REST = VaadinIcon.WRENCH;
     
-    public static final VaadinIcons SETTINGS = VaadinIcons.COGS;
+    public static final VaadinIcon SETTINGS = VaadinIcon.COGS;
     
-    public static final VaadinIcons LOGGING = VaadinIcons.PENCIL;
+    public static final VaadinIcon LOGGING = VaadinIcon.PENCIL;
     
-    public static final VaadinIcons NOTIFICATION = VaadinIcons.COMMENT;
+    public static final VaadinIcon NOTIFICATION = VaadinIcon.COMMENT;
     
-    public static final VaadinIcons LIST = VaadinIcons.LIST;
+    public static final VaadinIcon LIST = VaadinIcon.LIST;
     
-    public static final VaadinIcons BOOK = VaadinIcons.BOOK;
+    public static final VaadinIcon BOOK = VaadinIcon.BOOK;
     
-    public static final VaadinIcons TAG = VaadinIcons.TAG;
+    public static final VaadinIcon TAG = VaadinIcon.TAG;
     
-    public static final VaadinIcons LOCK = VaadinIcons.LOCK;
+    public static final VaadinIcon LOCK = VaadinIcon.LOCK;
     
-    public static final VaadinIcons CLOUD = VaadinIcons.CLOUD;
+    public static final VaadinIcon CLOUD = VaadinIcon.CLOUD;
     
 }

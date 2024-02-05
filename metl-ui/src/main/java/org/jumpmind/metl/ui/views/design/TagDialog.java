@@ -28,43 +28,39 @@ import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.Tag;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
-import org.jumpmind.vaadin.ui.common.ResizableWindow;
+import org.jumpmind.vaadin.ui.common.ResizableDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.ui.CheckBoxGroup;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
-public class TagDialog  extends ResizableWindow {
+public class TagDialog  extends ResizableDialog {
 
     final Logger log = LoggerFactory.getLogger(getClass());
     private static final long serialVersionUID = 1L;
     private IConfigurationService configurationService;
-    private CheckBoxGroup<Tag> tagGroup;
+    private CheckboxGroup<Tag> tagGroup;
     private String entityId;
     private String entityType;
     
     public TagDialog(ApplicationContext context, Object selectedElement) {
         super("Tag Item");
         this.configurationService = context.getConfigurationService();
-        initWindow(selectedElement);
+        initDialog(selectedElement);
     }
     
-    private void initWindow(Object selectedItem) {
-        Panel tagPanel = new Panel("Select tags");
-        tagPanel.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
-        tagPanel.setSizeFull();
+    private void initDialog(Object selectedItem) {
+        H3 tagHeader = new H3("Select tags");
         VerticalLayout tagLayout = new VerticalLayout();
         tagLayout.setMargin(true);
+        tagLayout.setSizeFull();
         addTagObjects(tagLayout, selectedItem);
-        tagPanel.setContent(tagLayout);
-        addComponent(tagPanel, 1);        
-        addComponent(buildButtonFooter(buildCloseButton()));
-        setWidth(400, Unit.PIXELS);
-        setHeight(500, Unit.PIXELS);
+        add(tagHeader, tagLayout, buildButtonFooter(buildCloseButton()));        
+        setWidth("400px");
+        setHeight("500px");
     }
 
     public void addTagObjects(VerticalLayout tagLayout, Object selected) {
@@ -75,9 +71,10 @@ public class TagDialog  extends ResizableWindow {
         }
         List<EntityTag> entityTags = configurationService.findEntityTagsForEntity(entityId);
         List<Tag> tags = configurationService.findTags();
-        tagGroup = new CheckBoxGroup<Tag>("Tags");
-        tagGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
-        tagGroup.setItemCaptionGenerator(tag -> tag.getName());
+        tagGroup = new CheckboxGroup<Tag>();
+        tagGroup.setLabel("Tags");
+        tagGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        tagGroup.setItemLabelGenerator(tag -> tag.getName());
         tagGroup.setItems(tags);
         for (Tag tag : tags) {
             for (EntityTag entityTag:entityTags) {
@@ -88,7 +85,7 @@ public class TagDialog  extends ResizableWindow {
             }
         }
         tagGroup.addValueChangeListener(selectedItem -> updateAffectedObjects());      
-        tagLayout.addComponent(tagGroup);
+        tagLayout.add(tagGroup);
     }
 
     private void updateAffectedObjects() {
@@ -100,8 +97,7 @@ public class TagDialog  extends ResizableWindow {
     }
 
     public static void show(ApplicationContext context, Object selectedElement) {
-        TagDialog dialog = new TagDialog(context, selectedElement);
-        UI.getCurrent().addWindow(dialog);
+        new TagDialog(context, selectedElement).open();
     }
     
 }

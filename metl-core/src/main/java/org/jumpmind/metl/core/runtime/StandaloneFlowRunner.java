@@ -53,6 +53,7 @@ import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.persist.IImportExportService;
 import org.jumpmind.metl.core.persist.IOperationsService;
+import org.jumpmind.metl.core.persist.IPersistenceManager;
 import org.jumpmind.metl.core.persist.ImportExportService;
 import org.jumpmind.metl.core.persist.OperationsService;
 import org.jumpmind.metl.core.persist.PluginService;
@@ -67,7 +68,6 @@ import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.security.SecurityService;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.MockJdbcDriver;
-import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.properties.TypedProperties;
 import org.springframework.core.env.StandardEnvironment;
 
@@ -226,7 +226,7 @@ public class StandaloneFlowRunner {
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_USER, "jumpmind");
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_PASSWORD, "jumpmind");
         DataSource ds = BasicDataSourceFactory.create(properties);
-        return JdbcDatabasePlatformFactory.createNewPlatformInstance(ds, new SqlTemplateSettings(), false, false);
+        return JdbcDatabasePlatformFactory.getInstance().create(ds, new SqlTemplateSettings(), false, false);
     }
 
 }

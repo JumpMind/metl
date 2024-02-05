@@ -20,9 +20,9 @@
  */
 package org.jumpmind.metl.ui.common;
 
-import com.vaadin.navigator.View;
+import com.vaadin.flow.router.BeforeEnterObserver;
 
-public interface TopView extends View {
+public interface TopView extends BeforeEnterObserver, View {
 
     public boolean isAccessible();
 }

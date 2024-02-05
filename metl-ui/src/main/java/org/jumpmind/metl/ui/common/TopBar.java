@@ -22,7 +22,6 @@ package org.jumpmind.metl.ui.common;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,17 +31,22 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.Page;
-import com.vaadin.server.VaadinSession;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.MenuBar.Command;
-import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.page.Page;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
+import com.vaadin.flow.server.VaadinSession;
 
-public class TopBar extends HorizontalLayout implements ViewChangeListener {
+public class TopBar extends HorizontalLayout implements AfterNavigationObserver {
 
     private static final long serialVersionUID = 1L;
 
@@ -51,33 +55,33 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
     MenuBar menuBar;
 
     ViewManager viewManager;
+    
+    String defaultView;
 
     Map<String, MenuItem> viewToButtonMapping;
 
     ApplicationContext context;
 
-    List<MenuItem> categoryItems = new ArrayList<MenuBar.MenuItem>();
+    List<MenuItem> categoryItems = new ArrayList<MenuItem>();
 
     public TopBar(ViewManager vm, ApplicationContext context) {
-        setWidth(100, Unit.PERCENTAGE);
+        setWidthFull();
         this.context = context;
         this.viewManager = vm;
-        this.viewManager.addViewChangeListener(this);
 
         viewToButtonMapping = new HashMap<String, MenuItem>();
 
         menuBar = new MenuBar();
-        menuBar.setWidth(100, Unit.PERCENTAGE);
-        addComponent(menuBar);
-        setExpandRatio(menuBar, 1.0f);
+        menuBar.setWidthFull();
+        addAndExpand(menuBar);
 
         for (TopBarButton topBarButton : viewManager.getTopBarButtons()) {
-            addComponent(topBarButton);
+            add(topBarButton);
         }
 
-        Button logoutButton = new Button("Logout", VaadinIcons.SIGN_OUT);
+        Button logoutButton = new Button("Logout", new Icon(VaadinIcon.SIGN_OUT));
         logoutButton.addClickListener(event -> logout());
-        addComponent(logoutButton);
+        add(logoutButton);
 
         Map<Category, List<TopBarLink>> menuItemsByCategory = viewManager.getMenuItemsByCategory();
         Set<Category> categories = menuItemsByCategory.keySet();
@@ -87,7 +91,7 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
                 continue;
             }
             List<TopBarLink> links = menuItemsByCategory.get(category);
-            boolean needDefaultView = viewManager.getDefaultView() == null && links.size() > 0;
+            boolean needDefaultView = defaultView == null && links.size() > 0;
             MenuItem categoryItem = null;
             if (links.size() > 1) {
                 categoryItem = menuBar.addItem(category.name(), null);
@@ -95,64 +99,61 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
             }
 
             if (needDefaultView) {
-                viewManager.setDefaultView(links.get(0).id());
+                defaultView = links.get(0).id();
             }
 
             for (final TopBarLink menuLink : links) {
-                Command command = new Command() {
+                ComponentEventListener<ClickEvent<MenuItem>> command = new ComponentEventListener<ClickEvent<MenuItem>>() {
 
                     private static final long serialVersionUID = 1L;
 
                     @Override
-                    public void menuSelected(MenuItem selectedItem) {
-                        uncheckAll();
-                        selectedItem.setChecked(true);
-                        viewManager.navigateTo(menuLink.id());
+                    public void onComponentEvent(ClickEvent<MenuItem> event) {
+                        setMenuItemFocus(event.getSource());
+                        UI.getCurrent().navigate(((Component) menuLink).getClass());
                     }
                 };
                 MenuItem menuItem = null;
                 if (categoryItem == null) {
                     menuItem = menuBar.addItem(menuLink.name(), command);
                 } else {
-                    menuItem = categoryItem.addItem(menuLink.name(), command);
+                    menuItem = categoryItem.getSubMenu().addItem(menuLink.name(), command);
                 }
-                menuItem.setCheckable(true);
                 viewToButtonMapping.put(menuLink.id(), menuItem);
             }
         }
-        viewManager.navigateTo(Page.getCurrent().getUriFragment());
+        //UI.getCurrent().getPage().fetchCurrentURL(url -> viewManager.navigateTo(url.getRef()));
     }
 
     protected void logout() {
-        URI uri = Page.getCurrent().getLocation();
-        VaadinSession.getCurrent().close();
-        Page.getCurrent().setLocation(uri.getPath());
+        Page page = UI.getCurrent().getPage();
+        page.fetchCurrentURL(url -> {
+            VaadinSession.getCurrent().close();
+            page.setLocation(url.toString());
+        });
     }
-
-    protected void uncheckAll() {
-        for (MenuItem menuItem : categoryItems) {
-            menuItem.setChecked(false);
+    
+    protected void setMenuItemFocus(MenuItem focusItem) {
+        for (MenuItem item : categoryItems) {
+            item.getElement().getStyle().set("color", "var(--lumo-header-text-color)");
         }
-        for (MenuItem menuItem : viewToButtonMapping.values()) {
-            menuItem.setChecked(false);
+        for (MenuItem item : viewToButtonMapping.values()) {
+            item.getElement().getStyle().set("color", "var(--lumo-header-text-color)");
+        }
+        if (focusItem != null) {
+            focusItem.getElement().getStyle().set("color", "rgb(22, 118, 243)");
         }
     }
 
     @Override
-    public boolean beforeViewChange(final ViewChangeEvent event) {
-        return true;
-    }
-
-    @Override
-    public void afterViewChange(final ViewChangeEvent event) {
-        String view = event.getViewName();
+    public void afterNavigation(AfterNavigationEvent event) {
+        String view = event.getLocation().getFirstSegment();
         if (isBlank(view)) {
-            view = viewManager.getDefaultView();
+            view = defaultView;
         }
         MenuItem menuItem = viewToButtonMapping.get(view);
         if (menuItem != null) {
-            uncheckAll();
-            menuItem.setChecked(true);
+            setMenuItemFocus(menuItem);
         }
     }
 

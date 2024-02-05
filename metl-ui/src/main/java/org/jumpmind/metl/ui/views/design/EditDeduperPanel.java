@@ -36,19 +36,18 @@ import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.Deduper;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UiUtils;
-import org.jumpmind.vaadin.ui.common.ResizableWindow;
+import org.jumpmind.vaadin.ui.common.ResizableDialog;
 
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.data.HasValue.ValueChangeListener;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Grid.SelectionMode;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.components.grid.GridRowDragger;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.textfield.TextField;
 
 public class EditDeduperPanel extends AbstractComponentEditPanel {
 
@@ -64,7 +63,7 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
 
     Button editButton;
     
-    EditAttributesWindow attributeWindow;
+    EditAttributesDialog attributeDialog;
     
     Set<EntitySettings> selectedItemIds;
     
@@ -73,18 +72,18 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
     	buildEntityGrid();
     	fillEntityContainer();
         updateEntityGrid(null);
-        buildAttributeWindow();
+        buildAttributeDialog();
     }
 
     protected void buildButtonBar() {
         ButtonBar buttonBar = new ButtonBar();
-        addComponent(buttonBar);
-        editButton = buttonBar.addButton("Edit Columns", VaadinIcons.EDIT);
+        add(buttonBar);
+        editButton = buttonBar.addButton("Edit Columns", VaadinIcon.EDIT);
         editButton.addClickListener(new EditButtonClickListener());
         entityFilterField = buttonBar.addFilter();
         entityFilterField.addValueChangeListener(event -> updateEntityGrid(event.getValue()));
         
-        addComponent(buttonBar);    	
+        add(buttonBar);    	
     }
 
     protected Set<EntitySettings> getSelectedItems() {
@@ -99,13 +98,13 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
         return null;
     }
     
-    class EditButtonClickListener implements ClickListener {
+    class EditButtonClickListener implements ComponentEventListener<ClickEvent<Button>> {
         private static final long serialVersionUID = 1L;
-        public void buttonClick(ClickEvent event) {
+        public void onComponentEvent(ClickEvent<Button> event) {
             if (getSelectedItem() != null) {
             	refreshAttributeContainer((EntitySettings) getSelectedItem());
             	updateAttributeGrid();
-                attributeWindow.show();
+                attributeDialog.show();
             }
         }   
     }    
@@ -116,11 +115,11 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
             RelationalModel model = (RelationalModel) component.getInputModel();
             ModelEntity entity = model.getEntityById(setting.getEntityId());
             return UiUtils.getName(entityFilterField.getValue(), entity.getName());
-        }).setCaption("Entity Name").setWidth(250).setExpandRatio(1).setSortable(false);
+        }).setHeader("Entity Name").setWidth("250px").setFlexGrow(1).setSortable(false);
         entityGrid.setSelectionMode(SelectionMode.MULTI);
-        new GridRowDragger<EntitySettings>(entityGrid);
-        addComponent(entityGrid);        
-        setExpandRatio(entityGrid, 1.0f);
+        entityGrid.setRowsDraggable(true);
+        add(entityGrid);        
+        expand(entityGrid);
     }    
 
     protected void fillEntityContainer() {  	
@@ -190,21 +189,21 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
         }
     }
 
-    //attribute window and support
+    //attribute dialog and support
     
-    protected void buildAttributeWindow() {
-        attributeWindow = new EditAttributesWindow();
+    protected void buildAttributeDialog() {
+        attributeDialog = new EditAttributesDialog();
     }
     
-    class EditAttributesWindow extends ResizableWindow {
+    class EditAttributesDialog extends ResizableDialog {
         private static final long serialVersionUID = 1L;
-		public EditAttributesWindow() {
+		public EditAttributesDialog() {
 			super("Edit Columns to Dedupe on");
-			setWidth(800f, Unit.PIXELS);
-			setHeight(600f, Unit.PIXELS);
-			content.setMargin(true);
+			setWidth("800px");
+			setHeight("600px");
+			innerContent.setMargin(true);
 			buildAttributeGrid();
-			addComponent(buildButtonFooter(buildCloseButton()));
+			add(buildButtonFooter(buildCloseButton()));
 		}
     	
         private void buildAttributeGrid() {
@@ -214,10 +213,10 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
                RelationalModel model = (RelationalModel) component.getInputModel();
                ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
                return UiUtils.getName(entityFilterField.getValue(), attribute.getName());
-     	   }).setCaption("Attribute Name").setWidth(250).setExpandRatio(1).setSortable(false);
-           attributeGrid.addComponentColumn(setting -> createAttributeCheckBox(setting, Deduper.ATTRIBUTE_DEDUPE_ENABLED))
-                   .setCaption("Dedupe Enabled").setSortable(false);
-           addComponent(attributeGrid, 1);
+     	   }).setHeader("Attribute Name").setWidth("250px").setFlexGrow(1).setSortable(false);
+           attributeGrid.addComponentColumn(setting -> createAttributeCheckbox(setting, Deduper.ATTRIBUTE_DEDUPE_ENABLED))
+                   .setHeader("Dedupe Enabled").setSortable(false);
+           this.addComponentAtIndex(1, attributeGrid);
             
         }
     }
@@ -238,12 +237,12 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
         attributeGrid.setItems(attributeSettings);
     }    
     
-    protected CheckBox createAttributeCheckBox(final AttributeSettings settings, final String key) {
-        final CheckBox checkBox = new CheckBox();
-        checkBox.addValueChangeListener(new ValueChangeListener<Boolean>() {
+    protected Checkbox createAttributeCheckbox(final AttributeSettings settings, final String key) {
+        final Checkbox checkbox = new Checkbox();
+        checkbox.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<Boolean>>() {
             private static final long serialVersionUID = 1L;
             @Override
-            public void valueChange(ValueChangeEvent<Boolean> event) {
+            public void valueChanged(ValueChangeEvent<Boolean> event) {
                 ComponentAttribSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(), key);
 
                 String oldValue = setting == null ? Boolean.FALSE.toString() : setting.getValue();
@@ -251,14 +250,14 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
                     setting = new ComponentAttribSetting(settings.getAttributeId(), component.getId(), key, Boolean.TRUE.toString());
                     component.addAttributeSetting(setting);
                 }
-                setting.setValue(checkBox.getValue().toString());
+                setting.setValue(checkbox.getValue().toString());
                 if (!oldValue.equals(setting.getValue())) {
                     context.getConfigurationService().save(setting);
                 }
             }
         });
-        checkBox.setReadOnly(readOnly);
-        return checkBox;
+        checkbox.setReadOnly(readOnly);
+        return checkbox;
     }
     
     public static class AttributeSettings implements Serializable {

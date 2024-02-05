@@ -29,7 +29,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
@@ -37,25 +36,25 @@ import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.ui.common.ApplicationContext;
-import org.jumpmind.vaadin.ui.common.ResizableWindow;
+import org.jumpmind.vaadin.ui.common.ResizableDialog;
+import org.jumpmind.vaadin.ui.common.TabSheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.AbstractLayout;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.NativeSelect;
-import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.Upload;
-import com.vaadin.ui.Upload.Receiver;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.listbox.ListBox;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.upload.Receiver;
+import com.vaadin.flow.component.upload.Upload;
 
-public class PluginsPanelAddDialog extends ResizableWindow {
+public class PluginsPanelAddDialog extends ResizableDialog {
 
     private static final long serialVersionUID = 1L;
 
@@ -77,7 +76,9 @@ public class PluginsPanelAddDialog extends ResizableWindow {
 
     String handEnteredName;
 
-    private NativeSelect<String> versionSelect;
+    private ListBox<String> versionSelect;
+    
+    private boolean allowEmptyVersionSelection = true;
 
     private ComboBox<String> groupCombo;
 
@@ -103,19 +104,18 @@ public class PluginsPanelAddDialog extends ResizableWindow {
 
         TabSheet tabSheet = new TabSheet();
 
-        AbstractLayout searchLayout = buildSearchLayout();
-        tabSheet.addTab(searchLayout, "Search For New Versions");
+        FormLayout searchLayout = buildSearchLayout();
+        tabSheet.add(searchLayout, "Search For New Versions");
 
-        AbstractLayout uploadLayout = buildUploadLayout();
-        tabSheet.addTab(uploadLayout, "Upload");
+        FormLayout uploadLayout = buildUploadLayout();
+        tabSheet.add(uploadLayout, "Upload");
 
         searchButton = new Button("Search", e -> search());
         searchButton.setEnabled(false);
 
         uploadHandler = new UploadHandler();
-        uploadButton = new Upload(null, uploadHandler);
+        uploadButton = new Upload(uploadHandler);
         uploadButton.setVisible(false);
-        uploadButton.setButtonCaption("Upload");
         uploadButton.addFinishedListener(e -> finishedUpload());
 
         tabSheet.addSelectedTabChangeListener(e -> {
@@ -124,7 +124,7 @@ public class PluginsPanelAddDialog extends ResizableWindow {
             uploadButton.setVisible(!searchSelected);
         });
 
-        addComponent(tabSheet, 1);
+        add(tabSheet, 1);
         tabSheet.setSelectedTab(0);
 
         cancelButton = new Button("Cancel");
@@ -132,15 +132,15 @@ public class PluginsPanelAddDialog extends ResizableWindow {
 
         addButton = new Button("Add");
         addButton.setEnabled(false);
-        addButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         addButton.addClickListener(e -> addPlugin());
 
-        addComponent(buildButtonFooter(uploadButton, searchButton, cancelButton, addButton));
+        add(buildButtonFooter(uploadButton, searchButton, cancelButton, addButton));
 
         cancelButton.focus();
 
-        setWidth(550, Unit.PIXELS);
-        setHeight(300, Unit.PIXELS);
+        setWidth("550px");
+        setHeight("300px");
     }
 
     protected void addPlugin() {
@@ -171,9 +171,8 @@ public class PluginsPanelAddDialog extends ResizableWindow {
         }
     }
 
-    protected AbstractLayout buildSearchLayout() {
+    protected FormLayout buildSearchLayout() {
         FormLayout layout = new FormLayout();
-        layout.setMargin(true);
 
         List<Plugin> existingPlugins = context.getPluginService().findPlugins();
         Set<String> groups = new HashSet<>();
@@ -183,55 +182,61 @@ public class PluginsPanelAddDialog extends ResizableWindow {
             names.add(plugin.getArtifactName());
         }
 
-        versionSelect = new NativeSelect<String>("Versions");
+        versionSelect = new ListBox<String>();
         groupCombo = new ComboBox<String>("Group");
         nameCombo = new ComboBox<String>("Name");
 
-        versionSelect.setVisibleItemCount(4);
-        versionSelect.setEmptySelectionAllowed(false);
-        versionSelect.setWidth(100, Unit.PERCENTAGE);
-        versionSelect.addValueChangeListener(e -> versionSelected());
+        versionSelect.setHeight("144px");
+        //versionSelect.setVisibleItemCount(4);
+        versionSelect.setWidthFull();
+        versionSelect.addValueChangeListener(e -> versionSelected(e));
 
-        groupCombo.setWidth(100, Unit.PERCENTAGE);
+        groupCombo.setWidthFull();
         groupCombo.setItems(groups);
         groupCombo.addValueChangeListener(e -> {
             populateNameField(nameCombo);
             setSearchButtonEnabled();
         });
-        groupCombo.setNewItemProvider(newGroup -> {
+        groupCombo.setAllowCustomValue(true);
+        groupCombo.addCustomValueSetListener(event -> {
         	groups.remove(handEnteredGroup);
-        	handEnteredGroup = newGroup;
+        	handEnteredGroup = event.getDetail();
         	groups.add(handEnteredGroup);
         	groupCombo.setItems(groups);
         	groupCombo.setValue(handEnteredGroup);
         	setSearchButtonEnabled();
-        	return Optional.of(newGroup);
         });
-        layout.addComponent(groupCombo);
+        layout.add(groupCombo);
 
-        nameCombo.setWidth(100, Unit.PERCENTAGE);
+        nameCombo.setWidthFull();
         nameCombo.setItems(names);
         nameCombo.addValueChangeListener(e -> {
             setSearchButtonEnabled();
         });
-        nameCombo.setNewItemProvider(newName -> {
+        nameCombo.setAllowCustomValue(true);
+        nameCombo.addCustomValueSetListener(event -> {
         	names.remove(handEnteredName);
-        	handEnteredName = newName;
+        	handEnteredName = event.getDetail();
         	names.add(handEnteredName);
         	nameCombo.setItems(names);
         	nameCombo.setValue(handEnteredName);
         	setSearchButtonEnabled();
-        	return Optional.of(newName);
         });
-        layout.addComponent(nameCombo);
-
-        layout.addComponent(versionSelect);
+        layout.add(nameCombo);
+        layout.addFormItem(versionSelect, "Versions");
 
         return layout;
     }
 
-    protected void versionSelected() {
-        addButton.setEnabled(versionSelect.getValue() != null);
+    protected void versionSelected(ValueChangeEvent<String> event) {
+        if (event.getValue() != null) {
+            addButton.setEnabled(true);
+        } else {
+            addButton.setEnabled(false);
+            if (!allowEmptyVersionSelection && event.getOldValue() != null) {
+                versionSelect.setValue(event.getOldValue());
+            }
+        }
     }
 
     protected void search() {
@@ -244,10 +249,15 @@ public class PluginsPanelAddDialog extends ResizableWindow {
             }
         }
         versionSelect.setItems(versions);
+        if (!versions.isEmpty()) {
+            allowEmptyVersionSelection = false;
+            versionSelect.setValue(versions.iterator().next());
+        }
     }
 
     protected void setSearchButtonEnabled() {
         searchButton.setEnabled(nameCombo.getValue() != null && groupCombo.getValue() != null);
+        allowEmptyVersionSelection = true;
         versionSelect.setItems(new ArrayList<String>());
     }
 
@@ -255,43 +265,40 @@ public class PluginsPanelAddDialog extends ResizableWindow {
 
     }
 
-    protected AbstractLayout buildUploadLayout() {
+    protected FormLayout buildUploadLayout() {
         FormLayout layout = new FormLayout();
-        layout.setMargin(true);
 
         groupField = new TextField("Group");
-        groupField.setWidth(100, Unit.PERCENTAGE);
+        groupField.setWidthFull();
         groupField.setRequiredIndicatorVisible(true);
-        layout.addComponent(groupField);
+        layout.add(groupField);
 
         nameField = new TextField("Name");
-        nameField.setWidth(100, Unit.PERCENTAGE);
+        nameField.setWidthFull();
         nameField.setRequiredIndicatorVisible(true);
-        layout.addComponent(nameField);
+        layout.add(nameField);
 
         versionField = new TextField("Version");
-        versionField.setWidth(100, Unit.PERCENTAGE);
+        versionField.setWidthFull();
         versionField.setRequiredIndicatorVisible(true);
-        layout.addComponent(versionField);
+        layout.add(versionField);
 
         return layout;
     }
 
-    protected HorizontalLayout buildButtonFooter(AbstractComponent... toTheRightButtons) {
+    protected HorizontalLayout buildButtonFooter(Component... toTheRightButtons) {
         HorizontalLayout footer = new HorizontalLayout();
 
         footer.setWidth("100%");
         footer.setSpacing(true);
-        footer.addStyleName(ValoTheme.WINDOW_BOTTOM_TOOLBAR);
 
-        Label footerText = new Label("");
+        Span footerText = new Span("");
         footerText.setSizeUndefined();
 
-        footer.addComponents(footerText);
-        footer.setExpandRatio(footerText, 1);
+        footer.addAndExpand(footerText);
 
         if (toTheRightButtons != null) {
-            footer.addComponents(toTheRightButtons);
+            footer.add(toTheRightButtons);
         }
 
         return footer;

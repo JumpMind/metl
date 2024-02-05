@@ -30,23 +30,22 @@ import org.jumpmind.metl.core.util.MessageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.event.ShortcutAction.KeyCode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.ProgressBar;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Upload;
-import com.vaadin.ui.Upload.FinishedEvent;
-import com.vaadin.ui.Upload.Receiver;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.upload.FinishedEvent;
+import com.vaadin.flow.component.upload.Receiver;
+import com.vaadin.flow.component.upload.Upload;
 
-public class ImportDialog extends Window {
+public class ImportDialog extends Dialog {
 
     private static final long serialVersionUID = 1L;
     
@@ -63,52 +62,53 @@ public class ImportDialog extends Window {
     public ImportDialog(String caption, String text, IImportListener importListener) {
         this.importListener = importListener;
         
-        setCaption(caption);
         setModal(true);
         setResizable(true);
-        setWidth(305, Unit.PIXELS);
-        setClosable(false);
+        setWidth("305px");
+
+        Span header = new Span("<b>" + caption + "</b><hr>");
+        header.setWidthFull();
+        header.getStyle().set("margin", null);
+        add(header);
 
         VerticalLayout layout = new VerticalLayout();
-        layout.setWidth(100, Unit.PERCENTAGE);
+        layout.setWidthFull();
         layout.setMargin(true);
         layout.setSpacing(true);
-        setContent(layout);
+        add(layout);
 
         if (isNotBlank(text)) {
-            Label textLabel = new Label(text);
-            layout.addComponent(textLabel);
+            Span textSpan = new Span(text);
+            layout.add(textSpan);
         }
         
         importLayout = new HorizontalLayout();
-        importLayout.setWidth(100, Unit.PERCENTAGE);
+        importLayout.setWidthFull();
         
-        layout.addComponent(importLayout);
-        layout.setExpandRatio(importLayout, 1);
+        layout.add(importLayout);
+        layout.expand(importLayout);
 
         buttonLayout = new HorizontalLayout();
-        buttonLayout.setStyleName(ValoTheme.WINDOW_BOTTOM_TOOLBAR);
         buttonLayout.setSpacing(true);
-        buttonLayout.setWidth(100, Unit.PERCENTAGE);
+        buttonLayout.setWidthFull();
 
-        Label spacer = new Label(" ");
-        buttonLayout.addComponent(spacer);
-        buttonLayout.setExpandRatio(spacer, 1);       
+        Span spacer = new Span(" ");
+        buttonLayout.addAndExpand(spacer);    
 
         Button closeButton = new Button("Close");
-        closeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
-        closeButton.setClickShortcut(KeyCode.ESCAPE);
-        closeButton.addClickListener(new ClickListener() {
+        closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        closeButton.addClickShortcut(Key.ESCAPE);
+        closeButton.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public void buttonClick(ClickEvent event) {
-                UI.getCurrent().removeWindow(ImportDialog.this);
+            public void onComponentEvent(ClickEvent<Button> event) {
+                close();
             }
         });
-        buttonLayout.addComponent(closeButton);
+        buttonLayout.add(closeButton);
         
-        layout.addComponent(buttonLayout);
+        layout.add(buttonLayout);
         
         replaceUploadButton();
         
@@ -117,45 +117,43 @@ public class ImportDialog extends Window {
     
     protected void replaceUploadButton() {
         if (upload != null) {
-            buttonLayout.removeComponent(upload);
+            buttonLayout.remove(upload);
         }
         final UploadHandler handler = new UploadHandler();
-        upload = new Upload(null, handler);
-        upload.setButtonCaption("Upload");
-        upload.addFinishedListener(new Upload.FinishedListener() {
+        upload = new Upload(handler);
+        upload.addFinishedListener(new ComponentEventListener<FinishedEvent>() {
             private static final long serialVersionUID = 1L;
 
-            public void uploadFinished(FinishedEvent event) {
+            public void onComponentEvent(FinishedEvent event) {
                 try {
                     String content = handler.getContent();   
                     importListener.onFinished(content);
-                    importLayout.removeAllComponents();
-                    Label label = new Label("Import Succeeded!");
-                    label.setStyleName(ValoTheme.LABEL_SUCCESS);
-                    importLayout.addComponent(label);
-                    importLayout.setComponentAlignment(label, Alignment.MIDDLE_CENTER);
+                    importLayout.removeAll();
+                    Span span = new Span("Import Succeeded!");
+                    //span.setStyleName(ValoTheme.LABEL_SUCCESS);
+                    importLayout.add(span);
+                    importLayout.setVerticalComponentAlignment(Alignment.CENTER, span);
                 } catch (Exception e) {
                     log.error("Import failed", e);
-                    importLayout.removeAllComponents();
+                    importLayout.removeAll();
                     String message = "Import Failed! Please check log file for details.";
                     if (e instanceof MessageException) {
                         message = e.getMessage();
                     }
-                    Label label = new Label(message);
-                    label.setStyleName(ValoTheme.LABEL_FAILURE);
-                    importLayout.addComponent(label);
-                    importLayout.setComponentAlignment(label, Alignment.MIDDLE_CENTER);
+                    Span span = new Span(message);
+                    //span.setStyleName(ValoTheme.LABEL_FAILURE);
+                    importLayout.add(span);
+                    importLayout.setVerticalComponentAlignment(Alignment.CENTER, span);
                 }             
                 replaceUploadButton();
             }
         });
 
-        buttonLayout.addComponent(upload, 1);
+        buttonLayout.addComponentAtIndex(1, upload);
     }
 
     public static void show(String caption, String text, IImportListener listener) {
-        ImportDialog dialog = new ImportDialog(caption, text, listener);
-        UI.getCurrent().addWindow(dialog);
+        new ImportDialog(caption, text, listener).open();
     }
 
     public static interface IImportListener extends Serializable {
@@ -169,11 +167,11 @@ public class ImportDialog extends Window {
 
         @Override
         public OutputStream receiveUpload(String filename, String mimeType) {
-            importLayout.removeAllComponents();
+            importLayout.removeAll();
             ProgressBar bar = new ProgressBar();
             bar.setIndeterminate(true);
-            importLayout.addComponent(bar);
-            importLayout.setComponentAlignment(bar, Alignment.MIDDLE_CENTER);
+            importLayout.add(bar);
+            importLayout.setVerticalComponentAlignment(Alignment.CENTER, bar);
             return os;
         }       
 

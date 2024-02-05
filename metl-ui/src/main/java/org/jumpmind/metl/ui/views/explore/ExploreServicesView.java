@@ -25,21 +25,21 @@ import javax.annotation.PostConstruct;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.TopBarLink;
+import org.jumpmind.metl.ui.common.View;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.ExternalResource;
-import com.vaadin.server.Page;
-import com.vaadin.ui.BrowserFrame;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.IFrame;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.Route;
 
 @UiComponent
 @Scope("ui")
-@TopBarLink(id = "exploreServices", category = Category.Explore, menuOrder = 30, name = "Services", icon = VaadinIcons.GLOBE)
+@TopBarLink(id = "exploreServices", category = Category.Explore, menuOrder = 30, name = "Services", icon = VaadinIcon.GLOBE)
+@Route("exploreServices")
 public class ExploreServicesView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = 1L;
@@ -49,20 +49,17 @@ public class ExploreServicesView extends VerticalLayout implements View {
 
     public ExploreServicesView() {
         setSizeFull();
-        String url = Page.getCurrent()
-                .getLocation().getPath();
-        BrowserFrame e = new BrowserFrame(null, new ExternalResource(url.substring(0, url.lastIndexOf("/")) + "/ws-api.html"));
-        e.setSizeFull();
-        addComponent(e);
+        UI.getCurrent().getPage().fetchCurrentURL(url -> {
+            String urlString = url.toString();
+            IFrame e = new IFrame(urlString.substring(0, urlString.lastIndexOf("/")) + "/ws-api.html");
+            e.setSizeFull();
+            add(e);
+        });
         
     }
     
     @PostConstruct
     protected void init() {
-    }
-
-    @Override
-    public void enter(ViewChangeEvent event) {
     }
 
 

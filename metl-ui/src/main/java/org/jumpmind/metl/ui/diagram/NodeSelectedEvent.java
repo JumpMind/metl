@@ -23,17 +23,17 @@ package org.jumpmind.metl.ui.diagram;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Component.Event;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.html.Div;
 
-public class NodeSelectedEvent extends Event {
+public class NodeSelectedEvent extends ComponentEvent<Div> {
 
 	private static final long serialVersionUID = 1L;
 
 	List<String> nodeIds = new ArrayList<String>();
 
-	public NodeSelectedEvent(Component source, List<String> nodeIds) {
-		super(source);
+	public NodeSelectedEvent(Div source, List<String> nodeIds) {
+		super(source, false);
 		this.nodeIds = nodeIds;
 	}
 

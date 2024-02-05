@@ -20,10 +20,10 @@
  */
 package org.jumpmind.metl.ui.diagram;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Component.Event;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.html.Div;
 
-public class LinkEvent extends Event {
+public class LinkEvent extends ComponentEvent<Div> {
 
     private static final long serialVersionUID = 1L;
 
@@ -33,9 +33,8 @@ public class LinkEvent extends Event {
 
     boolean removed;
 
-    public LinkEvent(Component source, String sourceNodeId, String targetNodeId,
-            boolean removed) {
-        super(source);
+    public LinkEvent(Div source, String sourceNodeId, String targetNodeId, boolean removed) {
+        super(source, false);
         this.sourceNodeId = sourceNodeId;
         this.targetNodeId = targetNodeId;
         this.removed = removed;

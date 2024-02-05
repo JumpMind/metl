@@ -30,31 +30,32 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.TopBarLink;
-import org.jumpmind.metl.ui.common.UIConstants;
+import org.jumpmind.metl.ui.common.View;
 import org.jumpmind.metl.ui.init.AppUI;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.shared.MouseEventDetails.MouseButton;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.Tree;
-import com.vaadin.ui.Tree.ItemClick;
-import com.vaadin.ui.Tree.ItemClickListener;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.ItemClickEvent;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.router.Route;
 
 @UiComponent
 @Scope(value = "ui")
-@TopBarLink(category = Category.Admin, name = "Admin", id = "admin", icon = VaadinIcons.COGS, menuOrder = 10)
-public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemClickListener<AdminMenuLink> {
+@TopBarLink(category = Category.Admin, name = "Admin", id = "admin", icon = VaadinIcon.COGS, menuOrder = 10)
+@Route("admin")
+public class AdminView extends HorizontalLayout implements IUiPanel, ComponentEventListener<ItemClickEvent<AdminMenuLink>>, View {
 
     private static final long serialVersionUID = 1L;
 
@@ -66,7 +67,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
     
     TabbedPanel tabbedPanel;
     
-    Tree<AdminMenuLink> tree;
+    TreeGrid<AdminMenuLink> tree;
 
     Map<String, Component> sideMenuById = new HashMap<String, Component>();
     
@@ -76,27 +77,22 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
 
         tabbedPanel = new TabbedPanel();
 
-        HorizontalSplitPanel leftSplit = new HorizontalSplitPanel();
+        SplitLayout leftSplit = new SplitLayout();
         leftSplit.setSizeFull();
-        leftSplit.setSplitPosition(UIConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS);
+        leftSplit.setSplitterPosition(20);
 
         VerticalLayout container = new VerticalLayout();
         container.setSizeFull();
-        container.addComponent(tabbedPanel);
-        leftSplit.setSecondComponent(container);
+        container.add(tabbedPanel);
+        leftSplit.addToSecondary(container);
 
-        tree = new Tree<AdminMenuLink>();
-        tree.addStyleName(ValoTheme.TREETABLE_NO_HORIZONTAL_LINES);
-        tree.addStyleName(ValoTheme.TREETABLE_NO_STRIPES);
-        tree.addStyleName(ValoTheme.TREETABLE_NO_VERTICAL_LINES);
-        tree.addStyleName(ValoTheme.TREETABLE_BORDERLESS);
+        tree = new TreeGrid<AdminMenuLink>();
+        tree.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
         tree.setSizeFull();
-        //tree.setCacheRate(100);
-        //tree.setPageLength(100);
+        tree.setPageSize(100);
         tree.addItemClickListener(this);
-        tree.addStyleName("noselect");
-        tree.setItemCaptionGenerator(item -> item.id());
-        tree.setItemIconGenerator(item -> item.icon());
+        tree.addClassName("noselect");
+        tree.addComponentColumn(item -> new HorizontalLayout(new Icon(item.icon()), new Span(item.id())));
         
         for (AdminSideView sideView : sideMenu) {
             AdminMenuLink link = (AdminMenuLink) sideView.getClass().getAnnotation(AdminMenuLink.class);
@@ -107,19 +103,16 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
                 }
         }
         VerticalLayout navigator = new VerticalLayout();
-        navigator.addStyleName(ValoTheme.MENU_ROOT);
         navigator.setSizeFull();
-        leftSplit.setFirstComponent(navigator);
+        leftSplit.addToPrimary(navigator);
                 
         MenuBar leftMenuBar = new MenuBar();
-        leftMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
-        leftMenuBar.setWidth(100, Unit.PERCENTAGE);
-        navigator.addComponent(leftMenuBar);
+        leftMenuBar.setWidthFull();
+        navigator.add(leftMenuBar);
 
-        navigator.addComponent(tree);
-        navigator.setExpandRatio(tree, 1);
+        navigator.addAndExpand(tree);
         
-        addComponent(leftSplit);
+        add(leftSplit);
         
     }
 
@@ -127,19 +120,15 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         tree.getTreeData().addItem(null, link);
     }
 
-    public void itemClick(ItemClick<AdminMenuLink> event) {
-        if (event.getMouseEventDetails().getButton() == MouseButton.LEFT) {
+    public void onComponentEvent(ItemClickEvent<AdminMenuLink> event) {
+        if (event.getButton() == 0) {
             AdminMenuLink value = event.getItem();
             if (value != null) {
                 String id = value.id();
                 Component panel = sideMenuById.get(id);
-                tabbedPanel.addCloseableTab(id, id, value.icon(), panel);
+                tabbedPanel.addCloseableTab(id, id, new Icon(value.icon()), panel);
             }
         }
-    }
-
-    @Override
-    public void enter(ViewChangeEvent event) {
     }
 
     @Override
@@ -163,7 +152,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         return tabbedPanel;
     }
 
-    protected Tree<AdminMenuLink> getTree() {
+    protected TreeGrid<AdminMenuLink> getTree() {
         return tree;
     }
 

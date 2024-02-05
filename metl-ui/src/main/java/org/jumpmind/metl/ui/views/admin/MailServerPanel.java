@@ -35,27 +35,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.data.HasValue.ValueChangeListener;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.NativeSelect;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 @SuppressWarnings("serial")
 @UiComponent
 @Scope(value = "ui")
 @Order(800)
-@AdminMenuLink(name = "Mail Server", id = "Mail Server", icon = VaadinIcons.ENVELOPE_O)
+@AdminMenuLink(name = "Mail Server", id = "Mail Server", icon = VaadinIcon.ENVELOPE_O)
 public class MailServerPanel extends AbstractAdminPanel {
 
     final Logger log = LoggerFactory.getLogger(getClass());
@@ -78,90 +76,87 @@ public class MailServerPanel extends AbstractAdminPanel {
         final GlobalSetting useAuthSetting = getGlobalSetting(MailSession.SETTING_USE_AUTH, "false");
 
         FormLayout form = new FormLayout();
-        form.setSpacing(true);
 
         TextField hostField = new TextField("Host name");
         hostField.setValueChangeMode(ValueChangeMode.LAZY);
         hostField.setValueChangeTimeout(200);
         hostField.addValueChangeListener(event -> saveSetting(hostNameSetting, event.getValue()));
         hostField.setValue(hostNameSetting.getValue());
-        hostField.setWidth(25f, Unit.EM);
-        form.addComponent(hostField);
+        hostField.setWidth("25em");
+        form.add(hostField);
         hostField.focus();
 
-        NativeSelect<String> transportField = new NativeSelect<String>("Transport");
+        Select<String> transportField = new Select<String>("Transport");
         transportField.setItems("smtp", "smtps", "mock_smtp");
         transportField.setValue(transportSetting.getValue() == null ? "smtp" : transportSetting.getValue());
         transportField.setEmptySelectionAllowed(false);
-        transportField.setWidth(10f, Unit.EM);
-        transportField.addValueChangeListener(new ValueChangeListener<String>() {
-            public void valueChange(ValueChangeEvent<String> event) {
+        transportField.setWidth("10em");
+        transportField.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
+            public void valueChanged(ValueChangeEvent<String> event) {
                 saveSetting(transportSetting, event.getValue());
             }
         });
-        form.addComponent(transportField);
+        form.add(transportField);
 
         TextField portField = new TextField("Port");
         portField.setValueChangeMode(ValueChangeMode.LAZY);
         portField.setValueChangeTimeout(200);
         portField.addValueChangeListener(event -> saveSetting(portSetting, event.getValue()));
         portField.setValue(portSetting.getValue());
-        portField.setWidth(25f, Unit.EM);
-        form.addComponent(portField);
+        portField.setWidth("25em");
+        form.add(portField);
 
         TextField fromField = new TextField("From Address");
         fromField.setValueChangeMode(ValueChangeMode.LAZY);
         fromField.setValueChangeTimeout(200);
         fromField.addValueChangeListener(event -> saveSetting(fromSetting, event.getValue()));
         fromField.setValue(fromSetting.getValue());
-        fromField.setWidth(25f, Unit.EM);
-        form.addComponent(fromField);
+        fromField.setWidth("25em");
+        form.add(fromField);
 
-        CheckBox tlsField = new CheckBox("Use TLS", Boolean.valueOf(useTlsSetting.getValue()));
-        tlsField.addValueChangeListener(new ValueChangeListener<Boolean>() {
-            public void valueChange(ValueChangeEvent<Boolean> event) {
+        Checkbox tlsField = new Checkbox("Use TLS", Boolean.valueOf(useTlsSetting.getValue()));
+        tlsField.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<Boolean>>() {
+            public void valueChanged(ValueChangeEvent<Boolean> event) {
                 saveSetting(useTlsSetting, event.getValue().toString());
             }            
         });
-        form.addComponent(tlsField);
+        form.add(tlsField);
 
         TextField userField = new TextField("Username");
         userField.setValueChangeMode(ValueChangeMode.LAZY);
         userField.setValueChangeTimeout(200);
         userField.addValueChangeListener(event -> saveSetting(usernameSetting, event.getValue()));
         userField.setValue(usernameSetting.getValue());
-        userField.setWidth(25f, Unit.EM);
+        userField.setWidth("25em");
 
         PasswordField passwordField = new PasswordField("Password");
         passwordField.setValueChangeMode(ValueChangeMode.LAZY);
         passwordField.setValueChangeTimeout(200);
         passwordField.addValueChangeListener(event -> saveSetting(passwordSetting, event.getValue()));
         passwordField.setValue(passwordSetting.getValue());
-        passwordField.setWidth(25f, Unit.EM);
+        passwordField.setWidth("25em");
 
-        CheckBox authField = new CheckBox("Use Authentication", Boolean.valueOf(useAuthSetting.getValue()));
-        authField.addValueChangeListener(new ValueChangeListener<Boolean>() {
-            public void valueChange(ValueChangeEvent<Boolean> event) {
+        Checkbox authField = new Checkbox("Use Authentication", Boolean.valueOf(useAuthSetting.getValue()));
+        authField.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<Boolean>>() {
+            public void valueChanged(ValueChangeEvent<Boolean> event) {
                 Boolean isEnabled = event.getValue();
                 saveSetting(useAuthSetting, isEnabled.toString());
                 userField.setEnabled(isEnabled);
                 passwordField.setEnabled(isEnabled);
             }            
         });
-        form.addComponent(authField);
         userField.setEnabled(authField.getValue());
-        form.addComponent(userField);
         passwordField.setEnabled(authField.getValue());
-        form.addComponent(passwordField);
+        form.add(authField, userField, passwordField);
         
         Button testButton = new Button("Test Connection");
         testButton.addClickListener(new TestClickListener());
-        form.addComponent(testButton);
+        form.add(testButton);
         
         VerticalLayout paddedLayout = new VerticalLayout();
         paddedLayout.setMargin(true);
-        paddedLayout.addComponent(form);
-        addComponent(paddedLayout);
+        paddedLayout.add(form);
+        add(paddedLayout);
     }
 
     private void saveSetting(GlobalSetting setting, String value) {
@@ -201,26 +196,22 @@ public class MailServerPanel extends AbstractAdminPanel {
         return setting;
     }
 
-    class TestClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class TestClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             MailSession mailSession = new MailSession(context.getOperationsService().findGlobalSettingsAsMap());
             try {                
                 mailSession.getTransport();                
                 CommonUiUtils.notify("SMTP Test", "Success!");
             } catch (AuthenticationFailedException e) {
-                CommonUiUtils.notify("SMTP Test", "Failed with authentication exception: " + e.getMessage(), Type.ERROR_MESSAGE);
+                CommonUiUtils.notify("SMTP Test", "Failed with authentication exception: " + e.getMessage());
                 log.warn("SMTP test failed authentication", e);
             } catch (MessagingException e) {
-                CommonUiUtils.notify("SMTP Test", "Failed with message exception: " + e.getMessage(), Type.ERROR_MESSAGE);
+                CommonUiUtils.notify("SMTP Test", "Failed with message exception: " + e.getMessage());
                 log.warn("SMTP test failed", e);
             } finally {
                 mailSession.closeTransport();
             }
         }        
-    }
-
-    @Override
-    public void enter(ViewChangeEvent event) {
     }
 
     @Override

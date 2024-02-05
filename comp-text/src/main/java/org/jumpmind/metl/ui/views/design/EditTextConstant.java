@@ -24,11 +24,12 @@ import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.component.TextConstant;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
-import org.vaadin.aceeditor.AceEditor;
-import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.data.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
+
+import de.f0rce.ace.AceEditor;
+import de.f0rce.ace.enums.AceMode;
 
 @SuppressWarnings("serial")
 public class EditTextConstant extends AbstractComponentEditPanel {
@@ -37,21 +38,21 @@ public class EditTextConstant extends AbstractComponentEditPanel {
     
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
-        addComponent(buttonBar);
+        add(buttonBar);
 
         editor = CommonUiUtils.createAceEditor();
         editor.setMode(AceMode.text);
         editor.setValue(component.get(TextConstant.SETTING_TEXT));
-        editor.addValueChangeListener(new ValueChangeListener<String>() {
-            public void valueChange(ValueChangeEvent<String> event) {
+        editor.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
+            public void valueChanged(ValueChangeEvent<String> event) {
                 Setting data = component.findSetting(TextConstant.SETTING_TEXT);
                 data.setValue(event.getValue());
                 context.getConfigurationService().save(data);
             }
         });
 
-        addComponent(editor);
-        setExpandRatio(editor, 1);
+        add(editor);
+        expand(editor);
     }
     
 }

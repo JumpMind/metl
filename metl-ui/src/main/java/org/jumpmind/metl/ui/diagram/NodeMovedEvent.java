@@ -20,17 +20,17 @@
  */
 package org.jumpmind.metl.ui.diagram;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Component.Event;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.html.Div;
 
-public class NodeMovedEvent extends Event {
+public class NodeMovedEvent extends ComponentEvent<Div> {
 
     private static final long serialVersionUID = 1L;
 
     Node node;
     
-    public NodeMovedEvent(Component source, Node node) {
-        super(source);
+    public NodeMovedEvent(Div source, Node node) {
+        super(source, false);
         this.node = node;
     }
 

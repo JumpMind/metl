@@ -42,17 +42,18 @@ import org.jumpmind.metl.core.runtime.component.ModelAttributeScriptHelper;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.ExportDialog;
 
-import com.vaadin.data.converter.StringToLongConverter;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.Column;
-import com.vaadin.ui.Grid.SelectionMode;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.components.grid.GridRowDragger;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.component.grid.editor.Editor;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.converter.StringToLongConverter;
 
 @SuppressWarnings("serial")
 public class EditFormatPanel extends AbstractComponentEditPanel {
@@ -66,28 +67,28 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
         if (!readOnly) {
-            addComponent(buttonBar);
+            add(buttonBar);
 
-            Button moveUpButton = buttonBar.addButton("Move Up", VaadinIcons.ARROW_UP);
+            Button moveUpButton = buttonBar.addButton("Move Up", VaadinIcon.ARROW_UP);
             moveUpButton.addClickListener(new MoveUpClickListener());
 
-            Button moveDownButton = buttonBar.addButton("Move Down", VaadinIcons.ARROW_DOWN);
+            Button moveDownButton = buttonBar.addButton("Move Down", VaadinIcon.ARROW_DOWN);
             moveDownButton.addClickListener(new MoveDownClickListener());
 
-            Button moveTopButton = buttonBar.addButton("Move Top", VaadinIcons.ANGLE_DOUBLE_UP);
+            Button moveTopButton = buttonBar.addButton("Move Top", VaadinIcon.ANGLE_DOUBLE_UP);
             moveTopButton.addClickListener(new MoveTopClickListener());
 
-            Button moveBottomButton = buttonBar.addButton("Move Bottom", VaadinIcons.ANGLE_DOUBLE_DOWN);
+            Button moveBottomButton = buttonBar.addButton("Move Bottom", VaadinIcon.ANGLE_DOUBLE_DOWN);
             moveBottomButton.addClickListener(new MoveBottomClickListener());
 
-            Button cutButton = buttonBar.addButton("Cut", VaadinIcons.SCISSORS);
+            Button cutButton = buttonBar.addButton("Cut", VaadinIcon.SCISSORS);
             cutButton.addClickListener(new CutClickListener());
 
-            Button pasteButton = buttonBar.addButton("Paste", VaadinIcons.PASTE);
+            Button pasteButton = buttonBar.addButton("Paste", VaadinIcon.PASTE);
             pasteButton.addClickListener(new PasteClickListener());
         }
         
-        buttonBar.addButtonRight("Export", VaadinIcons.DOWNLOAD, (e)->export());
+        buttonBar.addButtonRight("Export", VaadinIcon.DOWNLOAD, (e)->export());
 
         RelationalModel model = (RelationalModel) component.getInputModel();
         if (component.getType().equals(DelimitedParser.TYPE) || component.getType().equals(FixedLengthParser.TYPE)) {
@@ -115,70 +116,76 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
 
         grid.setSizeFull();
         boolean isFixedLength = component.getType().equals(FixedLengthFormatter.TYPE) || component.getType().equals(FixedLengthParser.TYPE);
-        grid.addColumn(RecordFormat::getEntityName).setCaption("Entity Name");
-        grid.addColumn(RecordFormat::getAttributeName).setCaption("Attribute Name");
+        grid.addColumn(RecordFormat::getEntityName).setHeader("Entity Name");
+        grid.addColumn(RecordFormat::getAttributeName).setHeader("Attribute Name");
+        if (!readOnly) {
+            grid.getEditor().setBinder(new Binder<RecordFormat>());
+        }
         if (isFixedLength) {
             if (readOnly) {
-                grid.addColumn(RecordFormat::getWidth).setCaption("Width");
+                grid.addColumn(RecordFormat::getWidth).setHeader("Width");
             } else {
                 final TextField textField = new TextField();
-                textField.setWidth(100, Unit.PERCENTAGE);
-                grid.addColumn(RecordFormat::getWidth)
-                        .setEditorBinding(grid.getEditor().getBinder().forField(textField)
-                                .withConverter(new StringToLongConverter("Width must be an integer"))
-                                .bind(RecordFormat::getWidth, RecordFormat::setWidth))
-                        .setCaption("Width");
+                textField.setWidthFull();
+                grid.getEditor().getBinder().forField(textField)
+                        .withConverter(new StringToLongConverter("Width must be an integer"))
+                        .bind(RecordFormat::getWidth, RecordFormat::setWidth);
+                grid.addColumn(RecordFormat::getWidth).setEditorComponent(textField).setHeader("Width");
             }
             
-            grid.addColumn(RecordFormat::getStartPos).setCaption("Start Position");
-            grid.addColumn(RecordFormat::getEndPos).setCaption("End Position");
+            grid.addColumn(RecordFormat::getStartPos).setHeader("Start Position");
+            grid.addColumn(RecordFormat::getEndPos).setHeader("End Position");
         } else {
-            grid.addColumn(RecordFormat::getOrdinalSetting).setCaption("Ordinal");
+            grid.addColumn(RecordFormat::getOrdinalSetting).setHeader("Ordinal");
         }
         if (readOnly) {
-            grid.addColumn(RecordFormat::getTransformText).setCaption("Transform");
+            grid.addColumn(RecordFormat::getTransformText).setHeader("Transform");
         } else {
             final ComboBox<String> combo = new ComboBox<String>();
-            combo.setWidth(100, Unit.PERCENTAGE);
+            combo.setWidthFull();
             List<String> itemList = new ArrayList<String>();
             String[] functions = ModelAttributeScriptHelper.getSignatures();
             for (String function : functions) {
                 itemList.add(function);
             }
-            combo.setPageLength(functions.length > 20 ? 20 : functions.length);
+            combo.setPageSize(functions.length > 20 ? 20 : functions.length);
             for (RecordFormat record : recordFormatList) {
                 if (record.getTransformText() != null && !itemList.contains(record.getTransformText())) {
                     itemList.add(record.getTransformText());
                 }
             }
             combo.setItems(itemList);
-            combo.setNewItemProvider(newItem -> {
-                itemList.add(newItem);
+            combo.setAllowCustomValue(true);
+            combo.addCustomValueSetListener(event -> {
+                itemList.add(event.getDetail());
                 combo.setItems(itemList);
-                combo.setValue(newItem);
-                return Optional.of(newItem);
+                combo.setValue(event.getDetail());
             });
-            grid.addColumn(RecordFormat::getTransformText).setEditorComponent(combo, RecordFormat::setTransformText).setCaption("Transform");
-            grid.getEditor().setEnabled(true).addSaveListener(event -> {
+            Editor<RecordFormat> editor = grid.getEditor();
+            Binder<RecordFormat> binder = editor.getBinder();
+            binder.forField(combo).bind(RecordFormat::getTransformText, RecordFormat::setTransformText);
+            grid.addColumn(RecordFormat::getTransformText).setEditorComponent(combo).setHeader("Transform");
+            editor.addSaveListener(event -> {
                 if (isFixedLength) {
                     calculatePositions();
                     saveLengthSettings();
                 }
                 saveTransformSettings();
             });
+            grid.addItemDoubleClickListener(event -> editor.editItem(event.getItem()));
         }
-        for (Column<RecordFormat, ?> column : grid.getColumns()) {
+        for (Column<RecordFormat> column : grid.getColumns()) {
             column.setSortable(false);
             if (isFixedLength) {
-                column.setWidth(75);
+                column.setWidth("75px");
             }
         }
         grid.setSelectionMode(SelectionMode.MULTI);
         if (!readOnly) {
-            new GridRowDragger<RecordFormat>(grid);
+            grid.setRowsDraggable(true);
         }
-        addComponent(grid);
-        setExpandRatio(grid, 1.0f);
+        add(grid);
+        expand(grid);
 
         grid.setItems(recordFormatList);
         calculatePositions();
@@ -302,8 +309,8 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
         }
     }
 
-    class MoveUpClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class MoveUpClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             Set<RecordFormat> itemIds = getSelectedItems();
             if (itemIds.size() > 0 && itemIds != null) {
                 RecordFormat firstItem = itemIds.iterator().next();
@@ -313,8 +320,8 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
         }
     }
 
-    class MoveDownClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class MoveDownClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             Set<RecordFormat> itemIds = getSelectedItems();
             if (itemIds.size() > 0 && itemIds != null) {
                 RecordFormat lastItem = null;
@@ -328,28 +335,28 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
         }
     }
 
-    class MoveTopClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class MoveTopClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             moveItemsTo(getSelectedItems(), 0);
         }
     }
 
-    class MoveBottomClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class MoveBottomClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             moveItemsTo(getSelectedItems(), recordFormatList.size() - 1);
         }
     }
 
-    class CutClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class CutClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             Set<RecordFormat> itemIds = getSelectedItems();
             selectedItemIds = new LinkedHashSet<RecordFormat>(itemIds);
             grid.deselectAll();
         }
     }
 
-    class PasteClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    class PasteClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        public void onComponentEvent(ClickEvent<Button> event) {
             Set<RecordFormat> itemIds = getSelectedItems();
             if (itemIds.size() > 0 && selectedItemIds != null) {
                 int index = recordFormatList.indexOf(itemIds.iterator().next());

@@ -21,34 +21,40 @@
 package org.jumpmind.metl.ui.views.design;
 
 import org.jumpmind.metl.ui.diagram.Diagram;
-import org.jumpmind.vaadin.ui.common.ResizableWindow;
+import org.jumpmind.vaadin.ui.common.ResizableDialog;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 
 @SuppressWarnings("serial")
-public class ImagePreviewDialog extends ResizableWindow {
+public class ImagePreviewDialog extends ResizableDialog {
     
     public ImagePreviewDialog(Diagram diagram) {
         super("Image (right-click to save)");
         
-        Panel panel = new Panel();
+        UI.getCurrent().getPage().retrieveExtendedClientDetails(details -> {
+            setWidth((details.getWindowInnerWidth() * .75) + "px");
+            setHeight((details.getWindowInnerHeight() * .75) + "px");
+        });
+
+        Div panel = new Div();
         panel.setId("canvasContainer");
         panel.setWidth("100%");  
         panel.setHeight("100%");
-        addComponent(panel,1);
+        addComponentAtIndex(1, panel);
         
         Button closeButton = new Button("Close");
-        closeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
-        closeButton.addClickListener(new ClickListener() {
+        closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        closeButton.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             @Override
-            public void buttonClick(ClickEvent event) {
+            public void onComponentEvent(ClickEvent<Button> event) {
                 close();
             }
         });
@@ -57,11 +63,9 @@ public class ImagePreviewDialog extends ResizableWindow {
         HorizontalLayout footer = new HorizontalLayout();
         footer.setWidth("100%");
         footer.setSpacing(true);
-        footer.addStyleName(ValoTheme.WINDOW_BOTTOM_TOOLBAR);
-        Label footerText = new Label("");
+        Span footerText = new Span("");
         footerText.setSizeUndefined();
-        footer.addComponents(footerText);
-        footer.setExpandRatio(footerText, 1);
+        footer.addAndExpand(footerText);
         
         // Remove download link since it does not work with IE. May choose
         // to selectively show based on browser in the future.
@@ -69,8 +73,8 @@ public class ImagePreviewDialog extends ResizableWindow {
 //        downloadLink.setId("downloadLink");
 //        footer.addComponent(downloadLink);
         
-        footer.addComponent(closeButton);
-        this.addComponent(footer);
+        footer.add(closeButton);
+        this.add(footer);
         
         diagram.export();
     }

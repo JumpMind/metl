@@ -20,19 +20,20 @@
  */
 package org.jumpmind.metl.ui.common;
 
-import com.vaadin.server.Resource;
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 
 public class TopBarButton extends Button {
 
     private static final long serialVersionUID = 1L;
 
-    public TopBarButton(String caption, Resource icon) {
-        super(caption, icon);
+    public TopBarButton(String caption, VaadinIcon icon) {
+        super(caption, new Icon(icon));
     }
 
-    public TopBarButton(Resource icon) {
-        super(icon);
+    public TopBarButton(VaadinIcon icon) {
+        super(new Icon(icon));
     }
 
 }

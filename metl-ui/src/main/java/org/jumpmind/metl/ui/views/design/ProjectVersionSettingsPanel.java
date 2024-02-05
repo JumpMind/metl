@@ -36,25 +36,20 @@ import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.shared.ui.grid.HeightMode;
-import com.vaadin.ui.AbstractLayout;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.DateField;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.SelectionMode;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.renderers.HtmlRenderer;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
-public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
+public class ProjectVersionSettingsPanel extends VerticalLayout implements IUiPanel {
 
     private static final long serialVersionUID = 1L;
 
@@ -80,60 +75,54 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
         this.designNavigator = projectNavigator;
         this.projectVersion = projectVersion;
         
-        VerticalLayout content = new VerticalLayout();
-        setContent(content);
-        
-        addHeader("Project Version Settings");
-        
         FormLayout formLayout = new FormLayout();
-        formLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        DateField releaseDateField = new DateField("Release Date");
+        DatePicker releaseDateField = new DatePicker("Release Date");
         Date releaseDate = projectVersion.getReleaseDate();
         if (releaseDate != null) {
         	releaseDateField.setValue(releaseDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
         }
         releaseDateField.setEnabled(false);        
-        formLayout.addComponent(releaseDateField);
+        formLayout.add(releaseDateField);
         
-        CheckBox archiveCheckBox = new CheckBox("Archived");
-        archiveCheckBox.setValue(projectVersion.isArchived());
-        archiveCheckBox.addValueChangeListener(e->toggleArchived(e));
-        formLayout.addComponent(archiveCheckBox);
-        content.addComponent(formLayout);
-
-        addHeader("Component Plugin Settings");
+        Checkbox archiveCheckbox = new Checkbox("Archived");
+        archiveCheckbox.setValue(projectVersion.isArchived());
+        archiveCheckbox.addValueChangeListener(e->toggleArchived(e));
+        formLayout.add(archiveCheckbox);
+        add(formLayout);
 
         ButtonBar buttonBar = new ButtonBar();
-        content.addComponent(buttonBar);
+        add(buttonBar);
         buttonBar.addButton("Refresh", Icons.REFRESH, (event)->refreshPlugins()); 
         updateButton = buttonBar.addButton("Update", Icons.UPDATE, (event)->update());        
-        pinButton =  buttonBar.addButton("Pin", VaadinIcons.CHECK_CIRCLE_O, (event)->pin(true));
-        unpinButton = buttonBar.addButton("Unpin", VaadinIcons.CIRCLE_THIN, (event)->pin(false));
+        pinButton =  buttonBar.addButton("Pin", VaadinIcon.CHECK_CIRCLE_O, (event)->pin(true));
+        unpinButton = buttonBar.addButton("Unpin", VaadinIcon.CIRCLE_THIN, (event)->pin(false));
 
         componentPluginsGrid = new Grid<ProjectVersionPlugin>();
         componentPluginsGrid.setSelectionMode(SelectionMode.MULTI);
-        componentPluginsGrid.setHeightMode(HeightMode.ROW);
-        componentPluginsGrid.setWidth(100, Unit.PERCENTAGE);
-        componentPluginsGrid.addColumn(ProjectVersionPlugin::getDefinitionType).setCaption("Plugin Type");
-        componentPluginsGrid.addColumn(ProjectVersionPlugin::getDefinitionName).setCaption("Name");
-        componentPluginsGrid.addColumn(ProjectVersionPlugin::getDefinitionTypeId).setCaption("Type");
-        componentPluginsGrid.addColumn(plugin -> String.format("%s:%s", plugin.getArtifactGroup(), plugin.getArtifactName())).setCaption("Plugin");
-        componentPluginsGrid.addColumn(ProjectVersionPlugin::isEnabled).setCaption("Enabled").setWidth(75);
-        componentPluginsGrid.addColumn(ProjectVersionPlugin::isPinVersion).setCaption("Pin Version").setWidth(95);
-        
-        final double VERSION_WIDTH = 190;
-        
-        componentPluginsGrid.addColumn(ProjectVersionPlugin::getArtifactVersion).setCaption("Version").setWidth(VERSION_WIDTH);
-        componentPluginsGrid.addColumn(plugin -> {
-        	return !plugin.getArtifactVersion().equals(plugin.getLatestArtifactVersion()) ? "<span class='warn' title='Updates Available'>" + VaadinIcons.WARNING.getHtml() + "</span>" : "";
-        }).setCaption("").setWidth(55).setRenderer(new HtmlRenderer());
+        componentPluginsGrid.setAllRowsVisible(true);
+        componentPluginsGrid.setWidthFull();
+        componentPluginsGrid.addColumn(ProjectVersionPlugin::getDefinitionType).setHeader("Plugin Type");
+        componentPluginsGrid.addColumn(ProjectVersionPlugin::getDefinitionName).setHeader("Name");
+        componentPluginsGrid.addColumn(ProjectVersionPlugin::getDefinitionTypeId).setHeader("Type");
+        componentPluginsGrid.addColumn(plugin -> String.format("%s:%s", plugin.getArtifactGroup(), plugin.getArtifactName())).setHeader("Plugin");
+        componentPluginsGrid.addColumn(ProjectVersionPlugin::isEnabled).setHeader("Enabled").setWidth("75px");
+        componentPluginsGrid.addColumn(ProjectVersionPlugin::isPinVersion).setHeader("Pin Version").setWidth("95px");
+        componentPluginsGrid.addColumn(ProjectVersionPlugin::getArtifactVersion).setHeader("Version").setWidth("190px");
+        componentPluginsGrid.addComponentColumn(plugin -> {
+            if (plugin.getArtifactVersion().equals(plugin.getLatestArtifactVersion())) {
+                return null;
+            }
+            Icon icon = new Icon(VaadinIcon.WARNING);
+            icon.addClassName("warn");
+            icon.getElement().setProperty("title", "Updates Available");
+            return icon;
+        }).setHeader("").setWidth("55px");
         componentPluginsGrid.addSelectionListener((event) -> setButtonsEnabled());
         
-        content.addComponent(componentPluginsGrid);
+        add(componentPluginsGrid);
 
         VerticalLayout spacer = new VerticalLayout();
-        content.addComponent(spacer);
-        content.setExpandRatio(spacer, 1);
+        addAndExpand(spacer);
 
         refresh();        
         setButtonsEnabled();        
@@ -147,12 +136,10 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
     
     protected void addHeader(String caption) {
         HorizontalLayout componentHeaderWrapper = new HorizontalLayout();
-        componentHeaderWrapper.setMargin(new MarginInfo(false, false, false, true));
-        Label componentHeader = new Label(caption);
-        componentHeader.addStyleName(ValoTheme.LABEL_H3);
-        componentHeader.addStyleName(ValoTheme.LABEL_COLORED);
-        componentHeaderWrapper.addComponent(componentHeader);
-        ((AbstractLayout)getContent()).addComponent(componentHeaderWrapper);
+        componentHeaderWrapper.getStyle().set("margin", "0 0 0 16px");
+        H3 componentHeader = new H3(caption);
+        componentHeaderWrapper.add(componentHeader);
+        add(componentHeaderWrapper);
     }
     
     protected void toggleArchived(ValueChangeEvent<Boolean> event) {
@@ -203,7 +190,6 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
         IConfigurationService configurationService = context.getConfigurationService();
         List<ProjectVersionPlugin> plugins = configurationService.findProjectVersionComponentPlugins(projectVersion.getId());
         componentPluginsGrid.setItems(plugins);
-        componentPluginsGrid.setHeightByRows(plugins.size() > 0 ? plugins.size() : 1);
     }
 
     public ProjectVersion getProjectVersion() {

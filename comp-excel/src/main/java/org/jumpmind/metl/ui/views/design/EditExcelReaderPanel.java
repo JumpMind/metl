@@ -33,14 +33,16 @@ import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.ExcelFileReader;
 
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.Column;
-import com.vaadin.ui.Grid.SelectionMode;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.components.grid.HeaderCell;
-import com.vaadin.ui.components.grid.HeaderRow;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.component.grid.HeaderRow;
+import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
+import com.vaadin.flow.component.grid.editor.Editor;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
+import com.vaadin.flow.data.binder.Binder;
 
 public class EditExcelReaderPanel extends AbstractComponentEditPanel {
 
@@ -54,7 +56,7 @@ public class EditExcelReaderPanel extends AbstractComponentEditPanel {
     
     TextField attributeFilterField = new TextField();
     
-    CheckBox filterCheckBox = new CheckBox("Show Set Only");
+    Checkbox filterCheckbox = new Checkbox("Show Set Only");
     
     @Override
     protected void buildUI() {
@@ -63,45 +65,47 @@ public class EditExcelReaderPanel extends AbstractComponentEditPanel {
         refresh();
     }
     
-    @SuppressWarnings("unchecked")
 	protected void buildGrid() {
         grid = new Grid<Record>();
         grid.setSelectionMode(SelectionMode.NONE);
         grid.setSizeFull();
-        grid.setColumnOrder("entityName", "attributeName", "excelMapping");
-        grid.addColumn(Record::getEntityName).setId("entityName").setCaption("Entity Name");
-        grid.addColumn(Record::getAttributeName).setId("attributeName").setCaption("Attribute Name");
-        grid.addColumn(Record::getExcelMapping).setId("excelMapping").setCaption("Excel Mapping").setExpandRatio(1);
+        grid.addColumn(Record::getEntityName).setKey("entityName").setHeader("Entity Name");
+        grid.addColumn(Record::getAttributeName).setKey("attributeName").setHeader("Attribute Name");
+        grid.addColumn(Record::getExcelMapping).setKey("excelMapping").setHeader("Excel Mapping").setFlexGrow(1);
         HeaderRow filterRow = grid.appendHeaderRow();
         addColumn("entityName", filterRow, entityFilterField);
         addColumn("attributeName", filterRow, attributeFilterField);
         if (!readOnly) {
             TextField tfExcelMapping = new TextField();
             tfExcelMapping.addBlurListener(e->saveExcelMappingSettings());
-            tfExcelMapping.setWidth(100, Unit.PERCENTAGE);
-            ((Column<Record, String>) grid.getColumn("excelMapping")).setEditorComponent(tfExcelMapping, Record::setExcelMapping);
-            grid.getEditor().setEnabled(true).setBuffered(false);
+            tfExcelMapping.setWidthFull();
+            Editor<Record> editor = grid.getEditor();
+            Binder<Record> binder = new Binder<Record>();
+            editor.setBinder(binder);
+            binder.forField(tfExcelMapping).bind(Record::getExcelMapping, Record::setExcelMapping);
+            ((Column<Record>) grid.getColumnByKey("excelMapping")).setEditorComponent(tfExcelMapping);
+            editor.setBuffered(false);
+            grid.addItemDoubleClickListener(event -> editor.editItem(event.getItem()));
         }
         addShowPopulatedFilter("excelMapping", filterRow);
-        addComponent(grid);
-        setExpandRatio(grid, 1);
+        add(grid);
+        expand(grid);
     }
 
     protected void addColumn(String propertyId, HeaderRow filterRow, TextField filterField) {
-        grid.getColumn(propertyId).setEditable(false);
-        HeaderCell cell = filterRow.getCell(propertyId);
+        Column<Record> column = grid.getColumnByKey(propertyId);
+        HeaderCell cell = filterRow.getCell(column);
         filterField.setPlaceholder("Filter");
-        filterField.addStyleName(ValoTheme.TEXTFIELD_TINY);
-        filterField.setWidth(100, Unit.PERCENTAGE);
+        filterField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+        filterField.setWidthFull();
         filterField.addValueChangeListener(change -> refreshGrid());
         cell.setComponent(filterField);
     }    
     
     protected void addShowPopulatedFilter(String propertyId, HeaderRow filterRow) {
-        HeaderCell cell = filterRow.getCell(propertyId);
-        filterCheckBox.addValueChangeListener(l->refreshGrid());
-        filterCheckBox.addStyleName(ValoTheme.CHECKBOX_SMALL);
-        cell.setComponent(filterCheckBox);
+        HeaderCell cell = filterRow.getCell(grid.getColumnByKey(propertyId));
+        filterCheckbox.addValueChangeListener(l->refreshGrid());
+        cell.setComponent(filterCheckbox);
         
     }
 

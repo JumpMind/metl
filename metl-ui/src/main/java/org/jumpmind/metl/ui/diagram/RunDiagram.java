@@ -22,9 +22,16 @@ package org.jumpmind.metl.ui.diagram;
 
 import java.util.List;
 
-import com.vaadin.annotations.JavaScript;
-import com.vaadin.annotations.StyleSheet;
-import com.vaadin.ui.AbstractJavaScriptComponent;
+import org.jumpmind.metl.ui.views.manage.ExecutionRunPanel;
+
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ClientCallable;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dependency.JavaScript;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.page.Page;
 
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
@@ -34,59 +41,63 @@ import elemental.json.JsonObject;
  * TODO: ADB: Refactor the RunDiagram screen to reuse the Diagram screen.
  *
  */
-@JavaScript({ "jquery-2.2.0.min.js", "dom.jsPlumb-1.7.5-min.js", "run-diagram.js" })
-@StyleSheet({ "run-diagram.css" })
-public class RunDiagram extends AbstractJavaScriptComponent {
+@CssImport("./run-diagram.css")
+@JsModule("./run-diagram.js")
+@JsModule("jquery")
+@JsModule("jsplumb")
+@JavaScript("./run-diagram.js")
+public class RunDiagram extends Div {
 
     private static final long serialVersionUID = 1L;
+    
+    private DiagramDetail diagramDetail;
+    
+    private ExecutionRunPanel panel;
 
-    public RunDiagram() {
-        setPrimaryStyleName("diagram");
+    public RunDiagram(ExecutionRunPanel panel) {
+        addClassName("diagram");
         setId("run-diagram");
-
-        addFunction("onNodeSelected", (arguments) -> {
-            DiagramState state = getState();
-            List<String> ids = state.selectedNodeIds;
-            ids.clear();
-            if (arguments.length() > 0) {
-                Object obj = arguments.get(0);
-                if (obj instanceof JsonObject) {
-                    JsonObject json = arguments.getObject(0);
-                    if (json.hasKey("nodes")) {
-                        JsonArray nodes = json.getArray("nodes");
-                        for (int i = 0; i < nodes.length(); i++) {
-                            ids.add(nodes.getObject(i).getString("id"));
-                        }
-                    }
-                }
+        diagramDetail = new DiagramDetail();
+        this.panel = panel;
+    }
+    
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        Page page = UI.getCurrent().getPage();
+        page.executeJs("window.org_jumpmind_metl_ui_diagram_RunDiagram()");
+    }
+    
+    @ClientCallable
+    private void onNodeSelected(JsonObject json) {
+        List<String> ids = diagramDetail.getSelectedNodeIds();
+        ids.clear();
+        if (json.hasKey("nodes")) {
+            JsonArray nodes = json.getArray("nodes");
+            for (int i = 0; i < nodes.length(); i++) {
+                ids.add(nodes.getObject(i).getString("id"));
             }
-            fireEvent(new NodeSelectedEvent(RunDiagram.this, ids));
-        });
-
+        }
+        panel.nodeSelectedEvent(new NodeSelectedEvent(RunDiagram.this, ids));
     }
 
     public void setSelectedNodeIds(List<String> ids) {
-        getState().selectedNodeIds = ids;
+        diagramDetail.setSelectedNodeIds(ids);
     }
 
     public List<String> getSelectedNodeIds() {
-        return getState().selectedNodeIds;
+        return diagramDetail.getSelectedNodeIds();
     }
 
     public void setNodes(List<Node> nodes) {
-        getState().nodes = nodes;
+        diagramDetail.setNodes(nodes);
     }
 
     public void addNode(Node node) {
-        getState().nodes.add(node);
-    }
-
-    @Override
-    protected DiagramState getState() {
-        return (DiagramState) super.getState();
+        diagramDetail.addNode(node);
     }
 
     public List<Node> getNodes() {
-        return getState().nodes;
+        return diagramDetail.getNodes();
     }
 }

@@ -25,8 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeploy;
@@ -42,7 +40,8 @@ import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.TopBarLink;
-import org.jumpmind.metl.ui.common.UIConstants;
+import org.jumpmind.metl.ui.common.View;
+import org.jumpmind.vaadin.ui.common.ColumnVisibilityToggler;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.UiComponent;
@@ -51,34 +50,34 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.data.HasValue.ValueChangeListener;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.shared.data.sort.SortDirection;
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.Column;
-import com.vaadin.ui.Grid.ItemClick;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.components.grid.ItemClickListener;
-import com.vaadin.ui.components.grid.SingleSelectionModel;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.component.grid.GridSortOrder;
+import com.vaadin.flow.component.grid.ItemClickEvent;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.provider.SortDirection;
+import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.Route;
 
 @UiComponent
 @Scope(value = "ui")
-@TopBarLink(category = Category.Manage, name = "Manage", id = "manage", icon = VaadinIcons.COGS, menuOrder = 25)
-public class ManageView extends HorizontalLayout implements View, IUiPanel, IBackgroundRefreshable<Object> {
+@TopBarLink(category = Category.Manage, name = "Manage", id = "manage", icon = VaadinIcon.COGS, menuOrder = 25)
+@Route("manage")
+public class ManageView extends HorizontalLayout implements BeforeEnterObserver, IUiPanel, IBackgroundRefreshable<Object>, View {
     
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -88,7 +87,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
     static final int DEFAULT_LIMIT = 100;
 
-    @Autowired
+    //@Autowired
     ApplicationContext context;
 
     ManageNavigator manageNavigator;
@@ -108,24 +107,25 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     int limit = DEFAULT_LIMIT;
 
     @SuppressWarnings("serial")
-    @PostConstruct
-    protected void init() {
+    public ManageView(@Autowired ApplicationContext context) {
+        this.context = context;
         viewButton = new Button("View Log");
         viewButton.setEnabled(false);
-        viewButton.addClickListener(new ClickListener() {
-            public void buttonClick(ClickEvent event) {
-                viewLog(((SingleSelectionModel<Execution>) grid.getSelectionModel()).getSelectedItem().orElse(null));
+        viewButton.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+            public void onComponentEvent(ClickEvent<Button> event) {
+                viewLog(grid.getSelectionModel().getFirstSelectedItem().orElse(null));
             }
         });
 
         VerticalLayout mainTab = new VerticalLayout();
         mainTab.setSizeFull();
         HorizontalLayout header = new HorizontalLayout();
-        header.addComponent(viewButton);
-        header.setComponentAlignment(viewButton, Alignment.BOTTOM_RIGHT);
+        header.setDefaultVerticalComponentAlignment(Alignment.END);
+        Span spacer = new Span();
+        header.add(spacer, viewButton);
+        header.expand(spacer);
 
         statusSelect = new ComboBox<String>("Status");
-        statusSelect.setEmptySelectionAllowed(false);
         List<String> statusList = new ArrayList<String>();
         statusList.add(ANY);
         for (ExecutionStatus status : ExecutionStatus.values()) {
@@ -133,26 +133,31 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         }
         statusSelect.setItems(statusList);
         statusSelect.setValue(ANY);
-        statusSelect.addValueChangeListener(new ValueChangeListener<String>() {
+        statusSelect.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
             @Override
-            public void valueChange(ValueChangeEvent<String> event) {
-                refreshUI(getBackgroundData(), true);
+            public void valueChanged(ValueChangeEvent<String> event) {
+                if (event.getValue() != null) {
+                    refreshUI(getBackgroundData(), true);
+                } else {
+                    statusSelect.setValue(event.getOldValue());
+                }
             }
         });
-        header.addComponent(statusSelect);
-        header.setComponentAlignment(statusSelect, Alignment.BOTTOM_RIGHT);
+        header.add(statusSelect);
 
         HorizontalLayout limitLayout = new HorizontalLayout();
         limitLayout.setSpacing(true);
-        Label limitLabel = new Label("Limit:");
-        limitLayout.addComponent(limitLabel);
-        limitLayout.setComponentAlignment(limitLabel, Alignment.MIDDLE_CENTER);
+        Span limitSpan = new Span("Limit:");
+        Span limitSpacer = new Span();
+        limitLayout.add(limitSpacer, limitSpan);
+        limitLayout.expand(limitSpacer);
+        limitLayout.setVerticalComponentAlignment(Alignment.CENTER, limitSpan);
         TextField limitField = new TextField(null, String.valueOf(DEFAULT_LIMIT));
         limitField.setWidth("5em");
         limitField.setValueChangeMode(ValueChangeMode.LAZY);
         limitField.setValueChangeTimeout(200);
-        limitField.addValueChangeListener(new ValueChangeListener<String>() {
-            public void valueChange(ValueChangeEvent<String> event) {
+        limitField.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
+            public void valueChanged(ValueChangeEvent<String> event) {
                 try {
                     limit = Integer.parseInt(event.getValue());
                 } catch (Exception e) {
@@ -160,65 +165,66 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
                 refreshUI(getBackgroundData(), true);
             }
         });
-        limitLayout.addComponent(limitField);
-        limitLayout.setComponentAlignment(limitField, Alignment.BOTTOM_RIGHT);
-        header.addComponent(limitLayout);
-        header.setComponentAlignment(limitLayout, Alignment.BOTTOM_RIGHT);
-        header.setExpandRatio(limitLayout, 1.0f);
+        limitLayout.add(limitField);
+        limitLayout.setVerticalComponentAlignment(Alignment.END, limitField);
+        header.add(limitLayout);
+        header.expand(limitLayout);
 
         filterField = new TextField();
         filterField.setPlaceholder("Filter");
-        filterField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
-        filterField.setIcon(VaadinIcons.SEARCH);
+        filterField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         filterField.setValueChangeMode(ValueChangeMode.LAZY);
         filterField.setValueChangeTimeout(200);
-        filterField.addValueChangeListener(new ValueChangeListener<String>() {
-            public void valueChange(ValueChangeEvent<String> event) {
+        filterField.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
+            public void valueChanged(ValueChangeEvent<String> event) {
                 refreshGrid();
             }
         });
-        header.addComponent(filterField);
-        header.setComponentAlignment(filterField, Alignment.BOTTOM_RIGHT);
+        header.add(filterField);
 
         header.setSpacing(true);
         header.setMargin(true);
         header.setWidth("100%");
-        mainTab.addComponent(header);
+        mainTab.add(header);
 
         grid = new Grid<Execution>();
         grid.setSizeFull();
-        grid.addItemClickListener(new ItemClickListener<Execution>() {
+        grid.addItemClickListener(new ComponentEventListener<ItemClickEvent<Execution>>() {
             @Override
-            public void itemClick(ItemClick<Execution> event) {
-                if (event.getMouseEventDetails().isDoubleClick()) {
+            public void onComponentEvent(ItemClickEvent<Execution> event) {
+                if (event.getClickCount() == 2) {
                     viewLog(event.getItem());
                 }
             }
         });
-        grid.addColumn(Execution::getAgentName).setCaption("Agent").setWidth(250);
-        grid.addColumn(Execution::getDeploymentName).setCaption("Deployment").setWidth(250);
-        grid.addColumn(Execution::getHostName).setCaption("Host").setWidth(145).setHidden(true);
-        grid.addColumn(Execution::getStatus).setCaption("Status").setWidth(90);
-        grid.addColumn(item -> CommonUiUtils.formatDateTime(item.getStartTime())).setId("startTime")
-                .setSortProperty("startTime").setCaption("Start").setWidth(170);
-        grid.addColumn(item -> CommonUiUtils.formatDateTime(item.getEndTime())).setSortProperty("endTime")
-                .setCaption("End").setWidth(170);
-        grid.addColumn(Execution::getCreateBy).setCaption("Caller").setWidth(100);
-        grid.addColumn(Execution::getParameters).setCaption("Parameters").setWidth(5000);
-        for (Column<Execution, ?> column : grid.getColumns()) {
-            column.setSortable(true).setHidable(true);
+        ColumnVisibilityToggler columnVisibilityToggler = new ColumnVisibilityToggler();
+        mainTab.add(columnVisibilityToggler);
+        mainTab.setHorizontalComponentAlignment(Alignment.END, columnVisibilityToggler);
+        columnVisibilityToggler.addColumn(grid.addColumn(Execution::getAgentName).setHeader("Agent").setWidth("250px"), "Agent");
+        columnVisibilityToggler.addColumn(grid.addColumn(Execution::getDeploymentName).setHeader("Deployment").setWidth("250px"), "Deployment");
+        columnVisibilityToggler.addColumn(grid.addColumn(Execution::getHostName).setHeader("Host").setWidth("145px"), "Host").setVisible(false);
+        columnVisibilityToggler.addColumn(grid.addColumn(Execution::getStatus).setHeader("Status").setWidth("90px"), "Status");
+        columnVisibilityToggler.addColumn(grid.addColumn(item -> CommonUiUtils.formatDateTime(item.getStartTime())).setKey("startTime")
+                .setSortProperty("startTime").setHeader("Start").setWidth("170px"), "Start");
+        columnVisibilityToggler.addColumn(grid.addColumn(item -> CommonUiUtils.formatDateTime(item.getEndTime())).setSortProperty("endTime")
+                .setHeader("End").setWidth("170px"), "End");
+        columnVisibilityToggler.addColumn(grid.addColumn(Execution::getCreateBy).setHeader("Caller").setWidth("100px"), "Caller");
+        columnVisibilityToggler.addColumn(grid.addColumn(Execution::getParameters).setHeader("Parameters").setWidth("5000px"), "Parameters");
+        for (Column<Execution> column : grid.getColumns()) {
+            column.setSortable(true);
         }
-        grid.sort("startTime", SortDirection.DESCENDING);
+        List<GridSortOrder<Execution>> orderList = new ArrayList<GridSortOrder<Execution>>();
+        orderList.add(new GridSortOrder<Execution>(grid.getColumnByKey("startTime"), SortDirection.DESCENDING));
+        grid.sort(orderList);
         grid.addSelectionListener((event) -> viewButton.setEnabled(event.getFirstSelectedItem().isPresent()));
-        mainTab.addComponent(grid);
-        mainTab.setExpandRatio(grid, 1.0f);
+        mainTab.addAndExpand(grid);
 
         tabs = new TabbedPanel();
-        tabs.setMainTab("Executions", Icons.EXECUTION, mainTab);
+        tabs.setMainTab("Executions", new Icon(Icons.EXECUTION), mainTab);
 
-        HorizontalSplitPanel split = new HorizontalSplitPanel();
+        SplitLayout split = new SplitLayout();
         split.setSizeFull();
-        split.setSplitPosition(UIConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS, false);
+        split.setSplitterPosition(20);
 
         manageNavigator = new ManageNavigator(FolderType.AGENT, context);
         manageNavigator.addValueChangeListener((event) -> {
@@ -238,20 +244,20 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
             }
             refreshUI(getBackgroundData(), true);
         });
-        split.setFirstComponent(manageNavigator);
+        split.addToPrimary(manageNavigator);
 
         VerticalLayout container = new VerticalLayout();
         container.setSizeFull();
-        container.addComponent(tabs);
-        split.setSecondComponent(container);
+        container.add(tabs);
+        split.addToSecondary(container);
 
-        addComponent(split);
+        add(split);
         setSizeFull();
         context.getBackgroundRefresherService().register(this);
     }
 
     @Override
-    public void enter(ViewChangeEvent event) {
+    public void beforeEnter(BeforeEnterEvent event) {
         manageNavigator.refresh();
     }
 
@@ -281,7 +287,8 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
     @Override
     public void onUIError(Throwable ex) {
-        CommonUiUtils.notify(ex);        
+        log.error("", ex);
+        CommonUiUtils.notifyError();        
     }
     
     public Object getBackgroundData() {
@@ -324,8 +331,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     protected void refreshUI(Object obj, boolean tabToFront) {
         List<Execution> data = (List<Execution>) obj;
         if (needsUpdated(data)) {
-            Execution currentGridSelection = ((SingleSelectionModel<Execution>) grid.getSelectionModel())
-                    .getSelectedItem().orElse(null);
+            Execution currentGridSelection = grid.getSelectionModel().getFirstSelectedItem().orElse(null);
             grid.deselectAll();
             executionList.clear();
             if (data != null) {
@@ -399,8 +405,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         if (item != null) {
             Execution execution = (Execution) item;
             ExecutionRunPanel logPanel = new ExecutionRunPanel(execution.getId(), context, tabs, null);
-            tabs.addCloseableTab(execution.getId(), "Log " + execution.getFlowName(), Icons.LOG,
-                    logPanel);
+            tabs.addCloseableTab(execution.getId(), "Log " + execution.getFlowName(), new Icon(Icons.LOG), logPanel);
             logPanel.onBackgroundUIRefresh(logPanel.onBackgroundDataRefresh());
         }
     }

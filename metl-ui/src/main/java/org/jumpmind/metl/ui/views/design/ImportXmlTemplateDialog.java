@@ -52,39 +52,37 @@ import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.plugin.XMLComponentDefinition.ResourceCategory;
 import org.jumpmind.metl.core.plugin.XMLResourceDefinition;
 import org.jumpmind.metl.ui.common.ApplicationContext;
-import org.jumpmind.metl.ui.views.design.ChooseWsdlServiceOperationWindow.ServiceChosenListener;
-import org.jumpmind.vaadin.ui.common.ResizableWindow;
+import org.jumpmind.metl.ui.views.design.ChooseWsdlServiceOperationDialog.ServiceChosenListener;
+import org.jumpmind.vaadin.ui.common.ResizableDialog;
 import org.reficio.ws.builder.SoapBuilder;
 import org.reficio.ws.builder.SoapOperation;
 import org.reficio.ws.builder.core.Wsdl;
-import org.vaadin.aceeditor.AceEditor;
-import org.vaadin.aceeditor.AceMode;
 
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.data.HasValue.ValueChangeListener;
-import com.vaadin.server.Page;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.RadioButtonGroup;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Upload;
-import com.vaadin.ui.Upload.Receiver;
-import com.vaadin.ui.Upload.SucceededEvent;
-import com.vaadin.ui.Upload.SucceededListener;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.upload.Receiver;
+import com.vaadin.flow.component.upload.Upload;
 
+import de.f0rce.ace.AceEditor;
+import de.f0rce.ace.enums.AceMode;
 import jlibs.xml.sax.XMLDocument;
 import jlibs.xml.xsd.XSInstance;
 import jlibs.xml.xsd.XSParser;
 
 @SuppressWarnings("serial")
-public class ImportXmlTemplateWindow extends ResizableWindow implements ValueChangeListener<String>, ClickListener, Receiver, SucceededListener {
+public class ImportXmlTemplateDialog extends ResizableDialog
+        implements ValueChangeListener<ValueChangeEvent<String>>, ComponentEventListener<ClickEvent<Button>>, Receiver {
 
     private static final String OPTION_TEXT = "Text";
 
@@ -116,54 +114,57 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
     
     ApplicationContext context;
 
-    public ImportXmlTemplateWindow(ImportXmlListener listener, Component component, ApplicationContext context) {
+    public ImportXmlTemplateDialog(ImportXmlListener listener, Component component, ApplicationContext context) {
         this.listener = listener;
         this.component = component;
         this.context = context;
-        setCaption("Import XML Template");
-        setWidth(600.0f, Unit.PIXELS);
-        setHeight(500.0f, Unit.PIXELS);
+        setWidth("600px");
+        setHeight("500px");
+
+        Span header = new Span("<b>Import XML Template</b><hr>");
+        header.setWidthFull();
+        header.getStyle().set("margin", null);
+        add(header);
 
         VerticalLayout layout = new VerticalLayout();
         layout.setSizeFull();
         layout.setSpacing(true);
         layout.setMargin(true);
-        layout.addStyleName(ValoTheme.WINDOW_BOTTOM_TOOLBAR);
-        layout.addComponent(new Label("Import XML from either an XSD or WSDL source."));
+        layout.add(new Span("Import XML from either an XSD or WSDL source."));
 
-        optionGroup = new RadioButtonGroup<String>("Select the location of the XSD or WSDL.");
+        optionGroup = new RadioButtonGroup<String>();
+        optionGroup.setLabel("Select the location of the XSD or WSDL.");
+        optionGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
         optionGroup.setItems(OPTION_TEXT, OPTION_FILE, OPTION_URL, OPTION_RESOURCE);
         optionGroup.setValue(OPTION_TEXT);
         optionGroup.addValueChangeListener(this);
-        layout.addComponent(optionGroup);
+        layout.add(optionGroup);
 
         optionLayout = new VerticalLayout();
         optionLayout.setSizeFull();
 
         editor = new AceEditor();
-        editor.setCaption("Enter the XML text:");
         editor.setMode(AceMode.xml);
         editor.setSizeFull();
         editor.setHighlightActiveLine(true);
         editor.setShowPrintMargin(false);
+        editor.setId("xmlEditor");
 
         Button importButton = new Button("Import");
         importButton.addClickListener(this);
 
-        upload = new Upload(null, this);
-        upload.addSucceededListener(this);
-        upload.setButtonCaption(null);
+        upload = new Upload(this);
+        upload.addSucceededListener(event -> importXml(new String(uploadedData.toByteArray())));
         urlTextField = new TextField("Enter the URL:");
-        urlTextField.setWidth(100.0f, Unit.PERCENTAGE);
+        urlTextField.setWidthFull();
         
         resourceComboBox = createResourceCB();
         
-        layout.addComponent(optionLayout);
-        layout.setExpandRatio(optionLayout, 1.0f);
+        layout.addAndExpand(optionLayout);
         rebuildOptionLayout();
 
-        addComponent(layout, 1);
-        addComponent(buildButtonFooter(importButton, buildCloseButton()));
+        addComponentAtIndex(1, layout);
+        add(buildButtonFooter(importButton, buildCloseButton()));
 
     }
     
@@ -185,35 +186,31 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
         	cb.setItems(resources);
         }
 
-        cb.setWidth(50.0f, Unit.PERCENTAGE);
+        cb.setWidth("50%");
         return cb;
     }
 
     protected void rebuildOptionLayout() {
-        optionLayout.removeAllComponents();
+        optionLayout.removeAll();
         if (optionGroup.getValue().equals(OPTION_TEXT)) {
-            optionLayout.addComponent(editor);
+            Label editorLabel = new Label("Enter the XML text:");
+            editorLabel.setFor(editor);
+            optionLayout.add(editorLabel, editor);
             editor.focus();
         } else if (optionGroup.getValue().equals(OPTION_FILE)) {
-            optionLayout.addComponent(upload);
-            upload.focus();
+            optionLayout.add(upload);
         } else if (optionGroup.getValue().equals(OPTION_URL)) {
-            optionLayout.addComponent(urlTextField);
+            optionLayout.add(urlTextField);
             urlTextField.focus();
         } else if (optionGroup.getValue().equals(OPTION_RESOURCE)) {
-            optionLayout.addComponent(resourceComboBox);
+            optionLayout.add(resourceComboBox);
             resourceComboBox.focus();
         }
     }
 
     @Override
-    public void valueChange(ValueChangeEvent<String> event) {
+    public void valueChanged(ValueChangeEvent<String> event) {
         rebuildOptionLayout();
-    }
-
-    @Override
-    public void uploadSucceeded(SucceededEvent event) {
-        importXml(new String(uploadedData.toByteArray()));
     }
 
     @Override
@@ -222,11 +219,11 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
     }
 
     @Override
-    public void buttonClick(ClickEvent event) {
+    public void onComponentEvent(ClickEvent<Button> event) {
         if (optionGroup.getValue().equals(OPTION_TEXT)) {
             importXml(editor.getValue());
         } else if (optionGroup.getValue().equals(OPTION_FILE)) {
-            upload.submitUpload();
+            upload.getElement().callJsFunction("uploadFiles");
         } else if (optionGroup.getValue().equals(OPTION_URL)) {
             InputStream in = null;
             String text = null;
@@ -269,9 +266,8 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
                 } else if (rootName.equals("schema")) {
                     importFromXsd(text);
                 } else {
-                    Notification note = new Notification("Unrecognized Content", "The XML file has a root element of " + rootName
-                            + ", but expected \"definitions\" for WSDL or \"schema\" for XSD.");
-                    note.show(Page.getCurrent());
+                    new Notification("Unrecognized Content: The XML file has a root element of " + rootName
+                            + ", but expected \"definitions\" for WSDL or \"schema\" for XSD.").open();
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -311,18 +307,16 @@ public class ImportXmlTemplateWindow extends ResizableWindow implements ValueCha
         }
 
         if (allOperations.size() == 0) {
-            Notification note = new Notification("No operations", "No operations found in the WSDL.");
-            note.show(Page.getCurrent());
+            new Notification("No operations found in the WSDL.").open();
         } else if (allOperations.size() == 1) {
             importFromWsdl(wsdl, allOperations.get(0));
         } else {
-            ChooseWsdlServiceOperationWindow dialog = new ChooseWsdlServiceOperationWindow(allOperations, new ServiceChosenListener() {
+            new ChooseWsdlServiceOperationDialog(allOperations, new ServiceChosenListener() {
                 public boolean onOk(SoapOperation operation) {
                     importFromWsdl(wsdl, operation);
                     return true;
                 }
-            });
-            UI.getCurrent().addWindow(dialog);
+            }).open();
         }
     }
 

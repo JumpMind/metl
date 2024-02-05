@@ -22,26 +22,28 @@ package org.jumpmind.metl.ui.views.design;
 
 import javax.annotation.PostConstruct;
 
-import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.TopBarLink;
+import org.jumpmind.metl.ui.common.View;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.Route;
 
 @UiComponent
 @Scope(value = "ui")
-@TopBarLink(category = Category.Design, name = "Design", id = "design", icon = VaadinIcons.CONNECT, menuOrder = 1, useAsDefault = true)
-public class DesignView extends HorizontalLayout implements View {
+@TopBarLink(category = Category.Design, name = "Design", id = "design", icon = VaadinIcon.CONNECT, menuOrder = 1, useAsDefault = true)
+@Route("design")
+public class DesignView extends HorizontalLayout implements BeforeEnterObserver, View {
 
     private static final long serialVersionUID = 1L;
 
@@ -58,23 +60,23 @@ public class DesignView extends HorizontalLayout implements View {
 
         tabbedPanel = new TabbedPanel();
 
-        HorizontalSplitPanel leftSplit = new HorizontalSplitPanel();
+        SplitLayout leftSplit = new SplitLayout();
         leftSplit.setSizeFull();
-        leftSplit.setSplitPosition(UIConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS);
+        leftSplit.setSplitterPosition(20);
 
         projectNavigator = new DesignNavigator(context, tabbedPanel);
 
-        leftSplit.setFirstComponent(projectNavigator);
+        leftSplit.addToPrimary(projectNavigator);
         VerticalLayout container = new VerticalLayout();
         container.setSizeFull();
-        container.addComponent(tabbedPanel);
-        leftSplit.setSecondComponent(container);
+        container.add(tabbedPanel);
+        leftSplit.addToSecondary(container);
 
-        addComponent(leftSplit);
+        add(leftSplit);
     }
 
     @Override
-    public void enter(ViewChangeEvent event) {
+    public void beforeEnter(BeforeEnterEvent event) {
         projectNavigator.refresh();
     }
 
