@@ -87,7 +87,7 @@ public class KafkaProducerResource extends AbstractResourceRuntime {
 					value = getSerializerClass((String) value);
 				} else if (stringKeyValue.equalsIgnoreCase("SETTING_BUFFER_MEMORY") ||
 						stringKeyValue.equalsIgnoreCase("SETTING_LINGER_MS")) {
-					value = new Long((Integer)value);
+					value = Long.valueOf((Integer)value);
 				}
 				properties.put(stringKeyValue, value);
 			}

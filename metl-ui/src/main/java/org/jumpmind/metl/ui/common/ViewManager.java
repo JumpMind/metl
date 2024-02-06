@@ -87,7 +87,7 @@ public class ViewManager implements Serializable {
             Collections.sort(viewsByCategory, new Comparator<TopBarLink>() {
                 @Override
                 public int compare(TopBarLink o1, TopBarLink o2) {
-                    return new Integer(o1.menuOrder()).compareTo(new Integer(o2.menuOrder()));
+                    return Integer.valueOf(o1.menuOrder()).compareTo(Integer.valueOf(o2.menuOrder()));
                 }
             });
             if (viewsByCategory.size() > 0) {

@@ -56,7 +56,7 @@ public class DatabaseScript implements Comparable<DatabaseScript> {
 		}
 		parseVersion(parts[0]);
 		when = parseWhen(parts[1]);
-		order = new Integer(parts[2]);
+		order = Integer.valueOf(parts[2]);
 		parseDescription(parts[3]);
 		
 	}
@@ -67,9 +67,9 @@ public class DatabaseScript implements Comparable<DatabaseScript> {
 			if (parts.length < 3) {
 				throw new RuntimeException(String.format("An invalid version was provided: %s", version));
 			}
-			this.major = new Integer(parts[0]).intValue();
-			this.minor = new Integer(parts[1]).intValue();
-			this.build = new Integer(parts[2]).intValue();
+			this.major = Integer.valueOf(parts[0]).intValue();
+			this.minor = Integer.valueOf(parts[1]).intValue();
+			this.build = Integer.valueOf(parts[2]).intValue();
 		}
 	}
 	

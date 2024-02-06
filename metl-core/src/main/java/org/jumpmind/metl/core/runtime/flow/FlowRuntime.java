@@ -327,7 +327,7 @@ public class FlowRuntime {
                 try {
                     IFlowManipulator flowManipulator = (IFlowManipulator) Class
                             .forName(componentDefintion.getFlowManipulatorClassName())
-                            .newInstance();
+                            .getDeclaredConstructor().newInstance();
                     clone = flowManipulator.manipulate(clone, flowStep, configurationService);
                 } catch (RuntimeException e) {
                     throw e;

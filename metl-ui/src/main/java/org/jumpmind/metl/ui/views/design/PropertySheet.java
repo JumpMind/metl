@@ -70,6 +70,7 @@ import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeListener;
@@ -88,6 +89,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 
 import de.f0rce.ace.AceEditor;
 import de.f0rce.ace.enums.AceMode;
+import de.f0rce.ace.events.AceValueChanged;
 
 @SuppressWarnings("serial")
 public class PropertySheet extends Div {
@@ -805,9 +807,9 @@ public class PropertySheet extends Div {
                     editor.setShowGutter(false);
                     editor.setShowPrintMargin(false);
                     editor.setValue(obj.get(definition.getId(), definition.getDefaultValue()));
-                    editor.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
+                    editor.addValueChangeListener(new ComponentEventListener<AceValueChanged>() {
                         @Override
-                        public void valueChanged(ValueChangeEvent<String> event) {
+                        public void onComponentEvent(AceValueChanged event) {
                             Setting data = obj.findSetting(definition.getId());
                             data.setValue(event.getValue());
                             context.getConfigurationService().save(data);

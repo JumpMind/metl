@@ -74,21 +74,21 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class ImportExportService extends AbstractService implements IImportExportService {
     
-    final static protected Integer TABLE = new Integer(0);
-    final static protected Integer SQL = new Integer(1);
-    final static protected Integer KEY_COLUMNS = new Integer(2);
+    final static protected Integer TABLE = Integer.valueOf(0);
+    final static protected Integer SQL = Integer.valueOf(1);
+    final static protected Integer KEY_COLUMNS = Integer.valueOf(2);
     
-    final static Integer PROJECT_IDX = new Integer(0);
-    final static Integer PROJECT_VERSION_IDX = new Integer(1);
-    final static Integer MODEL_IDX = new Integer(0);
-    final static Integer RESOURCE_IDX = new Integer(0);
-    final static Integer FLOW_IDX = new Integer(5);
-    final static Integer AGENT_IDX = new Integer(0);
+    final static Integer PROJECT_IDX = Integer.valueOf(0);
+    final static Integer PROJECT_VERSION_IDX = Integer.valueOf(1);
+    final static Integer MODEL_IDX = Integer.valueOf(0);
+    final static Integer RESOURCE_IDX = Integer.valueOf(0);
+    final static Integer FLOW_IDX = Integer.valueOf(5);
+    final static Integer AGENT_IDX = Integer.valueOf(0);
     
-    final static Integer CREATE_TIME_IDX = new Integer(0);
-    final static Integer LAST_UPDATE_TIME_IDX = new Integer(1);
-    final static Integer CREATE_BY_IDX = new Integer(2);
-    final static Integer LAST_UPDATE_BY_IDX = new Integer(3);
+    final static Integer CREATE_TIME_IDX = Integer.valueOf(0);
+    final static Integer LAST_UPDATE_TIME_IDX = Integer.valueOf(1);
+    final static Integer CREATE_BY_IDX = Integer.valueOf(2);
+    final static Integer LAST_UPDATE_BY_IDX = Integer.valueOf(3);
 
     final String[][] PROJECT_SQL = {
             {"_project","select * from %1$s_project where id in (select project_id from %1$s_project_version where id='%2$s') union select * from %1$s_project where id='%3$s' order by 1","id"},

@@ -142,7 +142,8 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
                 	if (sortOrder != 0) {
                 		return sortOrder;
                 	} else {
-                		return new Integer(o1.getOrdinalSetting()==0?999999:o1.getOrdinalSetting()).compareTo(new Integer(o2.getOrdinalSetting()==0?999999:o2.getOrdinalSetting()));
+                        return Integer.valueOf(o1.getOrdinalSetting() == 0 ? 999999 : o1.getOrdinalSetting()).compareTo(
+                                Integer.valueOf(o2.getOrdinalSetting() == 0 ? 999999 : o2.getOrdinalSetting()));
                 	}
                 }
             });

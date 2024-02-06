@@ -89,6 +89,7 @@ dependencies {
     compile ("software.amazon.awssdk:sqs:${awsSdkVersion2}") {
         exclude group: 'com.fasterxml.jackson.core'
     }
+    implementation "javax.annotation:javax.annotation-api:1.3.2"
 }
 
 clean.doFirst {

@@ -175,7 +175,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
 
             Collections.sort(entitySettings, new Comparator<EntitySettings>() {
                 public int compare(EntitySettings o1, EntitySettings o2) {
-                    return new Integer(o1.getOrdinalSetting()).compareTo(new Integer(o2.getOrdinalSetting()));
+                    return Integer.valueOf(o1.getOrdinalSetting()).compareTo(Integer.valueOf(o2.getOrdinalSetting()));
                 }
             });
         }

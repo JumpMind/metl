@@ -395,7 +395,7 @@ public class ModelAttributeScriptHelper {
                         currentValue = ((Number) obj).longValue();
                     } else if (obj != null) {
                         try {
-                            currentValue = new Long(obj.toString());
+                            currentValue = Long.valueOf(obj.toString());
                         } catch (NumberFormatException e) {
                         }
                     }
@@ -419,12 +419,12 @@ public class ModelAttributeScriptHelper {
         Long sequenceValue = (Long) context.getContext().get(attribute.getId());
         Object breakAttributeValue = data.get(breakAttribute.getId());
         if (sequenceValue == null) {
-            sequenceValue = new Long(seed_value);
+            sequenceValue = Long.valueOf(seed_value);
         } else {
             if (context.getContext().get(attribute.getId() + "-" + breakAttribute.getId()).equals(breakAttributeValue)) {
-                sequenceValue = new Long(sequenceValue.longValue() + incrementValue);
+                sequenceValue = Long.valueOf(sequenceValue.longValue() + incrementValue);
             } else {
-                sequenceValue = new Long(seed_value);
+                sequenceValue = Long.valueOf(seed_value);
             }
         }
         context.getContext().put(attribute.getId(), sequenceValue);

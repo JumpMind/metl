@@ -89,7 +89,7 @@ public class SequenceGenerator extends AbstractRdbmsComponentRuntime {
         sql = getComponent().get(SQL);   
         String seqStartString = getComponent().get(SEQUENCE_START_VALUE);
         if (seqStartString != null && !seqStartString.isEmpty()) {
-            sequenceStartValue = new Long(seqStartString);
+            sequenceStartValue = Long.valueOf(seqStartString);
         }
         if ((sql == null || sql.isEmpty()) && sequenceStartValue == null) {
             throw new IllegalStateException("Either a sequence start value or sql statement to get the start value is required");

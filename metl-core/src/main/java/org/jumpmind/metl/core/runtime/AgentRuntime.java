@@ -23,6 +23,7 @@ package org.jumpmind.metl.core.runtime;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -76,7 +77,7 @@ import org.jumpmind.util.FormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.scheduling.support.CronSequenceGenerator;
+import org.springframework.scheduling.support.CronExpression;
 import org.springframework.scheduling.support.CronTrigger;
 
 public class AgentRuntime {
@@ -346,7 +347,7 @@ public class AgentRuntime {
                 if (deployment.asStartType() == StartType.SCHEDULED_CRON) {
                     String cron = deployment.getStartExpression();
                     log.info("Scheduling '{}' on '{}' with a cron expression of '{}'  The next run time should be at: {}",
-                            new Object[] { flow.getName(), agent.getName(), cron, new CronSequenceGenerator(cron).next(new Date()) });
+                            new Object[] { flow.getName(), agent.getName(), cron, CronExpression.parse("test").next(LocalDateTime.now()) });
 
                     ScheduledFuture<?> future = this.flowExecutionScheduler
                             .schedule(new FlowRunner("metl cron", agentProjectVersionFlowDeployment), new CronTrigger(cron));
@@ -443,7 +444,7 @@ public class AgentRuntime {
             Class<? extends IResourceRuntime> clazz = (Class<? extends IResourceRuntime>) definition.getClassLoader()
                     .loadClass(definition.getClassName());
             if (clazz != null) {
-                IResourceRuntime runtime = clazz.newInstance();
+                IResourceRuntime runtime = clazz.getDeclaredConstructor().newInstance();
                 runtime.start(resource, agentOverrides);
                 return runtime;
             } else {
@@ -466,7 +467,7 @@ public class AgentRuntime {
                 try {
                     IComponentDeploymentListener listener = (IComponentDeploymentListener) Class
                             .forName(componentDefintion.getDeploymentListenerClassName(), true, componentDefintion.getClassLoader())
-                            .newInstance();
+                            .getDeclaredConstructor().newInstance();
                     if (listener instanceof IHttpRequestMappingRegistryAware) {
                         ((IHttpRequestMappingRegistryAware) listener).setHttpRequestMappingRegistry(httpRequestMappingRegistry);
                     }

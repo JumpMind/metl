@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -116,12 +117,14 @@ import com.vaadin.flow.di.LookupInitializer;
 import com.vaadin.flow.router.InternalServerError;
 import com.vaadin.flow.router.RouteNotFoundError;
 import com.vaadin.flow.server.InitParameters;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.startup.AnnotationValidator;
-import com.vaadin.flow.server.startup.DevModeInitializer;
+import com.vaadin.base.devserver.startup.DevModeInitializer;
 import com.vaadin.flow.server.startup.ErrorNavigationTargetInitializer;
 import com.vaadin.flow.server.startup.LookupServletContainerInitializer;
 import com.vaadin.flow.server.startup.RouteRegistryInitializer;
 import com.vaadin.flow.server.startup.ServletContextListeners;
+import com.vaadin.flow.server.startup.VaadinInitializerException;
 
 import de.f0rce.ace.AceEditor;
 
@@ -309,12 +312,18 @@ public class AppInitializer implements ServletContextListener {
         runInitializer(new RouteRegistryInitializer(), sce, AdminView.class, DesignView.class,
                 ExploreDataSourceView.class, ExploreDirectoryView.class, ExploreServicesView.class, ManageView.class);
         // @NpmPackage, @JsModule, @CssImport, @JavaScript or @Theme
-        runInitializer(new DevModeInitializer(), sce, AceEditor.class, AppUI.class, Diagram.class, RunDiagram.class, Button.class,
-                Checkbox.class, ComboBox.class, ContextMenu.class, DatePicker.class, Dialog.class, DragSource.class, DropTarget.class,
-                FormItem.class, FormLayout.class, Grid.class, GridSelectionColumn.class,
+        Set<Class<?>> devModeInitClassSet = new HashSet<Class<?>>();
+        devModeInitClassSet.addAll(Arrays.asList(AceEditor.class, AppUI.class, Diagram.class, RunDiagram.class, Button.class,
+                Checkbox.class, ComboBox.class, ContextMenu.class, DatePicker.class, Dialog.class, DragSource.class,
+                DropTarget.class, FormItem.class, FormLayout.class, Grid.class, GridSelectionColumn.class,
                 HorizontalLayout.class, Icon.class, ListBox.class, MenuBar.class, Notification.class, PasswordField.class,
                 ProgressBar.class, RadioButtonGroup.class, Scroller.class, Select.class, SplitLayout.class, Tabs.class,
-                TextArea.class, TextField.class, TreeGrid.class, Upload.class, VerticalLayout.class);
+                TextArea.class, TextField.class, TreeGrid.class, Upload.class, VerticalLayout.class));
+        try {
+            DevModeInitializer.initDevModeHandler(devModeInitClassSet, VaadinService.getCurrent().getContext());
+        } catch (VaadinInitializerException e) {
+            throw new RuntimeException(e);
+        }
         runInitializer(new AnnotationValidator(), sce, AdminView.class, DesignView.class,
                 ExploreDataSourceView.class, ExploreDirectoryView.class, ExploreServicesView.class, ManageView.class);
     }

@@ -10,7 +10,7 @@ public class AppServiceInitListener implements VaadinServiceInitListener {
 
     @Override
     public void serviceInit(ServiceInitEvent event) {
-        event.addBootstrapListener(response -> {
+        event.addIndexHtmlRequestListener(response -> {
             final Element head = response.getDocument().head();
             head.appendElement("meta").attr("name", "viewport")
                     .attr("content", "width=device-width, initial-scale=1");

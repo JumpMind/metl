@@ -51,6 +51,7 @@ import com.vaadin.flow.component.textfield.TextField;
 
 import de.f0rce.ace.AceEditor;
 import de.f0rce.ace.enums.AceMode;
+import de.f0rce.ace.events.AceValueChanged;
 
 @SuppressWarnings({ "serial" })
 public class EditXsltPanel extends AbstractComponentEditPanel implements ValueChangeListener<ValueChangeEvent<String>> {
@@ -187,8 +188,8 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements ValueCh
         return entities;
     }
 
-    class StylesheetChangeListener implements ValueChangeListener<ValueChangeEvent<String>> {
-        public void valueChanged(ValueChangeEvent<String> event) {
+    class StylesheetChangeListener implements ComponentEventListener<AceValueChanged> {
+        public void onComponentEvent(AceValueChanged event) {
             Setting stylesheet = component.findSetting(XsltProcessor.XSLT_PROCESSOR_STYLESHEET);
             stylesheet.setValue(editor.getValue());
             context.getConfigurationService().save(component);

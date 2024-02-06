@@ -24,11 +24,11 @@ import org.jumpmind.metl.core.runtime.component.Web;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 
-import com.vaadin.flow.component.HasValue.ValueChangeEvent;
-import com.vaadin.flow.component.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.ComponentEventListener;
 
 import de.f0rce.ace.AceEditor;
 import de.f0rce.ace.enums.AceMode;
+import de.f0rce.ace.events.AceValueChanged;
 
 @SuppressWarnings("serial")
 public class EditWebPanel extends AbstractComponentEditPanel {
@@ -42,8 +42,8 @@ public class EditWebPanel extends AbstractComponentEditPanel {
         editor = CommonUiUtils.createAceEditor();
         editor.setMode(AceMode.xml);
         editor.setValue(component.get(Web.BODY_TEXT));
-        editor.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
-            public void valueChanged(ValueChangeEvent<String> event) {
+        editor.addValueChangeListener(new ComponentEventListener<AceValueChanged>() {
+            public void onComponentEvent(AceValueChanged event) {
                 component.put(Web.BODY_TEXT, event.getValue());
                 context.getConfigurationService().save(component.findSetting(Web.BODY_TEXT));
             }

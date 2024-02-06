@@ -86,7 +86,8 @@ public class MailServerPanel extends AbstractAdminPanel {
         form.add(hostField);
         hostField.focus();
 
-        Select<String> transportField = new Select<String>("Transport");
+        Select<String> transportField = new Select<String>();
+        transportField.setLabel("Transport");
         transportField.setItems("smtp", "smtps", "mock_smtp");
         transportField.setValue(transportSetting.getValue() == null ? "smtp" : transportSetting.getValue());
         transportField.setEmptySelectionAllowed(false);

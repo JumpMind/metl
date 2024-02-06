@@ -117,7 +117,7 @@ public class PluginsPanel extends AbstractAdminPanel {
         Collections.sort(plugins, new Comparator<Plugin>() {
             @Override
             public int compare(Plugin o1, Plugin o2) {
-                return new Integer(o1.getLoadOrder()).compareTo(new Integer(o2.getLoadOrder()));
+                return Integer.valueOf(o1.getLoadOrder()).compareTo(Integer.valueOf(o2.getLoadOrder()));
             }
         });
         grid.setItems(plugins);

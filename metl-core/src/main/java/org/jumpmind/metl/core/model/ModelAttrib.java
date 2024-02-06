@@ -113,7 +113,7 @@ public class ModelAttrib extends AbstractNamedObject implements IAuditable, Comp
     
     @Override
     public int compareTo(ModelAttrib o) {
-        return new Integer(attributeOrder).compareTo(o.attributeOrder);
+        return Integer.valueOf(attributeOrder).compareTo(o.attributeOrder);
     }
 
 }

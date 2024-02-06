@@ -282,7 +282,7 @@ public class RelationalHierarchicalMapping extends AbstractMapping {
     		if (storedEntityData == null) {
     			storedEntityData = new ArrayList<EntityData>();
     			byQueryRowData.put(originatingStepId, storedEntityData);
-    			currentInputRowMap.put(originatingStepId, new Integer(0));
+    			currentInputRowMap.put(originatingStepId, Integer.valueOf(0));
     		}
     		storedEntityData.addAll(inputRows);
     }

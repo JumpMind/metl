@@ -714,7 +714,7 @@ public class ConfigurationService extends AbstractService
         Collections.sort(steps, new Comparator<FlowStep>() {
             @Override
             public int compare(FlowStep o1, FlowStep o2) {
-                return new Integer(o1.getX()).compareTo(new Integer(o2.getX()));
+                return Integer.valueOf(o1.getX()).compareTo(Integer.valueOf(o2.getX()));
             }
         });
 

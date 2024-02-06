@@ -133,7 +133,7 @@ public class DataDiff extends AbstractComponentRuntime {
                         .getSingleEntitySetting(o2.getId(), DataDiff.ENTITY_ORDER);
                 int orderValue2 = order2 != null ? Integer.parseInt(order2.getValue()) : 0;
 
-                return new Integer(orderValue1).compareTo(new Integer(orderValue2));
+                return Integer.valueOf(orderValue1).compareTo(Integer.valueOf(orderValue2));
             }
         });
     }

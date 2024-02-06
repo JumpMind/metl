@@ -52,11 +52,10 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasValue.ValueChangeEvent;
-import com.vaadin.flow.component.HasValue.ValueChangeListener;
 
 import de.f0rce.ace.AceEditor;
 import de.f0rce.ace.enums.AceMode;
+import de.f0rce.ace.events.AceValueChanged;
 
 @SuppressWarnings("serial")
 public class EditTransformerPanel extends AbstractComponentEditPanel {
@@ -433,11 +432,11 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             editor = CommonUiUtils.createAceEditor();
             editor.setMode(AceMode.java);
             
-            editor.addSelectionChangeListener(event -> cursorPosition = event.getSelectionFrom());
-            editor.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
+            editor.addSelectionChangeListener(event -> cursorPosition = event.getCursorPosition().getIndex());
+            editor.addValueChangeListener(new ComponentEventListener<AceValueChanged>() {
 
                 @Override
-                public void valueChanged(ValueChangeEvent<String> event) {
+                public void onComponentEvent(AceValueChanged event) {
                     setting.setValue(event.getValue());
                     EditTransformerPanel.this.context.getConfigurationService()
                             .save(setting);

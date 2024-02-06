@@ -24,6 +24,7 @@ import org.jumpmind.metl.core.runtime.component.Script;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -31,6 +32,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 
 import de.f0rce.ace.AceEditor;
 import de.f0rce.ace.enums.AceMode;
+import de.f0rce.ace.events.AceValueChanged;
 
 public class EditScriptPanel extends AbstractComponentEditPanel {
 
@@ -99,10 +101,10 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
         buttonBar.addLeft(select);
 
         if (!readOnly) {
-            editor.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
+            editor.addValueChangeListener(new ComponentEventListener<AceValueChanged>() {
 
                 @Override
-                public void valueChanged(ValueChangeEvent<String> event) {
+                public void onComponentEvent(AceValueChanged event) {
                     String key = (String) select.getValue();
                     EditScriptPanel.this.component.put(key, event.getValue());
                     EditScriptPanel.this.context.getConfigurationService()

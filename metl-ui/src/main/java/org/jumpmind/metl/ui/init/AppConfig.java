@@ -468,7 +468,7 @@ public class AppConfig {
             try {
                 securityService = (ISecurityService) Class
                         .forName(System.getProperty(SecurityConstants.CLASS_NAME_SECURITY_SERVICE, SecurityService.class.getName()))
-                        .newInstance();
+                        .getDeclaredConstructor().newInstance();
                 securityService.setConfigDir(AppUtils.getBaseDir());
             } catch (RuntimeException e) {
                 throw e;

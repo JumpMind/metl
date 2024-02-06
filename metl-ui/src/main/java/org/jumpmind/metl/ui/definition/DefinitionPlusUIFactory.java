@@ -105,7 +105,8 @@ public class DefinitionPlusUIFactory extends DefinitionFactory implements IDefin
         try {
             XMLComponentUI ui = getUiDefinition(projectVersionId, componentId);
             if (ui != null && isNotBlank(ui.getClassName())) {
-                return (IComponentEditPanel) Class.forName(ui.getClassName(), true, ui.getClassLoader()).newInstance();
+                return (IComponentEditPanel) Class.forName(ui.getClassName(), true, ui.getClassLoader())
+                        .getDeclaredConstructor().newInstance();
             } else {
                 return null;
             }

@@ -150,7 +150,7 @@ class EditFlowSettingsDialog extends ResizableDialog implements SelectionListene
         List<FlowParameter> params = flow.getFlowParameters();
         Collections.sort(params, new Comparator<FlowParameter>() {
             public int compare(FlowParameter o1, FlowParameter o2) {
-                return new Integer(o1.getPosition()).compareTo(new Integer(o2.getPosition()));
+                return Integer.valueOf(o1.getPosition()).compareTo(Integer.valueOf(o2.getPosition()));
             }
         });
 

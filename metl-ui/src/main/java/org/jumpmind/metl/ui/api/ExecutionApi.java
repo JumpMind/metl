@@ -339,7 +339,7 @@ public class ExecutionApi {
 
     private void addParameter(String name, Operation operation, Class<? extends AbstractSerializableParameter<?>> type) {
         try {
-            AbstractSerializableParameter<?> param = type.newInstance();
+            AbstractSerializableParameter<?> param = type.getDeclaredConstructor().newInstance();
             operation.addParameter(param.name(name).property(new StringProperty()));
         } catch (Exception e) {
             log.info("Failed to create parameter: " + name, e);

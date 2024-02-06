@@ -242,7 +242,7 @@ public class SecurityService implements ISecurityService {
             alg.update(randomBytes);
             byte hash[] = alg.digest();
             for (int i = 0; i < hash.length; i++) {
-                Integer c = new Integer(hash[i]);
+                Integer c = Integer.valueOf(hash[i]);
                 String hex = Integer.toHexString(c.intValue() + 128);
                 if (hex.length() == 1)
                     hex = "0" + hex;

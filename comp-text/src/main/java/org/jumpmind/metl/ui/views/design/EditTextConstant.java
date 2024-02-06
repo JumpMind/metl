@@ -25,11 +25,11 @@ import org.jumpmind.metl.core.runtime.component.TextConstant;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 
-import com.vaadin.flow.component.HasValue.ValueChangeEvent;
-import com.vaadin.flow.component.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.ComponentEventListener;
 
 import de.f0rce.ace.AceEditor;
 import de.f0rce.ace.enums.AceMode;
+import de.f0rce.ace.events.AceValueChanged;
 
 @SuppressWarnings("serial")
 public class EditTextConstant extends AbstractComponentEditPanel {
@@ -43,8 +43,8 @@ public class EditTextConstant extends AbstractComponentEditPanel {
         editor = CommonUiUtils.createAceEditor();
         editor.setMode(AceMode.text);
         editor.setValue(component.get(TextConstant.SETTING_TEXT));
-        editor.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
-            public void valueChanged(ValueChangeEvent<String> event) {
+        editor.addValueChangeListener(new ComponentEventListener<AceValueChanged>() {
+            public void onComponentEvent(AceValueChanged event) {
                 Setting data = component.findSetting(TextConstant.SETTING_TEXT);
                 data.setValue(event.getValue());
                 context.getConfigurationService().save(data);

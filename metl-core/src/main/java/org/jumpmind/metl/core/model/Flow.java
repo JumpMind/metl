@@ -405,14 +405,14 @@ public class Flow extends AbstractNamedObject implements IAuditable {
     static public class XSorter implements Comparator<FlowStep> {
         @Override
         public int compare(FlowStep o1, FlowStep o2) {
-            return new Integer(o1.getX()).compareTo(new Integer(o2.getX()));
+            return Integer.valueOf(o1.getX()).compareTo(Integer.valueOf(o2.getX()));
         }
     }
     
     static public class YSorter implements Comparator<FlowStep> {
         @Override
         public int compare(FlowStep o1, FlowStep o2) {
-            return new Integer(o1.getY()).compareTo(new Integer(o2.getY()));
+            return Integer.valueOf(o1.getY()).compareTo(Integer.valueOf(o2.getY()));
         }
     }
 }

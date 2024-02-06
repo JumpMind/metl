@@ -99,9 +99,9 @@ public class ExecutionService extends AbstractService implements IExecutionServi
         Collections.sort(steps, new Comparator<ExecutionStep>() {
             @Override
             public int compare(ExecutionStep o1, ExecutionStep o2) {
-                int order = new Integer(o1.getApproximateOrder()).compareTo(new Integer(o2.getApproximateOrder()));
+                int order = Integer.valueOf(o1.getApproximateOrder()).compareTo(Integer.valueOf(o2.getApproximateOrder()));
                 if (order == 0) {
-                    order = new Integer(o1.getThreadNumber()).compareTo(new Integer(o2.getThreadNumber()));
+                    order = Integer.valueOf(o1.getThreadNumber()).compareTo(Integer.valueOf(o2.getThreadNumber()));
                 }
                 return order;
             }

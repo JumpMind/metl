@@ -22,8 +22,8 @@ import java.util.Date
 	buildNumber = 'a'.equals(buildNumber) ?  ('a.' + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())) : buildNumber
 	version = version + "." + buildNumber
 	
-    sourceCompatibility=1.8
-    targetCompatibility=1.8
+    sourceCompatibility=1.11
+    targetCompatibility=1.11
     
     if (project.name.startsWith('comp-') && projectDir.getPath().contains('metl-com')) {
     		apply plugin: 'maven-publish'

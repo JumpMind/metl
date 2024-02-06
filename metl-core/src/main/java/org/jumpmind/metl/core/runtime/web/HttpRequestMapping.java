@@ -131,7 +131,7 @@ public class HttpRequestMapping implements Serializable, Comparable<HttpRequestM
 
     @Override
     public int compareTo(HttpRequestMapping o) {
-        int compare = new Integer(priority).compareTo(new Integer(o.getPriority()));
+        int compare = Integer.valueOf(priority).compareTo(Integer.valueOf(o.getPriority()));
         if (compare == 0) {
             compare = path.compareTo(o.path);
         }

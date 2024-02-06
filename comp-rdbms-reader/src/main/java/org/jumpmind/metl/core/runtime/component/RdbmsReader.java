@@ -223,7 +223,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                             + "Cannot match column name to unique attribute. Column: '%s')",columnName));
                 }
             } else {
-                if (StringUtils.isEmpty(tableName)) {
+                if (org.apache.commons.lang3.StringUtils.isEmpty(tableName)) {
                     throw new MisconfiguredException("Table name could not be determined from metadata or hints.  Please check column and hint.  "
                             + "(Note to SQL-Server users: metadata may not be returned unless you append 'FOR BROWSE' to the end of your query "
                             + "or set 'useCursors=true' on the JDBC URL.)" + "Query column = " + i);

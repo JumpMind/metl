@@ -56,7 +56,6 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
-import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
 
@@ -120,9 +119,9 @@ public class ExportDialog extends ResizableDialog {
     }
     
     private void selectAll() {
-		exportFlowGroup.setValue(exportFlowGroup.getDataProvider().fetch(new Query<>()).collect(Collectors.toSet()));
-        exportModelGroup.setValue(exportModelGroup.getDataProvider().fetch(new Query<>()).collect(Collectors.toSet()));
-        exportResourceGroup.setValue(exportResourceGroup.getDataProvider().fetch(new Query<>()).collect(Collectors.toSet()));
+		exportFlowGroup.setValue(exportFlowGroup.getListDataView().getItems().collect(Collectors.toSet()));
+        exportModelGroup.setValue(exportModelGroup.getListDataView().getItems().collect(Collectors.toSet()));
+        exportResourceGroup.setValue(exportResourceGroup.getListDataView().getItems().collect(Collectors.toSet()));
     }
     
     private void selectNone() {

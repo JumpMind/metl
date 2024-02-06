@@ -298,8 +298,8 @@ public class FilePoller extends AbstractComponentRuntime {
                         cmpr = new String(o1.getRelativePath())
                                 .compareTo(new String(o2.getRelativePath()));
                     } else if (SORT_MODIFIED.equals(fileSortOption)) {
-                        cmpr = new Long(o1.getLastUpdated())
-                                .compareTo(new Long(o2.getLastUpdated()));
+                        cmpr = Long.valueOf(o1.getLastUpdated())
+                                .compareTo(Long.valueOf(o2.getLastUpdated()));
                     }
                     return cmpr;
                 });

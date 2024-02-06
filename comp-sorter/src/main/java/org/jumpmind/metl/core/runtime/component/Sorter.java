@@ -122,8 +122,8 @@ public class Sorter extends AbstractComponentRuntime {
 
         Collections.sort(sortKeyAttributeIdList, new Comparator<ComponentAttribSetting>() {
             public int compare(ComponentAttribSetting o1, ComponentAttribSetting o2) {
-                return new Integer(Integer.parseInt(o1.getValue())==0?999999:Integer.parseInt(o1.getValue())).compareTo
-                		(new Integer(Integer.parseInt(o2.getValue())==0?999999:Integer.parseInt(o2.getValue())));
+                return Integer.valueOf(Integer.parseInt(o1.getValue())==0?999999:Integer.parseInt(o1.getValue())).compareTo
+                		(Integer.valueOf(Integer.parseInt(o2.getValue())==0?999999:Integer.parseInt(o2.getValue())));
             }
         });
         

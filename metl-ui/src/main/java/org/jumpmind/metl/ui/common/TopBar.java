@@ -94,7 +94,7 @@ public class TopBar extends HorizontalLayout implements AfterNavigationObserver 
             boolean needDefaultView = defaultView == null && links.size() > 0;
             MenuItem categoryItem = null;
             if (links.size() > 1) {
-                categoryItem = menuBar.addItem(category.name(), null);
+                categoryItem = menuBar.addItem(category.name());
                 categoryItems.add(categoryItem);
             }
 
