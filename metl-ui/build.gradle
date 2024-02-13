@@ -28,6 +28,7 @@ dependencies {
        exclude group:'com.googlecode.guava-osgi'
     }    
     compile "jlibs:jlibs-xml:1.0"
+    provided "xerces:xercesImpl:2.9.1"
     compile "com.vaadin:vaadin-server:$vaadinVersion"    
     compile "com.vaadin:vaadin-push:$vaadinVersion"    
     compile "com.vaadin:vaadin-themes:$vaadinVersion"    
