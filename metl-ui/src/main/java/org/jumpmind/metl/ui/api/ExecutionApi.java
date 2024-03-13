@@ -39,8 +39,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.Produces;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
 import org.jumpmind.metl.core.model.Agent;
@@ -71,7 +74,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -82,29 +84,29 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.HandlerMapping;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.models.Info;
-import io.swagger.models.Operation;
-import io.swagger.models.Path;
-import io.swagger.models.Response;
-import io.swagger.models.Scheme;
-import io.swagger.models.Swagger;
-import io.swagger.models.Tag;
-import io.swagger.models.parameters.AbstractSerializableParameter;
-import io.swagger.models.parameters.FormParameter;
-import io.swagger.models.parameters.PathParameter;
-import io.swagger.models.parameters.QueryParameter;
-import io.swagger.models.properties.StringProperty;
-import io.swagger.util.Json;
-import io.swagger.util.Yaml;
-import springfox.documentation.annotations.ApiIgnore;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.PathParameter;
+import io.swagger.v3.oas.models.parameters.QueryParameter;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.oas.models.servers.Server;
+import io.swagger.v3.oas.models.tags.Tag;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Yaml;
 
-@Api(value = "Execution API", description = "This is the API for Metl")
-@Controller
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Execution API", description = "This is the API for Metl")
+@RestController
+@RequestMapping("/api")
+@Produces("application/xml,application/json")
+@Consumes("application/xml,application/json")
 public class ExecutionApi {
 
     private static final String SWAGGER_JSON = "/swagger.json";
@@ -129,14 +131,14 @@ public class ExecutionApi {
 
     AntPathMatcher patternMatcher = new AntPathMatcher();
 
-    @ApiOperation(
-            value = "Invoke a flow that is deployed to an agent by name.  This is the way a non-webservice enabled flow is typically called by an external tool")
+    @io.swagger.v3.oas.annotations.Operation(
+            summary = "Invoke a flow that is deployed to an agent by name.  This is the way a non-webservice enabled flow is typically called by an external tool")
     @RequestMapping(value = "/agents/{agentName}/deployments/{deploymentName}/invoke", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public final ExecutionResults invoke(@ApiParam(value = "The name of the agent to use") @PathVariable("agentName") String agentName,
-            @ApiParam(value = "The name of the flow deployment to invoke") @PathVariable("deploymentName") String deploymentName,
-            @ApiParam(value = "Wether to start the flow asynchronously and poll for status") @RequestParam(required = false) Boolean async,            
+    public final ExecutionResults invoke(@io.swagger.v3.oas.annotations.Parameter(description = "The name of the agent to use") @PathVariable("agentName") String agentName,
+            @io.swagger.v3.oas.annotations.Parameter(description = "The name of the flow deployment to invoke") @PathVariable("deploymentName") String deploymentName,
+            @io.swagger.v3.oas.annotations.Parameter(description = "Wether to start the flow asynchronously and poll for status") @RequestParam(required = false) Boolean async,            
             HttpServletRequest req) {
     	if (async == null) {
     		async=false;
@@ -144,15 +146,15 @@ public class ExecutionApi {
         return callFlow(agentName, deploymentName, null, req, async);
     }
 
-    @ApiOperation(
-            value = "Invoke a flow that is deployed to an agent by name.  This is the way a non-webservice enabled flow is typically called by an external tool")
+    @io.swagger.v3.oas.annotations.Operation(
+            summary = "Invoke a flow that is deployed to an agent by name.  This is the way a non-webservice enabled flow is typically called by an external tool")
     @RequestMapping(value = "/agents/{agentName}/deployments/{deploymentName}/versions/{versionName}/invoke", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public final ExecutionResults invoke(@ApiParam(value = "The name of the agent to use") @PathVariable("agentName") String agentName,
-            @ApiParam(value = "The name of the flow deployment to invoke") @PathVariable("deploymentName") String deploymentName,
-            @ApiParam(value = "The version of the deployed flow to invoke") @PathVariable("versionName") String versionName,
-            @ApiParam(value = "Wether to start the flow asynchronously and poll for status") @RequestParam(required = false) Boolean async,            
+    public final ExecutionResults invoke(@io.swagger.v3.oas.annotations.Parameter(description = "The name of the agent to use") @PathVariable("agentName") String agentName,
+            @io.swagger.v3.oas.annotations.Parameter(description = "The name of the flow deployment to invoke") @PathVariable("deploymentName") String deploymentName,
+            @io.swagger.v3.oas.annotations.Parameter(description = "The version of the deployed flow to invoke") @PathVariable("versionName") String versionName,
+            @io.swagger.v3.oas.annotations.Parameter(description = "Wether to start the flow asynchronously and poll for status") @RequestParam(required = false) Boolean async,            
             HttpServletRequest req) {    	
     	if (async == null) {
     		async=false;
@@ -160,18 +162,18 @@ public class ExecutionApi {
         return callFlow(agentName, deploymentName, versionName, req, async);
     }
 
-    @ApiOperation(
-            value = "Check the status of a flow that has been invoked.  This is the way a non-webservice enabled flow that has been invoked asynchronously can have status checked")
+    @io.swagger.v3.oas.annotations.Operation(
+            summary = "Check the status of a flow that has been invoked.  This is the way a non-webservice enabled flow that has been invoked asynchronously can have status checked")
     @RequestMapping(value = "/executions/{executionId}/status", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public final ExecutionResults status(@ApiParam(value = "The execution Id of the flow on which to check status") @PathVariable("executionId") String executionId,
+    public final ExecutionResults status(@io.swagger.v3.oas.annotations.Parameter(description = "The execution Id of the flow on which to check status") @PathVariable("executionId") String executionId,
             HttpServletRequest req) {    	
         return checkStatus(executionId);
     }
 
     
-    @ApiIgnore
+    @Hidden
     @RequestMapping(value = WS + "/**", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
@@ -179,7 +181,7 @@ public class ExecutionApi {
         return executeFlow(req, res, null);
     }
 
-    @ApiIgnore
+    @Hidden
     @RequestMapping(value = WS + "/**", method = RequestMethod.PUT)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
@@ -187,7 +189,7 @@ public class ExecutionApi {
         return executeFlow(req, res, payload);
     }
 
-    @ApiIgnore
+    @Hidden
     @RequestMapping(value = WS + "/**", method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
@@ -196,7 +198,7 @@ public class ExecutionApi {
         return executeFlow(req, res, payload);
     }
 
-    @ApiIgnore
+    @Hidden
     @RequestMapping(value = WS + "/**", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
@@ -205,24 +207,24 @@ public class ExecutionApi {
         return executeFlow(req, res, payload);
     }
 
-    @ApiOperation(value = "This is the Json Swagger API definition for Metl Hosted Services. Visit http://swagger.io for more details about the specification")
+    @io.swagger.v3.oas.annotations.Operation(summary = "This is the Json Swagger API definition for Metl Hosted Services. Visit http://swagger.io for more details about the specification")
     @RequestMapping(value = SWAGGER_JSON, method = RequestMethod.GET)
     public final void swaggerJson(HttpServletRequest req, HttpServletResponse res) throws Exception {
-        Swagger swagger = buildSwagger(SWAGGER_JSON, req, res);
-        res.getWriter().write(Json.pretty().writeValueAsString(swagger));
+        OpenAPI openApi = buildOpenApi(SWAGGER_JSON, req, res);
+        res.getWriter().write(Json.pretty().writeValueAsString(openApi));
         res.getWriter().flush();
     }
         
 
-    @ApiOperation(value = "This is the Yaml Swagger API definition for Metl Hosted Services.  Visit http://swagger.io for more details about the specification")
+    @io.swagger.v3.oas.annotations.Operation(summary = "This is the Yaml Swagger API definition for Metl Hosted Services.  Visit http://swagger.io for more details about the specification")
     @RequestMapping(value = SWAGGER_YAML, method = RequestMethod.GET)
     public final void swaggerYaml(HttpServletRequest req, HttpServletResponse res) throws Exception {
-        Swagger swagger = buildSwagger(SWAGGER_YAML, req, res);
-        res.getWriter().write(Yaml.pretty().writeValueAsString(swagger));
+        OpenAPI openApi = buildOpenApi(SWAGGER_YAML, req, res);
+        res.getWriter().write(Yaml.pretty().writeValueAsString(openApi));
         res.getWriter().flush();
     }
 
-    protected final Swagger buildSwagger(String type, HttpServletRequest req, HttpServletResponse res) throws Exception {
+    protected final OpenAPI buildOpenApi(String type, HttpServletRequest req, HttpServletResponse res) throws Exception {
     Info info = new Info().version(VersionUtils.getCurrentVersion()).title("Metl Services")
                 .description("Following is a list of deployed web services.   The listing is by agent.");
         String basePath = req.getContextPath() + req.getServletPath() + WS + req.getPathInfo();
@@ -233,8 +235,11 @@ public class ExecutionApi {
         mimeTypes.add(MimeTypeUtils.APPLICATION_XML_VALUE);
         mimeTypes.add(MimeTypeUtils.APPLICATION_JSON_VALUE);
         
-        Swagger swagger = new Swagger().info(info).host(req.getServerName() + ":" + req.getServerPort()).scheme(Scheme.HTTP)
-                .basePath(basePath).produces(mimeTypes);
+        OpenAPI openApi = new OpenAPI().info(info).addServersItem(
+                new Server().url("http://" + req.getServerName() + ":" + req.getServerPort() + basePath));
+        
+        /*Swagger swagger = new Swagger().info(info).host(req.getServerName() + ":" + req.getServerPort()).scheme(Scheme.HTTP)
+                .basePath(basePath).produces(mimeTypes);*/
 
         Set<Agent> agents = agentManager.getAvailableAgents();
         for (Agent agent : agents) {
@@ -244,7 +249,7 @@ public class ExecutionApi {
             } else {
                 tag.setDescription("This is an agent");
             }
-            swagger.addTag(tag);            
+            openApi.addTagsItem(tag);            
 
             List<AgentDeploy> deployments = agent.getAgentDeployments();
             for (AgentDeploy agentDeployment : deployments) {
@@ -252,28 +257,30 @@ public class ExecutionApi {
                 if (flow.isWebService()) {
                     List<HttpRequestMapping> mappings = requestRegistry.getHttpRequestMappingsFor(agentDeployment);
                     for (HttpRequestMapping httpRequestMapping : mappings) {
-                        Operation operation = new Operation().summary(flow.getName()).operationId(flow.getName()).tag(tag.getName())
-                                .description(httpRequestMapping.getFlowDescription()).produces(mimeTypes);
+                        Operation operation = new Operation().summary(flow.getName()).operationId(flow.getName()).addTagsItem(tag.getName())
+                                .description(httpRequestMapping.getFlowDescription());
                         String path = addParameters(operation, httpRequestMapping.getPath());
-                        Response response = new Response().schema(new StringProperty()).description(httpRequestMapping.getResponseDescription());
-                        operation.response(200, response);
+                        
+                        operation.setResponses(new ApiResponses().addApiResponse("200", new ApiResponse().description(httpRequestMapping.getResponseDescription())));
+                        /*Response response = new Response().schema(new StringProperty()).description(httpRequestMapping.getResponseDescription());
+                        operation.response(200, response);*/
                         switch (httpRequestMapping.getMethod()) {
                             case GET:
-                                swagger.path(path, new Path().get(operation));
+                                openApi.path(path, new PathItem().get(operation));
                                 break;
                             case PUT:
-                                operation.addParameter(new FormParameter().name("payload").required(false).property(new StringProperty()));
-                                swagger.path(path, new Path().put(operation));
+                                //operation.addParameter(new FormParameter().name("payload").required(false).property(new StringProperty()));
+                                openApi.path(path, new PathItem().put(operation));
                                 break;
                             case POST:
-                                operation.addParameter(new FormParameter().name("payload").required(false).property(new StringProperty()));
-                                swagger.path(path, new Path().post(operation));
+                                //operation.addParameter(new FormParameter().name("payload").required(false).property(new StringProperty()));
+                                openApi.path(path, new PathItem().post(operation));
                                 break;
                             case DELETE:
-                                swagger.path(path, new Path().delete(operation));
+                                openApi.path(path, new PathItem().delete(operation));
                                 break;
                             case HEAD:
-                                swagger.path(path, new Path().head(operation));
+                                openApi.path(path, new PathItem().head(operation));
                                 break;
                         }
                     }
@@ -282,7 +289,7 @@ public class ExecutionApi {
 
         }
 
-        return swagger;
+        return openApi;
     }
 
     protected String addParameters(Operation operation, String path) {
@@ -300,7 +307,7 @@ public class ExecutionApi {
         return path;
     }
 
-    protected String addParameters(Operation operation, String path, Class<? extends AbstractSerializableParameter<?>> type) {
+    protected String addParameters(Operation operation, String path, Class<? extends Parameter> type) {
 
         if (path != null) {
             StringBuilder finalPath = new StringBuilder();
@@ -337,10 +344,10 @@ public class ExecutionApi {
         return path;
     }
 
-    private void addParameter(String name, Operation operation, Class<? extends AbstractSerializableParameter<?>> type) {
+    private void addParameter(String name, Operation operation, Class<? extends Parameter> type) {
         try {
-            AbstractSerializableParameter<?> param = type.getDeclaredConstructor().newInstance();
-            operation.addParameter(param.name(name).property(new StringProperty()));
+            Parameter param = type.getDeclaredConstructor().newInstance();
+            operation.addParametersItem(param.name(name));
         } catch (Exception e) {
             log.info("Failed to create parameter: " + name, e);
         }

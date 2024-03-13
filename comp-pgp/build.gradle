@@ -2,8 +2,8 @@ apply from: '../metl-assemble/common.gradle'
 
 dependencies {
     compileOnly project(':metl-ui')   
-    compile project(':comp-abstract')
-    compile "org.bouncycastle:bcprov-jdk15on:${bouncycastleVersion}"
-    compile "org.bouncycastle:bcpg-jdk15on:${bouncycastleVersion}"
-    testCompile project(path: ':metl-core', configuration: 'testArtifacts')     
+    api project(':comp-abstract')
+    api "org.bouncycastle:bcprov-jdk15on:${bouncycastleVersion}"
+    api "org.bouncycastle:bcpg-jdk15on:${bouncycastleVersion}"
+    testImplementation project(path: ':metl-core', configuration: 'testArtifacts')     
 }

@@ -1,0 +1,36 @@
+@import "variables";
+@import "apptheme";
+
+.apptheme {
+   @include apptheme;
+}
+
+html {
+	width: 100px;
+	min-width: 100%;
+}
+
+.v-button.v-widget.button-bar.v-button-button-bar, .v-label-button-bar {
+	height: 55px;
+}
+.v-button.v-widget.button-bar.v-button-button-bar::before {
+	display: block;
+	height: 5px;
+	min-width: 75px;
+}
+.v-button.v-widget.button-bar.v-button-button-bar.v-button-wrap {
+	display: block;
+}
+.v-button.v-widget.button-bar.v-button-button-bar .v-icon {
+	display: block;
+}
+.v-button.v-widget.button-bar.v-button-button-bar.v-button-caption {
+	display: block;
+}
+.v-layout.button-bar {
+	background: #f5f5f5;
+}
+
+.v-table-cell-content-highlight {
+	color: #c0c0c0;
+}

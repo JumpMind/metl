@@ -47,7 +47,7 @@ import org.jumpmind.metl.core.runtime.EntityData.ChangeType;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.util.FormatUtils;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.StandardReflectionParameterNameDiscoverer;
 
 public class ModelAttributeScriptHelper {
 
@@ -439,19 +439,21 @@ public class ModelAttributeScriptHelper {
     public static String[] getSignatures() {
         List<String> signatures = new ArrayList<String>();
         Method[] methods = ModelAttributeScriptHelper.class.getMethods();
-        LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
+        StandardReflectionParameterNameDiscoverer discoverer = new StandardReflectionParameterNameDiscoverer();
         for (Method method : methods) {
             if (method.getDeclaringClass().equals(ModelAttributeScriptHelper.class) && Modifier.isPublic(method.getModifiers())
                     && !Modifier.isStatic(method.getModifiers())) {
                 StringBuilder sig = new StringBuilder(method.getName());
                 sig.append("(");
                 String[] names = discoverer.getParameterNames(method);
-                for (String name : names) {
-                    sig.append(name);
-                    sig.append(",");
+                if (names != null) {
+                    for (String name : names) {
+                        sig.append(name);
+                        sig.append(",");
 
+                    }
                 }
-                if (names.length > 0) {
+                if (names != null && names.length > 0) {
                     sig.replace(sig.length() - 1, sig.length(), ")");
                 } else {
                     sig.append(")");

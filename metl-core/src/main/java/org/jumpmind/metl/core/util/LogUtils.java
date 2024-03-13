@@ -27,8 +27,13 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.RollingFileAppender;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.RollingFileAppender;
+import org.apache.logging.log4j.core.appender.rolling.DefaultRolloverStrategy;
+import org.apache.logging.log4j.core.appender.rolling.SizeBasedTriggeringPolicy;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.jumpmind.db.sql.Row;
 import org.jumpmind.properties.TypedProperties;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -120,7 +125,7 @@ public final class LogUtils {
         consoleEnabled = Boolean.parseBoolean(properties.getProperty(
                 EnvConstants.LOG_TO_CONSOLE_ENABLED, "true"));
         if (!consoleEnabled) {
-            org.apache.log4j.Logger.getRootLogger().removeAppender("CONSOLE");
+            removeAppender("CONSOLE");
         }
 
         fileEnabled = Boolean.parseBoolean(properties.getProperty(
@@ -134,22 +139,41 @@ public final class LogUtils {
             } else {
                 logDir = new File(logFilePath).getParentFile();
             }
-            int logFileRetentionInDays = properties.getInt(EnvConstants.LOG_FILE_RETENTION_IN_DAYS,10);  
+            String logFileRetentionInDays = properties.get(EnvConstants.LOG_FILE_RETENTION_IN_DAYS, "10");  
             String logFileMaxSize = properties.get(EnvConstants.LOG_FILE_MAX_SIZE, "40MB");
             String logFilePatternLayout = properties.get(EnvConstants.LOG_FILE_PATTERN_LAYOUT,"%d %-5p [%c{1}] [%t] %m%n");
             try {
-                RollingFileAppender logFileAppender = new RollingFileAppender();
-                logFileAppender.setFile(logFilePath);
-                logFileAppender.setMaxBackupIndex(logFileRetentionInDays);
-                logFileAppender.setMaxFileSize(logFileMaxSize);
-                logFileAppender.setAppend(true);
-                logFileAppender.setLayout(new PatternLayout(logFilePatternLayout));
-                org.apache.log4j.Logger.getRootLogger().addAppender(logFileAppender);
-                logFileAppender.activateOptions();
+                RollingFileAppender logFileAppender = RollingFileAppender.newBuilder().withFileName(logFilePath)
+                        .withAppend(true)
+                        .setLayout(PatternLayout.newBuilder().withPattern(logFilePatternLayout).build())
+                        .withPolicy(SizeBasedTriggeringPolicy.createPolicy(logFileMaxSize))
+                        .withStrategy(DefaultRolloverStrategy.newBuilder().withMax(logFileRetentionInDays).build())
+                        .build();
+                addAppender(logFileAppender);
             } catch (Exception ex) {
                 System.err.println("Failed to configure the following log file: " + logFilePath);
                 ex.printStackTrace();
             }
+        }
+    }
+    
+    public static void addAppender(Appender appender) {
+        try {
+            LoggerContext lc = (LoggerContext) LogManager.getContext(false);
+            appender.start();
+            lc.getRootLogger().addAppender(appender);
+            lc.updateLoggers();
+        } catch (Exception ex) {
+            System.err.println("Failed to add appender " + appender.getName());
+            ex.printStackTrace();
+        }
+    }
+    
+    public static void removeAppender(String name) {
+        LoggerContext lc = (LoggerContext) LogManager.getContext(false);
+        Appender appender = lc.getRootLogger().getAppenders().get(name);
+        if (appender != null) {
+            lc.getRootLogger().removeAppender(appender);
         }
     }
     

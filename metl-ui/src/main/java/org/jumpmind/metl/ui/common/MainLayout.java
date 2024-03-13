@@ -1,24 +1,4 @@
-/**
- * Licensed to JumpMind Inc under one or more contributor
- * license agreements.  See the NOTICE file distributed
- * with this work for additional information regarding
- * copyright ownership.  JumpMind Inc licenses this file
- * to you under the GNU General Public License, version 3.0 (GPLv3)
- * (the "License"); you may not use this file except in compliance
- * with the License.
- *
- * You should have received a copy of the GNU General Public License,
- * version 3.0 (GPLv3) along with this library; if not, see
- * <http://www.gnu.org/licenses/>.
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-package org.jumpmind.metl.ui.init;
+package org.jumpmind.metl.ui.common;
 
 import static org.jumpmind.metl.core.util.AppConstants.DEFAULT_GROUP;
 import static org.jumpmind.metl.core.util.AppConstants.DEFAULT_USER;
@@ -26,58 +6,45 @@ import static org.jumpmind.metl.ui.common.UiUtils.whereAreYou;
 
 import java.util.Date;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.jumpmind.metl.core.model.AuditEvent;
-import org.jumpmind.metl.core.model.AuditEvent.EventType;
 import org.jumpmind.metl.core.model.Group;
 import org.jumpmind.metl.core.model.GroupPrivilege;
 import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.model.UserGroup;
+import org.jumpmind.metl.core.model.AuditEvent.EventType;
 import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.core.util.VersionUtils;
-import org.jumpmind.metl.ui.common.ApplicationContext;
-import org.jumpmind.metl.ui.common.TopBar;
-import org.jumpmind.metl.ui.common.ViewManager;
+import org.jumpmind.metl.ui.init.AppSession;
+import org.jumpmind.metl.ui.init.BackgroundRefresherService;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.Html;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Push;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.PreserveOnRefresh;
-import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServlet;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinSession;
 
-@PageTitle("Metl")
+import jakarta.servlet.http.HttpServletRequest;
+
 @PreserveOnRefresh
-@Push()
-public class AppUI extends UI {
-
+public class MainLayout extends VerticalLayout implements RouterLayout {
     private static final long serialVersionUID = 1L;
-
-    ViewManager viewManager;
-
     BackgroundRefresherService backgroundRefresherService;
-
     AppSession appSession;
+    VerticalLayout contentArea = new VerticalLayout();
 
-    public AppUI() {
+    public MainLayout() {
         getElement().getClassList().add("apptheme");
-    }
-
-    @Override
-    protected void init(VaadinRequest request) {
+        
         HttpServletRequest req = ((VaadinServletRequest) VaadinService.getCurrentRequest())
                 .getHttpServletRequest();
         appSession = new AppSession(req.getRemoteUser(), whereAreYou(req), req.getRemoteHost(),
@@ -90,7 +57,7 @@ public class AppUI extends UI {
 
         afterInit();
     }
-
+    
     public static WebApplicationContext getWebApplicationContext() {
         VaadinServlet servlet = VaadinServlet.getCurrent();
         if (servlet != null) {
@@ -100,19 +67,7 @@ public class AppUI extends UI {
             return null;
         }
     }
-
-    @Override
-    public void onDetach(DetachEvent detachEvent) {
-        if (backgroundRefresherService != null) {
-            backgroundRefresherService.destroy();
-        }
-        if (appSession != null) {
-            AppSession.remove(appSession);
-        }
-        super.onDetach(detachEvent);
-
-    }
-
+    
     protected void afterInit() {
         WebApplicationContext ctx = getWebApplicationContext();
         ApplicationContext appCtx = ctx.getBean(ApplicationContext.class);
@@ -140,9 +95,9 @@ public class AppUI extends UI {
         }
         appCtx.setUser(user);
         login(user);
-        access(() -> initMenu());
+        initMenu();
     }
-
+    
     protected void login(User user) {        
         appSession.setUser(user);
         AppSession.addAppSession(appSession);
@@ -152,12 +107,15 @@ public class AppUI extends UI {
         WebApplicationContext ctx = getWebApplicationContext();
         User user = appSession.getUser();
 
-        VerticalLayout root = new VerticalLayout();
-        root.setSizeFull();
-        add(root);
+        setSizeFull();
+        setPadding(false);
+        setSpacing(false);
 
-        VerticalLayout contentArea = new VerticalLayout();
-        contentArea.setSizeFull();
+        contentArea.setWidthFull();
+        contentArea.setHeight("0");
+        contentArea.setPadding(false);
+        contentArea.getStyle().set("border-top", "1px solid var(--lumo-contrast-10pct)").set("border-bottom",
+                "1px solid var(--lumo-contrast-10pct)");
 
         ApplicationContext appCtx = ctx.getBean(ApplicationContext.class);
         appCtx.setUser(user);
@@ -166,7 +124,7 @@ public class AppUI extends UI {
         user.setLastLoginTime(new Date());
         user.setFailedLogins(0);
         appCtx.getOperationsService().save(user);
-        getViewManager().init(this);
+        getViewManager().init();
 
         TopBar menu = new TopBar(getViewManager(), appCtx);
 
@@ -187,11 +145,28 @@ public class AppUI extends UI {
         bottom.add(left);
         bottom.setVerticalComponentAlignment(Alignment.CENTER, left);
 
-        root.add(menu, contentArea, bottom);
-        root.expand(contentArea);
+        add(menu, contentArea, bottom);
+        expand(contentArea);
     }
 
     protected ViewManager getViewManager() {
         return getWebApplicationContext().getBean(ViewManager.class);
+    }
+    
+    @Override
+    public void showRouterLayoutContent(HasElement content) {
+        contentArea.getElement().appendChild(content.getElement());
+    }
+    
+    @Override
+    public void onDetach(DetachEvent detachEvent) {
+        if (backgroundRefresherService != null) {
+            backgroundRefresherService.destroy();
+        }
+        if (appSession != null) {
+            AppSession.remove(appSession);
+        }
+        super.onDetach(detachEvent);
+
     }
 }

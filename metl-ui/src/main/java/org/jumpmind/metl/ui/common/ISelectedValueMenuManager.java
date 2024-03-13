@@ -24,7 +24,7 @@ import org.jumpmind.metl.core.model.AbstractNamedObject;
 
 public interface ISelectedValueMenuManager {
 
-    public boolean handle(String menuSelected, Object selected);
+    public boolean handle(String menuSelected, AbstractNamedObject selected);
     
     public boolean isEnabled(String menuSelected, AbstractNamedObject selected);
 

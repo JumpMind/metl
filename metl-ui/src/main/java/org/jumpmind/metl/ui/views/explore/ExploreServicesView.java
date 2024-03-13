@@ -20,26 +20,29 @@
  */
 package org.jumpmind.metl.ui.views.explore;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
+import org.jumpmind.metl.ui.common.MainLayout;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.metl.ui.common.View;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.IFrame;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.UIScope;
 
 @UiComponent
-@Scope("ui")
-@TopBarLink(id = "exploreServices", category = Category.Explore, menuOrder = 30, name = "Services", icon = VaadinIcon.GLOBE)
-@Route("exploreServices")
+@UIScope
+@PreserveOnRefresh
+@TopBarLink(id = "exploreServices", view = ExploreServicesView.class, category = Category.Explore, menuOrder = 30, name = "Services", icon = VaadinIcon.GLOBE)
+@Route(value = "exploreServices", layout = MainLayout.class)
 public class ExploreServicesView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = 1L;

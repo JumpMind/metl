@@ -28,7 +28,7 @@ import java.io.InputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -38,7 +38,6 @@ import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
 import org.jumpmind.metl.ui.init.BackgroundRefresherService;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.UiComponent;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
 import com.vaadin.flow.component.ClickEvent;
@@ -62,10 +61,11 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.spring.annotation.UIScope;
 
 @SuppressWarnings("serial")
 @UiComponent
-@Scope(value = "ui")
+@UIScope
 @Order(1300)
 @AdminMenuLink(name = "Logging", id = "Logging", icon = VaadinIcon.FILE_TEXT_O)
 public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefreshable<Object> {
@@ -95,8 +95,7 @@ public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefre
             logFile = new File(LogUtils.getLogFilePath());
         }
         setSizeFull();
-        setSpacing(true);
-        setMargin(true);
+        getStyle().set("padding", "8px");
 
         HorizontalLayout topPanelLayout = new HorizontalLayout();
         topPanelLayout.setWidthFull();

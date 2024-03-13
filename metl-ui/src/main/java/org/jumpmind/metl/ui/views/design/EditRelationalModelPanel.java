@@ -40,8 +40,8 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.ExportDialog;
 import org.jumpmind.metl.ui.common.UiUtils;
-import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.Label;
 import org.jumpmind.vaadin.ui.common.NotifyDialog;
 
 import com.vaadin.flow.component.BlurNotifier.BlurEvent;
@@ -49,7 +49,6 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeListener;
-import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.ShortcutRegistration;
 import com.vaadin.flow.component.UI;
@@ -57,6 +56,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.ItemClickEvent;
@@ -115,6 +115,8 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
         this.model = new RelationalModel(modelId);
         this.readOnly = readOnly;
         context.getConfigurationService().refresh(model);
+        setPadding(false);
+        setSpacing(false);
 
         ButtonBar buttonBar1 = new ButtonBar();
         ButtonBar buttonBar2 = new ButtonBar();
@@ -156,7 +158,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
         treeGrid.setSizeFull();
         treeGrid.setPageSize(100);
         treeGrid.setSelectionMode(SelectionMode.MULTI);
-        treeGrid.addComponentColumn(obj -> {
+        treeGrid.addComponentHierarchyColumn(obj -> {
             if (lastEditItemIds.contains(obj) && !readOnly) {
                 TextField t = new TextField();
                 t.setValueChangeMode(ValueChangeMode.LAZY);
@@ -193,7 +195,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                 t.setPrefixComponent(new Icon(obj instanceof ModelEntity ? VaadinIcon.TABLE : VaadinIcon.SPLIT_H));
                 return t;
             } else {
-                Html label = UiUtils.getName(filterField.getValue(), obj.getName());
+                Label label = UiUtils.getName(filterField.getValue(), obj.getName());
                 Icon icon = new Icon(obj instanceof ModelEntity ? VaadinIcon.TABLE : VaadinIcon.SPLIT_H);
                 return new HorizontalLayout(icon, label);
             }
@@ -312,7 +314,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                 }
             }
             return null;
-        }).setHeader("PK").setWidth("40px");
+        }).setHeader("PK").setFlexGrow(0).setWidth("50px");
 
         treeGrid.addItemClickListener(new TreeGridItemClickListener());
         treeGrid.addSelectionListener(new TreeGridSelectionListener());
@@ -399,7 +401,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                 addModelAttribute(entity, modelAttribute);
             }
             treeGrid.select(selected);
-
+            treeGrid.getDataProvider().refreshAll();
         }
     }
 
@@ -627,9 +629,8 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
             Set<AbstractNamedObject> itemIds = new HashSet<AbstractNamedObject>();
             Set<AbstractNamedObject> selectedIds = getSelectedItems();
             
-            ConfirmDialog.show("Delete?",
-                    "Are you sure you want to delete the " + selectedIds.size() + " selected items?",
-                    ()->{
+            new ConfirmDialog("Delete?",
+                    "Are you sure you want to delete the " + selectedIds.size() + " selected items?", "Ok", e -> {
                         for (AbstractNamedObject itemId : selectedIds) {
                             Collection<AbstractNamedObject> children = treeGrid.getTreeData().getChildren(itemId);
                             if (children != null) {
@@ -655,9 +656,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                             }
                         }
                         treeGrid.getDataProvider().refreshAll();
-
-                        return true;
-                    });
+                    }).open();
         }
     }
 

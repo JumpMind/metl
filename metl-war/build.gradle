@@ -33,10 +33,7 @@ war {
 }    
 
 dependencies {
-    compile project(":metl-ui")
-    compileOnly ("com.vaadin:vaadin-client-compiler:$vaadinVersion")  {
-       exclude group:'org.eclipse.jetty'
-    }    
+    api project(":metl-ui")
     executableWar project(":metl-server")    
 }
 

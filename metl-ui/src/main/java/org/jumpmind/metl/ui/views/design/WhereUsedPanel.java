@@ -38,7 +38,6 @@ import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 public class WhereUsedPanel extends VerticalLayout implements IUiPanel {
@@ -63,13 +62,17 @@ public class WhereUsedPanel extends VerticalLayout implements IUiPanel {
     
     public WhereUsedPanel(String whereUsedType, String whereUsedObjectId, String whereUsedObjectName, ApplicationContext context, DesignNavigator projectNavigator) {
         this.setSizeFull();
+        this.setPadding(false);
+        this.setSpacing(false);
         this.context = context;
         this.designNavigator = projectNavigator;
         this.whereUsedType = whereUsedType;
         this.whereUsedObjectId = whereUsedObjectId;
         this.whereUsedObjectName = whereUsedObjectName;
         
-        addHeader(whereUsedType + " - Where Used");
+        H3 header = new H3(whereUsedType + " - Where Used");
+        header.getStyle().set("padding", "16px");
+        add(header);
 
         ButtonBar buttonBar = new ButtonBar();
         add(buttonBar);
@@ -106,19 +109,12 @@ public class WhereUsedPanel extends VerticalLayout implements IUiPanel {
     		flowName = selected.getFlowName();
             EditFlowPanel flowLayout = new EditFlowPanel(context, flowId, designNavigator, designNavigator.tabs);
             designNavigator.tabs.addCloseableTab(flowId, flowName, new Icon(Icons.FLOW), flowLayout);
+            designNavigator.tabs.setSelectedTab(flowLayout);
     	}
     }
 
     protected void export() {
         ExportDialog.show(context, componentWhereUsedGrid);
-    }
-    
-    protected void addHeader(String caption) {
-        HorizontalLayout componentHeaderWrapper = new HorizontalLayout();
-        componentHeaderWrapper.getStyle().set("margin", "0 0 0 16px");
-        H3 componentHeader = new H3(caption);
-        componentHeaderWrapper.add(componentHeader);
-        add(componentHeaderWrapper);
     }
     
     protected void populateContainer() {

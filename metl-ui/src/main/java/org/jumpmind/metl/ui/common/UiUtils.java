@@ -25,14 +25,13 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.ui.definition.XMLComponentUI;
-
-import com.vaadin.flow.component.Html;
+import org.jumpmind.vaadin.ui.common.Label;
 
 public final class UiUtils {
 
@@ -59,7 +58,7 @@ public final class UiUtils {
         return ip;  
     }    
 
-    public static Html getName(String filter, String name) {
+    public static Label getName(String filter, String name) {
         if (isNotBlank(filter) && isNotBlank(name)) {
             int[] startEndIndex = getFilterMatchRange(filter, name);
             if (startEndIndex[0] != -1) {
@@ -69,7 +68,7 @@ public final class UiUtils {
                 name = pre + "<span class='highlight'>" + highlighted + "</span>" + post;
             }
         }
-        return new Html(name);
+        return new Label(name);
     }
 
     public static boolean filterMatches(String needle, String haystack) {

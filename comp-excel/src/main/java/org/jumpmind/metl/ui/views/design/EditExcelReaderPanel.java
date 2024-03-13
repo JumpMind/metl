@@ -60,7 +60,7 @@ public class EditExcelReaderPanel extends AbstractComponentEditPanel {
     
     @Override
     protected void buildUI() {
-        
+        setPadding(false);
         buildGrid();
         refresh();
     }

@@ -41,6 +41,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.H3;
@@ -71,25 +72,37 @@ public class ProjectVersionSettingsPanel extends VerticalLayout implements IUiPa
 
     public ProjectVersionSettingsPanel(ProjectVersion projectVersion, ApplicationContext context, DesignNavigator projectNavigator) {
         this.setSizeFull();
+        this.setPadding(false);
+        this.setSpacing(false);
         this.context = context;
         this.designNavigator = projectNavigator;
         this.projectVersion = projectVersion;
         
+        H3 projectVersionHeader = new H3("Project Version Settings");
+        projectVersionHeader.getStyle().set("padding", "16px 0 0 8px");
+        add(projectVersionHeader);
+        
         FormLayout formLayout = new FormLayout();
-        DatePicker releaseDateField = new DatePicker("Release Date");
+        formLayout.getStyle().set("padding-left", "8px");
+        formLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
+        DatePicker releaseDateField = new DatePicker();
         Date releaseDate = projectVersion.getReleaseDate();
         if (releaseDate != null) {
         	releaseDateField.setValue(releaseDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
         }
         releaseDateField.setEnabled(false);        
-        formLayout.add(releaseDateField);
+        formLayout.addFormItem(releaseDateField, "Release Date");
         
         Checkbox archiveCheckbox = new Checkbox("Archived");
         archiveCheckbox.setValue(projectVersion.isArchived());
         archiveCheckbox.addValueChangeListener(e->toggleArchived(e));
-        formLayout.add(archiveCheckbox);
+        formLayout.addFormItem(archiveCheckbox, "");
         add(formLayout);
 
+        H3 componentPluginHeader = new H3("Component Plugin Settings");
+        componentPluginHeader.getStyle().set("padding", "16px 0 0 8px");
+        add(componentPluginHeader);
+        
         ButtonBar buttonBar = new ButtonBar();
         add(buttonBar);
         buttonBar.addButton("Refresh", Icons.REFRESH, (event)->refreshPlugins()); 
@@ -105,9 +118,9 @@ public class ProjectVersionSettingsPanel extends VerticalLayout implements IUiPa
         componentPluginsGrid.addColumn(ProjectVersionPlugin::getDefinitionName).setHeader("Name");
         componentPluginsGrid.addColumn(ProjectVersionPlugin::getDefinitionTypeId).setHeader("Type");
         componentPluginsGrid.addColumn(plugin -> String.format("%s:%s", plugin.getArtifactGroup(), plugin.getArtifactName())).setHeader("Plugin");
-        componentPluginsGrid.addColumn(ProjectVersionPlugin::isEnabled).setHeader("Enabled").setWidth("75px");
-        componentPluginsGrid.addColumn(ProjectVersionPlugin::isPinVersion).setHeader("Pin Version").setWidth("95px");
-        componentPluginsGrid.addColumn(ProjectVersionPlugin::getArtifactVersion).setHeader("Version").setWidth("190px");
+        componentPluginsGrid.addColumn(ProjectVersionPlugin::isEnabled).setHeader("Enabled").setFlexGrow(0).setWidth("85px");
+        componentPluginsGrid.addColumn(ProjectVersionPlugin::isPinVersion).setHeader("Pin Version").setFlexGrow(0).setWidth("105px");
+        componentPluginsGrid.addColumn(ProjectVersionPlugin::getArtifactVersion).setHeader("Version").setFlexGrow(0).setWidth("190px");
         componentPluginsGrid.addComponentColumn(plugin -> {
             if (plugin.getArtifactVersion().equals(plugin.getLatestArtifactVersion())) {
                 return null;

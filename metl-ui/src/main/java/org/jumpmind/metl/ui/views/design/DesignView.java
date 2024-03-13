@@ -20,29 +20,34 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
+import org.jumpmind.metl.ui.common.MainLayout;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.metl.ui.common.View;
+import org.jumpmind.vaadin.ui.common.TabSheet.EnhancedTab;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.UIScope;
 
 @UiComponent
-@Scope(value = "ui")
-@TopBarLink(category = Category.Design, name = "Design", id = "design", icon = VaadinIcon.CONNECT, menuOrder = 1, useAsDefault = true)
-@Route("design")
+@UIScope
+@PreserveOnRefresh
+@TopBarLink(category = Category.Design, name = "Design", id = "design", view = DesignView.class, icon = VaadinIcon.CONNECT, menuOrder = 1, useAsDefault = true)
+@Route(value = "design", layout = MainLayout.class)
 public class DesignView extends HorizontalLayout implements BeforeEnterObserver, View {
 
     private static final long serialVersionUID = 1L;
@@ -59,6 +64,15 @@ public class DesignView extends HorizontalLayout implements BeforeEnterObserver,
         setSizeFull();
 
         tabbedPanel = new TabbedPanel();
+        tabbedPanel.addSelectedTabChangeListener(event -> {
+            EnhancedTab tab = (EnhancedTab) event.getSelectedTab();
+            if (tab != null) {
+                Component component = tab.getComponent();
+                if (component instanceof EditFlowPanel) {
+                    ((EditFlowPanel) component).redrawFlow();
+                }
+            }
+        });
 
         SplitLayout leftSplit = new SplitLayout();
         leftSplit.setSizeFull();
@@ -69,6 +83,7 @@ public class DesignView extends HorizontalLayout implements BeforeEnterObserver,
         leftSplit.addToPrimary(projectNavigator);
         VerticalLayout container = new VerticalLayout();
         container.setSizeFull();
+        container.setPadding(false);
         container.add(tabbedPanel);
         leftSplit.addToSecondary(container);
 

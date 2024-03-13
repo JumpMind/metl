@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -85,6 +84,9 @@ public class EditJsonPanel extends AbstractComponentEditPanel {
     
 
     protected void buildUI() {
+        setPadding(false);
+        setSpacing(false);
+        
         ButtonBar buttonBar = new ButtonBar();
         add(buttonBar);
 
@@ -107,7 +109,6 @@ public class EditJsonPanel extends AbstractComponentEditPanel {
         grid = new Grid<Record>();
         grid.setSelectionMode(SelectionMode.NONE);
         grid.setSizeFull();
-        grid.setColumns("entityName", "attributeName", "path");
         grid.addColumn(Record::getEntityName).setKey("entityName").setHeader("Entity Name");
         grid.addColumn(Record::getAttributeName).setKey("attributeName").setHeader("Attribute Name");
         grid.addColumn(Record::getPath).setKey("path").setHeader("Path").setFlexGrow(1);
@@ -321,7 +322,7 @@ public class EditJsonPanel extends AbstractComponentEditPanel {
             editor.setValue(templateSetting.getValue());
             editor.setReadOnly(readOnly);
 
-            add(buildButtonFooter(buildCloseButton()));
+            buildButtonFooter(buildCloseButton());
         }
 
         @Override

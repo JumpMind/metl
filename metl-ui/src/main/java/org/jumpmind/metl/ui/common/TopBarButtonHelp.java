@@ -20,7 +20,6 @@
  */
 package org.jumpmind.metl.ui.common;
 
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -29,9 +28,10 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.page.Page;
+import com.vaadin.flow.spring.annotation.UIScope;
 
 @Component
-@Scope(value="ui")
+@UIScope
 @Order(value=20)
 public class TopBarButtonHelp extends TopBarButton {
 

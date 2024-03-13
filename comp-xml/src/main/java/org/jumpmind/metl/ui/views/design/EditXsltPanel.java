@@ -66,6 +66,8 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements ValueCh
     }
     
     protected void buildUI() {
+        setPadding(false);
+        setSpacing(false);
 
         ButtonBar buttonBar = new ButtonBar();
         add(buttonBar);
@@ -226,7 +228,7 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements ValueCh
             add(textField);
             expand(textField);
             
-            add(buildButtonFooter(buildCloseButton()));
+            buildButtonFooter(buildCloseButton());
         }
     }
 

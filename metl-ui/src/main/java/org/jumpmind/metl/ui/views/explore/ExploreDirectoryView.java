@@ -29,7 +29,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.plugin.XMLComponentDefinition.ResourceCategory;
@@ -43,13 +43,13 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.Icons;
+import org.jumpmind.metl.ui.common.MainLayout;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.metl.ui.common.View;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
@@ -65,13 +65,16 @@ import com.vaadin.flow.component.treegrid.ExpandEvent;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.spring.annotation.UIScope;
 
 @UiComponent
-@Scope("ui")
-@TopBarLink(id = "exploreDirectories", category = Category.Explore, menuOrder = 20, name = "Directory", icon = VaadinIcon.DATABASE)
-@Route("exploreDirectories")
+@UIScope
+@PreserveOnRefresh
+@TopBarLink(id = "exploreDirectories", view = ExploreDirectoryView.class, category = Category.Explore, menuOrder = 20, name = "Directory", icon = VaadinIcon.DATABASE)
+@Route(value = "exploreDirectories", layout = MainLayout.class)
 public class ExploreDirectoryView extends VerticalLayout implements BeforeEnterObserver, View {
 
     private static final long serialVersionUID = 1L;
@@ -86,6 +89,7 @@ public class ExploreDirectoryView extends VerticalLayout implements BeforeEnterO
     public ExploreDirectoryView() {
         setSizeFull();
         setMargin(false);
+        setPadding(false);
 
         ButtonBar buttonBar = new ButtonBar();
         Button refreshButton = buttonBar.addButton("Refresh", VaadinIcon.REFRESH);
@@ -96,13 +100,13 @@ public class ExploreDirectoryView extends VerticalLayout implements BeforeEnterO
         grid.setSizeFull();
         grid.addExpandListener(event -> expanded(event));
         grid.addCollapseListener(event -> collapsed(event));
-        grid.addComponentColumn(item -> fileLinkComponent(item)).setHeader("").setFlexGrow(1);
+        grid.addComponentHierarchyColumn(item -> fileLinkComponent(item)).setHeader("").setFlexGrow(1);
         grid.addColumn(item -> {
             if (item instanceof FileInfo) {
                 return ((FileInfo) item).getLastUpdated();
             }
             return null;
-        }).setHeader("Date Modified").setWidth("150px");
+        }).setHeader("Date Modified").setFlexGrow(0).setWidth("250px");
         grid.addColumn(item -> {
             if (item instanceof FileInfo) {
                 return ((FileInfo) item).getSize();

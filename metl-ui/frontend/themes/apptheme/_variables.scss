@@ -1,0 +1,33 @@
+$v-app-loading-text: "Loading";
+
+$v-font-family: "Roboto", sans-serif;
+$v-font-size: 14px;  
+$v-line-height: 1.4;
+$v-unit-size: 30px;
+$v-layout-spacing-vertical: 10px;
+$v-layout-spacing-horizontal: 10px;
+$v-layout-margin-top:    5px;
+$v-layout-margin-right:  15px;
+$v-layout-margin-bottom: 5px;
+$v-layout-margin-left:   15px;
+$v-font-weight: 400;
+$v-font-weight-header: 500;
+$v-background-color: #fff;
+$v-focus-color: #0072C6;
+$v-luminance-threshold: 180;
+$v-border: 1.0px solid v-shade;
+$v-border-radius: 0px;
+$v-bevel: false;
+$v-gradient: v-linear 10%;
+$v-shadow: false;
+$v-textfield-bevel: false;
+$v-textfield-shadow: false;
+$v-link-text-decoration: false;
+$v-selection-overlay-padding-horizontal: 0;
+$v-selection-overlay-padding-vertical: 6px;
+$v-selection-item-height: 30px;
+$v-selection-item-border-radius: 0;
+$valo-menu-background-color: #eee;
+$v-animations-enabled: true;
+
+@import "../valo/valo";

@@ -66,6 +66,9 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
     static final String SHOW_POPULATED_ENTITIES = "Filter Populated Entites";
 
     protected void buildUI() {
+        setPadding(false);
+        setSpacing(false);
+        
         ButtonBar buttonBar = new ButtonBar();
         add(buttonBar);
 
@@ -89,7 +92,7 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
         grid.addColumn(RecordFormat::getAttributeName).setHeader("Attribute Name").setSortable(false);
         grid.addColumn(RecordFormat::getOrdinalSetting).setHeader("Sort Order").setSortable(false);
         grid.addComponentColumn(setting -> createAttributeCheckbox(setting, Sorter.ATTRIBUTE_SORTER_ENABLED))
-                .setHeader("Sort").setSortable(false);
+                .setHeader("Sort").setSortable(false).setFlexGrow(0).setWidth("80px");
         grid.setSelectionMode(SelectionMode.MULTI);
         add(grid);
         expand(grid);
@@ -107,7 +110,9 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
     
     protected void updateGrid(String filter) {
         filter = filter != null ? filter.toLowerCase() : null;
-        filterTextField.setValue(filter);
+        if (filter != null) {
+            filterTextField.setValue(filter);
+        }
         RelationalModel model = (RelationalModel) component.getInputModel();
         recordFormatList = new ArrayList<RecordFormat>();
 

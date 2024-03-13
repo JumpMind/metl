@@ -24,25 +24,25 @@ import org.jumpmind.metl.core.model.GlobalSetting;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.converter.StringToIntegerConverter;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.spring.annotation.UIScope;
 
 @SuppressWarnings("serial")
 @UiComponent
-@Scope(value = "ui")
+@UIScope
 @Order(500)
 @AdminMenuLink(name = "General Settings", id = "General Settings", icon = VaadinIcon.COGS)
 public class GeneralSettingsPanel extends AbstractAdminPanel {
@@ -53,52 +53,45 @@ public class GeneralSettingsPanel extends AbstractAdminPanel {
 
     boolean isChanged;
 
-    FormLayout form;
-
     public GeneralSettingsPanel() {
     }
     
     public void init() {
-        form = new FormLayout();
+        FormLayout displaySettingsForm = new FormLayout();
+        displaySettingsForm.setResponsiveSteps(new ResponsiveStep("0", 1));
 
-        H3 section = new H3("Display Settings");
-        form.add(section);
-
-        ((Focusable<?>) addSetting("System Text", GlobalSetting.SYSTEM_TEXT, "",
+        ((Focusable<?>) addSetting(displaySettingsForm, "System Text", GlobalSetting.SYSTEM_TEXT, "",
                 "Set HTML content to be displayed in the top bar that can identify a particular environment"))
                         .focus();
         
-        section = new H3("Auto Backup");
-        form.add(section); 
+        FormLayout autoBackupForm = new FormLayout();
+        autoBackupForm.setResponsiveSteps(new ResponsiveStep("0", 1));
         
         Span instructions = new Span("A restart is required after changing these settings");
         instructions.getStyle().set("font-weight", "lighter");
-        form.add(instructions);
+        autoBackupForm.addFormItem(instructions, "");
         
-        addSetting("Enable Backup", GlobalSetting.CONFIG_BACKUP_ENABLED,
+        addSetting(autoBackupForm, "Enable Backup", GlobalSetting.CONFIG_BACKUP_ENABLED,
                 Boolean.toString(GlobalSetting.DEFAULT_CONFIG_BACKUP_ENABLED),
                 THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART, Boolean.class);
 
-        addSetting("Backup Cron Expression", GlobalSetting.CONFIG_BACKUP_CRON,
+        addSetting(autoBackupForm, "Backup Cron Expression", GlobalSetting.CONFIG_BACKUP_CRON,
                 GlobalSetting.DEFAULT_CONFIG_BACKUP_CRON,
                 THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART, String.class);
 
-        addSetting("Retention in Days", GlobalSetting.CONFIG_BACKUP_RETENTION_IN_DAYS,
+        addSetting(autoBackupForm, "Retention in Days", GlobalSetting.CONFIG_BACKUP_RETENTION_IN_DAYS,
                 Integer.toString(GlobalSetting.DEFAULT_CONFIG_BACKUP_RETENTION_IN_DAYS),
                 THIS_WILL_TAKE_EFFECT_ON_THE_NEXT_SERVER_RESTART, Integer.class);       
 
-        VerticalLayout paddedLayout = new VerticalLayout();
-        paddedLayout.setMargin(true);
-        paddedLayout.add(form);
-        add(paddedLayout);
+        add(new H3("Display Settings"), displaySettingsForm, new H3("Auto Backup"), autoBackupForm);
     }
 
-    protected AbstractField<?, ?> addSetting(String text, String globalSetting, String defaultValue,
+    protected AbstractField<?, ?> addSetting(FormLayout form, String text, String globalSetting, String defaultValue,
             String description) {
-        return addSetting(text, globalSetting, defaultValue, description, String.class);
+        return addSetting(form, text, globalSetting, defaultValue, description, String.class);
     }
 
-    protected AbstractField<?, ?> addSetting(String text, String globalSetting, String defaultValue,
+    protected AbstractField<?, ?> addSetting(FormLayout form, String text, String globalSetting, String defaultValue,
             String description, Class<?> converter) {
         final GlobalSetting setting = getGlobalSetting(globalSetting, defaultValue);
         AbstractField<?, ?> field = null;
@@ -108,8 +101,10 @@ public class GeneralSettingsPanel extends AbstractAdminPanel {
             checkbox.addValueChangeListener(
                     (e) -> saveSetting(setting, checkbox.getValue().toString()));
             field = checkbox;
+            form.addFormItem(field, "");
         } else {
             field = new TextField();
+            ((TextField) field).setWidthFull();
             ((TextField) field).setValueChangeMode(ValueChangeMode.LAZY);
             ((TextField) field).setValueChangeTimeout(200);
             field.addValueChangeListener(event -> saveSetting(setting, (String) event.getValue()));
@@ -121,8 +116,8 @@ public class GeneralSettingsPanel extends AbstractAdminPanel {
                         .withConverter(new StringToIntegerConverter("Value must be an integer"))
                         .bind(value -> Integer.parseInt(value), (value, newValue) -> value = String.valueOf(newValue));
             }
+            form.addFormItem(field, text);
         }
-        form.add(field);
         return field;
     }
 

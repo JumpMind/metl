@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import org.jumpmind.db.sql.SqlTemplateSettings;
@@ -66,6 +67,8 @@ public class EditRdbmsReaderPanel extends AbstractComponentEditPanel {
     ExecuteSqlClickListener executeSqlClickListener;
 
     protected void buildUI() {
+        setPadding(false);
+        setSpacing(false);
         if (!readOnly) {
             ButtonBar buttonBar = new ButtonBar();
             add(buttonBar);
@@ -134,15 +137,18 @@ public class EditRdbmsReaderPanel extends AbstractComponentEditPanel {
 
                     @Override
                     public void setExecuteAtCursorButtonEnabled(boolean enabled) {
-                        executeButton.setEnabled(enabled);
                     }
 
                     @Override
                     public void setCommitButtonEnabled(boolean enabled) {
                     }
                 }, context.getUser().getLoginId());
+                queryPanel.setWidthFull();
 
                 queryPanel.appendSql(component.get(RdbmsReader.SQL));
+                queryPanel.getSqlEditor().addSelectionChangeListener(event -> {
+                    executeButton.setEnabled(StringUtils.isNotBlank(event.getSelection().getSelectedText()));
+                });
 
                 Shortcuts.addShortcutListener(queryPanel, () -> {
                     executeSqlClickListener.onComponentEvent(new ClickEvent<Button>(executeButton));
@@ -152,6 +158,7 @@ public class EditRdbmsReaderPanel extends AbstractComponentEditPanel {
                 expand(queryPanel);
             } else {
                 Span span = new Span("Before configuring SQL you must select a data source");
+                span.getStyle().set("padding-left", "8px");
                 add(span);
                 expand(span);
             }

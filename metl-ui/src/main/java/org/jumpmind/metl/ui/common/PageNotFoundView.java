@@ -22,7 +22,7 @@ package org.jumpmind.metl.ui.common;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
@@ -31,7 +31,9 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.ErrorParameter;
 import com.vaadin.flow.router.HasErrorParameter;
 import com.vaadin.flow.router.NotFoundException;
+import com.vaadin.flow.router.ParentLayout;
 
+@ParentLayout(MainLayout.class)
 public class PageNotFoundView extends VerticalLayout implements HasErrorParameter<NotFoundException> {
 
     private static final long serialVersionUID = 1L;
@@ -48,7 +50,7 @@ public class PageNotFoundView extends VerticalLayout implements HasErrorParamete
     public int setErrorParameter(BeforeEnterEvent event,
           ErrorParameter<NotFoundException> parameter) {
         UI.getCurrent().getPage().fetchCurrentURL(url -> {
-            String uriFragment = url.getRef();
+            String uriFragment = url.getFile();
             if (isBlank(uriFragment)) {
                 //viewManager.navigateToDefault();
             } else {

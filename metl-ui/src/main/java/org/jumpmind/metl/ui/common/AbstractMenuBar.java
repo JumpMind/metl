@@ -58,6 +58,8 @@ abstract public class AbstractMenuBar extends MenuBar {
     ContextMenuListener contextMenuListener;
 
     GridContextMenu<AbstractNamedObject> contextMenu;
+    
+    AbstractNamedObject lastClickedItem;
 
     public AbstractMenuBar(TreeGrid<AbstractNamedObject> parent,
             ISelectedValueMenuManager nothingSelectedMenuManager) {
@@ -68,19 +70,24 @@ abstract public class AbstractMenuBar extends MenuBar {
         this.menuActionsByClass = new HashMap<>();
         this.registrationMap = new HashMap<MenuItemBase<?, ?, ?>, Registration>();
         this.parentMap = new HashMap<MenuItemBase<?, ?, ?>, MenuItemBase<?, ?, ?>>();
-        this.parent.addSelectionListener((e) -> valueChanged());
+        this.parent.addSelectionListener((e) -> valueChanged(null));
         this.menuBarListener = new MenuBarListener();
         this.contextMenuListener = new ContextMenuListener();
 
         contextMenu = parent.addContextMenu();
+        contextMenu.setDynamicContentHandler(item -> {
+            lastClickedItem = item;
+            valueChanged(lastClickedItem);
+            return true;
+        });
 
         buildMenu();
 
-        valueChanged();
+        valueChanged(null);
     }
     
     public void refresh() {
-        valueChanged();
+        valueChanged(null);
     }
     
     protected void addSeparator(String path) {
@@ -143,21 +150,29 @@ abstract public class AbstractMenuBar extends MenuBar {
     }
 
     
-    protected void valueChanged() {
-        AbstractNamedObject selected = parent.getSelectionModel().getFirstSelectedItem().orElse(null);
-        ISelectedValueMenuManager action = null;
-        if (selected != null) {
-            Class<?> clazz = selected.getClass();
-            action = menuActionsByClass.get(clazz);
+    protected void valueChanged(AbstractNamedObject clickedItem) {
+        AbstractNamedObject selectedItem = parent.getSelectionModel().getFirstSelectedItem().orElse(null);
+        ISelectedValueMenuManager menuBarAction = null;
+        ISelectedValueMenuManager contextMenuAction = null;
+        if (selectedItem != null) {
+            Class<?> clazz = selectedItem.getClass();
+            menuBarAction = menuActionsByClass.get(clazz);
+        }
+        if (clickedItem != null) {
+            Class<?> clazz = clickedItem.getClass();
+            contextMenuAction = menuActionsByClass.get(clazz);
         }
 
-        if (action == null) {
-            action = nothingSelectedMenuManager;
+        if (menuBarAction == null) {
+            menuBarAction = nothingSelectedMenuManager;
+        }
+        if (contextMenuAction == null) {
+            contextMenuAction = nothingSelectedMenuManager;
         }
 
-        if (action != null) {
-            setMenuBarEnabled(action, getItems(), selected);
-            setContextMenuEnabled(action, contextMenu.getItems(), selected);
+        if (menuBarAction != null) {
+            setMenuBarEnabled(menuBarAction, getItems(), selectedItem);
+            setContextMenuEnabled(contextMenuAction, contextMenu.getItems(), clickedItem);
         }
     }
 
@@ -271,7 +286,7 @@ abstract public class AbstractMenuBar extends MenuBar {
 
         @Override
         public void onComponentEvent(ClickEvent<MenuItem> event) {
-            menuSelected(buildMenuString(event.getSource()));
+            menuSelected(buildMenuString(event.getSource()), true);
         }
     }
     
@@ -281,22 +296,27 @@ abstract public class AbstractMenuBar extends MenuBar {
 
         @Override
         public void onComponentEvent(GridContextMenuItemClickEvent<AbstractNamedObject> event) {
-            menuSelected(buildMenuString(event.getSource()));
+            menuSelected(buildMenuString(event.getSource()), false);
         }
     }
     
-    protected void menuSelected(String menuString) {
-        Object selected = parent.getSelectionModel().getFirstSelectedItem().orElse(null);
+    protected void menuSelected(String menuString, boolean useSelectedItem) {
+        AbstractNamedObject item;
+        if (useSelectedItem) {
+            item = parent.getSelectionModel().getFirstSelectedItem().orElse(null);
+        } else {
+            item = lastClickedItem;
+        }
         ISelectedValueMenuManager action = null;
-        if (selected != null) {
-            Class<?> clazz = selected.getClass();
+        if (item != null) {
+            Class<?> clazz = item.getClass();
             action = menuActionsByClass.get(clazz);
         } else {
             action = nothingSelectedMenuManager;
         }
 
         if (action != null) {
-            action.handle(menuString, selected);
+            action.handle(menuString, item);
         }
     }
 

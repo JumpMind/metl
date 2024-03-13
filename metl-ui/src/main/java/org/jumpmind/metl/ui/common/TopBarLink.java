@@ -24,9 +24,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.jumpmind.metl.ui.init.AppUI;
-
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.icon.VaadinIcon;
 
 @Target({java.lang.annotation.ElementType.TYPE})
@@ -37,7 +35,7 @@ public @interface TopBarLink {
     
     String name();
     
-    Class<? extends UI> uiClass() default AppUI.class;
+    Class<? extends Component> view();
     
     Category category() default Category.Design;
     

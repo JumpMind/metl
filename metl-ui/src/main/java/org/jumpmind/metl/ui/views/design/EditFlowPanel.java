@@ -73,7 +73,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dnd.DropEvent;
 import com.vaadin.flow.component.dnd.DropTarget;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -143,10 +142,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         this.context = context;
         this.tabs = tabs;
         this.designNavigator = designNavigator;
+        setSpacing(false);
 
-        Span header = new Span("<b>Property Sheet</b><hr>");
-        header.setWidthFull();
-        header.getStyle().set("margin", null);
         this.propertySheet = new PropertySheet(context, tabs, readOnly);
         this.propertySheet.setListener((components) -> {
             List<FlowStep> steps = new ArrayList<FlowStep>();
@@ -155,7 +152,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             }
             refreshStepOnDiagram(steps);
         });
-        propertySheetLayout = new VerticalLayout(header, propertySheet);
+        propertySheetLayout = new VerticalLayout(propertySheet);
+        propertySheetLayout.getStyle().set("padding", "0 16px");
 
         componentPalette = new EditFlowPalette(this, context, flow.getProjectVersionId());
 
@@ -163,7 +161,9 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
         
         rightLayout = new VerticalLayout();
-        rightLayout.setSizeFull();
+        rightLayout.setHeightFull();
+        rightLayout.setWidth("0");
+        rightLayout.setPadding(false);
 
         rightLayout.add(buildButtonBar());
 
@@ -201,8 +201,6 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
         add(rightLayout);
         expand(rightLayout);
-
-        redrawFlow();
     }
 
     protected HorizontalLayout buildButtonBar() {
@@ -388,7 +386,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         designNavigator.refresh();
     }
 
-    protected void redrawFlow() {
+    public void redrawFlow() {
         if (diagram != null) {
             diagramLayout.remove(diagram);
         }
@@ -491,6 +489,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         if (flow.isWebService()) {
             CallWebServicePanel panel = new CallWebServicePanel(deployment, context, tabs);
             tabs.addCloseableTab(deployment.getId(), "Call " + flow.getName(), new Icon(Icons.RUN), panel);
+            tabs.setSelectedTab(panel);
         } else {
             String executionId = agentManager.getAgentRuntime(myDesignAgent.getId()).scheduleNow(context.getUser().getLoginId(), deployment,
                     flow.toFlowParametersAsString());
@@ -498,6 +497,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                 ExecutionRunPanel logPanel = new ExecutionRunPanel(executionId, context, tabs,
                         this);
                 tabs.addCloseableTab(executionId, "Run " + flow.getName(), new Icon(Icons.LOG), logPanel);
+                tabs.setSelectedTab(logPanel);
                 logPanel.onBackgroundUIRefresh(logPanel.onBackgroundDataRefresh());
             }
         }
@@ -540,6 +540,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                         panel.init(readOnly, flowStep.getComponent(), context, propertySheet);
                         tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), new Icon(Icons.COMPONENT),
                                 (AbstractComponentEditPanel) panel);
+                        tabs.setSelectedTab((AbstractComponentEditPanel) panel);
                     }
                 }
        

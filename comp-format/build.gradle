@@ -2,6 +2,12 @@ apply from: '../metl-assemble/common.gradle'
 
 dependencies {
     compileOnly project(':metl-ui')   
-    compile project(':comp-abstract')
-    testCompile project(path: ':metl-core', configuration: 'testArtifacts')     
+    api project(':comp-abstract')
+}
+
+sourceSets {
+    String sharedTestDir = project(':metl-core').file("src/test/java")
+    test {
+        java.srcDir sharedTestDir
+    }
 }

@@ -30,8 +30,10 @@ import org.jumpmind.vaadin.ui.common.IUiPanel;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.server.Command;
 
 @SuppressWarnings("serial")
 
@@ -42,30 +44,36 @@ public class PluginRepositoryEditPanel extends VerticalLayout implements IUiPane
     ApplicationContext context;
 
     PluginRepository pluginRepository;
+    
+    Command refreshGridCommand;
 
-    public PluginRepositoryEditPanel(ApplicationContext context, PluginRepository pluginRepository) {
+    public PluginRepositoryEditPanel(ApplicationContext context, PluginRepository pluginRepository, Command refreshGridCommand) {
         this.context = context;
         this.pluginRepository = pluginRepository;
+        this.refreshGridCommand = refreshGridCommand;
 
         FormLayout form = new FormLayout();
+        form.setResponsiveSteps(new ResponsiveStep("0", 1));
 
-        TextField field = new TextField("Name", StringUtils.trimToEmpty(pluginRepository.getName()));
+        TextField field = new TextField();
+        field.setValue(StringUtils.trimToEmpty(pluginRepository.getName()));
         field.setWidth("20em");
-        form.add(field);
+        form.addFormItem(field, "Name");
         field.addValueChangeListener(new NameChangeListener());
         field.focus();
 
-        field = new TextField("Url", StringUtils.trimToEmpty(pluginRepository.getUrl()));
+        field = new TextField();
+        field.setValue(StringUtils.trimToEmpty(pluginRepository.getUrl()));
         field.setWidth("45em");
         field.addValueChangeListener(new UrlChangeListener());
-        form.add(field);
+        form.addFormItem(field, "Url");
 
         add(form);
-        setMargin(true);
     }
 
     @Override
     public boolean closing() {
+        refreshGridCommand.execute();
         return true;
     }
 

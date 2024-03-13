@@ -6,90 +6,94 @@ configurations {
 }
  
 dependencies {
-    jaxbConfig 'org.glassfish.jaxb:jaxb-core:2.2.11'
-    jaxbConfig 'org.glassfish.jaxb:jaxb-jxc:2.2.11'
-    jaxbConfig 'org.glassfish.jaxb:jaxb-xjc:2.2.11'
+    jaxbConfig 'org.glassfish.jaxb:jaxb-core:4.0.4'
+    jaxbConfig 'org.glassfish.jaxb:jaxb-jxc:4.0.4'
+    jaxbConfig 'org.glassfish.jaxb:jaxb-xjc:4.0.4'
 }
 
 dependencies {
-    compile "org.slf4j:slf4j-api:$slf4jVersion"
-    compile "org.slf4j:jul-to-slf4j:$slf4jVersion"
-    compile "org.slf4j:jcl-over-slf4j:$slf4jVersion"
-    compile "org.slf4j:slf4j-log4j12:$slf4jVersion"        
-    compile "org.springframework:spring-context:$springVersion"
-    compile (group:"org.jumpmind.symmetric", name:"symmetric-util", version:"$symmetricVersion") {
+    api "org.slf4j:slf4j-api:$slf4jVersion"
+    api "org.slf4j:jul-to-slf4j:$slf4jVersion"
+    api "org.slf4j:jcl-over-slf4j:$slf4jVersion"
+    api "org.apache.logging.log4j:log4j-core:$log4jVersion"
+    api "org.apache.logging.log4j:log4j-api:$log4jVersion"
+    api "org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion"
+    api "org.springframework:spring-context:$springVersion"
+    api "org.springframework:spring-tx:$springVersion"
+    api (group:"org.jumpmind.symmetric", name:"symmetric-util", version:"$symmetricVersion") {
         exclude group: 'org.bouncycastle'
     }
-    compile group:"org.jumpmind.symmetric", name:"symmetric-db", version:"$symmetricVersion"
-    compile group:"org.jumpmind.symmetric", name:"symmetric-jdbc", version:"$symmetricVersion"
-    compile group:"org.jumpmind.symmetric", name:"symmetric-io", version:"$symmetricVersion"
-    compile group:"org.jumpmind.symmetric", name:"symmetric-core", version:"$symmetricVersion"
-    compile (group: 'jcifs', name: 'jcifs', version: '1.3.17') {
-        exclude group: 'javax.servlet'
+    api group:"org.jumpmind.symmetric", name:"symmetric-db", version:"$symmetricVersion"
+    api group:"org.jumpmind.symmetric", name:"symmetric-jdbc", version:"$symmetricVersion"
+    api group:"org.jumpmind.symmetric", name:"symmetric-io", version:"$symmetricVersion"
+    api group:"org.jumpmind.symmetric", name:"symmetric-core", version:"$symmetricVersion"
+    api (group: 'jcifs', name: 'jcifs', version: '1.3.17') {
+        exclude group: 'jakarta.servlet'
     }
-    compile "commons-lang:commons-lang:$commonsLangVersion"
-    compile "org.apache.commons:commons-dbcp2:$commonsDbcpVersion"
-    compile "commons-io:commons-io:$commonsIoVersion"
-    compile "commons-net:commons-net:$commonsNetVersion"    
-    compile "commons-fileupload:commons-fileupload:$commonsFileuploadVersion"
-    compile "commons-collections:commons-collections:$commonsCollectionsVersion"
-    compile "jaxen:jaxen:$jaxenVersion"
-    compile "javax.mail:javax.mail-api:$javaMailVersion"
-    compile "org.jdom:jdom2:$jdomVersion"
-    compile "javax.el:javax.el-api:3.0.0"
-    compile "com.h2database:h2:$h2Version"
-    compile "jdbc.postgresql:postgresql:$postgresqlVersion"
-    compile "net.sourceforge.jtds:jtds:$jtdsVersion"
-    compile "net.sf.jt400:jt400:$jt400Version"
-    compile "org.apache.httpcomponents:httpclient:$httpComponentsVersion"
-    compile "org.apache.httpcomponents:httpmime:$httpComponentsVersion"
-    compile "org.jumpmind.symmetric.schemaspy:schemaspy:5.0.0"
-    compile "org.codehaus.groovy:groovy-all:$groovyVersion"
-    compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
-    compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion"  
-	compile group: 'net.sf.saxon', name: 'saxon9', version: '9.1.0.8'
-	runtime group: 'net.sf.saxon', name: 'saxon9-dom', version: '9.1.0.8'
-    compile "com.jcraft:jsch:0.1.54"
-    compile "oauth.signpost:oauth-signpost:1.2.1.2"    
-    compile "org.apache.ant:ant:$antVersion"
-    compile "javax.jms:javax.jms-api:2.0.1"    
-    compile  "org.apache.activemq:activemq-client:$activeMqVersion"
-    compile  "org.apache.activemq:activemq-broker:$activeMqVersion"        
-    compile "sshtools:j2ssh-ant:0.2.9"
-    compile "com.googlecode.json-simple:json-simple:1.1.1"
-    compile "kxml2:kxml2:$kxmlVersion"  
-    compile group: 'org.apache.commons', name: 'commons-pool2', version: '2.4.2'
-    compile group: 'org.apache.maven', name: 'maven-aether-provider', version: '3.3.9'
-    compile group: 'org.eclipse.aether', name: 'aether-transport-http', version: '1.1.0'
-    compile group: 'org.eclipse.aether', name: 'aether-transport-file', version: '1.1.0'
-    compile group: 'org.eclipse.aether', name: 'aether-transport-classpath', version: '1.1.0'    
-    compile group: 'org.eclipse.aether', name: 'aether-connector-basic', version: '1.1.0'    
-    compile "de.saly:javamail-mock2-halfmock:0.5-beta4"
-    compile "com.sun.jersey.contribs.jersey-oauth:oauth-signature:1.19.2"
-    compile "org.apache.poi:poi-ooxml:$apachePOIVersion"
-    compile (group: 'com.mockrunner', name: 'mockrunner-jdbc', version: '1.1.2') {
+    api "commons-lang:commons-lang:$commonsLangVersion"
+    api "org.apache.commons:commons-dbcp2:$commonsDbcpVersion"
+    api "commons-io:commons-io:$commonsIoVersion"
+    api "commons-net:commons-net:$commonsNetVersion"    
+    api "commons-collections:commons-collections:$commonsCollectionsVersion"
+    api "jaxen:jaxen:$jaxenVersion"
+    api "org.eclipse.angus:jakarta.mail:$jakartaMailVersion"
+    api "org.jdom:jdom2:$jdomVersion"
+    api "jakarta.el:jakarta.el-api:5.0.1"
+    api "com.h2database:h2:$h2Version"
+    api "jdbc.postgresql:postgresql:$postgresqlVersion"
+    api "net.sourceforge.jtds:jtds:$jtdsVersion"
+    api "net.sf.jt400:jt400:$jt400Version"
+    api "org.apache.httpcomponents:httpclient:$httpComponentsVersion"
+    api "org.apache.httpcomponents:httpmime:$httpComponentsVersion"
+    api "org.jumpmind.symmetric.schemaspy:schemaspy:5.0.0"
+    api "org.apache.groovy:groovy-all:$groovyVersion"
+    api "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+    api "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion"  
+	api group: 'net.sf.saxon', name: 'saxon9', version: '9.1.0.8'
+	runtimeOnly group: 'net.sf.saxon', name: 'saxon9-dom', version: '9.1.0.8'
+    api "com.jcraft:jsch:0.1.54"
+    api "oauth.signpost:oauth-signpost:1.2.1.2"    
+    api "org.apache.ant:ant:$antVersion"
+    api "jakarta.jms:jakarta.jms-api:3.1.0"    
+    api  "org.apache.activemq:activemq-client:$activeMqVersion"
+    api  "org.apache.activemq:activemq-broker:$activeMqVersion"        
+    api "sshtools:j2ssh-ant:0.2.9"
+    api "com.googlecode.json-simple:json-simple:1.1.1"
+    api "kxml2:kxml2:$kxmlVersion"  
+    api group: 'org.apache.commons', name: 'commons-pool2', version: '2.4.2'
+    api group: 'org.apache.maven', name: 'maven-aether-provider', version: '3.3.9'
+    api group: 'org.eclipse.aether', name: 'aether-transport-http', version: '1.1.0'
+    api group: 'org.eclipse.aether', name: 'aether-transport-file', version: '1.1.0'
+    api group: 'org.eclipse.aether', name: 'aether-transport-classpath', version: '1.1.0'    
+    api group: 'org.eclipse.aether', name: 'aether-connector-basic', version: '1.1.0'    
+    api "de.saly:javamail-mock2-halfmock:0.5-beta4"
+    api "com.sun.jersey.contribs.jersey-oauth:oauth-signature:1.19.2"
+    api "org.apache.poi:poi-ooxml:$apachePOIVersion"
+    api (group: 'com.mockrunner', name: 'mockrunner-jdbc', version: '1.1.2') {
         exclude group: 'xerces'
     }
-    compile "org.jgrapht:jgrapht-core:1.0.1"
-    compile "org.apache.kafka:kafka-clients:$apacheKafkaVersion"
-    testCompile "org.mockito:mockito-all:$mockitoVersion"
-    testCompile "org.powermock:powermock-api-mockito:$powerMockVersion"
-    testCompile "org.powermock:powermock-module-junit4:$powerMockVersion"    
-    testCompile "xmlunit:xmlunit:$xmlunitVersion"
+    api "org.jgrapht:jgrapht-core:1.0.1"
+    api "org.apache.kafka:kafka-clients:$apacheKafkaVersion"
+    testImplementation "org.mockito:mockito-all:$mockitoVersion"
+    testImplementation "org.powermock:powermock-api-mockito:$powerMockVersion"
+    testImplementation "org.powermock:powermock-module-junit4:$powerMockVersion"    
+    testImplementation "xmlunit:xmlunit:$xmlunitVersion"
 
     /* TODO: AWS SDK dependencies in resource-core instead? */
-    compile "com.amazonaws:aws-encryption-sdk-java:${awsEncryptionSdkVersion}"
+    api "com.amazonaws:aws-encryption-sdk-java:${awsEncryptionSdkVersion}"
     /* required by aws-encryption-sdk-java: */
-    compile "com.amazonaws:aws-java-sdk-core:${awsSdkVersion1}"
-    compile "com.amazonaws:aws-java-sdk-kms:${awsSdkVersion1}"
+    api "com.amazonaws:aws-java-sdk-core:${awsSdkVersion1}"
+    api "com.amazonaws:aws-java-sdk-kms:${awsSdkVersion1}"
 
-    compile ("software.amazon.awssdk:s3:${awsSdkVersion2}") {
+    api ("software.amazon.awssdk:s3:${awsSdkVersion2}") {
         exclude group: 'com.fasterxml.jackson.core'
     }
-    compile ("software.amazon.awssdk:sqs:${awsSdkVersion2}") {
+    api ("software.amazon.awssdk:sqs:${awsSdkVersion2}") {
         exclude group: 'com.fasterxml.jackson.core'
     }
-    implementation "javax.annotation:javax.annotation-api:1.3.2"
+    api "jakarta.annotation:jakarta.annotation-api:2.1.1"
+    api "jakarta.xml.bind:jakarta.xml.bind-api:4.0.1"
+    api "com.sun.xml.bind:jaxb-impl:4.0.4"
 }
 
 clean.doFirst {

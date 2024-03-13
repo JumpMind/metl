@@ -34,9 +34,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 
 public class InProgressDialog<T> extends Dialog {
@@ -59,21 +57,15 @@ public class InProgressDialog<T> extends Dialog {
         this.backgroundService = backgroundService;
         this.worker = worker;
         this.failureMessage = failureMessage;
-        setWidth("300px");
-        setHeight("150px");
+        setWidth("400px");
+        setHeight("230px");
         setModal(true);
 
-        Span header = new Span("<b>Working...</b><hr>");
-        header.setWidthFull();
-        header.getStyle().set("margin", null);
-        add(header);
-
-        VerticalLayout content = new VerticalLayout();
-        add(content);
+        setHeaderTitle("Working...");
 
         HorizontalLayout middle = new HorizontalLayout();
+        middle.setPadding(false);
         middle.setSpacing(true);
-        middle.setMargin(true);
 
         ProgressBar pg = new ProgressBar();
         pg.setIndeterminate(true);
@@ -84,11 +76,8 @@ public class InProgressDialog<T> extends Dialog {
             middle.add(span);
         }
 
-        content.add(middle);
-        content.expand(middle);
+        add(middle);
 
-        HorizontalLayout buttonBar = new HorizontalLayout();
-        buttonBar.setWidthFull();
         Button dismiss = new Button("Dismiss");
         dismiss.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         dismiss.addClickShortcut(Key.ENTER);
@@ -101,10 +90,7 @@ public class InProgressDialog<T> extends Dialog {
                 InProgressDialog.this.close();
             }
         });
-        buttonBar.addAndExpand(new Span());
-        buttonBar.add(dismiss);
-        buttonBar.setVerticalComponentAlignment(Alignment.CENTER, dismiss);
-        content.add(buttonBar);
+        getFooter().add(dismiss);
 
     }
 

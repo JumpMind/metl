@@ -33,7 +33,6 @@ import org.jumpmind.metl.core.model.HierarchicalModel;
 import org.jumpmind.metl.core.model.ModelSchemaObject;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
 import com.vaadin.flow.component.BlurNotifier.BlurEvent;
@@ -46,6 +45,7 @@ import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.ItemClickEvent;
@@ -90,6 +90,8 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         this.model = new HierarchicalModel(modelId);
         this.readOnly = readOnly;
         context.getConfigurationService().refresh(model);
+        setPadding(false);
+        setSpacing(false);
         ButtonBar buttonBar1 = new ButtonBar();
         add(buttonBar1);
         
@@ -105,7 +107,7 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         treeGrid.setSizeFull();
         treeGrid.setPageSize(100);
         treeGrid.setSelectionMode(SelectionMode.MULTI);
-        treeGrid.addColumn(obj -> {
+        treeGrid.addComponentHierarchyColumn(obj -> {
             if (lastEditItemIds.contains(obj) && !readOnly) {
                 TextField t = new TextField();
                 t.setValueChangeMode(ValueChangeMode.LAZY);
@@ -126,7 +128,7 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
             }
         }).setHeader("Name");
 
-        treeGrid.addColumn(obj -> {
+        treeGrid.addComponentColumn(obj -> {
             if (lastEditItemIds.contains(obj) && !readOnly) {
                 TextField t = new TextField();
                 t.setValueChangeMode(ValueChangeMode.LAZY);
@@ -136,14 +138,17 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
                     EditHierarchicalModelPanel.this.context.getConfigurationService().save(obj);
                 });
                 t.setWidthFull();
-                t.setValue(obj.getDescription());
+                String description = obj.getDescription();
+                if (description != null) {
+                    t.setValue(description);
+                }
                 return t;
             } else {
-                return obj.getDescription();
+                return new Span(obj.getDescription());
             }
         }).setHeader("Description");
 
-        treeGrid.addColumn(obj -> {
+        treeGrid.addComponentColumn(obj -> {
             if (lastEditItemIds.contains(obj) && !readOnly) {
                 final ComboBox<String> cbox = new ComboBox<String>();
                 List<String> dataTypeList = new ArrayList<String>();
@@ -179,11 +184,11 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
                 });
                 return cbox;
             } else {
-                return obj.getType();
+                return new Span(obj.getType());
             }
         }).setHeader("Type");
 
-        treeGrid.addColumn(obj -> {
+        treeGrid.addComponentColumn(obj -> {
             if (lastEditItemIds.contains(obj) && !readOnly) {
                 TextField t = new TextField();
                 t.setValueChangeMode(ValueChangeMode.LAZY);
@@ -193,10 +198,13 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
                     EditHierarchicalModelPanel.this.context.getConfigurationService().save(obj);
                 });
                 t.setWidthFull();
-                t.setValue(obj.getPattern());
+                String pattern = obj.getPattern();
+                if (pattern != null) {
+                    t.setValue(pattern);
+                }
                 return t;
             } else {
-                return obj.getPattern();
+                return new Span(obj.getPattern());
             }
         }).setHeader("Pattern");
         
@@ -378,17 +386,15 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         public void onComponentEvent(ClickEvent<Button> event) {
 
             Set<ModelSchemaObject> selectedItems = getSelectedItems();
-            ConfirmDialog.show("Delete?",
-                    "Are you sure you want to delete the " + selectedItems.size() + " selected items and their children?",
-                    ()->{
+            new ConfirmDialog("Delete?", "Are you sure you want to delete the " + selectedItems.size()
+                    + " selected items and their children?", "Ok", e -> {
                         for (Object itemToDelete : selectedItems) {
-                    		    context.getConfigurationService().delete((ModelSchemaObject) itemToDelete);
-                    		    context.getConfigurationService().refresh(model);
-                    		    treeGrid.getTreeData().clear();
-                    		    addAll(model);
+                            context.getConfigurationService().delete((ModelSchemaObject) itemToDelete);
+                            context.getConfigurationService().refresh(model);
+                            treeGrid.getTreeData().clear();
+                            addAll(model);
                         }
-                    		return true;                    	
-                    });
+                    }).open();
         }
     }
 

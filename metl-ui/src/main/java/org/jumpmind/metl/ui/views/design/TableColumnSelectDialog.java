@@ -52,9 +52,9 @@ import org.jumpmind.vaadin.ui.sqlexplorer.DefaultSettingsProvider;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
@@ -88,8 +88,6 @@ public class TableColumnSelectDialog extends ResizableDialog implements Receiver
     VerticalLayout optionLayout;
     
     RadioButtonGroup<String> optionGroup;
-    
-    Scroller scrollable;
 
     Upload relCsvUpload;
     
@@ -113,11 +111,11 @@ public class TableColumnSelectDialog extends ResizableDialog implements Receiver
         this.model = model;
 
         setWidth("600px");
-        setHeight("600px");
+        setHeight("700px");
 
         VerticalLayout layout = new VerticalLayout();
-        layout.setSpacing(true);
-        layout.setMargin(true);
+        layout.setSpacing(false);
+        layout.setPadding(false);
         layout.setSizeFull();
         layout.add(new Span("Import Entity and Attributes from a database, csv file or source file header row into the model."));
 
@@ -131,15 +129,17 @@ public class TableColumnSelectDialog extends ResizableDialog implements Receiver
 
         optionLayout = new VerticalLayout();
         optionLayout.setSizeFull();
-        
-        scrollable = new Scroller();
-        scrollable.setSizeFull();
+        optionLayout.setPadding(false);
+        optionLayout.setSpacing(false);
 
         provider = new DbProvider(context);
         dbTree = new DbTree(provider, new DefaultSettingsProvider(context.getConfigDir()));
-        scrollable.setContent(dbTree);
+        dbTree.setSizeFull();
+        dbTree.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
 
         relCsvUpload = new Upload(this);
+        relCsvUpload.setId("csvUpload");
+        relCsvUpload.setDropAllowed(false);
         relCsvUpload.addSucceededListener(this);
 
         fileHeaderEntity = new TextField("Entity Name");
@@ -147,10 +147,12 @@ public class TableColumnSelectDialog extends ResizableDialog implements Receiver
         fileHeaderEntity.setRequiredIndicatorVisible(true);
 
         fileHeaderDelimiter = new TextField("Header Row Delimiter", ",");
-        fileHeaderDelimiter.setWidth("5em");
+        fileHeaderDelimiter.setWidth("10em");
         fileHeaderDelimiter.setRequiredIndicatorVisible(true);
         
         fileHeaderUpload = new Upload(this);
+        fileHeaderUpload.setId("headerUpload");
+        fileHeaderUpload.setDropAllowed(false);
         fileHeaderUpload.addSucceededListener(this);
 
         layout.addAndExpand(optionLayout);
@@ -160,7 +162,7 @@ public class TableColumnSelectDialog extends ResizableDialog implements Receiver
         Button refreshButton = new Button("Refresh");
         Button cancelButton = new Button("Cancel");
         Button selectButton = new Button("Import");
-        add(buildButtonFooter(refreshButton, cancelButton, selectButton));
+        buildButtonFooter(refreshButton, cancelButton, selectButton);
 
         cancelButton.addClickListener(event -> close());
         selectButton.addClickListener(event -> select());
@@ -170,13 +172,13 @@ public class TableColumnSelectDialog extends ResizableDialog implements Receiver
     protected void rebuildOptionLayout() {
         optionLayout.removeAll();
         if (optionGroup.getValue().equals(OPTION_DB)) {
-            optionLayout.add(scrollable);
+            optionLayout.add(dbTree);
         } else if (optionGroup.getValue().equals(OPTION_REL_FILE)) {
-            Label label = new Label("Comma separated file with 5 columns:  ENTITY, ATTRIBUTE, DESCRIPTION, DATA_TYPE, PK");
+            NativeLabel label = new NativeLabel("Comma separated file with 5 columns:  ENTITY, ATTRIBUTE, DESCRIPTION, DATA_TYPE, PK");
             label.setFor(relCsvUpload);
         	optionLayout.add(label, relCsvUpload);
         } else if (optionGroup.getValue().equals(OPTION_FILE_HEADER_ROW)) {
-            Label label = new Label("Source file containing a header row to use as attributes (will be created as VARCHAR type, no PK)");
+            NativeLabel label = new NativeLabel("Source file containing a header row to use as attributes (will be created as VARCHAR type, no PK)");
             label.setFor(fileHeaderUpload);
         	optionLayout.add(fileHeaderEntity, fileHeaderDelimiter, label, fileHeaderUpload);
         	optionLayout.setFlexGrow(0.2, fileHeaderEntity, fileHeaderDelimiter);

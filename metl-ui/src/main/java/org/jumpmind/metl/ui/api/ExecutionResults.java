@@ -23,7 +23,7 @@ package org.jumpmind.metl.ui.api;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "executionresults")
 public class ExecutionResults implements Serializable {

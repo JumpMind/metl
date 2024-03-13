@@ -37,6 +37,8 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -55,25 +57,21 @@ public class ImportDialog extends Dialog {
     
     IImportListener importListener;
     
-    Upload upload;
+    Button closeButton;
     
-    HorizontalLayout buttonLayout;
+    Upload upload;
 
     public ImportDialog(String caption, String text, IImportListener importListener) {
         this.importListener = importListener;
         
         setModal(true);
         setResizable(true);
-        setWidth("305px");
+        setWidth("420px");
 
-        Span header = new Span("<b>" + caption + "</b><hr>");
-        header.setWidthFull();
-        header.getStyle().set("margin", null);
-        add(header);
+        setHeaderTitle(caption);
 
         VerticalLayout layout = new VerticalLayout();
         layout.setWidthFull();
-        layout.setMargin(true);
         layout.setSpacing(true);
         add(layout);
 
@@ -88,14 +86,7 @@ public class ImportDialog extends Dialog {
         layout.add(importLayout);
         layout.expand(importLayout);
 
-        buttonLayout = new HorizontalLayout();
-        buttonLayout.setSpacing(true);
-        buttonLayout.setWidthFull();
-
-        Span spacer = new Span(" ");
-        buttonLayout.addAndExpand(spacer);    
-
-        Button closeButton = new Button("Close");
+        closeButton = new Button("Close");
         closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         closeButton.addClickShortcut(Key.ESCAPE);
         closeButton.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
@@ -106,9 +97,8 @@ public class ImportDialog extends Dialog {
                 close();
             }
         });
-        buttonLayout.add(closeButton);
         
-        layout.add(buttonLayout);
+        getFooter().add(closeButton);
         
         replaceUploadButton();
         
@@ -117,10 +107,11 @@ public class ImportDialog extends Dialog {
     
     protected void replaceUploadButton() {
         if (upload != null) {
-            buttonLayout.remove(upload);
+            getFooter().remove(upload);
         }
         final UploadHandler handler = new UploadHandler();
         upload = new Upload(handler);
+        upload.setDropAllowed(false);
         upload.addFinishedListener(new ComponentEventListener<FinishedEvent>() {
             private static final long serialVersionUID = 1L;
 
@@ -129,8 +120,9 @@ public class ImportDialog extends Dialog {
                     String content = handler.getContent();   
                     importListener.onFinished(content);
                     importLayout.removeAll();
-                    Span span = new Span("Import Succeeded!");
+                    Span span = new Span(new Icon(VaadinIcon.CHECK), new Span("Import Succeeded!"));
                     //span.setStyleName(ValoTheme.LABEL_SUCCESS);
+                    span.getElement().getThemeList().add("badge success");
                     importLayout.add(span);
                     importLayout.setVerticalComponentAlignment(Alignment.CENTER, span);
                 } catch (Exception e) {
@@ -140,8 +132,9 @@ public class ImportDialog extends Dialog {
                     if (e instanceof MessageException) {
                         message = e.getMessage();
                     }
-                    Span span = new Span(message);
+                    Span span = new Span(new Icon(VaadinIcon.BAN), new Span(message));
                     //span.setStyleName(ValoTheme.LABEL_FAILURE);
+                    span.getElement().getThemeList().add("badge error");
                     importLayout.add(span);
                     importLayout.setVerticalComponentAlignment(Alignment.CENTER, span);
                 }             
@@ -149,7 +142,7 @@ public class ImportDialog extends Dialog {
             }
         });
 
-        buttonLayout.addComponentAtIndex(1, upload);
+        getFooter().add(upload, closeButton);
     }
 
     public static void show(String caption, String text, IImportListener listener) {

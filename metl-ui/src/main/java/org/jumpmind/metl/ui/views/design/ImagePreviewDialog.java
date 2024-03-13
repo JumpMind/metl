@@ -48,7 +48,7 @@ public class ImagePreviewDialog extends ResizableDialog {
         panel.setId("canvasContainer");
         panel.setWidth("100%");  
         panel.setHeight("100%");
-        addComponentAtIndex(1, panel);
+        add(panel);
         
         Button closeButton = new Button("Close");
         closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -74,7 +74,7 @@ public class ImagePreviewDialog extends ResizableDialog {
 //        footer.addComponent(downloadLink);
         
         footer.add(closeButton);
-        this.add(footer);
+        getFooter().add(footer);
         
         diagram.export();
     }

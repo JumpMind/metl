@@ -4,18 +4,18 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.Contact;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
 
-@EnableSwagger2
+@Configuration
+@OpenAPIDefinition
 public class SwaggerConfig implements WebMvcConfigurer {
 
     @Override
@@ -31,6 +31,11 @@ public class SwaggerConfig implements WebMvcConfigurer {
     }
 
     @Bean
+    public OpenAPI openApi() {
+        return new OpenAPI().info(new Info().title("Metl API").description("This is the REST API for Metl"));
+    }
+    
+    /*@Bean
     public Docket swaggerSpringMvcPlugin() {
         return new Docket(DocumentationType.SWAGGER_2).produces(contentTypes()).consumes(contentTypes())
                 .apiInfo(new ApiInfo("Metl API", "This is the REST API for Metl", null, null, (Contact) null, null, null));
@@ -41,5 +46,5 @@ public class SwaggerConfig implements WebMvcConfigurer {
         set.add("application/xml");
         set.add("application/json");
         return set;
-    }
+    }*/
 }

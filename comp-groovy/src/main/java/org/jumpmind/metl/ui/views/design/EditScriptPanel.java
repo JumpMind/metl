@@ -51,6 +51,9 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
 
     @SuppressWarnings("serial")
     protected void buildUI() {
+        setPadding(false);
+        setSpacing(false);
+        
         ButtonBar buttonBar = new ButtonBar();
         add(buttonBar);
 

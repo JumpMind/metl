@@ -28,19 +28,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.mail.Address;
-import javax.mail.BodyPart;
-import javax.mail.Flags;
-import javax.mail.Folder;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.Part;
-import javax.mail.internet.ContentType;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.search.FlagTerm;
-import javax.mail.Store;
+import jakarta.mail.Address;
+import jakarta.mail.BodyPart;
+import jakarta.mail.Flags;
+import jakarta.mail.Folder;
+import jakarta.mail.MessagingException;
+import jakarta.mail.Multipart;
+import jakarta.mail.Part;
+import jakarta.mail.internet.ContentType;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.search.FlagTerm;
+import jakarta.mail.Store;
 
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
@@ -123,7 +123,7 @@ public class EmailReader extends AbstractComponentRuntime {
 	        	Flags flagSeen = new Flags(Flags.Flag.SEEN);
 	       	
 	        	if (emailFolder != null && emailFolder.exists()) {
-	        		javax.mail.Message[] messages = null;
+	        		jakarta.mail.Message[] messages = null;
 	        		emailFolder.open(Folder.READ_WRITE);
 		        	
 	        		if (getOnlyUnreadMessages) {
@@ -132,12 +132,12 @@ public class EmailReader extends AbstractComponentRuntime {
 	        			messages = emailFolder.getMessages();
 	        		}
 	        		
-		        	List<javax.mail.Message> tmpList = new ArrayList<>();
+		        	List<jakarta.mail.Message> tmpList = new ArrayList<>();
 	
 		        	for (int i = 0; i < messages.length; i++) {
 		                Map<String, Serializable> headers = new HashMap<>(1);
 		                headers.putAll(inputMessage.getHeader());
-		        		javax.mail.Message msg = messages[i];
+		        		jakarta.mail.Message msg = messages[i];
 		        		boolean fromAddrFound = false;
 		        		Multipart multipart = null;
 		        		int multipartCount = 0;
@@ -148,7 +148,7 @@ public class EmailReader extends AbstractComponentRuntime {
 		        		}
 		        		
 		        		if (markAllMailAsRead) {
-		        			emailFolder.setFlags(new javax.mail.Message[] {msg}, new Flags(Flags.Flag.SEEN), true);
+		        			emailFolder.setFlags(new jakarta.mail.Message[] {msg}, new Flags(Flags.Flag.SEEN), true);
 		        		}
 		                
 		        		if (searchByFrom) {
@@ -169,7 +169,7 @@ public class EmailReader extends AbstractComponentRuntime {
 		        			|| (searchBySubject && msg.getSubject().contains(subjectSearch) && searchByFrom && fromAddrFound)) {
 	
 			                payload = new ArrayList<String>();
-		        			emailFolder.setFlags(new javax.mail.Message[] {msg}, new Flags(Flags.Flag.SEEN), true);
+		        			emailFolder.setFlags(new jakarta.mail.Message[] {msg}, new Flags(Flags.Flag.SEEN), true);
 		            		tmpList.add(msg);
 
 		            		payload.add(getTextFromMessage(msg));
@@ -202,7 +202,7 @@ public class EmailReader extends AbstractComponentRuntime {
 		                checkForInterruption();
 		        	}
 		        	
-		        	javax.mail.Message[] rptMsgs = tmpList.toArray(new javax.mail.Message[tmpList.size()]);
+		        	jakarta.mail.Message[] rptMsgs = tmpList.toArray(new jakarta.mail.Message[tmpList.size()]);
 		        	
 		        	if (moveMailToFolder) {
 			        	emailFolder.copyMessages(rptMsgs, rptFolder);
@@ -220,7 +220,7 @@ public class EmailReader extends AbstractComponentRuntime {
         }
     }
 
-    private String getTextFromMessage(javax.mail.Message message) throws IOException, MessagingException {
+    private String getTextFromMessage(jakarta.mail.Message message) throws IOException, MessagingException {
         String result = "";
         if (message.isMimeType("text/plain")) {
             result = message.getContent().toString();

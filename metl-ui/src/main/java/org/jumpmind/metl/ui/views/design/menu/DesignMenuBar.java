@@ -32,6 +32,7 @@ import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.ui.common.AbstractMenuBar;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
 
+import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 
 public class DesignMenuBar extends AbstractMenuBar {
@@ -40,6 +41,7 @@ public class DesignMenuBar extends AbstractMenuBar {
 
     public DesignMenuBar(DesignNavigator navigator, TreeGrid<AbstractNamedObject> tree) {
         super(tree, new NothingSelectAction(navigator));
+        addThemeVariants(MenuBarVariant.LUMO_SMALL);
         addMenuManager(ProjectVersion.class, new ProjectVersionMenuManager(navigator));
         addMenuManager(Project.class, new ProjectMenuManager(navigator));
         addMenuManager(FlowName.class, new FlowMenuManager(navigator));

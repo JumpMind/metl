@@ -73,6 +73,8 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
     Set<EntitySettings> selectedItemIds;
 
     protected void buildUI() {
+        setPadding(false);
+        setSpacing(false);
         buildButtonBar();
         buildEntityGrid();
         fillEntityContainer();
@@ -143,13 +145,13 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
             RelationalModel model = (RelationalModel) component.getInputModel();
             ModelEntity entity = model.getEntityById(setting.getEntityId());
             return UiUtils.getName(entityFilterField.getValue(), entity.getName());
-        }).setHeader("Entity Name").setWidth("250px").setFlexGrow(1).setSortable(false);
+        }).setHeader("Entity Name").setFlexGrow(1).setSortable(false);
         entityGrid.addComponentColumn(setting -> createEntityCheckbox(setting, DataDiff.ENTITY_ADD_ENABLED))
-                .setHeader("Add Enabled").setSortable(false);
+                .setHeader("Add Enabled").setFlexGrow(0).setWidth("120px").setSortable(false);
         entityGrid.addComponentColumn(setting -> createEntityCheckbox(setting, DataDiff.ENTITY_CHG_ENABLED))
-                .setHeader("Chg Enabled").setSortable(false);
+                .setHeader("Chg Enabled").setFlexGrow(0).setWidth("120px").setSortable(false);
         entityGrid.addComponentColumn(setting -> createEntityCheckbox(setting, DataDiff.ENTITY_DEL_ENABLED))
-                .setHeader("Del Enabled").setSortable(false);
+                .setHeader("Del Enabled").setFlexGrow(0).setWidth("120px").setSortable(false);
         entityGrid.setSelectionMode(SelectionMode.MULTI);
         if (!readOnly) {
             entityGrid.setRowsDraggable(true);
@@ -183,7 +185,9 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
 
     protected void updateEntityGrid(String filter) {
         filter = filter != null ? filter.toLowerCase() : null;
-        entityFilterField.setValue(filter);
+        if (filter != null) {
+            entityFilterField.setValue(filter);
+        }
         filteredEntitySettings.clear();
         for (EntitySettings entitySetting : entitySettings) {
             RelationalModel model = (RelationalModel) component.getInputModel();
@@ -361,7 +365,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
             setHeight("600px");
             innerContent.setMargin(true);
             buildAttributeGrid();
-            add(buildButtonFooter(buildCloseButton()));
+            buildButtonFooter(buildCloseButton());
         }
 
         private void buildAttributeGrid() {

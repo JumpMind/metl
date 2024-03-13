@@ -2,7 +2,7 @@ apply from: '../metl-assemble/common.gradle'
 
 dependencies {
     compileOnly project(':metl-ui')
-    compile project(':comp-rdbms-reader')
-    compile project(':comp-rdbms-writer')
-    testCompile project(path: ':metl-core', configuration: 'testArtifacts') 
+    api project(':comp-rdbms-reader')
+    api project(':comp-rdbms-writer')
+    testImplementation project(path: ':metl-core', configuration: 'testArtifacts') 
 }

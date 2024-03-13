@@ -29,7 +29,6 @@ import org.jumpmind.metl.core.model.Tag;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.vaadin.ui.common.UiComponent;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
 import com.vaadin.flow.component.ClickEvent;
@@ -44,10 +43,11 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.selection.SelectionEvent;
 import com.vaadin.flow.data.selection.SelectionListener;
+import com.vaadin.flow.spring.annotation.UIScope;
 
 @SuppressWarnings("serial")
 @UiComponent
-@Scope(value = "ui")
+@UIScope
 @Order(300)
 @AdminMenuLink(name = "Tags", id = "Tags", icon = VaadinIcon.TAG)
 public class TagPanel extends AbstractAdminPanel {
@@ -63,6 +63,9 @@ public class TagPanel extends AbstractAdminPanel {
     Grid<Tag> grid;
     
     public TagPanel() {
+        setPadding(false);
+        setSpacing(false);
+        
         ButtonBar buttonBar = new ButtonBar();
         add(buttonBar);
 
@@ -137,7 +140,7 @@ public class TagPanel extends AbstractAdminPanel {
     class NewClickListener implements ComponentEventListener<ClickEvent<Button>> {
         public void onComponentEvent(ClickEvent<Button> event) {
             Tag tag = new Tag();
-            TagEditPanel editPanel = new TagEditPanel(context, tag);
+            TagEditPanel editPanel = new TagEditPanel(context, tag, () -> refresh());
             adminView.getTabbedPanel().addCloseableTab(tag.getId(), "Edit Tag", new Icon(VaadinIcon.TAG), editPanel);
         }
     }
@@ -147,7 +150,7 @@ public class TagPanel extends AbstractAdminPanel {
             Tag tag = getFirstSelectedItem();
 //TODO: refresh if we want to do things like show all entities that are tagged            
 //            context.getOperationsService().refresh(tag);
-            TagEditPanel editPanel = new TagEditPanel(context, tag);
+            TagEditPanel editPanel = new TagEditPanel(context, tag, () -> refresh());
             adminView.getTabbedPanel().addCloseableTab(tag.getId(), "Edit Tag", new Icon(VaadinIcon.TAG), editPanel);
         }
     }

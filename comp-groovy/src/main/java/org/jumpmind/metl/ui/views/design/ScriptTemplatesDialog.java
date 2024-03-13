@@ -30,7 +30,6 @@ import org.jumpmind.metl.core.runtime.component.Script;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
-import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.ResizableDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +40,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 
 import de.f0rce.ace.AceEditor;
 import de.f0rce.ace.enums.AceMode;
@@ -116,16 +116,14 @@ class ScriptTemplatesDialog extends ResizableDialog {
         closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         closeButton.addClickListener((e) -> close());
 
-        add(buildButtonFooter(applyButton, closeButton));
+        buildButtonFooter(applyButton, closeButton);
 
     }
 
     protected void notifyApplyTemplate(Template template) {
-        ConfirmDialog.show("Apply the '" + template.name + "' template?",
-                "Are you sure you want to apply the '" + template.name + "' template?", () -> {
-                    applyTemplate(template);
-                    return true;
-                });
+        new ConfirmDialog("Apply the '" + template.name + "' template?",
+                "Are you sure you want to apply the '" + template.name + "' template?", "Ok",
+                event -> applyTemplate(template)).open();
     }
 
     protected void applyTemplate(Template template) {

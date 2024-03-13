@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -163,7 +162,6 @@ public class ExcelFileReader extends AbstractFileReader {
         }
     }
 
-    @SuppressWarnings("deprecation")
     private void readWorkbook(Map<String, Serializable> headers, InputStream inStream,
             ISendMessageCallback callback, boolean oldExcelFormat) throws IOException {
 
@@ -190,23 +188,23 @@ public class ExcelFileReader extends AbstractFileReader {
                         for (Cell cell : row) {
                             if (worksheetColumnArray[cell.getColumnIndex()] != null) {
                                 switch (cell.getCellType()) {
-                                    case Cell.CELL_TYPE_STRING:
+                                    case STRING:
                                         cellValue = cell.getStringCellValue();
                                         break;
-                                    case Cell.CELL_TYPE_BOOLEAN:
+                                    case BOOLEAN:
                                         cellValue = cell.getBooleanCellValue();
                                         break;
-                                    case Cell.CELL_TYPE_NUMERIC:
+                                    case NUMERIC:
                                         if (DateUtil.isCellDateFormatted(cell)) {
                                             cellValue = cell.getDateCellValue();
                                         } else {
                                             cellValue = cell.getNumericCellValue();
                                         }
                                         break;
-                                    case Cell.CELL_TYPE_BLANK:
+                                    case BLANK:
                                         cellValue = null;
                                         break;
-                                    case Cell.CELL_TYPE_FORMULA:
+                                    case FORMULA:
                                     	// If a formula cell get the value the formula evaluates to.
                                     	// Some Errors appear as a formula, in these cases need to determine if user
                                     	// wants to fail the process or replace the error formula with null 
@@ -222,7 +220,7 @@ public class ExcelFileReader extends AbstractFileReader {
                                     		}
                                     	}
                                         break;
-                                    case Cell.CELL_TYPE_ERROR:
+                                    case ERROR:
                                     	if (ignoreError) {
                                     		cellValue = null;
                                 		} else {

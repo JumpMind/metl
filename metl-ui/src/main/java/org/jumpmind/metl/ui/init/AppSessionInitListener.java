@@ -20,6 +20,7 @@
  */
 package org.jumpmind.metl.ui.init;
 
+import org.jumpmind.vaadin.ui.common.Label;
 import org.jumpmind.vaadin.ui.common.ResizableDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,8 +86,8 @@ public class AppSessionInitListener implements SessionInitListener {
     class ErrorDialog extends ResizableDialog {
         public ErrorDialog(String intro, String message) {
             super("Error");
-            setWidth("600px");
-            setHeight("300px");
+            setWidth("750px");
+            setHeight("450px");
             innerContent.setMargin(true);
 
             HorizontalLayout layout = new HorizontalLayout();
@@ -95,7 +96,7 @@ public class AppSessionInitListener implements SessionInitListener {
             icon.setSize("70px");
             layout.add(icon);
 
-            Span labelIntro = new Span(intro);
+            Label labelIntro = new Label(intro);
             labelIntro.setClassName("large");
             labelIntro.setWidth("530px");
             layout.add(labelIntro);
@@ -104,11 +105,13 @@ public class AppSessionInitListener implements SessionInitListener {
             TextArea textField = new TextArea();
             textField.setSizeFull();
             textField.getStyle().set("white-space", "pre").set("overflow-x", "auto").set("padding-bottom", "1em");
-            textField.setValue(message);
+            if (message != null) {
+                textField.setValue(message);
+            }
             add(textField);
             innerContent.expand(textField);
 
-            add(buildButtonFooter(buildCloseButton()));
+            buildButtonFooter(buildCloseButton());
         }
     }
 

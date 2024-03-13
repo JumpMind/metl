@@ -47,10 +47,11 @@ import org.jumpmind.metl.ui.init.BackgroundRefresherService;
 import org.jumpmind.metl.ui.persist.IUICache;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
+
+import com.vaadin.flow.spring.annotation.UIScope;
 
 @UiComponent
-@Scope(value = "ui")
+@UIScope
 public class ApplicationContext implements Serializable {
 
     private static final long serialVersionUID = 1L;

@@ -6,34 +6,43 @@ apply from: '../metl-assemble/common.gradle'
 version = origVersion
 
 dependencies {
-    compile project(":metl-core")
-    compile (group:"org.jumpmind.symmetric", name:"symmetric-sqlexplorer", version:"$symmetricVersion", changing:true) {
+    api project(":metl-core")
+    api (group:"org.jumpmind.symmetric", name:"symmetric-sqlexplorer", version:"$symmetricVersion", changing:true) {
        exclude group:'com.vaadin'
     }
-    compile "org.springframework:spring-webmvc:$springVersion"
-    compile "org.apache.poi:poi:3.11"
-    compile "io.springfox:springfox-swagger2:$springfoxSwaggerVersion"
-    compile "io.springfox:springfox-swagger-ui:$springfoxSwaggerVersion"
-    compile "io.swagger:swagger-core:$swaggerVersion"
-    compile ("org.reficio:soap-builder:$reficioSoapVersion") {
+    api "org.springframework:spring-webmvc:$springVersion"
+    api "org.apache.poi:poi:3.11"
+    api "org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocVersion"
+    api "io.swagger.core.v3:swagger-annotations:$swaggerVersion"
+    api "io.swagger.core.v3:swagger-core:$swaggerVersion"
+    api "io.swagger.core.v3:swagger-models:$swaggerVersion"
+    api ("org.reficio:soap-builder:$reficioSoapVersion") {
        exclude group:'com.googlecode.guava-osgi'
     }    
-    compile ("org.reficio:soap-common:$reficioSoapVersion") {
+    api ("org.reficio:soap-common:$reficioSoapVersion") {
 
        exclude group:'com.googlecode.guava-osgi'
     }    
-    compile ("org.reficio:soap-legacy:$reficioSoapVersion") {
+    api ("org.reficio:soap-legacy:$reficioSoapVersion") {
        exclude group:'com.googlecode.guava-osgi'
     }    
-    compile "jlibs:jlibs-xml:1.0"
-    compile "com.vaadin:vaadin-bom:$vaadinVersion"
-    compile "com.vaadin:vaadin-core:$vaadinVersion"    
-    compile "com.vaadin:vaadin-spring:$vaadinVersion"
-    compile "javax.servlet:javax.servlet-api:$servletVersion"
-    compile "org.eclipse.jetty:jetty-servlet:$jettyVersion"
-    compile "de.f0rce:ace:3.4.2"
-    compile "org.vaadin.tatu:twincolselect:2.6.3"
-    compileOnly "javax.servlet.jsp:jsp-api:$jspVersion"
-    compileOnly "javax.websocket:javax.websocket-api:$webSocketVersion"     
-    compileOnly  group: 'javax.portlet', name: 'portlet-api', version: '2.0'
+    api "jlibs:jlibs-xml:1.0"
+    api "com.vaadin:vaadin-bom:$vaadinVersion"
+    api "com.vaadin:vaadin-core:$vaadinVersion"    
+    api "com.vaadin:vaadin-spring:$vaadinVersion"
+    api "jakarta.servlet:jakarta.servlet-api:$servletVersion"
+    api "org.eclipse.jetty.ee10:jetty-ee10-servlet:$jettyVersion"
+    implementation ("com.vaadin:vaadin-spring-boot-starter:${vaadinVersion}") {
+        exclude module: "spring-boot-starter-tomcat"
+        exclude module: "tomcat-embed-el"
+        exclude group: "org.apache.tomcat.embed"
+        exclude module: "spring-boot-starter-logging"
+    }
+    api "de.f0rce:ace:3.4.2"
+    api "org.vaadin.tatu:twincolselect:3.0.1"
+    api "org.vaadin.addons.tatu:colorpicker:1.4.1"
+    api "org.apache.httpcomponents.core5:httpcore5:5.2.4"
+    api "org.apache.httpcomponents.client5:httpclient5:5.3.1"
+    compileOnly "jakarta.servlet.jsp:jakarta.servlet.jsp-api:$jspVersion"
+    compileOnly "jakarta.websocket:jakarta.websocket-api:$webSocketVersion"     
 }

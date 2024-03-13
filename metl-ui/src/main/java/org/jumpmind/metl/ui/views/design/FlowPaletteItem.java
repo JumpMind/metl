@@ -38,9 +38,12 @@ public class FlowPaletteItem extends Button {
     boolean isShared;
 
     public FlowPaletteItem(String label, StreamResource imageResource) {
-        super(label);
+        super();
+        setHeight("90px");
+        setWidth("140px");
         addClassName("hidefocus");
         VerticalLayout buttonLayout = new VerticalLayout();
+        buttonLayout.setSpacing(false);
         Image image = new Image(imageResource, "");
         Span span = new Span(label);
         buttonLayout.add(image, span);

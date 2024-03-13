@@ -20,7 +20,6 @@
  */
 package org.jumpmind.metl.core.util;
 
-import org.apache.commons.fileupload.InvalidFileNameException;
 import org.springframework.core.io.Resource;
 
 public class DatabaseScript implements Comparable<DatabaseScript> {
@@ -52,7 +51,9 @@ public class DatabaseScript implements Comparable<DatabaseScript> {
 	public void parse(String fileName) {
 		String[] parts = fileName.split(DELIMITER_MAIN);
 		if (parts.length != 4) {
-			throw new InvalidFileNameException(fileName, "Database scripts must have 3 parts : version_when_order_description.sql");
+            throw new RuntimeException(String.format(
+                    "An invalid file name was provided: %s. Database scripts must have 3 parts : version_when_order_description.sql",
+                    fileName));
 		}
 		parseVersion(parts[0]);
 		when = parseWhen(parts[1]);

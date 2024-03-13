@@ -28,6 +28,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
@@ -47,7 +48,7 @@ public class ButtonBar extends HorizontalLayout {
 
     public ButtonBar() {
         setWidthFull();
-        getStyle().set("margin", "16px 0");
+        getStyle().set("margin", "4px 0");
 
         wrapper = new HorizontalLayout();
         wrapper.setSpacing(true);
@@ -69,7 +70,6 @@ public class ButtonBar extends HorizontalLayout {
         wrapper.addAndExpand(spacer);
 
         right = new HorizontalLayout();
-        right.setSpacing(false);
         right.setMargin(false);
         wrapper.add(right);
         wrapper.setVerticalComponentAlignment(Alignment.CENTER, right);
@@ -120,9 +120,16 @@ public class ButtonBar extends HorizontalLayout {
     }
     
     public Button createButton(String name, VaadinIcon icon, ComponentEventListener<ClickEvent<Button>> clickListener) {
-        Button button = new Button(name);
+        Icon buttonIcon = new Icon(icon);
+        buttonIcon.setSize("16px");
+        VerticalLayout buttonContent = new VerticalLayout(buttonIcon, new Span(name));
+        buttonContent.setPadding(false);
+        buttonContent.setSpacing(false);
+        buttonContent.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+        Button button = new Button(buttonContent);
+        button.setHeight("60px");
+        button.getStyle().set("min-width", "100px");
         button.addClassName(STYLE);
-        button.setIcon(new Icon(icon));
         if (clickListener != null) {
             button.addClickListener(clickListener);
         }

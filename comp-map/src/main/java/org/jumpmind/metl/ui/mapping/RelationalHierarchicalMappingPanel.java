@@ -54,12 +54,15 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
 @SuppressWarnings("serial")
 public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareComponentEditPanel implements IMappingPanel {
+    
+    VerticalLayout diagramLayout;
 
     MappingDiagram diagram;
 
@@ -149,13 +152,14 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
         dstMapFilter.addValueChangeListener(new FilterDstMapListener());
         dstFilterHeader.add(dstTextFilter, dstMapFilter);
 
-        VerticalLayout vlay = new VerticalLayout();
-        vlay.setSizeFull();
-        diagram = new MappingDiagram(context, component, this);
-        diagram.setSizeFull();
-        vlay.add(diagram);
-        add(vlay);
-        expand(vlay);
+        diagramLayout = new VerticalLayout();
+        diagramLayout.setWidthFull();
+        diagramLayout.setHeight("10000px");
+        redrawDiagram();
+        Scroller scroller = new Scroller(diagramLayout);
+        scroller.setSizeFull();
+        add(scroller);
+        expand(scroller);
         
         buildByQueryMappingDialog();
     }    
@@ -202,6 +206,17 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
     protected int minimum(int a, int b, int c) {
         return Math.min(Math.min(a, b), c);
     }
+    
+    protected void redrawDiagram() {
+        if (diagram != null) {
+            diagramLayout.remove(diagram);
+        }
+        
+        diagram = new MappingDiagram(context, component, this);
+        diagram.setSizeFull();
+        diagramLayout.add(diagram);
+    }
+
 
     protected void export() {
         Grid<Object> grid = new Grid<Object>();
@@ -233,6 +248,7 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
         public void onComponentEvent(ClickEvent<Button> event) {
             diagram.removeSelected();
             removeButton.setEnabled(false);
+            redrawDiagram();
         }
     }
 
@@ -276,9 +292,9 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
             super("Edit Entity Mapping to Source Reader");
             setWidth("800px");
             setHeight("600px");
-            innerContent.setMargin(true);
+            innerContent.setPadding(false);
             buildQueryMappingGrid();
-            add(buildButtonFooter(buildCloseButton()));
+            buildButtonFooter(buildCloseButton());
         }
 
         private void buildQueryMappingGrid() {
@@ -287,10 +303,13 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
             queryMappingGrid.addColumn(setting -> {
                 HierarchicalModel model = (HierarchicalModel) component.getOutputModel();
                 ModelSchemaObject object = model.getObjectById(setting.getEntityId());
-                return object.getName();
-            }).setHeader("Entiy Name").setFlexGrow(1).setSortable(false);
+                if (object != null) {
+                    return object.getName();
+                }
+                return "";
+            }).setHeader("Entity Name").setFlexGrow(1).setSortable(false);
             queryMappingGrid.addComponentColumn(setting -> createSourceStepComboBox(setting, RelationalHierarchicalMapping.ENTITY_TO_ORGINATING_STEP_ID))
-                    .setHeader("Source Step").setWidth("350px").setSortable(false);
+                    .setHeader("Source Step").setFlexGrow(0).setWidth("350px").setSortable(false);
             add(queryMappingGrid, 1);
         }
     }

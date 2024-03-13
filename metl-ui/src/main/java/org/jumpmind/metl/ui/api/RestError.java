@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.ui.api;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 

@@ -38,12 +38,11 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -80,13 +79,16 @@ class EditFlowSettingsDialog extends ResizableDialog implements SelectionListene
         closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         closeButton.addClickListener(new CloseClickListener());
         
-        addHeader("General Settings");
+        add(new H3("General Settings"));
         
         FormLayout formLayout = new FormLayout();
         formLayout.setWidthFull();
+        formLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
         add(formLayout);
         
-        TextArea description = new TextArea("Notes");
+        TextArea description = new TextArea();
+        description.setWidthFull();
+        description.getStyle().set("max-height", "124px");
         description.setValueChangeMode(ValueChangeMode.LAZY);
         description.setValueChangeTimeout(200);
         description.addValueChangeListener(event -> {
@@ -96,9 +98,9 @@ class EditFlowSettingsDialog extends ResizableDialog implements SelectionListene
         if (flow.getNotes() != null) {
             description.setValue(flow.getNotes());
         }
-        formLayout.add(description);
+        formLayout.addFormItem(description, "Notes");
 
-        addHeader("Parameters");
+        add(new H3("Parameters"));
         
         if (!readOnly) {
             ButtonBar buttonBar = new ButtonBar();
@@ -109,10 +111,6 @@ class EditFlowSettingsDialog extends ResizableDialog implements SelectionListene
             removeButton.setEnabled(false);
             add(buttonBar);
         }
-        
-        VerticalLayout gridWrapperLayout = new VerticalLayout();
-        gridWrapperLayout.setMargin(true);
-        gridWrapperLayout.setSizeFull();
         
         grid = new Grid<FlowParameter>();
         grid.setSizeFull();
@@ -141,11 +139,9 @@ class EditFlowSettingsDialog extends ResizableDialog implements SelectionListene
             grid.addColumn(FlowParameter::getName).setHeader("Name").setFlexGrow(3).setSortable(false);
             grid.addColumn(FlowParameter::getDefaultValue).setHeader("Default Value").setFlexGrow(6).setSortable(false);
         }
-        gridWrapperLayout.add(grid);
-        
-        addComponentAtIndex(1, gridWrapperLayout);
+        add(grid);
 
-        add(buildButtonFooter(closeButton));
+        buildButtonFooter(closeButton);
 
         List<FlowParameter> params = flow.getFlowParameters();
         Collections.sort(params, new Comparator<FlowParameter>() {
@@ -155,14 +151,6 @@ class EditFlowSettingsDialog extends ResizableDialog implements SelectionListene
         });
 
         grid.setItems(params);
-    }
-    
-    protected void addHeader(String caption) {
-        HorizontalLayout componentHeaderWrapper = new HorizontalLayout();
-        componentHeaderWrapper.getStyle().set("margin", "0 0 0 16px");
-        H3 componentHeader = new H3(caption);
-        componentHeaderWrapper.add(componentHeader);
-        add(componentHeaderWrapper);
     }
 
     public void selectionChange(SelectionEvent<Grid<FlowParameter>, FlowParameter> event) {

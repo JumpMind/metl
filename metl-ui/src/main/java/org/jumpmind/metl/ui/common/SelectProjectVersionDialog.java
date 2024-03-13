@@ -31,6 +31,7 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -60,8 +61,9 @@ public class SelectProjectVersionDialog extends ResizableDialog {
         super(caption);
         this.context = context;
 
+        tree.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
         tree.setSelectionMode(SelectionMode.SINGLE);
-        tree.addComponentColumn(item -> {
+        tree.addComponentHierarchyColumn(item -> {
             Icon icon = null;
             Span span = new Span(item.getName());
             if (item instanceof Project) {
@@ -84,19 +86,14 @@ public class SelectProjectVersionDialog extends ResizableDialog {
 
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
-        layout.setMargin(true);
+        layout.setPadding(false);
         layout.setSizeFull();
-        layout.add(new Span(introText));
-
-        Scroller scrollable = new Scroller();
-        scrollable.setSizeFull();
-        scrollable.setContent(tree);
-        layout.addAndExpand(scrollable);
-        addComponentAtIndex(1, layout);
+        layout.add(new Span(introText), tree);
+        add(layout);
 
         Button cancelButton = new Button("Cancel");
         Button selectButton = new Button("Select");
-        add(buildButtonFooter(cancelButton, selectButton));
+        buildButtonFooter(cancelButton, selectButton);
 
         cancelButton.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             public void onComponentEvent(ClickEvent<Button> event) {

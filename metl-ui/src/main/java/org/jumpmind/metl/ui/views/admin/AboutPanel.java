@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.apache.commons.lang.time.FastDateFormat;
 import org.jumpmind.metl.core.runtime.AgentManager;
@@ -35,16 +35,16 @@ import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.spring.annotation.UIScope;
 
 @UiComponent
-@Scope(value = "ui")
+@UIScope
 @Order(1400)
 @AdminMenuLink(name = "About", id = "About", icon = VaadinIcon.QUESTION)
 public class AboutPanel extends AbstractAdminPanel implements IBackgroundRefreshable<Object> {
@@ -57,7 +57,7 @@ public class AboutPanel extends AbstractAdminPanel implements IBackgroundRefresh
 
     public AboutPanel() {
         setSizeFull();
-        setMargin(true);
+        setPadding(true);
         setSpacing(true);
 
         Button gcCollect = new Button("Garbage Collect", (e) -> {
@@ -70,7 +70,7 @@ public class AboutPanel extends AbstractAdminPanel implements IBackgroundRefresh
         grid = new Grid<String[]>();
         grid.setSizeFull();
         grid.addClassName("noscroll");
-        grid.addColumn(item -> item[0]).setHeader("Name").setWidth("200px");
+        grid.addColumn(item -> item[0]).setHeader("Name").setFlexGrow(0).setWidth("200px");
         grid.addColumn(item -> item[1]).setHeader("Value");
         addAndExpand(grid);
     }

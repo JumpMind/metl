@@ -62,7 +62,6 @@ public class ChooseWsdlServiceOperationDialog extends Dialog {
         final ListBox<SoapOperation> field = new ListBox<SoapOperation>();
         field.setWidthFull();
         field.setHeight("540px");
-        //field.setVisibleItemCount(15);
         layout.add(field);
 
         Collections.sort(operations, new Comparator<SoapOperation>() {

@@ -31,7 +31,7 @@ public class ProjectDependencyMenuManager extends AbstractDesignSelectedValueMen
     }
     
     @Override
-    public boolean handle(String menuSelected, Object selected) {
+    public boolean handle(String menuSelected, AbstractNamedObject selected) {
         if (!super.handle(menuSelected, selected)) {            
             return true;
         } else {

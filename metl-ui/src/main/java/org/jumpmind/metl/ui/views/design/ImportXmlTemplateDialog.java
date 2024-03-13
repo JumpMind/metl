@@ -64,7 +64,7 @@ import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -121,16 +121,9 @@ public class ImportXmlTemplateDialog extends ResizableDialog
         setWidth("600px");
         setHeight("500px");
 
-        Span header = new Span("<b>Import XML Template</b><hr>");
-        header.setWidthFull();
-        header.getStyle().set("margin", null);
-        add(header);
+        setHeaderTitle("Import XML Template");
 
-        VerticalLayout layout = new VerticalLayout();
-        layout.setSizeFull();
-        layout.setSpacing(true);
-        layout.setMargin(true);
-        layout.add(new Span("Import XML from either an XSD or WSDL source."));
+        add(new Span("Import XML from either an XSD or WSDL source."));
 
         optionGroup = new RadioButtonGroup<String>();
         optionGroup.setLabel("Select the location of the XSD or WSDL.");
@@ -138,7 +131,7 @@ public class ImportXmlTemplateDialog extends ResizableDialog
         optionGroup.setItems(OPTION_TEXT, OPTION_FILE, OPTION_URL, OPTION_RESOURCE);
         optionGroup.setValue(OPTION_TEXT);
         optionGroup.addValueChangeListener(this);
-        layout.add(optionGroup);
+        add(optionGroup);
 
         optionLayout = new VerticalLayout();
         optionLayout.setSizeFull();
@@ -154,17 +147,17 @@ public class ImportXmlTemplateDialog extends ResizableDialog
         importButton.addClickListener(this);
 
         upload = new Upload(this);
+        upload.setDropAllowed(false);
         upload.addSucceededListener(event -> importXml(new String(uploadedData.toByteArray())));
         urlTextField = new TextField("Enter the URL:");
         urlTextField.setWidthFull();
         
         resourceComboBox = createResourceCB();
         
-        layout.addAndExpand(optionLayout);
+        add(optionLayout, 1);
         rebuildOptionLayout();
 
-        addComponentAtIndex(1, layout);
-        add(buildButtonFooter(importButton, buildCloseButton()));
+        buildButtonFooter(importButton, buildCloseButton());
 
     }
     
@@ -193,7 +186,7 @@ public class ImportXmlTemplateDialog extends ResizableDialog
     protected void rebuildOptionLayout() {
         optionLayout.removeAll();
         if (optionGroup.getValue().equals(OPTION_TEXT)) {
-            Label editorLabel = new Label("Enter the XML text:");
+            NativeLabel editorLabel = new NativeLabel("Enter the XML text:");
             editorLabel.setFor(editor);
             optionLayout.add(editorLabel, editor);
             editor.focus();

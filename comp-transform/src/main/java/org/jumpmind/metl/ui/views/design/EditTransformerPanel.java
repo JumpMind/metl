@@ -28,7 +28,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.RelationalModel;
@@ -75,6 +74,9 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
     static final String SHOW_POPULATED_ATTRIBUTES = "Show Attributes with Transforms";
 
     protected void buildUI() {
+        setPadding(false);
+        setSpacing(false);
+        
         ButtonBar buttonBar = new ButtonBar();
         add(buttonBar);
 
@@ -161,12 +163,12 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
             ModelEntity entity = model.getEntityById(attribute.getEntityId());
             return UiUtils.getName(filterField.getValue(), entity.getName());
-        }).setHeader("Entity Name").setWidth("250px").setSortable(true);
+        }).setHeader("Entity Name").setFlexGrow(0).setWidth("250px").setSortable(true);
         grid.addColumn(setting -> {
             RelationalModel model = (RelationalModel) component.getInputModel();
             ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
             return UiUtils.getName(filterField.getValue(), attribute.getName());
-        }).setHeader("Attribute Name").setWidth("250px").setSortable(true);
+        }).setHeader("Attribute Name").setFlexGrow(0).setWidth("250px").setSortable(true);
         final ComboBox<String> combo = new ComboBox<String>();
         combo.setWidthFull();
         List<String> functionList = new ArrayList<String>();
@@ -175,9 +177,11 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             functionList.add(function);
         }
         combo.setPageSize(functions.length > 20 ? 20 : functions.length);
-        for (ComponentAttribSetting setting : componentAttributes) {
-            if (setting.getValue() != null && !functionList.contains(setting.getValue())) {
-                functionList.add(setting.getValue());
+        if (componentAttributes != null) {
+            for (ComponentAttribSetting setting : componentAttributes) {
+                if (setting.getValue() != null && !functionList.contains(setting.getValue())) {
+                    functionList.add(setting.getValue());
+                }
             }
         }
         combo.setItems(functionList);
@@ -198,7 +202,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             button.setIcon(new Icon(VaadinIcon.COG));
             button.addClickListener((event) -> new EditTransformDialog(setting).showAtSize(.75));
             return button;
-        }).setHeader("Edit").setSortable(false);
+        }).setHeader("Edit").setFlexGrow(0).setWidth("80px").setSortable(false);
         
         editor.addSaveListener(event -> context.getConfigurationService().save(event.getItem()));
         grid.addItemDoubleClickListener(event -> editor.editItem(event.getItem()));
@@ -447,7 +451,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             innerContent.add(editor);
             innerContent.expand(editor);
             
-            add(buildButtonFooter(buildCloseButton()));
+            buildButtonFooter(buildCloseButton());
             
         }
         

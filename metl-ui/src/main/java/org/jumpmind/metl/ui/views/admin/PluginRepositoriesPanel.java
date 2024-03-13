@@ -28,7 +28,6 @@ import java.util.Set;
 import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.vaadin.ui.common.UiComponent;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
 import com.vaadin.flow.component.ClickEvent;
@@ -43,10 +42,11 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.selection.SelectionEvent;
 import com.vaadin.flow.data.selection.SelectionListener;
+import com.vaadin.flow.spring.annotation.UIScope;
 
 @SuppressWarnings("serial")
 @UiComponent
-@Scope(value = "ui")
+@UIScope
 @Order(600)
 @AdminMenuLink(name = "Plugin Repositories", id = "Plugin Repositories", icon = VaadinIcon.DATABASE)
 public class PluginRepositoriesPanel extends AbstractAdminPanel {
@@ -62,6 +62,9 @@ public class PluginRepositoriesPanel extends AbstractAdminPanel {
     Grid<PluginRepository> grid;
     
     public PluginRepositoriesPanel() {
+        setPadding(false);
+        setSpacing(false);
+        
         ButtonBar buttonBar = new ButtonBar();
         add(buttonBar);
 
@@ -79,9 +82,9 @@ public class PluginRepositoriesPanel extends AbstractAdminPanel {
         grid.setPageSize(100);
         grid.setSelectionMode(SelectionMode.MULTI);
 
-        grid.addColumn(PluginRepository::getName).setKey("name").setHeader("Name").setSortable(true);
-        grid.addColumn(PluginRepository::getUrl).setHeader("Url");
-        grid.addColumn(PluginRepository::getLastUpdateTime).setHeader("Updated").setWidth("165px");
+        grid.addColumn(PluginRepository::getName).setKey("name").setHeader("Name").setFlexGrow(1).setSortable(true);
+        grid.addColumn(PluginRepository::getUrl).setHeader("Url").setFlexGrow(5);
+        grid.addColumn(PluginRepository::getLastUpdateTime).setHeader("Updated").setFlexGrow(0).setWidth("250px");
         grid.addItemClickListener(new GridItemClickListener());
         grid.addSelectionListener(new GridSelectionListener());
         List<GridSortOrder<PluginRepository>> orderList = new ArrayList<GridSortOrder<PluginRepository>>();
@@ -136,7 +139,7 @@ public class PluginRepositoriesPanel extends AbstractAdminPanel {
     class NewClickListener implements ComponentEventListener<ClickEvent<Button>> {
         public void onComponentEvent(ClickEvent<Button> event) {
             PluginRepository pluginRepository = new PluginRepository();
-            PluginRepositoryEditPanel editPanel = new PluginRepositoryEditPanel(context, pluginRepository);
+            PluginRepositoryEditPanel editPanel = new PluginRepositoryEditPanel(context, pluginRepository, () -> refresh());
             adminView.getTabbedPanel().addCloseableTab(pluginRepository.getId(), "Edit Repository", new Icon(VaadinIcon.DATABASE), editPanel);
         }
     }
@@ -145,7 +148,7 @@ public class PluginRepositoriesPanel extends AbstractAdminPanel {
         public void onComponentEvent(ClickEvent<Button> event) {
             PluginRepository pluginRepository = getFirstSelectedItem();
             context.getPluginService().refresh(pluginRepository);
-            PluginRepositoryEditPanel editPanel = new PluginRepositoryEditPanel(context, pluginRepository);
+            PluginRepositoryEditPanel editPanel = new PluginRepositoryEditPanel(context, pluginRepository, () -> refresh());
             adminView.getTabbedPanel().addCloseableTab(pluginRepository.getId(), "Edit Repository", new Icon(VaadinIcon.DATABASE), editPanel);
         }
     }

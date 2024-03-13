@@ -29,14 +29,17 @@ import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
+import org.jumpmind.metl.ui.common.MainLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.spring.annotation.UIScope;
+
 @Component
-@Scope(value = "ui")
+@UIScope
 public class BackgroundRefresherService implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -47,12 +50,12 @@ public class BackgroundRefresherService implements Serializable {
 
     protected transient ThreadPoolTaskScheduler taskScheduler;
 
-    protected AppUI appUi;
+    protected MainLayout mainLayout;
 
     protected Set<IBackgroundRefreshable<Object>> currentlyRefreshing = Collections.synchronizedSet(new HashSet<IBackgroundRefreshable<Object>>());
 
-    protected void init(AppUI ui) {
-        this.appUi = ui;
+    public void init(MainLayout mainLayout) {
+        this.mainLayout = mainLayout;
         initBackgroundThread();
     }
 
@@ -83,12 +86,10 @@ public class BackgroundRefresherService implements Serializable {
     
     protected void refresh() {
         synchronized (currentlyRefreshing) {
-            if (appUi.isAttached()) {
-                for (final IBackgroundRefreshable<Object> refreshing : currentlyRefreshing) {
-                    if (refreshing != null) {                        
-                        run(refreshing);
-                    } 
-                }
+            for (final IBackgroundRefreshable<Object> refreshing : currentlyRefreshing) {
+                if (refreshing != null) {                        
+                    run(refreshing);
+                } 
             }
         }
     }
@@ -107,7 +108,7 @@ public class BackgroundRefresherService implements Serializable {
         currentlyRefreshing.clear();
     }
 
-    protected void destroy() {
+    public void destroy() {
         log.debug("The background refresher service is shutting down");
 
         if (taskScheduler != null) {
@@ -117,15 +118,18 @@ public class BackgroundRefresherService implements Serializable {
     }
     
     protected void run(IBackgroundRefreshable<Object> refreshing) {
-        try {
-            log.debug("refreshing background data " + refreshing.getClass().getSimpleName());
-            final Object data = refreshing.onBackgroundDataRefresh();
-            if (data != null) {
-                appUi.access(() -> refreshing.onBackgroundUIRefresh(data));
+        UI ui = mainLayout.getUI().orElse(null);
+        if (ui != null && ui.getElement().getNode().isAttached()) {
+            try {
+                log.debug("refreshing background data " + refreshing.getClass().getSimpleName());
+                final Object data = refreshing.onBackgroundDataRefresh();
+                if (data != null) {
+                    ui.access(() -> refreshing.onBackgroundUIRefresh(data));
+                }
+            } catch (Exception e) {
+                ui.access(() -> refreshing.onUIError(e));                            
+                log.error(e.getMessage(), e);
             }
-        } catch (Exception e) {
-            appUi.access(() -> refreshing.onUIError(e));                            
-            log.error(e.getMessage(), e);
         }
     }
 }

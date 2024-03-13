@@ -51,6 +51,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
+import com.vaadin.flow.component.dialog.DialogVariant;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
@@ -79,20 +80,28 @@ public class ExportDialog extends ResizableDialog {
     }
 
     private void initDialog(Object selectedItem) {
+        addThemeVariants(DialogVariant.LUMO_NO_PADDING);
+        
         H3 exportHeader = new H3("Export and Dependencies");
         VerticalLayout exportLayout = new VerticalLayout();
-        exportLayout.setMargin(true);
-        exportLayout.setSizeFull();
+        exportLayout.setPadding(false);
+        exportLayout.setSpacing(false);
+        exportLayout.setHeight("0");
+        exportLayout.setWidthFull();
         addSelectedAndDependentObjects(exportLayout, selectedItem);
 
         H3 affectedHeader = new H3("Possible Affected Flows");
         affectedLayout = new VerticalLayout();
-        affectedLayout.setMargin(true);
-        affectedLayout.setSizeFull();
+        affectedLayout.setPadding(false);
+        affectedLayout.setSpacing(false);
+        affectedLayout.setHeight("0");
+        affectedLayout.setWidthFull();
+        affectedLayout.getStyle().set("padding-top", "8px");
         updateAffectedObjects();
 
         // Split layout for Export and Affected
         SplitLayout splitLayout = new SplitLayout();
+        splitLayout.setHeight("340px");
         splitLayout.setWidthFull();
         splitLayout.addToPrimary(exportHeader, exportLayout);
         splitLayout.addToSecondary(affectedHeader, affectedLayout);
@@ -105,6 +114,7 @@ public class ExportDialog extends ResizableDialog {
 
         Button selectNoneLink = new Button("Select None");
         selectNoneLink.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        selectNoneLink.getStyle().set("padding-left", "16px");
         selectNoneLink.addClickListener((event) -> selectNone());
         
         exportAnchor = new Anchor();
@@ -112,7 +122,7 @@ public class ExportDialog extends ResizableDialog {
         exportAnchor.getElement().setAttribute("download", true);
         Button exportButton = new Button("Export", new ExportClickListener());
         exportAnchor.add(exportButton);
-        add(buildButtonFooter(new Button[] {selectAllLink, selectNoneLink}, exportAnchor, buildCloseButton()));
+        buildButtonFooter(new Button[] {selectAllLink, selectNoneLink}, exportAnchor, buildCloseButton());
 
         setWidth("700px");
         setHeight("500px");

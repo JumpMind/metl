@@ -28,16 +28,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jumpmind.metl.ui.init.AppUI;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteData;
+import com.vaadin.flow.spring.annotation.UIScope;
 
 @Component
-@Scope(value="ui")
+@UIScope
 public class ViewManager implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -54,7 +53,7 @@ public class ViewManager implements Serializable {
         
     }
 
-    public void init(AppUI ui) {
+    public void init() {
         for (RouteData route : RouteConfiguration.forSessionScope().getAvailableRoutes()) {
             views.add(route.getNavigationTarget());
         }
@@ -62,7 +61,7 @@ public class ViewManager implements Serializable {
         if (views != null) {
             for (Class<?> view : views) {
                 TopBarLink menu = (TopBarLink) view.getAnnotation(TopBarLink.class);
-                if (menu != null && menu.uiClass().equals(AppUI.class)) {
+                if (menu != null) {
                     filteredViews.add(view);
                 }
             }

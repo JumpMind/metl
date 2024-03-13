@@ -21,6 +21,7 @@
 package org.jumpmind.metl.ui.views.design.menu;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.ui.common.CutCopyPasteManager;
 import org.jumpmind.metl.ui.views.design.DesignNavigator;
 
@@ -31,7 +32,7 @@ public class FolderMenuManager extends AbstractDesignSelectedValueMenuManager {
     }
     
     @Override
-    public boolean handle(String menuSelected, Object selected) {
+    public boolean handle(String menuSelected, AbstractNamedObject selected) {
         if (!super.handle(menuSelected, selected)) {            
             return true;
         } else {

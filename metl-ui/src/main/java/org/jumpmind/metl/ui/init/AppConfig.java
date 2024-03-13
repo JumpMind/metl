@@ -40,7 +40,7 @@ import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_VALI
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.apache.activemq.Service;
 import org.apache.activemq.broker.BrokerService;
@@ -92,8 +92,8 @@ import org.jumpmind.security.SecurityServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -102,9 +102,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import org.jumpmind.metl.vaadin.spring.UIScope;
-
-@ComponentScan(basePackages = "org.jumpmind.metl.ui")
 @Configuration
 @EnableTransactionManagement
 @EnableWebMvc
@@ -295,6 +292,7 @@ public class AppConfig {
     }
 
     @Bean
+    @Qualifier("configDatabasePlatform")
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IDatabasePlatform configDatabasePlatform() {
         if (configDatabasePlatform == null) {
@@ -315,6 +313,7 @@ public class AppConfig {
     }
 
     @Bean
+    @Qualifier("tablePrefix")
     @Scope(value = "singleton")
     public String tablePrefix() {
         String tablePrefix = env.getProperty(EnvConstants.TABLE_PREFIX, "METL");
@@ -352,6 +351,7 @@ public class AppConfig {
     }
 
     @Bean
+    @Qualifier("persistenceManager")
     @Scope(value = "singleton")
     public IPersistenceManager persistenceManager() {
         if (persistenceManager == null) {
@@ -516,38 +516,6 @@ public class AppConfig {
             subscribeManager = new SubscribeManager();
         }
         return subscribeManager;
-    }
-    
-    @Bean
-    @Scope(value = "ui")
-    public BackgroundRefresherService backgroundRefresherService() {
-        if (backgroundRefresherService == null) {
-            backgroundRefresherService = new BackgroundRefresherService();
-        }
-        return backgroundRefresherService;
-    }
-    
-    @Bean
-    @Scope(value = "ui")
-    public ApplicationContext applicationContext() {
-        if (applicationContext == null) {
-            applicationContext = new ApplicationContext();
-        }
-        return applicationContext;
-    }
-    
-    @Bean
-    @Scope(value = "ui")
-    public ViewManager viewManager() {
-        if (viewManager == null) {
-            viewManager = new ViewManager();
-        }
-        return viewManager;
-    }
-
-    @Bean
-    static UIScope uiScope() {
-        return new UIScope();
     }
 
     public Environment getEnv() {

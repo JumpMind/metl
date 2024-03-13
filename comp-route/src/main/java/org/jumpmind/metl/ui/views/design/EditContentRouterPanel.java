@@ -56,14 +56,19 @@ public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPa
     Button removeButton;
 
     protected void buildUI() {
+        setPadding(false);
+        setSpacing(false);
         if (!readOnly) {
             ButtonBar buttonBar = new ButtonBar();
             add(buttonBar);
 
+            Editor<Route> editor = grid.getEditor();
             addButton = buttonBar.addButton("Add", VaadinIcon.PLUS);
             addButton.addClickListener((event) -> {
-                routeList.add(new Route());
+                Route newRoute = new Route();
+                routeList.add(newRoute);
                 grid.setItems(routeList);
+                editor.editItem(newRoute);
             });
 
             removeButton = buttonBar.addButton("Remove", VaadinIcon.TRASH);
@@ -79,7 +84,7 @@ public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPa
             textField.setValueChangeMode(ValueChangeMode.LAZY);
             textField.setValueChangeTimeout(200);
             textField.setWidthFull();
-            Editor<Route> editor = grid.getEditor();
+            
             Binder<Route> binder = new Binder<Route>();
             editor.setBinder(binder);
             binder.forField(textField).bind(Route::getMatchExpression, Route::setMatchExpression);
@@ -96,7 +101,9 @@ public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPa
                 comboStepList.add(comboStep);
             }
             combo.setItems(comboStepList);
-            combo.setValue(comboStepList.iterator().next());
+            if (!comboStepList.isEmpty()) {
+                combo.setValue(comboStepList.iterator().next());
+            }
             combo.setItemLabelGenerator(item -> item.getName());
             combo.addValueChangeListener(event -> {
                 if (event.getValue() == null) {

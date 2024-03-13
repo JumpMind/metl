@@ -26,7 +26,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -65,6 +64,8 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
     Set<RecordFormat> selectedItemIds;
 
     protected void buildUI() {
+        setPadding(false);
+        setSpacing(false);
         ButtonBar buttonBar = new ButtonBar();
         if (!readOnly) {
             add(buttonBar);
@@ -177,7 +178,7 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
         for (Column<RecordFormat> column : grid.getColumns()) {
             column.setSortable(false);
             if (isFixedLength) {
-                column.setWidth("75px");
+                column.setFlexGrow(0).setWidth("75px");
             }
         }
         grid.setSelectionMode(SelectionMode.MULTI);

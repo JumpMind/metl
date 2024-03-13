@@ -62,19 +62,20 @@ import org.jumpmind.metl.ui.diagram.NodeSelectedEvent;
 import org.jumpmind.metl.ui.diagram.RunDiagram;
 import org.jumpmind.util.AppUtils;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
-import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.CustomSplitLayout;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.ReadOnlyTextAreaDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
@@ -193,12 +194,15 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         this.context = context;
         this.parentTabSheet = parentTabSheet;
         this.flowRunnable = flowRunnable;
+        
+        setPadding(false);
+        setSpacing(false);
 
         Execution execution = executionService.findExecution(executionId);
         this.flow = context.getConfigurationService().findFlow(execution.getFlowId());
 
         HorizontalLayout topBar = new HorizontalLayout();
-        topBar.getStyle().set("margin", "16px 16px 0 16px");
+        //topBar.getStyle().set("margin", "16px 16px 0 16px");
         topBar.setWidthFull();
 
         HorizontalLayout left = new HorizontalLayout();
@@ -242,7 +246,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
             }
         });
         right.add(showDiagramCheckbox);
-        right.setVerticalComponentAlignment(Alignment.CENTER);
+        right.setVerticalComponentAlignment(Alignment.CENTER, showDiagramCheckbox);
 
         add(topBar);
 
@@ -255,20 +259,15 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         cancelButton = buttonBar.addButton("Cancel", Icons.CANCEL, event -> cancel());
 
         add(buttonBar);
-
-        HorizontalLayout header1 = new HorizontalLayout();
-        header1.add(new Html("<b>Flow:</b>"), flowSpan, new Html("<b>Start:</b>"), startSpan);
-        header1.setSpacing(true);
-        header1.getStyle().set("margin", "0 16px");
-        header1.setWidth("100%");
-        add(header1);
-
-        HorizontalLayout header2 = new HorizontalLayout();
-        header2.add(new Html("<b>Status:</b>"), statusLabel, new Html("<b>End:</b>"), endSpan);
-        header2.setSpacing(true);
-        header2.getStyle().set("margin", "0 16px 16px 16px");
-        header2.setWidth("100%");
-        add(header2);
+        
+        HorizontalLayout header = new HorizontalLayout(
+                createHeaderLayout(new Html("<b>Flow:</b>"), new Html("<b>Status:</b>")),
+                createHeaderLayout(flowSpan, statusLabel),
+                createHeaderLayout(new Html("<b>Start:</b>"), new Html("<b>End:</b>")),
+                createHeaderLayout(startSpan, endSpan));
+        header.setWidthFull();
+        header.getStyle().set("padding-left", "16px");
+        add(header);
 
         diagramLayout = new VerticalLayout();
         diagramLayout.setWidth("10000px");
@@ -282,29 +281,30 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
 
         stepGrid.setSelectionMode(SelectionMode.SINGLE);
         stepGrid.setSizeFull();
-        stepGrid.addColumn(ExecutionStep::getComponentName).setKey("componentName").setHeader("Component Name").setWidth("250px");
-        stepGrid.addColumn(ExecutionStep::getThreadNumber).setHeader("Thread").setWidth("100px");
-        stepGrid.addColumn(ExecutionStep::getStatus).setHeader("Status").setWidth("120px");
-        stepGrid.addColumn(ExecutionStep::getPayloadReceived).setHeader("Payload Recvd").setWidth("120px");
-        stepGrid.addColumn(ExecutionStep::getMessagesReceived).setHeader("Msgs Recvd").setWidth("100px");
-        stepGrid.addColumn(ExecutionStep::getMessagesProduced).setHeader("Msgs Sent").setWidth("100px");
-        stepGrid.addColumn(ExecutionStep::getPayloadProduced).setHeader("Payload Send").setWidth("120px");
+        stepGrid.addColumn(ExecutionStep::getComponentName).setKey("componentName").setHeader("Component Name")
+                .setFlexGrow(0).setWidth("250px");
+        stepGrid.addColumn(ExecutionStep::getThreadNumber).setHeader("Thread").setFlexGrow(0).setWidth("100px");
+        stepGrid.addColumn(ExecutionStep::getStatus).setHeader("Status").setFlexGrow(0).setWidth("120px");
+        stepGrid.addColumn(ExecutionStep::getPayloadReceived).setHeader("Payload Recvd").setFlexGrow(0).setWidth("130px");
+        stepGrid.addColumn(ExecutionStep::getMessagesReceived).setHeader("Msgs Recvd").setFlexGrow(0).setWidth("110px");
+        stepGrid.addColumn(ExecutionStep::getMessagesProduced).setHeader("Msgs Sent").setFlexGrow(0).setWidth("100px");
+        stepGrid.addColumn(ExecutionStep::getPayloadProduced).setHeader("Payload Sent").setFlexGrow(0).setWidth("120px");
 		stepGrid.addColumn(step -> {
 		    Date startTime = step.getStartTime();
 		    if (startTime != null) {
 		        return String.format(UIConstants.TIME_FORMAT, startTime);
 		    }
 		    return "";
-		}).setHeader("Start").setWidth("120px");
+		}).setHeader("Start").setFlexGrow(0).setWidth("120px");
 		stepGrid.addColumn(step -> {
             Date endTime = step.getEndTime();
             if (endTime != null) {
                 return String.format(UIConstants.TIME_FORMAT, endTime);
             }
             return "";
-        }).setHeader("End").setWidth("120px");
-		stepGrid.addColumn(ExecutionStep::getHandleDurationString).setHeader("Run Duration").setWidth("140px");
-		stepGrid.addColumn(ExecutionStep::getQueueDurationString).setHeader("Wait Duration").setWidth("140px");
+        }).setHeader("End").setFlexGrow(0).setWidth("120px");
+		stepGrid.addColumn(ExecutionStep::getHandleDurationString).setHeader("Run Duration").setFlexGrow(0).setWidth("140px");
+		stepGrid.addColumn(ExecutionStep::getQueueDurationString).setHeader("Wait Duration").setFlexGrow(0).setWidth("140px");
         stepGrid.addSelectionListener(event -> {
             ExecutionStep selected = stepGrid.getSelectionModel().getFirstSelectedItem().orElse(null);
             String stepId = selected != null ? selected.getId() : null;
@@ -326,7 +326,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         stepTableFilterHeader.getCell(stepGrid.getColumnByKey("componentName")).setComponent(componentNameFilterField);
 
         logGrid = new Grid<ExecutionStepLog>();
-        logGrid.addColumn(ExecutionStepLog::getLevel).setKey("Level").setHeader("Level").setWidth("110px");
+        logGrid.addColumn(ExecutionStepLog::getLevel).setKey("Level").setHeader("Level").setFlexGrow(0).setWidth("160px");
         logValueProviderMap.put("Level", ExecutionStepLog::getLevel);
         ValueProvider<ExecutionStepLog, String> timeValueProvider = log -> {
             Date createTime = log.getCreateTime();
@@ -335,7 +335,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
             }
             return "";
         };
-		logGrid.addColumn(timeValueProvider).setKey("Time").setHeader("Time").setWidth("120px");
+		logGrid.addColumn(timeValueProvider).setKey("Time").setHeader("Time").setFlexGrow(0).setWidth("120px");
 		logValueProviderMap.put("Time", timeValueProvider);
 		logGrid.addColumn(ExecutionStepLog::getLogText).setKey("Message").setHeader("Message").setFlexGrow(1);
 		logValueProviderMap.put("Message", ExecutionStepLog::getLogText);
@@ -368,6 +368,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         filteringHeader.getCell(logGrid.getColumnByKey("Level")).setComponent(levelFilterCombo);
 
         logLayout = new VerticalLayout();
+        logLayout.setSpacing(false);
         logLayout.setSizeFull();
         logLayout.addAndExpand(logGrid);
 
@@ -409,6 +410,14 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
 
         context.getBackgroundRefresherService().register(this);
     }
+	
+	private VerticalLayout createHeaderLayout(Component topComponent, Component bottomComponent) {
+	    VerticalLayout headerLayout = new VerticalLayout(topComponent, bottomComponent);
+	    headerLayout.setWidth("25%");
+	    headerLayout.setPadding(false);
+	    headerLayout.setSpacing(false);
+	    return headerLayout;
+	}
 
 	protected void download() {
         if (generateNewLogFile) {
@@ -571,22 +580,17 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
     }
 
     protected void remove() {
-        ConfirmDialog.show("Delete Execution?", "Are you sure you want to delete this execution?",
-                () -> {
-                    context.getExecutionService().deleteExecution(executionId);
-                    parentTabSheet.closeTab(executionId);
-                    return true;
-                });
-
+        new ConfirmDialog("Delete Execution?", "Are you sure you want to delete this execution?", "Ok", event -> {
+            context.getExecutionService().deleteExecution(executionId);
+            parentTabSheet.closeTab(executionId);
+        }).open();
     }
 
     protected void cancel() {
-        ConfirmDialog.show("Cancel Execution?", "Are you sure you want to cancel this execution?",
-                () -> {
-                    context.getAgentManager().cancel(executionId);
-                    cancelButton.setEnabled(false);
-                    return true;
-                });
+        new ConfirmDialog("Cancel Execution?", "Are you sure you want to cancel this execution?", "Ok", event -> {
+            context.getAgentManager().cancel(executionId);
+            cancelButton.setEnabled(false);
+        }).open();
     }
 
     protected void showDiagram() {
@@ -721,7 +725,9 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
                     statusLabel.add(new Icon(VaadinIcon.WARNING), new Span(executionStatus));
                 } else if (executionStatus.equals(ExecutionStatus.DONE.name())) {
                     statusLabel.setClassName("done");
-                    statusLabel.add(new Icon(VaadinIcon.CHECK), new Span(executionStatus));
+                    Icon icon = new Icon(VaadinIcon.CHECK);
+                    icon.setColor("green");
+                    statusLabel.add(icon, new Span(executionStatus));
                 } else if (executionStatus.equals(ExecutionStatus.RUNNING.name())) {
                     statusLabel.setClassName("running");
                     statusLabel.add(new Icon(VaadinIcon.SPINNER), new Span(executionStatus));

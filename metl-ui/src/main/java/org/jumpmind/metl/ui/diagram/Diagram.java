@@ -21,9 +21,12 @@
 package org.jumpmind.metl.ui.diagram;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.jumpmind.metl.ui.views.design.EditFlowPanel;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
@@ -39,9 +42,9 @@ import elemental.json.JsonObject;
 @JsModule("./html2canvas.js")
 @JsModule("./canvg.js")
 @CssImport("./diagram.css")
+@JsModule("./jquery-3.7.1.min.js")
+@JsModule("./jsplumb.min.js")
 @JsModule("./diagram.js")
-@JsModule("jquery")
-@JsModule("jsplumb")
 @JavaScript("./diagram.js")
 public class Diagram extends Div {
 
@@ -53,7 +56,7 @@ public class Diagram extends Div {
 
     public Diagram(EditFlowPanel panel) {
         addClassName("diagram");
-        setId("diagram");
+        setId("diagram-" + UUID.randomUUID());
         diagramDetail = new DiagramDetail();
         this.panel = panel;
     }
@@ -62,7 +65,7 @@ public class Diagram extends Div {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         Page page = UI.getCurrent().getPage();
-        page.executeJs("window.org_jumpmind_metl_ui_diagram_Diagram()");
+        page.executeJs("window.org_jumpmind_metl_ui_diagram_Diagram($0)", getElement());
     }
 
     @ClientCallable
@@ -158,6 +161,17 @@ public class Diagram extends Div {
         }
     }
     
+    @ClientCallable
+    public String getCurState() {
+        ObjectMapper om = new ObjectMapper();
+        try {
+            return om.writeValueAsString(diagramDetail);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
     public void setSelectedNodeIds(List<String> ids) {
         diagramDetail.setSelectedNodeIds(ids);
     }
@@ -194,7 +208,8 @@ public class Diagram extends Div {
         maxWidth += 200;
         maxHeight += 200;
         // Call client side code to create the canvas and display it.
-        UI.getCurrent().getPage().executeJs("exportDiagram("+maxWidth+","+maxHeight+");");
+        UI.getCurrent().getPage()
+                .executeJs("exportDiagram(" + maxWidth + "," + maxHeight + ",'" + getId().orElse(null) + "');");
     }
     
 }

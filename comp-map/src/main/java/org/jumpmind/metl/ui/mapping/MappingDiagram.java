@@ -23,10 +23,12 @@ package org.jumpmind.metl.ui.mapping;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentModelSetting;
 import org.jumpmind.metl.core.model.HierarchicalModel;
+import org.jumpmind.metl.core.model.IModel;
 import org.jumpmind.metl.core.model.ModelEntitySorter;
 import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.Setting;
@@ -34,6 +36,8 @@ import org.jumpmind.metl.core.model.ComponentModelSetting.Type;
 import org.jumpmind.metl.core.runtime.component.Mapping;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
@@ -43,12 +47,11 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.page.Page;
 
-import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 @CssImport("./mapping-diagram.css")
+@JsModule("./jsplumb.min.js")
 @JsModule("./mapping-diagram.js")
-@JsModule("jsplumb")
 @JavaScript("./mapping-diagram.js")
 @SuppressWarnings("serial")
 public class MappingDiagram extends Div {
@@ -71,40 +74,46 @@ public class MappingDiagram extends Div {
 		this.panel = panel;
 		diagramDetail = new MappingDiagramDetail();
 		addClassName("mapping-diagram");
-		setId("mapping-diagram");
+		setId("mapping-diagram-" + UUID.randomUUID());
 
 		cleanAbandonedLinks(component);
 
 		diagramDetail.setComponent(component);
 
-        if (component.getInputModel() instanceof RelationalModel) {
-            diagramDetail.setRelationalInputModel((RelationalModel) component.getInputModel());
-            context.getConfigurationService().refresh(diagramDetail.getRelationalInputModel());
-            Collections.sort((diagramDetail.getRelationalInputModel()).getModelEntities(), new ModelEntitySorter());
-            diagramDetail.getRelationalInputModel().sortAttributes();
-        } else {
-            diagramDetail.setHierarchicalInputModel((HierarchicalModel) component.getInputModel());
-            context.getConfigurationService().refresh(diagramDetail.getHierarchicalInputModel());
-        }
+		IModel inputModel = component.getInputModel();
+		if (inputModel != null) {
+	        if (inputModel instanceof RelationalModel) {
+	            diagramDetail.setRelationalInputModel((RelationalModel) inputModel);
+	            context.getConfigurationService().refresh(diagramDetail.getRelationalInputModel());
+	            Collections.sort((diagramDetail.getRelationalInputModel()).getModelEntities(), new ModelEntitySorter());
+	            diagramDetail.getRelationalInputModel().sortAttributes();
+	        } else {
+	            diagramDetail.setHierarchicalInputModel((HierarchicalModel) inputModel);
+	            context.getConfigurationService().refresh(diagramDetail.getHierarchicalInputModel());
+	        }
+		}
 
-        if (component.getOutputModel() instanceof RelationalModel) {
-            diagramDetail.setRelationalOutputModel((RelationalModel) component.getOutputModel());
-            if (diagramDetail.getRelationalOutputModel() != null) {
-                context.getConfigurationService().refresh(diagramDetail.getRelationalOutputModel());
-                Collections.sort((diagramDetail.getRelationalOutputModel()).getModelEntities(), new ModelEntitySorter());
-                diagramDetail.getRelationalOutputModel().sortAttributes();
-            }
-        } else {
-            diagramDetail.setHierarchicalOutputModel((HierarchicalModel) component.getOutputModel());
-            context.getConfigurationService().refresh(diagramDetail.getHierarchicalOutputModel());            
-        }		
+		IModel outputModel = component.getOutputModel();
+		if (outputModel != null) {
+	        if (outputModel instanceof RelationalModel) {
+	            diagramDetail.setRelationalOutputModel((RelationalModel) outputModel);
+	            if (diagramDetail.getRelationalOutputModel() != null) {
+	                context.getConfigurationService().refresh(diagramDetail.getRelationalOutputModel());
+	                Collections.sort((diagramDetail.getRelationalOutputModel()).getModelEntities(), new ModelEntitySorter());
+	                diagramDetail.getRelationalOutputModel().sortAttributes();
+	            }
+	        } else {
+	            diagramDetail.setHierarchicalOutputModel((HierarchicalModel) outputModel);
+	            context.getConfigurationService().refresh(diagramDetail.getHierarchicalOutputModel());            
+	        }       
+		}
 	}
 	
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         Page page = UI.getCurrent().getPage();
-        page.executeJs("window.org_jumpmind_metl_ui_mapping_MappingDiagram()");
+        page.executeJs("window.org_jumpmind_metl_ui_mapping_MappingDiagram($0)", getElement());
     }
 
     protected void cleanAbandonedLinks(Component c) {
@@ -197,8 +206,8 @@ public class MappingDiagram extends Div {
 	
     @ClientCallable
     private void onSelect(JsonObject json) {
-        selectedSourceId = json.getString("sourceId").substring(3);
-        selectedTargetId = json.getString("targetId").substring(3);
+        selectedSourceId = json.hasKey("sourceId") ? json.getString("sourceId").substring(3) : null;
+        selectedTargetId = json.hasKey("targetId") ? json.getString("targetId").substring(3) : null;
         panel.selectEvent(new SelectEvent(MappingDiagram.this, selectedSourceId, selectedTargetId));
     }
     
@@ -212,5 +221,16 @@ public class MappingDiagram extends Div {
         } else {
             addConnection(sourceId, targetId);
         }
+    }
+    
+    @ClientCallable
+    public String getCurState() {
+        ObjectMapper om = new ObjectMapper();
+        try {
+            return om.writeValueAsString(diagramDetail);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

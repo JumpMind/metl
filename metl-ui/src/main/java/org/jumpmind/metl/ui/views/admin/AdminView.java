@@ -24,18 +24,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
+import org.jumpmind.metl.ui.common.MainLayout;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.metl.ui.common.View;
-import org.jumpmind.metl.ui.init.AppUI;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -44,17 +43,19 @@ import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.UIScope;
 
 @UiComponent
-@Scope(value = "ui")
-@TopBarLink(category = Category.Admin, name = "Admin", id = "admin", icon = VaadinIcon.COGS, menuOrder = 10)
-@Route("admin")
+@UIScope
+@PreserveOnRefresh
+@TopBarLink(category = Category.Admin, name = "Admin", id = "admin", view = AdminView.class, icon = VaadinIcon.COGS, menuOrder = 10)
+@Route(value = "admin", layout = MainLayout.class)
 public class AdminView extends HorizontalLayout implements IUiPanel, ComponentEventListener<ItemClickEvent<AdminMenuLink>>, View {
 
     private static final long serialVersionUID = 1L;
@@ -83,6 +84,7 @@ public class AdminView extends HorizontalLayout implements IUiPanel, ComponentEv
 
         VerticalLayout container = new VerticalLayout();
         container.setSizeFull();
+        container.setPadding(false);
         container.add(tabbedPanel);
         leftSplit.addToSecondary(container);
 
@@ -92,25 +94,21 @@ public class AdminView extends HorizontalLayout implements IUiPanel, ComponentEv
         tree.setPageSize(100);
         tree.addItemClickListener(this);
         tree.addClassName("noselect");
-        tree.addComponentColumn(item -> new HorizontalLayout(new Icon(item.icon()), new Span(item.id())));
+        tree.addComponentHierarchyColumn(item -> {
+            Icon icon = new Icon(item.icon());
+            icon.getStyle().set("min-width", "24px");
+            return new HorizontalLayout(icon, new Span(item.id()));
+        });
         
         for (AdminSideView sideView : sideMenu) {
             AdminMenuLink link = (AdminMenuLink) sideView.getClass().getAnnotation(AdminMenuLink.class);
             sideView.setAdminView(this);
-                if (link != null && link.uiClass().equals(AppUI.class) && sideView.isAccessible()) {
+                if (link != null && sideView.isAccessible()) {
                     addItem(link);
                     sideMenuById.put(link.id(), sideView.getView());
                 }
         }
-        VerticalLayout navigator = new VerticalLayout();
-        navigator.setSizeFull();
-        leftSplit.addToPrimary(navigator);
-                
-        MenuBar leftMenuBar = new MenuBar();
-        leftMenuBar.setWidthFull();
-        navigator.add(leftMenuBar);
-
-        navigator.addAndExpand(tree);
+        leftSplit.addToPrimary(tree);
         
         add(leftSplit);
         
@@ -127,6 +125,7 @@ public class AdminView extends HorizontalLayout implements IUiPanel, ComponentEv
                 String id = value.id();
                 Component panel = sideMenuById.get(id);
                 tabbedPanel.addCloseableTab(id, id, new Icon(value.icon()), panel);
+                tabbedPanel.setSelectedTab(panel);
             }
         }
     }

@@ -23,15 +23,15 @@ package org.jumpmind.metl.ui.views.admin;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jumpmind.vaadin.ui.common.UiComponent;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.IFrame;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.spring.annotation.UIScope;
 
 @UiComponent
-@Scope(value = "ui")
+@UIScope
 @Order(400)
 @AdminMenuLink(name = "REST", id = "REST", icon = VaadinIcon.WRENCH)
 public class ApiPanel extends AbstractAdminPanel {

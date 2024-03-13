@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -90,6 +89,9 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
     ComboBox<String> xpathCombo = new ComboBox<String>();
 
     protected void buildUI() {
+        setPadding(false);
+        setSpacing(false);
+        
         ButtonBar buttonBar = new ButtonBar();
         add(buttonBar);
 
@@ -337,7 +339,7 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
             editor.setValue(templateSetting.getValue());
             editor.setReadOnly(readOnly);
 
-            add(buildButtonFooter(buildCloseButton()));
+            buildButtonFooter(buildCloseButton());
         }
 
         @Override

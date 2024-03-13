@@ -1,0 +1,261 @@
+@mixin apptheme {
+	
+  @include valo;
+  
+   .v-select-optiongroup-indent {
+      padding-left: 35px;
+   }
+  
+   .v-treetable .v-table-body {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+       user-select: none;
+    }
+  
+   .v-filterselect-suggestpopup [class$="status"] {
+       display: none;
+   }
+
+   .v-filterselect-suggestpopup div[class*="page"] {
+       opacity: .60;
+       filter: alpha(opacity=60) ;
+       -webkit-transform: scale(1.0);
+       -moz-transform: scale(1.0);
+       -ms-transform: scale(1.0);
+       -o-transform: scale(1.0);
+       transform: scale(1.0);
+       background-color: #0072C6;
+       color: #FFFFFF;
+   }
+
+   .v-filterselect-suggestpopup div[class*="page"]:hover {
+       background: rgba(0, 114, 198, 1.0);
+   }  
+  
+  .highlight {
+    background-color: #FCEE89;
+   } 
+   
+   .sqlexplorer .v-menubar-borderless .v-menubar-menuitem.v-menubar-menuitem-green {
+       color: #76aa2e;
+   }
+
+   .sqlexplorer .v-menubar-borderless .v-menubar-menuitem.v-menubar-menuitem-red {
+       color: #E84855;
+   }   
+   
+   .hidefocus:focus:after {
+        border: none;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+   }
+   
+  .leftAligned.v-button {
+    text-align: left; 
+    padding-left: 5px;
+  }
+  
+  .v-window-modalitycurtain {
+    opacity: 0.4;
+  }
+  
+  .v-table-cell-content-folder .v-icon {
+     color: #fbe37a;
+     text-shadow: 1px 1px 1px #bb9d7f;
+  }
+  
+  .done .v-icon {
+     color: green;
+  }
+  
+  .error .v-icon {
+     color: #cc0012;
+  }
+  
+  .running .v-icon {
+     color: $v-focus-color;
+  }
+  
+  .v-table-cell-content-project .v-icon {               
+     color: $v-focus-color;    
+  }
+  
+  .v-table-cell-content-project-version .v-icon {
+     color: $v-focus-color;    
+  }  
+  
+  .v-selected .v-table-cell-content-project .v-icon {
+     color: white;
+  }
+  
+  .v-selected .v-table-cell-content-project-version .v-icon {
+     color: white;
+  }
+  
+  .v-table-cell-content-project .v-table-cell-wrapper {
+     font-weight: bold;
+  }
+  
+  .v-table-cell-content-project-version-read-only .v-table-cell-wrapper {
+     font-weight: bold;
+     color: gray;
+  }  
+  
+  .v-selected .v-table-cell-content-project .v-table-cell-wrapper {
+     font-weight: bold;
+  }
+  
+  .v-selected .v-table-cell-content-project-read-only .v-table-cell-wrapper {
+     font-weight: bold;
+     color: white;
+  }   
+      
+  .v-selected .v-table-cell-content-project-version-read-only .v-table-cell-wrapper {
+     font-weight: bold;
+     color: white;
+  }   
+    
+  
+  .centerAligned.v-button, .centerAligned.v-label {
+    text-align: center; 
+  }  
+  
+  .v-table-cell-wrapper > span.v-icon.FontAwesome {
+    padding-right: 10px;
+  }
+  
+  .v-table-cell-wrapper > .leftPad.v-label {
+    margin-left: 5px; 
+  }
+  
+  .v-table-caption-container {
+    min-height: 12px;
+  }
+  
+  .v-table .v-selected .v-button-caption {
+    color: #fff;
+  }
+  
+  .v-table-header, .v-grid-header tr:first-child th {
+    background-image: -webkit-linear-gradient(#DEDEDE, #E0E0E0);
+    background-image: -moz-linear-gradient(#DEDEDE, #E0E0E0);
+    background-image: linear-gradient(#DEDEDE, #E0E0E0);
+    font-weight: bold;
+  }
+    
+  .v-table .v-selected .v-button-caption {
+    color: #fff;
+  }
+
+    .v-table-column-selector {
+        color: $v-focus-color;
+    }
+
+    .v-table-header-wrap .v-table-column-selector {
+        opacity: 1;
+        filter: none ;
+        -webkit-transition-delay: 100ms;
+        -moz-transition-delay: 100ms;
+        transition-delay: 100ms;
+    }
+  
+     .v-panel-noborder, .v-panel-noborder > .v-panel-captionwrap, .v-panel-caption-noborder {
+        border-radius: 0px;
+    }
+    
+    .v-menubar-noborder {
+        border-radius: 0px;
+        border: 0px;
+    }
+    
+    .v-menubar-noborder > .v-menubar-menuitem,  
+    .v-menubar-noborder > .v-menubar-menuitem:first-child,
+    .v-menubar-noborder > .v-menubar-menuitem:last-child {
+        border-radius: 0px;
+        border-width: 0 0 0 0;
+    }  
+  
+  .valo-menu-subtitle {
+     color: $v-focus-color;
+  }
+    
+  .v-menubar:focus:after {
+     border-color: #b2b2b2;
+     box-shadow: none;
+  }
+    
+    .h1, .h2, .h3 {
+       font-weight: normal;
+    }
+    
+    .v-label-color {
+        color: $v-focus-color;
+    }
+
+    .valo-menu-subtitle {
+       color: $v-focus-color;
+    }
+        
+    .v-menubar:focus:after {
+       border-color: #b2b2b2;
+       box-shadow: none;
+    }
+    
+    .v-panel-caption, .v-window-outerheader, .v-window-header, .v-window-maximizebox, .v-window-closebox, .v-menubar > .v-menubar-menuitem-checked {
+       background: $v-focus-color;
+       color: white;
+    }
+
+    .v-panel-caption-form, .v-panel-caption-help {
+        background-image: -webkit-linear-gradient(#DEDEDE, #E0E0E0);
+        background-image: -moz-linear-gradient(#DEDEDE, #E0E0E0);
+        background-image: linear-gradient(#DEDEDE, #E0E0E0);
+        color: #474747;
+        font: 12px/29px "Roboto", sans-serif;
+        font-weight: bold;
+    }
+
+
+    .v-contextmenu .gwt-MenuItem-selected, .v-filterselect-suggestpopup .gwt-MenuItem-selected {
+        color: #474747;
+        background-color: #DEDEDE;
+        background-image: -webkit-linear-gradient(#DEDEDE, #E0E0E0);
+        background-image: -moz-linear-gradient(#DEDEDE, #E0E0E0);
+        background-image: linear-gradient(#DEDEDE, #E0E0E0);
+    }
+    
+    .v-menubar-popup .v-menubar-menuitem-selected {
+        color: #474747;
+        background-color: #DEDEDE;
+        background-image: -webkit-linear-gradient(#DEDEDE, #E0E0E0);
+        background-image: -moz-linear-gradient(#DEDEDE, #E0E0E0);
+        background-image: linear-gradient(#DEDEDE, #E0E0E0);
+    }  
+ 
+    .ace_marker-layer .errormarker {
+        border-bottom: 2px dotted red;
+        position: absolute;
+    }
+    
+    .aceeditor-suggestpopup-description {
+        background: lightgray;
+        width: 400px;
+    }
+    
+    .vrule {
+        height: 100%;
+        border-left: 1px solid #c0c0c0;
+        margin-left: 5px;
+        margin-right: 6px;
+    }
+    
+    .noborder {
+        border: none;
+    }
+    .noborder:focus {
+        box-shadow: none;
+    }
+}

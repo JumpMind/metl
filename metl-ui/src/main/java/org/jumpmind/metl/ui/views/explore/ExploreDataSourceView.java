@@ -20,29 +20,32 @@
  */
 package org.jumpmind.metl.ui.views.explore;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.metl.ui.common.View;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.DbProvider;
+import org.jumpmind.metl.ui.common.MainLayout;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.jumpmind.vaadin.ui.sqlexplorer.SqlExplorer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.UIScope;
 
 @UiComponent
-@Scope("ui")
-@TopBarLink(id = "exploreDataSources", category = Category.Explore, menuOrder = 10, name = "DataSource", icon = VaadinIcon.DATABASE)
-@Route("exploreDataSources")
+@UIScope
+@PreserveOnRefresh
+@TopBarLink(id = "exploreDataSources", view = ExploreDataSourceView.class, category = Category.Explore, menuOrder = 10, name = "DataSource", icon = VaadinIcon.DATABASE)
+@Route(value = "exploreDataSources", layout = MainLayout.class)
 public class ExploreDataSourceView extends VerticalLayout implements BeforeEnterObserver, View {
 
     private static final long serialVersionUID = 1L;
@@ -60,9 +63,11 @@ public class ExploreDataSourceView extends VerticalLayout implements BeforeEnter
     
     @PostConstruct
     protected void init () {
+        setPadding(false);
         dbProvider = new DbProvider(context);
         explorer = new SqlExplorer(context.getConfigDir(),
                 dbProvider, context.getUser().getLoginId(), UIConstants.DEFAULT_LEFT_SPLIT);
+        explorer.setSplitterPosition(20);
         add(explorer);
     }
 

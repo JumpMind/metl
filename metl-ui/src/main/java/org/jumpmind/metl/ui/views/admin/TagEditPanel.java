@@ -22,6 +22,7 @@ package org.jumpmind.metl.ui.views.admin;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.awt.Color;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,12 +31,16 @@ import org.jumpmind.metl.core.model.Group;
 import org.jumpmind.metl.core.model.Tag;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
+import org.vaadin.addons.tatu.ColorPicker;
+import org.vaadin.addons.tatu.ColorPickerVariant;
 
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.server.Command;
 
 @SuppressWarnings("serial")
 
@@ -46,35 +51,33 @@ public class TagEditPanel extends VerticalLayout implements IUiPanel {
     ApplicationContext context;
 
     Tag tag;
+    
+    Command refreshGridCommand;
 
     Map<String, Group> groupsById;
 
     Set<String> lastGroups;
 
-    public TagEditPanel(ApplicationContext context, Tag tag) {
+    public TagEditPanel(ApplicationContext context, Tag tag, Command refreshGridCommand) {
         this.context = context;
         this.tag = tag;
+        this.refreshGridCommand = refreshGridCommand;
 
         FormLayout form = new FormLayout();
+        form.setResponsiveSteps(new ResponsiveStep("0", 1));
         
-        TextField nameField = new TextField("Name", StringUtils.trimToEmpty(tag.getName()));
-        form.add(nameField);
+        TextField nameField = new TextField();
+        nameField.setValue(StringUtils.trimToEmpty(tag.getName()));
+        form.addFormItem(nameField, "Name");
         nameField.addValueChangeListener(new NameChangeListener());
         nameField.focus();
 
-        /*ColorPicker colorPickerField = new ColorPicker("Tag Color");
-        colorPickerField.setSwatchesVisibility(true);
-        colorPickerField.setHistoryVisibility(true);
-        colorPickerField.setTextfieldVisibility(false);
-        colorPickerField.setHSVVisibility(false);
-        colorPickerField.setValue(new Color(tag.getColor()));
+        ColorPicker colorPickerField = new ColorPicker();
+        colorPickerField.addThemeVariants(ColorPickerVariant.COMPACT);
+        colorPickerField.setValue(String.format("#%06x", 0xFFFFFF & tag.getColor()));
         colorPickerField.addValueChangeListener(new ColorFieldListener());         
-
-        HorizontalLayout hLayout = new HorizontalLayout();
-        hLayout.setCaption("Color");
-        hLayout.add(colorPickerField);
                 
-        form.add(hLayout);*/
+        form.addFormItem(colorPickerField, "Color");
         
 //        List<Group> groups = context.getOperationsService().findGroups();
 //        groupsById = new HashMap<String, Group>();
@@ -104,6 +107,7 @@ public class TagEditPanel extends VerticalLayout implements IUiPanel {
 
     @Override
     public boolean closing() {
+        refreshGridCommand.execute();
         return true;
     }
 
@@ -128,13 +132,13 @@ public class TagEditPanel extends VerticalLayout implements IUiPanel {
         }
     }
 
-    /*class ColorFieldListener implements ValueChangeListener<Color> {
+    class ColorFieldListener implements ValueChangeListener<ValueChangeEvent<String>> {
         @Override
-        public void valueChange(ValueChangeEvent<Color> event) {
-            tag.setColor(event.getValue().getRGB());
+        public void valueChanged(ValueChangeEvent<String> event) {
+            tag.setColor(Color.decode(event.getValue()).getRGB());
             save(tag);
         }
-    }    */
+    }    
     
 //    class GroupChangeListener implements ValueChangeListener {
 //        @SuppressWarnings("unchecked")

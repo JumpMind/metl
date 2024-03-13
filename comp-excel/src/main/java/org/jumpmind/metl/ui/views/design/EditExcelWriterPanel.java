@@ -54,6 +54,8 @@ public class EditExcelWriterPanel extends AbstractComponentEditPanel {
     Set<RecordFormat> selectedItemIds;
 
     protected void buildUI() {
+        setPadding(false);
+        setSpacing(false);
         ButtonBar buttonBar = new ButtonBar();
         if (!readOnly) {
             add(buttonBar);

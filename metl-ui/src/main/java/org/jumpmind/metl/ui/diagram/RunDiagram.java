@@ -21,9 +21,12 @@
 package org.jumpmind.metl.ui.diagram;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.jumpmind.metl.ui.views.manage.ExecutionRunPanel;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
@@ -42,9 +45,9 @@ import elemental.json.JsonObject;
  *
  */
 @CssImport("./run-diagram.css")
+@JsModule("./jquery-3.7.1.min.js")
+@JsModule("./jsplumb.min.js")
 @JsModule("./run-diagram.js")
-@JsModule("jquery")
-@JsModule("jsplumb")
 @JavaScript("./run-diagram.js")
 public class RunDiagram extends Div {
 
@@ -56,7 +59,7 @@ public class RunDiagram extends Div {
 
     public RunDiagram(ExecutionRunPanel panel) {
         addClassName("diagram");
-        setId("run-diagram");
+        setId("run-diagram-" + UUID.randomUUID());
         diagramDetail = new DiagramDetail();
         this.panel = panel;
     }
@@ -65,7 +68,7 @@ public class RunDiagram extends Div {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         Page page = UI.getCurrent().getPage();
-        page.executeJs("window.org_jumpmind_metl_ui_diagram_RunDiagram()");
+        page.executeJs("window.org_jumpmind_metl_ui_diagram_RunDiagram($0)", getElement());
     }
     
     @ClientCallable
@@ -79,6 +82,17 @@ public class RunDiagram extends Div {
             }
         }
         panel.nodeSelectedEvent(new NodeSelectedEvent(RunDiagram.this, ids));
+    }
+    
+    @ClientCallable
+    public String getCurState() {
+        ObjectMapper om = new ObjectMapper();
+        try {
+            return om.writeValueAsString(diagramDetail);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public void setSelectedNodeIds(List<String> ids) {

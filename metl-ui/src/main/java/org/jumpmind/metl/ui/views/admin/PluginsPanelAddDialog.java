@@ -46,10 +46,13 @@ import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dialog.DialogVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Receiver;
 import com.vaadin.flow.component.upload.Upload;
@@ -101,8 +104,12 @@ public class PluginsPanelAddDialog extends ResizableDialog {
         this.context = context;
         this.pluginsPanel = pluginsPanel;
         this.pluginRepositories = context.getPluginService().findPluginRepositories();
+        
+        addThemeVariants(DialogVariant.LUMO_NO_PADDING);
+        innerContent.setPadding(false);
 
         TabSheet tabSheet = new TabSheet();
+        tabSheet.addThemeVariants(TabsVariant.LUMO_SMALL);
 
         FormLayout searchLayout = buildSearchLayout();
         tabSheet.add(searchLayout, "Search For New Versions");
@@ -115,11 +122,12 @@ public class PluginsPanelAddDialog extends ResizableDialog {
 
         uploadHandler = new UploadHandler();
         uploadButton = new Upload(uploadHandler);
+        uploadButton.setDropAllowed(false);
         uploadButton.setVisible(false);
         uploadButton.addFinishedListener(e -> finishedUpload());
 
         tabSheet.addSelectedTabChangeListener(e -> {
-            boolean searchSelected = tabSheet.getSelectedTab().equals(searchLayout);
+            boolean searchSelected = tabSheet.getSelectedTab().getComponent().equals(searchLayout);
             searchButton.setVisible(searchSelected);
             uploadButton.setVisible(!searchSelected);
         });
@@ -135,12 +143,12 @@ public class PluginsPanelAddDialog extends ResizableDialog {
         addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         addButton.addClickListener(e -> addPlugin());
 
-        add(buildButtonFooter(uploadButton, searchButton, cancelButton, addButton));
+        buildButtonFooter(uploadButton, searchButton, cancelButton, addButton);
 
         cancelButton.focus();
 
         setWidth("550px");
-        setHeight("300px");
+        setHeight("410px");
     }
 
     protected void addPlugin() {
@@ -173,6 +181,8 @@ public class PluginsPanelAddDialog extends ResizableDialog {
 
     protected FormLayout buildSearchLayout() {
         FormLayout layout = new FormLayout();
+        layout.getStyle().set("padding", "0 16px");
+        layout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
         List<Plugin> existingPlugins = context.getPluginService().findPlugins();
         Set<String> groups = new HashSet<>();
@@ -183,11 +193,9 @@ public class PluginsPanelAddDialog extends ResizableDialog {
         }
 
         versionSelect = new ListBox<String>();
-        groupCombo = new ComboBox<String>("Group");
-        nameCombo = new ComboBox<String>("Name");
+        groupCombo = new ComboBox<String>();
+        nameCombo = new ComboBox<String>();
 
-        versionSelect.setHeight("144px");
-        //versionSelect.setVisibleItemCount(4);
         versionSelect.setWidthFull();
         versionSelect.addValueChangeListener(e -> versionSelected(e));
 
@@ -206,7 +214,7 @@ public class PluginsPanelAddDialog extends ResizableDialog {
         	groupCombo.setValue(handEnteredGroup);
         	setSearchButtonEnabled();
         });
-        layout.add(groupCombo);
+        layout.addFormItem(groupCombo, "Group");
 
         nameCombo.setWidthFull();
         nameCombo.setItems(names);
@@ -222,7 +230,7 @@ public class PluginsPanelAddDialog extends ResizableDialog {
         	nameCombo.setValue(handEnteredName);
         	setSearchButtonEnabled();
         });
-        layout.add(nameCombo);
+        layout.addFormItem(nameCombo, "Name");
         layout.addFormItem(versionSelect, "Versions");
 
         return layout;
@@ -252,6 +260,9 @@ public class PluginsPanelAddDialog extends ResizableDialog {
         if (!versions.isEmpty()) {
             allowEmptyVersionSelection = false;
             versionSelect.setValue(versions.iterator().next());
+            versionSelect.setHeight("144px");
+        } else {
+            versionSelect.setHeight(null);
         }
     }
 
@@ -267,26 +278,28 @@ public class PluginsPanelAddDialog extends ResizableDialog {
 
     protected FormLayout buildUploadLayout() {
         FormLayout layout = new FormLayout();
+        layout.getStyle().set("padding", "0 16px");
+        layout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
-        groupField = new TextField("Group");
+        groupField = new TextField();
         groupField.setWidthFull();
         groupField.setRequiredIndicatorVisible(true);
-        layout.add(groupField);
+        layout.addFormItem(groupField, "Group");
 
-        nameField = new TextField("Name");
+        nameField = new TextField();
         nameField.setWidthFull();
         nameField.setRequiredIndicatorVisible(true);
-        layout.add(nameField);
+        layout.addFormItem(nameField, "Name");
 
-        versionField = new TextField("Version");
+        versionField = new TextField();
         versionField.setWidthFull();
         versionField.setRequiredIndicatorVisible(true);
-        layout.add(versionField);
+        layout.addFormItem(versionField, "Version");
 
         return layout;
     }
 
-    protected HorizontalLayout buildButtonFooter(Component... toTheRightButtons) {
+    protected void buildButtonFooter(Component... toTheRightButtons) {
         HorizontalLayout footer = new HorizontalLayout();
 
         footer.setWidth("100%");
@@ -300,8 +313,7 @@ public class PluginsPanelAddDialog extends ResizableDialog {
         if (toTheRightButtons != null) {
             footer.add(toTheRightButtons);
         }
-
-        return footer;
+        getFooter().add(footer);
     }
 
     @Override

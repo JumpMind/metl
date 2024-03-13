@@ -68,6 +68,8 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
     Set<EntitySettings> selectedItemIds;
     
     protected void buildUI() {
+        setPadding(false);
+        setSpacing(false);
     	buildButtonBar();
     	buildEntityGrid();
     	fillEntityContainer();
@@ -111,7 +113,7 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
     
     protected void buildEntityGrid() {
         entityGrid.setSizeFull();
-        entityGrid.addColumn(setting -> {
+        entityGrid.addComponentColumn(setting -> {
             RelationalModel model = (RelationalModel) component.getInputModel();
             ModelEntity entity = model.getEntityById(setting.getEntityId());
             return UiUtils.getName(entityFilterField.getValue(), entity.getName());
@@ -133,7 +135,9 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
     
     protected void updateEntityGrid(String filter) {
         filter = filter != null ? filter.toLowerCase() : null;
-        entityFilterField.setValue(filter);
+        if (filter != null) {
+            entityFilterField.setValue(filter);
+        }
         List<EntitySettings> filteredEntitySettings = new ArrayList<EntitySettings>();
         for (EntitySettings entitySetting : entitySettings) {
             RelationalModel model = (RelationalModel) component.getInputModel();
@@ -142,7 +146,13 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
             	filteredEntitySettings.add(entitySetting);
             }
         }
+        Set<EntitySettings> selectedItemsSet = entityGrid.getSelectedItems();
         entityGrid.setItems(filteredEntitySettings);
+        for (EntitySettings entitySetting : selectedItemsSet) {
+            if (filteredEntitySettings.contains(entitySetting)) {
+                entityGrid.select(entitySetting);
+            }
+        }
     }
          
     protected void saveSetting(String entityId, String name, String value) {
@@ -201,22 +211,22 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
 			super("Edit Columns to Dedupe on");
 			setWidth("800px");
 			setHeight("600px");
-			innerContent.setMargin(true);
+			innerContent.setPadding(false);
 			buildAttributeGrid();
-			add(buildButtonFooter(buildCloseButton()));
+			buildButtonFooter(buildCloseButton());
 		}
     	
         private void buildAttributeGrid() {
      	   
      	   attributeGrid.setSizeFull();
-     	   attributeGrid.addColumn(setting -> {
+     	   attributeGrid.addComponentColumn(setting -> {
                RelationalModel model = (RelationalModel) component.getInputModel();
                ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
                return UiUtils.getName(entityFilterField.getValue(), attribute.getName());
      	   }).setHeader("Attribute Name").setWidth("250px").setFlexGrow(1).setSortable(false);
            attributeGrid.addComponentColumn(setting -> createAttributeCheckbox(setting, Deduper.ATTRIBUTE_DEDUPE_ENABLED))
                    .setHeader("Dedupe Enabled").setSortable(false);
-           this.addComponentAtIndex(1, attributeGrid);
+           add(attributeGrid);
             
         }
     }
@@ -239,6 +249,8 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
     
     protected Checkbox createAttributeCheckbox(final AttributeSettings settings, final String key) {
         final Checkbox checkbox = new Checkbox();
+        ComponentAttribSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(), key);
+        checkbox.setValue(setting != null ? Boolean.parseBoolean(setting.getValue()) : true);
         checkbox.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<Boolean>>() {
             private static final long serialVersionUID = 1L;
             @Override

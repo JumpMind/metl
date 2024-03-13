@@ -78,6 +78,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
@@ -135,8 +136,11 @@ public class PropertySheet extends Div {
     public void setSource(Object obj) {
         value = obj;
         VerticalLayout vLayout = new VerticalLayout();
+        vLayout.setPadding(false);
+        vLayout.setSpacing(false);
         FormLayout formLayout = new FormLayout();
         formLayout.setWidthFull();
+        formLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
 
         if (obj != null) {
 
@@ -231,14 +235,14 @@ public class PropertySheet extends Div {
             }
         }
         if (components.size() != 0 && !readOnly) {
-            formLayout.add(buildRadioButtonGroup("Enabled", ENABLED, components), buildRadioButtonGroup("Log Input", LOG_INPUT, components),
-                    buildRadioButtonGroup("Log Output", LOG_OUTPUT, components));
+            formLayout.addFormItem(buildRadioButtonGroup(ENABLED, components), "Enabled");
+            formLayout.addFormItem(buildRadioButtonGroup(LOG_INPUT, components), "Log Input");
+            formLayout.addFormItem(buildRadioButtonGroup(LOG_OUTPUT, components), "Log Output");
         }
     }
 
-    protected RadioButtonGroup<String> buildRadioButtonGroup(String caption, String name, List<Component> components) {
+    protected RadioButtonGroup<String> buildRadioButtonGroup(String name, List<Component> components) {
         RadioButtonGroup<String> optionGroup = new RadioButtonGroup<String>();
-        optionGroup.setLabel(caption);
         optionGroup.setItems("ON", "OFF");
         optionGroup.addValueChangeListener((event) -> saveSetting(name, optionGroup, components));
         return optionGroup;
@@ -254,20 +258,22 @@ public class PropertySheet extends Div {
     }
 
     protected void addResourceProperties(FormLayout formLayout, Resource resource) {
-        TextField textField = new TextField("Resource Type");
+        TextField textField = new TextField();
+        textField.setWidthFull();
         textField.setValue(resource.getType());
         textField.setReadOnly(true);
-        formLayout.add(textField);
+        formLayout.addFormItem(textField, "Resource Type");
     }
 
     protected void addComponentProperties(FormLayout formLayout, Component component) {
         XMLComponentDefinition componentDefintion = context.getDefinitionFactory().getComponentDefinition(component.getProjectVersionId(),
                 component.getType());
         addComponentName(formLayout, component);
-        TextField textField = new TextField("Component Type");
+        TextField textField = new TextField();
+        textField.setWidthFull();
         textField.setValue(componentDefintion.getName());
         textField.setReadOnly(true);
-        formLayout.add(textField);
+        formLayout.addFormItem(textField, "Component Type");
         addResourceCombo(componentDefintion, formLayout, component);
         addInputModelCombo(componentDefintion, formLayout, component);
         addOutputModelCombo(componentDefintion, formLayout, component);
@@ -284,7 +290,8 @@ public class PropertySheet extends Div {
     protected void addErrorHandlerCombo(XMLComponentDefinition componentDefinition, FormLayout formLayout, final Component component) {
         FlowStep step = getSingleFlowStep();
         if (step != null) {
-            final ComboBox<FlowStep> combo = new ComboBox<FlowStep>("Error Suspense Step");
+            final ComboBox<FlowStep> combo = new ComboBox<FlowStep>();
+            combo.setWidthFull();
             IConfigurationService configurationService = context.getConfigurationService();
             Flow flow = configurationService.findFlow(step.getFlowId());
             String currentErrorHandlerId = component.get(ComponentSettingsConstants.ERROR_HANDLER);
@@ -315,7 +322,7 @@ public class PropertySheet extends Div {
                 }
             });
             combo.setReadOnly(readOnly);
-            formLayout.add(combo);
+            formLayout.addFormItem(combo, "Error Suspense Step");
         }
     }
 
@@ -331,7 +338,8 @@ public class PropertySheet extends Div {
 	            		|| componentDefinition.getOutputMessageType() == MessageType.MODEL)
 	                    	|| (componentDefinition.getOutputMessageType() == MessageType.ANY && componentDefinition.isShowOutputModel()))
                     && !componentDefinition.isInputOutputModelsMatch()) {
-                final ComboBox<AbstractName> combo = new ComboBox<AbstractName>("Output Model");
+                final ComboBox<AbstractName> combo = new ComboBox<AbstractName>();
+                combo.setWidthFull();
                 
                 List<AbstractName> models = new ArrayList<AbstractName>();
                 if (componentDefinition.getOutputMessageType() == MessageType.ANY
@@ -385,14 +393,15 @@ public class PropertySheet extends Div {
                     }
                 });
                 combo.setReadOnly(readOnly);
-                formLayout.add(combo);
+                formLayout.addFormItem(combo, "Output Model");
             }
         }
     }
 
     protected void addComponentName(FormLayout formLayout, final Component component) {
 
-        TextField textField = new TextField("Component Name");
+        TextField textField = new TextField();
+        textField.setWidthFull();
         textField.setValueChangeMode(ValueChangeMode.LAZY);
         textField.setValueChangeTimeout(200);
         textField.addValueChangeListener(event -> {
@@ -407,7 +416,7 @@ public class PropertySheet extends Div {
         textField.setValue(component.getName());
         textField.setRequiredIndicatorVisible(true);
         textField.getElement().setProperty("title", "Name for the component on the flow");
-        formLayout.add(textField);
+        formLayout.addFormItem(textField, "Component Name");
     }
 
     protected void addInputModelCombo(XMLComponentDefinition componentDefinition, FormLayout formLayout, final Component component) {
@@ -419,7 +428,8 @@ public class PropertySheet extends Div {
             		|| componentDefinition.getInputMessageType() == MessageType.HIERARCHICAL 
             		|| componentDefinition.getInputMessageType() == MessageType.MODEL)
                     || (componentDefinition.getInputMessageType() == MessageType.ANY && componentDefinition.isShowInputModel())) {
-                final ComboBox<AbstractName> combo = new ComboBox<AbstractName>("Input Model");              
+                final ComboBox<AbstractName> combo = new ComboBox<AbstractName>();      
+                combo.setWidthFull();
 
                 List<AbstractName> models = new ArrayList<AbstractName>();
                 if (componentDefinition.getInputMessageType() == MessageType.ANY
@@ -477,7 +487,7 @@ public class PropertySheet extends Div {
                     }
                 });
                 combo.setReadOnly(readOnly);
-                formLayout.add(combo);
+                formLayout.addFormItem(combo, "Input Model");
             }
         }
     }
@@ -490,7 +500,8 @@ public class PropertySheet extends Div {
             FlowStep step = getSingleFlowStep();
             if (componentDefintion.getResourceCategory() != null && componentDefintion.getResourceCategory() != ResourceCategory.NONE
                     && step != null) {
-                final ComboBox<Resource> resourcesCombo = new ComboBox<Resource>("Resource");
+                final ComboBox<Resource> resourcesCombo = new ComboBox<Resource>();
+                resourcesCombo.setWidthFull();
                 String projectVersionId = step.getComponent().getProjectVersionId();
                 Set<XMLResourceDefinition> types = context.getDefinitionFactory().getResourceDefinitions(projectVersionId,
                         componentDefintion.getResourceCategory());
@@ -517,7 +528,7 @@ public class PropertySheet extends Div {
                     }
                 });
 
-                formLayout.add(resourcesCombo);
+                formLayout.addFormItem(resourcesCombo, "Resource");
             }
         }
     }
@@ -578,10 +589,11 @@ public class PropertySheet extends Div {
                         }
                     });
                     checkbox.setReadOnly(readOnly);
-                    formLayout.add(checkbox);
+                    formLayout.addFormItem(checkbox, "");
                     break;
                 case CHOICE:
-                    final ComboBox<String> choice = new ComboBox<String>(definition.getName());
+                    final ComboBox<String> choice = new ComboBox<String>();
+                    choice.setWidthFull();
                     List<String> choices = definition.getChoices() != null ? definition.getChoices().getChoice() : new ArrayList<String>(0);
                     choice.setItems(choices);
                     choice.setValue(obj.get(definition.getId(), definition.getDefaultValue()));
@@ -600,17 +612,18 @@ public class PropertySheet extends Div {
                         }
                     });
                     choice.setReadOnly(readOnly);
-                    formLayout.add(choice);
+                    formLayout.addFormItem(choice, definition.getName());
                     break;
                 case PASSWORD:
                     
-                    ImmediateUpdateTogglePasswordField passwordField = new ImmediateUpdateTogglePasswordField(definition.getName()) {
+                    ImmediateUpdateTogglePasswordField passwordField = new ImmediateUpdateTogglePasswordField() {
                         protected void save(String text) {
                             if (!DUMMY_PASSWORD.equals(text)) {
                                 saveSetting(definition.getId(), text, obj);
                             }
                         }
                     };
+                    passwordField.setWidthFull();
                     
                     boolean allowToggle = context.userHasPrivilege(Privilege.PASSWORD);
                     passwordField.setToggleAllowed(allowToggle);
@@ -625,12 +638,15 @@ public class PropertySheet extends Div {
                     }
                     
                     passwordField.setRequiredIndicatorVisible(required);
-                    passwordField.getElement().setProperty("title", description);
+                    if (description != null) {
+                        passwordField.getElement().setProperty("title", description);
+                    }
                     passwordField.setReadOnly(readOnly);
-                    formLayout.add(passwordField);
+                    formLayout.addFormItem(passwordField, definition.getName());
                     break;
                 case INTEGER:
-                    TextField integerField = new TextField(definition.getName());
+                    TextField integerField = new TextField();
+                    integerField.setWidthFull();
                     integerField.setValueChangeMode(ValueChangeMode.LAZY);
                     integerField.setValueChangeTimeout(200);
                     integerField.addValueChangeListener(event -> saveSetting(definition.getId(), event.getValue(), obj));
@@ -641,10 +657,11 @@ public class PropertySheet extends Div {
                     integerField.setRequiredIndicatorVisible(required);
                     integerField.getElement().setProperty("title", description);
                     integerField.setReadOnly(readOnly);
-                    formLayout.add(integerField);
+                    formLayout.addFormItem(integerField, definition.getName());
                     break;
                 case TEXT:
-                    TextField textField = new TextField(definition.getName());
+                    TextField textField = new TextField();
+                    textField.setWidthFull();
                     textField.setValueChangeMode(ValueChangeMode.LAZY);
                     textField.setValueChangeTimeout(200);
                     textField.addValueChangeListener(event -> saveSetting(definition.getId(), event.getValue(), obj));
@@ -653,13 +670,14 @@ public class PropertySheet extends Div {
                     textField.setRequiredIndicatorVisible(required);
                     textField.getElement().setProperty("title", description);
                     textField.setReadOnly(readOnly);
-                    formLayout.add(textField);
+                    formLayout.addFormItem(textField, definition.getName());
                     break;
                 case SOURCE_STEP:
                     step = getSingleFlowStep();
                     if (step != null) {
                         Flow flow = context.getConfigurationService().findFlow(step.getFlowId());
-                        final ComboBox<FlowStep> sourceStepsCombo = new ComboBox<FlowStep>(definition.getName());
+                        final ComboBox<FlowStep> sourceStepsCombo = new ComboBox<FlowStep>();
+                        sourceStepsCombo.setWidthFull();
 
                         FlowStep currentValue = null;
                         List<FlowStep> sourceStepList = new ArrayList<FlowStep>();
@@ -692,7 +710,7 @@ public class PropertySheet extends Div {
                             }
                         });
                         sourceStepsCombo.setReadOnly(readOnly);
-                        formLayout.add(sourceStepsCombo);
+                        formLayout.addFormItem(sourceStepsCombo, definition.getName());
                     }
                     break;
                 case FLOW:
@@ -702,7 +720,8 @@ public class PropertySheet extends Div {
                         FlowName currentValue = null;
                         List<FlowName> nameList = new ArrayList<FlowName>();
                         List<FlowName> flows = context.getConfigurationService().findFlowsInProject(projectVersionId, false);
-                        final ComboBox<FlowName> combo = new ComboBox<FlowName>(definition.getName());
+                        final ComboBox<FlowName> combo = new ComboBox<FlowName>();
+                        combo.setWidthFull();
                         for (FlowName name : flows) {
                             if (!step.getFlowId().equals(name.getId())) {
                                 nameList.add(name);
@@ -732,18 +751,19 @@ public class PropertySheet extends Div {
                             }
                         });
                         combo.setReadOnly(readOnly);
-                        formLayout.add(combo);
+                        formLayout.addFormItem(combo, definition.getName());
                     }
                     break;
                 case STREAMABLE_RESOURCE:
-                    formLayout.add(createResourceCombo(definition, obj, ResourceCategory.STREAMABLE));
+                    formLayout.addFormItem(createResourceCombo(definition, obj, ResourceCategory.STREAMABLE), definition.getName());
                     break;
                 case DATASOURCE_RESOURCE:
-                    formLayout.add(createResourceCombo(definition, obj, ResourceCategory.DATASOURCE));
+                    formLayout.addFormItem(createResourceCombo(definition, obj, ResourceCategory.DATASOURCE), definition.getName());
                     break;
                 case MODEL_COLUMN:
                     if (component != null) {
-                        final ComboBox<ModelAttrib> modelColumnCombo = new ComboBox<ModelAttrib>(definition.getName());                        
+                        final ComboBox<ModelAttrib> modelColumnCombo = new ComboBox<ModelAttrib>();     
+                        modelColumnCombo.setWidthFull();
                         ModelAttrib currentValue = null;
                         if (component.getInputModel() instanceof RelationalModel) {
                             List<ModelEntity> entities = new ArrayList<ModelEntity>();
@@ -797,13 +817,14 @@ public class PropertySheet extends Div {
                             }
                         });
                         modelColumnCombo.setReadOnly(readOnly);
-                        formLayout.add(modelColumnCombo);
+                        formLayout.addFormItem(modelColumnCombo, definition.getName());
                     }
                     break;
                 case SCRIPT:
                     final AceEditor editor = CommonUiUtils.createAceEditor();
                     editor.setMode(AceMode.java);
                     editor.setHeight("10em");
+                    editor.setWidthFull();
                     editor.setShowGutter(false);
                     editor.setShowPrintMargin(false);
                     editor.setValue(obj.get(definition.getId(), definition.getDefaultValue()));
@@ -820,24 +841,25 @@ public class PropertySheet extends Div {
                     break;
                 case MULTILINE_TEXT:
                 case XML:
-                    TextArea area = new TextArea(definition.getName());
+                    TextArea area = new TextArea();
                     area.setValueChangeMode(ValueChangeMode.LAZY);
                     area.setValueChangeTimeout(200);
                     area.addValueChangeListener(event -> saveSetting(definition.getId(), event.getValue(), obj));
                     String areaValue = obj.get(definition.getId(), definition.getDefaultValue());
                     area.setValue(areaValue != null ? areaValue : "");
                     area.setHeight("143px");
-                    //area.setRows(5);
+                    area.setWidthFull();
                     area.setRequiredIndicatorVisible(required);
                     area.getElement().setProperty("title", description);
                     area.setReadOnly(readOnly);
-                    formLayout.add(area);
+                    formLayout.addFormItem(area, definition.getName());
                     break;
                 case TARGET_STEP:
                     step = getSingleFlowStep();
                     if (step != null) {
                         Flow flow = context.getConfigurationService().findFlow(step.getFlowId());
-                        final ComboBox<FlowStep> targetStepsCombo = new ComboBox<FlowStep>(definition.getName());
+                        final ComboBox<FlowStep> targetStepsCombo = new ComboBox<FlowStep>();
+                        targetStepsCombo.setWidthFull();
 
                         FlowStep currentValue = null;
                         List<FlowStep> targetStepList = new ArrayList<FlowStep>();
@@ -868,11 +890,12 @@ public class PropertySheet extends Div {
                             }
                         });
                         targetStepsCombo.setReadOnly(readOnly);
-                        formLayout.add(targetStepsCombo);
+                        formLayout.addFormItem(targetStepsCombo, definition.getName());
                     }
                     break;
                 case CLOUD_BUCKET:
-                    formLayout.add(createResourceCombo(definition, obj, ResourceCategory.CLOUD_BUCKET));
+                    formLayout.addFormItem(createResourceCombo(definition, obj, ResourceCategory.CLOUD_BUCKET),
+                            definition.getName());
                     break;
                 default:
                     break;
@@ -885,7 +908,8 @@ public class PropertySheet extends Div {
         IConfigurationService configurationService = context.getConfigurationService();
         FlowStep step = getSingleFlowStep();
         String projectVersionId = step.getComponent().getProjectVersionId();
-        final ComboBox<Resource> combo = new ComboBox<Resource>(definition.getName());
+        final ComboBox<Resource> combo = new ComboBox<Resource>();
+        combo.setWidthFull();
         combo.getElement().setProperty("title", definition.getDescription());
         combo.setRequiredIndicatorVisible(definition.isRequired());
         Set<XMLResourceDefinition> types = context.getDefinitionFactory()

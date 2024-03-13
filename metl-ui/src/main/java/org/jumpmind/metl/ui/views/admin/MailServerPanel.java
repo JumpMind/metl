@@ -20,9 +20,9 @@
  */
 package org.jumpmind.metl.ui.views.admin;
 
-import javax.annotation.PostConstruct;
-import javax.mail.AuthenticationFailedException;
-import javax.mail.MessagingException;
+import jakarta.annotation.PostConstruct;
+import jakarta.mail.AuthenticationFailedException;
+import jakarta.mail.MessagingException;
 
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentStatus;
@@ -32,7 +32,6 @@ import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
 import com.vaadin.flow.component.ClickEvent;
@@ -42,16 +41,17 @@ import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.spring.annotation.UIScope;
 
 @SuppressWarnings("serial")
 @UiComponent
-@Scope(value = "ui")
+@UIScope
 @Order(800)
 @AdminMenuLink(name = "Mail Server", id = "Mail Server", icon = VaadinIcon.ENVELOPE_O)
 public class MailServerPanel extends AbstractAdminPanel {
@@ -75,19 +75,22 @@ public class MailServerPanel extends AbstractAdminPanel {
         final GlobalSetting useTlsSetting = getGlobalSetting(MailSession.SETTING_USE_TLS, "false");
         final GlobalSetting useAuthSetting = getGlobalSetting(MailSession.SETTING_USE_AUTH, "false");
 
+        setPadding(false);
+        
         FormLayout form = new FormLayout();
+        form.getStyle().set("padding-left", "16px");
+        form.setResponsiveSteps(new ResponsiveStep("0", 1));
 
-        TextField hostField = new TextField("Host name");
+        TextField hostField = new TextField();
         hostField.setValueChangeMode(ValueChangeMode.LAZY);
         hostField.setValueChangeTimeout(200);
         hostField.addValueChangeListener(event -> saveSetting(hostNameSetting, event.getValue()));
         hostField.setValue(hostNameSetting.getValue());
         hostField.setWidth("25em");
-        form.add(hostField);
+        form.addFormItem(hostField, "Host name");
         hostField.focus();
 
         Select<String> transportField = new Select<String>();
-        transportField.setLabel("Transport");
         transportField.setItems("smtp", "smtps", "mock_smtp");
         transportField.setValue(transportSetting.getValue() == null ? "smtp" : transportSetting.getValue());
         transportField.setEmptySelectionAllowed(false);
@@ -97,23 +100,23 @@ public class MailServerPanel extends AbstractAdminPanel {
                 saveSetting(transportSetting, event.getValue());
             }
         });
-        form.add(transportField);
+        form.addFormItem(transportField, "Transport");
 
-        TextField portField = new TextField("Port");
+        TextField portField = new TextField();
         portField.setValueChangeMode(ValueChangeMode.LAZY);
         portField.setValueChangeTimeout(200);
         portField.addValueChangeListener(event -> saveSetting(portSetting, event.getValue()));
         portField.setValue(portSetting.getValue());
         portField.setWidth("25em");
-        form.add(portField);
+        form.addFormItem(portField, "Port");
 
-        TextField fromField = new TextField("From Address");
+        TextField fromField = new TextField();
         fromField.setValueChangeMode(ValueChangeMode.LAZY);
         fromField.setValueChangeTimeout(200);
         fromField.addValueChangeListener(event -> saveSetting(fromSetting, event.getValue()));
         fromField.setValue(fromSetting.getValue());
         fromField.setWidth("25em");
-        form.add(fromField);
+        form.addFormItem(fromField, "From Address");
 
         Checkbox tlsField = new Checkbox("Use TLS", Boolean.valueOf(useTlsSetting.getValue()));
         tlsField.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<Boolean>>() {
@@ -121,16 +124,16 @@ public class MailServerPanel extends AbstractAdminPanel {
                 saveSetting(useTlsSetting, event.getValue().toString());
             }            
         });
-        form.add(tlsField);
+        form.addFormItem(tlsField, "");
 
-        TextField userField = new TextField("Username");
+        TextField userField = new TextField();
         userField.setValueChangeMode(ValueChangeMode.LAZY);
         userField.setValueChangeTimeout(200);
         userField.addValueChangeListener(event -> saveSetting(usernameSetting, event.getValue()));
         userField.setValue(usernameSetting.getValue());
         userField.setWidth("25em");
 
-        PasswordField passwordField = new PasswordField("Password");
+        PasswordField passwordField = new PasswordField();
         passwordField.setValueChangeMode(ValueChangeMode.LAZY);
         passwordField.setValueChangeTimeout(200);
         passwordField.addValueChangeListener(event -> saveSetting(passwordSetting, event.getValue()));
@@ -148,16 +151,15 @@ public class MailServerPanel extends AbstractAdminPanel {
         });
         userField.setEnabled(authField.getValue());
         passwordField.setEnabled(authField.getValue());
-        form.add(authField, userField, passwordField);
+        form.addFormItem(authField, "");
+        form.addFormItem(userField, "Username");
+        form.addFormItem(passwordField, "Password");
         
         Button testButton = new Button("Test Connection");
         testButton.addClickListener(new TestClickListener());
-        form.add(testButton);
-        
-        VerticalLayout paddedLayout = new VerticalLayout();
-        paddedLayout.setMargin(true);
-        paddedLayout.add(form);
-        add(paddedLayout);
+        form.addFormItem(testButton, "");
+
+        add(form);
     }
 
     private void saveSetting(GlobalSetting setting, String value) {

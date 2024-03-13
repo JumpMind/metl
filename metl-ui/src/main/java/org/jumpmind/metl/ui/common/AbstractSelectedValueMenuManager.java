@@ -25,7 +25,7 @@ import org.jumpmind.metl.core.model.AbstractNamedObject;
 public abstract class AbstractSelectedValueMenuManager implements ISelectedValueMenuManager {
 
     @Override
-    public boolean handle(String menuSelected, Object selected) {
+    public boolean handle(String menuSelected, AbstractNamedObject selected) {
         return false;
     }
 

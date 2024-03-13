@@ -53,12 +53,12 @@ public class TagDialog  extends ResizableDialog {
     }
     
     private void initDialog(Object selectedItem) {
-        H3 tagHeader = new H3("Select tags");
         VerticalLayout tagLayout = new VerticalLayout();
-        tagLayout.setMargin(true);
+        tagLayout.setPadding(false);
         tagLayout.setSizeFull();
         addTagObjects(tagLayout, selectedItem);
-        add(tagHeader, tagLayout, buildButtonFooter(buildCloseButton()));        
+        add(tagLayout);        
+        buildButtonFooter(buildCloseButton());
         setWidth("400px");
         setHeight("500px");
     }

@@ -1,5 +1,5 @@
 .diagram {
-	position: absolute;
+	position: relative;
 	background-color: white;
 }
 
@@ -46,11 +46,11 @@
 	opacity: 0.25;
 }
 
-.diagram ._jsPlumb_endpoint {
+.diagram .jtk-endpoint {
 	z-index: 3;
 }
 
-.diagram ._jsPlumb_overlay {
+.diagram .jtk-overlay {
     z-index: 2;
 }
 

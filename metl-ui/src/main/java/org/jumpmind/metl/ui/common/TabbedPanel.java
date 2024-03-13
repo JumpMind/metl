@@ -34,6 +34,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.tabs.TabsVariant;
 
 public class TabbedPanel extends TabSheet {
 
@@ -57,9 +58,16 @@ public class TabbedPanel extends TabSheet {
 
     public TabbedPanel() {
         setSizeFull();
+        tabs.addThemeVariants(TabsVariant.LUMO_SMALL);
+        
+        content.setHeight("96%");
 
         addSelectedTabChangeListener((event) -> {
-            Component selected = event.getSelectedTab();
+            EnhancedTab tab = (EnhancedTab) event.getSelectedTab();
+            Component selected = null;
+            if (tab != null) {
+                selected = tab.getComponent();
+            }
             if (selectedTab != null) {
                 selectedTab.deselected();
                 selectedTab = null;
@@ -78,7 +86,7 @@ public class TabbedPanel extends TabSheet {
 
         setCloseHandler((tabsheet, tabContent) -> close(tabContent));
 
-        ContextMenu menu = new ContextMenu(this);
+        ContextMenu menu = new ContextMenu(tabs);
         menu.addItem("Close", selectedItem -> close());
         menu.addItem("Close Others", selectedItem -> closeOthers());
         menu.addItem("Close To the Left", selectedItem -> closeToTheLeft());
@@ -194,6 +202,14 @@ public class TabbedPanel extends TabSheet {
         if (tab != null) {
             contentToId.remove(tab.getComponent());
             this.remove(tab);
+            EnhancedTab selectedTab = (EnhancedTab) tabs.getSelectedTab();
+            if (selectedTab != null) {
+                Component component = selectedTab.getComponent();
+                if (component != null) {
+                    component.setVisible(true);
+                    content.add(component);
+                }
+            }
             return true;
         } else {
             return false;

@@ -1,51 +1,52 @@
 apply from: '../metl-assemble/common.gradle'
 
 dependencies {
-    compile (project(":metl-ui")) {
+    api project(":metl-server")
+    api (project(":metl-ui")) {
        exclude group:'org.eclipse.jetty'
-       exclude group:'javax.websocket'
-       exclude group:'javax.servlet.jsp'
-       exclude group:'javax.servlet'
+       exclude group:'jakarta.websocket'
+       exclude group:'jakarta.servlet.jsp'
+       exclude group:'jakarta.servlet'
     }
-    compile project(":metl-core")
-    testCompile project(":resource-core")
-    testCompile project(":comp-rdbms-reader")  
-    testCompile project(":comp-data-diff")  
-    testCompile project(":comp-sorter")  
-    testCompile project(":comp-temp-rdbms")
-    testCompile project(":comp-serialize")
-    testCompile project(":comp-sql-execute")
-    testCompile project(":comp-rdbms-writer")
-    testCompile project(":comp-sequence")    
-    testCompile project(":comp-service")
-    testCompile project(":comp-zip")
-    testCompile project(":comp-file")
-    testCompile project(":comp-excel")
-    testCompile project(":comp-control") 
-    testCompile project(":comp-groovy")  
-    testCompile project(":comp-route")  
-    testCompile project(":comp-map")
-    testCompile project(":comp-transform")
-    testCompile project(":comp-xml") 
-    testCompile project(":comp-json") 
-    testCompile project(":comp-format")
-    testCompile project(":comp-email")
-    testCompile project(":comp-execute")
-    testCompile project(":comp-webrequest") 
-    testCompile project(":comp-test") 
-    testCompile project(":comp-text")      
-    testCompile project(":comp-stamp")      
-    testCompile project(":comp-subscribe")   
-    testCompile project(":comp-pgp")   
-	testCompile project(":comp-kafka")
-	testCompile project(":comp-sqs")
-    testCompile project(path: ':metl-core', configuration: 'testArtifacts')    
-    testCompile "javax.servlet:javax.servlet-api:$servletVersion"
-    testCompile "org.eclipse.jetty:jetty-servlet:$jettyVersion"
-    testCompile "javax.servlet.jsp:jsp-api:$jspVersion"
-    testCompile "javax.websocket:javax.websocket-api:$webSocketVersion"        
-    testCompile "org.eclipse.jetty:jetty-webapp:$jettyVersion"
-    testCompile "org.eclipse.jetty:jetty-jmx:$jettyVersion"
-    testCompile "org.eclipse.jetty:jetty-annotations:$jettyVersion"
-    testCompile "org.eclipse.jetty.websocket:javax-websocket-server-impl:$jettyVersion"
+    api project(":metl-core")
+    testImplementation project(":resource-core")
+    testImplementation project(":comp-rdbms-reader")  
+    testImplementation project(":comp-data-diff")  
+    testImplementation project(":comp-sorter")  
+    testImplementation project(":comp-temp-rdbms")
+    testImplementation project(":comp-serialize")
+    testImplementation project(":comp-sql-execute")
+    testImplementation project(":comp-rdbms-writer")
+    testImplementation project(":comp-sequence")    
+    testImplementation project(":comp-service")
+    testImplementation project(":comp-zip")
+    testImplementation project(":comp-file")
+    testImplementation project(":comp-excel")
+    testImplementation project(":comp-control") 
+    testImplementation project(":comp-groovy")  
+    testImplementation project(":comp-route")  
+    testImplementation project(":comp-map")
+    testImplementation project(":comp-transform")
+    testImplementation project(":comp-xml") 
+    testImplementation project(":comp-json") 
+    testImplementation project(":comp-format")
+    testImplementation project(":comp-email")
+    testImplementation project(":comp-execute")
+    testImplementation project(":comp-webrequest") 
+    testImplementation project(":comp-test") 
+    testImplementation project(":comp-text")      
+    testImplementation project(":comp-stamp")      
+    testImplementation project(":comp-subscribe")   
+    testImplementation project(":comp-pgp")   
+	testImplementation project(":comp-kafka")
+	testImplementation project(":comp-sqs")
+    testImplementation project(path: ':metl-core', configuration: 'testArtifacts')    
+    testImplementation "jakarta.servlet:jakarta.servlet-api:$servletVersion"
+    testImplementation "org.eclipse.jetty.ee10:jetty-ee10-servlet:$jettyVersion"
+    testImplementation "jakarta.servlet.jsp:jakarta.servlet.jsp-api:$jspVersion"
+    testImplementation "jakarta.websocket:jakarta.websocket-api:$webSocketVersion"        
+    testImplementation "org.eclipse.jetty.ee10:jetty-ee10-webapp:$jettyVersion"
+    testImplementation "org.eclipse.jetty:jetty-jmx:$jettyVersion"
+    testImplementation "org.eclipse.jetty.ee10:jetty-ee10-annotations:$jettyVersion"
+    testImplementation "org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-jakarta-server:$jettyVersion"
 }

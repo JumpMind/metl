@@ -66,10 +66,11 @@ public class EditFlowPalette extends VerticalLayout {
         this.projectVersionId = projectVersionId;
         
         setHeightFull();
-        setWidth("150px");
+        setWidth("190px");
+        setPadding(false);
+        setSpacing(false);
 
         HorizontalLayout topWrapper = new HorizontalLayout();
-        topWrapper.getStyle().set("margin", "16px 0 0 0");
         HorizontalLayout top = new HorizontalLayout();
         top.addClassName(ButtonBar.STYLE);
         top.setMargin(true);
@@ -78,7 +79,7 @@ public class EditFlowPalette extends VerticalLayout {
         add(topWrapper);
         
         TextField filterField = new TextField();
-        filterField.setWidth("120px");
+        filterField.setWidth("160px");
         filterField.setPlaceholder("Filter");
         filterField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         filterField.setValueChangeMode(ValueChangeMode.LAZY);
@@ -93,6 +94,7 @@ public class EditFlowPalette extends VerticalLayout {
         panel.setSizeFull();
 
         componentLayout = new VerticalLayout();
+        componentLayout.setPadding(false);
         componentLayout.getStyle().set("margin", "16px 0 0 0");
         componentLayout.addClassName("scrollable");
         panel.setContent(componentLayout);
@@ -139,7 +141,6 @@ public class EditFlowPalette extends VerticalLayout {
             paletteItem.setShared(false);
         }
         paletteItem.addClassName("leftAligned");
-        paletteItem.setWidthFull();
         DragSource<FlowPaletteItem> extension = DragSource.create(paletteItem);
         extension.setDragData(paletteItem);
         componentLayout.add(paletteItem);

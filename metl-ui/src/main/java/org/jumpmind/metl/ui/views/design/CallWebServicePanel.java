@@ -30,20 +30,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.AuthCache;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.BasicAuthCache;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.impl.auth.BasicAuthCache;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.auth.BasicScheme;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.protocol.BasicHttpContext;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.jumpmind.metl.core.model.AgentDeploy;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
@@ -62,6 +61,7 @@ import org.jumpmind.vaadin.ui.common.TabSheet;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.MimeTypeUtils;
@@ -74,17 +74,22 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.server.VaadinServlet;
 
@@ -103,8 +108,6 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
     TextField urlField;
 
     RadioButtonGroup<String> methodGroup;
-
-    VerticalLayout responseStatusAreaLayout;
 
     TextArea responseStatusArea;
 
@@ -127,6 +130,9 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
         this.tabs = tabs;
         IConfigurationService configurationService = context.getConfigurationService();
         Flow flow = configurationService.findFlow(deployment.getFlowId());
+        
+        setPadding(false);
+        setSpacing(false);
 
         ButtonBar buttonBar = new ButtonBar();
         buttonBar.addButton("Call Service", Icons.RUN, (e) -> runFlow());
@@ -143,43 +149,47 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
 
         FormLayout formLayout = new FormLayout();
         formLayout.setSizeUndefined();
+        formLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
+        formLayout.getStyle().set("padding-left", "16px");
         scrollable.setContent(formLayout);
 
-        urlField = new TextField("URL");
-        formLayout.add(urlField);
+        urlField = new TextField();
+        urlField.setWidth("550px");
+        formLayout.addFormItem(urlField, "URL");
 
         methodGroup = new RadioButtonGroup<String>();
-        methodGroup.setLabel("Method");
         methodGroup.setItems("GET", "PUT", "POST", "DELETE");
-        formLayout.add(methodGroup);
+        formLayout.addFormItem(methodGroup, "Method");
 
-        ComboBox<String> contentType = new ComboBox<String>("Content Type");
+        ComboBox<String> contentType = new ComboBox<String>();
+        contentType.setWidth("550px");
         contentType.setItems(MimeTypeUtils.APPLICATION_JSON.toString(), MimeTypeUtils.APPLICATION_XML.toString());
-        formLayout.add(contentType);
+        formLayout.addFormItem(contentType, "Content Type");
 
-        securitySchemeCombo = new ComboBox<SecurityScheme>("Security Scheme");
+        securitySchemeCombo = new ComboBox<SecurityScheme>();
+        securitySchemeCombo.setWidth("550px");
         securitySchemeCombo.setItems(SecurityScheme.values());
         securitySchemeCombo.addValueChangeListener((e) -> securityMethodChanged(e));
-        formLayout.add(securitySchemeCombo);
+        formLayout.addFormItem(securitySchemeCombo, "Security Scheme");
 
-        userField = new TextField("Security Username");
+        userField = new TextField();
+        userField.setWidth("550px");
         userField.setVisible(false);
-        formLayout.add(userField);
+        formLayout.addFormItem(userField, "Security Username");
 
-        passwordField = new PasswordField("Security Password");
+        passwordField = new PasswordField();
+        passwordField.setWidth("550px");
         passwordField.setVisible(false);
-        formLayout.add(passwordField);
+        formLayout.addFormItem(passwordField, "Security Password");
 
-        requestTabs = new ReqRespTabSheet("Request", true);
+        requestTabs = new ReqRespTabSheet(true);
         formLayout.addFormItem(requestTabs, "Request");
 
-        responseTabs = new ReqRespTabSheet("Response", false);
-        responseStatusAreaLayout = new VerticalLayout();
-        responseStatusAreaLayout.setSizeFull();
+        responseTabs = new ReqRespTabSheet(false);
         responseStatusArea = new TextArea();
         responseStatusArea.setSizeFull();
-        responseStatusAreaLayout.add(responseStatusArea);
-        responseTabs.add(responseStatusAreaLayout, "Status", 0);
+        responseTabs.add(responseStatusArea, "Status", 0);
+        responseTabs.setSelectedTab(1);
         formLayout.addFormItem(responseTabs, "Response");
 
         contentType.addValueChangeListener((e) -> {
@@ -273,7 +283,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
                 responseTabs.setHeader(key, headerMap.get(key));
             }
             responseStatusArea.setValue(response.getStatusCode().toString() + " "
-                    + response.getStatusCode().getReasonPhrase());
+                    + ((HttpStatus) response.getStatusCode()).getReasonPhrase());
         } catch (HttpStatusCodeException e) {
             responseTabs.getPayload().setValue(e.getResponseBodyAsString());
             headerMap = e.getResponseHeaders().toSingleValueMap();
@@ -281,7 +291,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
                 responseTabs.setHeader(key, headerMap.get(key));
             }
             responseStatusArea.setValue(
-                    e.getStatusCode().toString() + " " + e.getStatusCode().getReasonPhrase());
+                    e.getStatusCode().toString() + " " + ((HttpStatus) e.getStatusCode()).getReasonPhrase());
         }
 
         if (headerMap != null) {
@@ -314,30 +324,28 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
 
     class ReqRespTabSheet extends TabSheet {
         private static final long serialVersionUID = 1L;
-        VerticalLayout payloadLayout;
         TextArea payload;
         List<Header> headersList = new ArrayList<Header>();
         Grid<Header> headersGrid;
 
-        public ReqRespTabSheet(String caption, boolean editable) {
+        public ReqRespTabSheet(boolean editable) {
             setHeight("15em");
             setWidth("550px");
-
-            payloadLayout = new VerticalLayout();
-            payloadLayout.setSizeFull();
+            addThemeVariants(TabsVariant.LUMO_SMALL);
             payload = new TextArea();
             payload.setSizeFull();
-            payloadLayout.add(payload);
-            add(payloadLayout, "Payload");
+            add(payload, "Payload");
 
             VerticalLayout requestHeadersLayout = new VerticalLayout();
             requestHeadersLayout.setSizeFull();
+            requestHeadersLayout.setPadding(false);
+            requestHeadersLayout.setSpacing(false);
             if (editable) {
                 HorizontalLayout requestHeadersButtonLayout = new HorizontalLayout();
-                Button addButton = new Button("+", (e) -> add());
-                addButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
-                Button deleteButton = new Button("-", (e) -> delete());
-                deleteButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+                Button addButton = new Button(new Icon(VaadinIcon.PLUS), (e) -> add());
+                addButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_ICON);
+                Button deleteButton = new Button(new Icon(VaadinIcon.MINUS), (e) -> delete());
+                deleteButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_ICON);
                 requestHeadersButtonLayout.add(addButton, deleteButton);
                 requestHeadersLayout.add(requestHeadersButtonLayout);
             }
@@ -348,10 +356,12 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
                 Binder<Header> binder = new Binder<Header>();
                 headersEditor.setBinder(binder);
                 TextField headerField = new TextField();
+                headerField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
                 binder.forField(headerField).bind(Header::getName, Header::setName);
                 headersGrid.addColumn(Header::getName).setHeader("Header").setEditorComponent(headerField)
                         .setFlexGrow(1);
                 TextField valueField = new TextField();
+                valueField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
                 binder.forField(valueField).bind(Header::getValue, Header::setValue);
                 headersGrid.addColumn(Header::getValue).setHeader("Value").setEditorComponent(valueField)
                         .setFlexGrow(1);
@@ -363,12 +373,9 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
             }
             headersGrid.setSelectionMode(SelectionMode.SINGLE);
             headersGrid.setSizeFull();
+            headersGrid.addThemeVariants(GridVariant.LUMO_COMPACT);
             requestHeadersLayout.addAndExpand(headersGrid);
             add(requestHeadersLayout, "Headers");
-        }
-
-        public VerticalLayout getPayloadLayout() {
-            return payloadLayout;
         }
 
         protected void setHeader(String name, String value) {
@@ -383,6 +390,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
 
             if (!found) {
                 headersList.add(new Header(name, value));
+                headersGrid.setItems(headersList);
             }
         }
 
@@ -450,14 +458,14 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
 
         public BasicRequestFactory(String username, String password) {
             BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));
+            credentialsProvider.setCredentials(new AuthScope(null, -1), new UsernamePasswordCredentials(username, password.toCharArray()));
             setHttpClient(HttpClientBuilder.create().setDefaultCredentialsProvider(credentialsProvider).build());
         }
 
         @Override
         protected HttpContext createHttpContext(HttpMethod httpMethod, URI uri) {
-            HttpHost targetHost = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
-            AuthCache authCache = new BasicAuthCache();
+            HttpHost targetHost = new HttpHost(uri.getScheme(), uri.getHost(), uri.getPort());
+            BasicAuthCache authCache = new BasicAuthCache();
             BasicScheme basicAuth = new BasicScheme();
             authCache.put(targetHost, basicAuth);
             BasicHttpContext localContext = new BasicHttpContext();

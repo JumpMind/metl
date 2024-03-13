@@ -45,7 +45,6 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.treegrid.TreeGrid;
@@ -70,17 +69,10 @@ public class ManageNavigator extends VerticalLayout {
         this.context = context;
 
         setSizeFull();
-
-        VerticalLayout content = new VerticalLayout();
-        content.setSizeFull();
-        add(content);
-
-        MenuBar leftMenuBar = new MenuBar();
-        leftMenuBar.setWidthFull();
-        content.add(leftMenuBar);
+        setPadding(false);
 
         treeGrid = buildTreeGrid();
-        content.addAndExpand(treeGrid);
+        addAndExpand(treeGrid);
 
         agentsFolder = new Folder();
         agentsFolder.setName("Agents");
@@ -185,7 +177,7 @@ public class ManageNavigator extends VerticalLayout {
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
         grid.setSizeFull();
         grid.setPageSize(100);
-        grid.addComponentColumn(item -> {
+        grid.addComponentHierarchyColumn(item -> {
             Icon icon = null;
             String title = null;
             if (item.equals(CURRENTLY_RUNNING)) {
@@ -207,7 +199,8 @@ public class ManageNavigator extends VerticalLayout {
                 }
             }
             if (icon != null) {
-                HorizontalLayout layout = new HorizontalLayout(new Span(item.getName()), icon);
+                icon.getStyle().set("min-width", "24px");
+                HorizontalLayout layout = new HorizontalLayout(icon, new Span(item.getName()));
                 if (title != null) {
                     layout.getElement().setProperty("title", title);
                 }

@@ -26,7 +26,6 @@ import static org.jumpmind.metl.core.runtime.FlowConstants.REQUEST_VALUE_PARAMET
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.Resource;
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
@@ -50,6 +49,8 @@ import org.jumpmind.metl.core.runtime.resource.ISubscribe;
 import org.jumpmind.util.AppUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.annotation.Resource;
 
 public class SubscribeManager implements ISubscribeManager {
 

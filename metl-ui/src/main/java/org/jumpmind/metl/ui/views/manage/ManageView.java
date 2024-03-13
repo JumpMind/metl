@@ -38,6 +38,7 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
 import org.jumpmind.metl.ui.common.Icons;
+import org.jumpmind.metl.ui.common.MainLayout;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.metl.ui.common.View;
@@ -48,7 +49,6 @@ import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -71,12 +71,17 @@ import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.UIScope;
+
+import jakarta.annotation.PostConstruct;
 
 @UiComponent
-@Scope(value = "ui")
-@TopBarLink(category = Category.Manage, name = "Manage", id = "manage", icon = VaadinIcon.COGS, menuOrder = 25)
-@Route("manage")
+@UIScope
+@PreserveOnRefresh
+@TopBarLink(category = Category.Manage, name = "Manage", id = "manage", view = ManageView.class, icon = VaadinIcon.COGS, menuOrder = 25)
+@Route(value = "manage", layout = MainLayout.class)
 public class ManageView extends HorizontalLayout implements BeforeEnterObserver, IUiPanel, IBackgroundRefreshable<Object>, View {
     
     final Logger log = LoggerFactory.getLogger(getClass());
@@ -87,7 +92,7 @@ public class ManageView extends HorizontalLayout implements BeforeEnterObserver,
 
     static final int DEFAULT_LIMIT = 100;
 
-    //@Autowired
+    @Autowired
     ApplicationContext context;
 
     ManageNavigator manageNavigator;
@@ -107,9 +112,10 @@ public class ManageView extends HorizontalLayout implements BeforeEnterObserver,
     int limit = DEFAULT_LIMIT;
 
     @SuppressWarnings("serial")
-    public ManageView(@Autowired ApplicationContext context) {
-        this.context = context;
+    @PostConstruct
+    protected void init() {
         viewButton = new Button("View Log");
+        viewButton.getStyle().set("margin-left", "16px");
         viewButton.setEnabled(false);
         viewButton.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             public void onComponentEvent(ClickEvent<Button> event) {
@@ -119,11 +125,10 @@ public class ManageView extends HorizontalLayout implements BeforeEnterObserver,
 
         VerticalLayout mainTab = new VerticalLayout();
         mainTab.setSizeFull();
+        mainTab.setPadding(false);
         HorizontalLayout header = new HorizontalLayout();
         header.setDefaultVerticalComponentAlignment(Alignment.END);
-        Span spacer = new Span();
-        header.add(spacer, viewButton);
-        header.expand(spacer);
+        header.add(viewButton);
 
         statusSelect = new ComboBox<String>("Status");
         List<String> statusList = new ArrayList<String>();
@@ -144,6 +149,7 @@ public class ManageView extends HorizontalLayout implements BeforeEnterObserver,
             }
         });
         header.add(statusSelect);
+        header.addAndExpand(new Span());
 
         HorizontalLayout limitLayout = new HorizontalLayout();
         limitLayout.setSpacing(true);
@@ -168,7 +174,6 @@ public class ManageView extends HorizontalLayout implements BeforeEnterObserver,
         limitLayout.add(limitField);
         limitLayout.setVerticalComponentAlignment(Alignment.END, limitField);
         header.add(limitLayout);
-        header.expand(limitLayout);
 
         filterField = new TextField();
         filterField.setPlaceholder("Filter");
@@ -183,7 +188,6 @@ public class ManageView extends HorizontalLayout implements BeforeEnterObserver,
         header.add(filterField);
 
         header.setSpacing(true);
-        header.setMargin(true);
         header.setWidth("100%");
         mainTab.add(header);
 
@@ -198,18 +202,25 @@ public class ManageView extends HorizontalLayout implements BeforeEnterObserver,
             }
         });
         ColumnVisibilityToggler columnVisibilityToggler = new ColumnVisibilityToggler();
-        mainTab.add(columnVisibilityToggler);
-        mainTab.setHorizontalComponentAlignment(Alignment.END, columnVisibilityToggler);
-        columnVisibilityToggler.addColumn(grid.addColumn(Execution::getAgentName).setHeader("Agent").setWidth("250px"), "Agent");
-        columnVisibilityToggler.addColumn(grid.addColumn(Execution::getDeploymentName).setHeader("Deployment").setWidth("250px"), "Deployment");
-        columnVisibilityToggler.addColumn(grid.addColumn(Execution::getHostName).setHeader("Host").setWidth("145px"), "Host").setVisible(false);
-        columnVisibilityToggler.addColumn(grid.addColumn(Execution::getStatus).setHeader("Status").setWidth("90px"), "Status");
+        columnVisibilityToggler.getStyle().set("margin-right", "16px");
+        header.add(columnVisibilityToggler);
+        columnVisibilityToggler.addColumn(
+                grid.addColumn(Execution::getAgentName).setHeader("Agent").setFlexGrow(0).setWidth("250px"), "Agent");
+        columnVisibilityToggler.addColumn(
+                grid.addColumn(Execution::getDeploymentName).setHeader("Deployment").setFlexGrow(0).setWidth("250px"), "Deployment");
+        columnVisibilityToggler
+                .addColumn(grid.addColumn(Execution::getHostName).setHeader("Host").setFlexGrow(0).setWidth("145px"), "Host")
+                .setVisible(false);
+        columnVisibilityToggler.addColumn(
+                grid.addColumn(Execution::getStatus).setHeader("Status").setFlexGrow(0).setWidth("90px"), "Status");
         columnVisibilityToggler.addColumn(grid.addColumn(item -> CommonUiUtils.formatDateTime(item.getStartTime())).setKey("startTime")
-                .setSortProperty("startTime").setHeader("Start").setWidth("170px"), "Start");
+                .setSortProperty("startTime").setHeader("Start").setFlexGrow(0).setWidth("170px"), "Start");
         columnVisibilityToggler.addColumn(grid.addColumn(item -> CommonUiUtils.formatDateTime(item.getEndTime())).setSortProperty("endTime")
-                .setHeader("End").setWidth("170px"), "End");
-        columnVisibilityToggler.addColumn(grid.addColumn(Execution::getCreateBy).setHeader("Caller").setWidth("100px"), "Caller");
-        columnVisibilityToggler.addColumn(grid.addColumn(Execution::getParameters).setHeader("Parameters").setWidth("5000px"), "Parameters");
+                .setHeader("End").setFlexGrow(0).setWidth("170px"), "End");
+        columnVisibilityToggler.addColumn(
+                grid.addColumn(Execution::getCreateBy).setHeader("Caller").setFlexGrow(0).setWidth("100px"), "Caller");
+        columnVisibilityToggler.addColumn(
+                grid.addColumn(Execution::getParameters).setHeader("Parameters").setFlexGrow(0).setWidth("5000px"), "Parameters");
         for (Column<Execution> column : grid.getColumns()) {
             column.setSortable(true);
         }
@@ -248,6 +259,7 @@ public class ManageView extends HorizontalLayout implements BeforeEnterObserver,
 
         VerticalLayout container = new VerticalLayout();
         container.setSizeFull();
+        container.setPadding(false);
         container.add(tabs);
         split.addToSecondary(container);
 

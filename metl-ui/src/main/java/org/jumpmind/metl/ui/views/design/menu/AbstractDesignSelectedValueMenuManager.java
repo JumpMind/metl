@@ -34,96 +34,96 @@ abstract public class AbstractDesignSelectedValueMenuManager extends AbstractSel
     }
     
     @Override
-    public boolean handle(String menuSelected, Object valueSelected) {
+    public boolean handle(String menuSelected, AbstractNamedObject valueSelected) {
         boolean handled = false;
         if (!super.handle(menuSelected, valueSelected)) {
             if ("File|New|Project".equals(menuSelected)) {
                 navigator.addNewProject();
                 return true;
             } else if ("Edit|Rename".equals(menuSelected)) {
-                navigator.startEditingItem((AbstractNamedObject) valueSelected);
+                navigator.startEditingItem(valueSelected);
                 return true;
             } else if ("File|New|Project Dependency".equals(menuSelected)) {
-                navigator.promptForNewDependency();
+                navigator.promptForNewDependency(valueSelected);
                 return true;
             } else if ("File|New|Project Branch".equals(menuSelected)) {
-                navigator.doNewProjectBranch();
+                navigator.doNewProjectBranch(valueSelected);
                 return true;
             } else if ("File|New|Flow|Design".equals(menuSelected)) {
-                navigator.addNewFlow(false);
+                navigator.addNewFlow(valueSelected, false);
                 return true;
             } else if ("File|New|Flow|Test".equals(menuSelected)) {
-                navigator.addNewFlow(true);
+                navigator.addNewFlow(valueSelected, true);
                 return true;
             } else if ("File|New|Model|Hierarchical".equals(menuSelected)) {
-                navigator.addNewHierarhicalModel();
+                navigator.addNewHierarhicalModel(valueSelected);
                 return true;
             } else if ("File|New|Model|Relational".equals(menuSelected)) {
-                navigator.addNewRelationalModel();
+                navigator.addNewRelationalModel(valueSelected);
                 return true;
             } else if ("File|New|Resource|Database".equals(menuSelected)) {
-                navigator.addNewDatabase();
+                navigator.addNewDatabase(valueSelected);
                 return true;
             } else if ("File|New|Resource|Directory|FTP".equals(menuSelected)) {
-                navigator.addNewFtpFileSystem();
+                navigator.addNewFtpFileSystem(valueSelected);
                 return true;
             } else if ("File|New|Resource|Subscribe|JMS".equals(menuSelected)) {
-                navigator.addNewJmsSubscribe();
+                navigator.addNewJmsSubscribe(valueSelected);
                 return true;          
             } else if ("File|New|Resource|Queue|Kafka Publisher".equals(menuSelected)) {
-                navigator.addNewKafkaProducer();
+                navigator.addNewKafkaProducer(valueSelected);
                 return true;                          
             } else if ("File|New|Resource|Queue|SQS".equals(menuSelected)) {
-                navigator.addNewSqsQueue();
+                navigator.addNewSqsQueue(valueSelected);
                 return true;                          
             } else if ("File|New|Resource|Directory|File System".equals(menuSelected)) {
-                navigator.addNewLocalFileSystem();
+                navigator.addNewLocalFileSystem(valueSelected);
                 return true;
             } else if ("File|New|Resource|Directory|JMS".equals(menuSelected)) {
-                navigator.addNewJMSFileSystem();
+                navigator.addNewJMSFileSystem(valueSelected);
                 return true;
             } else if ("File|New|Resource|Directory|SFTP".equals(menuSelected)) {
-                navigator.addNewSftpFileSystem();
+                navigator.addNewSftpFileSystem(valueSelected);
                 return true;
             } else if ("File|New|Resource|Directory|SMB".equals(menuSelected)) {
-                navigator.addNewSMBFileSystem();
+                navigator.addNewSMBFileSystem(valueSelected);
                 return true;
             } else if ("File|New|Resource|HTTP".equals(menuSelected)) {
-                navigator.addNewHttpResource();
+                navigator.addNewHttpResource(valueSelected);
                 return true;
             } else if ("File|New|Resource|Mail Session".equals(menuSelected)) {
-                navigator.addNewMailSession();
+                navigator.addNewMailSession(valueSelected);
                 return true;
             } else if ("File|New|Resource|Cloud Bucket|AWS S3".equals(menuSelected)) {
-            	navigator.addNewAWSS3();
+            	navigator.addNewAWSS3(valueSelected);
             	return true;
             } else if ("File|Import...".equals(menuSelected)) {
                 navigator.doImport();
                 return true;
             } else if ("File|Export...".equals(menuSelected)) {
-                navigator.doExport();
+                navigator.doExport(valueSelected);
                 return true;
             } else if ("File|Open".equals(menuSelected)) {
-                navigator.doOpen();
+                navigator.doOpen(valueSelected);
                 return true;
             } else if ("File|Where Used".equals(menuSelected)) {
-                navigator.doWhereUsed();
+                navigator.doWhereUsed(valueSelected);
                 return true;
             } else if ("Edit|Remove".equals(menuSelected)) {
-                navigator.doRemove();
+                navigator.doRemove(valueSelected);
                 return true;
             } else if ("Edit|Cut".equals(menuSelected)) {
-                navigator.doCut();
+                navigator.doCut(valueSelected);
                 return true;
             } else if ("Edit|Copy".equals(menuSelected)) {
-                navigator.doCopy();
+                navigator.doCopy(valueSelected);
                 return true;
             } else if ("Edit|Paste".equals(menuSelected)) {
-                navigator.doPaste();
+                navigator.doPaste(valueSelected);
             } else if ("Edit|Change Dependency Version".equals(menuSelected)) {
-                navigator.doChangeDependencyVersion();
+                navigator.doChangeDependencyVersion(valueSelected);
             } else if ("Tag".equals(menuSelected)) {
-                navigator.doTag();
+                navigator.doTag(valueSelected);
             }
         }
         return handled;

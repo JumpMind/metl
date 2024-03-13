@@ -51,6 +51,9 @@ public class EditMergerPanel extends AbstractComponentEditPanel {
     List<AttributeSettings> attributeSettings = new ArrayList<AttributeSettings>();
 
     protected void buildUI() {
+        setPadding(false);
+        setSpacing(false);
+        
         ButtonBar buttonBar = new ButtonBar();
         add(buttonBar);
 
@@ -72,12 +75,12 @@ public class EditMergerPanel extends AbstractComponentEditPanel {
             ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
             ModelEntity entity = model.getEntityById(attribute.getEntityId());
             return UiUtils.getName(filterField.getValue(), entity.getName());
-        }).setHeader("Entity Name").setWidth("250px").setSortable(true);
+        }).setHeader("Entity Name").setFlexGrow(0).setWidth("250px").setSortable(true);
         grid.addColumn(setting -> {
             RelationalModel model = (RelationalModel) component.getInputModel();
             ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
             return UiUtils.getName(filterField.getValue(), attribute.getName());
-        }).setHeader("Attribute Name").setWidth("250px").setSortable(true);
+        }).setHeader("Attribute Name").setFlexGrow(0).setWidth("250px").setSortable(true);
         grid.addComponentColumn(setting -> createCheckbox(setting, Merger.MERGE_ATTRIBUTE)).setHeader("Join On").setSortable(true);
         add(grid);
         expand(grid);

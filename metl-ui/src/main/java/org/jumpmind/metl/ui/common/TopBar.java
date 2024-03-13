@@ -32,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -59,6 +58,8 @@ public class TopBar extends HorizontalLayout implements AfterNavigationObserver 
     String defaultView;
 
     Map<String, MenuItem> viewToButtonMapping;
+    
+    Map<String, MenuItem> childToParentMapping;
 
     ApplicationContext context;
 
@@ -70,16 +71,19 @@ public class TopBar extends HorizontalLayout implements AfterNavigationObserver 
         this.viewManager = vm;
 
         viewToButtonMapping = new HashMap<String, MenuItem>();
+        childToParentMapping = new HashMap<String, MenuItem>();
 
         menuBar = new MenuBar();
         menuBar.setWidthFull();
         addAndExpand(menuBar);
 
         for (TopBarButton topBarButton : viewManager.getTopBarButtons()) {
+            topBarButton.getStyle().set("margin-top", "0").set("margin-bottom", "0");
             add(topBarButton);
         }
 
         Button logoutButton = new Button("Logout", new Icon(VaadinIcon.SIGN_OUT));
+        logoutButton.getStyle().set("margin-top", "0").set("margin-bottom", "0");
         logoutButton.addClickListener(event -> logout());
         add(logoutButton);
 
@@ -110,7 +114,7 @@ public class TopBar extends HorizontalLayout implements AfterNavigationObserver 
                     @Override
                     public void onComponentEvent(ClickEvent<MenuItem> event) {
                         setMenuItemFocus(event.getSource());
-                        UI.getCurrent().navigate(((Component) menuLink).getClass());
+                        UI.getCurrent().navigate(menuLink.view());
                     }
                 };
                 MenuItem menuItem = null;
@@ -118,11 +122,21 @@ public class TopBar extends HorizontalLayout implements AfterNavigationObserver 
                     menuItem = menuBar.addItem(menuLink.name(), command);
                 } else {
                     menuItem = categoryItem.getSubMenu().addItem(menuLink.name(), command);
+                    childToParentMapping.put(menuLink.name(), categoryItem);
                 }
                 viewToButtonMapping.put(menuLink.id(), menuItem);
             }
         }
-        //UI.getCurrent().getPage().fetchCurrentURL(url -> viewManager.navigateTo(url.getRef()));
+        UI.getCurrent().getPage().fetchCurrentURL(url -> {
+            String path = url.getPath();
+            int lastSlash = path.lastIndexOf("/");
+            if (lastSlash > -1) {
+                MenuItem menuItem = viewToButtonMapping.get(path.substring(lastSlash + 1));
+                setMenuItemFocus(menuItem);
+            } else {
+                setMenuItemFocus(null);
+            }
+        });
     }
 
     protected void logout() {
@@ -141,7 +155,11 @@ public class TopBar extends HorizontalLayout implements AfterNavigationObserver 
             item.getElement().getStyle().set("color", "var(--lumo-header-text-color)");
         }
         if (focusItem != null) {
-            focusItem.getElement().getStyle().set("color", "rgb(22, 118, 243)");
+            focusItem.getElement().getStyle().set("color", "var(--lumo-primary-color)");
+            MenuItem parentItem = childToParentMapping.get(focusItem.getText());
+            if (parentItem != null) {
+                parentItem.getElement().getStyle().set("color", "var(--lumo-primary-color)");
+            }
         }
     }
 

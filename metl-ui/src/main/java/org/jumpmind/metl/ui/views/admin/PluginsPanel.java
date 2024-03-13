@@ -26,24 +26,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.persist.IPluginService;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.vaadin.ui.common.UiComponent;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.spring.annotation.UIScope;
 
 @SuppressWarnings("serial")
 @UiComponent
-@Scope(value = "ui")
+@UIScope
 @Order(700)
 @AdminMenuLink(name = "Plugins", id = "Plugins", icon = VaadinIcon.PUZZLE_PIECE)
 public class PluginsPanel extends AbstractAdminPanel {
@@ -66,6 +65,9 @@ public class PluginsPanel extends AbstractAdminPanel {
     @PostConstruct
     @Override
     public void init() {
+        setPadding(false);
+        setSpacing(false);
+        
         ButtonBar buttonBar = new ButtonBar();
         add(buttonBar);
 
@@ -85,13 +87,14 @@ public class PluginsPanel extends AbstractAdminPanel {
         grid.addColumn(Plugin::getArtifactGroup).setHeader("Group").setSortable(false);
         grid.addColumn(Plugin::getArtifactName).setHeader("Name").setSortable(false);
         grid.addColumn(Plugin::getArtifactVersion).setHeader("Version").setSortable(false);
-        grid.addColumn(Plugin::getLastUpdateTime).setHeader("Updated").setWidth("165px").setSortable(false);
+        grid.addColumn(Plugin::getLastUpdateTime).setHeader("Updated").setFlexGrow(0).setWidth("250px").setSortable(false);
         grid.addSelectionListener(e -> setButtonsEnabled());
 
         add(grid);
         expand(grid);
 
         context.getPluginManager().refresh();
+        refresh();
     }
 
     public List<Plugin> getPlugins() {

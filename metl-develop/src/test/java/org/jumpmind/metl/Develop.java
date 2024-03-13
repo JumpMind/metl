@@ -21,66 +21,22 @@
 package org.jumpmind.metl;
 
 import java.io.File;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-import javax.websocket.server.ServerContainer;
-
-import org.apache.commons.io.FileUtils;
-import org.eclipse.jetty.annotations.AnnotationConfiguration;
-import org.eclipse.jetty.annotations.AnnotationConfiguration.ClassInheritanceMap;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.util.ConcurrentHashSet;
-import org.eclipse.jetty.webapp.Configuration;
-import org.eclipse.jetty.webapp.Configuration.ClassList;
-import org.eclipse.jetty.webapp.WebAppContext;
-import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 
 public class Develop {
 
     public static void main(String[] args) throws Exception {
-        String pathPrefix = "../";
-        if (args.length > 0) {
-            pathPrefix = args[0];
-        }
-        System.out.println(new String(Files.readAllBytes(Paths.get(pathPrefix, "metl-server/src/main/resources/Metl.asciiart")), Charset.defaultCharset()));
-
-        new File(System.getProperty("java.io.tmpdir")).mkdirs();
         new File("working").mkdirs();
         System.setProperty("org.jumpmind.metl.ui.init.config.dir","working");
-        
-        File clientJsDest = new File("bin/main/META-INF/metl/VAADIN/static/client/client-7411BA7112A12159D80F3BB11AD68707.cache.js");
-        if (!clientJsDest.exists()) {
-            new File(clientJsDest.getParent()).mkdirs();
-            System.out.println("Copying client-*.cache.js...");
-            FileUtils.copyFile(new File("static/client/client-7411BA7112A12159D80F3BB11AD68707.cache.js"), clientJsDest);
-        }
 
-        Server server = new Server(42000);
-        ClassList classlist = Configuration.ClassList.setServerDefault(server);
+        /*ClassList classlist = Configuration.ClassList.setServerDefault(server);
         classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration", "org.eclipse.jetty.annotations.AnnotationConfiguration");
-
-        WebAppContext webapp = new WebAppContext();
-        webapp.setParentLoaderPriority(true);
-        webapp.setConfigurationDiscovered(true);
-        webapp.setContextPath("/metl");
         webapp.setWar(pathPrefix + "metl-war/src/main/webapp");
         webapp.setResourceBase(pathPrefix + "metl-war/src/main/webapp");
-
-        ClassInheritanceMap map = new ClassInheritanceMap();
-        ConcurrentHashSet<String> set = new ConcurrentHashSet<>();
-        set.add("org.jumpmind.metl.ui.init.AppInitializer");
-        map.put("org.springframework.web.WebApplicationInitializer", set);
-        webapp.setAttribute(AnnotationConfiguration.CLASS_INHERITANCE_MAP, map);
-
-        server.setHandler(webapp);
         
         ServerContainer webSocketServer = WebSocketServerContainerInitializer.configureContext(webapp);
-        webSocketServer.setDefaultMaxSessionIdleTimeout(10000000);        
+        webSocketServer.setDefaultMaxSessionIdleTimeout(10000000);        */
         
-        server.start();
-        server.join();
+        StartWebServer.runWebServer(new String[0]);
 
     }
     

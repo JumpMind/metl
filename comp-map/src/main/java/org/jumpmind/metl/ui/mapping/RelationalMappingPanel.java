@@ -37,7 +37,6 @@ import org.jumpmind.metl.core.runtime.component.Mapping;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.ExportDialog;
 import org.jumpmind.metl.ui.views.design.AbstractFlowStepAwareComponentEditPanel;
-import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -46,16 +45,20 @@ import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
 @SuppressWarnings("serial")
 public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPanel implements IMappingPanel {
+    
+    VerticalLayout diagramLayout;
 
     MappingDiagram diagram;
 
@@ -96,8 +99,8 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
         titleHeader.setSpacing(true);
         titleHeader.getStyle().set("margin", "0 16px");
         titleHeader.setWidthFull();
-		Html inputModelHtml = new Html("<b>Input Model:</b> &nbsp;" + (inputModel != null ? inputModel.getName() : "?"));
-        Html outputModelHtml = new Html("<b>Output Model:</b> &nbsp;" + (outputModel != null ? outputModel.getName() : "?"));
+		Html inputModelHtml = new Html("<span><b>Input Model:</b> &nbsp;" + (inputModel != null ? inputModel.getName() : "?") + "</span>");
+        Html outputModelHtml = new Html("<span><b>Output Model:</b> &nbsp;" + (outputModel != null ? outputModel.getName() : "?") + "</span>");
         titleHeader.add(inputModelHtml, outputModelHtml);
         add(titleHeader);
 
@@ -138,13 +141,14 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
         dstMapFilter.addValueChangeListener(new FilterDstMapListener());
         dstFilterHeader.add(dstTextFilter, dstMapFilter);
 
-        VerticalLayout vlay = new VerticalLayout();
-        vlay.setSizeFull();
-        diagram = new MappingDiagram(context, component, this);
-        diagram.setSizeFull();
-        vlay.add(diagram);
-        add(vlay);
-        expand(vlay);
+        diagramLayout = new VerticalLayout();
+        diagramLayout.setWidthFull();
+        diagramLayout.setHeight("10000px");
+        redrawDiagram();
+        Scroller scroller = new Scroller(diagramLayout);
+        scroller.setSizeFull();
+        add(scroller);
+        expand(scroller);
         
     }    
     
@@ -160,18 +164,20 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
     }
 
     protected void autoMap(boolean fuzzy) {
-        for (ModelEntity entity1 : inputModel.getModelEntities()) {
-            for (ModelAttrib attr : entity1.getModelAttributes()) {
-                /* look for exact match first */
-                for (ModelEntity entity2 : outputModel.getModelEntities()) {
-                    boolean foundExactMatch = false;
-                    for (ModelAttrib attr2 : entity2.getModelAttributes()) {
-                        foundExactMatch |= autoMap(entity1, entity2, attr, attr2, fuzzy, true);
-                    }
-
-                    if (!foundExactMatch) {
+        if (inputModel != null) {
+            for (ModelEntity entity1 : inputModel.getModelEntities()) {
+                for (ModelAttrib attr : entity1.getModelAttributes()) {
+                    /* look for exact match first */
+                    for (ModelEntity entity2 : outputModel.getModelEntities()) {
+                        boolean foundExactMatch = false;
                         for (ModelAttrib attr2 : entity2.getModelAttributes()) {
-                            autoMap(entity1, entity2, attr, attr2, fuzzy, false);
+                            foundExactMatch |= autoMap(entity1, entity2, attr, attr2, fuzzy, true);
+                        }
+
+                        if (!foundExactMatch) {
+                            for (ModelAttrib attr2 : entity2.getModelAttributes()) {
+                                autoMap(entity1, entity2, attr, attr2, fuzzy, false);
+                            }
                         }
                     }
                 }
@@ -232,6 +238,16 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
     protected int minimum(int a, int b, int c) {
         return Math.min(Math.min(a, b), c);
     }
+    
+    protected void redrawDiagram() {
+        if (diagram != null) {
+            diagramLayout.remove(diagram);
+        }
+        
+        diagram = new MappingDiagram(context, component, this);
+        diagram.setSizeFull();
+        diagramLayout.add(diagram);
+    }
 
     protected void export() {
         Grid<String[]> table = new Grid<String[]>();
@@ -263,25 +279,24 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
 
     class RemoveAllListener implements ComponentEventListener<ClickEvent<Button>> {
         public void onComponentEvent(ClickEvent<Button> event) {
-            ConfirmDialog.show("Delete ALL Links?", "Are you sure you want to remove all of the connections between source and target attributes?",
-                    ()->{
-	                    	Map<String, List<String>> linksMap = new HashMap<>();
-	                    	for (ComponentModelSetting setting : component.getModelSettings()) {
-	                    		if (setting.getName().equals(Mapping.MODEL_OBJECT_MAPS_TO)) {
-	                        		List<String> linksList = new ArrayList<String>();
-	                        		linksList.add(setting.getModelObjectId());
-	                        		linksList.add(setting.getValue());
-	                    			linksMap.put(setting.getModelObjectId() + "-" + setting.getValue(), linksList);
-	                    		}
-	                    	}
-	                        for (String key : linksMap.keySet()) {
-	                        	List<String> links = linksMap.get(key);
-	                    		diagram.removeConnection(links.get(0), links.get(1));
-	                        }
-	                    	    	
-	                    	removeButton.setEnabled(false);        
-		            		return true;                    	
-			            });
+            new ConfirmDialog("Delete ALL Links?", "Are you sure you want to remove all of the connections between source and target attributes?", "Ok", e -> {
+                Map<String, List<String>> linksMap = new HashMap<>();
+                for (ComponentModelSetting setting : component.getModelSettings()) {
+                    if (setting.getName().equals(Mapping.MODEL_OBJECT_MAPS_TO)) {
+                        List<String> linksList = new ArrayList<String>();
+                        linksList.add(setting.getModelObjectId());
+                        linksList.add(setting.getValue());
+                        linksMap.put(setting.getModelObjectId() + "-" + setting.getValue(), linksList);
+                    }
+                }
+                for (String key : linksMap.keySet()) {
+                    List<String> links = linksMap.get(key);
+                    diagram.removeConnection(links.get(0), links.get(1));
+                }
+                        
+                removeButton.setEnabled(false); 
+                redrawDiagram();
+            }).open();
         }
     }
 
@@ -289,6 +304,7 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
         public void onComponentEvent(ClickEvent<Button> event) {
             diagram.removeSelected();
             removeButton.setEnabled(false);
+            redrawDiagram();
         }
     }
 
@@ -296,6 +312,7 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
         public void onComponentEvent(ClickEvent<Button> event) {
             autoMap(false);
             autoMap(true);
+            redrawDiagram();
         }
     }
     
