@@ -20,12 +20,13 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.RelationalModel;
@@ -68,21 +69,24 @@ public class EditRdbmsWriterPanel extends AbstractComponentEditPanel {
         });
 
         grid.setSizeFull();
-        grid.addColumn(setting -> {
-            RelationalModel model = (RelationalModel) component.getInputModel();
-            ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
-            ModelEntity entity = model.getEntityById(attribute.getEntityId());
-            return UiUtils.getName(filterField.getValue(), entity.getName());
-        }).setHeader("Entity Name").setFlexGrow(0).setWidth("250px").setSortable(true);
-        grid.addColumn(setting -> {
-            RelationalModel model = (RelationalModel) component.getInputModel();
-            ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
-            return UiUtils.getName(filterField.getValue(), attribute.getName());
-        }).setHeader("Attribute Name").setFlexGrow(0).setWidth("250px").setSortable(true);
+        grid.addComponentColumn(setting -> {
+            return UiUtils.getName(filterField.getValue(), getEntityName(setting));
+        }).setHeader("Entity Name").setComparator(setting -> getEntityName(setting));
+        grid.addComponentColumn(setting -> {
+            return UiUtils.getName(filterField.getValue(), getAttributeName(setting));
+        }).setHeader("Attribute Name").setComparator(setting -> getAttributeName(setting));
         grid.addComponentColumn(setting -> createCheckbox(setting, RdbmsWriter.ATTRIBUTE_INSERT_ENABLED))
-                .setHeader("Insert Enabled").setSortable(true);
+                .setHeader("Insert Enabled").setFlexGrow(0).setWidth("160px").setComparator(settings -> {
+                    ComponentAttribSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(),
+                            RdbmsWriter.ATTRIBUTE_INSERT_ENABLED);
+                    return setting != null ? Boolean.parseBoolean(setting.getValue()) : true;
+                });
         grid.addComponentColumn(setting -> createCheckbox(setting, RdbmsWriter.ATTRIBUTE_UPDATE_ENABLED))
-                .setHeader("Update Enabled").setSortable(true);
+                .setHeader("Update Enabled").setFlexGrow(0).setWidth("160px").setComparator(settings -> {
+                    ComponentAttribSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(),
+                            RdbmsWriter.ATTRIBUTE_UPDATE_ENABLED);
+                    return setting != null ? Boolean.parseBoolean(setting.getValue()) : true;
+                });
         add(grid);
         expand(grid);
 
@@ -132,11 +136,32 @@ public class EditRdbmsWriterPanel extends AbstractComponentEditPanel {
                 filteredAttributeSettings.add(attributeSetting);
             }
         }
+        Set<AttributeSettings> selectedSettings = grid.getSelectedItems();
         grid.setItems(filteredAttributeSettings);
+        for (AttributeSettings setting : selectedSettings) {
+            if (filteredAttributeSettings.contains(setting)) {
+                grid.select(setting);
+            }
+        }
+    }
+    
+    private String getEntityName(AttributeSettings setting) {
+        RelationalModel model = (RelationalModel) component.getInputModel();
+        ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
+        ModelEntity entity = model.getEntityById(attribute.getEntityId());
+        return entity.getName();
+    }
+    
+    private String getAttributeName(AttributeSettings setting) {
+        RelationalModel model = (RelationalModel) component.getInputModel();
+        ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
+        return attribute.getName();
     }
 
     private Checkbox createCheckbox(final AttributeSettings settings, final String key) {
         final Checkbox checkbox = new Checkbox();
+        ComponentAttribSetting attributeSetting = component.getSingleAttributeSetting(settings.getAttributeId(), key);
+        checkbox.setValue(attributeSetting != null ? Boolean.parseBoolean(attributeSetting.getValue()) : true);
         if (!readOnly) {
             checkbox.addValueChangeListener((event) -> {
                 ComponentAttribSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(), key);

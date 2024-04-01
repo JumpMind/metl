@@ -24,9 +24,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.RandomUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.simple.RandomSource;
 import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
@@ -143,6 +144,7 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements ValueCh
         String batchXml = "";
         if (model != null) {
             ArrayList<EntityData> inputRows = new ArrayList<EntityData>();
+            UniformRandomProvider randomProvider = RandomSource.XO_RO_SHI_RO_128_PP.create();
             for (ModelEntity entity : getMatchingEntities(filterField.getValue())) {
                 EntityData data = new EntityData();
                 inputRows.add(data);
@@ -152,11 +154,11 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements ValueCh
                     if (type.isString()) {
                         value = RandomStringUtils.randomAlphanumeric(10);
                     } else if (type.isNumeric()) {
-                        value = String.valueOf(RandomUtils.nextInt());
+                        value = String.valueOf(randomProvider.nextInt());
                     } else if (type.isTimestamp()) {
-                        value = new Date(RandomUtils.nextInt(Integer.MAX_VALUE) * 1000l);
+                        value = new Date(randomProvider.nextInt(Integer.MAX_VALUE) * 1000l);
                     } else if (type.isBoolean()) {
-                        value = Boolean.toString(RandomUtils.nextBoolean());
+                        value = Boolean.toString(randomProvider.nextBoolean());
                     }
                     data.put(attr.getId(), value);
                 }

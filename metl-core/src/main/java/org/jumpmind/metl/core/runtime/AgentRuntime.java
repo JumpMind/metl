@@ -20,26 +20,27 @@
  */
 package org.jumpmind.metl.core.runtime;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeploy;
 import org.jumpmind.metl.core.model.AgentFlowDeployParm;
@@ -200,7 +201,7 @@ public class AgentRuntime {
                 deploy(deployment);
             }
 
-            agentRequestHandler = this.flowExecutionScheduler.scheduleWithFixedDelay(new AgentRequestHandler(), 10000);
+            agentRequestHandler = this.flowExecutionScheduler.scheduleWithFixedDelay(new AgentRequestHandler(), Duration.ofMillis(10000));
 
             agent.setAgentStatus(AgentStatus.RUNNING);
             operationsService.save(agent);
@@ -409,7 +410,7 @@ public class AgentRuntime {
                             if (alreadyDeployedOverrides != null ) {
                             	oldObj = alreadyDeployedOverrides.get(key);
                             }
-                            if (!ObjectUtils.equals(newObj, oldObj)) {
+                            if (!Objects.equals(newObj, oldObj)) {
                                 deploy = true;
                                 break;
                             }
@@ -506,7 +507,7 @@ public class AgentRuntime {
             deployResources(deployment);
         }
         String executionId = createExecutionId();
-        this.flowExecutionScheduler.schedule(new FlowRunner(userId, findDeployed(deployment), runtimeParameters, executionId), new Date());
+        this.flowExecutionScheduler.schedule(new FlowRunner(userId, findDeployed(deployment), runtimeParameters, executionId), Instant.now());
         return executionId;
     }
 

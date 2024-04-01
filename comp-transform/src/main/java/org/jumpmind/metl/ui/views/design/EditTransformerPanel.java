@@ -20,14 +20,17 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.RelationalModel;
@@ -36,19 +39,30 @@ import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.component.ModelAttributeScriptHelper;
 import org.jumpmind.metl.core.runtime.component.Transformer;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.metl.ui.common.ExportDialog;
+import org.jumpmind.metl.ui.common.ExcelExport;
 import org.jumpmind.metl.ui.common.UiUtils;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
+import org.jumpmind.vaadin.ui.common.CsvExport;
+import org.jumpmind.vaadin.ui.common.ExportFileDownloader;
+import org.jumpmind.vaadin.ui.common.GridDataProvider;
+import org.jumpmind.vaadin.ui.common.IDataProvider;
 import org.jumpmind.vaadin.ui.common.ResizableDialog;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.editor.Editor;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 
@@ -62,6 +76,8 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
     Grid<ComponentAttribSetting> grid = new Grid<ComponentAttribSetting>();
 
     Grid<Record> exportGrid = new Grid<Record>();
+    
+    Map<Column<Record>, ValueProvider<Record, Object>> exportValueProviderMap;
 
     TextField filterField;
 
@@ -158,17 +174,13 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         }
 
         grid.setSizeFull();
-        grid.addColumn(setting -> {
-            RelationalModel model = (RelationalModel) component.getInputModel();
-            ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
-            ModelEntity entity = model.getEntityById(attribute.getEntityId());
-            return UiUtils.getName(filterField.getValue(), entity.getName());
-        }).setHeader("Entity Name").setFlexGrow(0).setWidth("250px").setSortable(true);
-        grid.addColumn(setting -> {
-            RelationalModel model = (RelationalModel) component.getInputModel();
-            ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
-            return UiUtils.getName(filterField.getValue(), attribute.getName());
-        }).setHeader("Attribute Name").setFlexGrow(0).setWidth("250px").setSortable(true);
+        grid.setSelectionMode(SelectionMode.NONE);
+        grid.addComponentColumn(setting -> {
+            return UiUtils.getName(filterField.getValue(), getEntityName(setting));
+        }).setHeader("Entity Name").setFlexGrow(0).setWidth("250px").setComparator(setting -> getEntityName(setting));
+        grid.addComponentColumn(setting -> {
+            return UiUtils.getName(filterField.getValue(), getAttributeName(setting));
+        }).setHeader("Attribute Name").setFlexGrow(0).setWidth("250px").setComparator(setting -> getAttributeName(setting));
         final ComboBox<String> combo = new ComboBox<String>();
         combo.setWidthFull();
         List<String> functionList = new ArrayList<String>();
@@ -194,6 +206,13 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         Editor<ComponentAttribSetting> editor = grid.getEditor();
         Binder<ComponentAttribSetting> binder = new Binder<ComponentAttribSetting>();
         editor.setBinder(binder);
+        combo.addValueChangeListener(event -> {
+            ComponentAttribSetting setting = editor.getItem();
+            if (setting != null) {
+                binder.writeBeanAsDraft(setting);
+                context.getConfigurationService().save(setting);
+            }
+        });
         binder.forField(combo).bind(ComponentAttribSetting::getValue, ComponentAttribSetting::setValue);
         grid.addColumn(ComponentAttribSetting::getValue).setEditorComponent(combo)
                 .setHeader("Transform").setFlexGrow(1).setSortable(true);
@@ -204,16 +223,16 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             return button;
         }).setHeader("Edit").setFlexGrow(0).setWidth("80px").setSortable(false);
         
-        editor.addSaveListener(event -> context.getConfigurationService().save(event.getItem()));
         grid.addItemDoubleClickListener(event -> editor.editItem(event.getItem()));
         add(grid);
         expand(grid);
 
         updateGrid(null);
 
-        exportGrid.addColumn(Record::getEntityName).setHeader("Entity Name");
-        exportGrid.addColumn(Record::getAttributeName).setHeader("Attribute Name");
-        exportGrid.addColumn(Record::getValue).setHeader("Transform");
+        exportValueProviderMap = new HashMap<Column<Record>, ValueProvider<Record, Object>>();
+        exportValueProviderMap.put(exportGrid.addColumn(Record::getEntityName).setHeader("Entity Name"), Record::getEntityName);
+        exportValueProviderMap.put(exportGrid.addColumn(Record::getAttributeName).setHeader("Attribute Name"), Record::getAttributeName);
+        exportValueProviderMap.put(exportGrid.addColumn(Record::getValue).setHeader("Transform"), Record::getValue);
     }
     
     protected void removeDeadAttributeSettings() {
@@ -286,10 +305,23 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             grid.setItems(filteredComponentAttributes);
         }
     }
+    
+    private String getEntityName(ComponentAttribSetting setting) {
+        RelationalModel model = (RelationalModel) component.getInputModel();
+        ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
+        ModelEntity entity = model.getEntityById(attribute.getEntityId());
+        return entity.getName();
+    }
+    
+    private String getAttributeName(ComponentAttribSetting setting) {
+        RelationalModel model = (RelationalModel) component.getInputModel();
+        ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
+        return attribute.getName();
+    }
 
     protected void export() {
         updateExportGrid(filterField.getValue());
-        ExportDialog.show(context, exportGrid);
+        new ExportDialog().open();
     }
 
     protected void updateExportGrid(String filter) {
@@ -393,7 +425,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             super("Transform");
             setWidth("800px");
             setHeight("600px");
-            innerContent.setMargin(true);
+            innerContent.setPadding(false);
             
             ButtonBar buttonBar = new ButtonBar();
             add(buttonBar);
@@ -461,5 +493,63 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             updateGrid();
         }
 
+    }
+    
+    class ExportDialog extends ResizableDialog {
+        IDataProvider<Record> dataProvider;
+        
+        Button exportButton;
+        
+        Anchor downloadAnchor;
+        
+        public ExportDialog() {
+            super("Export");
+            setWidth("300px");
+            setHeight("260px");
+            
+            dataProvider = new GridDataProvider<Record>(exportGrid, exportValueProviderMap);
+            
+            RadioButtonGroup<String> oGroup = new RadioButtonGroup<String>("Export Format");
+            oGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+            List<String> options = Arrays.asList("CSV", "Excel");
+            oGroup.setItems(options);
+            oGroup.addValueChangeListener(event -> refreshExportButton(event.getValue().toString().equals("CSV")));
+            
+            exportButton = new Button("Export");
+            exportButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            Button cancelButton = new Button("Cancel", event -> close());
+            buildButtonFooter(cancelButton);
+            
+            oGroup.setValue("CSV");
+            add(oGroup);
+        }
+        
+        private void refreshExportButton(boolean csv) {
+            ExportFileDownloader downloader = csv ? getCsvDownloader() : getExcelDownloader();
+            if (downloadAnchor != null) {
+                downloadAnchor.removeAll();
+                getFooter().remove(downloadAnchor);
+            }
+            downloadAnchor = new Anchor();
+            downloadAnchor.setHref(downloader);
+            downloadAnchor.setTarget("_blank");
+            downloadAnchor.getElement().setAttribute("download", true);
+            downloadAnchor.add(exportButton);
+            getFooter().add(downloadAnchor);
+        }
+        
+        private ExportFileDownloader getCsvDownloader() {
+            CsvExport<Record> csvExport = new CsvExport<Record>(dataProvider);
+            csvExport.setFileName(component.getName().toLowerCase().replace(' ', '-') + "-export.csv");
+            csvExport.setTitle(component.getName());
+            return csvExport.getFileDownloader();
+        }
+        
+        private ExportFileDownloader getExcelDownloader() {
+            ExcelExport<Record> excelExport = new ExcelExport<Record>(dataProvider);
+            excelExport.setFileName(component.getName().toLowerCase().replace(' ', '-') + "-export.xls");
+            excelExport.setTitle(component.getName());
+            return excelExport.getFileDownloader();
+        }
     }
 }

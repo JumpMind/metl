@@ -21,6 +21,7 @@
 package org.jumpmind.metl;
 
 import java.io.File;
+import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
 
@@ -33,7 +34,7 @@ public class StartWebServer {
     public static void runWebServer(String[] args) throws Exception {
         new File(System.getProperty("java.io.tmpdir")).mkdirs();
 
-        System.out.println(IOUtils.toString(StartWebServer.class.getResource("/Metl.asciiart")));
+        System.out.println(IOUtils.toString(StartWebServer.class.getResource("/Metl.asciiart"), Charset.defaultCharset()));
 
         MetlBoot.run(new String[0]);
 

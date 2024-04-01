@@ -20,8 +20,8 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -54,7 +54,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.util.StringUtils;
 
 public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
@@ -327,7 +326,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         while (columns.indexOf("/*", commentIdx) != -1) {
             commentIdx = columns.indexOf("/*", commentIdx) + 2;
             int columnIdx = countColumnSeparatingCommas(columns.substring(0, commentIdx)) + 1;
-            String entity = StringUtils.trimWhitespace(columns.substring(commentIdx, columns.indexOf("*/", commentIdx)));
+            String entity = columns.substring(commentIdx, columns.indexOf("*/", commentIdx)).strip();
             // Only check for dupes if the entity and attributes are provided.
             if (entity.contains(".")) {
                 if (!used.contains(entity)) {

@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
@@ -43,6 +43,7 @@ import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 public class EditExcelReaderPanel extends AbstractComponentEditPanel {
 
@@ -98,6 +99,7 @@ public class EditExcelReaderPanel extends AbstractComponentEditPanel {
         filterField.setPlaceholder("Filter");
         filterField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
         filterField.setWidthFull();
+        filterField.setValueChangeMode(ValueChangeMode.EAGER);
         filterField.addValueChangeListener(change -> refreshGrid());
         cell.setComponent(filterField);
     }    
@@ -225,7 +227,7 @@ public class EditExcelReaderPanel extends AbstractComponentEditPanel {
 				&& record.getEntityName().toLowerCase().contains(entityFilterField.getValue().toLowerCase()));
 		boolean validAttribute = StringUtils.isBlank(attributeFilterField.getValue()) || (record.getAttributeName() != null
 				&& record.getAttributeName().toLowerCase().contains(attributeFilterField.getValue().toLowerCase()));
-    	boolean validExcelMapping = StringUtils.isNotBlank(record.getExcelMapping());
+    	boolean validExcelMapping = !filterCheckbox.getValue() || StringUtils.isNotBlank(record.getExcelMapping());
     	return !validEntity || !validAttribute || !validExcelMapping;
     }
 }

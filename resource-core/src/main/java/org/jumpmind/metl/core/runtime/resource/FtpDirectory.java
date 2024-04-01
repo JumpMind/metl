@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.util.List;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FtpDirectory extends AbstractDirectory {
 

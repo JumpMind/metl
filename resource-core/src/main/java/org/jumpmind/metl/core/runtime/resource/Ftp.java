@@ -22,7 +22,7 @@ package org.jumpmind.metl.core.runtime.resource;
 
 import org.jumpmind.properties.TypedProperties;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class Ftp extends AbstractResourceRuntime {
 

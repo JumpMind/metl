@@ -22,6 +22,7 @@ package org.jumpmind.metl.core.runtime;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -206,7 +207,7 @@ public class StandaloneFlowRunner {
                     SqlScript script = new SqlScript(configSqlScriptURL, databasePlatform.getSqlTemplate());
                     script.execute();
                 } else {
-                    importService.importConfiguration(IOUtils.toString(configSqlScriptURL), "standalone");
+                    importService.importConfiguration(IOUtils.toString(configSqlScriptURL, Charset.defaultCharset()), "standalone");
                 }
 
                 componentDefinitionFactory.refresh();
@@ -222,7 +223,7 @@ public class StandaloneFlowRunner {
         TypedProperties properties = new TypedProperties();
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_DRIVER, "org.h2.Driver");
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_URL,
-                "jdbc:h2:mem:" + FilenameUtils.removeExtension(configSqlScript).replaceAll("-", ""));
+                "jdbc:h2:mem:" + FilenameUtils.removeExtension(configSqlScript).replaceAll("-", "") + ";NON_KEYWORDS=VALUE");
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_USER, "jumpmind");
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_PASSWORD, "jumpmind");
         DataSource ds = BasicDataSourceFactory.create(properties);

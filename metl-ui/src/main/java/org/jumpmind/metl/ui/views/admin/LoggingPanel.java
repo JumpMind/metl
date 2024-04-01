@@ -25,18 +25,20 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jakarta.annotation.PostConstruct;
 
 import org.apache.commons.io.input.ReversedLinesFileReader;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
 import org.jumpmind.metl.ui.init.BackgroundRefresherService;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
+import org.jumpmind.vaadin.ui.common.Label;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.core.annotation.Order;
 
@@ -50,7 +52,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -78,7 +79,7 @@ public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefre
 
     Checkbox autoRefreshOn;
 
-    Pre logView;
+    Label logView;
 
     Scroller logPanel;
 
@@ -157,9 +158,16 @@ public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefre
         logPanel = new Scroller(ScrollDirection.VERTICAL);
         add(new H3("Log Output"));
         logPanel.setSizeFull();
-        logView = new Pre("");
+        logView = new Label("");
         logView.setSizeUndefined();
         logPanel.setContent(logView);
+        logPanel.getElement().addAttachListener(event -> {
+            UI.getCurrent().getPage().executeJs("$0.addEventListener('scroll', function() {"
+                    + "if ($0.scrollHeight - $0.scrollTop != $0.clientHeight) {"
+                    + "$1.removeAttribute('checked');"
+                    + "$1.setAttribute('aria-checked', false);"
+                    + "}});", logPanel.getElement(), autoRefreshOn.getElement());
+        });
         addAndExpand(logPanel);
         refresh();
         backgroundRefresherService.register(this);
@@ -210,17 +218,18 @@ public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefre
                 String filterValue = filter.getValue();
                 boolean isFiltering = !StringUtils.isBlank(filterValue);
                 Pattern filter = Pattern.compile("(.*)(" + filterValue + ")(.*)");
-                ReversedLinesFileReader reader = new ReversedLinesFileReader(logFile);
+                ReversedLinesFileReader reader = new ReversedLinesFileReader.Builder().setFile(logFile)
+                        .setCharset(Charset.defaultCharset()).get();
                 try {
                     int lines = Integer.parseInt(bufferSize.getValue());
                     int counter = 0;
                     String line = null;
                     do {
                         if (!isFiltering) {
-                            line = StringEscapeUtils.escapeHtml(reader.readLine());
+                            line = StringEscapeUtils.escapeHtml4(reader.readLine());
                         } else {
                             StringBuilder multiLine = new StringBuilder();
-                            while ((line = StringEscapeUtils.escapeHtml(reader.readLine())) != null) {
+                            while ((line = StringEscapeUtils.escapeHtml4(reader.readLine())) != null) {
                                 if (pattern.matcher(line).matches()) {
                                     multiLine.insert(0, line);
                                     line = multiLine.toString();
@@ -251,6 +260,8 @@ public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefre
                         reader.close();
                     }
                 }
+                builder.insert(0, "<span style=\"font-family:monospace\">");
+                builder.append("</span>");
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -263,7 +274,9 @@ public class LoggingPanel extends AbstractAdminPanel implements IBackgroundRefre
         if (backgroundData != null) {
             StringBuilder builder = (StringBuilder) backgroundData;
             logView.setText(builder.toString());
-            UI.getCurrent().getPage().executeJs("$0.scrollTop = $0.scrollHeight;", logPanel.getElement());
+            if (logPanel.getElement() != null && logPanel.isAttached()) {
+                UI.getCurrent().getPage().executeJs("$0.scrollTop = $0.scrollHeight;", logPanel.getElement());
+            }
         }
     }
     

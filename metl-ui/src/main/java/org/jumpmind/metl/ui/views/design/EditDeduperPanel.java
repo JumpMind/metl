@@ -20,14 +20,14 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.RelationalModel;
@@ -250,7 +250,7 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
     protected Checkbox createAttributeCheckbox(final AttributeSettings settings, final String key) {
         final Checkbox checkbox = new Checkbox();
         ComponentAttribSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(), key);
-        checkbox.setValue(setting != null ? Boolean.parseBoolean(setting.getValue()) : true);
+        checkbox.setValue(setting != null ? Boolean.parseBoolean(setting.getValue()) : false);
         checkbox.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<Boolean>>() {
             private static final long serialVersionUID = 1L;
             @Override

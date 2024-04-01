@@ -36,8 +36,6 @@ public class ButtonBar extends HorizontalLayout {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String STYLE = "button-bar";
-
     HorizontalLayout bar;
 
     HorizontalLayout wrapper;
@@ -53,7 +51,6 @@ public class ButtonBar extends HorizontalLayout {
         wrapper = new HorizontalLayout();
         wrapper.setSpacing(true);
         wrapper.setWidthFull();
-        wrapper.addClassName(STYLE);
         wrapper.getStyle().set("margin", "0 16px 0 0");
 
         left = new HorizontalLayout();       
@@ -66,7 +63,6 @@ public class ButtonBar extends HorizontalLayout {
         wrapper.setVerticalComponentAlignment(Alignment.CENTER, bar);
 
         Span spacer = new Span();
-        spacer.addClassName(STYLE);
         wrapper.addAndExpand(spacer);
 
         right = new HorizontalLayout();
@@ -129,7 +125,6 @@ public class ButtonBar extends HorizontalLayout {
         Button button = new Button(buttonContent);
         button.setHeight("60px");
         button.getStyle().set("min-width", "100px");
-        button.addClassName(STYLE);
         if (clickListener != null) {
             button.addClickListener(clickListener);
         }

@@ -88,7 +88,6 @@ public class ChangeDependencyVersionDialog extends ResizableDialog  {
         
         optionGroup = new RadioButtonGroup<ProjectVersion>();
         optionGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
-        optionGroup.addClassName("indent");
         optionGroup.setRenderer(new ComponentRenderer<Span, ProjectVersion>(
                 version -> version != null ? new Span(version.getVersionLabel()) : new Span()));
         optionGroup.setItemEnabledProvider(

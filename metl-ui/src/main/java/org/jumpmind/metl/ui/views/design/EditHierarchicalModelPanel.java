@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
-import static org.apache.commons.lang.StringUtils.trim;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 import java.util.ArrayList;
 import java.util.Collections;

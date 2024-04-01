@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
-import javax.jms.MessageListener;
+import jakarta.jms.MessageListener;
 import javax.naming.Context;
 import java.util.HashMap;
 import java.util.Map;

@@ -20,11 +20,12 @@
  */
 package org.jumpmind.metl.core.persist;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -37,8 +38,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.jumpmind.db.model.Table;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.sql.ISqlRowMapper;
@@ -56,7 +57,6 @@ import org.jumpmind.metl.core.runtime.ExecutionTrackerRecorder;
 import org.jumpmind.metl.core.runtime.IExecutionTracker;
 import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.util.LogUtils;
-import org.jumpmind.metl.core.persist.IPersistenceManager;
 import org.jumpmind.symmetric.csv.CsvReader;
 import org.jumpmind.util.FormatUtils;
 import org.springframework.core.env.Environment;
@@ -82,7 +82,7 @@ public class ExecutionService extends AbstractService implements IExecutionServi
         int periodInMs = Integer.parseInt(environment.getProperty("execution.purge.job.period.time.ms", Integer.toString(1000 * 60 * 60)));
         Date firstScheduledRunTime = DateUtils.addMilliseconds(new Date(), periodInMs);
         log.info("Scheduling the purge job to run every {}ms.  The first scheduled run time is at {}", periodInMs, firstScheduledRunTime);
-        this.purgeScheduler.scheduleWithFixedDelay(new PurgeExecutionHandler(), firstScheduledRunTime, periodInMs);
+        this.purgeScheduler.scheduleWithFixedDelay(new PurgeExecutionHandler(), firstScheduledRunTime.toInstant(), Duration.ofMillis(periodInMs));
     }
 
     public Execution findExecution(String id) {

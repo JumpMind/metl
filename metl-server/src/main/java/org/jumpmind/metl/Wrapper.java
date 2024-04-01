@@ -19,10 +19,11 @@
  * under the License.
  */
 package org.jumpmind.metl;
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -70,11 +71,13 @@ public class Wrapper {
         File configFile = new File(appHomeDir, METL_SERVICE_CONF);
         if (!configFile.exists()) {   
             try {
-                String propContent = IOUtils.toString(Wrapper.class.getClassLoader().getResourceAsStream(METL_SERVICE_CONF));
+                String propContent = IOUtils.toString(
+                        Wrapper.class.getClassLoader().getResourceAsStream(METL_SERVICE_CONF),
+                        Charset.defaultCharset());
                 propContent = propContent.replace("$(metl.war)", jarFileName);
                 propContent = propContent.replace("$(java.io.tmpdir)", appHomeDir + File.separator + "tmp");     
                 propContent = propContent.replace("$(metl.home.dir)", appHomeDir);
-                FileUtils.write(configFile, propContent);
+                FileUtils.write(configFile, propContent, Charset.defaultCharset());
             } catch (Exception e) {
                 System.out.println("Unable to write config file for service wrapper." + e.getMessage());
                 System.exit(-1);

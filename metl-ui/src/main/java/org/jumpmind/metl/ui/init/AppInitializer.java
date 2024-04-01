@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.ui.init;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.jumpmind.metl.core.model.GlobalSetting.CONFIG_BACKUP_CRON;
 import static org.jumpmind.metl.core.model.GlobalSetting.CONFIG_BACKUP_ENABLED;
 import static org.jumpmind.metl.core.model.GlobalSetting.DEFAULT_CONFIG_BACKUP_CRON;
@@ -31,7 +31,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.util.Date;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
@@ -58,12 +60,16 @@ import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.util.AppConstants;
 import org.jumpmind.metl.core.util.DatabaseScriptContainer;
+import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.VersionUtils;
 import org.jumpmind.metl.ui.persist.IUICache;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.web.context.WebApplicationContext;
@@ -116,7 +122,14 @@ public class AppInitializer implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
+        System.out.println("Version: " + VersionUtils.getCurrentVersion());
+        Properties properties = loadProperties();
+        LogUtils.initLogging(AppUtils.getBaseDir(), (TypedProperties) properties);
         WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(sce.getServletContext());        
+        if (ctx instanceof AbstractApplicationContext) {
+            MutablePropertySources sources = ((AbstractApplicationContext) ctx).getEnvironment().getPropertySources();
+            sources.addLast(new PropertiesPropertySource("passed in properties", properties));
+        }
         cleanTempJettyDirectories();
         initDatabase(ctx);
         initPlugins(ctx);        
@@ -155,7 +168,7 @@ public class AppInitializer implements ServletContextListener {
                         new CronTrigger(
                                 properties.get(CONFIG_BACKUP_CRON, DEFAULT_CONFIG_BACKUP_CRON)));
             }
-            jobScheduler.scheduleAtFixedRate(() -> configurationService.doInBackground(), 600000);
+            jobScheduler.scheduleAtFixedRate(() -> configurationService.doInBackground(), Duration.ofMillis(600000));
         } catch (Exception e) {
             LoggerFactory.getLogger(getClass()).info("Failed to schedule the backup job", e);
         }
@@ -219,7 +232,9 @@ public class AppInitializer implements ServletContextListener {
             try {
                 IImportExportService importExportService = ctx.getBean(IImportExportService.class);
                 LoggerFactory.getLogger(getClass()).info("Installing Metl samples");
-                importExportService.importConfiguration(IOUtils.toString(getClass().getResourceAsStream("/metl-samples.json")), AppConstants.SYSTEM_USER);
+                importExportService.importConfiguration(IOUtils
+                        .toString(getClass().getResourceAsStream("/metl-samples.json"), Charset.defaultCharset()),
+                        AppConstants.SYSTEM_USER);
             } catch (Exception e) {
                 getLogger().error("Failed to install Metl samples", e);
             }
@@ -241,7 +256,7 @@ public class AppInitializer implements ServletContextListener {
                 System.out.println(
                         "Could not find the " + configFile.getAbsolutePath() + " configuration file.  A default version will be written.");
                 configFile.getParentFile().mkdirs();
-                String propContent = IOUtils.toString(getClass().getResourceAsStream("/" + configFile.getName()));
+                String propContent = IOUtils.toString(getClass().getResourceAsStream("/" + configFile.getName()), Charset.defaultCharset());
                 propContent = FormatUtils.replaceToken(propContent, "configDir", configDir, true);
                 properties = new TypedProperties(new ByteArrayInputStream(propContent.getBytes()));
                 properties.put("log.to.console.enabled", System.getProperty("log.to.console.enabled", "false"));

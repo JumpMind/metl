@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.core.model;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.ArrayList;
 import java.util.List;

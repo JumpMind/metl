@@ -242,8 +242,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         // There is an issue with the html2canvas library not writing 
         // component anchors correctly when the scroll panel is scrolled down.
         // Reset scrolling first.
-        //flowPanel.setScrollLeft(0);
-        //flowPanel.setScrollTop(0);
+        flowPanel.getElement().executeJs("this.scrollTop = 0");
+        flowPanel.getElement().executeJs("this.scrollLeft = 0");
         new ImagePreviewDialog(diagram).open();
     }
     

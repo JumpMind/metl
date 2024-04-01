@@ -20,12 +20,14 @@
  */
 package org.jumpmind.metl.ui.common;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import jakarta.servlet.http.HttpServletResponse;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.ErrorParameter;
@@ -42,7 +44,6 @@ public class PageNotFoundView extends VerticalLayout implements HasErrorParamete
 
     public PageNotFoundView() {
         setSizeFull();
-        setMargin(true);
         add(pageNotFoundSpan);
     }
 
@@ -54,8 +55,10 @@ public class PageNotFoundView extends VerticalLayout implements HasErrorParamete
             if (isBlank(uriFragment)) {
                 //viewManager.navigateToDefault();
             } else {
-                pageNotFoundSpan.addClassName("failure");
-                pageNotFoundSpan.setText("Could not find page for " + uriFragment);
+                pageNotFoundSpan.getElement().getThemeList().add("badge error");
+                Icon errorIcon = new Icon(VaadinIcon.BAN);
+                errorIcon.getStyle().set("padding", "var(--lumo-space-xs)");
+                pageNotFoundSpan.add(errorIcon, new Span("Could not find page for " + uriFragment));
             }
         });
         return HttpServletResponse.SC_NOT_FOUND;

@@ -22,7 +22,7 @@ package org.jumpmind.metl.core.runtime.resource;
 
 import org.jumpmind.properties.TypedProperties;
 
-import javax.jms.*;
+import jakarta.jms.*;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import java.util.UUID;

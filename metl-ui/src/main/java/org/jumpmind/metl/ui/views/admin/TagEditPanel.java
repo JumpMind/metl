@@ -20,13 +20,13 @@
  */
 package org.jumpmind.metl.ui.views.admin;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.awt.Color;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.metl.core.model.Group;
 import org.jumpmind.metl.core.model.Tag;
 import org.jumpmind.metl.ui.common.ApplicationContext;

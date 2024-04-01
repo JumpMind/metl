@@ -30,7 +30,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -66,6 +66,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import de.f0rce.ace.AceEditor;
 import de.f0rce.ace.enums.AceMode;
@@ -206,7 +207,7 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
 				&& record.getEntityName().toLowerCase().contains(entityFilterField.getValue().toLowerCase()));
 		boolean validAttribute = StringUtils.isBlank(attributeFilterField.getValue()) || (record.getAttributeName() != null
 				&& record.getAttributeName().toLowerCase().contains(attributeFilterField.getValue().toLowerCase()));
-    	boolean validXpath = StringUtils.isNotBlank(record.getXpath());
+    	boolean validXpath = !filterCheckbox.getValue() || StringUtils.isNotBlank(record.getXpath());
     	return !validEntity || !validAttribute || !validXpath;
     }
     
@@ -222,6 +223,7 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
         filterField.setPlaceholder("Filter");
         filterField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
         filterField.setWidthFull();
+        filterField.setValueChangeMode(ValueChangeMode.EAGER);
         filterField.addValueChangeListener(change -> refreshGrid());
         cell.setComponent(filterField);
     }

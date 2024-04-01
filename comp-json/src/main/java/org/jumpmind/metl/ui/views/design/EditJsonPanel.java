@@ -26,9 +26,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.ModelAttrib;
@@ -44,7 +43,6 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
@@ -55,7 +53,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import de.f0rce.ace.AceEditor;
 import de.f0rce.ace.enums.AceMode;
@@ -76,8 +74,6 @@ public class EditJsonPanel extends AbstractComponentEditPanel {
     Checkbox filterCheckbox = new Checkbox("Show Set Only");
 
     Set<String> xpathChoices;
-    
-    ComboBox<String> pathCombo = new ComboBox<String>();
     
     public final static String JSON_PATH = "json.path";
     public final static String JSON_TEMPLATE = "json.template";
@@ -119,22 +115,14 @@ public class EditJsonPanel extends AbstractComponentEditPanel {
         addColumn("attributeName", filterRow, attributeFilterField);
 
         if (!readOnly) {
-            ComboBox<String> combo = new ComboBox<String>();
-            combo.addValueChangeListener(e->saveSettings());
-            combo.setWidthFull();
-            combo.setAllowCustomValue(true);
-            combo.addCustomValueSetListener(event -> {
-    			List<String> itemList = combo.getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
-    			itemList.add(event.getDetail());
-    			combo.setItems(itemList);
-    			combo.setValue(event.getDetail());
-            });
-            combo.setAllowCustomValue(true);
+            TextField field = new TextField();
+            field.addValueChangeListener(e->saveSettings());
+            field.setWidthFull();
             Editor<Record> editor = grid.getEditor();
             Binder<Record> binder = new Binder<Record>();
             editor.setBinder(binder);
-            binder.forField(combo).bind(Record::getPath, Record::setPath);
-            ((Column<Record>) grid.getColumnByKey("path")).setEditorComponent(combo);
+            binder.forField(field).bind(Record::getPath, Record::setPath);
+            ((Column<Record>) grid.getColumnByKey("path")).setEditorComponent(field);
             editor.setBuffered(false);
             grid.addItemDoubleClickListener(event -> editor.editItem(event.getItem()));
         }
@@ -153,6 +141,7 @@ public class EditJsonPanel extends AbstractComponentEditPanel {
                 }
             });
 
+            recordList.clear();
             for (ModelEntity entity : model.getModelEntities()) {
                 boolean firstAttribute = true;
                 Record entityRecord = new Record(entity, null);
@@ -186,7 +175,7 @@ public class EditJsonPanel extends AbstractComponentEditPanel {
 				&& record.getEntityName().toLowerCase().contains(entityFilterField.getValue().toLowerCase()));
 		boolean validAttribute = StringUtils.isBlank(attributeFilterField.getValue()) || (record.getAttributeName() != null
 				&& record.getAttributeName().toLowerCase().contains(attributeFilterField.getValue().toLowerCase()));
-    	boolean validPath = StringUtils.isNotBlank(record.getPath());
+    	boolean validPath = !filterCheckbox.getValue() || StringUtils.isNotBlank(record.getPath());
     	return !validEntity || !validAttribute || !validPath;
     }
 
@@ -203,6 +192,7 @@ public class EditJsonPanel extends AbstractComponentEditPanel {
         filterField.setPlaceholder("Filter");
         filterField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
         filterField.setWidthFull();
+        filterField.setValueChangeMode(ValueChangeMode.EAGER);
         filterField.addValueChangeListener(change -> refreshGrid());
         cell.setComponent(filterField);
     }

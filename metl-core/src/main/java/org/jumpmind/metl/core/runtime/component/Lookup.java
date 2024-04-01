@@ -20,15 +20,15 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-import org.apache.commons.lang.ObjectUtils;
 import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -104,7 +104,7 @@ public class Lookup extends AbstractComponentRuntime {
             if (inputMessage instanceof EntityDataMessage) {
                 List<EntityData> datas = ((EntityDataMessage)inputMessage).getPayload();
                 for (EntityData entityData : datas) {
-                    lookup.put(ObjectUtils.toString(entityData.get(keyAttributeId)), entityData.get(valueAttributeId));
+                    lookup.put(Objects.toString(entityData.get(keyAttributeId), ""), entityData.get(valueAttributeId));
                 }
             }
             lookupInitialized = inputMessage instanceof ControlMessage;
@@ -139,7 +139,7 @@ public class Lookup extends AbstractComponentRuntime {
                 newData.setChangeType(oldData.getChangeType());
                 newData.putAll(oldData);
                 newData.put(replacementValueAttributeId, 
-                        lookup.get(ObjectUtils.toString(oldData.get(replacementKeyAttributeId))));
+                        lookup.get(Objects.toString(oldData.get(replacementKeyAttributeId), "")));
                 payload.add(newData);
             }
             callback.sendEntityDataMessage(null, payload);

@@ -131,9 +131,6 @@ class EditFlowSettingsDialog extends ResizableDialog implements SelectionListene
             binder.forField(defaultValueField).bind(FlowParameter::getDefaultValue, FlowParameter::setDefaultValue);
             grid.addColumn(FlowParameter::getDefaultValue).setEditorComponent(defaultValueField)
                     .setHeader("Default Value").setFlexGrow(6).setSortable(false);
-            editor.addSaveListener(event -> {
-                context.getConfigurationService().save(event.getItem());
-            });
             grid.addItemDoubleClickListener(event -> editor.editItem(event.getItem()));
         } else {
             grid.addColumn(FlowParameter::getName).setHeader("Name").setFlexGrow(3).setSortable(false);
@@ -219,9 +216,17 @@ class EditFlowSettingsDialog extends ResizableDialog implements SelectionListene
     
     protected TextField createEditorField() {
         final TextField textField = new TextField();
+        textField.setWidthFull();
         textField.setValueChangeMode(ValueChangeMode.LAZY);
         textField.setValueChangeTimeout(200);
-        textField.setWidthFull();
+        textField.addValueChangeListener(event -> {
+            Editor<FlowParameter> editor = grid.getEditor();
+            FlowParameter parameter = editor.getItem();
+            if (parameter != null) {
+                editor.getBinder().writeBeanAsDraft(parameter);
+                context.getConfigurationService().save(parameter);
+            }
+        });
         return textField;
     }
 

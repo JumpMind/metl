@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.InputStream;
 import java.util.Collections;
@@ -72,7 +72,6 @@ public class EditFlowPalette extends VerticalLayout {
 
         HorizontalLayout topWrapper = new HorizontalLayout();
         HorizontalLayout top = new HorizontalLayout();
-        top.addClassName(ButtonBar.STYLE);
         top.setMargin(true);
         topWrapper.add(top);
         
@@ -96,7 +95,6 @@ public class EditFlowPalette extends VerticalLayout {
         componentLayout = new VerticalLayout();
         componentLayout.setPadding(false);
         componentLayout.getStyle().set("margin", "16px 0 0 0");
-        componentLayout.addClassName("scrollable");
         panel.setContent(componentLayout);
 
         addAndExpand(panel);
@@ -140,7 +138,6 @@ public class EditFlowPalette extends VerticalLayout {
             paletteItem.setComponentType(componentType);
             paletteItem.setShared(false);
         }
-        paletteItem.addClassName("leftAligned");
         DragSource<FlowPaletteItem> extension = DragSource.create(paletteItem);
         extension.setDragData(paletteItem);
         componentLayout.add(paletteItem);

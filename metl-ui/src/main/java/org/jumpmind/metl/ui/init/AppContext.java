@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.Properties;
 
@@ -39,7 +40,7 @@ public class AppContext extends AnnotationConfigWebApplicationContext {
                 System.out.println(
                         "Could not find the " + configFile.getAbsolutePath() + " configuration file.  A default version will be written.");
                 configFile.getParentFile().mkdirs();
-                String propContent = IOUtils.toString(getClass().getResourceAsStream("/" + configFile.getName()));
+                String propContent = IOUtils.toString(getClass().getResourceAsStream("/" + configFile.getName()), Charset.defaultCharset());
                 propContent = FormatUtils.replaceToken(propContent, "configDir", configDir, true);
                 properties = new TypedProperties(new ByteArrayInputStream(propContent.getBytes()));
                 properties.put("log.to.console.enabled", System.getProperty("log.to.console.enabled", "false"));

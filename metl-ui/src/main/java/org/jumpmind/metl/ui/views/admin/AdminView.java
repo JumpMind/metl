@@ -93,7 +93,6 @@ public class AdminView extends HorizontalLayout implements IUiPanel, ComponentEv
         tree.setSizeFull();
         tree.setPageSize(100);
         tree.addItemClickListener(this);
-        tree.addClassName("noselect");
         tree.addComponentHierarchyColumn(item -> {
             Icon icon = new Icon(item.icon());
             icon.getStyle().set("min-width", "24px");

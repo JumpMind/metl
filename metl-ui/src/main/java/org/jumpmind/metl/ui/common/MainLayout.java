@@ -130,7 +130,7 @@ public class MainLayout extends VerticalLayout implements RouterLayout {
 
         HorizontalLayout bottom = new HorizontalLayout();
         bottom.setWidthFull();
-        bottom.getStyle().set("margin", "0 16px");
+        bottom.getStyle().set("padding", "0 16px");
 
         HorizontalLayout left = new HorizontalLayout();
         left.setSpacing(true);

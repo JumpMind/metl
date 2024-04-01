@@ -25,7 +25,7 @@ import org.jumpmind.util.FormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.*;
+import jakarta.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -33,7 +33,7 @@ import java.io.*;
 import java.lang.reflect.Method;
 import java.util.Hashtable;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 abstract public class AbstractJMSJndiDirectory extends AbstractDirectory {
 

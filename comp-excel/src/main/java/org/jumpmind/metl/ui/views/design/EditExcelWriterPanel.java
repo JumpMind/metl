@@ -28,7 +28,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
@@ -151,6 +151,9 @@ public class EditExcelWriterPanel extends AbstractComponentEditPanel {
                 record.setFocusFieldId("transformText");
             }
             grid.setItems(recordFormatList);
+            if (record != null) {
+                grid.select(record);
+            }
         }
     }
 

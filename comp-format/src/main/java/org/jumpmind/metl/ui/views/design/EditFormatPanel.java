@@ -28,7 +28,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
@@ -119,17 +119,25 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
         boolean isFixedLength = component.getType().equals(FixedLengthFormatter.TYPE) || component.getType().equals(FixedLengthParser.TYPE);
         grid.addColumn(RecordFormat::getEntityName).setHeader("Entity Name");
         grid.addColumn(RecordFormat::getAttributeName).setHeader("Attribute Name");
+        Editor<RecordFormat> editor = grid.getEditor();
         if (!readOnly) {
-            grid.getEditor().setBinder(new Binder<RecordFormat>());
+            editor.setBinder(new Binder<RecordFormat>());
         }
+        Binder<RecordFormat> binder = editor.getBinder();
         if (isFixedLength) {
             if (readOnly) {
                 grid.addColumn(RecordFormat::getWidth).setHeader("Width");
             } else {
                 final TextField textField = new TextField();
                 textField.setWidthFull();
-                grid.getEditor().getBinder().forField(textField)
-                        .withConverter(new StringToLongConverter("Width must be an integer"))
+                textField.addValueChangeListener(event -> {
+                    if (editor.getItem() != null) {
+                        binder.writeBeanAsDraft(editor.getItem());
+                    }
+                    calculatePositions();
+                    saveLengthSettings();
+                });
+                binder.forField(textField).withConverter(new StringToLongConverter("Width must be an integer"))
                         .bind(RecordFormat::getWidth, RecordFormat::setWidth);
                 grid.addColumn(RecordFormat::getWidth).setEditorComponent(textField).setHeader("Width");
             }
@@ -162,24 +170,18 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
                 combo.setItems(itemList);
                 combo.setValue(event.getDetail());
             });
-            Editor<RecordFormat> editor = grid.getEditor();
-            Binder<RecordFormat> binder = editor.getBinder();
-            binder.forField(combo).bind(RecordFormat::getTransformText, RecordFormat::setTransformText);
-            grid.addColumn(RecordFormat::getTransformText).setEditorComponent(combo).setHeader("Transform");
-            editor.addSaveListener(event -> {
-                if (isFixedLength) {
-                    calculatePositions();
-                    saveLengthSettings();
+            combo.addValueChangeListener(event -> {
+                if (editor.getItem() != null) {
+                    binder.writeBeanAsDraft(editor.getItem());
                 }
                 saveTransformSettings();
             });
+            binder.forField(combo).bind(RecordFormat::getTransformText, RecordFormat::setTransformText);
+            grid.addColumn(RecordFormat::getTransformText).setEditorComponent(combo).setHeader("Transform");
             grid.addItemDoubleClickListener(event -> editor.editItem(event.getItem()));
         }
         for (Column<RecordFormat> column : grid.getColumns()) {
             column.setSortable(false);
-            if (isFixedLength) {
-                column.setFlexGrow(0).setWidth("75px");
-            }
         }
         grid.setSelectionMode(SelectionMode.MULTI);
         if (!readOnly) {
@@ -239,7 +241,11 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
             }
         }
         if (needsRefreshed) {
+            RecordFormat selectedRecord = getSelectedItem();
             grid.setItems(recordFormatList);
+            if (selectedRecord != null) {
+                grid.select(selectedRecord);
+            }
         }
     }
 

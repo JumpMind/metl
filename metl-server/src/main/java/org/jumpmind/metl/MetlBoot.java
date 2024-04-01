@@ -1,13 +1,14 @@
 package org.jumpmind.metl;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.lang.reflect.Constructor;
 import java.net.InetAddress;
+import java.nio.charset.Charset;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
 import java.security.PrivateKey;
@@ -84,7 +85,7 @@ public class MetlBoot {
 
                 if (isBlank(hostName)) {
                     try {
-                        hostName = IOUtils.toString(Runtime.getRuntime().exec("hostname").getInputStream());
+                        hostName = IOUtils.toString(Runtime.getRuntime().exec("hostname").getInputStream(), Charset.defaultCharset());
                     } catch (Exception ex) {
                     }
                 }

@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.ui.common;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
@@ -120,8 +120,9 @@ public class ImportDialog extends Dialog {
                     String content = handler.getContent();   
                     importListener.onFinished(content);
                     importLayout.removeAll();
-                    Span span = new Span(new Icon(VaadinIcon.CHECK), new Span("Import Succeeded!"));
-                    //span.setStyleName(ValoTheme.LABEL_SUCCESS);
+                    Icon successIcon = new Icon(VaadinIcon.CHECK);
+                    successIcon.getStyle().set("padding", "var(--lumo-space-xs)");
+                    Span span = new Span(successIcon, new Span("Import Succeeded!"));
                     span.getElement().getThemeList().add("badge success");
                     importLayout.add(span);
                     importLayout.setVerticalComponentAlignment(Alignment.CENTER, span);
@@ -132,8 +133,9 @@ public class ImportDialog extends Dialog {
                     if (e instanceof MessageException) {
                         message = e.getMessage();
                     }
-                    Span span = new Span(new Icon(VaadinIcon.BAN), new Span(message));
-                    //span.setStyleName(ValoTheme.LABEL_FAILURE);
+                    Icon errorIcon = new Icon(VaadinIcon.BAN);
+                    errorIcon.getStyle().set("padding", "var(--lumo-space-xs)");
+                    Span span = new Span(errorIcon, new Span(message));
                     span.getElement().getThemeList().add("badge error");
                     importLayout.add(span);
                     importLayout.setVerticalComponentAlignment(Alignment.CENTER, span);

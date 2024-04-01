@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +63,8 @@ public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPa
             add(buttonBar);
 
             Editor<Route> editor = grid.getEditor();
+            Binder<Route> binder = new Binder<Route>();
+            editor.setBinder(binder);
             addButton = buttonBar.addButton("Add", VaadinIcon.PLUS);
             addButton.addClickListener((event) -> {
                 Route newRoute = new Route();
@@ -81,12 +83,16 @@ public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPa
             });
             
             final TextField textField = new TextField();
+            textField.setWidthFull();
             textField.setValueChangeMode(ValueChangeMode.LAZY);
             textField.setValueChangeTimeout(200);
-            textField.setWidthFull();
+            textField.addValueChangeListener(event -> {
+                if (editor.getItem() != null) {
+                    binder.writeBeanAsDraft(editor.getItem());
+                }
+                save();
+            });
             
-            Binder<Route> binder = new Binder<Route>();
-            editor.setBinder(binder);
             binder.forField(textField).bind(Route::getMatchExpression, Route::setMatchExpression);
             grid.addColumn(Route::getMatchExpression).setEditorComponent(textField).setHeader("Expression")
                     .setSortable(false);
@@ -108,13 +114,17 @@ public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPa
             combo.addValueChangeListener(event -> {
                 if (event.getValue() == null) {
                     combo.setValue(event.getOldValue());
+                } else {
+                    if (editor.getItem() != null) {
+                        binder.writeBeanAsDraft(editor.getItem());
+                    }
+                    save();
                 }
             });
             binder.forField(combo).bind(route -> flow.findFlowStepWithId(route.getTargetStepId()),
                     (route, step) -> route.setTargetStepId(step.getId()));
             grid.addColumn(Route::getTargetStepId).setEditorComponent(combo).setHeader("Target Step").setSortable(false);
             
-            editor.addSaveListener(event -> save());
             grid.addItemDoubleClickListener(event -> editor.editItem(event.getItem()));
             
             grid.addSelectionListener((event) -> removeButton.setEnabled(!event.getAllSelectedItems().isEmpty()));

@@ -18,7 +18,7 @@ dependencies {
         exclude module: "tomcat-embed-el"
     }
     api "commons-io:commons-io:$commonsIoVersion"
-    api "commons-lang:commons-lang:$commonsLangVersion"
+    api "org.apache.commons:commons-lang3:$commonsLangVersion"
     api (group:"org.jumpmind.symmetric", name:"symmetric-wrapper", version:"$symmetricVersion", changing:true) {
         exclude group:"org.bouncycastle"
         exclude group:"log4j"

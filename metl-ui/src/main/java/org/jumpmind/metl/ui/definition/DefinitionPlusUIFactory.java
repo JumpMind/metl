@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.ui.definition;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;

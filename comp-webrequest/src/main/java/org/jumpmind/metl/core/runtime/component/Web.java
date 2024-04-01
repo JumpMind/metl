@@ -20,8 +20,8 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -29,14 +29,15 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.net.util.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
@@ -217,7 +218,7 @@ public class Web extends AbstractComponentRuntime {
                 throw new IoException(
                         String.format("Error calling http method.  HTTP Status %d, HTTP Status Description %s, HTTP Result %s", responseCode,
                                 httpResponse.getStatusLine().getReasonPhrase(), 
-                                IOUtils.toString(httpResponse.getEntity().getContent())).replace("%", "%%"));
+                                IOUtils.toString(httpResponse.getEntity().getContent(), Charset.defaultCharset())).replace("%", "%%"));
             } else {
                 HttpEntity resultEntity = httpResponse.getEntity();
 
@@ -386,7 +387,7 @@ public class Web extends AbstractComponentRuntime {
     protected void setAuthIfNeeded(HttpRequestBase request, IHttpDirectory httpDirectory) {
         if (HttpDirectory.SECURITY_BASIC.equals(httpDirectory.getSecurity())) {
             String userpassword = String.format("%s:%s", httpDirectory.getUsername(), httpDirectory.getPassword());
-            String encodedAuthorization = new String(Base64.encodeBase64(userpassword.getBytes()));
+            String encodedAuthorization = new String(Base64.getEncoder().encode(userpassword.getBytes()));
             request.setHeader("Authorization", "Basic " + encodedAuthorization);
         } else if (HttpDirectory.SECURITY_TOKEN.equals(httpDirectory.getSecurity())) {
             request.setHeader("Authorization", "Bearer " + httpDirectory.getToken());

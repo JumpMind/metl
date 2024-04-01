@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.ExecutionStepLog;
 import org.jumpmind.metl.core.persist.IExecutionService;

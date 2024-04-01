@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.core.plugin;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.jumpmind.metl.core.plugin.PluginConstants.DEFINTION_TYPE_COMPONENT;
 import static org.jumpmind.metl.core.plugin.PluginConstants.DEFINTION_TYPE_RESOURCE;
 import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.ENABLED;
@@ -441,7 +441,7 @@ public class DefinitionFactory implements IDefinitionFactory {
                     .getResources(name);
             while (systemResources.hasMoreElements()) {
                 URL url = systemResources.nextElement();
-                if (!urls.contains(url)) {
+                if (!urls.contains(url) && !url.toString().contains("org.eclipse.sisu")) {
                     list.add(url.openStream());
                     urls.add(url);
                 }

@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
-import javax.jms.MessageListener;
+import jakarta.jms.MessageListener;
 
 public interface ISubscribe {
 

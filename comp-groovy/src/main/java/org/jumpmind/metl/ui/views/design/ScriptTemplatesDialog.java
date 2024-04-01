@@ -21,6 +21,7 @@
 package org.jumpmind.metl.ui.views.design;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -163,8 +164,9 @@ class ScriptTemplatesDialog extends ResizableDialog {
             name = fileName.replaceAll("\\-", " ");
             name = name.substring(0, fileName.length() - ".groovy".length());
             try {
-                script = IOUtils.toString(getClass()
-                        .getResourceAsStream("/org/jumpmind/metl/ui/examples/scripts/" + fileName));
+                script = IOUtils.toString(
+                        getClass().getResourceAsStream("/org/jumpmind/metl/ui/examples/scripts/" + fileName),
+                        Charset.defaultCharset());
             } catch (IOException e) {
                 script = "Failed to read " + fileName;
             }

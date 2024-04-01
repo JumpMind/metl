@@ -20,8 +20,8 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.FORMAT;
 import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.FORMAT_JSON;
 import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.FORMAT_XML;

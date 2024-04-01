@@ -22,8 +22,9 @@ package org.jumpmind.metl.ui.init;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -77,11 +78,11 @@ public class BackgroundRefresherService implements Serializable {
         if (future != null) {
             future.cancel(false);
         }
-        this.future = this.taskScheduler.scheduleWithFixedDelay(() -> refresh(), new Date(), interval);
+        this.future = this.taskScheduler.scheduleWithFixedDelay(() -> refresh(), Instant.now(), Duration.ofMillis(interval));
     }
 
     public void doWork(IBackgroundRefreshable<Object> work) {
-        taskScheduler.schedule(() -> run(work), new Date());
+        taskScheduler.schedule(() -> run(work), Instant.now());
     }
     
     protected void refresh() {

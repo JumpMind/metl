@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.core.runtime;
 
-import static org.apache.commons.lang.StringUtils.abbreviate;
+import static org.apache.commons.lang3.StringUtils.abbreviate;
 
 import java.util.Date;
 import java.util.HashMap;

@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.core.util;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

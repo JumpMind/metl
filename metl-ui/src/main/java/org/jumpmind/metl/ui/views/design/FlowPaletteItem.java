@@ -41,7 +41,6 @@ public class FlowPaletteItem extends Button {
         super();
         setHeight("90px");
         setWidth("140px");
-        addClassName("hidefocus");
         VerticalLayout buttonLayout = new VerticalLayout();
         buttonLayout.setSpacing(false);
         Image image = new Image(imageResource, "");

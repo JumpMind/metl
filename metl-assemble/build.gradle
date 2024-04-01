@@ -9,16 +9,16 @@ buildscript {
     }
 
     dependencies {
-    	classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.3'
-        classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.6'
+    	classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.6.1'
+        classpath 'org.asciidoctor:asciidoctorj-pdf:2.3.15'
         classpath 'com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2'
         classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'      
-        classpath 'co.riiid:gradle-github-plugin:0.3.1'
+        classpath 'co.riiid:gradle-github-plugin:0.4.2'
     }
 }
 
 plugins {
-    id 'com.vaadin' version '0.14.8.1' apply false
+    id 'com.vaadin' version '24.3.7' apply false
 }
 
 buildNumber = 'a'.equals(buildNumber) ?  ('a.' + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())) : buildNumber
@@ -43,7 +43,7 @@ configurations {
 }
 
 dependencies {
-    sshAntTask 'org.apache.ant:ant-jsch:1.7.1', 'jsch:jsch:0.1.29'
+    sshAntTask 'org.apache.ant:ant-jsch:1.10.14', 'com.github.mwiede:jsch:0.2.17'
 }
 
 github {

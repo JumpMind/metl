@@ -45,6 +45,7 @@ import jakarta.annotation.PostConstruct;
 import org.apache.activemq.Service;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.commons.lang3.StringUtils;
 import org.h2.Driver;
 import org.h2.tools.Server;
 import org.jumpmind.db.platform.IDatabasePlatform;
@@ -166,10 +167,13 @@ public class AppConfig {
     @Scope(value = "singleton")
     Server h2Server() {
         String configDbUrl = env.getProperty(DB_POOL_URL, "jdbc:h2:mem:config");
+        if (!StringUtils.containsIgnoreCase(configDbUrl, ";NON_KEYWORDS=VALUE")) {
+            configDbUrl += ";NON_KEYWORDS=VALUE";
+        }
         String execDbUrl = env.getProperty(EXECUTION + DB_POOL_URL, configDbUrl);
         if (h2Server == null && (configDbUrl.contains("h2:tcp") || execDbUrl.contains("h2:tcp"))) {
             try {
-                h2Server = Server.createTcpServer("-tcpPort", env.getProperty("h2.port", "9092"));
+                h2Server = Server.createTcpServer("-tcpPort", env.getProperty("h2.port", "9092"), "-ifNotExists");
                 h2Server.start();
             } catch (SQLException e) {
                 throw new SqlException(e);
@@ -228,7 +232,11 @@ public class AppConfig {
             h2Server();
             TypedProperties properties = new TypedProperties();
             properties.put(DB_POOL_DRIVER, env.getProperty(DB_POOL_DRIVER, Driver.class.getName()));
-            properties.put(DB_POOL_URL, env.getProperty(DB_POOL_URL, "jdbc:h2:mem:config"));
+            String dbUrl = env.getProperty(DB_POOL_URL, "jdbc:h2:mem:config");
+            if (!StringUtils.containsIgnoreCase(dbUrl, ";NON_KEYWORDS=VALUE")) {
+                dbUrl += ";NON_KEYWORDS=VALUE";
+            }
+            properties.put(DB_POOL_URL, dbUrl);
             properties.put(DB_POOL_USER, env.getProperty(DB_POOL_USER));
             properties.put(DB_POOL_PASSWORD, env.getProperty(DB_POOL_PASSWORD));
             properties.put(DB_POOL_INITIAL_SIZE, env.getProperty(DB_POOL_INITIAL_SIZE, "20"));
@@ -264,6 +272,9 @@ public class AppConfig {
                 appendToProperties = "";
                 executionUrl = env.getProperty(DB_POOL_URL, "jdbc:h2:mem:exec");
             }            
+            if (!StringUtils.containsIgnoreCase(executionUrl, ";NON_KEYWORDS=VALUE")) {
+                executionUrl += ";NON_KEYWORDS=VALUE";
+            }
             properties.put(DB_POOL_URL, executionUrl);
             properties.put(DB_POOL_DRIVER,
                     env.getProperty(appendToProperties + DB_POOL_DRIVER, env.getProperty(DB_POOL_DRIVER, Driver.class.getName())));

@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -177,7 +177,6 @@ public class DesignNavigator extends VerticalLayout {
     protected TreeGrid<AbstractNamedObject> buildTreeGrid() {
         treeGrid = new TreeGrid<AbstractNamedObject>();
         treeGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
-        treeGrid.addClassName("noselect");
         treeGrid.setSizeFull();
         treeGrid.setPageSize(100);
         Editor<AbstractNamedObject> editor = treeGrid.getEditor();

@@ -20,8 +20,8 @@
  */
 package org.jumpmind.metl.core.util;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.File;
 import java.util.Iterator;
@@ -143,7 +143,9 @@ public final class LogUtils {
             String logFileMaxSize = properties.get(EnvConstants.LOG_FILE_MAX_SIZE, "40MB");
             String logFilePatternLayout = properties.get(EnvConstants.LOG_FILE_PATTERN_LAYOUT,"%d %-5p [%c{1}] [%t] %m%n");
             try {
-                RollingFileAppender logFileAppender = RollingFileAppender.newBuilder().withFileName(logFilePath)
+                RollingFileAppender logFileAppender = RollingFileAppender.newBuilder().setName("ROLLING")
+                        .withFileName(logFilePath)
+                        .withFilePattern(logFilePath + ".%i")
                         .withAppend(true)
                         .setLayout(PatternLayout.newBuilder().withPattern(logFilePatternLayout).build())
                         .withPolicy(SizeBasedTriggeringPolicy.createPolicy(logFileMaxSize))

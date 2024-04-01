@@ -22,7 +22,7 @@ package org.jumpmind.metl.ui.common;
 
 import jakarta.annotation.PostConstruct;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.metl.core.model.GlobalSetting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;

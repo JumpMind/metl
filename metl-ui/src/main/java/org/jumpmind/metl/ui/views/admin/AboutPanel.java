@@ -26,7 +26,7 @@ import java.util.List;
 
 import jakarta.annotation.PostConstruct;
 
-import org.apache.commons.lang.time.FastDateFormat;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.jumpmind.metl.core.runtime.AgentManager;
 import org.jumpmind.metl.core.util.VersionUtils;
 import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
@@ -69,7 +69,6 @@ public class AboutPanel extends AbstractAdminPanel implements IBackgroundRefresh
 
         grid = new Grid<String[]>();
         grid.setSizeFull();
-        grid.addClassName("noscroll");
         grid.addColumn(item -> item[0]).setHeader("Name").setFlexGrow(0).setWidth("200px");
         grid.addColumn(item -> item[1]).setHeader("Value");
         addAndExpand(grid);

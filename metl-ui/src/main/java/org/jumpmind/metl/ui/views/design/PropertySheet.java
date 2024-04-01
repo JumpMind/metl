@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.ENABLED;
 import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.LOG_INPUT;
 import static org.jumpmind.metl.core.runtime.component.ComponentSettingsConstants.LOG_OUTPUT;
@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jumpmind.metl.core.model.AbstractName;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
@@ -120,7 +120,6 @@ public class PropertySheet extends Div {
 
         panel = new VerticalLayout();
         panel.setSizeFull();
-        panel.addClassName("noborder");
         add(panel);
     }
 

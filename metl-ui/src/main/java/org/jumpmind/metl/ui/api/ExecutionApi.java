@@ -20,9 +20,9 @@
  */
 package org.jumpmind.metl.ui.api;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-import static org.apache.commons.lang.StringUtils.left;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.left;
 import static org.jumpmind.metl.core.runtime.FlowConstants.REQUEST_VALUE_PARAMETER;
 import static org.jumpmind.metl.ui.api.ApiConstants.HEADER_EXECUTION_ID;
 import static org.jumpmind.metl.ui.common.UiUtils.whereAreYou;

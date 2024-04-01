@@ -11,7 +11,7 @@ dependencies {
        exclude group:'com.vaadin'
     }
     api "org.springframework:spring-webmvc:$springVersion"
-    api "org.apache.poi:poi:3.11"
+    api "org.apache.poi:poi:$apachePOIVersion"
     api "org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocVersion"
     api "io.swagger.core.v3:swagger-annotations:$swaggerVersion"
     api "io.swagger.core.v3:swagger-core:$swaggerVersion"

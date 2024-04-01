@@ -37,8 +37,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.FlowStep;
@@ -245,7 +245,7 @@ public class StepRuntime implements Runnable {
         if (ex instanceof MisconfiguredException || ex instanceof AssertException) {
             msg = ex.getMessage();
         } else {
-            msg = ExceptionUtils.getFullStackTrace(ex);
+            msg = ExceptionUtils.getStackTrace(ex);
         }
 
         componentContext.getExecutionTracker().log(threadNumber, LogLevel.ERROR, componentContext, msg);

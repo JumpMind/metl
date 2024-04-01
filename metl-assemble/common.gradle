@@ -89,6 +89,7 @@ import java.util.Date
         all {
             // check for updates every build
             resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+            resolutionStrategy.force 'net.java.dev.jna:jna:5.13.0', 'net.java.dev.jna:jna-platform:5.13.0'
         }    
     }
     
@@ -111,7 +112,7 @@ import java.util.Date
 	}
     
     dependencies {
-        deployerJars "org.apache.maven.wagon:wagon-ssh:2.2"
+        deployerJars "org.apache.maven.wagon:wagon-ssh:3.5.3"
     }
 
     task sourcesJar(type: Jar, dependsOn:classes) {

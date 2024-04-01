@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +31,7 @@ import java.util.Set;
 
 import javax.script.ScriptException;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ModelAttrib;
@@ -125,7 +125,6 @@ public class Transformer extends AbstractComponentRuntime {
 		}
 	}
 
-    @SuppressWarnings("unchecked")
     protected EntityData processEntity(EntityData inData, Message inputMessage, RelationalModel inputModel,
     		boolean isRoot) {
 
@@ -153,7 +152,6 @@ public class Transformer extends AbstractComponentRuntime {
 //        return outDatas;
 //    }    
 
-    @SuppressWarnings("unchecked")
     protected void processAttribute(String attributeId, EntityData inData, EntityData outData, Message inputMessage, RelationalModel inputModel) {
         String transform = transformsByAttributeId.get(attributeId);
         Object value = inData.get(attributeId);

@@ -24,6 +24,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.List;
 
@@ -31,7 +32,6 @@ import org.apache.commons.io.FileUtils;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.model.AgentDeploy;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
@@ -40,7 +40,6 @@ import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.RelationalModel;
-import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.component.NoOp;
@@ -163,7 +162,7 @@ public class TestUtils {
     
     public static String getTestXMLFileContent(String fileName) {
     	try {
-    		return FileUtils.readFileToString(getTestXMLFile(fileName));
+    		return FileUtils.readFileToString(getTestXMLFile(fileName), Charset.defaultCharset());
     	}
     	catch (Exception e) {
     		return null;

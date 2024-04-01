@@ -70,8 +70,6 @@ public class AppSessionInitListener implements SessionInitListener {
                     message = t.getMessage();
                 }
             }
-            ErrorDialog dialog = new ErrorDialog(intro, message);
-            dialog.show();
 
             Throwable ex = e.getThrowable();
             if (ex != null) {
@@ -79,6 +77,9 @@ public class AppSessionInitListener implements SessionInitListener {
             } else {
                 log.error("An unexpected error occurred");
             }
+            
+            ErrorDialog dialog = new ErrorDialog(intro, message);
+            dialog.show();
         });
     }
     

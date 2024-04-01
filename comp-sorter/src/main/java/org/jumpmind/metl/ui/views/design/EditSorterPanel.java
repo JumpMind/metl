@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.RelationalModel;
@@ -161,7 +161,13 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
                 recordFormatList.add(recordFormat);
             }
         }
+        Set<RecordFormat> selectedRecords = grid.getSelectedItems();
         grid.setItems(recordFormatList);
+        for (RecordFormat record : selectedRecords) {
+            if (recordFormatList.contains(record)) {
+                grid.select(record);
+            }
+        }
     }
 
     protected void calculatePositions() {
@@ -183,7 +189,13 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
         }
         
         if (needsRefreshed) {
+            Set<RecordFormat> selectedRecords = grid.getSelectedItems();
             grid.setItems(recordFormatList);
+            for (RecordFormat record : selectedRecords) {
+                if (recordFormatList.contains(record)) {
+                    grid.select(record);
+                }
+            }
         }
     }
 
@@ -202,7 +214,13 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
                 calculatePositions();
                 saveOrdinalSettings();
             }
+            Set<RecordFormat> selectedRecords = grid.getSelectedItems();
             grid.setItems(recordFormatList);
+            for (RecordFormat record : selectedRecords) {
+                if (recordFormatList.contains(record)) {
+                    grid.select(record);
+                }
+            }
         }
     }
 
@@ -463,6 +481,8 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
 
     protected Checkbox createAttributeCheckbox(final RecordFormat record, final String key) {
         final Checkbox checkbox = new Checkbox();
+        ComponentAttribSetting setting = component.getSingleAttributeSetting(record.getAttributeId(), key);
+        checkbox.setValue(setting != null ? Boolean.parseBoolean(setting.getValue()) : false);
         checkbox.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<Boolean>>() {
             private static final long serialVersionUID = 1L;
             @Override
@@ -475,6 +495,7 @@ public class EditSorterPanel extends AbstractComponentEditPanel {
                     component.addAttributeSetting(setting);
                 }
                 setting.setValue(checkbox.getValue().toString());
+                record.setSortSetting(checkbox.getValue());
                 if (!oldValue.equals(setting.getValue())) {
                     context.getConfigurationService().save(setting);   
                     Set<RecordFormat> attributes = new HashSet<>();

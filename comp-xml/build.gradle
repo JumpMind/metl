@@ -3,5 +3,6 @@ apply from: '../metl-assemble/common.gradle'
 dependencies {
     compileOnly project(':metl-ui')   
     api project(':comp-abstract')
+    api "org.apache.commons:commons-rng-simple:$commonsRngVersion"
     testImplementation project(path: ':metl-core', configuration: 'testArtifacts')     
 }

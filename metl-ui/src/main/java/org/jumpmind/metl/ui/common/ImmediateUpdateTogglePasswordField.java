@@ -66,15 +66,6 @@ public abstract class ImmediateUpdateTogglePasswordField extends CustomField<Str
             }
         });
         
-        // Valo FORMLAYOUT_LIGHT style does not apply to nested fields  
-        // https://github.com/vaadin/framework/issues/8837
-        // Work around is to remove the border manually to match the other 
-        // fields that are not nested. 
-        // Once bug is fixed, remove the following two lines. 
-        passwordField.addClassName("noborder");
-        textField.addClassName("noborder");
-        // End Work Around
-        
         passwordField.setValueChangeMode(ValueChangeMode.LAZY);
         textField.setValueChangeMode(ValueChangeMode.LAZY);
         passwordField.setValueChangeTimeout(200);

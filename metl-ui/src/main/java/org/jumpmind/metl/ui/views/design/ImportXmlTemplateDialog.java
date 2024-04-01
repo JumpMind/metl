@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -30,6 +30,7 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -222,7 +223,7 @@ public class ImportXmlTemplateDialog extends ResizableDialog
             String text = null;
             try {
                 in = new URL(urlTextField.getValue()).openStream();
-                text = IOUtils.toString(in);
+                text = IOUtils.toString(in, Charset.defaultCharset());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             } finally {
@@ -236,7 +237,7 @@ public class ImportXmlTemplateDialog extends ResizableDialog
                 Resource resource = (Resource) resourceComboBox.getValue();
                 String resourceUrl = resource.findSetting(URL_SETTING).getValue();
                 in = new URL(resourceUrl).openStream();
-                text = IOUtils.toString(in);
+                text = IOUtils.toString(in, Charset.defaultCharset());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             } finally {
@@ -289,7 +290,7 @@ public class ImportXmlTemplateDialog extends ResizableDialog
 
     protected void importFromWsdl(String text) throws Exception {
         File wsdlFile = File.createTempFile("import", "wsdl");
-        FileUtils.write(wsdlFile, text);
+        FileUtils.write(wsdlFile, text, Charset.defaultCharset());
         final Wsdl wsdl = Wsdl.parse(wsdlFile.toURI().toURL());
         List<SoapOperation> allOperations = new ArrayList<>();
         List<QName> bindings = wsdl.getBindings();

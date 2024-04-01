@@ -47,7 +47,7 @@ abstract public class DbTestUtils {
         TypedProperties properties = new TypedProperties();
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_DRIVER, "org.h2.Driver");
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_URL, "jdbc:h2:file:"
-                + DB_DIR + "/testdb");
+                + DB_DIR + "/testdb;NON_KEYWORDS=VALUE");
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_USER, "jumpmind");
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_PASSWORD, "jumpmind");
         DataSource ds = BasicDataSourceFactory.create(properties);

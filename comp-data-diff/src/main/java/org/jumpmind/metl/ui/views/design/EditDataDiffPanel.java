@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.RelationalModel;
@@ -141,7 +141,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
 
     protected void buildEntityGrid() {
         entityGrid.setSizeFull();
-        entityGrid.addColumn(setting -> {
+        entityGrid.addComponentColumn(setting -> {
             RelationalModel model = (RelationalModel) component.getInputModel();
             ModelEntity entity = model.getEntityById(setting.getEntityId());
             return UiUtils.getName(entityFilterField.getValue(), entity.getName());
@@ -196,7 +196,13 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
                 filteredEntitySettings.add(entitySetting);
             }
         }
+        Set<EntitySettings> selectedSettings = entityGrid.getSelectedItems();
         entityGrid.setItems(filteredEntitySettings);
+        for (EntitySettings setting : selectedSettings) {
+            if (filteredEntitySettings.contains(setting)) {
+                entityGrid.select(setting);
+            }
+        }
     }
 
     protected void moveItemsTo(Set<EntitySettings> itemIds, int index) {
@@ -251,12 +257,20 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
             ordinal++;
         }
         if (needsRefreshed) {
+            Set<EntitySettings> selectedSettings = entityGrid.getSelectedItems();
             entityGrid.setItems(filteredEntitySettings);
+            for (EntitySettings setting : selectedSettings) {
+                if (filteredEntitySettings.contains(setting)) {
+                    entityGrid.select(setting);
+                }
+            }
         }
     }
 
     protected Checkbox createEntityCheckbox(final EntitySettings settings, final String key) {
         final Checkbox checkbox = new Checkbox();
+        ComponentEntitySetting setting = component.getSingleEntitySetting(settings.getEntityId(), key);
+        checkbox.setValue(setting != null ? Boolean.parseBoolean(setting.getValue()) : true);
         checkbox.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<Boolean>>() {
             private static final long serialVersionUID = 1L;
 
@@ -363,7 +377,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
             super("Edit Columns to Compare");
             setWidth("800px");
             setHeight("600px");
-            innerContent.setMargin(true);
+            innerContent.setPadding(false);
             buildAttributeGrid();
             buildButtonFooter(buildCloseButton());
         }
@@ -371,7 +385,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
         private void buildAttributeGrid() {
 
             attributeGrid.setSizeFull();
-            attributeGrid.addColumn(setting -> {
+            attributeGrid.addComponentColumn(setting -> {
                 RelationalModel model = (RelationalModel) component.getInputModel();
                 ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
                 return UiUtils.getName(entityFilterField.getValue(), attribute.getName());
@@ -403,6 +417,8 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
         if (settings.isPrimaryKey()) {
             checkbox.setEnabled(false);
         }
+        ComponentAttribSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(), key);
+        checkbox.setValue(setting != null ? Boolean.parseBoolean(setting.getValue()) : true);
         checkbox.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<Boolean>>() {
             private static final long serialVersionUID = 1L;
 

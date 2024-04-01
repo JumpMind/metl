@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.ui.common;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,7 +65,7 @@ public final class UiUtils {
                 String pre = startEndIndex[0] < name.length() ? name.substring(0, startEndIndex[0]) : "";
                 String highlighted = name.substring(startEndIndex[0], startEndIndex[1]);
                 String post = startEndIndex[1] < name.length() ? name.substring(startEndIndex[1]) : "";
-                name = pre + "<span class='highlight'>" + highlighted + "</span>" + post;
+                name = pre + "<span style='background-color: #FCEE89'>" + highlighted + "</span>" + post;
             }
         }
         return new Label(name);

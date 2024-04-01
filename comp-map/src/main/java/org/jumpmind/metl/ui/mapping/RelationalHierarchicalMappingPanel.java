@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.ui.mapping;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.Serializable;
 import java.util.ArrayList;

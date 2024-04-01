@@ -20,6 +20,7 @@ eclipse {
 war {
     archiveName="metl.war"
     jar.enabled = true
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     from {
         configurations.executableWar.collect {
             it.isDirectory() ? it : project.zipTree(it)

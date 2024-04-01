@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,18 +70,17 @@ public class EditMergerPanel extends AbstractComponentEditPanel {
         add(buttonBar);
 
         grid.setSizeFull();
-        grid.addColumn(setting -> {
-            RelationalModel model = (RelationalModel) component.getInputModel();
-            ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
-            ModelEntity entity = model.getEntityById(attribute.getEntityId());
-            return UiUtils.getName(filterField.getValue(), entity.getName());
-        }).setHeader("Entity Name").setFlexGrow(0).setWidth("250px").setSortable(true);
-        grid.addColumn(setting -> {
-            RelationalModel model = (RelationalModel) component.getInputModel();
-            ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
-            return UiUtils.getName(filterField.getValue(), attribute.getName());
-        }).setHeader("Attribute Name").setFlexGrow(0).setWidth("250px").setSortable(true);
-        grid.addComponentColumn(setting -> createCheckbox(setting, Merger.MERGE_ATTRIBUTE)).setHeader("Join On").setSortable(true);
+        grid.addComponentColumn(setting -> {
+            return UiUtils.getName(filterField.getValue(), getEntityName(setting));
+        }).setHeader("Entity Name").setComparator(setting -> getEntityName(setting));
+        grid.addComponentColumn(setting -> {
+            return UiUtils.getName(filterField.getValue(), getAttributeName(setting));
+        }).setHeader("Attribute Name").setComparator(setting -> getAttributeName(setting));
+        grid.addComponentColumn(setting -> createCheckbox(setting, Merger.MERGE_ATTRIBUTE)).setHeader("Join On")
+                .setFlexGrow(0).setWidth("100px").setComparator(settings -> {
+                    ComponentAttribSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(), Merger.MERGE_ATTRIBUTE);
+                    return setting != null ? Boolean.parseBoolean(setting.getValue()) : true;
+                });
         add(grid);
         expand(grid);
 
@@ -132,9 +131,24 @@ public class EditMergerPanel extends AbstractComponentEditPanel {
         }
         grid.setItems(filteredAttributeSettings);
     }
+    
+    private String getEntityName(AttributeSettings setting) {
+        RelationalModel model = (RelationalModel) component.getInputModel();
+        ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
+        ModelEntity entity = model.getEntityById(attribute.getEntityId());
+        return entity.getName();
+    }
+    
+    private String getAttributeName(AttributeSettings setting) {
+        RelationalModel model = (RelationalModel) component.getInputModel();
+        ModelAttrib attribute = model.getAttributeById(setting.getAttributeId());
+        return attribute.getName();
+    }
 
     private Checkbox createCheckbox(final AttributeSettings settings, final String key) {
         final Checkbox checkbox = new Checkbox();
+        ComponentAttribSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(), key);
+        checkbox.setValue(setting != null ? Boolean.parseBoolean(setting.getValue()) : false);
         checkbox.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<Boolean>>() {
 
             @Override

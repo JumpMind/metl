@@ -25,12 +25,13 @@ import static org.jumpmind.metl.core.model.GlobalSetting.DEFAULT_CONFIG_BACKUP_R
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IImportExportService;
@@ -84,7 +85,7 @@ public class BackupJob implements Runnable {
             String json = importExportService.exportProjectVersion(version.getId(), AppConstants.SYSTEM_USER);
             FileUtils.write(new File(todaysDir,
                     (version.getProject().getName() + "-" + version.getName()).toLowerCase().replaceAll(" - ", " ").replaceAll(" ", "-") + ".json"),
-                    json);
+                    json, Charset.defaultCharset());
         }
     }
     

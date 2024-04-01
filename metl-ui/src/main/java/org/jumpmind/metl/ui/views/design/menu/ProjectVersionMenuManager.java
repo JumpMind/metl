@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.ui.views.design.menu;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.ui.common.CutCopyPasteManager;
