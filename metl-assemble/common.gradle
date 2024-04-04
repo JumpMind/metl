@@ -10,9 +10,7 @@ import java.util.Date
     apply plugin: 'eclipse-wtp'
     apply plugin: 'java'
     apply plugin: 'java-library'
-    apply plugin: 'license-report'
 	apply plugin: 'jacoco'
-	apply plugin: 'license'
 	apply plugin: 'maven-publish'
 	
 	ext {
@@ -55,13 +53,6 @@ import java.util.Date
             }
         }
     }   
-    
-    license {
-        header rootProject.file('HEADER')
-        strictCheck true
-        includes(["**/*.java", "**/*.properties", "**/*.xml"])
-        excludes(["**/AppWidgetSet.gwt.xml"])
-    }     
     
     ext {
         majorMinorVersion = version.substring(0, version.indexOf(".", version.indexOf(".")+ 1))
