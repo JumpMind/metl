@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -6,18 +26,29 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.lang.reflect.Constructor;
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.nio.charset.Charset;
+import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
-import java.security.PrivateKey;
+import java.security.KeyStore.PrivateKeyEntry;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v1CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.eclipse.jetty.ee10.servlet.DefaultServlet;
 import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -135,42 +166,35 @@ public class MetlBoot {
             KeyStore.ProtectionParameter param = new KeyStore.PasswordProtection(keyPass.toCharArray());
             Entry entry = keyStore.getEntry(alias, param);
             if (entry == null) {
-                Class<?> keyPairClazz = Class.forName("sun.security.tools.keytool.CertAndKeyGen");
-                Constructor<?> constructor = keyPairClazz.getConstructor(String.class, String.class);
-                Object keypair = constructor.newInstance("RSA", "SHA1WithRSA");
-
-                Class<?> x500NameClazz = Class.forName("sun.security.x509.X500Name");
-                constructor = x500NameClazz.getConstructor(String.class, String.class, String.class, String.class, String.class,
-                        String.class);
-                Object x500Name = constructor.newInstance(hostName, "Metl", "JumpMind", "Unknown", "Unknown", "Unknown");
-
-                keyPairClazz.getMethod("generate", Integer.TYPE).invoke(keypair, 1024);
-
-                PrivateKey privKey = (PrivateKey) keyPairClazz.getMethod("getPrivateKey").invoke(keypair);
-
-                X509Certificate[] chain = new X509Certificate[1];
-
-                Date startDate = new Date(System.currentTimeMillis() - (1000 * 60 * 60 * 24));
-                long validTimeInMs = 100 * 365 * 24 * 60 * 60;
-                chain[0] = (X509Certificate) keyPairClazz.getMethod("getSelfCertificate", x500NameClazz, Date.class, Long.TYPE)
-                        .invoke(keypair, x500Name, startDate, validTimeInMs);
-
-                keyStore.setKeyEntry(alias, privKey, keyPass.toCharArray(), chain);
-
+            	BouncyCastleHelper helper = new BouncyCastleHelper();
+                helper.checkProviderInstalled();
+                KeyPair pair = helper.generateRSAKeyPair();
+                String certString = String.format("CN=%s, OU=Metl, O=Jumpmind", hostName);
+                SubjectPublicKeyInfo publicKeyInfo = helper.getInstance(pair.getPublic());
+                X509v1CertificateBuilder builder = new X509v1CertificateBuilder(new X500Name(certString), BigInteger.valueOf(System.currentTimeMillis()),
+                        new Date(System.currentTimeMillis() - 86400000), new Date(System.currentTimeMillis() + 788400000000l), new X500Name(certString),
+                        publicKeyInfo);
+                AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA256WithRSAEncryption");
+                AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
+                ContentSigner signer = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(helper.createKey(pair.getPrivate()));
+                X509CertificateHolder holder = builder.build(signer);
+                X509Certificate cert = new JcaX509CertificateConverter().getCertificate(holder);
+                X509Certificate[] serverChain = new X509Certificate[] { cert };
+                PrivateKeyEntry privateEntry = new PrivateKeyEntry(pair.getPrivate(), serverChain);
+                keyStore.setEntry(alias, privateEntry, param);
                 File keyStoreFile = getKeyStoreFile(args);
                 keyStoreFile.getParentFile().mkdirs();
                 try (FileOutputStream fos = new FileOutputStream(keyStoreFile)) {
                     keyStore.store(fos, keyPass.toCharArray());
                 }
             }
-
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-    
+
     public static void main(String[] args) {
         run(args);
     }

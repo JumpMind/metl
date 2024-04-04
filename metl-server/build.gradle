@@ -20,8 +20,9 @@ dependencies {
     api "commons-io:commons-io:$commonsIoVersion"
     api "org.apache.commons:commons-lang3:$commonsLangVersion"
     api (group:"org.jumpmind.symmetric", name:"symmetric-wrapper", version:"$symmetricVersion", changing:true) {
-        exclude group:"org.bouncycastle"
         exclude group:"log4j"
         exclude group:"org.slf4j"
     }
+    api "org.bouncycastle:bcprov-jdk18on:$bouncycastleVersion"
+    api "org.bouncycastle:bcpkix-jdk18on:$bouncycastleVersion"
 }
