@@ -6,6 +6,7 @@ import static org.jumpmind.metl.ui.common.UiUtils.whereAreYou;
 
 import java.util.Date;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.metl.core.model.AuditEvent;
 import org.jumpmind.metl.core.model.Group;
 import org.jumpmind.metl.core.model.GroupPrivilege;
@@ -23,6 +24,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.Html;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -147,6 +149,17 @@ public class MainLayout extends VerticalLayout implements RouterLayout {
 
         add(menu, contentArea, bottom);
         expand(contentArea);
+        
+        String defaultView = menu.getDefaultView();
+        if (defaultView != null) {
+            UI ui = UI.getCurrent();
+            ui.getPage().fetchCurrentURL(url -> {
+                String path = url.getPath();
+                if (StringUtils.remove(path, "/").equalsIgnoreCase("metl")) {
+                    ui.navigate(defaultView);
+                }
+            });
+        }
     }
 
     protected ViewManager getViewManager() {

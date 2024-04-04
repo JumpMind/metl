@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.ui.common;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import org.apache.commons.lang3.StringUtils;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -48,17 +48,15 @@ public class PageNotFoundView extends VerticalLayout implements HasErrorParamete
     }
 
     @Override
-    public int setErrorParameter(BeforeEnterEvent event,
-          ErrorParameter<NotFoundException> parameter) {
-        UI.getCurrent().getPage().fetchCurrentURL(url -> {
-            String uriFragment = url.getFile();
-            if (isBlank(uriFragment)) {
-                //viewManager.navigateToDefault();
-            } else {
+    public int setErrorParameter(BeforeEnterEvent event, ErrorParameter<NotFoundException> parameter) {
+        UI ui = UI.getCurrent();
+        ui.getPage().fetchCurrentURL(url -> {
+            String path = url.getPath();
+            if (!StringUtils.remove(path, "/").equalsIgnoreCase("metl")) {
                 pageNotFoundSpan.getElement().getThemeList().add("badge error");
                 Icon errorIcon = new Icon(VaadinIcon.BAN);
                 errorIcon.getStyle().set("padding", "var(--lumo-space-xs)");
-                pageNotFoundSpan.add(errorIcon, new Span("Could not find page for " + uriFragment));
+                pageNotFoundSpan.add(errorIcon, new Span("Could not find page for " + path));
             }
         });
         return HttpServletResponse.SC_NOT_FOUND;

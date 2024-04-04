@@ -6,3 +6,7 @@
 /*.iml
 /.DS_Store
 /frontend/generated/
+/node_modules/
+/vite.generated.ts
+/types.d.ts
+/tsconfig.json

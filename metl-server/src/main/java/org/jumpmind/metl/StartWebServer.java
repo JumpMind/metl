@@ -37,15 +37,5 @@ public class StartWebServer {
         System.out.println(IOUtils.toString(StartWebServer.class.getResource("/Metl.asciiart"), Charset.defaultCharset()));
 
         MetlBoot.run(new String[0]);
-
-        /*ClassList classlist = Configurations.ClassList.setServerDefault(server);
-        classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration", "org.eclipse.jetty.annotations.AnnotationConfiguration");
-
-        MBeanContainer mbContainer = new MBeanContainer(ManagementFactory.getPlatformMBeanServer());
-        server.addBean(mbContainer);
-
-        ServerContainer webSocketServer = WebSocketServerContainerInitializer.configureContext(webapp);
-
-        webSocketServer.setDefaultMaxSessionIdleTimeout(10000000);*/
     }
 }

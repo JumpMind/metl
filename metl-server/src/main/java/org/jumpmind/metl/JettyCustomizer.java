@@ -12,6 +12,7 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
@@ -20,7 +21,9 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.springframework.boot.web.embedded.jetty.JettyServerCustomizer;
 import org.springframework.boot.web.embedded.jetty.JettyServletWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.stereotype.Component;
 
+@Component
 public class JettyCustomizer implements WebServerFactoryCustomizer<JettyServletWebServerFactory>, JettyServerCustomizer {
     Logger log = Logger.getLogger(JettyCustomizer.class.getName());
     
@@ -44,6 +47,10 @@ public class JettyCustomizer implements WebServerFactoryCustomizer<JettyServletW
                         HttpConfiguration httpsConfig = connectionFactory.getHttpConfiguration();
                         if (httpsConfig != null) {
                             httpsConfig.setSendServerVersion(false);
+                            SecureRequestCustomizer customizer = httpsConfig.getCustomizer(SecureRequestCustomizer.class);
+                            if (customizer != null) {
+                                customizer.setSniHostCheck(false);
+                            }
                         }
                     }
                 }

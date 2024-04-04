@@ -174,5 +174,9 @@ public class TopBar extends HorizontalLayout implements AfterNavigationObserver 
             setMenuItemFocus(menuItem);
         }
     }
+    
+    public String getDefaultView() {
+        return defaultView;
+    }
 
 }

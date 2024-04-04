@@ -27,14 +27,6 @@ public class Develop {
     public static void main(String[] args) throws Exception {
         new File("working").mkdirs();
         System.setProperty("org.jumpmind.metl.ui.init.config.dir","working");
-
-        /*ClassList classlist = Configuration.ClassList.setServerDefault(server);
-        classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration", "org.eclipse.jetty.annotations.AnnotationConfiguration");
-        webapp.setWar(pathPrefix + "metl-war/src/main/webapp");
-        webapp.setResourceBase(pathPrefix + "metl-war/src/main/webapp");
-        
-        ServerContainer webSocketServer = WebSocketServerContainerInitializer.configureContext(webapp);
-        webSocketServer.setDefaultMaxSessionIdleTimeout(10000000);        */
         
         StartWebServer.runWebServer(new String[0]);
 

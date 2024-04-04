@@ -40,9 +40,6 @@ import com.vaadin.flow.spring.annotation.UIScope;
 public class ViewManager implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    /*@Autowired(required = false)
-    List<View> views;*/
     
     List<Class<?>> views = new ArrayList<Class<?>>();
     

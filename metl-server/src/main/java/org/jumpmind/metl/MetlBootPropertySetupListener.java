@@ -36,7 +36,7 @@ public class MetlBootPropertySetupListener implements ApplicationListener<Applic
         } else if (httpsEnabled) {
             setIfNotBlank(ServerConstants.HTTPS_HOST_BIND_NAME, "server.address", sysProps, bootProps);
             bootProps.put("server.port", httpsPort);
-            /*bootProps.put("server.ssl.enabled", Boolean.toString(true));
+            bootProps.put("server.ssl.enabled", Boolean.toString(true));
             if (!httpEnabled) {
                 bootProps.setProperty("server.servlet.session.cookie.secure", Boolean.toString(true));
             }
@@ -59,7 +59,7 @@ public class MetlBootPropertySetupListener implements ApplicationListener<Applic
                 }
                 bootProps.put("server.ssl.trust-store-type", sysProps.getOrDefault(ServerConstants.SSL_KEYSTORE_TYPE,
                         ServerConstants.SSL_DEFAULT_KEYSTORE_TYPE));
-            }*/
+            }
         }
         bootProps.put("server.cookie.name", getCookieName(httpEnabled, httpsEnabled, httpPort, httpsPort));
         event.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("metlBootProps", bootProps));
