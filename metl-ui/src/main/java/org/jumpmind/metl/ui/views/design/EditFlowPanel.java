@@ -539,8 +539,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                         }
                         panel.init(readOnly, flowStep.getComponent(), context, propertySheet);
                         tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), new Icon(Icons.COMPONENT),
-                                (AbstractComponentEditPanel) panel);
-                        tabs.setSelectedTab((AbstractComponentEditPanel) panel);
+                                (com.vaadin.flow.component.Component) panel);
+                        tabs.setSelectedTab((com.vaadin.flow.component.Component) panel);
                     }
                 }
        
