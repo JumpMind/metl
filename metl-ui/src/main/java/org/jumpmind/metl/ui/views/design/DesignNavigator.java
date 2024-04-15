@@ -200,8 +200,11 @@ public class DesignNavigator extends VerticalLayout {
             if (item instanceof FolderName) {
                 icon = new Icon(treeGrid.isExpanded(item) ? Icons.FOLDER_OPEN : Icons.FOLDER_CLOSED);
             } else if (item instanceof ProjectVersion) {
-                icon = new Icon(((ProjectVersion) item).locked() ? VaadinIcon.LOCK : Icons.PROJECT_VERSION);
-                icon.setColor("var(--lumo-primary-color)");
+                boolean locked = ((ProjectVersion) item).locked();
+                icon = new Icon(locked ? VaadinIcon.LOCK : Icons.PROJECT_VERSION);
+                if (!locked) {
+                    icon.setColor("var(--lumo-primary-color)");
+                }
             } else if (item instanceof Project) {
                 icon = new Icon(Icons.PROJECT);
                 icon.setColor("var(--lumo-primary-color)");
@@ -338,10 +341,13 @@ public class DesignNavigator extends VerticalLayout {
             configurationService.save(setting);
 
             if (!(object instanceof Project)) {
-                String projectId = findProjectVersion().getProjectId();
-                setting = context.getUser().findSetting(UserSetting.SETTING_DESIGN_NAVIGATOR_SELECTED_PROJECT_ID);
-                setting.setValue(projectId);
-                configurationService.save(setting);
+                ProjectVersion projectVersion = findProjectVersion();
+                if (projectVersion != null) {
+                    String projectId = projectVersion.getProjectId();
+                    setting = context.getUser().findSetting(UserSetting.SETTING_DESIGN_NAVIGATOR_SELECTED_PROJECT_ID);
+                    setting.setValue(projectId);
+                    configurationService.save(setting);
+                }
             }
         }
     }
@@ -894,6 +900,10 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public ProjectVersion findProjectVersion(AbstractNamedObject value) {
+        if (!treeGrid.getTreeData().contains(value)) {
+            return null;
+        }
+        
         while (!(value instanceof ProjectVersion) && value != null) {
             value = treeGrid.getTreeData().getParent(value);
         }
@@ -1099,8 +1109,10 @@ public class DesignNavigator extends VerticalLayout {
             tabs.closeTab(toDelete.getId());
             AbstractNamedObject parent = treeGrid.getTreeData().getParent(toDelete);
             refresh();
-            treeGrid.select(parent);
-            treeGrid.expand(parent);
+            if (treeGrid.getTreeData().contains(parent)) {
+                treeGrid.select(parent);
+                treeGrid.expand(parent);
+            }
         }
     }
 
@@ -1120,8 +1132,10 @@ public class DesignNavigator extends VerticalLayout {
             tabs.closeTab(toDelete.getId());
             AbstractNamedObject parent = treeGrid.getTreeData().getParent(toDelete);
             refresh();
-            treeGrid.select(parent);
-            treeGrid.expand(parent);
+            if (treeGrid.getTreeData().contains(parent)) {
+                treeGrid.select(parent);
+                treeGrid.expand(parent);
+            }
         }
 
     }
@@ -1150,8 +1164,10 @@ public class DesignNavigator extends VerticalLayout {
             tabs.closeTab(toDelete.getId());
             AbstractNamedObject parent = treeGrid.getTreeData().getParent(toDelete);
             refresh();
-            treeGrid.select(parent);
-            treeGrid.expand(parent);
+            if (treeGrid.getTreeData().contains(parent)) {
+                treeGrid.select(parent);
+                treeGrid.expand(parent);
+            }
         }
     }
 

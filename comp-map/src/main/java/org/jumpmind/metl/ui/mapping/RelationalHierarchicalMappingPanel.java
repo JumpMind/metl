@@ -108,10 +108,10 @@ public class RelationalHierarchicalMappingPanel extends AbstractFlowStepAwareCom
         titleHeader.setSpacing(true);
         titleHeader.getStyle().set("margin", "0 16px");
         titleHeader.setWidthFull();
-		Html inputModelHtml = new Html("<b>Input Model:</b> &nbsp;"
-				+ (component.getInputModel() != null ? component.getInputModel().getName() : "?"));
-		Html outputModelHtml = new Html("<b>Output Model:</b> &nbsp;"
-				+ (component.getOutputModel() != null ? component.getOutputModel().getName() : "?"));
+        Html inputModelHtml = new Html("<span><b>Input Model:</b> &nbsp;"
+                + (component.getInputModel() != null ? component.getInputModel().getName() : "?") + "</span>");
+        Html outputModelHtml = new Html("<span><b>Output Model:</b> &nbsp;"
+                + (component.getOutputModel() != null ? component.getOutputModel().getName() : "?") + "</span>");
         titleHeader.add(inputModelHtml, outputModelHtml);
         add(titleHeader);
 

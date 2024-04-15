@@ -219,6 +219,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         grid.addComponentColumn(setting -> {
             Button button = new Button();
             button.setIcon(new Icon(VaadinIcon.COG));
+            button.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_SMALL);
             button.addClickListener((event) -> new EditTransformDialog(setting).showAtSize(.75));
             return button;
         }).setHeader("Edit").setFlexGrow(0).setWidth("80px").setSortable(false);

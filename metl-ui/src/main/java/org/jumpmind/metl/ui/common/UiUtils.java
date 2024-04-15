@@ -68,7 +68,7 @@ public final class UiUtils {
                 name = pre + "<span style='background-color: #FCEE89'>" + highlighted + "</span>" + post;
             }
         }
-        return new Label(name);
+        return new Label(name != null ? name : "");
     }
 
     public static boolean filterMatches(String needle, String haystack) {

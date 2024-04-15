@@ -295,14 +295,14 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
 		        return String.format(UIConstants.TIME_FORMAT, startTime);
 		    }
 		    return "";
-		}).setHeader("Start").setFlexGrow(0).setWidth("120px");
+		}).setHeader("Start").setFlexGrow(0).setWidth("130px");
 		stepGrid.addColumn(step -> {
             Date endTime = step.getEndTime();
             if (endTime != null) {
                 return String.format(UIConstants.TIME_FORMAT, endTime);
             }
             return "";
-        }).setHeader("End").setFlexGrow(0).setWidth("120px");
+        }).setHeader("End").setFlexGrow(0).setWidth("130px");
 		stepGrid.addColumn(ExecutionStep::getHandleDurationString).setHeader("Run Duration").setFlexGrow(0).setWidth("140px");
 		stepGrid.addColumn(ExecutionStep::getQueueDurationString).setHeader("Wait Duration").setFlexGrow(0).setWidth("140px");
         stepGrid.addSelectionListener(event -> {

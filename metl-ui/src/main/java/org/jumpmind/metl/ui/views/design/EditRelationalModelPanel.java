@@ -314,7 +314,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                 }
             }
             return null;
-        }).setHeader("PK").setFlexGrow(0).setWidth("50px");
+        }).setHeader("PK").setFlexGrow(0).setWidth("60px");
 
         treeGrid.addItemClickListener(new TreeGridItemClickListener());
         treeGrid.addSelectionListener(new TreeGridSelectionListener());

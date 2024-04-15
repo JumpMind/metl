@@ -366,6 +366,9 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
             		if (model.getRootObject() == null) {
             		    model.setRootObject(newObject);
             		} else {
+            		    if (parentSchemaObject == null) {
+            		        parentSchemaObject = model.getRootObject();
+            		    }
             		    parentSchemaObject.getChildObjects().add(newObject);
             		}
                 addSchemaObject(newObject,parentSchemaObject,null);

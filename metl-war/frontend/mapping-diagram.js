@@ -201,7 +201,7 @@ window.org_jumpmind_metl_ui_mapping_MappingDiagram = function(javaElement) {
                     //TODO: deal with this when we have a component that needs it
             }
             
-            if (typeof state.relationalOutputModel !== 'undefined') {
+            if (state.relationalOutputModel !== null) {
                 appendRelationalNodes(mappingDiv, state.relationalOutputModel.modelEntities, "dst", (mappingDiv.clientWidth / 2) + 12, 10,
                         outputModelFilter, outputFilterPopulated, false);	
             } else {
@@ -243,9 +243,9 @@ window.org_jumpmind_metl_ui_mapping_MappingDiagram = function(javaElement) {
         
         function addSchemaObject(parentDiv, parentSchemaObject, prefix, xycoord) {
             var lineHeight = 23;
-            var key = "";
-            var column = "";
-            var table = "";
+            var key = "key";
+            var column = "split-h";
+            var table = "table";
         
             createNode(parentDiv, prefix + parentSchemaObject.id, parentSchemaObject.name, "entity " + prefix, xycoord.left, xycoord.top, table);    
             xycoord.top += lineHeight
@@ -262,9 +262,9 @@ window.org_jumpmind_metl_ui_mapping_MappingDiagram = function(javaElement) {
         function appendRelationalNodes(parentDiv, entities, prefix, left, top, filterText, filterMapped, src) {
             var lineHeight = 23;
             var filteredEntities = [];
-            var key = "";
-            var column = "";
-            var table = "";
+            var key = "key";
+            var column = "split-h";
+            var table = "table";
             for (var i = 0; i < entities.length; i++) {
                 var entity = entities[i];
         
@@ -311,7 +311,7 @@ window.org_jumpmind_metl_ui_mapping_MappingDiagram = function(javaElement) {
             div.id = id;
             div.style.top = top + "px";
             div.style.left = left + "px";
-            div.innerHTML = "<i class=\"v-icon FontAwesome\">" + icon + "</i><span>" + name + "</span>";
+            div.innerHTML = "<vaadin-icon icon=\"vaadin:" + icon + "\" style=\"padding-right: 4px;\"></vaadin-icon><span>" + name + "</span>";
             div.className = className;
             div.onmousedown = nodeClick;
             parentDiv.appendChild(div);

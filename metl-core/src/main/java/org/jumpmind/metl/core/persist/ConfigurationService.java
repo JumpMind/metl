@@ -178,7 +178,7 @@ public class ConfigurationService extends AbstractService
     public boolean isModelUsed(String id) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("outputModelId", id);
-        params.put("deleted", false);
+        params.put("deleted", 0);
         if (count(Component.class, params) == 0) {
             params.remove("outputModelId");
             params.put("inputModelId", id);
