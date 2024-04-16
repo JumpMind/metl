@@ -49,6 +49,10 @@
         <name>Delay (ms)</name>
         <defaultValue>1000</defaultValue>
       </setting>
+      <setting id='pause.all.messages.once' required='false' type='boolean'>
+        <name>Pause all messages one time (ignores Run When)</name>
+        <defaultValue>false</defaultValue>
+      </setting>
     </settings>
   </component>
   <component category='CONTROL'

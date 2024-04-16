@@ -31,14 +31,19 @@ public class Delay extends AbstractComponentRuntime {
     
     public final static String DELAY_TIME = "delay.in.ms";
     
+    public final static String PAUSE_ALL_MESSAGES_ONCE = "pause.all.messages.once";
+    
     String runWhen = PER_UNIT_OF_WORK;
     
+    boolean pauseAllMessagesOnce = false;
+    boolean onetimePauseCompleted = false;    
     long delay = 1000;
 
     @Override
     public void start() {        
         delay = getComponent().getLong(DELAY_TIME, 1000l);
         runWhen = getComponent().get(RUN_WHEN, PER_UNIT_OF_WORK);
+        pauseAllMessagesOnce = properties.is(PAUSE_ALL_MESSAGES_ONCE, pauseAllMessagesOnce);
     }
     
     @Override
@@ -48,9 +53,17 @@ public class Delay extends AbstractComponentRuntime {
     
 	@Override
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
-				|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
+		if (pauseAllMessagesOnce) {
+			pauseAllMessagesOnce = false;
+			onetimePauseCompleted = true;
 			AppUtils.sleep(delay);
+		} else {
+			if (!onetimePauseCompleted) {
+				if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
+						|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
+					AppUtils.sleep(delay);
+				}
+			}
 		}
 		callback.forward(inputMessage);
 	}
