@@ -1,6 +1,6 @@
 
 
-apply plugin: 'org.asciidoctor.gradle.asciidoctor'
+apply plugin: 'org.asciidoctor.jvm.convert'
 
 task cleanAsciidocBuildDir {
     doFirst {
@@ -27,6 +27,8 @@ task copyWiki(type: Copy) {
 
     from ("$buildDir/../../../metl.wiki/") { include "**/*.asciidoc" } 
     from ("$buildDir/../../metl-ui/src/asciidoc/") 
+    
+    filteringCharset = 'UTF-8'
     
     filter { text ->
       text.findAll(/link:.*]/).each { link ->
@@ -70,7 +72,9 @@ task publishDoc {
 }
 
 asciidoctor { (1)
-	backends = docFormat.split ","
+	outputOptions {
+		backends docFormat
+	}
     sourceDir = file("$buildDir/../../metl-ui/working/asciidoc")
     outputDir = file("$buildDir/src/asciidoc")
     options = [
@@ -79,12 +83,12 @@ asciidoctor { (1)
             'user-guide.asciidoc'            
             ]
     ]    
-    attributes = [
+    attributes \
         'source-highlighter':'coderay',
         'data-uri':'true',
         'imagesdir': '.',
         'icons': 'font'
-    ]
+    baseDirFollowsSourceFile()
 }
 
 asciidoctor.dependsOn copyWiki

@@ -3,8 +3,6 @@ import org.apache.tools.ant.filters.ReplaceTokens
 import java.text.SimpleDateFormat
 import java.util.Date
 
-    apply from: metlAssembleDir + '/asciidoc.gradle'
-
     group = 'org.jumpmind.metl'
         
     apply plugin: 'eclipse-wtp'

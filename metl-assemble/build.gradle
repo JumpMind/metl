@@ -9,7 +9,7 @@ buildscript {
     }
 
     dependencies {
-    	classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.6.1'
+    	classpath 'org.asciidoctor:asciidoctor-gradle-jvm:3.3.2'
         classpath 'org.asciidoctor:asciidoctorj-pdf:2.3.15'
         classpath 'io.github.humblerookie:gradle-github-plugin:0.5.0'
     }
@@ -17,6 +17,7 @@ buildscript {
 
 plugins {
     id 'com.vaadin' version '24.3.7' apply false
+    id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
 }
 
 buildNumber = 'a'.equals(buildNumber) ?  ('a.' + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())) : buildNumber
