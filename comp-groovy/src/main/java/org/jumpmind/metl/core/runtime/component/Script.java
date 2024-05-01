@@ -46,6 +46,8 @@ import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
+import groovy.xml.XmlParser;
+
 public class Script extends AbstractComponentRuntime {
 
     public static final String TYPE = "Script";
@@ -96,6 +98,7 @@ public class Script extends AbstractComponentRuntime {
         script.append(String.format("import %s;\n", MisconfiguredException.class.getName()));
         script.append(String.format("import %s;\n", AssertException.class.getName()));
         script.append(String.format("import %s.%s;\n", EntityData.class.getName(), ChangeType.class.getSimpleName()));
+        script.append(String.format("import %s;\n", XmlParser.class.getName()));
         script.append("import org.jumpmind.db.sql.*;\n");
         if (isNotBlank(importStatements)) {
             script.append(importStatements);
