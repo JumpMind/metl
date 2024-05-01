@@ -66,5 +66,10 @@ public class ApiPanel extends AbstractAdminPanel {
     @Override
     protected void refresh() {
     }
+    
+    @Override
+    public boolean isAccessible() {
+        return false;
+    }
 
 }
