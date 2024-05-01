@@ -41,18 +41,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.dependency.JavaScript;
-import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.page.Page;
 
 import elemental.json.JsonObject;
 
-@CssImport("./mapping-diagram.css")
-@JsModule("./jsplumb.min.js")
-@JsModule("./mapping-diagram.js")
-@JavaScript("./mapping-diagram.js")
 @SuppressWarnings("serial")
 public class MappingDiagram extends Div {
     

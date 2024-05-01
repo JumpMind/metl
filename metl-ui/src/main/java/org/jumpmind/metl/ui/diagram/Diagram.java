@@ -46,6 +46,10 @@ import elemental.json.JsonObject;
 @JsModule("./jsplumb.min.js")
 @JsModule("./diagram.js")
 @JavaScript("./diagram.js")
+@CssImport("./mapping-diagram.css")
+@JsModule("./jsplumb.min.js")
+@JsModule("./mapping-diagram.js")
+@JavaScript("./mapping-diagram.js")
 public class Diagram extends Div {
 
     private static final long serialVersionUID = 1L;
