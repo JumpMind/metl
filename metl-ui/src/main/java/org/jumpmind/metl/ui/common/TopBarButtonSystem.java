@@ -29,7 +29,10 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.vaadin.flow.component.Html;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.spring.annotation.UIScope;
 
 @Component
@@ -51,12 +54,17 @@ public class TopBarButtonSystem extends TopBarButton {
         String caption = "";
         GlobalSetting setting = context.getOperationsService().findGlobalSetting(GlobalSetting.SYSTEM_TEXT);
         if (setting != null) {
-            caption = setting.getValue();
+            caption = "<div>" + setting.getValue() + "</div>";
         }
 
         if (StringUtils.isNotBlank(caption)) {
             setText(null);
-            setIcon(new Html(caption));
+            Icon icon = new Icon(VaadinIcon.WARNING);
+            icon.getStyle().set("padding", "4px");
+            HorizontalLayout layout = new HorizontalLayout(icon, new Html(caption));
+            layout.setSpacing(false);
+            layout.setDefaultVerticalComponentAlignment(Alignment.CENTER);
+            setIcon(layout);
         } else {
             setVisible(false);
         }
