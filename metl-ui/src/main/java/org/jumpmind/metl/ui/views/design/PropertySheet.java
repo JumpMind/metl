@@ -820,7 +820,7 @@ public class PropertySheet extends Div {
                     }
                     break;
                 case SCRIPT:
-                    final AceEditor editor = CommonUiUtils.createAceEditor();
+                    final AceEditor editor = new AceEditor();
                     editor.setMode(AceMode.java);
                     editor.setHeight("10em");
                     editor.setWidthFull();

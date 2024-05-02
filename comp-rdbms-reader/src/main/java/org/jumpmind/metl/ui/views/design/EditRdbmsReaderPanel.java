@@ -35,7 +35,6 @@ import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.component.RdbmsReader;
 import org.jumpmind.metl.core.runtime.resource.Datasource;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.sqlexplorer.IButtonBar;
 import org.jumpmind.vaadin.ui.sqlexplorer.IDb;
 import org.jumpmind.vaadin.ui.sqlexplorer.ISettingsProvider;
@@ -163,10 +162,12 @@ public class EditRdbmsReaderPanel extends AbstractComponentEditPanel {
                 expand(span);
             }
         } else {
-            AceEditor editor = CommonUiUtils.createAceEditor();
+            AceEditor editor = new AceEditor();
+            editor.setSizeFull();
             editor.setMode(AceMode.sql);
             editor.setValue(component.get(RdbmsReader.SQL));
             editor.setReadOnly(readOnly);
+            editor.setShowPrintMargin(false);
             add(editor);
             expand(editor);
         }

@@ -23,7 +23,6 @@ package org.jumpmind.metl.ui.views.design;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.component.TextConstant;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 
 import com.vaadin.flow.component.ComponentEventListener;
 
@@ -40,8 +39,10 @@ public class EditTextConstant extends AbstractComponentEditPanel {
         ButtonBar buttonBar = new ButtonBar();
         add(buttonBar);
 
-        editor = CommonUiUtils.createAceEditor();
+        editor = new AceEditor();
+        editor.setSizeFull();
         editor.setMode(AceMode.text);
+        editor.setShowPrintMargin(false);
         editor.setValue(component.get(TextConstant.SETTING_TEXT));
         editor.addValueChangeListener(new ComponentEventListener<AceValueChanged>() {
             public void onComponentEvent(AceValueChanged event) {

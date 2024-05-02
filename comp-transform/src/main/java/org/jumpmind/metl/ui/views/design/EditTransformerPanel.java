@@ -41,7 +41,6 @@ import org.jumpmind.metl.core.runtime.component.Transformer;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.ExcelExport;
 import org.jumpmind.metl.ui.common.UiUtils;
-import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.CsvExport;
 import org.jumpmind.vaadin.ui.common.ExportFileDownloader;
 import org.jumpmind.vaadin.ui.common.GridDataProvider;
@@ -466,8 +465,10 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
                     });
             
             
-            editor = CommonUiUtils.createAceEditor();
+            editor = new AceEditor();
+            editor.setSizeFull();
             editor.setMode(AceMode.java);
+            editor.setShowPrintMargin(false);
             
             editor.addSelectionChangeListener(event -> cursorPosition = event.getCursorPosition().getIndex());
             editor.addValueChangeListener(new ComponentEventListener<AceValueChanged>() {

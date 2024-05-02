@@ -22,7 +22,6 @@ package org.jumpmind.metl.ui.views.design;
 
 import org.jumpmind.metl.core.runtime.component.TempRdbms;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
@@ -46,8 +45,10 @@ public class EditTempRdbmsPanel extends AbstractComponentEditPanel {
     	ButtonBar buttonBar = new ButtonBar();
         add(buttonBar);
         
-    	editor = CommonUiUtils.createAceEditor();
+    	editor = new AceEditor();
+    	editor.setSizeFull();
         editor.setMode(AceMode.sql);
+        editor.setShowPrintMargin(false);
         
         select = new ComboBox<String>();
         select.setWidth("40em");

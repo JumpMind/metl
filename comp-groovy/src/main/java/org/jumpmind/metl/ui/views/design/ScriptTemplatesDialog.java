@@ -30,7 +30,6 @@ import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.runtime.component.Script;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ResizableDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,9 +100,10 @@ class ScriptTemplatesDialog extends ResizableDialog {
             }
         });
 
-        editor = CommonUiUtils.createAceEditor();
+        editor = new AceEditor();
         editor.setSizeFull();
-        editor.setMode(AceMode.java);
+        editor.setMode(AceMode.groovy);
+        editor.setShowPrintMargin(false);
         add(editor, 1);
 
         if (currentValue != null) {

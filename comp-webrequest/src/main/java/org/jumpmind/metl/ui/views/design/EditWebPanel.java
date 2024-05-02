@@ -22,7 +22,6 @@ package org.jumpmind.metl.ui.views.design;
 
 import org.jumpmind.metl.core.runtime.component.Web;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 
 import com.vaadin.flow.component.ComponentEventListener;
 
@@ -39,8 +38,10 @@ public class EditWebPanel extends AbstractComponentEditPanel {
         ButtonBar buttonBar = new ButtonBar();
         add(buttonBar);
 
-        editor = CommonUiUtils.createAceEditor();
+        editor = new AceEditor();
+        editor.setSizeFull();
         editor.setMode(AceMode.xml);
+        editor.setShowPrintMargin(false);
         editor.setValue(component.get(Web.BODY_TEXT));
         editor.addValueChangeListener(new ComponentEventListener<AceValueChanged>() {
             public void onComponentEvent(AceValueChanged event) {

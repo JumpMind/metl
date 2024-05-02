@@ -22,7 +22,6 @@ package org.jumpmind.metl.ui.views.design;
 
 import org.jumpmind.metl.core.runtime.component.Script;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
@@ -61,9 +60,10 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
                 (e) -> new ScriptTemplatesDialog(this, context, component, readOnly)
                         .showAtSize(.75));
 
-        editor = CommonUiUtils.createAceEditor();
-
-        editor.setMode(AceMode.java);
+        editor = new AceEditor();
+        editor.setSizeFull();
+        editor.setMode(AceMode.groovy);
+        editor.setShowPrintMargin(false);
 
         select = new ComboBox<String>();
         select.setWidth("40em");
