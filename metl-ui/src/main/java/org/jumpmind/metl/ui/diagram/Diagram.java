@@ -68,8 +68,10 @@ public class Diagram extends Div {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        Page page = UI.getCurrent().getPage();
-        page.executeJs("window.org_jumpmind_metl_ui_diagram_Diagram($0)", getElement());
+        if (attachEvent.isInitialAttach()) {
+            Page page = UI.getCurrent().getPage();
+            page.executeJs("window.org_jumpmind_metl_ui_diagram_Diagram($0)", getElement());
+        }
     }
 
     @ClientCallable

@@ -292,8 +292,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             configurationService.refresh(step.getComponent(), true);
             ids.add(step.getId());
         }
-        diagram.setNodes(getNodes());
-        diagram.setSelectedNodeIds(ids);
+        redrawFlow();
     }
 
     @Override

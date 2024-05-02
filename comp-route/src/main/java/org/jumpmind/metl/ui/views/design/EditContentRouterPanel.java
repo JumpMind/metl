@@ -79,6 +79,7 @@ public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPa
                 if (selected != null) {
                     routeList.remove(selected);
                     save();
+                    grid.getDataProvider().refreshAll();
                 }
             });
             

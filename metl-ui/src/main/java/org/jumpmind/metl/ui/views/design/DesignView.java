@@ -93,6 +93,10 @@ public class DesignView extends HorizontalLayout implements BeforeEnterObserver,
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         projectNavigator.refresh();
+        if (tabbedPanel != null && tabbedPanel.getSelectedTab() != null
+                && tabbedPanel.getSelectedTab().getComponent() instanceof EditFlowPanel panel) {
+            panel.redrawFlow();
+        }
     }
 
 }
