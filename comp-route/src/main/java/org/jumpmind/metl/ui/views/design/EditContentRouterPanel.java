@@ -123,14 +123,14 @@ public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPa
             });
             binder.forField(combo).bind(route -> flow.findFlowStepWithId(route.getTargetStepId()),
                     (route, step) -> route.setTargetStepId(step.getId()));
-            grid.addColumn(Route::getTargetStepId).setEditorComponent(combo).setHeader("Target Step").setSortable(false);
+            grid.addColumn(route -> getTargetStepNameForRoute(route)).setEditorComponent(combo).setHeader("Target Step").setSortable(false);
             
             grid.addItemDoubleClickListener(event -> editor.editItem(event.getItem()));
             
             grid.addSelectionListener((event) -> removeButton.setEnabled(!event.getAllSelectedItems().isEmpty()));
         } else {
             grid.addColumn(Route::getMatchExpression).setHeader("Expression").setSortable(false);
-            grid.addColumn(Route::getTargetStepId).setHeader("Target Step").setSortable(false);
+            grid.addColumn(route -> getTargetStepNameForRoute(route)).setHeader("Target Step").setSortable(false);
         }
 
         grid.setSizeFull(); 
@@ -140,6 +140,19 @@ public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPa
 
 
     }    
+    
+    protected String getTargetStepNameForRoute(Route route) {
+        flow = context.getConfigurationService().findFlow(flow.getId());
+        List<FlowStepLink> stepLinks = flow.findFlowStepLinksWithSource(flowStep.getId());
+        String stepName = null;
+        for (FlowStepLink flowStepLink : stepLinks) {
+            FlowStep step = flow.findFlowStepWithId(flowStepLink.getTargetStepId());
+            if (step != null && (flowStepLink.getTargetStepId().equals(route.getTargetStepId()) || stepName == null)) {
+                stepName = step.getName();
+            }
+        }
+        return stepName != null ? stepName : "";
+    }
     
     @Override
     public void selected() {
