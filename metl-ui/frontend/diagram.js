@@ -329,8 +329,9 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function(javaElement) {
                 ctrlPress = false;
             }));
 
-            //not sure what this does.
-            parentDiv.click(diagramContainer_Click);
+            parent.addEventListener("click", function() {
+                diagramContainer_Click(event);
+            });
             if (!(state.readOnly)) {
                 parentDiv.addEventListener("mousedown",function() {
                 diagramContainer_MouseDown(event);
