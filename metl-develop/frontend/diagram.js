@@ -304,7 +304,7 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function(javaElement) {
                     });
                     connection.toggleType("selected");
                     sendSelected();
-                    self.onLinkSelected({
+                    document.getElementById(parentDiv.id).$server.onLinkSelected({
                         'sourceNodeId' : connection.sourceId,
                         'targetNodeId' : connection.targetId,
                     });
