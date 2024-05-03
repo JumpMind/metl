@@ -721,12 +721,12 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                 Component component = new Component();
                 component.setId(droppedItem.getComponentId());
                 configurationService.refresh(component, true);
-                addComponent(droppedItem.getText(), (int) x, (int) y, component);
+                addComponent(droppedItem.getLabel(), (int) x, (int) y, component);
             } else {
                 Component component = new Component();
                 component.setType(droppedItem.getComponentType());
                 component.setShared(false);
-                addComponent(droppedItem.getText(), (int) x, (int) y, component);
+                addComponent(droppedItem.getLabel(), (int) x, (int) y, component);
             }
             droppedItem = null;
         }

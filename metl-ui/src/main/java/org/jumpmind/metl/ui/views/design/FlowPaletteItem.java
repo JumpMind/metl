@@ -35,10 +35,13 @@ public class FlowPaletteItem extends Button {
     
     String componentId;
     
+    String label;
+    
     boolean isShared;
 
     public FlowPaletteItem(String label, StreamResource imageResource) {
         super();
+        this.label = label;
         setHeight("90px");
         setWidth("140px");
         VerticalLayout buttonLayout = new VerticalLayout();
@@ -64,6 +67,14 @@ public class FlowPaletteItem extends Button {
     
     public void setComponentId(String componentId) {
         this.componentId = componentId;
+    }
+    
+    public String getLabel() {
+        return label;
+    }
+    
+    public void setLabel(String label) {
+        this.label = label;
     }
     
     public boolean isShared() {
