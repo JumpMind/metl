@@ -175,6 +175,10 @@ public class TopBar extends HorizontalLayout implements AfterNavigationObserver 
         }
     }
     
+    public boolean containsView(String viewName) {
+        return viewToButtonMapping.get(viewName) != null;
+    }
+    
     public String getDefaultView() {
         return defaultView;
     }

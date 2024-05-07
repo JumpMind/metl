@@ -154,8 +154,8 @@ public class MainLayout extends VerticalLayout implements RouterLayout {
         if (defaultView != null) {
             UI ui = UI.getCurrent();
             ui.getPage().fetchCurrentURL(url -> {
-                String path = url.getPath();
-                if (StringUtils.remove(path, "/").equalsIgnoreCase("metl")) {
+                String path = StringUtils.remove(url.getPath(), "/");
+                if (path.equalsIgnoreCase("metl") || !menu.containsView(StringUtils.removeIgnoreCase(path, "metl"))) {
                     ui.navigate(defaultView);
                 }
             });
