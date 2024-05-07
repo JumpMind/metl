@@ -75,7 +75,6 @@ public class EditRdbmsReaderPanel extends AbstractComponentEditPanel {
             executeSqlClickListener = new ExecuteSqlClickListener();
 
             executeButton = buttonBar.addButton("Execute", VaadinIcon.PLAY, executeSqlClickListener);
-            executeButton.setEnabled(false);
 
             Resource resource = component.getResource();
 
@@ -145,9 +144,6 @@ public class EditRdbmsReaderPanel extends AbstractComponentEditPanel {
                 queryPanel.setWidthFull();
 
                 queryPanel.appendSql(component.get(RdbmsReader.SQL));
-                queryPanel.getSqlEditor().addSelectionChangeListener(event -> {
-                    executeButton.setEnabled(StringUtils.isNotBlank(event.getSelection().getSelectedText()));
-                });
 
                 Shortcuts.addShortcutListener(queryPanel, () -> {
                     executeSqlClickListener.onComponentEvent(new ClickEvent<Button>(executeButton));
