@@ -197,6 +197,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
             } else {
                 Label label = UiUtils.getName(filterField.getValue(), obj.getName());
                 Icon icon = new Icon(obj instanceof ModelEntity ? VaadinIcon.TABLE : VaadinIcon.SPLIT_H);
+                icon.getStyle().set("min-width", "24px");
                 return new HorizontalLayout(icon, label);
             }
         }).setHeader("Name");
@@ -310,7 +311,9 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
 
                     return cbox;
                 } else if (obj.isPk()) {
-                    return new Icon(VaadinIcon.KEY);
+                    Icon icon = new Icon(VaadinIcon.KEY);
+                    icon.getStyle().set("min-width", "24px");
+                    return icon;
                 }
             }
             return null;
@@ -705,7 +708,11 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
 
         public void onComponentEvent(ItemClickEvent<AbstractNamedObject> event) {
             if (event.getClickCount() == 2) {
-                editSelectedItem();
+                treeGrid.deselectAll();
+                treeGrid.select(event.getItem());
+                lastEditItemIds = Collections.singleton(event.getItem());
+                treeGrid.getDataProvider().refreshAll();
+                grid.getDataProvider().refreshAll();
             } else if (System.currentTimeMillis() - lastClick > 1000
                     && getSelectedItems().size() > 0) {
                 treeGrid.deselectAll();
