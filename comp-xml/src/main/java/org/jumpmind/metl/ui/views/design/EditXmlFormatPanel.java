@@ -174,6 +174,7 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
                 }
             });
 
+            recordList.clear();
             for (ModelEntity entity : model.getModelEntities()) {
                 boolean firstAttribute = true;
                 Record entityRecord = new Record(entity, null);
