@@ -403,6 +403,7 @@ public class PropertySheet extends Div {
         textField.setWidthFull();
         textField.setValueChangeMode(ValueChangeMode.LAZY);
         textField.setValueChangeTimeout(200);
+        textField.setValue(component.getName());
         textField.addValueChangeListener(event -> {
             component.setName(event.getValue());
             context.getConfigurationService().save(component);
@@ -412,7 +413,6 @@ public class PropertySheet extends Div {
                 listener.componentChanged(components);
             }
         });
-        textField.setValue(component.getName());
         textField.setRequiredIndicatorVisible(true);
         textField.getElement().setProperty("title", "Name for the component on the flow");
         formLayout.addFormItem(textField, "Component Name");
