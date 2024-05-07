@@ -40,12 +40,13 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.editor.Editor;
+import com.vaadin.flow.component.grid.dnd.GridDropLocation;
+import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.selection.SelectionEvent;
 import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -60,6 +61,8 @@ class EditFlowSettingsDialog extends ResizableDialog implements SelectionListene
     List<FlowParameter> flowParameterList = new ArrayList<FlowParameter>();
 
     Grid<FlowParameter> grid;
+    
+    FlowParameter draggedParameter;
 
     Button insertButton;
 
@@ -114,24 +117,49 @@ class EditFlowSettingsDialog extends ResizableDialog implements SelectionListene
         
         grid = new Grid<FlowParameter>();
         grid.setSizeFull();
-        grid.addColumn(FlowParameter::getPosition).setHeader("#").setSortable(false);
+        grid.addColumn(FlowParameter::getPosition).setHeader("#").setFlexGrow(0).setWidth("100px").setSortable(false);
         if (!readOnly) {
             grid.setRowsDraggable(true);
-            grid.addDropListener(event -> saveAllPositions());
+            grid.setDropMode(GridDropMode.BETWEEN);
+            grid.addDragStartListener(
+                    event -> draggedParameter = !event.getDraggedItems().isEmpty() ? event.getDraggedItems().get(0) : null);
+            grid.addDropListener(event -> {
+                if (draggedParameter != null) {
+                    FlowParameter dropTargetParameter = event.getDropTargetItem().orElse(null);
+                    if (dropTargetParameter != null && !draggedParameter.equals(dropTargetParameter)) {
+                        flowParameterList.remove(draggedParameter);
+                        int index = flowParameterList.indexOf(dropTargetParameter);
+                        if (event.getDropLocation() == GridDropLocation.BELOW) {
+                            flowParameterList.add(index + 1, draggedParameter);
+                        } else {
+                            flowParameterList.add(index, draggedParameter);
+                        }
+                        saveAllPositions();
+                        grid.setItems(flowParameterList);
+                    }
+                }
+            });
+            grid.addDragEndListener(event -> draggedParameter = null);
             grid.addSelectionListener(this);
             
-            Editor<FlowParameter> editor = grid.getEditor();
-            Binder<FlowParameter> binder = new Binder<FlowParameter>();
-            editor.setBinder(binder);
-            TextField nameField = createEditorField();
-            binder.forField(nameField).bind(FlowParameter::getName, FlowParameter::setName);
-            grid.addColumn(FlowParameter::getName).setEditorComponent(nameField).setHeader("Name").setFlexGrow(3)
-                    .setSortable(false);
-            TextField defaultValueField = createEditorField();
-            binder.forField(defaultValueField).bind(FlowParameter::getDefaultValue, FlowParameter::setDefaultValue);
-            grid.addColumn(FlowParameter::getDefaultValue).setEditorComponent(defaultValueField)
-                    .setHeader("Default Value").setFlexGrow(6).setSortable(false);
-            grid.addItemDoubleClickListener(event -> editor.editItem(event.getItem()));
+            grid.addComponentColumn(parameter -> {
+                TextField nameField = createEditorField();
+                nameField.setValue(parameter.getName() != null ? parameter.getName() : "");
+                nameField.addValueChangeListener(event -> {
+                    parameter.setName(event.getValue());
+                    context.getConfigurationService().save(parameter);
+                });
+                return nameField;
+            }).setHeader("Name").setFlexGrow(3).setSortable(false);
+            grid.addComponentColumn(parameter -> {
+                TextField defaultValueField = createEditorField();
+                defaultValueField.setValue(parameter.getDefaultValue() != null ? parameter.getDefaultValue() : "");
+                defaultValueField.addValueChangeListener(event -> {
+                    parameter.setDefaultValue(event.getValue());
+                    context.getConfigurationService().save(parameter);
+                });
+                return defaultValueField;
+            }).setHeader("Default Value").setFlexGrow(6).setSortable(false);
         } else {
             grid.addColumn(FlowParameter::getName).setHeader("Name").setFlexGrow(3).setSortable(false);
             grid.addColumn(FlowParameter::getDefaultValue).setHeader("Default Value").setFlexGrow(6).setSortable(false);
@@ -140,14 +168,14 @@ class EditFlowSettingsDialog extends ResizableDialog implements SelectionListene
 
         buildButtonFooter(closeButton);
 
-        List<FlowParameter> params = flow.getFlowParameters();
-        Collections.sort(params, new Comparator<FlowParameter>() {
+        flowParameterList = flow.getFlowParameters();
+        Collections.sort(flowParameterList, new Comparator<FlowParameter>() {
             public int compare(FlowParameter o1, FlowParameter o2) {
                 return Integer.valueOf(o1.getPosition()).compareTo(Integer.valueOf(o2.getPosition()));
             }
         });
 
-        grid.setItems(params);
+        grid.setItems(flowParameterList);
     }
 
     public void selectionChange(SelectionEvent<Grid<FlowParameter>, FlowParameter> event) {
@@ -161,7 +189,6 @@ class EditFlowSettingsDialog extends ResizableDialog implements SelectionListene
         parameter.setName("Parameter " + (index + 1));
         parameter.setPosition((index + 1));
         context.getConfigurationService().save(parameter);
-        flow.getFlowParameters().add(parameter);
         flowParameterList.add(index, parameter);
         grid.setItems(flowParameterList);
         grid.select(parameter);
@@ -195,12 +222,11 @@ class EditFlowSettingsDialog extends ResizableDialog implements SelectionListene
         public void onComponentEvent(ClickEvent<Button> event) {
             FlowParameter parameter = grid.getSelectionModel().getFirstSelectedItem().orElse(null);
             if (parameter != null) {
-                flow.getFlowParameters().remove(parameter);
                 context.getConfigurationService().delete((AbstractObject) parameter);
                 int index = flowParameterList.indexOf(parameter);
                 flowParameterList.remove(parameter);
                 grid.setItems(flowParameterList);
-                if (index < flowParameterList.size()) {
+                if (index > -1 && index < flowParameterList.size()) {
                     grid.select(flowParameterList.get(index));
                 }
                 saveAllPositions();
@@ -217,16 +243,9 @@ class EditFlowSettingsDialog extends ResizableDialog implements SelectionListene
     protected TextField createEditorField() {
         final TextField textField = new TextField();
         textField.setWidthFull();
+        textField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
         textField.setValueChangeMode(ValueChangeMode.LAZY);
         textField.setValueChangeTimeout(200);
-        textField.addValueChangeListener(event -> {
-            Editor<FlowParameter> editor = grid.getEditor();
-            FlowParameter parameter = editor.getItem();
-            if (parameter != null) {
-                editor.getBinder().writeBeanAsDraft(parameter);
-                context.getConfigurationService().save(parameter);
-            }
-        });
         return textField;
     }
 
