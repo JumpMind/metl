@@ -138,6 +138,7 @@ public class TableColumnSelectDialog extends ResizableDialog implements Receiver
         dbTree.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
 
         relCsvUpload = new Upload(this);
+        relCsvUpload.setWidthFull();
         relCsvUpload.setId("csvUpload");
         relCsvUpload.setDropAllowed(false);
         relCsvUpload.addSucceededListener(this);
@@ -146,11 +147,13 @@ public class TableColumnSelectDialog extends ResizableDialog implements Receiver
         fileHeaderEntity.setWidth("25em");
         fileHeaderEntity.setRequiredIndicatorVisible(true);
 
-        fileHeaderDelimiter = new TextField("Header Row Delimiter", ",");
+        fileHeaderDelimiter = new TextField("Header Row Delimiter");
         fileHeaderDelimiter.setWidth("10em");
         fileHeaderDelimiter.setRequiredIndicatorVisible(true);
+        fileHeaderDelimiter.setValue(",");
         
         fileHeaderUpload = new Upload(this);
+        fileHeaderUpload.setWidthFull();
         fileHeaderUpload.setId("headerUpload");
         fileHeaderUpload.setDropAllowed(false);
         fileHeaderUpload.addSucceededListener(this);
