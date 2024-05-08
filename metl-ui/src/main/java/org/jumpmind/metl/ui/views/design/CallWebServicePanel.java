@@ -74,6 +74,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.formlayout.FormLayout.FormItem;
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -120,8 +121,12 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
     ComboBox<SecurityScheme> securitySchemeCombo;
 
     TextField userField;
+    
+    FormItem userFormItem;
 
     PasswordField passwordField;
+    
+    FormItem passwordFormItem;
 
     public CallWebServicePanel(AgentDeploy deployment, ApplicationContext context,
             TabbedPanel tabs) {
@@ -174,13 +179,13 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
 
         userField = new TextField();
         userField.setWidth("550px");
-        userField.setVisible(false);
-        formLayout.addFormItem(userField, "Security Username");
+        userFormItem = formLayout.addFormItem(userField, "Security Username");
+        userFormItem.setVisible(false);
 
         passwordField = new PasswordField();
         passwordField.setWidth("550px");
-        passwordField.setVisible(false);
-        formLayout.addFormItem(passwordField, "Security Password");
+        passwordFormItem = formLayout.addFormItem(passwordField, "Security Password");
+        passwordFormItem.setVisible(false);
 
         requestTabs = new ReqRespTabSheet(true);
         formLayout.addFormItem(requestTabs, "Request");
@@ -241,8 +246,8 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
         if (event.getValue() != null) {
             SecurityScheme scheme = (SecurityScheme) securitySchemeCombo.getValue();
             boolean visible = scheme != SecurityScheme.NONE;
-            userField.setVisible(visible);
-            passwordField.setVisible(visible);
+            userFormItem.setVisible(visible);
+            passwordFormItem.setVisible(visible);
         } else {
             securitySchemeCombo.setValue(event.getOldValue());
         }
