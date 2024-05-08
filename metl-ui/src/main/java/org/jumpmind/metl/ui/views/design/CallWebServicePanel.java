@@ -215,8 +215,8 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
             });
 
             securitySchemeCombo.setValue(mapping.getSecurityScheme());
-            userField.setValue(mapping.getSecurityUsername());
-            passwordField.setValue(mapping.getSecurityPassword());
+            userField.setValue(mapping.getSecurityUsername() != null ? mapping.getSecurityUsername() : "");
+            passwordField.setValue(mapping.getSecurityPassword() != null ? mapping.getSecurityPassword() : "");
             
             methodGroup.setValue(mapping.getMethod().name());
 
