@@ -82,7 +82,7 @@ window.org_jumpmind_metl_ui_mapping_MappingDiagram = function(javaElement) {
 
             instance.bind("connection", function(info, originalEvent) {
                 unselectAllNodes();
-                diagramDiv.$server.onConnection({
+                mappingDiv.$server.onConnection({
                     "sourceId" : info.connection.sourceId,
                     "targetId" : info.connection.targetId,
                     "removed" : false
@@ -91,7 +91,7 @@ window.org_jumpmind_metl_ui_mapping_MappingDiagram = function(javaElement) {
     
             instance.bind("connectionDetached", function(info, originalEvent) {
                 unselectAllNodes();
-                diagramDiv.$server.onConnection({
+                mappingDiv.$server.onConnection({
                     "sourceId" : info.connection.sourceId,
                     "targetId" : info.connection.targetId,
                     "removed" : true
@@ -105,7 +105,7 @@ window.org_jumpmind_metl_ui_mapping_MappingDiagram = function(javaElement) {
                         info.connection.endpoints[i].toggleType("selected");
                     }
                 }
-                diagramDiv.$server.onConnection({
+                mappingDiv.$server.onConnection({
                     "sourceId" : info.originalSourceId,
                     "targetId" : info.originalTargetId,
                     "removed" : true
