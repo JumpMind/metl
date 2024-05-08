@@ -85,7 +85,7 @@ public class DbProvider implements IDbProvider, Serializable {
                 List<Resource> resources = configurationService.findResourcesByTypes(version.getId(), false, "Database");
                 for (Resource resource : resources) {
                     if (resource.getBoolean("show.on.explore.screen", false) || showAllResources) {
-                        DbResource db = new DbResource("Design > " + resource.getName(),
+                        DbResource db = new DbResource(createUniqueName("Design > " + resource.getName()),
                                 resource.toTypedProperties(defintion.getSettings().getSetting()));
                         dbs.add(db);
                     }
@@ -101,7 +101,7 @@ public class DbProvider implements IDbProvider, Serializable {
                 Collection<IResourceRuntime> resources = runtime.getDeployedResources();
                 for (IResourceRuntime iResource : resources) {
                     if (iResource.getResource().getType().equals("Database")) {
-                        DbResource db = new DbResource(agent.getName() + " > " + iResource.getResource().getName(),
+                        DbResource db = new DbResource(createUniqueName(agent.getName() + " > " + iResource.getResource().getName()),
                                 iResource.getResourceRuntimeSettings());
                         dbs.add(db);
                     }
@@ -119,6 +119,19 @@ public class DbProvider implements IDbProvider, Serializable {
         dbs.add(0, new MetlDb());
         dbs.add(1, new ExecutionMetlDb());
 
+    }
+    
+    private String createUniqueName(String originalName) {
+        String uniqueName = originalName;
+        int duplicateCount = 0;
+        while (!isNameUnique(uniqueName)) {
+            uniqueName = originalName + " - " + ++duplicateCount;
+        }
+        return uniqueName;
+    }
+    
+    private boolean isNameUnique(String name) {
+        return dbs.stream().noneMatch(db -> db.getName().equals(name));
     }
 
     @Override
