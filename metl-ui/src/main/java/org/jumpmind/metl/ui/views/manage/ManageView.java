@@ -418,6 +418,7 @@ public class ManageView extends HorizontalLayout implements BeforeEnterObserver,
             Execution execution = (Execution) item;
             ExecutionRunPanel logPanel = new ExecutionRunPanel(execution.getId(), context, tabs, null);
             tabs.addCloseableTab(execution.getId(), "Log " + execution.getFlowName(), new Icon(Icons.LOG), logPanel);
+            tabs.setSelectedTab(logPanel);
             logPanel.onBackgroundUIRefresh(logPanel.onBackgroundDataRefresh());
         }
     }
