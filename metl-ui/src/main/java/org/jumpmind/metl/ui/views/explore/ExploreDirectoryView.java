@@ -44,6 +44,7 @@ import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.MainLayout;
+import org.jumpmind.metl.ui.common.PlaceholderObject;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.metl.ui.common.View;
 import org.jumpmind.vaadin.ui.common.UiComponent;
@@ -128,24 +129,25 @@ public class ExploreDirectoryView extends VerticalLayout implements BeforeEnterO
     }
 
     protected Component fileLinkComponent(Object itemId) {
-        if (itemId instanceof FileInfo) {
-            final FileInfo file = (FileInfo) itemId;
+        if (itemId instanceof FileInfo file) {
             if (!file.isDirectory()) {
                 final Button button = new Button(file.getName());
                 button.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
                 button.setIcon(new Icon(VaadinIcon.FILE));
                 StreamResource resource = new StreamResource(file.getName(), () -> stream(file));
                 Anchor fileDownloader = new Anchor(resource, null);
+                fileDownloader.getElement().setAttribute("download", true);
                 fileDownloader.add(button);
                 return fileDownloader;
             } else {
                 Icon icon = new Icon(grid.isExpanded(itemId) ? Icons.FOLDER_OPEN : Icons.FOLDER_CLOSED);
                 return new HorizontalLayout(icon, new Span(file.getName()));
             }
-        } else {
+        } else if (itemId instanceof DirectoryResource resource) {
             Icon icon = new Icon(grid.isExpanded(itemId) ? Icons.FOLDER_OPEN : Icons.FOLDER_CLOSED);
-            return new HorizontalLayout(icon, new Span(((DirectoryResource) itemId).getName()));
-
+            return new HorizontalLayout(icon, new Span(resource.getName()));
+        } else {
+            return new Span("<empty>");
         }
     }
 
@@ -174,6 +176,7 @@ public class ExploreDirectoryView extends VerticalLayout implements BeforeEnterO
                     grid.getTreeData().removeItem(object);
                 }
             }
+            grid.getTreeData().addItem(item, new PlaceholderObject());
             grid.getDataProvider().refreshAll();
         }
     }
@@ -184,16 +187,22 @@ public class ExploreDirectoryView extends VerticalLayout implements BeforeEnterO
             Object item = items.iterator().next();
             DirectoryResource resource = getDirectoryResource(item);
             IDirectory directory = resource.getDirectory();
+            List<FileInfo> files = null;
             try {
                 if (item instanceof DirectoryResource) {
-                    List<FileInfo> files = directory.listFiles("");
-                    addChildren(item, files);
-                } else if (item instanceof FileInfo) {
-                    List<FileInfo> files = directory.listFiles(((FileInfo) item).getRelativePath());
-                    addChildren(item, files);
+                    files = directory.listFiles("");
+                } else if (item instanceof FileInfo info) {
+                    files = directory.listFiles(info.getRelativePath());
                 }
             } catch (UnsupportedOperationException e) {
                 log.info("The '{}' resource does not currently support listing files", resource.getName());
+            }
+            if (files != null && !files.isEmpty()) {
+                List<Object> children = grid.getTreeData().getChildren(item);
+                if (!children.isEmpty() && children.iterator().next() instanceof PlaceholderObject child) {
+                    grid.getTreeData().removeItem(child);
+                }
+                addChildren(item, files);
             }
         }
     }
@@ -209,6 +218,9 @@ public class ExploreDirectoryView extends VerticalLayout implements BeforeEnterO
     protected void addChildren(Object item, List<FileInfo> files) {
         for (FileInfo fileInfo : files) {
             grid.getTreeData().addItem(item, fileInfo);
+            if (fileInfo.isDirectory()) {
+                grid.getTreeData().addItem(fileInfo, new PlaceholderObject());
+            }
         }
 
         grid.getDataProvider().refreshAll();
@@ -240,6 +252,7 @@ public class ExploreDirectoryView extends VerticalLayout implements BeforeEnterO
 
         for (DirectoryResource resource : directoryRuntimes) {
             grid.getTreeData().addItem(null, resource);
+            grid.getTreeData().addItem(resource, new PlaceholderObject());
         }
 
         grid.getDataProvider().refreshAll();
