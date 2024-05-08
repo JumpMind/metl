@@ -366,11 +366,11 @@ public class ManageView extends HorizontalLayout implements BeforeEnterObserver,
         if (StringUtils.isNotBlank(filterValue)) {
             for (Execution execution : executionList) {
                 if (StringUtils.containsIgnoreCase(execution.getAgentName(), filterValue)
-                        && StringUtils.containsIgnoreCase(execution.getHostName(), filterValue)
-                        && StringUtils.containsIgnoreCase(execution.getFlowName(), filterValue)
-                        && StringUtils.containsIgnoreCase(execution.getStatus(), filterValue)
-                        && StringUtils.containsIgnoreCase(CommonUiUtils.formatDateTime(execution.getStartTime()), filterValue)
-                        && StringUtils.containsIgnoreCase(CommonUiUtils.formatDateTime(execution.getEndTime()), filterValue)) {
+                        || StringUtils.containsIgnoreCase(execution.getHostName(), filterValue)
+                        || StringUtils.containsIgnoreCase(execution.getFlowName(), filterValue)
+                        || StringUtils.containsIgnoreCase(execution.getStatus(), filterValue)
+                        || StringUtils.containsIgnoreCase(CommonUiUtils.formatDateTime(execution.getStartTime()), filterValue)
+                        || StringUtils.containsIgnoreCase(CommonUiUtils.formatDateTime(execution.getEndTime()), filterValue)) {
                     filteredExecutionList.add(execution);
                 }
             }
