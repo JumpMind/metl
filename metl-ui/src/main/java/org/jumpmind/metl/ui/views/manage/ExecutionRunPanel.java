@@ -350,6 +350,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         messageFilterField.setPlaceholder("Filter");
         messageFilterField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
         messageFilterField.setWidth("100%");
+        messageFilterField.setValueChangeMode(ValueChangeMode.EAGER);
 
         // Update filter When the filter input is changed
         messageFilterField.addValueChangeListener(change -> refreshLogTable());
