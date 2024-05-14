@@ -45,14 +45,16 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.ComboBoxVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.converter.StringToLongConverter;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 @SuppressWarnings("serial")
 public class EditFormatPanel extends AbstractComponentEditPanel {
@@ -62,6 +64,8 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
     Grid<RecordFormat> grid = new Grid<RecordFormat>();
 
     Set<RecordFormat> selectedItemIds;
+    
+    List<String> transformList = new ArrayList<String>();
 
     protected void buildUI() {
         setPadding(false);
@@ -123,23 +127,41 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
         if (!readOnly) {
             editor.setBinder(new Binder<RecordFormat>());
         }
-        Binder<RecordFormat> binder = editor.getBinder();
         if (isFixedLength) {
             if (readOnly) {
                 grid.addColumn(RecordFormat::getWidth).setHeader("Width");
             } else {
-                final TextField textField = new TextField();
-                textField.setWidthFull();
-                textField.addValueChangeListener(event -> {
-                    if (editor.getItem() != null) {
-                        binder.writeBeanAsDraft(editor.getItem());
-                    }
-                    calculatePositions();
-                    saveLengthSettings();
-                });
-                binder.forField(textField).withConverter(new StringToLongConverter("Width must be an integer"))
-                        .bind(RecordFormat::getWidth, RecordFormat::setWidth);
-                grid.addColumn(RecordFormat::getWidth).setEditorComponent(textField).setHeader("Width");
+                grid.addComponentColumn(record -> {
+                    TextField widthField = new TextField();
+                    widthField.setWidthFull();
+                    widthField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+                    widthField.setValueChangeMode(ValueChangeMode.LAZY);
+                    widthField.setValueChangeTimeout(200);
+                    widthField.setValue(Long.toString(record.getWidth()));
+                    widthField.setManualValidation(true);
+                    widthField.setErrorMessage("Width must be an integer");
+                    widthField.addValueChangeListener(event -> {
+                        String widthString = event.getValue();
+                        if (widthString == null) {
+                            widthField.setInvalid(true);
+                        } else {
+                            widthString = widthString.trim();
+                            Long width = null;
+                            try {
+                                width = Long.parseLong(widthString);
+                            } catch (NumberFormatException ex) {
+                                widthField.setInvalid(true);
+                            }
+                            if (width != null) {
+                                widthField.setInvalid(false);
+                                record.setWidth(width);
+                                calculatePositions();
+                                saveLengthSettings();
+                            }
+                        }
+                    });
+                    return widthField;
+                }).setHeader("Width");
             }
             
             grid.addColumn(RecordFormat::getStartPos).setHeader("Start Position");
@@ -150,35 +172,36 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
         if (readOnly) {
             grid.addColumn(RecordFormat::getTransformText).setHeader("Transform");
         } else {
-            final ComboBox<String> combo = new ComboBox<String>();
-            combo.setWidthFull();
-            List<String> itemList = new ArrayList<String>();
             String[] functions = ModelAttributeScriptHelper.getSignatures();
             for (String function : functions) {
-                itemList.add(function);
+                transformList.add(function);
             }
-            combo.setPageSize(functions.length > 20 ? 20 : functions.length);
             for (RecordFormat record : recordFormatList) {
-                if (record.getTransformText() != null && !itemList.contains(record.getTransformText())) {
-                    itemList.add(record.getTransformText());
+                if (record.getTransformText() != null && !transformList.contains(record.getTransformText())) {
+                    transformList.add(record.getTransformText());
                 }
             }
-            combo.setItems(itemList);
-            combo.setAllowCustomValue(true);
-            combo.addCustomValueSetListener(event -> {
-                itemList.add(event.getDetail());
-                combo.setItems(itemList);
-                combo.setValue(event.getDetail());
-            });
-            combo.addValueChangeListener(event -> {
-                if (editor.getItem() != null) {
-                    binder.writeBeanAsDraft(editor.getItem());
+            grid.addComponentColumn(record -> {
+                ComboBox<String> transformCombo = new ComboBox<String>();
+                transformCombo.setWidthFull();
+                transformCombo.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
+                transformCombo.setPageSize(functions.length > 20 ? 20 : functions.length);
+                transformCombo.setItems(transformList);
+                transformCombo.setAllowCustomValue(true);
+                transformCombo.addCustomValueSetListener(event -> {
+                    transformList.add(event.getDetail());
+                    transformCombo.setItems(transformList);
+                    transformCombo.setValue(event.getDetail());
+                });
+                if (StringUtils.isNotEmpty(record.getTransformText())) {
+                    transformCombo.setValue(record.getTransformText());
                 }
-                saveTransformSettings();
-            });
-            binder.forField(combo).bind(RecordFormat::getTransformText, RecordFormat::setTransformText);
-            grid.addColumn(RecordFormat::getTransformText).setEditorComponent(combo).setHeader("Transform");
-            grid.addItemDoubleClickListener(event -> editor.editItem(event.getItem()));
+                transformCombo.addValueChangeListener(event -> {
+                    record.setTransformText(event.getValue());
+                    saveTransformSettings();
+                });
+                return transformCombo;
+            }).setFlexGrow(0).setWidth("400px").setHeader("Transform");
         }
         for (Column<RecordFormat> column : grid.getColumns()) {
             column.setSortable(false);
