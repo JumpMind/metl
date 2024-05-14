@@ -227,7 +227,11 @@ public class ExportDialog extends ResizableDialog {
 					.map(resource -> new ResourceName(resource)).collect(Collectors.toList()));
         }
         
-        models.addAll(dependentModels);
+        for (RelationalModelName dependentModel : dependentModels) {
+            if (!models.contains(dependentModel)) {
+                models.add(dependentModel);
+            }
+        }
         exportModelGroup.setItems(models);
         for (RelationalModelName key : models) {
             if (allChecked || key.equals(selectedModel) || dependentModels.contains(key)) {
@@ -235,7 +239,11 @@ public class ExportDialog extends ResizableDialog {
             }
         }
         
-        resources.addAll(dependentResources);
+        for (ResourceName dependentResource : dependentResources) {
+            if (!resources.contains(dependentResource)) {
+                resources.add(dependentResource);
+            }
+        }
         exportResourceGroup.setItems(resources);
         for (ResourceName key : resources) {
             if (allChecked || key.equals(selectedResource) || dependentResources.contains(key)) {
