@@ -112,7 +112,6 @@ public class TagPanel extends AbstractAdminPanel {
     public void refresh() {
         tagList.clear();
         tagList.addAll(context.getConfigurationService().findTags());
-        tagList.sort(null);
         grid.setItems(tagList);
         setButtonsEnabled();
     }
