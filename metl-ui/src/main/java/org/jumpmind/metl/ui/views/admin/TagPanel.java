@@ -142,6 +142,7 @@ public class TagPanel extends AbstractAdminPanel {
             Tag tag = new Tag();
             TagEditPanel editPanel = new TagEditPanel(context, tag, () -> refresh());
             adminView.getTabbedPanel().addCloseableTab(tag.getId(), "Edit Tag", new Icon(VaadinIcon.TAG), editPanel);
+            adminView.getTabbedPanel().setSelectedTab(editPanel);
         }
     }
 
@@ -152,6 +153,7 @@ public class TagPanel extends AbstractAdminPanel {
 //            context.getOperationsService().refresh(tag);
             TagEditPanel editPanel = new TagEditPanel(context, tag, () -> refresh());
             adminView.getTabbedPanel().addCloseableTab(tag.getId(), "Edit Tag", new Icon(VaadinIcon.TAG), editPanel);
+            adminView.getTabbedPanel().setSelectedTab(editPanel);
         }
     }
 
