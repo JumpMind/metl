@@ -155,6 +155,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
             }
         });
 
+        treeGrid.addThemeName("easySelect");
         treeGrid.setSizeFull();
         treeGrid.setPageSize(100);
         treeGrid.setSelectionMode(SelectionMode.MULTI);

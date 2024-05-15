@@ -90,6 +90,7 @@ public class AdminView extends HorizontalLayout implements IUiPanel, ComponentEv
 
         tree = new TreeGrid<AdminMenuLink>();
         tree.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
+        tree.addThemeName("easySelect");
         tree.setSizeFull();
         tree.setPageSize(100);
         tree.addItemClickListener(this);

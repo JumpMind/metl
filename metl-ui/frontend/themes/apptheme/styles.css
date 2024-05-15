@@ -1,0 +1,7 @@
+vaadin-grid[theme~="easySelect"] vaadin-grid-tree-toggle {
+    pointer-events: none;
+}
+
+vaadin-grid[theme~="easySelect"] vaadin-grid-tree-toggle::part(toggle) {
+    pointer-events: auto;
+}

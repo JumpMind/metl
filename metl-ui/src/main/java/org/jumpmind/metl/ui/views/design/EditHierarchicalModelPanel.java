@@ -104,6 +104,7 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
         removeButton = buttonBar1.addButton("Remove", VaadinIcon.TRASH);
         removeButton.addClickListener(new RemoveClickListener());
 
+        treeGrid.addThemeName("easySelect");
         treeGrid.setSizeFull();
         treeGrid.setPageSize(100);
         treeGrid.setSelectionMode(SelectionMode.MULTI);

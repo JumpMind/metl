@@ -175,6 +175,7 @@ public class ManageNavigator extends VerticalLayout {
     protected TreeGrid<AbstractNamedObject> buildTreeGrid() {
         final TreeGrid<AbstractNamedObject> grid = new TreeGrid<AbstractNamedObject>();
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
+        grid.addThemeName("easySelect");
         grid.setSizeFull();
         grid.setPageSize(100);
         grid.addComponentHierarchyColumn(item -> {

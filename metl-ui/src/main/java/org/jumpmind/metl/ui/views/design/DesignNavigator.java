@@ -177,6 +177,7 @@ public class DesignNavigator extends VerticalLayout {
     protected TreeGrid<AbstractNamedObject> buildTreeGrid() {
         treeGrid = new TreeGrid<AbstractNamedObject>();
         treeGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
+        treeGrid.addThemeName("easySelect");
         treeGrid.setSizeFull();
         treeGrid.setPageSize(100);
         Editor<AbstractNamedObject> editor = treeGrid.getEditor();

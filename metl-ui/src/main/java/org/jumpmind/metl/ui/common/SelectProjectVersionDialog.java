@@ -62,6 +62,7 @@ public class SelectProjectVersionDialog extends ResizableDialog {
         this.context = context;
 
         tree.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
+        tree.addThemeName("easySelect");
         tree.setSelectionMode(SelectionMode.SINGLE);
         tree.addComponentHierarchyColumn(item -> {
             Icon icon = null;

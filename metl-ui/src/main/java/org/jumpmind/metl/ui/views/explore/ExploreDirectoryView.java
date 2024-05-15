@@ -98,6 +98,7 @@ public class ExploreDirectoryView extends VerticalLayout implements BeforeEnterO
         add(buttonBar);
 
         grid = new TreeGrid<Object>();
+        grid.addThemeName("easySelect");
         grid.setSizeFull();
         grid.addExpandListener(event -> expanded(event));
         grid.addCollapseListener(event -> collapsed(event));
