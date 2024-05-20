@@ -167,7 +167,7 @@ public class AppConfig {
     @Scope(value = "singleton")
     Server h2Server() {
         String configDbUrl = env.getProperty(DB_POOL_URL, "jdbc:h2:mem:config");
-        if (!StringUtils.containsIgnoreCase(configDbUrl, ";NON_KEYWORDS=VALUE")) {
+        if (StringUtils.startsWithIgnoreCase(configDbUrl, "jdbc:h2:") && !StringUtils.containsIgnoreCase(configDbUrl, ";NON_KEYWORDS=VALUE")) {
             configDbUrl += ";NON_KEYWORDS=VALUE";
         }
         String execDbUrl = env.getProperty(EXECUTION + DB_POOL_URL, configDbUrl);
@@ -233,7 +233,7 @@ public class AppConfig {
             TypedProperties properties = new TypedProperties();
             properties.put(DB_POOL_DRIVER, env.getProperty(DB_POOL_DRIVER, Driver.class.getName()));
             String dbUrl = env.getProperty(DB_POOL_URL, "jdbc:h2:mem:config");
-            if (!StringUtils.containsIgnoreCase(dbUrl, ";NON_KEYWORDS=VALUE")) {
+            if (StringUtils.startsWithIgnoreCase(dbUrl, "jdbc:h2:") && !StringUtils.containsIgnoreCase(dbUrl, ";NON_KEYWORDS=VALUE")) {
                 dbUrl += ";NON_KEYWORDS=VALUE";
             }
             properties.put(DB_POOL_URL, dbUrl);
@@ -272,7 +272,7 @@ public class AppConfig {
                 appendToProperties = "";
                 executionUrl = env.getProperty(DB_POOL_URL, "jdbc:h2:mem:exec");
             }            
-            if (!StringUtils.containsIgnoreCase(executionUrl, ";NON_KEYWORDS=VALUE")) {
+            if (StringUtils.startsWithIgnoreCase(executionUrl, "jdbc:h2:") && !StringUtils.containsIgnoreCase(executionUrl, ";NON_KEYWORDS=VALUE")) {
                 executionUrl += ";NON_KEYWORDS=VALUE";
             }
             properties.put(DB_POOL_URL, executionUrl);
