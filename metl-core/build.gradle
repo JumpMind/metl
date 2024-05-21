@@ -41,7 +41,7 @@ dependencies {
     api "org.jdom:jdom2:$jdomVersion"
     api "jakarta.el:jakarta.el-api:5.0.1"
     api "com.h2database:h2:$h2Version"
-    api "jdbc.postgresql:postgresql:$postgresqlVersion"
+    api "org.postgresql:postgresql:$postgresqlVersion"
     api "net.sourceforge.jtds:jtds:$jtdsVersion"
     api "net.sf.jt400:jt400:$jt400Version"
     api "org.apache.httpcomponents.client5:httpclient5:$httpComponentsVersion"

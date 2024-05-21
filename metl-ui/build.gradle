@@ -27,7 +27,12 @@ dependencies {
     api ("org.reficio:soap-legacy:$reficioSoapVersion") {
        exclude group:'com.googlecode.guava-osgi'
     }    
-    api "jlibs:jlibs-xml:1.0"
+    api ("jlibs:jlibs-xml:1.0") {
+       exclude group:'xerces'
+    }
+    api ("xerces:xercesImpl:2.12.2") {
+       exclude group:'xml-apis'
+    }
     api "com.vaadin:vaadin-bom:$vaadinVersion"
     api "com.vaadin:vaadin-core:$vaadinVersion"    
     api "com.vaadin:vaadin-spring:$vaadinVersion"
