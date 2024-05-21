@@ -16,7 +16,7 @@ buildscript {
 }
 
 plugins {
-    id 'com.vaadin' version '24.3.7' apply false
+    id 'com.vaadin' version '24.3.11' apply false
     id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
 }
 
