@@ -198,7 +198,9 @@ public class PropertySheet extends Div {
         ButtonBar buttonBar = new ButtonBar();
         Button testBtn = buttonBar.addButton("Test", Icons.RUN);
         testBtn.addClickListener((event)->testResource(resource));
-        testBtn.setEnabled(createResourceRuntime(resource).isTestSupported());
+        String resourceType = resource.getType();
+        testBtn.setEnabled("Database".equals(resourceType) || "Ftp".equals(resourceType) || "Http".equals(resourceType)
+                || "AWS S3".equals(resourceType));
         layout.add(buttonBar);
     }
     
