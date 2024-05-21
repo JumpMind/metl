@@ -41,7 +41,6 @@ public class MetlBootConfig {
             }
         });
         bean.addInitParameter("widgetset", "org.jumpmind.metl.ui.AppWidgetSet");
-        bean.addInitParameter("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.JSR356AsyncSupport");
         bean.addUrlMappings("/*");
         bean.setAsyncSupported(true);
         return bean;
