@@ -226,9 +226,9 @@ public class TabbedPanel extends TabSheet {
             tab = add(component, caption, icon);
             tab.setCloseable(true);
             tabsById.put(id, tab);
-            setSelectedTab(tab);
+            setSelectedTab(tab.getComponent());
         } else {
-            setSelectedTab(tab);
+            setSelectedTab(tab.getComponent());
         }
     }
 
