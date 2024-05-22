@@ -19,7 +19,7 @@ public class MetlBootConfig {
         return new ServletContextInitializer() {
             @Override
             public void onStartup(ServletContext servletContext) throws ServletException {
-                servletContext.setInitParameter("productionMode", "false");
+                servletContext.setInitParameter("productionMode", "true");
             }
         };
     }

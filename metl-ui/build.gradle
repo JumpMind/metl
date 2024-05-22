@@ -2,6 +2,11 @@ plugins {
     id 'com.vaadin'
 }
 
+vaadin {
+	productionMode = true
+	optimizeBundle = false
+}
+
 apply from: '../metl-assemble/common.gradle'
 apply from: '../metl-assemble/asciidoc.gradle'
 version = origVersion
