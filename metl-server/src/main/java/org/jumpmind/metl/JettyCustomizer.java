@@ -3,8 +3,10 @@ package org.jumpmind.metl;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.ee10.webapp.WebAppContext;
 import org.eclipse.jetty.server.AbstractConnector;
 import org.eclipse.jetty.server.ConnectionFactory;
@@ -83,7 +85,7 @@ public class JettyCustomizer implements WebServerFactoryCustomizer<JettyServletW
         try {
             extraClasspath = getPluginClasspath(new File(Wrapper.getConfigDir(null, false)));
         } catch (Exception e) {
-            log.severe("Failed to get plugin classpath");
+            log.log(Level.SEVERE, "Failed to get plugin classpath", e);
         }
         for (Handler handler : server.getHandlers()) {
             if (handler instanceof WebAppContext webapp) {
@@ -91,7 +93,9 @@ public class JettyCustomizer implements WebServerFactoryCustomizer<JettyServletW
                 webapp.setConfigurationDiscovered(true);
                 webapp.addAliasCheck(new SymlinkAllowedResourceAliasChecker(webapp));
                 log.info("Adding extra classpath of: " + extraClasspath);
-                webapp.setExtraClasspath(extraClasspath);
+                if (StringUtils.isNotBlank(extraClasspath)) {
+                    webapp.setExtraClasspath(extraClasspath);
+                }
             }
         }
     }
@@ -101,10 +105,12 @@ public class JettyCustomizer implements WebServerFactoryCustomizer<JettyServletW
         pluginsDir.mkdirs();
         StringBuilder extraClasspath = new StringBuilder();
         File[] files = pluginsDir.listFiles();
-        Arrays.sort(files);
-        for (File file : files) {
-            if (file.isFile() && file.getName().endsWith(".jar")) {
-                extraClasspath.append(file.toURI().toURL().toExternalForm()).append(",");
+        if (files != null) {
+            Arrays.sort(files);
+            for (File file : files) {
+                if (file.isFile() && file.getName().endsWith(".jar")) {
+                    extraClasspath.append(file.toURI().toURL().toExternalForm()).append(",");
+                }
             }
         }
         return extraClasspath.toString();
