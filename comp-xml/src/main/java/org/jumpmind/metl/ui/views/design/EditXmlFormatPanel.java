@@ -129,7 +129,6 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
         addColumn("attributeName", filterRow, attributeFilterField);
 
         if (!readOnly) {
-            xpathCombo.addValueChangeListener(e->saveXPathSettings());
             xpathCombo.setWidthFull();
             xpathCombo.setAllowCustomValue(true);
             xpathCombo.addCustomValueSetListener(event -> {
@@ -142,6 +141,13 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
             Editor<Record> editor = grid.getEditor();
             Binder<Record> binder = new Binder<Record>();
             editor.setBinder(binder);
+            xpathCombo.addValueChangeListener(e -> {
+                Record record = editor.getItem();
+                if (record != null) {
+                    binder.writeBeanAsDraft(record);
+                    saveXPathSettings();
+                }
+            });
             binder.forField(xpathCombo).bind(Record::getXpath, Record::setXpath);
             ((Column<Record>) grid.getColumnByKey("xpath")).setEditorComponent(xpathCombo);
             editor.setBuffered(false);
