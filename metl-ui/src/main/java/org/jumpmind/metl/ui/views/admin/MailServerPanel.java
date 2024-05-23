@@ -80,6 +80,7 @@ public class MailServerPanel extends AbstractAdminPanel {
         FormLayout form = new FormLayout();
         form.getStyle().set("padding-left", "16px");
         form.setResponsiveSteps(new ResponsiveStep("0", 1));
+        form.addClassName("side-aligned-labels");
 
         TextField hostField = new TextField();
         hostField.setValueChangeMode(ValueChangeMode.LAZY);

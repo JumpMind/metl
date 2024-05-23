@@ -65,7 +65,7 @@ public class ChangeDependencyVersionDialog extends ResizableDialog  {
     private void initDialog(Object selectedItem) {
         dependency = (ProjectVersionDepends) selectedItem;
         
-        setWidth("400px");
+        setWidth("450px");
         setHeight("600px");
         innerContent.setPadding(false);
         VerticalLayout vLayout = new VerticalLayout();
@@ -107,6 +107,7 @@ public class ChangeDependencyVersionDialog extends ResizableDialog  {
     protected FormLayout buildForm(ProjectVersion sourceProjectVersion, ProjectVersion targetProjectVersion) {
         FormLayout form = new FormLayout();
         form.setResponsiveSteps(new ResponsiveStep("0", 1));
+        form.addClassName("side-aligned-labels");
         TextField sourceProjectNameField = new TextField();
         sourceProjectNameField.setWidthFull();
         sourceProjectNameField.setValue(sourceProjectVersion.getProject().getName());

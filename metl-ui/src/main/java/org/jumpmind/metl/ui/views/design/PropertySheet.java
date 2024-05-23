@@ -140,6 +140,7 @@ public class PropertySheet extends Div {
         FormLayout formLayout = new FormLayout();
         formLayout.setWidthFull();
         formLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
+        formLayout.addClassName("side-aligned-labels");
 
         if (obj != null) {
 

@@ -1,11 +1,14 @@
 package org.jumpmind.metl.ui.init;
 
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.AppShellSettings;
 import com.vaadin.flow.theme.Theme;
 
+@CssImport(value = "./form-layout.css", themeFor = "vaadin-form-layout")
+@CssImport(value = "./form-item.css", themeFor = "vaadin-form-item")
 @Push()
 @PageTitle("Metl")
 @Theme("apptheme")

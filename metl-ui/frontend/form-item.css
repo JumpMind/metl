@@ -1,0 +1,7 @@
+:host {
+  display: var(--vaadin-form-item-display);
+}
+  
+#spacing {
+  display: var(--vaadin-form-item-spacing-display);
+}

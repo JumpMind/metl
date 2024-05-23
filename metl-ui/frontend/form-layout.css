@@ -1,0 +1,8 @@
+:host(.side-aligned-labels) #layout {
+  display: grid;
+  grid-template-columns: max-content auto;
+  grid-column-gap: var(--vaadin-form-layout-column-spacing);
+  --vaadin-form-item-label-width: auto;
+  --vaadin-form-item-display: contents;
+  --vaadin-form-item-spacing-display: none;
+}

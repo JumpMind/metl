@@ -183,6 +183,7 @@ public class PluginsPanelAddDialog extends ResizableDialog {
         FormLayout layout = new FormLayout();
         layout.getStyle().set("padding", "0 16px");
         layout.setResponsiveSteps(new ResponsiveStep("0", 1));
+        layout.addClassName("side-aligned-labels");
 
         List<Plugin> existingPlugins = context.getPluginService().findPlugins();
         Set<String> groups = new HashSet<>();
@@ -280,6 +281,7 @@ public class PluginsPanelAddDialog extends ResizableDialog {
         FormLayout layout = new FormLayout();
         layout.getStyle().set("padding", "0 16px");
         layout.setResponsiveSteps(new ResponsiveStep("0", 1));
+        layout.addClassName("side-aligned-labels");
 
         groupField = new TextField();
         groupField.setWidthFull();

@@ -155,6 +155,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
         FormLayout formLayout = new FormLayout();
         formLayout.setSizeUndefined();
         formLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
+        formLayout.addClassName("side-aligned-labels");
         formLayout.getStyle().set("padding-left", "16px");
         scrollable.setContent(formLayout);
 

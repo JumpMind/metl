@@ -54,6 +54,7 @@ public class PluginRepositoryEditPanel extends VerticalLayout implements IUiPane
 
         FormLayout form = new FormLayout();
         form.setResponsiveSteps(new ResponsiveStep("0", 1));
+        form.addClassName("side-aligned-labels");
 
         TextField field = new TextField();
         field.setValue(StringUtils.trimToEmpty(pluginRepository.getName()));

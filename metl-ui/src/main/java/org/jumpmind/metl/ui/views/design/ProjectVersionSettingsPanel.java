@@ -85,6 +85,7 @@ public class ProjectVersionSettingsPanel extends VerticalLayout implements IUiPa
         FormLayout formLayout = new FormLayout();
         formLayout.getStyle().set("padding-left", "8px");
         formLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
+        formLayout.addClassName("side-aligned-labels");
         DatePicker releaseDateField = new DatePicker();
         Date releaseDate = projectVersion.getReleaseDate();
         if (releaseDate != null) {

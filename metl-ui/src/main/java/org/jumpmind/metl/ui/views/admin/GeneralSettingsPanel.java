@@ -59,6 +59,7 @@ public class GeneralSettingsPanel extends AbstractAdminPanel {
     public void init() {
         FormLayout displaySettingsForm = new FormLayout();
         displaySettingsForm.setResponsiveSteps(new ResponsiveStep("0", 1));
+        displaySettingsForm.addClassName("side-aligned-labels");
 
         ((Focusable<?>) addSetting(displaySettingsForm, "System Text", GlobalSetting.SYSTEM_TEXT, "",
                 "Set HTML content to be displayed in the top bar that can identify a particular environment"))
@@ -66,6 +67,7 @@ public class GeneralSettingsPanel extends AbstractAdminPanel {
         
         FormLayout autoBackupForm = new FormLayout();
         autoBackupForm.setResponsiveSteps(new ResponsiveStep("0", 1));
+        autoBackupForm.addClassName("side-aligned-labels");
         
         Span instructions = new Span("A restart is required after changing these settings");
         instructions.getStyle().set("font-weight", "lighter");

@@ -65,6 +65,7 @@ public class TagEditPanel extends VerticalLayout implements IUiPanel {
 
         FormLayout form = new FormLayout();
         form.setResponsiveSteps(new ResponsiveStep("0", 1));
+        form.addClassName("side-aligned-labels");
         
         TextField nameField = new TextField();
         nameField.setValue(StringUtils.trimToEmpty(tag.getName()));

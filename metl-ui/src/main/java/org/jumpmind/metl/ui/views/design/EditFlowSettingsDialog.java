@@ -87,6 +87,7 @@ class EditFlowSettingsDialog extends ResizableDialog implements SelectionListene
         FormLayout formLayout = new FormLayout();
         formLayout.setWidthFull();
         formLayout.setResponsiveSteps(new ResponsiveStep("0", 1));
+        formLayout.addClassName("side-aligned-labels");
         add(formLayout);
         
         TextArea description = new TextArea();
