@@ -230,10 +230,13 @@ public class DefinitionFactory implements IDefinitionFactory {
     @Override
     public List<XMLComponentDefinition> getComponentDefinitions(String projectVersionId) {
         List<XMLComponentDefinition> components = new ArrayList<>();
-        Collection<XMLAbstractDefinition> definitions = definitionsByProjectVersionIdById.get(projectVersionId).values();
-        for (XMLAbstractDefinition xmlAbstractDefinition : definitions) {
-            if (xmlAbstractDefinition instanceof XMLComponentDefinition) {
-                components.add((XMLComponentDefinition) xmlAbstractDefinition);
+        Map<String, XMLAbstractDefinition> definitionsById = definitionsByProjectVersionIdById.get(projectVersionId);
+        if (definitionsById != null) {
+            Collection<XMLAbstractDefinition> definitions = definitionsById.values();
+            for (XMLAbstractDefinition xmlAbstractDefinition : definitions) {
+                if (xmlAbstractDefinition instanceof XMLComponentDefinition) {
+                    components.add((XMLComponentDefinition) xmlAbstractDefinition);
+                }
             }
         }
         return components;
