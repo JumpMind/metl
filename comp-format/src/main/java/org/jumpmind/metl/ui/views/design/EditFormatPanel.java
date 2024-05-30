@@ -135,8 +135,7 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
                     TextField widthField = new TextField();
                     widthField.setWidthFull();
                     widthField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
-                    widthField.setValueChangeMode(ValueChangeMode.LAZY);
-                    widthField.setValueChangeTimeout(200);
+                    widthField.setValueChangeMode(ValueChangeMode.ON_BLUR);
                     widthField.setValue(Long.toString(record.getWidth()));
                     widthField.setManualValidation(true);
                     widthField.setErrorMessage("Width must be an integer");
