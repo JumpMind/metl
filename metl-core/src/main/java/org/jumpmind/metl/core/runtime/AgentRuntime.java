@@ -348,7 +348,7 @@ public class AgentRuntime {
                 if (deployment.asStartType() == StartType.SCHEDULED_CRON) {
                     String cron = deployment.getStartExpression();
                     log.info("Scheduling '{}' on '{}' with a cron expression of '{}'  The next run time should be at: {}",
-                            new Object[] { flow.getName(), agent.getName(), cron, CronExpression.parse("test").next(LocalDateTime.now()) });
+                            new Object[] { flow.getName(), agent.getName(), cron, CronExpression.parse(cron).next(LocalDateTime.now()) });
 
                     ScheduledFuture<?> future = this.flowExecutionScheduler
                             .schedule(new FlowRunner("metl cron", agentProjectVersionFlowDeployment), new CronTrigger(cron));
