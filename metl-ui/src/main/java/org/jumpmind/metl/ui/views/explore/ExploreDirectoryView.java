@@ -55,6 +55,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -98,8 +99,8 @@ public class ExploreDirectoryView extends VerticalLayout implements BeforeEnterO
         add(buttonBar);
 
         grid = new TreeGrid<Object>();
-        grid.addThemeName("easySelect");
         grid.setSizeFull();
+        grid.setSelectionMode(SelectionMode.NONE);
         grid.addExpandListener(event -> expanded(event));
         grid.addCollapseListener(event -> collapsed(event));
         grid.addComponentHierarchyColumn(item -> fileLinkComponent(item)).setHeader("").setFlexGrow(1);
