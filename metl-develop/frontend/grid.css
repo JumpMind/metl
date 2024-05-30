@@ -1,0 +1,4 @@
+.noSelect[first-column] ::slotted(*) {
+  opacity: 0;
+  pointer-events: none;
+}

@@ -9,6 +9,7 @@ import com.vaadin.flow.theme.Theme;
 
 @CssImport(value = "./form-layout.css", themeFor = "vaadin-form-layout")
 @CssImport(value = "./form-item.css", themeFor = "vaadin-form-item")
+@CssImport(value = "./grid.css", themeFor = "vaadin-grid")
 @Push()
 @PageTitle("Metl")
 @Theme("apptheme")
