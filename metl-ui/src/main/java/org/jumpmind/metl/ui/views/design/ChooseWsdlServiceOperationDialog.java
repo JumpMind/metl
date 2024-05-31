@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.reficio.ws.builder.SoapOperation;
+import com.predic8.wsdl.BindingOperation;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -34,39 +34,35 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.listbox.ListBox;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 
 @SuppressWarnings("serial")
 public class ChooseWsdlServiceOperationDialog extends Dialog {
 
-    public ChooseWsdlServiceOperationDialog(List<SoapOperation> operations,
+    public ChooseWsdlServiceOperationDialog(List<BindingOperation> operations,
             final ServiceChosenListener listener) {
         setModal(true);
         setResizable(false);
         setSizeUndefined();
 
-        Span header = new Span("<b>Choose SOAP Operation</b><hr>");
-        header.setWidthFull();
-        header.getStyle().set("margin", null);
-        add(header);
+        setHeaderTitle("Choose SOAP Operation");
 
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
-        layout.setMargin(true);
+        layout.setMargin(false);
         add(layout);
 
         layout.add(new Span("Choose the SOAP operation to use."));
 
-        final ListBox<SoapOperation> field = new ListBox<SoapOperation>();
+        final ListBox<BindingOperation> field = new ListBox<BindingOperation>();
         field.setWidthFull();
         field.setHeight("540px");
         layout.add(field);
 
-        Collections.sort(operations, new Comparator<SoapOperation>() {
-            public int compare(SoapOperation o1, SoapOperation o2) {
-                return o1.getOperationName().compareTo(o2.getOperationName());
+        Collections.sort(operations, new Comparator<BindingOperation>() {
+            public int compare(BindingOperation o1, BindingOperation o2) {
+                return o1.getName().compareTo(o2.getName());
             }
         });
 
@@ -77,14 +73,7 @@ public class ChooseWsdlServiceOperationDialog extends Dialog {
                 field.setValue(event.getOldValue());
             }
         });
-        field.setRenderer(new ComponentRenderer<>(item -> new Span(item.getBindingName().getLocalPart() + "." + item.getOperationName())));
-
-        HorizontalLayout buttonLayout = new HorizontalLayout();
-        buttonLayout.setSpacing(true);
-        buttonLayout.setWidthFull();
-
-        Span spacer = new Span(" ");
-        buttonLayout.addAndExpand(spacer);
+        field.setRenderer(new ComponentRenderer<>(item -> new Span(item.getBinding().getQName().getLocalPart() + "." + item.getName())));
 
         Button cancelButton = new Button("Cancel");
         cancelButton.addClickShortcut(Key.ESCAPE);
@@ -93,24 +82,22 @@ public class ChooseWsdlServiceOperationDialog extends Dialog {
                 close();
             }
         });
-        buttonLayout.add(cancelButton);
+        getFooter().add(cancelButton);
 
         Button okButton = new Button("Ok");
         okButton.addClickShortcut(Key.ENTER);
         okButton.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             public void onComponentEvent(ClickEvent<Button> event) {
-                if (listener.onOk((SoapOperation) field.getValue())) {
+                if (listener.onOk(field.getValue())) {
                     close();
                 }
             }
         });
-        buttonLayout.add(okButton);
-
-        layout.add(buttonLayout);
+        getFooter().add(okButton);
     }
 
     public static interface ServiceChosenListener extends Serializable {
-        public boolean onOk(SoapOperation operation);
+        public boolean onOk(BindingOperation operation);
     }
 
 }

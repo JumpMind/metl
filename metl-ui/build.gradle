@@ -22,16 +22,7 @@ dependencies {
     api "io.swagger.core.v3:swagger-annotations:$swaggerVersion"
     api "io.swagger.core.v3:swagger-core:$swaggerVersion"
     api "io.swagger.core.v3:swagger-models:$swaggerVersion"
-    api ("org.reficio:soap-builder:$reficioSoapVersion") {
-       exclude group:'com.googlecode.guava-osgi'
-    }    
-    api ("org.reficio:soap-common:$reficioSoapVersion") {
-
-       exclude group:'com.googlecode.guava-osgi'
-    }    
-    api ("org.reficio:soap-legacy:$reficioSoapVersion") {
-       exclude group:'com.googlecode.guava-osgi'
-    }    
+    api "com.predic8:soa-model-core:2.0.1"
     api ("jlibs:jlibs-xml:1.0") {
        exclude group:'xerces'
     }

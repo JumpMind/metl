@@ -24,6 +24,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -55,10 +56,13 @@ import org.jumpmind.metl.core.plugin.XMLResourceDefinition;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.views.design.ChooseWsdlServiceOperationDialog.ServiceChosenListener;
 import org.jumpmind.vaadin.ui.common.ResizableDialog;
-import org.reficio.ws.builder.SoapBuilder;
-import org.reficio.ws.builder.SoapOperation;
-import org.reficio.ws.builder.core.Wsdl;
 
+import com.predic8.wsdl.Binding;
+import com.predic8.wsdl.BindingOperation;
+import com.predic8.wsdl.Definitions;
+import com.predic8.wsdl.WSDLParser;
+import com.predic8.wstool.creator.RequestCreator;
+import com.predic8.wstool.creator.SOARequestCreator;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
@@ -77,6 +81,7 @@ import com.vaadin.flow.component.upload.Upload;
 
 import de.f0rce.ace.AceEditor;
 import de.f0rce.ace.enums.AceMode;
+import groovy.xml.MarkupBuilder;
 import jlibs.xml.sax.XMLDocument;
 import jlibs.xml.xsd.XSInstance;
 import jlibs.xml.xsd.XSParser;
@@ -148,6 +153,7 @@ public class ImportXmlTemplateDialog extends ResizableDialog
         importButton.addClickListener(this);
 
         upload = new Upload(this);
+        upload.setWidthFull();
         upload.setDropAllowed(false);
         upload.addSucceededListener(event -> importXml(new String(uploadedData.toByteArray())));
         urlTextField = new TextField("Enter the URL:");
@@ -291,34 +297,33 @@ public class ImportXmlTemplateDialog extends ResizableDialog
     protected void importFromWsdl(String text) throws Exception {
         File wsdlFile = File.createTempFile("import", "wsdl");
         FileUtils.write(wsdlFile, text, Charset.defaultCharset());
-        final Wsdl wsdl = Wsdl.parse(wsdlFile.toURI().toURL());
-        List<SoapOperation> allOperations = new ArrayList<>();
-        List<QName> bindings = wsdl.getBindings();
-        for (QName binding : bindings) {
-            SoapBuilder builder = wsdl.getBuilder(binding);
-            List<SoapOperation> operations = builder.getOperations();
-            allOperations.addAll(operations);
+        List<BindingOperation> allOperations = new ArrayList<BindingOperation>();
+        Definitions definitions = new WSDLParser().parse(new FileInputStream(wsdlFile));
+        for (Binding binding : definitions.getBindings()) {
+            allOperations.addAll(binding.getOperations());
         }
 
         if (allOperations.size() == 0) {
             new Notification("No operations found in the WSDL.").open();
         } else if (allOperations.size() == 1) {
-            importFromWsdl(wsdl, allOperations.get(0));
+            importFromWsdl(definitions, allOperations.get(0));
         } else {
             new ChooseWsdlServiceOperationDialog(allOperations, new ServiceChosenListener() {
-                public boolean onOk(SoapOperation operation) {
-                    importFromWsdl(wsdl, operation);
+                public boolean onOk(BindingOperation operation) {
+                    importFromWsdl(definitions, operation);
                     return true;
                 }
             }).open();
         }
     }
 
-    protected void importFromWsdl(Wsdl wsdl, SoapOperation operation) {
+    protected void importFromWsdl(Definitions definitions, BindingOperation operation) {
         try {
-            SoapBuilder builder = wsdl.getBuilder(operation.getBindingName());
-            String xml = builder.buildInputMessage(operation);
-            listener.onImport(xml);
+            Binding binding = operation.getBinding();
+            StringWriter writer = new StringWriter();
+            new SOARequestCreator(definitions, new RequestCreator(), new MarkupBuilder(writer))
+                    .createRequest(binding.getPortType().getName(), operation.getName(), binding.getName());
+            listener.onImport(writer.toString());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
