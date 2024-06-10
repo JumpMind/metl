@@ -24,12 +24,16 @@ import jakarta.annotation.PostConstruct;
 
 import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.metl.ui.common.View;
+import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.DbProvider;
 import org.jumpmind.metl.ui.common.MainLayout;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.vaadin.ui.common.UiComponent;
+import org.jumpmind.vaadin.ui.sqlexplorer.DefaultSettingsProvider;
+import org.jumpmind.vaadin.ui.sqlexplorer.ISettingsProvider;
+import org.jumpmind.vaadin.ui.sqlexplorer.Settings;
 import org.jumpmind.vaadin.ui.sqlexplorer.SqlExplorer;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -65,8 +69,13 @@ public class ExploreDataSourceView extends VerticalLayout implements BeforeEnter
     protected void init () {
         setPadding(false);
         dbProvider = new DbProvider(context);
+        ISettingsProvider settingsProvider = new DefaultSettingsProvider(context.getConfigDir(), context.getUser().getLoginId());
+        Settings settings = settingsProvider.get();
+        TypedProperties properties = settings.getProperties();
+        properties.setProperty(Settings.SQL_EXPLORER_SHOW_TRIGGERS, "false");
+        settingsProvider.save(settings);
         explorer = new SqlExplorer(context.getConfigDir(),
-                dbProvider, context.getUser().getLoginId(), UIConstants.DEFAULT_LEFT_SPLIT);
+                dbProvider, settingsProvider, context.getUser().getLoginId(), UIConstants.DEFAULT_LEFT_SPLIT);
         explorer.setSplitterPosition(20);
         add(explorer);
     }
