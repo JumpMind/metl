@@ -25,11 +25,14 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.cert.CertificateException;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.KeySpec;
 
@@ -42,6 +45,7 @@ import javax.crypto.spec.PBEParameterSpec;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,12 +62,36 @@ public class SecurityService implements ISecurityService {
     
     protected String configDir;
 
+    protected static String keyStoreFileName;
+
+    protected static volatile boolean hasInitKeyStore;
+
+    static {
+        keyStoreFileName = StringUtils.trimToNull(System.getProperty(SecurityConstants.SYSPROP_KEYSTORE));
+    }
+
     public SecurityService() {
     }
     
     @Override
     public void setConfigDir(String dir) {
         this.configDir = dir;
+    }
+
+    protected void checkThatKeystoreFileExists() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+        if (!hasInitKeyStore) {
+            synchronized (SecurityService.class) {
+                if (!hasInitKeyStore && keyStoreFileName != null && !new File(keyStoreFileName).exists()) {
+                    String keyStoreType = System.getProperty(SecurityConstants.SYSPROP_KEYSTORE_TYPE, SecurityConstants.KEYSTORE_TYPE);
+                    KeyStore ks = KeyStore.getInstance(keyStoreType);
+                    ks.load(null, getKeyStorePassword().toCharArray());
+                    try (FileOutputStream os = new FileOutputStream(keyStoreFileName)) {
+                        ks.store(os, getKeyStorePassword().toCharArray());
+                    }
+                    hasInitKeyStore = true;
+                }
+            }
+        }
     }
 
     protected File getKeyStoreFile() {
@@ -76,15 +104,18 @@ public class SecurityService implements ISecurityService {
     @Override
     public KeyStore getKeyStore() {
         try {
+            checkThatKeystoreFileExists();
             String keyStoreType = System.getProperty(SecurityConstants.SYSPROP_KEYSTORE_TYPE,
                     SecurityConstants.KEYSTORE_TYPE);
             File keyStoreFile = getKeyStoreFile();
             KeyStore ks = KeyStore.getInstance(keyStoreType);
             if (keyStoreFile.exists()) {
+                log.info("Loading keystore from file {}", keyStoreFile.getName());
                 try (FileInputStream is = new FileInputStream(keyStoreFile)) {
                     ks.load(is, getKeyStorePassword().toCharArray());
                 }
             } else {
+                log.info("Loading keystore from memory");
                 ks.load(null, getKeyStorePassword().toCharArray());
             }
             return ks;
@@ -97,6 +128,7 @@ public class SecurityService implements ISecurityService {
 
     public String encrypt(String plainText) {
         try {
+            checkThatKeystoreFileExists();
             byte[] bytes = plainText.getBytes(SecurityConstants.CHARSET);
             byte[] enc = getCipher(Cipher.ENCRYPT_MODE).doFinal(bytes);
             return new String(Base64.encodeBase64(enc), SecurityConstants.CHARSET);
@@ -109,6 +141,7 @@ public class SecurityService implements ISecurityService {
 
     public String decrypt(String encText) {
         try {
+            checkThatKeystoreFileExists();
             byte[] dec = Base64.decodeBase64(encText.getBytes());
             byte[] bytes = getCipher(Cipher.DECRYPT_MODE).doFinal(dec);
             return new String(bytes, SecurityConstants.CHARSET);
@@ -196,12 +229,12 @@ public class SecurityService implements ISecurityService {
         KeyStore.SecretKeyEntry entry = (KeyStore.SecretKeyEntry) ks
                 .getEntry(SecurityConstants.ALIAS_SYM_SECRET_KEY, param);
         if (entry == null) {
-            log.debug("Generating secret key");
+            log.info("Generating secret key");
             entry = new KeyStore.SecretKeyEntry(getDefaultSecretKey());
             ks.setEntry(SecurityConstants.ALIAS_SYM_SECRET_KEY, entry, param);
             saveKeyStore(ks, password);
         } else {
-            log.debug("Retrieving secret key");
+            log.info("Retrieving secret key");
         }
         return entry.getSecretKey();
     }
@@ -255,7 +288,14 @@ public class SecurityService implements ISecurityService {
     }
 
     protected SecretKey getDefaultSecretKey() throws Exception {
-        String keyPassword = nextSecureHexString(8);
+        String keyPassword = null;
+        if (keyStoreFileName != null) {
+            log.info("Using random chars for secret key");
+            keyPassword = nextSecureHexString(8);
+        } else {
+            log.info("Using keystore password as chars for secret key");
+            keyPassword = getKeyStorePassword();
+        }
         KeySpec keySpec = new PBEKeySpec(keyPassword.toCharArray(), SecurityConstants.SALT,
                 SecurityConstants.ITERATION_COUNT, 56);
         SecretKey secretKey = SecretKeyFactory.getInstance(SecurityConstants.ALGORITHM)
@@ -264,8 +304,10 @@ public class SecurityService implements ISecurityService {
     }
 
     protected void saveKeyStore(KeyStore ks, String password) throws Exception {
-        try (FileOutputStream os = new FileOutputStream(getKeyStoreFile())) {
-            ks.store(os, password.toCharArray());
+        if (keyStoreFileName != null) {
+            try (FileOutputStream os = new FileOutputStream(getKeyStoreFile())) {
+                ks.store(os, password.toCharArray());
+            }
         }
     }
     
