@@ -39,8 +39,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.Produces;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -356,7 +356,7 @@ public class ExecutionApi {
     private Object executeFlow(HttpServletRequest request, HttpServletResponse response, String payload) throws Exception {
         Object resultPayload = null;
         String requestType = request.getMethod();
-        String restOfTheUrl = ((String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)).substring(WS.length());
+        String restOfTheUrl = ((String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)).substring(WS.length() + 4);
         log.info(String.format("Attempting to find a service uri match for %s with request type %s", restOfTheUrl, requestType));
         HttpRequestMapping mapping = requestRegistry.findBestMatch(HttpMethod.valueOf(requestType), restOfTheUrl);
         if (mapping != null) {

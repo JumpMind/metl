@@ -19,9 +19,10 @@ dependencies {
     api "org.springframework:spring-webmvc:$springVersion"
     api "org.apache.poi:poi:$apachePOIVersion"
     api "org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocVersion"
-    api "io.swagger.core.v3:swagger-annotations:$swaggerVersion"
-    api "io.swagger.core.v3:swagger-core:$swaggerVersion"
-    api "io.swagger.core.v3:swagger-models:$swaggerVersion"
+    api "io.swagger.core.v3:swagger-annotations-jakarta:$swaggerVersion"
+    api "io.swagger.core.v3:swagger-core-jakarta:$swaggerVersion"
+    api "io.swagger.core.v3:swagger-models-jakarta:$swaggerVersion"
+    api "jakarta.ws.rs:jakarta.ws.rs-api:3.1.0"
     api "com.predic8:soa-model-core:2.0.1"
     api ("jlibs:jlibs-xml:1.0") {
        exclude group:'xerces'

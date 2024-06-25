@@ -41,7 +41,7 @@ public class MetlBootConfig {
             }
         });
         bean.addInitParameter("widgetset", "org.jumpmind.metl.ui.AppWidgetSet");
-        bean.addUrlMappings("/*");
+        bean.addUrlMappings("/app/*");
         bean.setAsyncSupported(true);
         return bean;
     }

@@ -23,7 +23,6 @@ package org.jumpmind.metl.ui.views.design;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,16 +32,6 @@ import java.util.stream.Collectors;
 import jakarta.servlet.ServletContext;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hc.client5.http.auth.AuthScope;
-import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
-import org.apache.hc.client5.http.impl.auth.BasicAuthCache;
-import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
-import org.apache.hc.client5.http.impl.auth.BasicScheme;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.client5.http.protocol.HttpClientContext;
-import org.apache.hc.core5.http.HttpHost;
-import org.apache.hc.core5.http.protocol.BasicHttpContext;
-import org.apache.hc.core5.http.protocol.HttpContext;
 import org.jumpmind.metl.core.model.AgentDeploy;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
@@ -58,12 +47,12 @@ import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.views.manage.ExecutionRunPanel;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.TabSheet;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
@@ -270,7 +259,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
             viewExecutionLogButton.setEnabled(false);
             RestTemplate template = null;            
             if (securitySchemeCombo.getValue() == SecurityScheme.BASIC) {
-                template = new RestTemplate(new BasicRequestFactory(userField.getValue(), passwordField.getValue()));
+                template = new RestTemplateBuilder().basicAuthentication(userField.getValue(), passwordField.getValue()).build();
             } else {
                 template = new RestTemplate();
             }
@@ -458,27 +447,6 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
 				this.value = value;
 			}
         }
-    }
-    
-    public class BasicRequestFactory extends HttpComponentsClientHttpRequestFactory {
-
-        public BasicRequestFactory(String username, String password) {
-            BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(new AuthScope(null, -1), new UsernamePasswordCredentials(username, password.toCharArray()));
-            setHttpClient(HttpClientBuilder.create().setDefaultCredentialsProvider(credentialsProvider).build());
-        }
-
-        @Override
-        protected HttpContext createHttpContext(HttpMethod httpMethod, URI uri) {
-            HttpHost targetHost = new HttpHost(uri.getScheme(), uri.getHost(), uri.getPort());
-            BasicAuthCache authCache = new BasicAuthCache();
-            BasicScheme basicAuth = new BasicScheme();
-            authCache.put(targetHost, basicAuth);
-            BasicHttpContext localContext = new BasicHttpContext();
-            localContext.setAttribute(HttpClientContext.AUTH_CACHE, authCache);
-            return localContext;
-        }
-
     }
 
 }

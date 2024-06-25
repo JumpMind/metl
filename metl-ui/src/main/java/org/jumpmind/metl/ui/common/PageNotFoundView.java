@@ -52,7 +52,7 @@ public class PageNotFoundView extends VerticalLayout implements HasErrorParamete
         UI ui = UI.getCurrent();
         ui.getPage().fetchCurrentURL(url -> {
             String path = url.getPath();
-            if (!StringUtils.remove(path, "/").equalsIgnoreCase("metl")) {
+            if (!StringUtils.remove(path, "/").equalsIgnoreCase("metlapp")) {
                 pageNotFoundSpan.getElement().getThemeList().add("badge error");
                 Icon errorIcon = new Icon(VaadinIcon.BAN);
                 errorIcon.getStyle().set("padding", "var(--lumo-space-xs)");
