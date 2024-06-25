@@ -43,8 +43,8 @@ public class ApiPanel extends AbstractAdminPanel {
     public ApiPanel() {   
         setSizeFull();
         UI.getCurrent().getPage().fetchCurrentURL(url -> {
-            String urlString = url.toString();
-            IFrame e = new IFrame(urlString.substring(0, urlString.lastIndexOf("/")) + "/api.html");
+            String path = url.getPath();
+            IFrame e = new IFrame(path.substring(0, path.indexOf("/app")) + "/swagger-ui/index.html");
             e.setSizeFull();
             add(e);
         });
@@ -65,11 +65,6 @@ public class ApiPanel extends AbstractAdminPanel {
 
     @Override
     protected void refresh() {
-    }
-    
-    @Override
-    public boolean isAccessible() {
-        return false;
     }
 
 }
