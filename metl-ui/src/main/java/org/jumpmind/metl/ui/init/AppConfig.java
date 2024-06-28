@@ -204,18 +204,24 @@ public class AppConfig {
             // //agentManager.stop();
             // IExecutionService service = ctx.getBean(IExecutionService.class);
             // //service.stop();
-            log.info("Shutting down and compacting the config database");
-            new JdbcTemplate(configDataSource()).execute("SHUTDOWN COMPACT");
-            log.info("Done shutting down and compacting the config database");
+            BasicDataSource configDataSource = configDataSource();
+            if (StringUtils.startsWithIgnoreCase(configDataSource.getUrl(), "jdbc:h2:")) {
+                log.info("Shutting down and compacting the config database");
+                new JdbcTemplate(configDataSource).execute("SHUTDOWN COMPACT");
+                log.info("Done shutting down and compacting the config database");
+            }
             try {
-                configDataSource().close();
+                configDataSource.close();
             } catch (SQLException e) {
             }
-            log.info("Shutting down and compacting the execution database");
-            new JdbcTemplate(executionDataSource()).execute("SHUTDOWN COMPACT");
-            log.info("Done shutting down and compacting the execution database");
+            BasicDataSource executionDataSource = executionDataSource();
+            if (StringUtils.startsWithIgnoreCase(executionDataSource.getUrl(), "jdbc:h2:")) {
+                log.info("Shutting down and compacting the execution database");
+                new JdbcTemplate(executionDataSource).execute("SHUTDOWN COMPACT");
+                log.info("Done shutting down and compacting the execution database");
+            }
             try {
-                executionDataSource().close();
+                executionDataSource.close();
             } catch (SQLException e) {
             }
             
