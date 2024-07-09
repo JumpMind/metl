@@ -72,7 +72,7 @@ window.org_jumpmind_metl_ui_mapping_MappingDiagram = function(javaElement) {
             scrollDiv.parentNode.addEventListener("click", function(event) {
                 if (event.target.tagName == "DIV") {
                     unselectAllConnections();
-                    document.getElementById(mappingDiv.id).$server.onSelect({});
+                    mappingDiv.$server.onSelect({});
                 }
                 if (event.target.classList !== undefined && !event.target.classList.contains("dst")) {
                     selectedSrcId = selectedDstId = null;
@@ -129,7 +129,7 @@ window.org_jumpmind_metl_ui_mapping_MappingDiagram = function(javaElement) {
                 for (var i = 0; i < connection.endpoints.length; i++) {
                     connection.endpoints[i].toggleType("selected");
                 }
-                document.getElementById(mappingDiv.id).$server.onSelect({
+                mappingDiv.$server.onSelect({
                     "sourceId" : connection.sourceId,
                     "targetId" : connection.targetId
                 });
