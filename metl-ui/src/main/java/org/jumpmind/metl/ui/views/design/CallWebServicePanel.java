@@ -204,7 +204,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
             String contextPath = servletContext.getContextPath();
             UI.getCurrent().getPage().fetchCurrentURL(url -> {
                 String pageUrl = url.toExternalForm();
-                String urlString = pageUrl.substring(0, pageUrl.indexOf(contextPath) + contextPath.length());
+                String urlString = pageUrl.substring(0, pageUrl.lastIndexOf(contextPath) + contextPath.length());
                 urlField.setValue(String.format("%s/api/ws%s", urlString,
                         mapping.getPath().startsWith("/") ? mapping.getPath() : ("/" + mapping.getPath())));
             });

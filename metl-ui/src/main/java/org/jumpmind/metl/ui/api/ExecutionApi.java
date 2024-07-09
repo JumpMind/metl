@@ -46,6 +46,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeploy;
 import org.jumpmind.metl.core.model.DeploymentStatus;
@@ -425,9 +426,11 @@ public class ExecutionApi {
                         String credentials = new String(Base64.decodeBase64(st.nextToken().getBytes()));
                         int p = credentials.indexOf(":");
                         if (p != -1) {
-                            String _username = credentials.substring(0, p).trim();
-                            String _password = credentials.substring(p + 1).trim();
-                            if (!security.getUsername().equals(_username) || !security.getPassword().equals(_password)) {
+                            String securityUsername = StringUtils.trimToEmpty(security.getUsername());
+                            String securityPassword = StringUtils.trimToEmpty(security.getPassword());
+                            String _username = StringUtils.trimToEmpty(credentials.substring(0, p));
+                            String _password = StringUtils.trimToEmpty(credentials.substring(p + 1));
+                            if (!securityUsername.equals(_username) || !securityPassword.equals(_password)) {
                                 unauthorized(response, "Bad credentials");
                                 secured = false;
                             }
