@@ -272,7 +272,11 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
                     headers);
             ResponseEntity<String> response = template.exchange(urlField.getValue(),
                     HttpMethod.valueOf(methodGroup.getValue()), entity, String.class);
-            responseTabs.getPayload().setValue(response.getBody());
+            if (response.getBody() != null) {
+                responseTabs.getPayload().setValue(response.getBody());
+            } else {
+                responseTabs.getPayload().clear();
+            }
             headerMap = response.getHeaders().toSingleValueMap();
             for (String key : headerMap.keySet()) {
                 responseTabs.setHeader(key, headerMap.get(key));
@@ -280,7 +284,11 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
             responseStatusArea.setValue(response.getStatusCode().toString() + " "
                     + ((HttpStatus) response.getStatusCode()).getReasonPhrase());
         } catch (HttpStatusCodeException e) {
-            responseTabs.getPayload().setValue(e.getResponseBodyAsString());
+            if (e.getResponseBodyAsString() != null) {
+                responseTabs.getPayload().setValue(e.getResponseBodyAsString());
+            } else {
+                responseTabs.getPayload().clear();
+            }
             headerMap = e.getResponseHeaders().toSingleValueMap();
             for (String key : headerMap.keySet()) {
                 responseTabs.setHeader(key, headerMap.get(key));
