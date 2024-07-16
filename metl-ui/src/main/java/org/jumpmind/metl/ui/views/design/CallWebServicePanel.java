@@ -336,7 +336,9 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
             setWidth("550px");
             addThemeVariants(TabsVariant.LUMO_SMALL);
             payload = new TextArea();
-            payload.setSizeFull();
+            payload.setHeight("204px");
+            payload.setWidthFull();
+            payload.getStyle().set("max-height", "204px");
             add(payload, "Payload");
 
             VerticalLayout requestHeadersLayout = new VerticalLayout();
