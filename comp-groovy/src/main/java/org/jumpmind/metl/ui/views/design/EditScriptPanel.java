@@ -64,6 +64,7 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
         editor.setSizeFull();
         editor.setMode(AceMode.groovy);
         editor.setShowPrintMargin(false);
+        editor.setBaseUrl("../ace-builds/src-min-noconflict/");
 
         select = new ComboBox<String>();
         select.setWidth("40em");
