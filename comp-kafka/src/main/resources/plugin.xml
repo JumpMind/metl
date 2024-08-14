@@ -26,7 +26,7 @@
              inputMessageType='relational'
              inputOutputModelsMatch='false'
              outputMessageType='text'
-             resourceCategory='publish'>
+             resourceCategory='queue'>
     <name>Kafka Producer</name>
     <className>org.jumpmind.metl.core.runtime.component.KafkaProducer</className>
     <keywords>kafka</keywords>
