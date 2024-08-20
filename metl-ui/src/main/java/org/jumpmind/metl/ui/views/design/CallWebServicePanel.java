@@ -153,7 +153,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
         formLayout.addFormItem(urlField, "URL");
 
         methodGroup = new RadioButtonGroup<String>();
-        methodGroup.setItems("GET", "PUT", "POST", "DELETE");
+        methodGroup.setItems("GET", "PUT", "POST", "PATCH", "DELETE");
         formLayout.addFormItem(methodGroup, "Method");
 
         ComboBox<String> contentType = new ComboBox<String>();

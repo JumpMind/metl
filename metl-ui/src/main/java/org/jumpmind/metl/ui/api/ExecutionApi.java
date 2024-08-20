@@ -208,6 +208,15 @@ public class ExecutionApi {
         return executeFlow(req, res, payload);
     }
 
+    @Hidden
+    @RequestMapping(value = WS + "/**", method = RequestMethod.PATCH)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public final Object patch(HttpServletRequest req, HttpServletResponse res, @RequestBody(required = false) String payload)
+            throws Exception {
+        return executeFlow(req, res, payload);
+    }
+    
     @io.swagger.v3.oas.annotations.Operation(summary = "This is the Json Swagger API definition for Metl Hosted Services. Visit http://swagger.io for more details about the specification")
     @RequestMapping(value = SWAGGER_JSON, method = RequestMethod.GET)
     public final void swaggerJson(HttpServletRequest req, HttpServletResponse res) throws Exception {

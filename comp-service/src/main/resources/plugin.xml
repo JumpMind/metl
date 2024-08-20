@@ -42,6 +42,7 @@
           <choice>GET</choice>
           <choice>POST</choice>
           <choice>PUT</choice>
+          <choice>PATCH</choice>
           <choice>DELETE</choice>
         </choices>
       </setting>
