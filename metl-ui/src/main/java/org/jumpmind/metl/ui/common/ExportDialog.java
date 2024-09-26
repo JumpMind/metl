@@ -135,9 +135,9 @@ public class ExportDialog extends ResizableDialog {
     }
     
     private void selectNone() {
-        exportFlowGroup.setValue(null);
-        exportModelGroup.setValue(null);
-        exportResourceGroup.setValue(null);
+        exportFlowGroup.clear();
+        exportModelGroup.clear();
+        exportResourceGroup.clear();
     }
 
     private void updateAffectedObjects() {
