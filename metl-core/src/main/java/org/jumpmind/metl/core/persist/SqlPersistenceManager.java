@@ -2,7 +2,9 @@ package org.jumpmind.metl.core.persist;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +13,8 @@ import java.util.Set;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.beanutils.SuppressPropertiesBeanIntrospector;
+import org.apache.commons.beanutils.converters.DateTimeConverter;
+import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.db.model.Column;
 import org.jumpmind.db.model.Table;
 import org.jumpmind.db.platform.IDatabasePlatform;
@@ -32,6 +36,23 @@ public class SqlPersistenceManager extends AbstractPersistenceManager {
         this.databasePlatform = databasePlatform;
         BEAN_UTILS.getPropertyUtils().addBeanIntrospector(
                 SuppressPropertiesBeanIntrospector.SUPPRESS_CLASS);        
+        if (databasePlatform != null && StringUtils.contains(databasePlatform.getName(), "mssql")) {
+            BEAN_UTILS.getConvertUtils().register(new DateTimeConverter() {
+                @SuppressWarnings("unchecked")
+                @Override
+                protected <T> T convertToType(final Class<T> targetType, final Object value) throws Exception {
+                    if (Date.class.equals(targetType) && value instanceof String dateString) {
+                        return (T) new Date(Timestamp.valueOf(dateString).getTime());
+                    }
+                    return super.convertToType(targetType, value);
+                }
+
+                @Override
+                protected Class<?> getDefaultType() {
+                    return Date.class;
+                }
+            }, Date.class);
+        }
     }
     
     @Override
