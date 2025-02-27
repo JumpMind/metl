@@ -335,7 +335,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         return outData;
     }
 
-    protected void addConfigData(List<TableData> tableData, String[][] sqlElements,
+    protected void addConfigData(List<TableData> tableDataList, String[][] sqlElements,
             String projectVersionId, String keyValue) {
         
         // Get existing ProjectVersion
@@ -343,30 +343,40 @@ public class ImportExportService extends AbstractService implements IImportExpor
         for (int i = 0; i < sqlElements.length; i++) {
             if (!sqlElements[0][0].equalsIgnoreCase("_project") ||
                     version == null || !projectsExported.contains(version.getProjectId()) ) {
-                String[] entry = sqlElements[i];
-                // Query existing data matching the config data.
-                List<Row> rows = getConfigTableData(String.format(entry[SQL],
-                        tablePrefix, projectVersionId, keyValue));
-                for (Row row : rows) {
-                    if (isPassword(row.getString("NAME", false))) {
-                        String value = row.getString("VALUE", false);
-                        if (isNotBlank(value)) {
-                            if (value.startsWith(SecurityConstants.PREFIX_ENC)) {
-                                try {
-                                    row.put("VALUE", securityService.decrypt(
-                                            value.substring(SecurityConstants.PREFIX_ENC.length() - 1)));
-                                } catch (Exception e) {
-                                }
-                            }
-                        }
-                    }
-                    tableData.get(i).rows.put(getPkDataAsString(row, entry[KEY_COLUMNS]), row);
-                }
+                populateConfigTableData(projectVersionId, keyValue, sqlElements[i], tableDataList.get(i));
             }
         }
         
         if (version != null) {
             projectsExported.add(version.getProjectId());
+        }
+    }
+    
+    protected void addConfigDataForImport(List<TableData> tableDataList, String[][] sqlElements,
+            String projectVersionId, String keyValue) {
+        for (int i = 0; i < sqlElements.length; i++) {
+            populateConfigTableData(projectVersionId, keyValue, sqlElements[i], tableDataList.get(i));
+        }
+    }
+    
+    private void populateConfigTableData(String projectVersionId, String keyValue, String[] entry, TableData tableData) {
+        // Query existing data matching the config data.
+        List<Row> rows = getConfigTableData(String.format(entry[SQL],
+                tablePrefix, projectVersionId, keyValue));
+        for (Row row : rows) {
+            if (isPassword(row.getString("NAME", false))) {
+                String value = row.getString("VALUE", false);
+                if (isNotBlank(value)) {
+                    if (value.startsWith(SecurityConstants.PREFIX_ENC)) {
+                        try {
+                            row.put("VALUE", securityService.decrypt(
+                                    value.substring(SecurityConstants.PREFIX_ENC.length() - 1)));
+                        } catch (Exception e) {
+                        }
+                    }
+                }
+            }
+            tableData.rows.put(getPkDataAsString(row, entry[KEY_COLUMNS]), row);
         }
     }
 
@@ -502,7 +512,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         while (itr.hasNext()) {
             String key = itr.next();
             LinkedCaseInsensitiveMap<Object> row = importData.getAgentData().get(AGENT_IDX).getTableData().get(key);
-            addConfigData(existingAgentData, AGENT_SQL, (String) row.get(AGENT_SQL[AGENT_IDX][KEY_COLUMNS]),
+            addConfigDataForImport(existingAgentData, AGENT_SQL, (String) row.get(AGENT_SQL[AGENT_IDX][KEY_COLUMNS]),
                     (String) row.get(AGENT_SQL[AGENT_IDX][KEY_COLUMNS]));
         }
         
@@ -531,7 +541,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         while (itr.hasNext()) {
             String key = itr.next();
             LinkedCaseInsensitiveMap<Object> row = data.getProjectData().get(PROJECT_IDX).getTableData().get(key);
-            addConfigData(existingProjectData, PROJECT_SQL, projectVersionId,
+            addConfigDataForImport(existingProjectData, PROJECT_SQL, projectVersionId,
                     (String) row.get(PROJECT_SQL[PROJECT_IDX][KEY_COLUMNS]));
         }
         
@@ -571,7 +581,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         while (itr.hasNext()) {
             String key = itr.next();
             LinkedCaseInsensitiveMap<Object> row = data.getResourceData().get(RESOURCE_IDX).getTableData().get(key);
-            addConfigData(existingResourceData, RESOURCE_SQL, projectVersionId,
+            addConfigDataForImport(existingResourceData, RESOURCE_SQL, projectVersionId,
                     (String) row.get(RESOURCE_SQL[RESOURCE_IDX][KEY_COLUMNS]));
         }       
         
@@ -595,7 +605,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         while (itr.hasNext()) {
             String key = itr.next();
             LinkedCaseInsensitiveMap<Object> row = data.getModelData().get(MODEL_IDX).getTableData().get(key);
-            addConfigData(existingModelData, MODEL_SQL, projectVersionId,
+            addConfigDataForImport(existingModelData, MODEL_SQL, projectVersionId,
                     (String) row.get(MODEL_SQL[MODEL_IDX][KEY_COLUMNS]));
         }
         
@@ -618,7 +628,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         while (itr.hasNext()) {
             String key = itr.next();
             LinkedCaseInsensitiveMap<Object> row = data.getFlowData().get(FLOW_IDX).getTableData().get(key);
-            addConfigData(existingFlowData, FLOW_SQL, projectVersionId,
+            addConfigDataForImport(existingFlowData, FLOW_SQL, projectVersionId,
                     (String) row.get(FLOW_SQL[FLOW_IDX][KEY_COLUMNS]));
         }  
 
