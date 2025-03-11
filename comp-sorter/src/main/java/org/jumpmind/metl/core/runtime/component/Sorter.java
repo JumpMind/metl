@@ -62,6 +62,8 @@ public class Sorter extends AbstractComponentRuntime {
     public final static String SORTER_ATTRIBUTE_ORDINAL = "sort.attribute.order";
 
     public final static String ATTRIBUTE_SORTER_ENABLED = "sort.enabled";
+    
+    public final static String QUOTE_IDENTIFIERS = "quote.identifiers";
 
     int rowsPerMessage;
 
@@ -82,6 +84,8 @@ public class Sorter extends AbstractComponentRuntime {
     Throwable error;
     
     boolean entitySort = true;
+    
+    String quote;
     
     @Override
     public void start() {
@@ -132,6 +136,8 @@ public class Sorter extends AbstractComponentRuntime {
         			"Sort attribute must be a valid 'entity.attribute' in the input model. "
         			+ "Or at least one attribute must be specified to sort on in the component editor.");
         }        
+        
+        quote = properties.is(QUOTE_IDENTIFIERS) ? "\"" : "";
     }
     
     @Override
@@ -208,7 +214,7 @@ public class Sorter extends AbstractComponentRuntime {
 		for (ModelEntity entity : entities) {
 			StringBuilder sql = new StringBuilder("select ");
 			appendColumns(sql, entity);
-			sql.append(" from " + entity.getName() + "_1 ");
+			sql.append(" from " + quote + entity.getName().toUpperCase() + "_1" + quote + " ");
 			
 			// check to see if any one attribute of the entity is flagged to sort by before adding the 'order by' clause 
 			for (ComponentAttribSetting componentAttribute : sortKeyAttributeIdList) {
@@ -258,7 +264,7 @@ public class Sorter extends AbstractComponentRuntime {
 	
 	protected void appendColumns(StringBuilder sql, ModelEntity entity) {
 		for (ModelAttrib attribute : entity.getModelAttributes()) {
-			sql.append(attribute.getName()).append(" /* ")
+			sql.append(quote).append(attribute.getName().toUpperCase()).append(quote).append(" /* ")
 				.append(entity.getName()).append(".").append(attribute.getName())
 				.append(" */").append(",");
 		}
@@ -270,7 +276,7 @@ public class Sorter extends AbstractComponentRuntime {
 		for (ComponentAttribSetting componentAttribute : sortKeyAttributeIdList) {
 			for (ModelAttrib attribute : entity.getModelAttributes()) {
 				if (componentAttribute.getAttributeId().equals(attribute.getId())) {
-					sql.append(attribute.getName()).append(",");
+					sql.append(quote).append(attribute.getName().toUpperCase()).append(quote).append(",");
 					break;
 				}
 			}

@@ -42,6 +42,12 @@
         <name>Rows/Msg</name>
         <defaultValue>10</defaultValue>
       </setting>
+            <setting id='quote.identifiers'
+               required='false'
+               type='boolean'>
+        <name>Quote Identifiers</name>
+        <defaultValue>false</defaultValue>
+      </setting>
     </settings>
   </component>
 </definitions>
