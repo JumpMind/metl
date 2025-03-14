@@ -11,6 +11,10 @@ apply from: '../metl-assemble/common.gradle'
 apply from: '../metl-assemble/asciidoc.gradle'
 version = origVersion
 
+compileJava {
+    options.compilerArgs += '-parameters'
+}
+
 dependencies {
     api project(":metl-core")
     api (group:"org.jumpmind.symmetric", name:"symmetric-sqlexplorer", version:"$symmetricVersion", changing:true) {
