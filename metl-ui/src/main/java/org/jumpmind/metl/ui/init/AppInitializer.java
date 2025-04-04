@@ -130,6 +130,12 @@ public class AppInitializer implements ServletContextListener {
             MutablePropertySources sources = ((AbstractApplicationContext) ctx).getEnvironment().getPropertySources();
             sources.addLast(new PropertiesPropertySource("passed in properties", properties));
         }
+        try {
+	        groovy.json.JsonSlurper slurper = new groovy.json.JsonSlurper();
+	        Object result = slurper.parseText("jsontext");
+        } catch (Throwable e) {
+            	
+        }
         cleanTempJettyDirectories();
         initDatabase(ctx);
         initPlugins(ctx);        
