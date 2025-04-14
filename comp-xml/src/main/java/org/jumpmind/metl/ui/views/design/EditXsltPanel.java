@@ -24,15 +24,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.simple.RandomSource;
 import org.jumpmind.metl.core.model.DataType;
-import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
-import org.jumpmind.metl.core.model.Setting;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.component.XsltProcessor;
 import org.jumpmind.metl.ui.common.ButtonBar;
@@ -56,11 +55,8 @@ import de.f0rce.ace.events.AceValueChanged;
 
 @SuppressWarnings({ "serial" })
 public class EditXsltPanel extends AbstractComponentEditPanel implements ValueChangeListener<ValueChangeEvent<String>> {
-
     TextField filterField;
-    
     AceEditor editor;
-    
     TextArea textArea;
 
     public EditXsltPanel() {
@@ -194,9 +190,11 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements ValueCh
 
     class StylesheetChangeListener implements ComponentEventListener<AceValueChanged> {
         public void onComponentEvent(AceValueChanged event) {
-            Setting stylesheet = component.findSetting(XsltProcessor.XSLT_PROCESSOR_STYLESHEET);
-            stylesheet.setValue(editor.getValue());
-            context.getConfigurationService().save(component);
+            String key = XsltProcessor.XSLT_PROCESSOR_STYLESHEET;
+            EditXsltPanel.this.component.put(key, event.getValue());
+            EditXsltPanel.this.context.getConfigurationService()
+                    .save(EditXsltPanel.this.component.findSetting(key));
+
         }
     }
 
