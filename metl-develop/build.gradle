@@ -40,6 +40,7 @@ dependencies {
     testImplementation project(":comp-pgp")   
 	testImplementation project(":comp-kafka")
 	testImplementation project(":comp-sqs")
+	testImplementation project(":comp-paged-web-reader")
     testImplementation project(path: ':metl-core', configuration: 'testArtifacts')    
     testImplementation "jakarta.servlet:jakarta.servlet-api:$servletVersion"
     testImplementation "org.eclipse.jetty.ee10:jetty-ee10-servlet:$jettyVersion"
