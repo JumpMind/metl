@@ -22,6 +22,7 @@ package org.jumpmind.metl.core.runtime.component;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -44,8 +45,8 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.Http;
-import org.jumpmind.metl.core.runtime.resource.HttpOutputStream;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
+import org.jumpmind.metl.core.runtime.resource.IOutputStreamWithResponse;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.util.FormatUtils;
 
@@ -142,24 +143,20 @@ public class WebXmlPagedReader extends AbstractComponentRuntime {
                                 requestContent = documentFindReplace(requestContent, requestXpath, pageValue);
                             }
                             info("relativePath: " + relativePath);
-                            Object rawStream = streamable.getOutputStream(relativePath, false);
-                            info("Returned stream class: " + rawStream.getClass().getName());
-                            info("Returned stream class loader: " + rawStream.getClass().getClassLoader());
-                            info("HttpOutputStream class loader: " + HttpOutputStream.class.getClassLoader());
-                            HttpOutputStream os = (HttpOutputStream) rawStream;
-                            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, DEFAULT_CHARSET));
+                            OutputStream rawStream = streamable.getOutputStream(relativePath, false);
+                            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(rawStream, DEFAULT_CHARSET));
                             try {
                                 writer.write(requestContent);
                             } finally {
                                 writer.close();
-                                String response = os.getResponse();
-                                if (response != null) {
-                                    outputPayload.add(response);
-                                    if (StringUtils.isNotBlank(resultXpath)) {
-                                        pageValue = getDocumentValue(response, resultXpath);
-                                        log(LogLevel.INFO, "The Result XPath expression: '" + resultXpath 
-                                                + "' returned the following value: '" + pageValue + "'.");
-                                    }
+                                if (rawStream instanceof IOutputStreamWithResponse is) {
+	                                String response = is.getResponse();
+	                                if (response != null) {
+	                                    outputPayload.add(response);
+	                                    if (StringUtils.isNotBlank(resultXpath)) {
+	                                        pageValue = getDocumentValue(response, resultXpath);
+	                                    }
+	                                }
                                 }
                             }
                             if (outputPayload.size() > 0) {
