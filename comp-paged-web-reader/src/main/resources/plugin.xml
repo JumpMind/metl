@@ -1,0 +1,62 @@
+<definitions>
+	<component category='PROCESSOR'
+             id='Paged Web Reader'
+             inputMessageType='text'
+             inputOutputModelsMatch='false'
+             outputMessageType='text'
+             resourceCategory='http'>
+		<name>Paged Web Reader</name>
+		<className>org.jumpmind.metl.core.runtime.component.WebXmlPagedReader</className>
+		<description></description>
+		<settings>
+			<setting id='run.when'
+               required='false'
+               type='choice'>
+				<name>Run When</name>
+				<defaultValue>PER UNIT OF WORK</defaultValue>
+				<choices>
+					<choice>PER UNIT OF WORK</choice>
+					<choice>PER MESSAGE</choice>
+				</choices>
+			</setting>
+			<setting id='relative.path'
+               required='false'
+               type='text'>
+				<name>Append To Url</name>
+			</setting>
+			<setting id='body.from'
+               required='true'
+               type='choice'>
+				<name>Body From</name>
+				<defaultValue>Provided</defaultValue>
+				<choices>
+					<choice>Message</choice>
+					<choice>Provided</choice>
+				</choices>
+			</setting>
+			<setting id='body.text'
+               required='false'
+               type='multiline_text'>
+				<name>Body Text</name>
+			</setting>
+		    <setting id='parameter.replacement'
+		             required='false'
+		             type='boolean'>
+		        <name>Parameter replacement</name>
+		        <defaultValue>false</defaultValue>
+		    </setting>
+			<setting id='request.xpath'
+               required='false'
+               type='text'>
+				<name>Request XPath</name>
+				<defaultValue>//previousPageLastRecordPredicate</defaultValue>
+			</setting>
+			<setting id='result.xpath'
+               required='false'
+               type='text'>
+				<name>Result XPath</name>
+				<defaultValue>//lastRecordPredicate</defaultValue>
+			</setting>
+		</settings>
+	</component>   
+</definitions>
