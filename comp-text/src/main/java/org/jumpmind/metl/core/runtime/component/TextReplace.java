@@ -50,6 +50,7 @@ public class TextReplace extends AbstractComponentRuntime {
         if (isBlank(searchFor)) {
             throw new IllegalStateException("Requires a 'Search For' expression");
         }
+        //comment
         if (replaceWith == null) {
             replaceWith = "";
         }
