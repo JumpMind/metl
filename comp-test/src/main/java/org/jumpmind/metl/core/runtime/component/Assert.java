@@ -110,6 +110,7 @@ public class Assert extends AbstractComponentRuntime {
         expectedTextPayload = properties.get(EXPECTED_TEXT_PAYLOAD, null);
         sql = properties.get(ASSERT_SQL);
         dataSourceId = properties.get(ASSERT_SQL_DATASOURCE);
+        assertTrue(true);
     }
 
     @Override
