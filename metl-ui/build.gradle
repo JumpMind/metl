@@ -19,9 +19,13 @@ dependencies {
     api project(":metl-core")
     api (group:"org.jumpmind.symmetric", name:"symmetric-sqlexplorer", version:"$symmetricVersion", changing:true) {
        exclude group:'com.vaadin'
+       exclude group:"org.apache.logging.log4j"
+       exclude group:"org.slf4j"
     }
     api "org.springframework:spring-webmvc:$springVersion"
-    api "org.apache.poi:poi:$apachePOIVersion"
+    api ("org.apache.poi:poi:$apachePOIVersion") {
+       exclude group:"org.apache.logging.log4j"
+    }
     api "org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocVersion"
     api "io.swagger.core.v3:swagger-annotations-jakarta:$swaggerVersion"
     api "io.swagger.core.v3:swagger-core-jakarta:$swaggerVersion"
@@ -37,6 +41,7 @@ dependencies {
     api "com.vaadin:vaadin-bom:$vaadinVersion"
     api "com.vaadin:vaadin-core:$vaadinVersion"    
     api "com.vaadin:vaadin-spring:$vaadinVersion"
+    api "org.springframework:spring-websocket:$springVersion"
     api "jakarta.servlet:jakarta.servlet-api:$servletVersion"
     api "org.eclipse.jetty.ee10:jetty-ee10-servlet:$jettyVersion"
     implementation ("com.vaadin:vaadin-spring-boot-starter:${vaadinVersion}") {
@@ -45,6 +50,8 @@ dependencies {
         exclude group: "org.apache.tomcat.embed"
         exclude module: "spring-boot-starter-logging"
     }
+    implementation ("org.apache.commons:commons-fileupload2-core:2.0.0-M4")
+    implementation ("org.apache.commons:commons-fileupload2-jakarta:2.0.0-M4")
     api "de.f0rce:ace:3.4.2"
     api "org.vaadin.tatu:twincolselect:3.0.1"
     api "org.vaadin.addons.tatu:colorpicker:1.4.1"
