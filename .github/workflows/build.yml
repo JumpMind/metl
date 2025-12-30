@@ -32,3 +32,7 @@ jobs:
         run: |
           ./gradlew clean develop
         working-directory: metl-assemble
+        env:
+            ORG_GRADLE_PROJECT_signingKey: ${{ secrets.PGP_KEY }}
+            ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.PGP_KEY_PASSWORD }}
+
