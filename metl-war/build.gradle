@@ -23,7 +23,7 @@ eclipse {
 }
 
 war {
-    archiveName="metl.war"
+    archiveFileName="metl.war"
     jar.enabled = true
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     from {
@@ -68,9 +68,9 @@ task zipPlugins (type:Zip) {
     }
     
     from ('build/plugins')
-    destinationDir file('build') 
+    destinationDirectory = file('build') 
     rename 'maven-metadata.xml(.*)', 'maven-metadata-local.xml$1'
-    archiveName 'plugins.zip'
+    archiveFileName = 'plugins.zip'
 }
 
 
@@ -79,4 +79,5 @@ develop.dependsOn copyJavaDocsToWebapp
 assemble.dependsOn copyJavaDocsToWebapp
 develop.dependsOn copyPluginsForDevelopment
 war.dependsOn zipPlugins
+war.dependsOn tasks.getByPath(':metl-server:jar')
 assemble.dependsOn(jar)
