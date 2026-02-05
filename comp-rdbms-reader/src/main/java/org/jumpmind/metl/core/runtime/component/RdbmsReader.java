@@ -28,6 +28,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -101,7 +102,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     public void start() {
         TypedProperties properties = getTypedProperties();
         getSqlFromMessage = properties.is(SQL_FROM_MESSAGE, getSqlFromMessage);
-        sqls = getSqlStatements(!getSqlFromMessage);
+        sqls = getSqlStatementsPreservingHints(!getSqlFromMessage);
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
         trimColumns = properties.is(TRIM_COLUMNS);
         matchOnColumnNameOnly = properties.is(MATCH_ON_COLUMN_NAME_ONLY, false);
@@ -109,6 +110,34 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         runWhen = properties.get(RUN_WHEN, runWhen);
         unitOfWork = properties.get(UNIT_OF_WORK, unitOfWork);
         queryTimeout = properties.getInt(QUERY_TIMEOUT, queryTimeout);
+    }
+
+    /**
+     * Override to preserve SQL comments (hints) by setting stripOutComments=false on SqlScriptReader
+     */
+    protected List<String> getSqlStatementsPreservingHints(boolean required) {
+        TypedProperties properties = getTypedProperties();
+        String script = properties.get(SQL);
+        if (isNotBlank(script)) {
+            List<String> sqlStatements = new ArrayList<String>();
+            org.jumpmind.db.sql.SqlScriptReader scriptReader = new org.jumpmind.db.sql.SqlScriptReader(new java.io.StringReader(script));
+            // Preserve comments so hints are not stripped out
+            scriptReader.setStripOutComments(false);
+            try {
+                String sql = scriptReader.readSqlStatement();
+                while (sql != null) {
+                    sqlStatements.add(sql);
+                    sql = scriptReader.readSqlStatement();
+                }
+                return sqlStatements;
+            } finally {
+                org.apache.commons.io.IOUtils.closeQuietly(scriptReader);
+            }
+        } else if (required) {
+            throw new MisconfiguredException("Please configure the SQL for %s", componentDefinition.getName());
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     @Override
@@ -192,11 +221,13 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         for (int i = 1; i <= meta.getColumnCount(); i++) {
             String columnName = meta.getColumnName(i);
             String tableName = meta.getTableName(i);
+            boolean hintHasEntityAndAttribute = false;
             if (sqlEntityHints.containsKey(i)) {
                 String hint = sqlEntityHints.get(i);
                 if (hint.indexOf(".") != -1) {
                     tableName = hint.substring(0, hint.indexOf("."));
                     columnName = hint.substring(hint.indexOf(".") + 1);
+                    hintHasEntityAndAttribute = true;
                 } else {
                     tableName = hint;
                 }
@@ -211,15 +242,16 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                 tableName = getTableNameFromSql(sql);
             }
 
-           if (matchOnColumnNameOnly) {
+           if (matchOnColumnNameOnly && !hintHasEntityAndAttribute) {
                 List<String> foundIds = getAttributeIds(columnName);
                 if (foundIds.size() == 1) {
                     attributeIds.addAll(foundIds);
                     attributeFound = true;
-                } 
-                if (foundIds.size() > 1) {
+                } else if (foundIds.size() > 1) {
                     throw new MisconfiguredException(String.format("Ambiguous attribute name in model. "
                             + "Cannot match column name to unique attribute. Column: '%s')",columnName));
+                } else if (foundIds.size() == 0) {
+                    attributeIds.add(null);
                 }
             } else {
                 if (org.apache.commons.lang3.StringUtils.isEmpty(tableName)) {
@@ -234,7 +266,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                 attributeIds.add(attributeId);
             }
         }
-        
+
         if (!attributeFound) {
             throw new MisconfiguredException(String.format("The SQL query results could not be mapped to an existing model entity.  Please verify table columns "
                     + "and hints match the configured output model, '%s'. SQL: '%s')",getOutputModel().getName(),sql));
