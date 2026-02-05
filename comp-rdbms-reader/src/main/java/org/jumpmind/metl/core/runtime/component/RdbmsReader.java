@@ -112,16 +112,12 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         queryTimeout = properties.getInt(QUERY_TIMEOUT, queryTimeout);
     }
 
-    /**
-     * Override to preserve SQL comments (hints) by setting stripOutComments=false on SqlScriptReader
-     */
     protected List<String> getSqlStatementsPreservingHints(boolean required) {
         TypedProperties properties = getTypedProperties();
         String script = properties.get(SQL);
         if (isNotBlank(script)) {
             List<String> sqlStatements = new ArrayList<String>();
             org.jumpmind.db.sql.SqlScriptReader scriptReader = new org.jumpmind.db.sql.SqlScriptReader(new java.io.StringReader(script));
-            // Preserve comments so hints are not stripped out
             scriptReader.setStripOutComments(false);
             try {
                 String sql = scriptReader.readSqlStatement();
@@ -221,13 +217,11 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         for (int i = 1; i <= meta.getColumnCount(); i++) {
             String columnName = meta.getColumnName(i);
             String tableName = meta.getTableName(i);
-            boolean hintHasEntityAndAttribute = false;
             if (sqlEntityHints.containsKey(i)) {
                 String hint = sqlEntityHints.get(i);
                 if (hint.indexOf(".") != -1) {
                     tableName = hint.substring(0, hint.indexOf("."));
                     columnName = hint.substring(hint.indexOf(".") + 1);
-                    hintHasEntityAndAttribute = true;
                 } else {
                     tableName = hint;
                 }
@@ -242,16 +236,15 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                 tableName = getTableNameFromSql(sql);
             }
 
-           if (matchOnColumnNameOnly && !hintHasEntityAndAttribute) {
+           if (matchOnColumnNameOnly) {
                 List<String> foundIds = getAttributeIds(columnName);
                 if (foundIds.size() == 1) {
                     attributeIds.addAll(foundIds);
                     attributeFound = true;
-                } else if (foundIds.size() > 1) {
+				}
+                if (foundIds.size() > 1) {
                     throw new MisconfiguredException(String.format("Ambiguous attribute name in model. "
                             + "Cannot match column name to unique attribute. Column: '%s')",columnName));
-                } else if (foundIds.size() == 0) {
-                    attributeIds.add(null);
                 }
             } else {
                 if (org.apache.commons.lang3.StringUtils.isEmpty(tableName)) {
