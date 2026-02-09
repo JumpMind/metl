@@ -102,7 +102,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     public void start() {
         TypedProperties properties = getTypedProperties();
         getSqlFromMessage = properties.is(SQL_FROM_MESSAGE, getSqlFromMessage);
-        sqls = getSqlStatementsPreservingHints(!getSqlFromMessage);
+        sqls = getSqlStatements(!getSqlFromMessage);
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
         trimColumns = properties.is(TRIM_COLUMNS);
         matchOnColumnNameOnly = properties.is(MATCH_ON_COLUMN_NAME_ONLY, false);
@@ -110,30 +110,6 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         runWhen = properties.get(RUN_WHEN, runWhen);
         unitOfWork = properties.get(UNIT_OF_WORK, unitOfWork);
         queryTimeout = properties.getInt(QUERY_TIMEOUT, queryTimeout);
-    }
-
-    protected List<String> getSqlStatementsPreservingHints(boolean required) {
-        TypedProperties properties = getTypedProperties();
-        String script = properties.get(SQL);
-        if (isNotBlank(script)) {
-            List<String> sqlStatements = new ArrayList<String>();
-            org.jumpmind.db.sql.SqlScriptReader scriptReader = new org.jumpmind.db.sql.SqlScriptReader(new java.io.StringReader(script));
-            scriptReader.setStripOutComments(false);
-            try {
-                String sql = scriptReader.readSqlStatement();
-                while (sql != null) {
-                    sqlStatements.add(sql);
-                    sql = scriptReader.readSqlStatement();
-                }
-                return sqlStatements;
-            } finally {
-                org.apache.commons.io.IOUtils.closeQuietly(scriptReader);
-            }
-        } else if (required) {
-            throw new MisconfiguredException("Please configure the SQL for %s", componentDefinition.getName());
-        } else {
-            return Collections.emptyList();
-        }
     }
 
     @Override

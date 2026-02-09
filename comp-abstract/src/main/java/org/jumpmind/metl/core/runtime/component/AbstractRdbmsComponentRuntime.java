@@ -94,6 +94,7 @@ abstract public class AbstractRdbmsComponentRuntime extends AbstractComponentRun
         if (isNotBlank(script)) {
             List<String> sqlStatements = new ArrayList<String>();
             SqlScriptReader scriptReader = new SqlScriptReader(new StringReader(script));
+            scriptReader.setStripOutComments(false);
             try {
                 String sql = scriptReader.readSqlStatement();
                 while (sql != null) {
