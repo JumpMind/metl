@@ -28,7 +28,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -217,7 +216,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                 if (foundIds.size() == 1) {
                     attributeIds.addAll(foundIds);
                     attributeFound = true;
-				}
+                } 
                 if (foundIds.size() > 1) {
                     throw new MisconfiguredException(String.format("Ambiguous attribute name in model. "
                             + "Cannot match column name to unique attribute. Column: '%s')",columnName));
@@ -235,7 +234,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                 attributeIds.add(attributeId);
             }
         }
-
+        
         if (!attributeFound) {
             throw new MisconfiguredException(String.format("The SQL query results could not be mapped to an existing model entity.  Please verify table columns "
                     + "and hints match the configured output model, '%s'. SQL: '%s')",getOutputModel().getName(),sql));
