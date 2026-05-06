@@ -23,6 +23,7 @@ eclipse {
 }
 
 war {
+	dependsOn 'copyJavaDocsToWebapp'
     archiveFileName="metl.war"
     jar.enabled = true
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
@@ -44,7 +45,10 @@ dependencies {
 }
 
 task copyJavaDocsToWebapp(type: Copy) {    
-    dependsOn javadoc    
+    dependsOn javadoc
+    dependsOn ':metl-core:javadoc'
+    dependsOn ':metl-ui:javadoc'
+    duplicatesStrategy='warn'
     destinationDir = file("src/main/webapp/doc")
     into('javadoc') {
         from ('../metl-core/build/docs/javadoc') { include '**/*' }
