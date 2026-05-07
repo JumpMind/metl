@@ -20,11 +20,14 @@ dependencies {
     api "org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion"
     api "org.springframework:spring-context:$springVersion"
     api "org.springframework:spring-tx:$springVersion"
+    api "org.springframework:spring-jdbc:$springVersion"
     api (group:"org.jumpmind.symmetric", name:"symmetric-util", version:"$symmetricVersion") {
         exclude group: 'org.bouncycastle'
     }
     api group:"org.jumpmind.symmetric", name:"symmetric-db", version:"$symmetricVersion"
-    api group:"org.jumpmind.symmetric", name:"symmetric-jdbc", version:"$symmetricVersion"
+    api (group:"org.jumpmind.symmetric", name:"symmetric-jdbc", version:"$symmetricVersion") {
+    	exclude group: 'org.springframework'
+    }
     api group:"org.jumpmind.symmetric", name:"symmetric-io", version:"$symmetricVersion"
     api group:"org.jumpmind.symmetric", name:"symmetric-core", version:"$symmetricVersion"
     api (group: 'jcifs', name: 'jcifs', version: '1.3.17') {
