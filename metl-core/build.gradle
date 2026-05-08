@@ -64,12 +64,11 @@ dependencies {
     api "sshtools:j2ssh-ant:0.2.9"
     api "com.googlecode.json-simple:json-simple:1.1.1"
     api "kxml2:kxml2:$kxmlVersion"  
-    api group: 'org.apache.commons', name: 'commons-pool2', version: '2.12.0'
-    api group: 'org.apache.maven', name: 'maven-resolver-provider', version: '3.9.6'
-    api group: 'org.apache.maven.resolver', name: 'maven-resolver-transport-http', version: '1.9.18'
-    api group: 'org.apache.maven.resolver', name: 'maven-resolver-transport-file', version: '1.9.18'
-    api group: 'org.apache.maven.resolver', name: 'maven-resolver-transport-classpath', version: '1.9.18'    
-    api group: 'org.apache.maven.resolver', name: 'maven-resolver-connector-basic', version: '1.9.18'    
+    api group: 'org.apache.maven', name: 'maven-resolver-provider', version: '3.9.15'
+    api group: 'org.apache.maven.resolver', name: 'maven-resolver-transport-http', version: '1.9.27'
+    api group: 'org.apache.maven.resolver', name: 'maven-resolver-transport-file', version: '1.9.27'
+    api group: 'org.apache.maven.resolver', name: 'maven-resolver-transport-classpath', version: '1.9.27'    
+    api group: 'org.apache.maven.resolver', name: 'maven-resolver-connector-basic', version: '1.9.27'     
     api "de.saly:javamail-mock2-halfmock:0.5-beta4"
     api "com.sun.jersey.contribs.jersey-oauth:oauth-signature:1.19.4"
     api "org.apache.poi:poi-ooxml:$apachePOIVersion"
