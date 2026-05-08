@@ -58,7 +58,7 @@ dependencies {
     api "org.apache.ant:ant:$antVersion"
     api "jakarta.jms:jakarta.jms-api:3.1.0"    
     api "org.apache.qpid:proton-j:0.34.1"
-    api "org.apache.qpid:qpid-jms-client:2.5.0"
+    api "org.apache.qpid:qpid-jms-client:2.10.0"
     api  "org.apache.activemq:activemq-client:$activeMqVersion"
     api  "org.apache.activemq:activemq-broker:$activeMqVersion"        
     api "sshtools:j2ssh-ant:0.2.9"
