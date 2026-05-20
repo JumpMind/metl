@@ -321,12 +321,18 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     public static Map<Integer, String> getSqlColumnEntityHints(String sql) {
         Map<Integer, String> columnEntityHints = new HashMap<Integer, String>();
         String columns = sql.substring(sql.toLowerCase().indexOf("select") + 6, getFromIndex(sql));
+        // Strip -- line comments so their /* */ content is not mistaken for hints
+        columns = columns.replaceAll("--[^\n]*", "");
         int commentIdx = 0;
         Set<String> used = new HashSet<>();
         while (columns.indexOf("/*", commentIdx) != -1) {
             commentIdx = columns.indexOf("/*", commentIdx) + 2;
             int columnIdx = countColumnSeparatingCommas(columns.substring(0, commentIdx)) + 1;
-            String entity = columns.substring(commentIdx, columns.indexOf("*/", commentIdx)).strip();
+            int closeIdx = columns.indexOf("*/", commentIdx);
+            if (closeIdx == -1) {
+                break;
+            }
+            String entity = columns.substring(commentIdx, closeIdx).strip();
             // Only check for dupes if the entity and attributes are provided.
             if (entity.contains(".")) {
                 if (!used.contains(entity)) {
