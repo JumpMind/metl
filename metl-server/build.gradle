@@ -1,5 +1,4 @@
 apply from: '../metl-assemble/common.gradle'
-version = origVersion
 
 dependencies {
     api "jakarta.servlet:jakarta.servlet-api:$servletVersion"
@@ -20,7 +19,7 @@ dependencies {
     api "commons-io:commons-io:$commonsIoVersion"
     api "org.apache.commons:commons-lang3:$commonsLangVersion"
     api (group:"org.jumpmind.symmetric", name:"symmetric-wrapper", version:"$symmetricVersion", changing:true) {
-        exclude group:"log4j"
+        exclude group:"org.apache.logging.log4j"
         exclude group:"org.slf4j"
     }
     api "org.bouncycastle:bcprov-jdk18on:$bouncycastleVersion"
