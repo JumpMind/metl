@@ -1,5 +1,4 @@
 apply from: '../metl-assemble/common.gradle'
-version = origVersion
 
 configurations {
     jaxbConfig

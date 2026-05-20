@@ -9,7 +9,6 @@ vaadin {
 
 apply from: '../metl-assemble/common.gradle'
 apply from: '../metl-assemble/asciidoc.gradle'
-version = origVersion
 
 compileJava {
     options.compilerArgs += '-parameters'

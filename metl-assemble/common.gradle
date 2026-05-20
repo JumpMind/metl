@@ -11,13 +11,15 @@ import java.util.Date
 	apply plugin: 'jacoco'
 	apply plugin: 'signing'
 	
-	ext {
-	    origVersion = version
-	    pluginBuildNumber = buildNumber = 'a'.equals(buildNumber) ?  ('a.' + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())) : buildNumber
-	}
+	if (!project.name.equals("metl-com") && !project.name.equals("metl-core") && !project.name.equals("metl-server") && !project.name.equals("metl-ui")) {
+		ext {
+		    origVersion = version
+		    pluginBuildNumber = buildNumber = 'a'.equals(buildNumber) ?  ('a.' + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())) : buildNumber
+		}
 	
-	buildNumber = 'a'.equals(buildNumber) ?  ('a.' + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())) : buildNumber
-	version = version + "." + buildNumber
+		buildNumber = 'a'.equals(buildNumber) ?  ('a.' + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())) : buildNumber
+		version = version + "." + buildNumber
+	}
 	def licenseName = null;
 	
     sourceCompatibility=JavaVersion.VERSION_17
