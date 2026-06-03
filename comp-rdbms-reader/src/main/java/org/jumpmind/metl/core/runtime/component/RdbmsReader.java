@@ -320,13 +320,13 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
     public static Map<Integer, String> getSqlColumnEntityHints(String sql) {
         Map<Integer, String> columnEntityHints = new HashMap<Integer, String>();
+        // Strip -- line comments so their /* */ content is not mistaken for hints
+        sql = sql.replaceAll("--[^\n]*", "");
         int selectIdx = getSelectIndex(sql);
         if (selectIdx == -1) {
             return columnEntityHints;
         }
         String columns = sql.substring(selectIdx + 6, getFromIndex(sql));
-        // Strip -- line comments so their /* */ content is not mistaken for hints
-        columns = columns.replaceAll("--[^\n]*", "");
         int commentIdx = 0;
         Set<String> used = new HashSet<>();
         while (columns.indexOf("/*", commentIdx) != -1) {
