@@ -320,9 +320,13 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
     public static Map<Integer, String> getSqlColumnEntityHints(String sql) {
         Map<Integer, String> columnEntityHints = new HashMap<Integer, String>();
-        String columns = sql.substring(sql.toLowerCase().indexOf("select") + 6, getFromIndex(sql));
         // Strip -- line comments so their /* */ content is not mistaken for hints
-        columns = columns.replaceAll("--[^\n]*", "");
+        sql = sql.replaceAll("--[^\n]*", "");
+        int selectIdx = getSelectIndex(sql);
+        if (selectIdx == -1) {
+            return columnEntityHints;
+        }
+        String columns = sql.substring(selectIdx + 6, getFromIndex(sql));
         int commentIdx = 0;
         Set<String> used = new HashSet<>();
         while (columns.indexOf("/*", commentIdx) != -1) {
@@ -369,21 +373,71 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         return count;
     }
 
-    protected static int getFromIndex(String sql) {
-        sql = sql.toLowerCase();
-        int idx = -1;
+    protected static int getSelectIndex(String sql) {
+        String lower = sql.toLowerCase();
+        int length = lower.length();
+        int i = 0;
+        while (i < length) {
+            if (i + 1 < length && lower.charAt(i) == '-' && lower.charAt(i + 1) == '-') {
+                int newline = lower.indexOf('\n', i);
+                if (newline == -1) return -1;
+                i = newline + 1;
+            } else if (i + 1 < length && lower.charAt(i) == '/' && lower.charAt(i + 1) == '*') {
+                int close = lower.indexOf("*/", i + 2);
+                if (close == -1) return -1;
+                i = close + 2;
+            } else if (lower.charAt(i) == '\'') {
+                i++;
+                while (i < length && lower.charAt(i) != '\'') {
+                    i++;
+                }
+                i++;
+            } else if (lower.startsWith("select", i)) {
+                int after = i + 6;
+                if (after >= length || Character.isWhitespace(lower.charAt(after)) || lower.charAt(after) == '(') {
+                    return i;
+                }
+                i++;
+            } else {
+                i++;
+            }
+        }
+        return -1;
+    }
 
-        idx = sql.toLowerCase().indexOf("from ");
-        if (idx == -1) {
-            idx = sql.toLowerCase().indexOf("from\n");
+    protected static int getFromIndex(String sql) {
+        String lower = sql.toLowerCase();
+        int length = lower.length();
+        int depth = 0;
+        int i = 0;
+        while (i < length) {
+            if (i + 1 < length && lower.charAt(i) == '-' && lower.charAt(i + 1) == '-') {
+                int newline = lower.indexOf('\n', i);
+                if (newline == -1) return length - 1;
+                i = newline + 1;
+            } else if (i + 1 < length && lower.charAt(i) == '/' && lower.charAt(i + 1) == '*') {
+                int close = lower.indexOf("*/", i + 2);
+                if (close == -1) return length - 1;
+                i = close + 2;
+            } else if (lower.charAt(i) == '\'') {
+                i++;
+                while (i < length && lower.charAt(i) != '\'') {
+                    i++;
+                }
+                i++;
+            } else if (lower.charAt(i) == '(') {
+                depth++;
+                i++;
+            } else if (lower.charAt(i) == ')') {
+                depth--;
+                i++;
+            } else if (depth == 0 && (lower.startsWith("from ", i) || lower.startsWith("from\n", i) || lower.startsWith("from\r\n", i))) {
+                return i;
+            } else {
+                i++;
+            }
         }
-        if (idx == -1) {
-            idx = sql.toLowerCase().indexOf("from\r\n");
-        }
-        if (idx == -1) {
-            idx = sql.length() - 1;
-        }
-        return idx;
+        return length - 1;
     }
 
     protected void logEntityAttributes(EntityData rowData) {
