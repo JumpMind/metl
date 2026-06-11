@@ -55,8 +55,8 @@ import org.jumpmind.metl.ui.common.EnableFocusTextField;
 import org.jumpmind.metl.ui.common.ExportDialog;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.ImportDialog;
-import org.jumpmind.metl.ui.common.PlaceholderObject;
 import org.jumpmind.metl.ui.common.ImportDialog.IImportListener;
+import org.jumpmind.metl.ui.common.PlaceholderObject;
 import org.jumpmind.metl.ui.common.SelectProjectVersionDialog;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.views.design.menu.DesignMenuBar;
@@ -66,9 +66,9 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog.ConfirmEvent;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -162,6 +162,7 @@ public class DesignNavigator extends VerticalLayout {
         filterField.setValueChangeMode(ValueChangeMode.LAZY);
         filterField.setValueChangeTimeout(200);
         filterField.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
+            @Override
             public void valueChanged(ValueChangeEvent<String> event) {
                 if (event.getValue() != null && !event.getValue().isEmpty()) {
                     tagFilterText = event.getValue();
@@ -229,21 +230,20 @@ public class DesignNavigator extends VerticalLayout {
             if (event.getButton() == 0) {
                 if (event.getClickCount() == 2) {
                     abortEditingItem();
-                    open(event.getItem());
+                    AbstractNamedObject item = event.getItem();
+                    open(item);
                     if (treeGrid.getDataProvider().hasChildren(event.getItem())) {
-                        AbstractNamedObject item = event.getItem();
                         if (treeGrid.isExpanded(item)) {
                             treeGrid.collapse(item);
                         } else {
                             treeGrid.expand(item);
                         }
                     }
+                    treeGrid.select(item);
                 }
             }
         });
         treeGrid.addExpandListener(e -> {
-            // deselect any selected rows when they expand or collapse?
-            treeGrid.deselectAll();
             Collection<AbstractNamedObject> items = e.getItems();
             if (!items.isEmpty()) {
                 AbstractNamedObject item = items.iterator().next();
@@ -306,7 +306,7 @@ public class DesignNavigator extends VerticalLayout {
                     }
 
                     if (!(itemId instanceof FolderName)) {
-                        ids.append(itemId.getClass().getSimpleName()).append(":").append(((AbstractObject) itemId).getId()).append(";");
+                        ids.append(itemId.getClass().getSimpleName()).append(":").append(itemId.getId()).append(";");
                     }
                 }
             }
@@ -314,8 +314,6 @@ public class DesignNavigator extends VerticalLayout {
             Setting setting = context.getUser().findSetting(UserSetting.SETTING_DESIGN_NAVIGATOR_EXPANDED_IDS);
             setting.setValue(ids.toString());
             configurationService.save(setting);
-            
-            treeGrid.getDataProvider().refreshAll();
         }
     }
     
@@ -369,8 +367,6 @@ public class DesignNavigator extends VerticalLayout {
     public boolean startEditingItem(AbstractNamedObject obj) {
         if (obj.isSettingNameAllowed()) {
             itemBeingEdited = obj;
-            treeGrid.getDataProvider().refreshAll();
-            treeGrid.deselectAll();
             treeGrid.getDataCommunicator().getKeyMapper().key(obj);
             treeGrid.getEditor().editItem(obj);
             return true;
@@ -485,7 +481,7 @@ public class DesignNavigator extends VerticalLayout {
                     String projectId = context.getUser().findSetting(UserSetting.SETTING_DESIGN_NAVIGATOR_SELECTED_PROJECT_ID).getValue();
                     if (isNotBlank(projectId)) {
                         for (AbstractNamedObject object : itemIds) {
-                            if (object instanceof Project && ((Project) object).getId().equals(projectId)
+                            if (object instanceof Project && object.getId().equals(projectId)
                                     && !((Project) object).isDeleted() && projects.contains(object)) {
                                 addProjectVersions((Project) object);
                                 selected = findChild(selectedId, object);
@@ -633,7 +629,7 @@ public class DesignNavigator extends VerticalLayout {
                 AbstractName named = (AbstractName) value;
                 projectVersionId = named.getProjectVersionId();
             } else if (value instanceof ProjectVersion) {
-                projectVersionId = ((ProjectVersion) value).getId();
+                projectVersionId = value.getId();
             }
 
             String projectId = null;
@@ -641,7 +637,7 @@ public class DesignNavigator extends VerticalLayout {
                 ProjectVersion projectVersion = configurationService.findProjectVersion(projectVersionId);
                 projectId = projectVersion.getProjectId();
             } else if (value instanceof Project) {
-                projectId = ((Project) value).getId();
+                projectId = value.getId();
             }
 
             if (isNotBlank(projectId)) {
@@ -869,7 +865,7 @@ public class DesignNavigator extends VerticalLayout {
                     "Are you sure you want to delete the '" + namedObject.getName() + "' version?", "Ok",
                     new DeleteProjectVersionConfirmationListener(namedObject)).open();
         } else if (object instanceof ProjectVersionDepends) {
-            configurationService.delete((ProjectVersionDepends) object);
+            configurationService.delete(object);
             treeGrid.getTreeData().removeItem(object);
         }
     }
