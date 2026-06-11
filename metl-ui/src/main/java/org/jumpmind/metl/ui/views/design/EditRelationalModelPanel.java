@@ -671,6 +671,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                                 treeGrid.getDataProvider().refreshItem(obj, true);
                             }
                         }
+                    }, "Cancel", e -> {
                     }).open();
         }
     }
