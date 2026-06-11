@@ -32,10 +32,10 @@ import java.util.Set;
 
 import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.DataType;
-import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelEntitySorter;
+import org.jumpmind.metl.core.model.RelationalModel;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.ExportDialog;
@@ -43,6 +43,8 @@ import org.jumpmind.metl.ui.common.UiUtils;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.Label;
 import org.jumpmind.vaadin.ui.common.NotifyDialog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.BlurNotifier.BlurEvent;
 import com.vaadin.flow.component.ClickEvent;
@@ -73,41 +75,24 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 
 @SuppressWarnings("serial")
 public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel {
-
+    Logger log = LoggerFactory.getLogger(EditRelationalModelPanel.class);
     ApplicationContext context;
-
     TreeGrid<AbstractNamedObject> treeGrid = new TreeGrid<AbstractNamedObject>();
-
     Grid<Record> grid = new Grid<Record>();
-
     RelationalModel model;
-
     Set<AbstractNamedObject> lastEditItemIds = Collections.emptySet();
-
     TableColumnSelectDialog tableColumnSelectDialog;
-
     Button addEntityButton;
-
     Button addAttributeButton;
-
     Button editButton;
-
     Button removeButton;
-
     Button importButton;
-
     Button moveUpButton;
-
     Button moveDownButton;
-
     Button moveTopButton;
-
     Button moveBottomButton;
-
     TextField filterField;
-    
     ShortcutRegistration enterKeyRegistration;
-
     boolean readOnly;
 
     public EditRelationalModelPanel(ApplicationContext context, String modelId, boolean readOnly) {
@@ -117,44 +102,34 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
         context.getConfigurationService().refresh(model);
         setPadding(false);
         setSpacing(false);
-
         ButtonBar buttonBar1 = new ButtonBar();
         ButtonBar buttonBar2 = new ButtonBar();
         add(buttonBar1, buttonBar2);
-
-            addEntityButton = buttonBar1.addButton("Add Entity", VaadinIcon.TABLE);
-            addEntityButton.addClickListener(new AddEntityClickListener());
-
-            addAttributeButton = buttonBar1.addButton("Add Attr", VaadinIcon.SPLIT_H);
-            addAttributeButton.addClickListener(new AddAttributeClickListener());
-
-            editButton = buttonBar1.addButton("Edit", VaadinIcon.EDIT);
-            editButton.addClickListener(new EditClickListener());
-
-            removeButton = buttonBar1.addButton("Remove", VaadinIcon.TRASH);
-            removeButton.addClickListener(new RemoveClickListener());
-
-            moveUpButton = buttonBar2.addButton("Up", VaadinIcon.ARROW_UP, e -> moveUp());
-            moveDownButton = buttonBar2.addButton("Down", VaadinIcon.ARROW_DOWN, e -> moveDown());
-            moveTopButton = buttonBar2.addButton("Top", VaadinIcon.ANGLE_DOUBLE_UP,
-                    e -> moveTop());
-            moveBottomButton = buttonBar2.addButton("Bottom", VaadinIcon.ANGLE_DOUBLE_DOWN,
-                    e -> moveBottom());
-
-            importButton = buttonBar1.addButtonRight("Import ...", VaadinIcon.UPLOAD,
-                    new ImportClickListener());
-
+        addEntityButton = buttonBar1.addButton("Add Entity", VaadinIcon.TABLE);
+        addEntityButton.addClickListener(new AddEntityClickListener());
+        addAttributeButton = buttonBar1.addButton("Add Attr", VaadinIcon.SPLIT_H);
+        addAttributeButton.addClickListener(new AddAttributeClickListener());
+        editButton = buttonBar1.addButton("Edit", VaadinIcon.EDIT);
+        editButton.addClickListener(new EditClickListener());
+        removeButton = buttonBar1.addButton("Remove", VaadinIcon.TRASH);
+        removeButton.addClickListener(new RemoveClickListener());
+        moveUpButton = buttonBar2.addButton("Up", VaadinIcon.ARROW_UP, e -> moveUp());
+        moveDownButton = buttonBar2.addButton("Down", VaadinIcon.ARROW_DOWN, e -> moveDown());
+        moveTopButton = buttonBar2.addButton("Top", VaadinIcon.ANGLE_DOUBLE_UP, e -> moveTop());
+        moveBottomButton = buttonBar2.addButton("Bottom", VaadinIcon.ANGLE_DOUBLE_DOWN,
+                e -> moveBottom());
+        importButton = buttonBar1.addButtonRight("Import ...", VaadinIcon.UPLOAD,
+                new ImportClickListener());
         buttonBar1.addButtonRight("Export...", VaadinIcon.DOWNLOAD, (e) -> export());
-
         filterField = buttonBar2.addFilter();
         filterField.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
+            @Override
             public void valueChanged(ValueChangeEvent<String> event) {
                 filterField.setValue(event.getValue());
                 treeGrid.getTreeData().clear();
                 addAll(event.getValue(), EditRelationalModelPanel.this.model.getModelEntities());
             }
         });
-
         treeGrid.addThemeName("easySelect");
         treeGrid.setSizeFull();
         treeGrid.setPageSize(100);
@@ -193,7 +168,10 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                 t.setValue(obj.getName());
                 t.focus();
                 t.getElement().executeJs("this.inputElement.select()");
-                t.setPrefixComponent(new Icon(obj instanceof ModelEntity ? VaadinIcon.TABLE : VaadinIcon.SPLIT_H));
+                t.getElement().addEventListener("click", e -> {
+                }).addEventData("event.stopPropagation()");
+                t.setPrefixComponent(new Icon(
+                        obj instanceof ModelEntity ? VaadinIcon.TABLE : VaadinIcon.SPLIT_H));
                 return t;
             } else {
                 Label label = UiUtils.getName(filterField.getValue(), obj.getName());
@@ -202,7 +180,6 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                 return new HorizontalLayout(icon, label);
             }
         }).setHeader("Name");
-
         treeGrid.addComponentColumn(itemId -> {
             if (itemId instanceof ModelAttrib) {
                 final ModelAttrib obj = (ModelAttrib) itemId;
@@ -237,10 +214,10 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                 } else {
                     return UiUtils.getName(filterField.getValue(), obj.getDescription());
                 }
-            } else
-                return null;
+            } else {
+                return new Span();
+            }
         }).setHeader("Description");
-
         treeGrid.addComponentColumn(itemId -> {
             if (itemId instanceof ModelAttrib) {
                 final ModelAttrib obj = (ModelAttrib) itemId;
@@ -253,6 +230,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                     cbox.setItems(itemList);
                     cbox.setValue(obj.getType());
                     cbox.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
+                        @Override
                         public void valueChanged(ValueChangeEvent<String> event) {
                             if (event.getValue() != null) {
                                 obj.setType(cbox.getValue());
@@ -263,13 +241,11 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                         }
                     });
                     cbox.addBlurListener(new ComponentEventListener<BlurEvent<ComboBox<String>>>() {
+                        @Override
                         public void onComponentEvent(BlurEvent<ComboBox<String>> event) {
                             List<AbstractNamedObject> items = getAllItems();
-                            boolean found = false;
                             for (AbstractNamedObject item : items) {
                                 if (item.equals(obj)) {
-                                    found = true;
-                                } else if (found) {
                                     selectOnly(item);
                                     editSelectedItem();
                                     break;
@@ -283,10 +259,9 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                     return new Span(obj.getType());
                 }
             } else {
-                return null;
+                return new Span();
             }
         }).setHeader("Type");
-
         treeGrid.addComponentColumn(itemId -> {
             if (itemId instanceof ModelAttrib) {
                 final ModelAttrib obj = (ModelAttrib) itemId;
@@ -295,13 +270,11 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                     cbox.setValue(obj.isPk());
                     cbox.addValueChangeListener(event -> togglePk(obj));
                     cbox.addBlurListener(new ComponentEventListener<BlurEvent<Checkbox>>() {
+                        @Override
                         public void onComponentEvent(BlurEvent<Checkbox> event) {
                             List<AbstractNamedObject> items = getAllItems();
-                            boolean found = false;
                             for (AbstractNamedObject item : items) {
                                 if (item.equals(obj)) {
-                                    found = true;
-                                } else if (found) {
                                     selectOnly(item);
                                     editSelectedItem();
                                     break;
@@ -317,41 +290,56 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                     return icon;
                 }
             }
-            return null;
+            return new Span();
         }).setHeader("PK").setFlexGrow(0).setWidth("60px");
-
         treeGrid.addItemClickListener(new TreeGridItemClickListener());
         treeGrid.addSelectionListener(new TreeGridSelectionListener());
-
         add(treeGrid);
         expand(treeGrid);
-
         HorizontalLayout hlayout = new HorizontalLayout();
         add(hlayout);
-
         Button collapseAll = new Button("Collapse All");
         collapseAll.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
         hlayout.add(collapseAll);
         collapseAll.addClickListener(e -> collapseAll());
-
         Button expandAll = new Button("Expand All");
         expandAll.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
         hlayout.add(expandAll);
         expandAll.addClickListener(e -> expandAll());
-
         addAll("", model.getModelEntities());
-
         setButtonsEnabled();
-
         grid.addColumn(Record::getEntityName).setHeader("Entity Name");
         grid.addColumn(Record::getAttributeName).setHeader("Attribute Name");
         grid.addColumn(Record::getDescription).setHeader("Description");
         grid.addColumn(Record::getType).setHeader("Type");
         grid.addColumn(Record::getPk).setHeader("PK");
-
         if (model.getModelEntities().size() > 10) {
             collapseAll();
         }
+    }
+
+    public void scrollToItemAndExpand(AbstractNamedObject item) {
+        treeGrid.select(item);
+        ArrayList<AbstractNamedObject> items = new ArrayList<>();
+        ArrayList<Integer> indices = new ArrayList<>();
+        items.add(item);
+        AbstractNamedObject parent;
+        do {
+            AbstractNamedObject current = items.get(items.size() - 1);
+            parent = treeGrid.getTreeData().getParent(current);
+            int index = treeGrid.getTreeData().getChildren(parent).indexOf(current);
+            indices.add(index);
+            if (parent != null) {
+                items.add(parent);
+            }
+            List<AbstractNamedObject> shallowItemsCopy = items.subList(0, items.size());
+            Collections.reverse(shallowItemsCopy);
+            treeGrid.expand(shallowItemsCopy);
+            List<Integer> shallowIndicesCopy = indices.subList(0, indices.size());
+            Collections.reverse(shallowIndicesCopy);
+            treeGrid.scrollToIndex(
+                    shallowIndicesCopy.stream().mapToInt(Integer::intValue).toArray());
+        } while (parent != null);
     }
 
     protected List<AbstractNamedObject> getAllItems() {
@@ -381,7 +369,6 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
             } else if (!down && index > 0 && !toEnd) {
                 attributes.remove(selected);
                 attributes.add(index - 1, selected);
-
             } else if (down) {
                 attributes.remove(selected);
                 attributes.add(0, selected);
@@ -389,23 +376,20 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                 attributes.remove(selected);
                 attributes.add(selected);
             }
-
             index = 0;
             for (ModelAttrib modelAttribute : attributes) {
                 modelAttribute.setAttributeOrder(index++);
                 context.getConfigurationService().save(modelAttribute);
             }
-
             List<AbstractNamedObject> children = new ArrayList<AbstractNamedObject>(treeGrid.getTreeData().getChildren(entity));
             for (AbstractNamedObject object : children) {
                 treeGrid.getTreeData().removeItem(object);
             }
-
             for (ModelAttrib modelAttribute : attributes) {
                 addModelAttribute(entity, modelAttribute);
             }
             treeGrid.select(selected);
-            treeGrid.getDataProvider().refreshAll();
+            treeGrid.getDataProvider().refreshItem(entity, true);
         }
     }
 
@@ -482,8 +466,18 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
     public void selected() {
         enterKeyRegistration = UI.getCurrent().addShortcutListener(() -> {
             lastEditItemIds = Collections.emptySet();
-            treeGrid.getDataProvider().refreshAll();
+            refreshSelectedItems();
         }, Key.ENTER);
+    }
+
+    private void refreshSelectedItems() {
+        refreshSelectedItems(getSelectedItems());
+    }
+
+    private void refreshSelectedItems(Set<AbstractNamedObject> items) {
+        for (AbstractNamedObject obj : items) {
+            treeGrid.getDataProvider().refreshItem(obj, true);
+        }
     }
 
     @Override
@@ -533,7 +527,6 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                 filteredModelEntityList.add(modelEntity);
             }
         }
-
         Collections.sort(filteredModelEntityList, new ModelEntitySorter());
         for (ModelEntity modelEntity : filteredModelEntityList) {
             add(modelEntity);
@@ -555,7 +548,6 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                 filteredModelEntityList.add(modelEntity);
             }
         }
-
         List<Record> recordList = new ArrayList<Record>();
         Collections.sort(filteredModelEntityList, new ModelEntitySorter());
         for (ModelEntity modelEntity : filteredModelEntityList) {
@@ -576,11 +568,13 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
 
     protected void editSelectedItem() {
         lastEditItemIds = getSelectedItems();
-        treeGrid.getDataProvider().refreshAll();
-        grid.getDataProvider().refreshAll();
+        for (AbstractNamedObject o : getSelectedItems()) {
+            treeGrid.getDataProvider().refreshItem(o);
+        }
     }
 
     class AddEntityClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        @Override
         public void onComponentEvent(ClickEvent<Button> event) {
             ModelEntity e = new ModelEntity();
             e.setName("New Entity");
@@ -589,11 +583,14 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
             context.getConfigurationService().save(e);
             addModelEntity(e);
             selectOnly(e);
+            treeGrid.getDataProvider().refreshAll();
             editSelectedItem();
+            EditRelationalModelPanel.this.scrollToItemAndExpand(e);
         }
     }
 
     class AddAttributeClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        @Override
         public void onComponentEvent(ClickEvent<Button> event) {
             Set<AbstractNamedObject> itemIds = getSelectedItems();
             if (itemIds.size() > 0) {
@@ -607,7 +604,6 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                 } else if (itemId instanceof ModelAttrib) {
                     entity = (ModelEntity) treeGrid.getTreeData().getParent(itemId);
                 }
-
                 if (entity != null) {
                     a.setEntityId(entity.getId());
                     entity.addModelAttribute(a);
@@ -615,6 +611,9 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                     addModelAttribute(entity, a);
                     treeGrid.expand(entity);
                     selectOnly(a);
+                    Set<AbstractNamedObject> s = new HashSet<>();
+                    s.add(entity);
+                    refreshSelectedItems(s);
                     editSelectedItem();
                 }
             }
@@ -622,17 +621,17 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
     }
 
     class EditClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        @Override
         public void onComponentEvent(ClickEvent<Button> event) {
             editSelectedItem();
         }
     }
 
     class RemoveClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        @Override
         public void onComponentEvent(ClickEvent<Button> event) {
-
             Set<AbstractNamedObject> itemIds = new HashSet<AbstractNamedObject>();
             Set<AbstractNamedObject> selectedIds = getSelectedItems();
-            
             new ConfirmDialog("Delete?",
                     "Are you sure you want to delete the " + selectedIds.size() + " selected items?", "Ok", e -> {
                         for (AbstractNamedObject itemId : selectedIds) {
@@ -642,29 +641,42 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
                             }
                             itemIds.add(itemId);
                         }
-
+                        Set<AbstractNamedObject> entitiesToRefresh = new HashSet<>();
                         for (AbstractNamedObject itemId : itemIds) {
                             if (itemId instanceof ModelAttrib) {
+                                log.info("Removing attribute {}", itemId);
                                 ModelAttrib a = (ModelAttrib) itemId;
                                 context.getConfigurationService().delete((ModelAttrib) itemId);
                                 ModelEntity entity = (ModelEntity) treeGrid.getTreeData().getParent(itemId);
                                 entity.removeModelAttribute(a);
+                                entitiesToRefresh.add(entity);
+                                treeGrid.deselect(itemId);
                                 treeGrid.getTreeData().removeItem(itemId);
                             }
                         }
                         for (AbstractNamedObject itemId : itemIds) {
                             if (itemId instanceof ModelEntity) {
                                 context.getConfigurationService().delete((ModelEntity) itemId);
+                                treeGrid.deselect(itemId);
                                 treeGrid.getTreeData().removeItem(itemId);
                                 model.getModelEntities().remove(itemId);
+                                entitiesToRefresh.remove(itemId);
                             }
                         }
-                        treeGrid.getDataProvider().refreshAll();
+                        if (entitiesToRefresh.isEmpty()) {
+                            treeGrid.getDataProvider().refreshAll();
+                        } else {
+                            for (AbstractNamedObject obj : entitiesToRefresh) {
+                                log.info("Refreshing {}", obj);
+                                treeGrid.getDataProvider().refreshItem(obj, true);
+                            }
+                        }
                     }).open();
         }
     }
 
     class ImportClickListener implements ComponentEventListener<ClickEvent<Button>>, TableColumnSelectListener {
+        @Override
         public void onComponentEvent(ClickEvent<Button> event) {
             if (tableColumnSelectDialog == null) {
                 tableColumnSelectDialog = new TableColumnSelectDialog(context, model);
@@ -673,6 +685,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
             tableColumnSelectDialog.open();
         }
 
+        @Override
         public void selected(Collection<ModelEntity> modelEntityCollection) {
             HashMap<String, ModelEntity> existingModelEntities = new HashMap<String, ModelEntity>();
             for (Object itemId : getAllItems()) {
@@ -707,15 +720,20 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
     class TreeGridItemClickListener implements ComponentEventListener<ItemClickEvent<AbstractNamedObject>> {
         long lastClick;
 
+        @Override
         public void onComponentEvent(ItemClickEvent<AbstractNamedObject> event) {
             if (event.getClickCount() == 2) {
                 treeGrid.deselectAll();
                 treeGrid.select(event.getItem());
                 lastEditItemIds = Collections.singleton(event.getItem());
-                treeGrid.getDataProvider().refreshAll();
-                grid.getDataProvider().refreshAll();
+                treeGrid.getDataProvider().refreshItem(event.getItem(), true);
+            } else if (getSelectedItems().contains(event.getItem())) {
+                treeGrid.getDataProvider().refreshItem(event.getItem(), true);
             } else if (System.currentTimeMillis() - lastClick > 1000
                     && getSelectedItems().size() > 0) {
+                Set<AbstractNamedObject> oldIds = new HashSet<>(lastEditItemIds);
+                lastEditItemIds = Collections.emptySet();
+                refreshSelectedItems(oldIds);
                 treeGrid.deselectAll();
             }
             lastClick = System.currentTimeMillis();
@@ -723,36 +741,32 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
     }
 
     class TreeGridSelectionListener implements SelectionListener<Grid<AbstractNamedObject>, AbstractNamedObject> {
+        @Override
         public void selectionChange(SelectionEvent<Grid<AbstractNamedObject>, AbstractNamedObject> event) {
+            log.info("TreeGridSelectionListener::selectionChange: {}",
+                    event.getAllSelectedItems());
+            Set<AbstractNamedObject> oldIds = new HashSet<>(lastEditItemIds);
             lastEditItemIds = Collections.emptySet();
-            treeGrid.getDataProvider().refreshAll();
+            refreshSelectedItems(oldIds);
             setButtonsEnabled();
         }
     }
 
     public class Record {
         ModelEntity modelEntity;
-
         ModelAttrib modelAttribute;
-
         String entityName = "";
-
         String attributeName = "";
-
         String description = "";
-
         String type = "";
-
         String pk = "";
 
         public Record(ModelEntity modelEntity, ModelAttrib modelAttribute) {
             this.modelEntity = modelEntity;
             this.modelAttribute = modelAttribute;
-
             if (modelEntity != null) {
                 this.entityName = modelEntity.getName();
             }
-
             if (modelAttribute != null) {
                 this.attributeName = modelAttribute.getName();
                 this.description = modelAttribute.getDescription();
@@ -761,6 +775,7 @@ public class EditRelationalModelPanel extends VerticalLayout implements IUiPanel
             }
         }
 
+        @Override
         public int hashCode() {
             return modelEntity.hashCode() + modelAttribute.hashCode();
         }
