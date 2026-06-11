@@ -28,11 +28,11 @@ import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.runtime.component.Script;
-import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.vaadin.ui.common.ResizableDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -111,7 +111,7 @@ class ScriptTemplatesDialog extends ResizableDialog {
         }
 
         Button applyButton = new Button("Apply This Template",
-                e -> notifyApplyTemplate((Template) templates.getValue()));
+                e -> notifyApplyTemplate(templates.getValue()));
 
         Button closeButton = new Button("Close");
         closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -124,7 +124,8 @@ class ScriptTemplatesDialog extends ResizableDialog {
     protected void notifyApplyTemplate(Template template) {
         new ConfirmDialog("Apply the '" + template.name + "' template?",
                 "Are you sure you want to apply the '" + template.name + "' template?", "Ok",
-                event -> applyTemplate(template)).open();
+                event -> applyTemplate(template), "Cancel", e -> {
+                }).open();
     }
 
     protected void applyTemplate(Template template) {
