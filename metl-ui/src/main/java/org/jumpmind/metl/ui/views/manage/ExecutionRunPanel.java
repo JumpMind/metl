@@ -444,6 +444,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
                 InputStreamFactory factory = new InputStreamFactory() {
                     private static final long serialVersionUID = 1L;
 
+                    @Override
                     public InputStream createInputStream() {
                         try {
                             return new FileInputStream(file);
@@ -584,6 +585,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         new ConfirmDialog("Delete Execution?", "Are you sure you want to delete this execution?", "Ok", event -> {
             context.getExecutionService().deleteExecution(executionId);
             parentTabSheet.closeTab(executionId);
+        }, "Cancel", e -> {
         }).open();
     }
 
@@ -591,6 +593,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         new ConfirmDialog("Cancel Execution?", "Are you sure you want to cancel this execution?", "Ok", event -> {
             context.getAgentManager().cancel(executionId);
             cancelButton.setEnabled(false);
+        }, "Cancel", e -> {
         }).open();
     }
 
@@ -630,6 +633,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         }
     }
     
+    @Override
     public void onUIError(Throwable ex) {
         log.error("", ex);
         CommonUiUtils.notifyError();   

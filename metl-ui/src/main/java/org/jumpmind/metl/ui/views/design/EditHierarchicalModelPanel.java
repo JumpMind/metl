@@ -38,10 +38,10 @@ import org.jumpmind.vaadin.ui.common.IUiPanel;
 import com.vaadin.flow.component.BlurNotifier.BlurEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.ShortcutRegistration;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.ShortcutRegistration;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -159,6 +159,7 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
                 cbox.setItems(dataTypeList);
                 cbox.setValue(obj.getType());
                 cbox.addValueChangeListener(new ValueChangeListener<ValueChangeEvent<String>>() {
+                    @Override
                     public void valueChanged(ValueChangeEvent<String> event) {
                         if (event.getValue() != null) {
                             obj.setType(cbox.getValue());
@@ -169,6 +170,7 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
                     }
                 });
                 cbox.addBlurListener(new ComponentEventListener<BlurEvent<ComboBox<String>>>() {
+                    @Override
                     public void onComponentEvent(BlurEvent<ComboBox<String>> event) {
                         List<ModelSchemaObject> items = getAllItems();
                         boolean found = false;
@@ -339,6 +341,7 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
     }
 
     class AddSchemaObjectClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        @Override
         public void onComponentEvent(ClickEvent<Button> event) {
         		
             Set<ModelSchemaObject> selectedIds = getSelectedItems();
@@ -381,12 +384,14 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
     }
 
     class EditClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        @Override
         public void onComponentEvent(ClickEvent<Button> event) {
             editSelectedItem();
         }
     }
 
     class RemoveClickListener implements ComponentEventListener<ClickEvent<Button>> {
+        @Override
         public void onComponentEvent(ClickEvent<Button> event) {
 
             Set<ModelSchemaObject> selectedItems = getSelectedItems();
@@ -398,6 +403,7 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
                             treeGrid.getTreeData().clear();
                             addAll(model);
                         }
+                    }, "Cancel", e -> {
                     }).open();
         }
     }
@@ -405,6 +411,7 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
     class TreeGridItemClickListener implements ComponentEventListener<ItemClickEvent<ModelSchemaObject>> {
         long lastClick;
 
+        @Override
         public void onComponentEvent(ItemClickEvent<ModelSchemaObject> event) {
             if (event.getClickCount() == 2) {
                 editSelectedItem();
@@ -417,6 +424,7 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
     }
 
     class TreeGridSelectionListener implements SelectionListener<Grid<ModelSchemaObject>, ModelSchemaObject> {
+        @Override
         public void selectionChange(SelectionEvent<Grid<ModelSchemaObject>, ModelSchemaObject> event) {
             lastEditItemIds = Collections.emptySet();
             treeGrid.getDataProvider().refreshAll();
@@ -450,6 +458,7 @@ public class EditHierarchicalModelPanel extends VerticalLayout implements IUiPan
             }
         }
 
+        @Override
         public int hashCode() {
             return modelSchemaObject.hashCode();
         }

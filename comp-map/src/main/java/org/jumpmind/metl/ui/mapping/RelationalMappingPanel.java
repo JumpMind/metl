@@ -29,10 +29,10 @@ import java.util.Map;
 
 import org.jumpmind.metl.core.model.ComponentAttribSetting;
 import org.jumpmind.metl.core.model.ComponentModelSetting;
+import org.jumpmind.metl.core.model.ComponentModelSetting.Type;
 import org.jumpmind.metl.core.model.ModelAttrib;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.RelationalModel;
-import org.jumpmind.metl.core.model.ComponentModelSetting.Type;
 import org.jumpmind.metl.core.runtime.component.Mapping;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.ExportDialog;
@@ -76,6 +76,7 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
     
     RelationalModel outputModel;
     
+    @Override
     protected void buildUI() {
         
         inputModel = ((RelationalModel)component.getInputModel());
@@ -278,6 +279,7 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
     }
 
     class RemoveAllListener implements ComponentEventListener<ClickEvent<Button>> {
+        @Override
         public void onComponentEvent(ClickEvent<Button> event) {
             new ConfirmDialog("Delete ALL Links?", "Are you sure you want to remove all of the connections between source and target attributes?", "Ok", e -> {
                 Map<String, List<String>> linksMap = new HashMap<>();
@@ -296,11 +298,13 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
                         
                 removeButton.setEnabled(false); 
                 redrawDiagram();
+            }, "Cancel", e -> {
             }).open();
         }
     }
 
     class RemoveListener implements ComponentEventListener<ClickEvent<Button>> {
+        @Override
         public void onComponentEvent(ClickEvent<Button> event) {
             diagram.removeSelected();
             removeButton.setEnabled(false);
@@ -309,6 +313,7 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
     }
 
     class AutoMapListener implements ComponentEventListener<ClickEvent<Button>> {
+        @Override
         public void onComponentEvent(ClickEvent<Button> event) {
             autoMap(false);
             autoMap(true);
@@ -317,24 +322,28 @@ public class RelationalMappingPanel extends AbstractFlowStepAwareComponentEditPa
     }
     
     class FilterInputTextListener implements ValueChangeListener<ValueChangeEvent<String>> {
+        @Override
         public void valueChanged(ValueChangeEvent<String> event) {
             diagram.filterInputModel(event.getValue(), srcMapFilter.getValue());
         }
     }
 
     class FilterOutputTextListener implements ValueChangeListener<ValueChangeEvent<String>> {
+        @Override
         public void valueChanged(ValueChangeEvent<String> event) {
             diagram.filterOutputModel(event.getValue(), dstMapFilter.getValue());
         }
     }
 
     class FilterSrcMapListener implements ValueChangeListener<ValueChangeEvent<Boolean>> {
+        @Override
         public void valueChanged(ValueChangeEvent<Boolean> event) {
             diagram.filterInputModel(srcTextFilter.getValue(), event.getValue());
         }
     }
 
     class FilterDstMapListener implements ValueChangeListener<ValueChangeEvent<Boolean>> {
+        @Override
         public void valueChanged(ValueChangeEvent<Boolean> event) {
             diagram.filterOutputModel(dstTextFilter.getValue(), event.getValue());
         }
