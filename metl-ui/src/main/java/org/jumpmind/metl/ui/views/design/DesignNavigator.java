@@ -836,12 +836,14 @@ public class DesignNavigator extends VerticalLayout {
         if (object instanceof FlowName) {
             FlowName flow = (FlowName) object;
             new ConfirmDialog("Delete Flow?", "Are you sure you want to delete the '" + flow.getName() + "' flow?",
-                    "Ok", new DeleteFlowConfirmationListener(flow)).open();
+                    "Ok", new DeleteFlowConfirmationListener(flow), "Cancel", e -> {
+                    }).open();
         } else if (object instanceof ResourceName) {
             ResourceName resource = (ResourceName) object;
             new ConfirmDialog("Delete Resource?",
                     "Are you sure you want to delete the '" + resource.getName() + "' resource?", "Ok",
-                    new DeleteResourceConfirmationListener(resource)).open();
+                    new DeleteResourceConfirmationListener(resource), "Cancel", e -> {
+                    }).open();
 
         } else if (object instanceof RelationalModelName
         		|| object instanceof HierarchicalModelName) {
@@ -849,7 +851,8 @@ public class DesignNavigator extends VerticalLayout {
             if (!configurationService.isModelUsed(model.getId())) {
                 new ConfirmDialog("Delete Model?",
                         "Are you sure you want to delete the '" + model.getName() + "' model?", "Ok",
-                        new DeleteModelConfirmationListener(model)).open();
+                        new DeleteModelConfirmationListener(model), "Cancel", e -> {
+                        }).open();
             } else {
                 CommonUiUtils.notify("The model is currently in use.  It cannot be deleted.");
             }
@@ -857,13 +860,15 @@ public class DesignNavigator extends VerticalLayout {
             Project namedObject = (Project) object;
             new ConfirmDialog("Delete Project?",
                     "Are you sure you want to delete the '" + namedObject.getName() + "' project?", "Ok",
-                    new DeleteProjectConfirmationListener(namedObject)).open();
+                    new DeleteProjectConfirmationListener(namedObject), "Cancel", e -> {
+                    }).open();
 
         } else if (object instanceof ProjectVersion) {
             ProjectVersion namedObject = (ProjectVersion) object;
             new ConfirmDialog("Delete Project Version?",
                     "Are you sure you want to delete the '" + namedObject.getName() + "' version?", "Ok",
-                    new DeleteProjectVersionConfirmationListener(namedObject)).open();
+                    new DeleteProjectVersionConfirmationListener(namedObject), "Cancel", e -> {
+                    }).open();
         } else if (object instanceof ProjectVersionDepends) {
             configurationService.delete(object);
             treeGrid.getTreeData().removeItem(object);
