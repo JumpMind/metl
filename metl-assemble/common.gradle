@@ -68,6 +68,11 @@ import java.util.Date
         apply plugin: 'eu.kakde.gradle.sonatype-maven-central-publisher'
         licenseName = project.name.equals("metl-com") ? "Commercial" : "GNU GPL version 3.0"
         publishing {
+        	publications {
+                mavenJava(MavenPublication) {
+                    from components.java
+                }
+            }
             signing {
                 useInMemoryPgpKeys(findProperty("signingKey"), findProperty("signingPassword"))
 	            sign publishing.publications
