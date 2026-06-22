@@ -75,7 +75,7 @@ import java.util.Date
             }
             signing {
                 useInMemoryPgpKeys(findProperty("signingKey"), findProperty("signingPassword"))
-	            sign publishing.publications
+	            sign publishing.publications.mavenJava
             }
         }
     }
