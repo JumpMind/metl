@@ -7,6 +7,10 @@ vaadin {
 	optimizeBundle = false
 }
 
+java {
+    withJavadocJar()
+}
+
 apply from: '../metl-assemble/common.gradle'
 apply from: '../metl-assemble/asciidoc.gradle'
 
