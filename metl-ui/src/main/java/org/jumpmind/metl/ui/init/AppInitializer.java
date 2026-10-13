@@ -58,6 +58,7 @@ import org.jumpmind.metl.core.persist.IOperationsService;
 import org.jumpmind.metl.core.plugin.IDefinitionFactory;
 import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.core.runtime.IAgentManager;
+import org.jumpmind.metl.core.security.SecurityService;
 import org.jumpmind.metl.core.util.AppConstants;
 import org.jumpmind.metl.core.util.DatabaseScriptContainer;
 import org.jumpmind.metl.core.util.LogUtils;
@@ -123,6 +124,7 @@ public class AppInitializer implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         System.out.println("Version: " + VersionUtils.getCurrentVersion());
+        SecurityService.initSymmetricKeyStore();
         Properties properties = loadProperties();
         LogUtils.initLogging(AppUtils.getBaseDir(), (TypedProperties) properties);
         WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(sce.getServletContext());        
@@ -224,8 +226,10 @@ public class AppInitializer implements ServletContextListener {
             dbUpgradeScripts.executePreInstallScripts(fromVersion, toVersion);
         }
         ctx.getBean("configDatabaseUpgrader", ConfigDatabaseUpgrader.class).upgrade();
-        platform.resetCachedTableModel();
+        platform.resetCachedRelationModel();
         ctx.getBean("executionDatabaseUpgrader", ConfigDatabaseUpgrader.class).upgrade();
+        // symmetricds 3.18 caches table names, so clear them now that the execution tables may have been created
+        ctx.getBean("executionDatabasePlatform", IDatabasePlatform.class).resetCachedRelationModel();
         
         if (fromVersion != null && !fromVersion.equals(toVersion)) {
             dbUpgradeScripts.executePostInstallScripts(fromVersion, toVersion);

@@ -36,13 +36,12 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.page.Page;
 
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
+import tools.jackson.databind.JsonNode;
 
 @JsModule("./html2canvas.js")
 @JsModule("./canvg.js")
 @CssImport("./diagram.css")
-@JsModule("./jquery-3.7.1.min.js")
+@JsModule("./jquery-global.js")
 @JsModule("./jsplumb.min.js")
 @JsModule("./diagram.js")
 @JavaScript("./diagram.js")
@@ -75,28 +74,28 @@ public class Diagram extends Div {
     }
 
     @ClientCallable
-    private void onNodeSelected(JsonObject json) {
+    private void onNodeSelected(JsonNode json) {
         List<String> ids = diagramDetail.getSelectedNodeIds();
         ids.clear();
-        if (json.hasKey("nodes")) {
-            JsonArray nodes = json.getArray("nodes");
-            for (int i = 0; i < nodes.length(); i++) {
-                ids.add(nodes.getObject(i).getString("id"));
+        if (json.has("nodes")) {
+            JsonNode nodes = json.get("nodes");
+            for (int i = 0; i < nodes.size(); i++) {
+                ids.add(nodes.get(i).get("id").asString());
             }
         }
         panel.nodeSelectedEvent(new NodeSelectedEvent(Diagram.this, ids));
     }
     
     @ClientCallable
-    private void onLinkSelected(JsonObject json) {
-        String sourceNodeId = json.getString("sourceNodeId");
-        String targetNodeId = json.getString("targetNodeId");
+    private void onLinkSelected(JsonNode json) {
+        String sourceNodeId = json.get("sourceNodeId").asString();
+        String targetNodeId = json.get("targetNodeId").asString();
         panel.linkSelectedEvent(new LinkSelectedEvent(Diagram.this, sourceNodeId, targetNodeId));
     }
 
     @ClientCallable
-    private void onNodeDoubleClick(JsonObject json) {
-        String id = json.getString("id");
+    private void onNodeDoubleClick(JsonNode json) {
+        String id = json.get("id").asString();
         for (Node node : diagramDetail.getNodes()) {
             if (node.getId().equals(id)) {
                 panel.nodeDoubleClickedEvent(new NodeDoubleClickedEvent(Diagram.this, node));
@@ -106,10 +105,10 @@ public class Diagram extends Div {
     }
     
     @ClientCallable
-    private void onNodeMoved(JsonObject json) {
-        String id = json.getString("id");
-        double x = json.getNumber("x");
-        double y = json.getNumber("y");
+    private void onNodeMoved(JsonNode json) {
+        String id = json.get("id").asString();
+        double x = json.get("x").asDouble();
+        double y = json.get("y").asDouble();
         for (Node node : diagramDetail.getNodes()) {
             if (node.getId().equals(id)) {
                 // Why do we set the state on the server side?
@@ -124,10 +123,10 @@ public class Diagram extends Div {
     }
     
     @ClientCallable
-    private void onConnection(JsonObject json) {
-        String sourceNodeId = json.getString("sourceNodeId");
-        String targetNodeId = json.getString("targetNodeId");
-        boolean removed = json.getBoolean("removed");
+    private void onConnection(JsonNode json) {
+        String sourceNodeId = json.get("sourceNodeId").asString();
+        String targetNodeId = json.get("targetNodeId").asString();
+        boolean removed = json.get("removed").asBoolean();
         for (Node node : diagramDetail.getNodes()) {
             if (node.getId().equals(sourceNodeId)) {
                 if (!removed && !node.getTargetNodeIds().contains(targetNodeId)) {
@@ -142,11 +141,11 @@ public class Diagram extends Div {
     }
     
     @ClientCallable
-    private void onConnectionMoved(JsonObject json) {
-        String sourceNodeId = json.getString("sourceNodeId");
-        String targetNodeId = json.getString("targetNodeId");
-        String origSourceNodeId = json.getString("origSourceNodeId");
-        String origTargetNodeId = json.getString("origTargetNodeId");
+    private void onConnectionMoved(JsonNode json) {
+        String sourceNodeId = json.get("sourceNodeId").asString();
+        String targetNodeId = json.get("targetNodeId").asString();
+        String origSourceNodeId = json.get("origSourceNodeId").asString();
+        String origTargetNodeId = json.get("origTargetNodeId").asString();
 
         for (Node node : diagramDetail.getNodes()) {
             if (node.getId().equals(sourceNodeId)) {

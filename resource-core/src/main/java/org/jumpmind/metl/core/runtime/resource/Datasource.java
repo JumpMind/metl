@@ -22,6 +22,7 @@ package org.jumpmind.metl.core.runtime.resource;
 
 import org.jumpmind.db.model.Table;
 import org.jumpmind.db.util.BasicDataSourceFactory;
+import org.jumpmind.db.util.DataSourceProperties;
 import org.jumpmind.db.util.ResettableBasicDataSource;
 import org.jumpmind.properties.TypedProperties;
 
@@ -75,6 +76,8 @@ public class Datasource extends AbstractResourceRuntime implements IDatasourceRu
     
     @Override
     protected void start(TypedProperties properties) {
+        // metl relies on the dbcp2 pool, symmetricds 3.18 defaults to hikari
+        properties.put(DataSourceProperties.DB_POOL_TYPE, "dbcp2");
         this.dataSource = BasicDataSourceFactory
                 .create(properties);
     }
@@ -96,12 +99,12 @@ public class Datasource extends AbstractResourceRuntime implements IDatasourceRu
     }
     
     public void putTableInCache(String catalogName, String schemaName, String tableName, Table table) {
-        String key = Table.getFullyQualifiedTableName(catalogName, schemaName, tableName);
+        String key = Table.getFullyQualifiedName(catalogName, schemaName, tableName);
         tableCache.put(key, table);
     }
     
     public Table getTableFromCache(String catalogName, String schemaName, String tableName) {
-        String key = Table.getFullyQualifiedTableName(catalogName, schemaName, tableName);
+        String key = Table.getFullyQualifiedName(catalogName, schemaName, tableName);
         return tableCache.get(key);
     }
     

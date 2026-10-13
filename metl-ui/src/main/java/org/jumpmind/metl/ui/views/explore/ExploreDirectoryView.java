@@ -116,7 +116,7 @@ public class ExploreDirectoryView extends VerticalLayout implements BeforeEnterO
             }
             return null;
         }).setHeader("Size (bytes)");
-        grid.setClassNameGenerator(itemId -> cellStyle(itemId));
+        grid.setPartNameGenerator(itemId -> cellStyle(itemId));
         addAndExpand(grid);
         
     }

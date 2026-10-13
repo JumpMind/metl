@@ -4,11 +4,11 @@ dependencies {
     api "jakarta.servlet:jakarta.servlet-api:$servletVersion"
     api "jakarta.servlet.jsp:jakarta.servlet.jsp-api:$jspVersion"
     api "jakarta.websocket:jakarta.websocket-api:$webSocketVersion"
-    api "org.eclipse.jetty.ee10:jetty-ee10-webapp:$jettyVersion"
+    api "org.eclipse.jetty.ee11:jetty-ee11-webapp:$jettyVersion"
     api "org.eclipse.jetty:jetty-jmx:$jettyVersion"
-    api "org.eclipse.jetty.ee10:jetty-ee10-annotations:$jettyVersion"
-    api "org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-jakarta-server:$jettyVersion"    
-    api ("org.springframework.boot:spring-boot-starter-web:${springBootVersion}") {
+    api "org.eclipse.jetty.ee11:jetty-ee11-annotations:$jettyVersion"
+    api "org.eclipse.jetty.ee11.websocket:jetty-ee11-websocket-jakarta-server:$jettyVersion"    
+    api ("org.springframework.boot:spring-boot-starter-webmvc:${springBootVersion}") {
         exclude module: "spring-boot-starter-tomcat"
         exclude module: "spring-boot-starter-logging"
     }

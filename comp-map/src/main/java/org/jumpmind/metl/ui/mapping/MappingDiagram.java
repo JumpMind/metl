@@ -44,7 +44,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.page.Page;
 
-import elemental.json.JsonObject;
+import tools.jackson.databind.JsonNode;
 
 @SuppressWarnings("serial")
 public class MappingDiagram extends Div {
@@ -198,17 +198,17 @@ public class MappingDiagram extends Div {
 	}	
 	
     @ClientCallable
-    private void onSelect(JsonObject json) {
-        selectedSourceId = json.hasKey("sourceId") ? json.getString("sourceId").substring(3) : null;
-        selectedTargetId = json.hasKey("targetId") ? json.getString("targetId").substring(3) : null;
+    private void onSelect(JsonNode json) {
+        selectedSourceId = json.has("sourceId") ? json.get("sourceId").asString().substring(3) : null;
+        selectedTargetId = json.has("targetId") ? json.get("targetId").asString().substring(3) : null;
         panel.selectEvent(new SelectEvent(MappingDiagram.this, selectedSourceId, selectedTargetId));
     }
     
     @ClientCallable
-    private void onConnection(JsonObject json) {
-        String sourceId = json.getString("sourceId").substring(3);
-        String targetId = json.getString("targetId").substring(3);
-        boolean removed = json.getBoolean("removed");
+    private void onConnection(JsonNode json) {
+        String sourceId = json.get("sourceId").asString().substring(3);
+        String targetId = json.get("targetId").asString().substring(3);
+        boolean removed = json.get("removed").asBoolean();
         if (removed) {
             removeConnection(sourceId, targetId);
         } else {

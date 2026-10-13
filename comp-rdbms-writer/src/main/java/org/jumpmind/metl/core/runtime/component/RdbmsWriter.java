@@ -34,6 +34,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.jumpmind.db.model.Column;
+import org.jumpmind.db.model.Relation;
 import org.jumpmind.db.model.Table;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
@@ -179,7 +180,8 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                         IDatasourceRuntime resource = (IDatasourceRuntime)getResourceRuntime();
                         Table table = resource != null ? resource.getTableFromCache(catalogName, schemaName, tableName) : null;
                         if (table == null || !useCachedMetadata) {
-                            table = databasePlatform.getTableFromCache(catalogName, schemaName, tableName, true);
+                            Relation relation = databasePlatform.getRelationFromCache(catalogName, schemaName, tableName, true);
+                            table = relation instanceof Table ? (Table) relation : null;
                             if (resource != null) {
                                 resource.putTableInCache(catalogName, schemaName, tableName, table);
                             }
@@ -476,7 +478,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                     }
                     if (msg.length() > 0) {
                         log(LogLevel.INFO, "%s: %s",
-                                table.getInsertTable().getTable().getFullyQualifiedTableName(),
+                                table.getInsertTable().getTable().getFullyQualifiedName(),
                                 msg.toString());
                     }
                 }

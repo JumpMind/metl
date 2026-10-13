@@ -81,7 +81,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
 import com.vaadin.flow.dom.DomEvent;
 
-import elemental.json.JsonObject;
+import tools.jackson.databind.JsonNode;
 
 @SuppressWarnings("serial")
 public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRunnable {
@@ -714,9 +714,9 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     
     private void onDrop(DomEvent event) {
         if (droppedItem != null) {
-            JsonObject eventData = event.getEventData();
-            double x = eventData.getNumber("event.offsetX");
-            double y = eventData.getNumber("event.offsetY");
+            JsonNode eventData = event.getEventData();
+            double x = eventData.get("event.offsetX").asDouble();
+            double y = eventData.get("event.offsetY").asDouble();
             if (droppedItem.isShared()) {
                 Component component = new Component();
                 component.setId(droppedItem.getComponentId());

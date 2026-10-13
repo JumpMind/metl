@@ -1294,7 +1294,7 @@ public class ConfigurationService extends AbstractService
 
     @Override
     public boolean isInstalled() {
-        return databasePlatform.getTableFromCache(tableName(Component.class), false) != null;
+        return databasePlatform.getRelationFromCache(tableName(Component.class), false) != null;
     }
 
     @Override
@@ -1354,7 +1354,7 @@ public class ConfigurationService extends AbstractService
     }
 
     private boolean doesTableExist(Class<?> clazz) {
-        return databasePlatform.getTableFromCache(tableName(clazz), false) != null;
+        return databasePlatform.getRelationFromCache(tableName(clazz), false) != null;
     }
 
     @Override

@@ -5,3 +5,8 @@ vaadin-grid[theme~="easySelect"] vaadin-grid-tree-toggle {
 vaadin-grid[theme~="easySelect"] vaadin-grid-tree-toggle::part(toggle) {
     pointer-events: auto;
 }
+
+/* Vaadin 25 no longer lets split layout panes scroll, so content taller than the pane was cut off */
+vaadin-split-layout > * {
+    overflow: auto;
+}

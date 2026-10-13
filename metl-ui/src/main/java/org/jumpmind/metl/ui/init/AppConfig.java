@@ -53,6 +53,7 @@ import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import org.jumpmind.db.sql.SqlException;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.BasicDataSourceFactory;
+import org.jumpmind.db.util.DataSourceProperties;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
 import org.jumpmind.metl.core.persist.ConfigurationService;
 import org.jumpmind.metl.core.persist.ExecutionService;
@@ -262,6 +263,8 @@ public class AppConfig {
                             + " '{}' and the following url: '{}' and the following user: '{}'",
                     new Object[] { properties.get(DB_POOL_DRIVER), properties.get(DB_POOL_URL), properties.get(DB_POOL_USER) });
 
+            // metl relies on the dbcp2 pool, symmetricds 3.18 defaults to hikari
+            properties.put(DataSourceProperties.DB_POOL_TYPE, "dbcp2");
             configDataSource = BasicDataSourceFactory.create(properties, SecurityServiceFactory.create());
         }
         return configDataSource;
@@ -303,6 +306,8 @@ public class AppConfig {
                             + " '{}' and the following url: '{}' and the following user: '{}'",
                     new Object[] { properties.get(DB_POOL_DRIVER), executionUrl, properties.get(DB_POOL_USER) });
 
+            // metl relies on the dbcp2 pool, symmetricds 3.18 defaults to hikari
+            properties.put(DataSourceProperties.DB_POOL_TYPE, "dbcp2");
             executionDataSource = BasicDataSourceFactory.create(properties, SecurityServiceFactory.create());
         }
         return executionDataSource;

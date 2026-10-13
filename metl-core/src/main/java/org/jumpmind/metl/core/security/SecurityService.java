@@ -70,6 +70,21 @@ public class SecurityService implements ISecurityService {
         keyStoreFileName = StringUtils.trimToNull(System.getProperty(SecurityConstants.SYSPROP_KEYSTORE));
     }
 
+    /**
+     * SymmetricDS requires a keystore to create data sources, so point it at the Metl keystore
+     * unless one was configured.  Must be called before the first data source is created.
+     */
+    public static void initSymmetricKeyStore() {
+        if (StringUtils.isBlank(System.getProperty(org.jumpmind.security.SecurityConstants.SYSPROP_KEYSTORE))) {
+            System.setProperty(org.jumpmind.security.SecurityConstants.SYSPROP_KEYSTORE,
+                    System.getProperty(SecurityConstants.SYSPROP_KEYSTORE, "security/keystore"));
+            if (StringUtils.isBlank(System.getProperty(org.jumpmind.security.SecurityConstants.SYSPROP_KEYSTORE_TYPE))) {
+                System.setProperty(org.jumpmind.security.SecurityConstants.SYSPROP_KEYSTORE_TYPE,
+                        System.getProperty(SecurityConstants.SYSPROP_KEYSTORE_TYPE, SecurityConstants.KEYSTORE_TYPE));
+            }
+        }
+    }
+
     public SecurityService() {
     }
     

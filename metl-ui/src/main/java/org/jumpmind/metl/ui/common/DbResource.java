@@ -28,6 +28,7 @@ import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.BasicDataSourceFactory;
+import org.jumpmind.db.util.DataSourceProperties;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.vaadin.ui.sqlexplorer.IDb;
 
@@ -54,6 +55,8 @@ public class DbResource implements IDb, Serializable {
         @Override
         public IDatabasePlatform getPlatform() {
             if (platform == null) {                
+                // metl relies on the dbcp2 pool, symmetricds 3.18 defaults to hikari
+                properties.put(DataSourceProperties.DB_POOL_TYPE, "dbcp2");
                 BasicDataSource dataSource = BasicDataSourceFactory.create(properties);
                 dataSource.setMaxTotal(2);
                 dataSource.setMaxIdle(1);
