@@ -228,6 +228,8 @@ public class AppInitializer implements ServletContextListener {
         ctx.getBean("configDatabaseUpgrader", ConfigDatabaseUpgrader.class).upgrade();
         platform.resetCachedRelationModel();
         ctx.getBean("executionDatabaseUpgrader", ConfigDatabaseUpgrader.class).upgrade();
+        // symmetricds 3.18 caches table names, so clear them now that the execution tables may have been created
+        ctx.getBean("executionDatabasePlatform", IDatabasePlatform.class).resetCachedRelationModel();
         
         if (fromVersion != null && !fromVersion.equals(toVersion)) {
             dbUpgradeScripts.executePostInstallScripts(fromVersion, toVersion);
