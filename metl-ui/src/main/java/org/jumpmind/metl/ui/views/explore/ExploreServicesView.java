@@ -30,12 +30,12 @@ import org.jumpmind.metl.ui.common.View;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.IFrame;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.spring.annotation.UIScope;
 
 @UiComponent
@@ -52,13 +52,10 @@ public class ExploreServicesView extends VerticalLayout implements View {
 
     public ExploreServicesView() {
         setSizeFull();
-        UI.getCurrent().getPage().fetchCurrentURL(url -> {
-            String urlString = url.toString();
-            IFrame e = new IFrame(urlString.substring(0, urlString.lastIndexOf("/")) + "/ws-api.html");
-            e.setSizeFull();
-            add(e);
-        });
-        
+        // ws-api.html is served from the context root, a page under the Vaadin app path is answered by Vaadin
+        IFrame e = new IFrame(VaadinService.getCurrentRequest().getContextPath() + "/ws-api.html");
+        e.setSizeFull();
+        add(e);
     }
     
     @PostConstruct

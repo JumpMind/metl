@@ -133,7 +133,14 @@ public class DesignNavigator extends VerticalLayout {
         buildTreeGrid();
         HorizontalLayout hLayout = new HorizontalLayout();
         menuBar = new DesignMenuBar(this, treeGrid);
-        hLayout.add(menuBar, buildFilterField());
+        TextField filterField = buildFilterField();
+        // let the toolbar shrink to fit the pane, otherwise the pane scrolls it sideways.  The menu bar moves
+        // items that do not fit into an overflow menu.
+        menuBar.setMinWidth("0");
+        filterField.setMinWidth("0");
+        hLayout.add(menuBar, filterField);
+        hLayout.setFlexGrow(1, filterField);
+        hLayout.setWidthFull();
         hLayout.setSpacing(false);
         add(hLayout);
     }
