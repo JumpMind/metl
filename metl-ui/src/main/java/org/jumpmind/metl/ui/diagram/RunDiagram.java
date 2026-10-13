@@ -44,7 +44,7 @@ import tools.jackson.databind.JsonNode;
  *
  */
 @CssImport("./run-diagram.css")
-@JsModule("./jquery-3.7.1.min.js")
+@JsModule("./jquery-global.js")
 @JsModule("./jsplumb.min.js")
 @JsModule("./run-diagram.js")
 @JavaScript("./run-diagram.js")

@@ -41,7 +41,7 @@ import tools.jackson.databind.JsonNode;
 @JsModule("./html2canvas.js")
 @JsModule("./canvg.js")
 @CssImport("./diagram.css")
-@JsModule("./jquery-3.7.1.min.js")
+@JsModule("./jquery-global.js")
 @JsModule("./jsplumb.min.js")
 @JsModule("./diagram.js")
 @JavaScript("./diagram.js")
