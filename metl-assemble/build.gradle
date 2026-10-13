@@ -16,7 +16,7 @@ buildscript {
 }
 
 plugins {
-    id 'com.vaadin' version '24.9.8' apply false
+    id 'com.vaadin' version '25.3.2' apply false
     id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
     id 'eu.kakde.gradle.sonatype-maven-central-publisher' version '1.0.6' apply false
 }

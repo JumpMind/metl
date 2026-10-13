@@ -42,7 +42,6 @@ import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.ExcelExport;
 import org.jumpmind.metl.ui.common.UiUtils;
 import org.jumpmind.vaadin.ui.common.CsvExport;
-import org.jumpmind.vaadin.ui.common.ExportFileDownloader;
 import org.jumpmind.vaadin.ui.common.GridDataProvider;
 import org.jumpmind.vaadin.ui.common.IDataProvider;
 import org.jumpmind.vaadin.ui.common.ResizableDialog;
@@ -62,6 +61,7 @@ import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 
@@ -527,7 +527,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         }
         
         private void refreshExportButton(boolean csv) {
-            ExportFileDownloader downloader = csv ? getCsvDownloader() : getExcelDownloader();
+            DownloadHandler downloader = csv ? getCsvDownloader() : getExcelDownloader();
             if (downloadAnchor != null) {
                 downloadAnchor.removeAll();
                 getFooter().remove(downloadAnchor);
@@ -540,18 +540,18 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             getFooter().add(downloadAnchor);
         }
         
-        private ExportFileDownloader getCsvDownloader() {
+        private DownloadHandler getCsvDownloader() {
             CsvExport<Record> csvExport = new CsvExport<Record>(dataProvider);
             csvExport.setFileName(component.getName().toLowerCase().replace(' ', '-') + "-export.csv");
             csvExport.setTitle(component.getName());
-            return csvExport.getFileDownloader();
+            return csvExport.getDownloadHandler();
         }
         
-        private ExportFileDownloader getExcelDownloader() {
+        private DownloadHandler getExcelDownloader() {
             ExcelExport<Record> excelExport = new ExcelExport<Record>(dataProvider);
             excelExport.setFileName(component.getName().toLowerCase().replace(' ', '-') + "-export.xls");
             excelExport.setTitle(component.getName());
-            return excelExport.getFileDownloader();
+            return excelExport.getDownloadHandler();
         }
     }
 }

@@ -14,6 +14,60 @@ configurations {
     executableWar
 }
 
+// The launcher jars are unpacked into the root of the war, so service and spring factory
+// files that more than one jar provides have to be merged rather than overwritten
+ext.mergedLauncherMetaFiles = ['META-INF/services/*', 'META-INF/spring.factories',
+    'META-INF/spring/*.factories', 'META-INF/spring/*.imports']
+
+task mergeLauncherMetaFiles {
+    def outputDir = layout.buildDirectory.dir('merged-launcher-meta')
+    inputs.files configurations.executableWar
+    outputs.dir outputDir
+    doLast {
+        def lines = [:]
+        def factories = [:]
+        configurations.executableWar.each { jar ->
+            if (!jar.isFile()) {
+                return
+            }
+            new java.util.zip.ZipFile(jar).withCloseable { zip ->
+                zip.entries().each { entry ->
+                    def name = entry.name
+                    if (entry.isDirectory()) {
+                        return
+                    } else if (name == 'META-INF/spring.factories' || (name.startsWith('META-INF/spring/') && name.endsWith('.factories'))) {
+                        def props = new Properties()
+                        zip.getInputStream(entry).withCloseable { props.load(it) }
+                        def merged = factories.computeIfAbsent(name) { [:] }
+                        props.each { key, value ->
+                            def values = merged.computeIfAbsent(key) { new LinkedHashSet() }
+                            value.split(',').collect { it.trim() }.findAll { it }.each { values << it }
+                        }
+                    } else if ((name.startsWith('META-INF/services/') && name.indexOf('/', 'META-INF/services/'.length()) < 0)
+                            || (name.startsWith('META-INF/spring/') && name.endsWith('.imports'))) {
+                        def merged = lines.computeIfAbsent(name) { new LinkedHashSet() }
+                        zip.getInputStream(entry).withCloseable {
+                            it.getText('UTF-8').readLines().collect { it.trim() }.findAll { it && !it.startsWith('#') }.each { merged << it }
+                        }
+                    }
+                }
+            }
+        }
+        def dir = outputDir.get().asFile
+        project.delete(dir)
+        lines.each { name, values ->
+            def file = new File(dir, name)
+            file.parentFile.mkdirs()
+            file.text = values.join('\n') + '\n'
+        }
+        factories.each { name, props ->
+            def file = new File(dir, name)
+            file.parentFile.mkdirs()
+            file.text = props.collect { key, values -> "${key}=${values.join(',')}" }.join('\n') + '\n'
+        }
+    }
+}
+
 eclipse {
     wtp {
         component {
@@ -34,7 +88,9 @@ war {
     }
     {
         exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
-    }    
+        exclude mergedLauncherMetaFiles
+    }
+    from mergeLauncherMetaFiles
     from ('build') { include 'plugins.zip' }
     manifest { attributes 'Main-Class': 'org.jumpmind.metl.Metl' }
 }    

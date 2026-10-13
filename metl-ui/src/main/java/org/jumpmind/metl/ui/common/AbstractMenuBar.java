@@ -34,7 +34,6 @@ import com.vaadin.flow.component.contextmenu.MenuItemBase;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu.GridContextMenuItemClickEvent;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
-import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.shared.Registration;
@@ -91,8 +90,8 @@ abstract public class AbstractMenuBar extends MenuBar {
     }
     
     protected void addSeparator(String path) {
-        getMenuItem(path).getSubMenu().add(new Hr());
-        getContextMenuItem(path).getSubMenu().add(new Hr());    
+        getMenuItem(path).getSubMenu().addSeparator();
+        getContextMenuItem(path).getSubMenu().addSeparator();
     }
 
     private String buildMenuString(MenuItemBase<?, ?, ?> item) {

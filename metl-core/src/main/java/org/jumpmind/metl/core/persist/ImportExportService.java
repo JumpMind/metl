@@ -680,7 +680,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
     }
 
     private void processTableInserts(TableData inserts, ISqlTransaction transaction) {
-            Table table = databasePlatform.getTableFromCache(null, null, inserts.getTableName(),
+            Table table = (Table) databasePlatform.getRelationFromCache(null, null, inserts.getTableName(),
                     false);
             excludeInsertColumns(table);
             DmlStatement stmt = databasePlatform.createDmlStatement(DmlType.INSERT,
@@ -721,7 +721,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
     }
     
     private void processTableUpdates(TableData updates, ISqlTransaction transaction) {
-            Table table = databasePlatform.getTableFromCache(null, null, updates.getTableName(), false);
+            Table table = (Table) databasePlatform.getRelationFromCache(null, null, updates.getTableName(), false);
             excludeUpdateColumns(table);         
             DmlStatement stmt = databasePlatform.createDmlStatement(DmlType.UPDATE, table.getCatalog(),
                     table.getSchema(), table.getName(), table.getPrimaryKeyColumns(),
@@ -761,7 +761,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
     
     private void processTableDeletes(TableData deletes, ISqlTransaction transaction) {
         if (deletes != null) {
-            Table table = databasePlatform.getTableFromCache(null, null, deletes.getTableName(),
+            Table table = (Table) databasePlatform.getRelationFromCache(null, null, deletes.getTableName(),
                     false);
             DmlStatement stmt = databasePlatform.createDmlStatement(DmlType.DELETE,
                     table.getCatalog(), table.getSchema(), table.getName(),

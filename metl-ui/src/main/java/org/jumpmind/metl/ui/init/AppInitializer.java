@@ -224,7 +224,7 @@ public class AppInitializer implements ServletContextListener {
             dbUpgradeScripts.executePreInstallScripts(fromVersion, toVersion);
         }
         ctx.getBean("configDatabaseUpgrader", ConfigDatabaseUpgrader.class).upgrade();
-        platform.resetCachedTableModel();
+        platform.resetCachedRelationModel();
         ctx.getBean("executionDatabaseUpgrader", ConfigDatabaseUpgrader.class).upgrade();
         
         if (fromVersion != null && !fromVersion.equals(toVersion)) {

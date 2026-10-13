@@ -40,7 +40,7 @@ import java.util.concurrent.ExecutorService;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.jumpmind.db.model.Table;
+import org.jumpmind.db.model.Relation;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.sql.ISqlRowMapper;
 import org.jumpmind.db.sql.ISqlTemplate;
@@ -282,7 +282,7 @@ public class ExecutionService extends AbstractService implements IExecutionServi
 
     protected void purgeExecutions(String status, int retentionTimeInMs) {
         if (databasePlatform != null) {
-            Table table = databasePlatform.readTableFromDatabase(null, null, tableName(Execution.class));
+            Relation table = databasePlatform.readRelationFromDatabase(null, null, tableName(Execution.class));
             if (table != null) {
                 Date purgeBefore = DateUtils.addMilliseconds(new Date(), -retentionTimeInMs);
                 log.debug("Purging executions with the status of {} before {}", status, purgeBefore);

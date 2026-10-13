@@ -32,7 +32,6 @@ import org.jumpmind.vaadin.ui.common.TabSheet;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
-import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.tabs.TabsVariant;
 
@@ -91,7 +90,7 @@ public class TabbedPanel extends TabSheet {
         menu.addItem("Close Others", selectedItem -> closeOthers());
         menu.addItem("Close To the Left", selectedItem -> closeToTheLeft());
         menu.addItem("Close To the Right", selectedItem -> closeToTheRight());
-        menu.add(new Hr());
+        menu.addSeparator();
         menu.addItem("Close All", selectedItem -> closeAll());
     }
 

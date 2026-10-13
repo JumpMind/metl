@@ -96,12 +96,12 @@ public class Datasource extends AbstractResourceRuntime implements IDatasourceRu
     }
     
     public void putTableInCache(String catalogName, String schemaName, String tableName, Table table) {
-        String key = Table.getFullyQualifiedTableName(catalogName, schemaName, tableName);
+        String key = Table.getFullyQualifiedName(catalogName, schemaName, tableName);
         tableCache.put(key, table);
     }
     
     public Table getTableFromCache(String catalogName, String schemaName, String tableName) {
-        String key = Table.getFullyQualifiedTableName(catalogName, schemaName, tableName);
+        String key = Table.getFullyQualifiedName(catalogName, schemaName, tableName);
         return tableCache.get(key);
     }
     

@@ -43,11 +43,11 @@ dependencies {
 	testImplementation project(":comp-paged-web-reader")
     testImplementation project(path: ':metl-core', configuration: 'testArtifacts')    
     testImplementation "jakarta.servlet:jakarta.servlet-api:$servletVersion"
-    testImplementation "org.eclipse.jetty.ee10:jetty-ee10-servlet:$jettyVersion"
+    testImplementation "org.eclipse.jetty.ee11:jetty-ee11-servlet:$jettyVersion"
     testImplementation "jakarta.servlet.jsp:jakarta.servlet.jsp-api:$jspVersion"
     testImplementation "jakarta.websocket:jakarta.websocket-api:$webSocketVersion"        
-    testImplementation "org.eclipse.jetty.ee10:jetty-ee10-webapp:$jettyVersion"
+    testImplementation "org.eclipse.jetty.ee11:jetty-ee11-webapp:$jettyVersion"
     testImplementation "org.eclipse.jetty:jetty-jmx:$jettyVersion"
-    testImplementation "org.eclipse.jetty.ee10:jetty-ee10-annotations:$jettyVersion"
-    testImplementation "org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-jakarta-server:$jettyVersion"
+    testImplementation "org.eclipse.jetty.ee11:jetty-ee11-annotations:$jettyVersion"
+    testImplementation "org.eclipse.jetty.ee11.websocket:jetty-ee11-websocket-jakarta-server:$jettyVersion"
 }

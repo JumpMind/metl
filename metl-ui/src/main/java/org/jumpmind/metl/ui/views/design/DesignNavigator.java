@@ -258,7 +258,7 @@ public class DesignNavigator extends VerticalLayout {
             saveExpandedList();
         });
         treeGrid.addCollapseListener(event -> saveExpandedList());
-        treeGrid.setClassNameGenerator(itemId -> {
+        treeGrid.setPartNameGenerator(itemId -> {
             if (itemId instanceof FolderName) {
                 return "folder";
             } else if (itemId instanceof Project) {

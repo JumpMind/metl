@@ -1,8 +1,7 @@
 package org.jumpmind.metl.ui.common;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.Iterator;
@@ -19,10 +18,12 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
-import org.jumpmind.vaadin.ui.common.ExportFileDownloader;
 import org.jumpmind.vaadin.ui.common.IDataProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
 
 public class ExcelExport<T> {
     protected IDataProvider<T> gridData = null;
@@ -107,27 +108,14 @@ public class ExcelExport<T> {
         this.sheetName = sheet;
     }
     
-    public ExportFileDownloader getFileDownloader() {
+    public DownloadHandler getDownloadHandler() {
         convertToExcel();
-        FileOutputStream outStream = null;
-        File file = null;
-        try {
-            String prefix = fileName.substring(0, fileName.length() - 4);
-            file = File.createTempFile(prefix, ".xls");
-            outStream = new FileOutputStream(file);
+        return DownloadHandler.fromInputStream(event -> {
+            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
             workbook.write(outStream);
-            return new ExportFileDownloader(fileName, excelMimeContentType, file);
-        } catch (Exception e) {
-            log.error("", e);
-            return null;
-        } finally {
-            try {
-                file.deleteOnExit();
-                outStream.close();
-            } catch (IOException e) {
-                log.error("Problem closing File Stream", e);
-            }
-        }
+            byte[] data = outStream.toByteArray();
+            return new DownloadResponse(new ByteArrayInputStream(data), fileName, excelMimeContentType, data.length);
+        });
     }
 
     public void convertToExcel() {

@@ -32,11 +32,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jumpmind.db.platform.DatabaseNamesConstants;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.platform.h2.H2DatabasePlatform;
-import org.jumpmind.db.platform.oracle.OracleDatabasePlatform;
 import org.jumpmind.db.sql.ISqlTemplate;
 import org.jumpmind.db.sql.SqlScript;
 import org.jumpmind.exception.IoException;
@@ -66,7 +68,7 @@ public class DatabaseScriptContainer {
         try {
             this.scriptLocation = scriptLocation;
             this.platform = platform;
-            this.jdbcTemplate = new JdbcTemplate(platform.getDataSource());
+            this.jdbcTemplate = new JdbcTemplate(platform.<DataSource> getDataSource());
 
             replacementTokens = new HashMap<String, String>();
             // Add any replacement tokens
@@ -155,7 +157,7 @@ public class DatabaseScriptContainer {
         if (script.getDescription().equals("H2Only")) {
             return platform instanceof H2DatabasePlatform;
         } else if (script.getDescription().equals("OracleOnly")) {
-            return platform instanceof OracleDatabasePlatform;
+            return platform.getName() != null && platform.getName().startsWith(DatabaseNamesConstants.ORACLE);
         } else {
             return true;
         }

@@ -36,8 +36,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.page.Page;
 
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
+import tools.jackson.databind.JsonNode;
 
 
 /**
@@ -72,13 +71,13 @@ public class RunDiagram extends Div {
     }
     
     @ClientCallable
-    private void onNodeSelected(JsonObject json) {
+    private void onNodeSelected(JsonNode json) {
         List<String> ids = diagramDetail.getSelectedNodeIds();
         ids.clear();
-        if (json.hasKey("nodes")) {
-            JsonArray nodes = json.getArray("nodes");
-            for (int i = 0; i < nodes.length(); i++) {
-                ids.add(nodes.getObject(i).getString("id"));
+        if (json.has("nodes")) {
+            JsonNode nodes = json.get("nodes");
+            for (int i = 0; i < nodes.size(); i++) {
+                ids.add(nodes.get(i).get("id").asString());
             }
         }
         panel.nodeSelectedEvent(new NodeSelectedEvent(RunDiagram.this, ids));

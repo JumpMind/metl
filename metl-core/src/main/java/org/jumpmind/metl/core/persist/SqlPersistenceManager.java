@@ -367,10 +367,10 @@ public class SqlPersistenceManager extends AbstractPersistenceManager {
     }
 
     private Table findTable(String catalogName, String schemaName, String tableName) {
-        Table table = databasePlatform.getTableFromCache(catalogName, schemaName, tableName, false);
+        Table table = (Table) databasePlatform.getRelationFromCache(catalogName, schemaName, tableName, false);
         if (table == null) {
             throw new SqlException("Could not find table "
-                    + Table.getFullyQualifiedTableName(catalogName, schemaName, tableName));
+                    + Table.getFullyQualifiedName(catalogName, schemaName, tableName));
         } else {
             return table;
         }

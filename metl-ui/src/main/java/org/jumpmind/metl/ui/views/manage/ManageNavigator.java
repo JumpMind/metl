@@ -225,7 +225,7 @@ public class ManageNavigator extends VerticalLayout {
             }
         });
 
-        grid.setClassNameGenerator(itemId -> {
+        grid.setPartNameGenerator(itemId -> {
             if (itemId instanceof Folder) {
                 return "folder";
             } else {

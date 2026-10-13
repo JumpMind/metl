@@ -47,12 +47,12 @@ import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.views.manage.ExecutionRunPanel;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.TabSheet;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
@@ -259,7 +259,8 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
             viewExecutionLogButton.setEnabled(false);
             RestTemplate template = null;            
             if (securitySchemeCombo.getValue() == SecurityScheme.BASIC) {
-                template = new RestTemplateBuilder().basicAuthentication(userField.getValue(), passwordField.getValue()).build();
+                template = new RestTemplate();
+                template.getInterceptors().add(new BasicAuthenticationInterceptor(userField.getValue(), passwordField.getValue()));
             } else {
                 template = new RestTemplate();
             }

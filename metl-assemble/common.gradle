@@ -22,8 +22,8 @@ import java.util.Date
 	}
 	def licenseName = null;
 	
-    sourceCompatibility=JavaVersion.VERSION_17
-    targetCompatibility=JavaVersion.VERSION_17
+    sourceCompatibility=JavaVersion.VERSION_21
+    targetCompatibility=JavaVersion.VERSION_21
     
     if (project.name.startsWith('comp-') && projectDir.getPath().contains('metl-com')) {
         apply plugin: 'eu.kakde.gradle.sonatype-maven-central-publisher'
@@ -142,7 +142,10 @@ import java.util.Date
             // check for updates every build
             resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
             resolutionStrategy.force 'net.java.dev.jna:jna:5.14.0', 'net.java.dev.jna:jna-platform:5.14.0'
-        }    
+            // symmetricds 3.18 brings in logback and spring boot 4 brings in log4j-to-slf4j, metl logs through log4j
+            exclude group: 'ch.qos.logback'
+            exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
+        }
     }
     
     dependencies {
