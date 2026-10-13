@@ -38,6 +38,7 @@ import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import org.jumpmind.db.sql.SqlScript;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.BasicDataSourceFactory;
+import org.jumpmind.db.util.DataSourceProperties;
 import org.jumpmind.db.util.BasicDataSourcePropertyConstants;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
 import org.jumpmind.metl.core.model.Agent;
@@ -226,6 +227,9 @@ public class StandaloneFlowRunner {
                 "jdbc:h2:mem:" + FilenameUtils.removeExtension(configSqlScript).replaceAll("-", "") + ";NON_KEYWORDS=VALUE");
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_USER, "jumpmind");
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_PASSWORD, "jumpmind");
+        // metl relies on the dbcp2 pool, symmetricds 3.18 defaults to hikari
+        properties.setProperty(DataSourceProperties.DB_POOL_TYPE, "dbcp2");
+        SecurityService.initSymmetricKeyStore();
         DataSource ds = BasicDataSourceFactory.create(properties);
         return JdbcDatabasePlatformFactory.getInstance().create(ds, new SqlTemplateSettings(), false, false);
     }
